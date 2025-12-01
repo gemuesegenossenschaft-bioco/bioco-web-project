@@ -10,7 +10,7 @@ interface DepotLocation {
   lng: number
   day: 'Dienstag' | 'Freitag' | 'Beide'
   contact?: string
-  phone?: string
+  website?: string
   notes?: string
 }
 
@@ -25,7 +25,7 @@ const depotLocations: DepotLocation[] = [
     lng: 8.3050,
     day: 'Dienstag',
     contact: 'Corona Banky',
-    phone: '079 602 68 06',
+    website: 'https://www.xn--chrttli-7wa.ch/',
     notes: 'Quartierladen. Rechts neben dem Laden hat es eine Rampe. Unter der Rampe ist das Depot.'
   },
   {
@@ -36,7 +36,7 @@ const depotLocations: DepotLocation[] = [
     lng: 8.3080,
     day: 'Dienstag',
     contact: 'Tobias Kloter',
-    phone: '076 310 75 86',
+    website: 'https://www.ohne.ch/',
     notes: 'Körbe unter die hinteren Tische stellen, leere Körbe und Klammern sind unter den vorderen Tischen.'
   },
   {
@@ -47,7 +47,7 @@ const depotLocations: DepotLocation[] = [
     lng: 8.3100,
     day: 'Dienstag',
     contact: 'Josef Lindiridi',
-    phone: '078 777 56 54',
+    website: 'https://anixis.ch/',
     notes: 'Infrarotsender hinter der Barriere. Körbe auf das Materiallager stellen.'
   },
   {
@@ -58,7 +58,6 @@ const depotLocations: DepotLocation[] = [
     lng: 8.2100,
     day: 'Dienstag',
     contact: 'David Müller',
-    phone: '079 948 42 69',
     notes: 'Zufahrt via Einfahrt ab Hauptstrasse. Körbe in der Nische zum hinteren Eingang des Blumengeschäfts.'
   },
   // Freitag (Friday) depots
@@ -69,8 +68,7 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4800,
     lng: 8.2400,
     day: 'Freitag',
-    contact: 'Matthias Müller',
-    phone: '077 936 72 79'
+    contact: 'Matthias Müller'
   },
   {
     id: 'kupperhaus',
@@ -80,7 +78,6 @@ const depotLocations: DepotLocation[] = [
     lng: 8.2083,
     day: 'Freitag',
     contact: 'Brigitte Perren Henneck',
-    phone: '056 441 69 71',
     notes: 'Rückwärts neben dem Kupperhaus hinunterfahren bis auf Höhe Rampe. Körbe die Rampe hinunterbringen.'
   },
   {
@@ -90,8 +87,7 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4811,
     lng: 8.3194,
     day: 'Freitag',
-    contact: 'Nils und Armelle George',
-    phone: '079 879 44 50'
+    contact: 'Nils und Armelle George'
   },
   {
     id: 'lemonia',
@@ -101,7 +97,7 @@ const depotLocations: DepotLocation[] = [
     lng: 8.3175,
     day: 'Freitag',
     contact: 'Martin Gruchow',
-    phone: '076 582 87 67',
+    website: 'http://lemonia.ch/',
     notes: 'Körbe hinter dem Haus unter den Tisch stellen.'
   },
   {
@@ -111,8 +107,7 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4600,
     lng: 8.3200,
     day: 'Freitag',
-    contact: 'Helen Matthäus',
-    phone: '056 633 36 85'
+    contact: 'Helen Matthäus'
   },
 ]
 
@@ -164,7 +159,7 @@ export function DepotMap() {
             ${depot.address}<br>
             <small><strong>${depot.day}</strong></small><br>
             ${depot.contact ? `<small>Kontakt: ${depot.contact}</small><br>` : ''}
-            ${depot.phone ? `<small>Tel: ${depot.phone}</small>` : ''}
+            ${depot.website ? `<small><a href="${depot.website}" target="_blank" rel="noopener noreferrer">Website</a></small>` : ''}
           </div>
         `
         marker.bindPopup(popupContent)
@@ -200,7 +195,14 @@ export function DepotMap() {
                 <div key={depot.id} className="address-item" style={{ marginBottom: 'var(--spacing-md)' }}>
                   <strong>{depot.name}</strong>
                   <p>{depot.address}</p>
-                  {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact} {depot.phone && `(${depot.phone})`}</p>}
+                  {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact}</p>}
+                  {depot.website && (
+                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      <a href={depot.website} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--bioco-green)', textDecoration: 'underline' }}>
+                        {depot.website}
+                      </a>
+                    </p>
+                  )}
                   {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${depot.lat},${depot.lng}`}
@@ -220,7 +222,14 @@ export function DepotMap() {
                 <div key={depot.id} className="address-item" style={{ marginBottom: 'var(--spacing-md)' }}>
                   <strong>{depot.name}</strong>
                   <p>{depot.address}</p>
-                  {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact} {depot.phone && `(${depot.phone})`}</p>}
+                  {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact}</p>}
+                  {depot.website && (
+                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                      <a href={depot.website} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--bioco-green)', textDecoration: 'underline' }}>
+                        {depot.website}
+                      </a>
+                    </p>
+                  )}
                   {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
                   <a
                     href={`https://www.google.com/maps/dir/?api=1&destination=${depot.lat},${depot.lng}`}

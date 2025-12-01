@@ -375,7 +375,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                       />
                       <div style={{ flex: 1 }}>
                         <h4>Mitarbeit</h4>
-                        <p>Wir sind eine Mitmach-Genossenschaft! Jedes Mitglied leistet pro Jahr <strong>20 Stunden (bei halbem Korb) bzw. 40 Stunden (bei ganzem Korb) Mitarbeit</strong>. Dies kann auf dem Feld, in der Logistik oder bei Events sein.</p>
+                        <p>Wir sind eine Mitmach-Genossenschaft! Jedes Mitglied leistet pro Jahr <strong>10 Arbeitseinsätze à 2 Stunden (bei halbem Korb) bzw. 20 Arbeitseinsätze à 2 Stunden (bei ganzem Korb) Mitarbeit</strong>. Dies kann auf dem Feld, in der Logistik oder bei Events sein.</p>
                       </div>
                     </div>
                   </label>
@@ -617,7 +617,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                     <div className="invalid-feedback">{fieldErrors.depot}</div>
                   )}
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
-                    Abholzeiten: Dienstag und Freitag, 17:00-19:00 Uhr
+                    ab 16:00 uhr abholbereit
                   </p>
                 </div>
 

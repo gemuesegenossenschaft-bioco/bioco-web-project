@@ -4,10 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 const ABO_PRICES = {
-  'halb': { name: 'Halb Gemüsekorb', price: 750, shares: 1, hours: 20, halbtage: 10 },
-  'standard': { name: 'Gemüsekorb (Standard)', price: 1280, shares: 2, hours: 40, halbtage: 20 },
-  'doppel': { name: 'Doppelter Gemüsekorb', price: 2350, shares: 4, hours: 80, halbtage: 40 },
-  'kein': { name: 'Kein Abo', price: 0, shares: 0, hours: 0, halbtage: 0 }
+  'halb': { name: 'Halb Gemüsekorb', price: 750, shares: 1, hours: 20, arbeitseinsaetze: 10 },
+  'standard': { name: 'Gemüsekorb (Standard)', price: 1280, shares: 2, hours: 40, arbeitseinsaetze: 20 },
+  'doppel': { name: 'Doppelter Gemüsekorb', price: 2350, shares: 4, hours: 80, arbeitseinsaetze: 40 },
+  'kein': { name: 'Kein Abo', price: 0, shares: 0, hours: 0, arbeitseinsaetze: 0 }
 }
 
 const SHARE_PRICE = 250
@@ -101,7 +101,7 @@ export function PricingCalculator({ onStartForm }: PricingCalculatorProps) {
                     <strong style={{ color: 'var(--bioco-green)', fontSize: '0.875rem' }}>Jährlicher Beitrag</strong>
                   </span>
                   <span className="mitarbeit-info" style={{ display: 'block', marginTop: '8px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                    <strong>Mitarbeit pro Jahr:</strong> {aboData.hours} Stunden oder {aboData.halbtage} Halbtage
+                    <strong>Mitarbeit pro Jahr:</strong> {aboData.arbeitseinsaetze} Arbeitseinsätze à 2 Stunden
                   </span>
                 </td>
                 <td>1</td>

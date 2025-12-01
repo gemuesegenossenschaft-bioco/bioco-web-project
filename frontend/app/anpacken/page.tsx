@@ -2,8 +2,7 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { EventsBanner } from '@/components/EventsBanner'
 import { CTA } from '@/components/CTA'
-import { getEventItems } from '@/components/AktuellesData'
-import { AktuellesItemComponent } from '@/components/AktuellesItem'
+import { EventsSection } from '@/components/EventsSection'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -106,22 +105,7 @@ export default function AnpackenPage() {
 
           {/* Events und Familien & Kinder nebeneinander */}
           <div className="ernte-bottom-row">
-            <section className="bento-card events-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Nächste Events</h3>
-              </div>
-              <div className="card-body">
-                <div className="events-list">
-                  {getEventItems().slice(0, 3).map((item, index) => (
-                    <AktuellesItemComponent key={index} item={item} variant="event" />
-                  ))}
-                </div>
-                <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
-                  Alle Events ansehen
-                </Link>
-              </div>
-            </section>
+            <EventsSection limit={3} />
 
             <section id="D-03" className="bento-card">
               <div className="plant-pattern"></div>

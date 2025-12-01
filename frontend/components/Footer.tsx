@@ -28,9 +28,7 @@ export function Footer() {
                 <a href="mailto:info@bioco.ch">info@bioco.ch</a>
               </p>
               <p style={{ marginTop: '12px', fontSize: '14px' }}>
-                <strong>Depot-Abholzeiten:</strong><br />
-                Dienstag & Freitag<br />
-                17:00 - 19:00 Uhr
+                <strong>ab 16:00 uhr abholbereit</strong>
               </p>
             </div>
 

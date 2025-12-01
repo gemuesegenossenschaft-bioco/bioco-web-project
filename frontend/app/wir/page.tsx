@@ -2,8 +2,7 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { EventsBanner } from '@/components/EventsBanner'
 import { CTA } from '@/components/CTA'
-import { getEventItems } from '@/components/AktuellesData'
-import { AktuellesItemComponent } from '@/components/AktuellesItem'
+import { EventsSection } from '@/components/EventsSection'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -53,14 +52,14 @@ export default function WirPage() {
               <div className="team-card">
                 <div className="team-card-image" style={{ marginBottom: '16px' }}>
                   <Image
-                    src="/images/team/bioco_hofteam_christian.JPG"
-                    alt="Christian vom Hof-Team - Demeter Landwirtschaft Geisshof"
+                    src="/images/team/bioco_hofteam_michael.JPG"
+                    alt="Michael vom Hof-Team - Demeter Landwirtschaft Geisshof"
                     width={300}
                     height={300}
                     style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: '8px' }}
                   />
                 </div>
-                <h3>Christian</h3>
+                <h3>Michael</h3>
                 <p>Hof-Team</p>
               </div>
               
@@ -96,22 +95,7 @@ export default function WirPage() {
           </section>
 
           {/* Nächste Events - Full Width */}
-          <section className="bento-card events-card bento-card-fullwidth">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Nächste Events</h3>
-            </div>
-            <div className="card-body">
-              <div className="events-list">
-                {getEventItems().slice(0, 3).map((item, index) => (
-                  <AktuellesItemComponent key={index} item={item} variant="event" />
-                ))}
-              </div>
-              <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
-                Alle Events ansehen
-              </Link>
-            </div>
-          </section>
+          <EventsSection limit={3} />
 
           <section id="F-01b" className="bento-card bento-card-large">
             <div className="plant-pattern"></div>

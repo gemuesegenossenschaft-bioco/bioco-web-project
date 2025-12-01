@@ -3,8 +3,7 @@ import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import { Gallery } from '@/components/Gallery'
 import { Saisonkalender } from '@/components/Saisonkalender'
-import { getEventItems } from '@/components/AktuellesData'
-import { AktuellesItemComponent } from '@/components/AktuellesItem'
+import { EventsSection } from '@/components/EventsSection'
 import Link from 'next/link'
 import { Metadata } from 'next'
 
@@ -38,22 +37,7 @@ export default function ErntePage() {
               </div>
             </section>
 
-            <section className="bento-card events-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Nächste Events</h3>
-              </div>
-              <div className="card-body">
-                <div className="events-list">
-                  {getEventItems().slice(0, 3).map((item, index) => (
-                    <AktuellesItemComponent key={index} item={item} variant="event" />
-                  ))}
-                </div>
-                <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
-                  Alle Events ansehen
-                </Link>
-              </div>
-            </section>
+            <EventsSection limit={3} />
           </div>
 
           {/* Dritte Zeile: Demeter und Pictures nebeneinander (50/50) */}

@@ -65,7 +65,7 @@ export function LocalBusinessSchema() {
     "telephone": "",
     "email": "info@bioco.ch",
     "priceRange": "CHF 1000-2000",
-    "openingHours": "Tu,Fr 17:00-19:00",
+    "openingHours": "Tu,Fr 16:00-19:00",
     "servesCuisine": "Organic Vegetables",
     "areaServed": [
       {

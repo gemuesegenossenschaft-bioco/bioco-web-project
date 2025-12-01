@@ -3,8 +3,6 @@ import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import { DepotMap } from '@/components/DepotMap'
 import { GeisshofMap } from '@/components/GeisshofMap'
-import { getEventItems } from '@/components/AktuellesData'
-import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import Link from 'next/link'
 import { Metadata } from 'next'
 
@@ -36,30 +34,13 @@ export default function StandortePage() {
             </div>
           </section>
 
-          <section className="bento-card events-card bento-card-fullwidth">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Nächste Events</h3>
-            </div>
-            <div className="card-body">
-              <div className="events-list">
-                {getEventItems().slice(0, 3).map((item, index) => (
-                  <AktuellesItemComponent key={index} item={item} variant="event" />
-                ))}
-              </div>
-              <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
-                Alle Events ansehen
-              </Link>
-            </div>
-          </section>
-
           <section id="E-02" className="bento-card standorte-map-section standorte-depot-fullwidth">
             <div className="plant-pattern"></div>
             <div className="card-header">
               <h3>Depot-Standort für Abholung</h3>
             </div>
             <div className="card-body">
-              <p className="card-text">Hier findest du alle Depot-Standorte in Baden, Brugg, Gebenstorf, Wettingen und der Region Aargau, an denen du deinen wöchentlichen Gemüsekorb mit frischem Bio-Gemüse abholen kannst. Abholzeiten: Dienstag und Freitag, 17:00-19:00 Uhr.</p>
+              <p className="card-text">Hier findest du alle Depot-Standorte in Baden, Brugg, Gebenstorf, Wettingen und der Region Aargau, an denen du deinen wöchentlichen Gemüsekorb mit frischem Bio-Gemüse abholen kannst. ab 16:00 uhr abholbereit.</p>
               <DepotMap />
             </div>
           </section>

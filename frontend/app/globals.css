@@ -1089,6 +1089,10 @@ header {
   header {
     top: 0;
     padding: var(--spacing-sm) var(--spacing-xs);
+    background: white;
+    border-bottom: 2px solid var(--bioco-green);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    color: var(--text-primary);
   }
   
   .header-top {
@@ -3769,6 +3773,10 @@ footer a:hover {
   header {
     position: sticky;
     top: 0;
+    background: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    color: var(--text-primary);
   }
 
   .header-top {

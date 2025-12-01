@@ -59,8 +59,8 @@ export default function AbosPage() {
                     <td>CHF 750.-</td>
                     <td>CHF 250.-</td>
                     <td>
-                      20 Stunden<br />
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>oder 10 Halbtage</span>
+                      10 Arbeitseinsätze<br />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>à 2 Stunden</span>
                     </td>
                   </tr>
                   <tr>
@@ -79,8 +79,8 @@ export default function AbosPage() {
                     <td>CHF 1'280.-</td>
                     <td>CHF 500.-</td>
                     <td>
-                      40 Stunden<br />
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>oder 20 Halbtage</span>
+                      20 Arbeitseinsätze<br />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>à 2 Stunden</span>
                     </td>
                   </tr>
                   <tr>
@@ -99,8 +99,8 @@ export default function AbosPage() {
                     <td>CHF 2'350.-</td>
                     <td>CHF 1'000.-</td>
                     <td>
-                      80 Stunden<br />
-                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>oder 40 Halbtage</span>
+                      40 Arbeitseinsätze<br />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>à 2 Stunden</span>
                     </td>
                   </tr>
                 </tbody>
@@ -118,7 +118,7 @@ export default function AbosPage() {
                 <li>Wöchentlicher Gemüsekorb mit saisonalem Gemüse</li>
                 <li>Demeter-Qualität – höchste Bio-Standards</li>
                 <li>Frisch vom Geisshof in Gebenstorf</li>
-                <li>Abholung in einem der <Link href="/standorte">Standorte</Link> (Dienstag oder Freitag, 17:00-19:00 Uhr)</li>
+                <li>Abholung in einem der <Link href="/standorte">Standorte</Link> (ab 16:00 uhr abholbereit)</li>
               </ul>
               <p><Link href="/ernte">Mehr über unsere Ernte erfahren →</Link></p>
             </div>

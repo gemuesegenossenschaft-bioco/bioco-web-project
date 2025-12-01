@@ -61,7 +61,7 @@ export default function Home() {
                 Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude 
                 an der Arbeit. Das ist <Link href="/wir">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen 
                 und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/ernte">Anbau</Link> und erleben, 
-                wie aus einem Samen frisches Bio-Gemüse wird, das jeden Dienstag und Freitag in den 
+                wie aus einem Samen frisches Bio-Gemüse wird, das ab 16:00 uhr abholbereit in den 
                 <Link href="/depots"> Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
               </p>
               <div className="button-group"></div>
