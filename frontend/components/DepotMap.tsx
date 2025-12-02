@@ -218,87 +218,115 @@ export function DepotMap() {
         <div className="location-addresses">
           <h4>Depot-Standorte</h4>
           <div className="address-list">
-            <div style={{ marginBottom: 'var(--spacing-md)' }}>
-              <h5 style={{ color: 'var(--bioco-green)', marginBottom: 'var(--spacing-sm)' }}>Dienstag</h5>
-              {depotLocations.filter(d => d.day === 'Dienstag').map((depot) => (
-                <div key={depot.id} className="address-item" style={{ marginBottom: 'var(--spacing-md)' }}>
-                  <strong>{depot.name}</strong>
-                  <p>{depot.address}</p>
-                  {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact}</p>}
-                  {depot.website && (
-                    <p style={{ fontSize: '0.875rem', marginTop: '8px', marginBottom: '8px' }}>
-                      <a 
-                        href={depot.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        style={{
-                          color: 'white',
-                          backgroundColor: 'var(--bioco-green)',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          textDecoration: 'none',
-                          fontWeight: '600',
-                          display: 'inline-block',
-                          fontSize: '0.875rem'
-                        }}
-                      >
-                        Zur Website →
-                      </a>
-                    </p>
-                  )}
-                  {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
-                  <a
-                    href={getGoogleMapsLink(depot)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary"
-                    style={{ marginTop: 'var(--spacing-sm)', display: 'inline-block' }}
-                  >
-                    Route planen →
-                  </a>
-                </div>
-              ))}
+            <div style={{ marginBottom: 'var(--spacing-lg)', paddingBottom: 'var(--spacing-lg)', borderBottom: '1px solid var(--border-color)' }}>
+              <h5 style={{ 
+                color: 'black', 
+                marginBottom: 'var(--spacing-md)',
+                fontSize: '1.25rem',
+                fontWeight: '700'
+              }}>
+                Dienstag
+              </h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                {depotLocations.filter(d => d.day === 'Dienstag').map((depot) => (
+                  <div key={depot.id} className="address-item" style={{ 
+                    padding: 'var(--spacing-md)',
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)'
+                  }}>
+                    <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '8px' }}>{depot.name}</strong>
+                    <p style={{ marginBottom: '8px' }}>{depot.address}</p>
+                    {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Kontakt: {depot.contact}</p>}
+                    {depot.website && (
+                      <p style={{ fontSize: '0.875rem', marginTop: '8px', marginBottom: '8px' }}>
+                        <a 
+                          href={depot.website} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          style={{
+                            color: 'white',
+                            backgroundColor: 'var(--bioco-green)',
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textDecoration: 'none',
+                            fontWeight: '600',
+                            display: 'inline-block',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          Zur Website →
+                        </a>
+                      </p>
+                    )}
+                    {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
+                    <a
+                      href={getGoogleMapsLink(depot)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary"
+                      style={{ marginTop: 'var(--spacing-sm)', display: 'inline-block' }}
+                    >
+                      Route planen →
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
             <div>
-              <h5 style={{ color: 'var(--bioco-orange)', marginBottom: 'var(--spacing-sm)' }}>Freitag</h5>
-              {depotLocations.filter(d => d.day === 'Freitag').map((depot) => (
-                <div key={depot.id} className="address-item" style={{ marginBottom: 'var(--spacing-md)' }}>
-                  <strong>{depot.name}</strong>
-                  <p>{depot.address}</p>
-                  {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact}</p>}
-                  {depot.website && (
-                    <p style={{ fontSize: '0.875rem', marginTop: '8px', marginBottom: '8px' }}>
-                      <a 
-                        href={depot.website} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        style={{
-                          color: 'white',
-                          backgroundColor: 'var(--bioco-green)',
-                          padding: '6px 12px',
-                          borderRadius: '4px',
-                          textDecoration: 'none',
-                          fontWeight: '600',
-                          display: 'inline-block',
-                          fontSize: '0.875rem'
-                        }}
-                      >
-                        Zur Website →
-                      </a>
-                    </p>
-                  )}
-                  {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
-                  <a
-                    href={getGoogleMapsLink(depot)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary"
-                    style={{ marginTop: 'var(--spacing-sm)', display: 'inline-block' }}
-                  >
-                    Route planen →
-                  </a>
-                </div>
-              ))}
+              <h5 style={{ 
+                color: 'black', 
+                marginBottom: 'var(--spacing-md)',
+                fontSize: '1.25rem',
+                fontWeight: '700'
+              }}>
+                Freitag
+              </h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                {depotLocations.filter(d => d.day === 'Freitag').map((depot) => (
+                  <div key={depot.id} className="address-item" style={{ 
+                    padding: 'var(--spacing-md)',
+                    backgroundColor: 'var(--bg-secondary)',
+                    borderRadius: '8px',
+                    border: '1px solid var(--border-color)'
+                  }}>
+                    <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '8px' }}>{depot.name}</strong>
+                    <p style={{ marginBottom: '8px' }}>{depot.address}</p>
+                    {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Kontakt: {depot.contact}</p>}
+                    {depot.website && (
+                      <p style={{ fontSize: '0.875rem', marginTop: '8px', marginBottom: '8px' }}>
+                        <a 
+                          href={depot.website} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          style={{
+                            color: 'white',
+                            backgroundColor: 'var(--bioco-green)',
+                            padding: '6px 12px',
+                            borderRadius: '4px',
+                            textDecoration: 'none',
+                            fontWeight: '600',
+                            display: 'inline-block',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          Zur Website →
+                        </a>
+                      </p>
+                    )}
+                    {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
+                    <a
+                      href={getGoogleMapsLink(depot)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-secondary"
+                      style={{ marginTop: 'var(--spacing-sm)', display: 'inline-block' }}
+                    >
+                      Route planen →
+                    </a>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
