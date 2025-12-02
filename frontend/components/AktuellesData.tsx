@@ -54,6 +54,84 @@ export const aktuellesData: AktuellesItem[] = [
     location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
     time: '19:00 Uhr',
     signupRequired: false
+  },
+  // Schnuppertage 2026
+  {
+    id: 4,
+    date: '28.04.2026',
+    title: 'Schnuppertag April',
+    description: 'Lerne biocò und den Geisshof kennen',
+    type: 'event',
+    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
+    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
+    time: '14:00 - 17:00 Uhr',
+    signupRequired: true
+  },
+  {
+    id: 5,
+    date: '29.05.2026',
+    title: 'Schnuppertag Mai',
+    description: 'Lerne biocò und den Geisshof kennen',
+    type: 'event',
+    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
+    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
+    time: '14:00 - 17:00 Uhr',
+    signupRequired: true
+  },
+  {
+    id: 6,
+    date: '26.06.2026',
+    title: 'Schnuppertag Juni',
+    description: 'Lerne biocò und den Geisshof kennen',
+    type: 'event',
+    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
+    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
+    time: '14:00 - 17:00 Uhr',
+    signupRequired: true
+  },
+  {
+    id: 7,
+    date: '31.07.2026',
+    title: 'Schnuppertag Juli',
+    description: 'Lerne biocò und den Geisshof kennen',
+    type: 'event',
+    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
+    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
+    time: '14:00 - 17:00 Uhr',
+    signupRequired: true
+  },
+  {
+    id: 8,
+    date: '28.08.2026',
+    title: 'Schnuppertag August',
+    description: 'Lerne biocò und den Geisshof kennen',
+    type: 'event',
+    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
+    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
+    time: '14:00 - 17:00 Uhr',
+    signupRequired: true
+  },
+  {
+    id: 9,
+    date: '25.09.2026',
+    title: 'Schnuppertag September',
+    description: 'Lerne biocò und den Geisshof kennen',
+    type: 'event',
+    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
+    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
+    time: '14:00 - 17:00 Uhr',
+    signupRequired: true
+  },
+  {
+    id: 10,
+    date: '30.10.2026',
+    title: 'Schnuppertag Oktober',
+    description: 'Lerne biocò und den Geisshof kennen',
+    type: 'event',
+    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
+    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
+    time: '14:00 - 17:00 Uhr',
+    signupRequired: true
   }
 ]
 
