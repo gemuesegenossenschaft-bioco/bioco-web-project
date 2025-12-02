@@ -75,8 +75,8 @@ const depotLocations: DepotLocation[] = [
     id: 'kupperhaus',
     name: 'Depot Kupperhaus',
     address: 'Schulthess-Allee 4, 5200 Brugg',
-    lat: 47.4854,
-    lng: 8.2083,
+    lat: 47.4843986,
+    lng: 8.2069493,
     day: 'Freitag',
     contact: 'Brigitte Perren Henneck',
     notes: 'Unten an der Rampe (Zufahrt rückwärts neben dem Kupperhaus).'
