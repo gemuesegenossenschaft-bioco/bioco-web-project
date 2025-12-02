@@ -226,25 +226,23 @@ export function DepotMap() {
                   <p>{depot.address}</p>
                   {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact}</p>}
                   {depot.website && (
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    <p style={{ fontSize: '0.875rem', marginTop: '8px', marginBottom: '8px' }}>
                       <a 
                         href={depot.website} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        style={depot.id === 'chraettli' ? {
+                        style={{
                           color: 'white',
                           backgroundColor: 'var(--bioco-green)',
-                          padding: '4px 8px',
+                          padding: '6px 12px',
                           borderRadius: '4px',
                           textDecoration: 'none',
-                          fontWeight: 'bold',
-                          display: 'inline-block'
-                        } : { 
-                          color: 'var(--bioco-green)', 
-                          textDecoration: 'underline' 
+                          fontWeight: '600',
+                          display: 'inline-block',
+                          fontSize: '0.875rem'
                         }}
                       >
-                        {depot.id === 'chraettli' ? 'Zur Chrättli Website' : depot.website}
+                        Zur Website →
                       </a>
                     </p>
                   )}
@@ -269,25 +267,23 @@ export function DepotMap() {
                   <p>{depot.address}</p>
                   {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact}</p>}
                   {depot.website && (
-                    <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    <p style={{ fontSize: '0.875rem', marginTop: '8px', marginBottom: '8px' }}>
                       <a 
                         href={depot.website} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        style={depot.id === 'chraettli' ? {
+                        style={{
                           color: 'white',
                           backgroundColor: 'var(--bioco-green)',
-                          padding: '4px 8px',
+                          padding: '6px 12px',
                           borderRadius: '4px',
                           textDecoration: 'none',
-                          fontWeight: 'bold',
-                          display: 'inline-block'
-                        } : { 
-                          color: 'var(--bioco-green)', 
-                          textDecoration: 'underline' 
+                          fontWeight: '600',
+                          display: 'inline-block',
+                          fontSize: '0.875rem'
                         }}
                       >
-                        {depot.id === 'chraettli' ? 'Zur Chrättli Website' : depot.website}
+                        Zur Website →
                       </a>
                     </p>
                   )}
