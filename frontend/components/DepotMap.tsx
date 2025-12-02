@@ -85,8 +85,8 @@ const depotLocations: DepotLocation[] = [
     id: 'ennetbaden',
     name: 'Depot Ennetbaden',
     address: 'Geissbergstrasse 17, 5408 Ennetbaden',
-    lat: 47.4811,
-    lng: 8.3194,
+    lat: 47.4802623,
+    lng: 8.3191206,
     day: 'Freitag',
     contact: 'Nils und Armelle George',
     notes: 'Beim Wohnhaus.'
@@ -106,8 +106,8 @@ const depotLocations: DepotLocation[] = [
     id: 'laegernstrasse',
     name: 'Depot Lägernstrasse',
     address: 'Lägernstrasse 6, 5430 Wettingen',
-    lat: 47.4600,
-    lng: 8.3200,
+    lat: 47.4611864,
+    lng: 8.3168081,
     day: 'Freitag',
     contact: 'Helen Matthäus',
     notes: 'Beim Wohnhaus.'
