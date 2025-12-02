@@ -151,7 +151,7 @@ export default function MitmachenPage() {
                 />
                 <CTA
                   text="Zu uns finden"
-                  href="/depots"
+                  href="/standorte-depots"
                   variant="secondary"
                 />
               </div>

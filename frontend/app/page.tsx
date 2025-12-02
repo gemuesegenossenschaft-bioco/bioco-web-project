@@ -51,7 +51,7 @@ export default function Home() {
             <div className="card-body">
               <p className="card-text">
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen 
-                Prinzipien und liefern <Link href="/ernte">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für 
+                Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für 
                 Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/wir">solidarischer Landwirtschaft</Link>, 
                 das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/anpacken">Mitglied</Link> bringt sich ein, ob auf 
                 dem <Link href="/anpacken">Feld</Link>, in der <Link href="/anpacken">Logistik</Link> oder bei der <Link href="/anpacken">Organisation</Link>.
@@ -60,9 +60,9 @@ export default function Home() {
               <p className="card-text">
                 Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude 
                 an der Arbeit. Das ist <Link href="/wir">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen 
-                und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/ernte">Anbau</Link> und erleben, 
+                und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/gemuese">Anbau</Link> und erleben, 
                 wie aus einem Samen frisches Bio-Gemüse wird, das ab 16:00 uhr abholbereit in den 
-                <Link href="/depots"> Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
+                <Link href="/standorte-depots"> Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
               </p>
               <div className="button-group"></div>
             </div>
@@ -74,7 +74,7 @@ export default function Home() {
               <h3>Das ist drin: Saisonal & Demeter</h3>
             </div>
             <div className="card-body">
-              <p className="card-text">Wöchentlich erhalten unsere Mitglieder ein <Link href="/abos">Gemüseabo</Link> mit frischem, saisonalem <Link href="/ernte">Demeter-Gemüse</Link>.</p>
+              <p className="card-text">Wöchentlich erhalten unsere Mitglieder ein <Link href="/abos">Gemüseabo</Link> mit frischem, saisonalem <Link href="/gemuese">Demeter-Gemüse</Link>.</p>
               <div className="pea-bullet-list">
                 <PeaBullet>Wöchentlicher Gemüsekorb</PeaBullet>
                 <PeaBullet>Saisonalität – das Gemüse der Jahreszeit</PeaBullet>
@@ -194,7 +194,7 @@ export default function Home() {
                 <div className="step-icon">4</div>
                 <div className="step-content">
                   <h3>Gemüse abholen</h3>
-                  <p>Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/depots">Standorte</Link> ab</p>
+                  <p>Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/standorte-depots">Standorte</Link> ab</p>
                 </div>
               </div>
               <div className="procedure-step">
@@ -224,7 +224,7 @@ export default function Home() {
                 />
                 <CTA
                   text="Zu uns finden"
-                  href="/depots"
+                  href="/standorte-depots"
                   variant="secondary"
                 />
               </div>

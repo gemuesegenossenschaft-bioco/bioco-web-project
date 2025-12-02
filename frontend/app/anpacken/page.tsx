@@ -163,7 +163,7 @@ export default function AnpackenPage() {
                 />
                 <CTA
                   text="Zu uns finden"
-                  href="/depots"
+                  href="/standorte-depots"
                   variant="secondary"
                 />
               </div>

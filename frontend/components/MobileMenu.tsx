@@ -1,11 +1,31 @@
 'use client'
 
 import { useState } from 'react'
-import { SecondaryNavigation } from './SecondaryNavigation'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { TriColorHamburgerIcon } from './TriColorHamburgerIcon'
+
+// All navigation items for mobile - combines primary and utility nav
+const allNavItems = [
+  // Primary navigation items
+  { title: 'Wir', href: '/wir', section: 'primary' },
+  { title: 'Gemüse', href: '/gemuese', section: 'primary' },
+  { title: 'Mitmachen', href: '/anpacken', section: 'primary' },
+  { title: 'Abos', href: '/abos', section: 'primary' },
+  { title: 'Aktuelles', href: '/aktuelles', section: 'primary' },
+  // Utility navigation items
+  { title: 'Standorte', href: '/standorte-depots', section: 'utility' },
+  { title: 'Kontakt', href: '/kontakt', section: 'utility' },
+  { title: 'Intranet', href: '/intranet', section: 'utility' },
+]
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
+  const pathname = usePathname()
+
+  const handleLinkClick = () => {
+    setIsOpen(false)
+  }
 
   return (
     <>
@@ -39,9 +59,31 @@ export function MobileMenu() {
               </button>
             </div>
             <div className="mobile-menu-primary-section">
-              <div className="mobile-menu-secondary">
-                <SecondaryNavigation />
-              </div>
+              <ul className="mobile-nav-list">
+                {allNavItems.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={isActive ? 'active' : ''}
+                        onClick={handleLinkClick}
+                      >
+                        {item.title}
+                      </Link>
+                    </li>
+                  )
+                })}
+                <li>
+                  <Link
+                    href="/mitmachen"
+                    className="btn btn-orange"
+                    onClick={handleLinkClick}
+                  >
+                    biocò werden
+                  </Link>
+                </li>
+              </ul>
             </div>
           </nav>
         </div>

@@ -5,12 +5,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
 const popularPages = [
-  { title: 'Ernte', href: '/ernte' },
+  { title: 'Gemüse', href: '/gemuese' },
   { title: 'Anpacken', href: '/anpacken' },
   { title: 'Abos', href: '/abos' },
   { title: 'Wir', href: '/wir' },
   { title: 'Aktuelles', href: '/aktuelles' },
-  { title: 'Depots', href: '/depots' },
+  { title: 'Standorte', href: '/standorte-depots' },
   { title: 'Kontakt', href: '/kontakt' },
 ]
 

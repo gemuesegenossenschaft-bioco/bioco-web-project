@@ -586,7 +586,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                   <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                     Wo möchtest du deinen Gemüsekorb abholen?{' '}
                     <Link 
-                      href="/depots" 
+                      href="/standorte-depots" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       style={{ color: 'var(--bioco-green)', textDecoration: 'underline' }}

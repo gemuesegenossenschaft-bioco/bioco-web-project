@@ -18,18 +18,32 @@ export const metadata: Metadata = {
   },
 }
 
-export default function ErntePage() {
+export default function GemusePage() {
   return (
     <>
       <Header />
       <main className="main-content">
         <div className="bento-grid">
+          {/* Page Header with H1 */}
+          <section className="bento-card bento-card-fullwidth">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Was wächst gerade auf dem Geisshof?</h1>
+            </div>
+            <div className="card-body">
+              <p className="card-text">
+                Unser saisonales Demeter-Gemüse wächst in der Region Baden-Brugg. 
+                Hier erfährst du, welche Gemüsesorten gerade Saison haben und in deinem Gemüsekorb landen.
+              </p>
+            </div>
+          </section>
+
           {/* Erste Zeile: Saisonkalender (2/3) und Events (1/3) */}
           <div className="ernte-top-row">
             <section id="B-04" className="bento-card">
               <div className="plant-pattern"></div>
               <div className="card-header">
-                <h3>Saisonkalender</h3>
+                <h2>Saisonkalender</h2>
               </div>
               <div className="card-body">
                 <p className="card-text">Wann ist welches Gemüse verfügbar? Entdecke unsere saisonale Vielfalt.</p>
@@ -45,7 +59,7 @@ export default function ErntePage() {
             <section id="B-05" className="bento-card">
               <div className="plant-pattern"></div>
               <div className="card-header">
-                <h3>Demeter-Qualität</h3>
+                <h2>Demeter-Qualität</h2>
               </div>
               <div className="card-body">
                 <div className="demeter-info">
@@ -110,7 +124,7 @@ export default function ErntePage() {
             <section id="B-02" className="bento-card">
               <div className="plant-pattern"></div>
               <div className="card-header">
-                <h3>Was wir anbauen</h3>
+                <h2>Was wir anbauen</h2>
               </div>
               <div className="card-body">
                 <p className="card-text">Einblicke in unsere Ernte, den Anbau und die Gemeinschaft</p>
@@ -135,7 +149,7 @@ export default function ErntePage() {
                 />
                 <CTA
                   text="Zu uns finden"
-                  href="/depots"
+                  href="/standorte-depots"
                   variant="secondary"
                 />
               </div>

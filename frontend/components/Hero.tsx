@@ -24,7 +24,7 @@ export function Hero({ title, subtitle, image }: HeroProps) {
               )}
               <h1 className="hero-title">{title}</h1>
               <div className="hero-buttons">
-                <Link href="/ernte" className="btn btn-primary">
+                <Link href="/gemuese" className="btn btn-primary">
                   Was wächst gerade
                 </Link>
                 <Link href="/wir" className="btn btn-secondary">

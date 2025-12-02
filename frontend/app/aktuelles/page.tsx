@@ -117,7 +117,7 @@ export default function AktuellesPage() {
                 />
                 <CTA
                   text="Zu uns finden"
-                  href="/depots"
+                  href="/standorte-depots"
                   variant="secondary"
                 />
               </div>

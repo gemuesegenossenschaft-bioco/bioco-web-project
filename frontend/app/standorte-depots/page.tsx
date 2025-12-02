@@ -23,13 +23,32 @@ export default function StandortePage() {
       <Header />
       <main className="main-content">
         <div className="standorte-layout">
+          {/* Page Header with H1 */}
+          <section className="bento-card bento-card-fullwidth">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Unsere Depots in der Region</h1>
+            </div>
+            <div className="card-body">
+              <p className="card-text">
+                Holt euer frisches Bio-Gemüse direkt vom Bio Bauernhof ab! Wir beliefern verschiedene 
+                Depot-Standorte in Baden, Brugg, Gebenstorf und Wettingen. Jeden Dienstag und Freitag 
+                könnt ihr euren Gemüsekorb ab 16:00 Uhr an eurem gewählten Depot abholen.
+              </p>
+            </div>
+          </section>
+
           <section id="E-01" className="bento-card standorte-map-section">
             <div className="plant-pattern"></div>
             <div className="card-header">
-              <h3>Anfahrt zum Geisshof</h3>
+              <h2>Anfahrt zum Geisshof</h2>
             </div>
             <div className="card-body">
-              <p className="card-text">Der Geisshof ist unser Betrieb in Gebenstorf im Aargau, wo wir Bio-Gemüse in Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg kannst du hier auch direkt vorbeikommen und die solidarische Landwirtschaft kennenlernen.</p>
+              <p className="card-text">
+                Der Geisshof ist unser Bio Bauernhof in Gebenstorf im Aargau, wo wir Bio-Gemüse in 
+                Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg kannst du hier 
+                auch direkt vorbeikommen und die solidarische Landwirtschaft kennenlernen.
+              </p>
               <GeisshofMap />
             </div>
           </section>
@@ -37,11 +56,44 @@ export default function StandortePage() {
           <section id="E-02" className="bento-card standorte-map-section standorte-depot-fullwidth">
             <div className="plant-pattern"></div>
             <div className="card-header">
-              <h3>Depot-Standort für Abholung</h3>
+              <h2>Depot-Standorte für Gemüseabholung</h2>
             </div>
             <div className="card-body">
-              <p className="card-text">Hier findest du alle Depot-Standorte in Baden, Brugg, Gebenstorf, Wettingen und der Region Aargau, an denen du deinen wöchentlichen Gemüsekorb mit frischem Bio-Gemüse abholen kannst. ab 16:00 uhr abholbereit.</p>
+              <p className="card-text">
+                Hier findest du alle Depot-Standorte, an denen du dein Gemüse abholen kannst. 
+                Wähle das Depot, das für dich am besten gelegen ist.
+              </p>
               <DepotMap />
+              
+              <div style={{ marginTop: '24px' }}>
+                <h3>Depot Baden</h3>
+                <p>
+                  <strong>Gemüse abholen Baden:</strong> Das Depot Baden befindet sich zentral in der Stadt 
+                  und ist ideal für alle, die in Baden und Umgebung wohnen.
+                </p>
+                
+                <h3>Depot Brugg</h3>
+                <p>
+                  <strong>Gemüse abholen Brugg:</strong> Unser Depot Brugg bietet eine bequeme Abholmöglichkeit 
+                  für Mitglieder aus Brugg und der umliegenden Region.
+                </p>
+                
+                <h3>Depot Gebenstorf</h3>
+                <p>
+                  Direkt beim Geisshof könnt ihr euer Gemüse in Gebenstorf abholen – ideal für 
+                  alle, die den Hof besuchen möchten.
+                </p>
+                
+                <h3>Depot Wettingen</h3>
+                <p>
+                  Das Depot Wettingen ermöglicht eine einfache Abholung für Mitglieder aus Wettingen 
+                  und der näheren Umgebung.
+                </p>
+                
+                <p style={{ marginTop: '16px', fontStyle: 'italic' }}>
+                  <strong>Abholzeiten:</strong> Dienstag und Freitag, ab 16:00 Uhr
+                </p>
+              </div>
             </div>
           </section>
 
@@ -63,7 +115,7 @@ export default function StandortePage() {
                 />
                 <CTA
                   text="Zu uns finden"
-                  href="/depots"
+                  href="/standorte-depots"
                   variant="secondary"
                 />
               </div>

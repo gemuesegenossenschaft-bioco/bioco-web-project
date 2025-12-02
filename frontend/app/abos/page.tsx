@@ -114,13 +114,18 @@ export default function AbosPage() {
 
             <div style={{ marginTop: '16px' }}>
               <h3>Was ist im Gemüsekorb?</h3>
-              <ul>
+              <p className="card-text">
+                Bestellen Sie Ihr Biogemüse direkt vom Hof: Unsere Bio Gemüse Kiste kommt 
+                wöchentlich frisch vom Geisshof. Die wöchentliche Bio Gemüse Lieferung landet 
+                in einem unserer Depots, wo Sie Ihren Gemüsekorb abholen können.
+              </p>
+              <ul style={{ marginTop: '12px' }}>
                 <li>Wöchentlicher Gemüsekorb mit saisonalem Gemüse</li>
                 <li>Demeter-Qualität – höchste Bio-Standards</li>
                 <li>Frisch vom Geisshof in Gebenstorf</li>
-                <li>Abholung in einem der <Link href="/standorte">Standorte</Link> (ab 16:00 uhr abholbereit)</li>
+                <li>Abholung in einem der <Link href="/standorte-depots">Standorte</Link> (ab 16:00 uhr abholbereit)</li>
               </ul>
-              <p><Link href="/ernte">Mehr über unsere Ernte erfahren →</Link></p>
+              <p><Link href="/gemuese">Mehr über unsere Ernte erfahren →</Link></p>
             </div>
 
             <div style={{ marginTop: '16px' }}>
@@ -231,7 +236,7 @@ export default function AbosPage() {
                 />
                 <CTA
                   text="Zu uns finden"
-                  href="/depots"
+                  href="/standorte-depots"
                   variant="secondary"
                 />
               </div>

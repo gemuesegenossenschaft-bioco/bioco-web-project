@@ -8,9 +8,9 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Über uns | Solidarische Landwirtschaft Baden | biocò Gemüsegenossenschaft',
-  description: 'biocò Gemüsegenossenschaft: Seit 2014 solidarische Landwirtschaft auf dem Geisshof Gebenstorf. Demeter-zertifiziertes Bio-Gemüse für Baden-Brugg.',
-  keywords: 'solidarische landwirtschaft, gemüsegenossenschaft, baden, brugg, gebenstorf, demeter, bio gemüse',
+  title: 'Über uns | Bio Bauernhof Baden | biocò Gemüsegenossenschaft',
+  description: 'biocò Gemüsegenossenschaft: Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof Gebenstorf. Demeter-zertifiziertes Gemüse für Baden-Brugg.',
+  keywords: 'bio bauernhof, solidarische landwirtschaft, gemüsegenossenschaft, baden, brugg, gebenstorf, demeter, geisshof',
   openGraph: {
     title: 'Über uns | Solidarische Landwirtschaft Baden | biocò',
     description: 'Seit 2014 solidarische Landwirtschaft auf dem Geisshof Gebenstorf. Demeter-zertifiziertes Bio-Gemüse für Baden-Brugg.',
@@ -32,7 +32,7 @@ export default function WirPage() {
             </div>
             <div className="card-body">
               <h4 className="card-title">Team & Hof</h4>
-              <p className="card-text">biocò ist eine Gemeinschaft von engagierten Menschen, die gemeinsam für frisches, regionales <Link href="/ernte">Demeter-Gemüse</Link> sorgen.</p>
+              <p className="card-text">biocò ist eine Gemeinschaft von engagierten Menschen, die gemeinsam für frisches, regionales <Link href="/gemuese">Demeter-Gemüse</Link> sorgen.</p>
             
             <div className="team-grid">
               <div className="team-card">
@@ -104,10 +104,11 @@ export default function WirPage() {
             </div>
             <div className="card-body">
               <p className="card-text">
-                Der Geisshof in Gebenstorf im Aargau ist seit 2014 der Ort, an dem biocò Bio-Gemüse 
-                in Demeter-Qualität anbaut. Zentral gelegen zwischen Baden und Brugg versorgen wir die 
-                Region mit frischem, saisonalem Gemüse. Hier finden die Feldarbeit, die Gemüseaufbereitung 
-                und viele gemeinsame Anlässe statt.
+                Wir bewirtschaften einen Bio Bauernhof in Baden – genauer gesagt den Geisshof in 
+                Gebenstorf im Aargau. Seit 2014 ist dieser Ort das Herzstück von biocò, wo wir 
+                Bio-Gemüse in Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg 
+                versorgen wir die Region mit frischem, saisonalem Gemüse. Hier finden die Feldarbeit, 
+                die Gemüseaufbereitung und viele gemeinsame Anlässe statt.
               </p>
               
               <div className="geisshof-images-grid">
@@ -132,7 +133,7 @@ export default function WirPage() {
               </div>
               
               <p style={{ marginTop: 'var(--spacing-md)' }}>
-                <Link href="/depots" className="btn btn-secondary" style={{ display: 'inline-block' }}>
+                <Link href="/standorte-depots" className="btn btn-secondary" style={{ display: 'inline-block' }}>
                   Anfahrtsweg zum Geisshof
                 </Link>
               </p>
@@ -152,6 +153,11 @@ export default function WirPage() {
                 <p>
                   Wir teilen Arbeit und Ertrag. Solidarische Landwirtschaft bedeutet, 
                   dass Produzentinnen und Konsumentinnen zusammenarbeiten und füreinander einstehen.
+                </p>
+                <p style={{ marginTop: '12px' }}>
+                  <Link href="/solawi" className="btn btn-secondary" style={{ display: 'inline-block', fontSize: '0.875rem' }}>
+                    → Mehr über solidarische Landwirtschaft erfahren
+                  </Link>
                 </p>
               </div>
               
@@ -295,7 +301,7 @@ export default function WirPage() {
                 />
                 <CTA
                   text="Zu uns finden"
-                  href="/depots"
+                  href="/standorte-depots"
                   variant="secondary"
                 />
               </div>

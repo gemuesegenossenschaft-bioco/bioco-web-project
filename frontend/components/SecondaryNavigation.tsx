@@ -2,30 +2,28 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { DuckIcon } from './BiocoIcons'
 import { Logo } from './Logo'
 
-const navigationItems = [
+// Primary navigation items (main menu)
+const primaryNavItems = [
   { title: 'Wir', href: '/wir' },
-  { title: 'Gemüse', href: '/ernte' },
+  { title: 'Gemüse', href: '/gemuese' },
   { title: 'Mitmachen', href: '/anpacken' },
   { title: 'Abos', href: '/abos' },
   { title: 'Aktuelles', href: '/aktuelles' },
-  { title: 'Standorte', href: '/depots' },
-  { title: 'Kontakt', href: '/kontakt' },
 ]
 
-export function SecondaryNavigation() {
+export function PrimaryNavigation() {
   const pathname = usePathname()
 
   return (
-    <nav className="secondary-nav">
-      <div className="secondary-nav-container">
-        <div className="secondary-nav-logo">
+    <nav className="primary-nav">
+      <div className="primary-nav-container">
+        <div className="primary-nav-logo">
           <Logo />
         </div>
         <ul>
-          {navigationItems.map((item) => {
+          {primaryNavItems.map((item) => {
             const isActive = pathname === item.href
             
             return (
@@ -47,18 +45,11 @@ export function SecondaryNavigation() {
               biocò werden
             </Link>
           </li>
-          <li>
-            <Link 
-              href="/intranet" 
-              className={`duck-icon-link ${pathname === '/intranet' ? 'active' : ''}`}
-              title="Intranet"
-              aria-label="Intranet"
-            >
-              <DuckIcon size={20} />
-            </Link>
-          </li>
         </ul>
       </div>
     </nav>
   )
 }
+
+// Keep SecondaryNavigation as an alias for backwards compatibility
+export const SecondaryNavigation = PrimaryNavigation
