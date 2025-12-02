@@ -200,12 +200,12 @@ p {
   flex-direction: column;
   min-width: 0;
   background-color: #faf9f7;
-  border: 2px solid var(--bioco-green);
+  border: none;
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
   padding: 0;
   overflow: visible;
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
   margin-bottom: 0;
 }
 
@@ -550,7 +550,7 @@ h4.card-title {
 .bento-card.text-white.bg-primary {
   background-color: var(--bioco-green);
   color: white;
-  border-color: var(--bioco-green-dark);
+  border: none;
 }
 
 .bento-card.bg-primary .card-header,
@@ -569,7 +569,7 @@ h4.card-title {
 .bento-card.text-white.bg-secondary {
   background-color: var(--bioco-green-dark);
   color: white;
-  border-color: var(--bioco-green);
+  border: none;
 }
 
 .bento-card.bg-secondary .card-header,
@@ -587,7 +587,7 @@ h4.card-title {
 .bento-card.bg-success {
   background-color: var(--bioco-green-light);
   color: white;
-  border-color: var(--bioco-green);
+  border: none;
 }
 
 .bento-card.bg-success .card-header {
@@ -603,7 +603,7 @@ h4.card-title {
 .bento-card.bg-warning {
   background-color: var(--bioco-orange);
   color: white;
-  border-color: #E88200;
+  border: none;
 }
 
 .bento-card.bg-warning .card-header {
@@ -619,7 +619,7 @@ h4.card-title {
 .bento-card.bg-danger {
   background-color: var(--bioco-beet);
   color: white;
-  border-color: var(--bioco-beet-light);
+  border: none;
 }
 
 .bento-card.bg-danger .card-header {
@@ -635,7 +635,7 @@ h4.card-title {
 .bento-card.bg-info {
   background-color: var(--bioco-green-light);
   color: white;
-  border-color: var(--bioco-green);
+  border: none;
 }
 
 .bento-card.bg-info .card-header {
@@ -651,13 +651,13 @@ h4.card-title {
 .bento-card.bg-light {
   background-color: var(--bg-secondary);
   color: var(--text-primary);
-  border-color: #333;
+  border: none;
 }
 
 .bento-card.bg-dark {
   background-color: #333;
   color: white;
-  border-color: #555;
+  border: none;
 }
 
 .bento-card.bg-dark .card-header {
@@ -684,10 +684,10 @@ h4.card-title {
   grid-column: 1 / -1;
 }
 
-/* Kennenlernen Card - Red border matching logo (Randrot) */
+/* Kennenlernen Card - Red styling without border */
 .kennenlernen-card {
-  border: 3px solid #8b0000 !important;
-  box-shadow: 0 4px 8px rgba(139, 0, 0, 0.2), 0 2px 4px rgba(139, 0, 0, 0.1) !important;
+  border: none !important;
+  box-shadow: 0 8px 16px rgba(139, 0, 0, 0.15), 0 4px 8px rgba(139, 0, 0, 0.1) !important;
 }
 
 .kennenlernen-card .card-text,
@@ -1006,7 +1006,7 @@ a:hover {
 .primary-nav,
 .secondary-nav {
   background: var(--bg-secondary);
-  border-bottom: 2px solid var(--bioco-green);
+  border-bottom: 1px solid var(--border-color);
   padding: var(--spacing-xs) 0;
   position: sticky;
   top: 0;
@@ -1193,7 +1193,7 @@ header {
 
 header .header-nav-container {
   background: transparent;
-  border: 2px solid var(--bioco-green);
+  border: none;
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
   padding: var(--spacing-xs) var(--spacing-md);
   box-shadow: var(--shadow-sm);
@@ -2321,17 +2321,17 @@ footer a:hover {
   display: inline-block;
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-primary);
-  border: 2px solid var(--bioco-green);
+  border: 1px solid var(--border-color);
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  color: var(--bioco-green);
+  color: var(--text-primary);
   font-size: 0.875rem;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
 }
 
 .partner-badge:hover {
-  background: var(--bioco-green);
-  color: white;
+  background: var(--bg-secondary);
+  box-shadow: var(--shadow-md);
 }
 
 /* Saisonkalender */
@@ -2402,8 +2402,8 @@ footer a:hover {
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  border: 2px solid #333;
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: var(--shadow-md);
   width: 100%;
 }
 
@@ -2507,8 +2507,8 @@ footer a:hover {
   aspect-ratio: 4/3;
   overflow: hidden;
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  border: 2px solid #333;
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: var(--shadow-md);
 }
 
 .gallery-placeholder {
@@ -2530,10 +2530,10 @@ footer a:hover {
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
   margin-bottom: var(--spacing-sm);
-  border: 2px solid #333;
+  border: none;
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
   overflow: visible;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .demeter-accordion summary {
@@ -2590,9 +2590,9 @@ footer a:hover {
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  border: 2px solid #333;
+  border: none;
   transition: all 0.2s ease;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .team-card-image-grid {
@@ -2656,9 +2656,8 @@ footer a:hover {
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  border: 1px solid var(--bioco-green);
-  border-left: 4px solid var(--bioco-green);
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: var(--shadow-md);
 }
 
 .mission-item h3 {
@@ -2751,11 +2750,11 @@ footer a:hover {
 
 .aktuelles-item {
   background: var(--bg-secondary);
-  border: 1px solid var(--bioco-green);
+  border: none;
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .aktuelles-item h3 {
@@ -2831,7 +2830,7 @@ footer a:hover {
 /* Events Card - Light Green Styling */
 .events-card {
   background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
-  border: 2px solid rgba(46, 125, 50, 0.3);
+  border: none;
 }
 
 .events-card .card-header {
@@ -2852,11 +2851,11 @@ footer a:hover {
 
 .event-item {
   background: var(--bg-secondary);
-  border: 1px solid var(--bioco-green);
+  border: none;
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .event-item h3 {
@@ -2869,6 +2868,98 @@ footer a:hover {
 
 .event-item p {
   margin: var(--spacing-xs) 0;
+  color: var(--text-secondary);
+}
+
+.past-events-card {
+  background: white;
+  border: none;
+  margin-top: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.past-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.past-event-tile {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.past-event-tile:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.past-event-media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #f3f3f3;
+}
+
+.past-event-media img,
+.past-event-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.past-event-meta {
+  padding: 0 var(--spacing-md) var(--spacing-md) var(--spacing-md);
+}
+
+.past-event-date {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.past-event-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.past-event-location {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.past-event-cta {
+  color: var(--bioco-green);
+  font-weight: 600;
+}
+
+.event-media-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.event-media-grid figure {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.event-media-grid figcaption {
+  font-size: 0.85rem;
   color: var(--text-secondary);
 }
 
@@ -2889,8 +2980,8 @@ footer a:hover {
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  border: 1px solid var(--bioco-green);
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: var(--shadow-md);
   transition: all 0.2s ease;
 }
 
@@ -3417,12 +3508,11 @@ footer a:hover {
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  border: 1px solid var(--bioco-green);
-  border-left: 4px solid var(--bioco-green);
+  border: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
   display: block;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-md);
 }
 
 .commitment-item:hover {
@@ -3503,8 +3593,8 @@ footer a:hover {
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  border: 1px solid var(--bioco-green);
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: var(--shadow-md);
 }
 
 .faq-item h3 {
@@ -3594,8 +3684,8 @@ footer a:hover {
   padding: var(--spacing-lg);
   background: var(--bg-secondary);
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
-  border: 1px solid var(--bioco-green);
-  box-shadow: var(--shadow-sm);
+  border: none;
+  box-shadow: var(--shadow-md);
   min-height: auto;
 }
 
