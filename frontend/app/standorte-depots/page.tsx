@@ -27,18 +27,20 @@ export default function StandortePage() {
           <section className="bento-card bento-card-fullwidth">
             <div className="plant-pattern"></div>
             <div className="card-header">
-              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Unsere Depots in der Region</h1>
+              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Unsere Standorte & Depots</h1>
             </div>
             <div className="card-body">
               <p className="card-text">
-                Holt euer frisches Bio-Gemüse direkt vom Bio Bauernhof ab! Wir beliefern verschiedene 
-                Depot-Standorte in Baden, Brugg, Gebenstorf und Wettingen. Jeden Dienstag und Freitag 
-                könnt ihr euren Gemüsekorb ab 16:00 Uhr an eurem gewählten Depot abholen.
+                Wir unterscheiden zwei Arten von Standorten:
               </p>
+              <ul style={{ margin: '16px 0', paddingLeft: '20px' }}>
+                <li style={{ marginBottom: '8px' }}><strong>Geisshof:</strong> Hier bauen wir unser Gemüse an und arbeiten gemeinsam.</li>
+                <li><strong>Depots:</strong> Hier stehen die Gemüsekörbe jeweils dienstags oder freitags zur Abholung bereit.</li>
+              </ul>
             </div>
           </section>
 
-          <section id="E-01" className="bento-card standorte-map-section">
+          <section id="E-01" className="bento-card bento-card-fullwidth standorte-map-section">
             <div className="plant-pattern"></div>
             <div className="card-header">
               <h2>Anfahrt zum Geisshof</h2>
@@ -49,6 +51,19 @@ export default function StandortePage() {
                 Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg kannst du hier 
                 auch direkt vorbeikommen und die solidarische Landwirtschaft kennenlernen.
               </p>
+              
+              <div style={{ marginTop: '16px', padding: '16px', backgroundColor: 'var(--bg-secondary)', borderRadius: '8px' }}>
+                <h4 style={{ marginBottom: '12px', color: 'var(--bioco-green)' }}>Anreise & Parken</h4>
+                <p style={{ marginBottom: '8px' }}><strong>Bitte komm wenn möglich mit dem Velo oder Bus!</strong></p>
+                <p style={{ marginBottom: '8px' }}>Falls du mit dem Auto kommst:</p>
+                <ul style={{ margin: '0 0 8px 0', paddingLeft: '20px' }}>
+                  <li>Bitte <strong>nicht auf den Hof hinauffahren</strong></li>
+                  <li>Parkiere unten an der Strasse</li>
+                  <li>Halte den <strong>Wendeplatz zwingend frei</strong> (für landwirtschaftliche Fahrzeuge)</li>
+                </ul>
+                <p style={{ fontSize: '0.9rem', fontStyle: 'italic' }}>Danke für deine Rücksichtnahme!</p>
+              </div>
+
               <GeisshofMap />
             </div>
           </section>

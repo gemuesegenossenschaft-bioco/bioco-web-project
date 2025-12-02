@@ -21,12 +21,12 @@ const depotLocations: DepotLocation[] = [
     id: 'chraettli',
     name: 'Depot Chrättli',
     address: 'Allmendstrasse 16, 5400 Baden',
-    lat: 47.4760,
-    lng: 8.3050,
+    lat: 47.4685,
+    lng: 8.2985,
     day: 'Dienstag',
     contact: 'Corona Banky',
     website: 'https://www.xn--chrttli-7wa.ch/',
-    notes: 'Quartierladen. Rechts neben dem Laden hat es eine Rampe. Unter der Rampe ist das Depot.'
+    notes: 'Das Depot befindet sich unter der Rampe rechts neben dem Quartierladen.'
   },
   {
     id: 'ohne',
@@ -37,7 +37,7 @@ const depotLocations: DepotLocation[] = [
     day: 'Dienstag',
     contact: 'Tobias Kloter',
     website: 'https://www.ohne.ch/',
-    notes: 'Körbe unter die hinteren Tische stellen, leere Körbe und Klammern sind unter den vorderen Tischen.'
+    notes: 'Die Körbe stehen unter den Tischen im hinteren Bereich.'
   },
   {
     id: 'anixis',
@@ -48,27 +48,28 @@ const depotLocations: DepotLocation[] = [
     day: 'Dienstag',
     contact: 'Josef Lindiridi',
     website: 'https://anixis.ch/',
-    notes: 'Infrarotsender hinter der Barriere. Körbe auf das Materiallager stellen.'
+    notes: 'Hinter der Barriere auf dem Materiallager.'
   },
   {
     id: 'casa-flora',
     name: 'Casa Flora',
     address: 'Zurzacherstrasse 171, 5200 Brugg',
-    lat: 47.4850,
-    lng: 8.2100,
+    lat: 47.4920,
+    lng: 8.2150,
     day: 'Dienstag',
     contact: 'David Müller',
-    notes: 'Zufahrt via Einfahrt ab Hauptstrasse. Körbe in der Nische zum hinteren Eingang des Blumengeschäfts.'
+    notes: 'In der Nische beim hinteren Eingang des Blumengeschäfts (Zufahrt via Hauptstrasse).'
   },
   // Freitag (Friday) depots
   {
     id: 'geisshof',
     name: 'Depot Geisshof',
     address: 'Geisshof, Gebenstorf',
-    lat: 47.4800,
-    lng: 8.2400,
+    lat: 47.4825,
+    lng: 8.2430,
     day: 'Freitag',
-    contact: 'Matthias Müller'
+    contact: 'Matthias Müller',
+    notes: 'Direkt auf dem Hof.'
   },
   {
     id: 'kupperhaus',
@@ -78,7 +79,7 @@ const depotLocations: DepotLocation[] = [
     lng: 8.2083,
     day: 'Freitag',
     contact: 'Brigitte Perren Henneck',
-    notes: 'Rückwärts neben dem Kupperhaus hinunterfahren bis auf Höhe Rampe. Körbe die Rampe hinunterbringen.'
+    notes: 'Unten an der Rampe (Zufahrt rückwärts neben dem Kupperhaus).'
   },
   {
     id: 'ennetbaden',
@@ -87,18 +88,19 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4811,
     lng: 8.3194,
     day: 'Freitag',
-    contact: 'Nils und Armelle George'
+    contact: 'Nils und Armelle George',
+    notes: 'Beim Wohnhaus.'
   },
   {
     id: 'lemonia',
     name: 'Depot Lemonia',
     address: 'Schartenstrasse 28, 5430 Wettingen',
-    lat: 47.4586,
-    lng: 8.3175,
+    lat: 47.4676,
+    lng: 8.3277,
     day: 'Freitag',
     contact: 'Martin Gruchow',
     website: 'http://lemonia.ch/',
-    notes: 'Körbe hinter dem Haus unter den Tisch stellen.'
+    notes: 'Hinter dem Haus unter dem Tisch.'
   },
   {
     id: 'laegernstrasse',
@@ -107,7 +109,8 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4600,
     lng: 8.3200,
     day: 'Freitag',
-    contact: 'Helen Matthäus'
+    contact: 'Helen Matthäus',
+    notes: 'Beim Wohnhaus.'
   },
 ]
 

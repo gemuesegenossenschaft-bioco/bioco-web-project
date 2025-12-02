@@ -21,14 +21,10 @@ export function Footer() {
               <p>
                 <strong>Gemüsegenossenschaft biocò</strong><br />
                 Geisshof<br />
-                5412 Gebenstorf<br />
-                Aargau, Schweiz
+                5412 Gebenstorf
               </p>
               <p>
                 <a href="mailto:info@bioco.ch">info@bioco.ch</a>
-              </p>
-              <p style={{ marginTop: '12px', fontSize: '14px' }}>
-                <strong>ab 16:00 uhr abholbereit</strong>
               </p>
             </div>
 
@@ -98,7 +94,7 @@ export function Footer() {
                 rel="noopener noreferrer"
                 className="partner-badge"
               >
-                <span>Basimil</span>
+                <span>Basimilch</span>
               </a>
               <a 
                 href="https://www.demeter.ch" 
