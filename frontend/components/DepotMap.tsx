@@ -65,8 +65,8 @@ const depotLocations: DepotLocation[] = [
     id: 'geisshof',
     name: 'Depot Geisshof',
     address: 'Geisshof, Gebenstorf',
-    lat: 47.4819,
-    lng: 8.2389,
+    lat: 47.4741684,
+    lng: 8.2456318,
     day: 'Freitag',
     contact: 'Matthias Müller',
     notes: 'Direkt auf dem Hof.'

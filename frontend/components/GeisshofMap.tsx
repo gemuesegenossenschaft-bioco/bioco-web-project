@@ -6,8 +6,8 @@ import { useEffect, useRef } from 'react'
 const geisshofLocation = {
   name: 'Geisshof',
   address: 'Geisslistrasse, Gebenstorf, Schweiz',
-  lat: 47.4819,
-  lng: 8.2389,
+  lat: 47.4741684,
+  lng: 8.2456318,
 }
 
 export function GeisshofMap() {
@@ -55,7 +55,7 @@ export function GeisshofMap() {
         <div style="padding: 8px;">
           <strong>Geisshof</strong><br>
           ${geisshofLocation.address}<br>
-          <a href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent('Geisslistrasse, Gebenstorf, Schweiz')}" 
+          <a href="https://maps.app.goo.gl/1ESuXVJwUUEd5SzX8" 
              target="_blank" 
              rel="noopener noreferrer"
              style="color: #2e7d32; text-decoration: underline;">
@@ -96,7 +96,7 @@ export function GeisshofMap() {
             <div className="direction-item">
               <strong>{geisshofLocation.name}</strong>
               <a
-                href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geisshofLocation.address)}`}
+                href="https://maps.app.goo.gl/1ESuXVJwUUEd5SzX8"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary"
