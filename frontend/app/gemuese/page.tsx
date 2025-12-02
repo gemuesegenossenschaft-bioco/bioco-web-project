@@ -8,11 +8,11 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Saisonales Demeter Gemüse | Was wächst gerade | biocò',
+  title: 'Saisonales Demeter Gemüse | Welche Gemüse haben gerade Saison | biocò',
   description: 'Entdecke unser saisonales Bio-Gemüse in Demeter-Qualität. Frisch vom Geisshof in Gebenstorf für die Region Baden-Brugg.',
   keywords: 'demeter gemüse, bio gemüse, saisonales gemüse, gebenstorf, baden, brugg, gemüseernte',
   openGraph: {
-    title: 'Saisonales Demeter Gemüse | Was wächst gerade | biocò',
+    title: 'Saisonales Demeter Gemüse | Welche Gemüse haben gerade Saison | biocò',
     description: 'Entdecke unser saisonales Bio-Gemüse in Demeter-Qualität. Frisch vom Geisshof in Gebenstorf.',
     type: 'website',
   },
@@ -28,7 +28,7 @@ export default function GemusePage() {
           <section className="bento-card bento-card-fullwidth">
             <div className="plant-pattern"></div>
             <div className="card-header">
-              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Was wächst gerade auf dem Geisshof?</h1>
+              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Welche Gemüse haben gerade Saison</h1>
             </div>
             <div className="card-body">
               <p className="card-text">
