@@ -1,5 +1,13 @@
 // Shared data source for Aktuelles and Events
 // Structure designed to be easily replaceable with ProcessWire API data
+export type EventStatus = 'upcoming' | 'past'
+
+export interface EventMediaItem {
+  url: string
+  type: 'image' | 'video'
+  description?: string
+}
+
 export interface AktuellesItem {
   id?: string | number // For ProcessWire: page ID
   date: string
@@ -10,15 +18,54 @@ export interface AktuellesItem {
   fullDescription?: string
   location?: string
   time?: string
+  timeLabel?: string
+  startDate?: string
+  endDate?: string
+  status?: EventStatus
   signupRequired?: boolean
+  signupEnabled?: boolean
   signupUrl?: string
+  signupNotes?: string
   imageUrl?: string
+  media?: EventMediaItem[]
   // ProcessWire fields (for future API integration)
   body?: string // Full content from ProcessWire
   url?: string // ProcessWire page URL
+  parentTitle?: string
   // Instagram-specific fields
   instagram_id?: string
   instagram_url?: string
+}
+
+interface EventsApiEvent {
+  id: number
+  title: string
+  description: string
+  fullDescription?: string
+  location?: string
+  startDate?: string
+  endDate?: string
+  dateLabel?: string
+  timeLabel?: string
+  signupEnabled?: boolean
+  signupNotes?: string
+  status?: EventStatus
+  media?: EventMediaItem[]
+  url?: string
+  parentTitle?: string
+}
+
+interface EventsApiResponse {
+  success: boolean
+  generatedAt?: string
+  upcoming: EventsApiEvent[]
+  past: EventsApiEvent[]
+}
+
+export interface EventsFeed {
+  upcoming: AktuellesItem[]
+  past: AktuellesItem[]
+  generatedAt?: string
 }
 
 export const aktuellesData: AktuellesItem[] = [
@@ -43,7 +90,12 @@ export const aktuellesData: AktuellesItem[] = [
     fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
     location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
     time: '14:00 - 17:00 Uhr',
-    signupRequired: true
+    timeLabel: '14:00 - 17:00 Uhr',
+    startDate: '2026-04-28T14:00:00+02:00',
+    endDate: '2026-04-28T17:00:00+02:00',
+    status: 'upcoming',
+    signupRequired: true,
+    signupEnabled: true
   },
   {
     id: 5,
@@ -54,7 +106,12 @@ export const aktuellesData: AktuellesItem[] = [
     fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
     location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
     time: '14:00 - 17:00 Uhr',
-    signupRequired: true
+    timeLabel: '14:00 - 17:00 Uhr',
+    startDate: '2026-05-29T14:00:00+02:00',
+    endDate: '2026-05-29T17:00:00+02:00',
+    status: 'upcoming',
+    signupRequired: true,
+    signupEnabled: true
   },
   {
     id: 6,
@@ -65,7 +122,12 @@ export const aktuellesData: AktuellesItem[] = [
     fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
     location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
     time: '14:00 - 17:00 Uhr',
-    signupRequired: true
+    timeLabel: '14:00 - 17:00 Uhr',
+    startDate: '2026-06-26T14:00:00+02:00',
+    endDate: '2026-06-26T17:00:00+02:00',
+    status: 'upcoming',
+    signupRequired: true,
+    signupEnabled: true
   },
   {
     id: 7,
@@ -76,7 +138,12 @@ export const aktuellesData: AktuellesItem[] = [
     fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
     location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
     time: '14:00 - 17:00 Uhr',
-    signupRequired: true
+    timeLabel: '14:00 - 17:00 Uhr',
+    startDate: '2026-07-31T14:00:00+02:00',
+    endDate: '2026-07-31T17:00:00+02:00',
+    status: 'upcoming',
+    signupRequired: true,
+    signupEnabled: true
   },
   {
     id: 8,
@@ -87,7 +154,12 @@ export const aktuellesData: AktuellesItem[] = [
     fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
     location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
     time: '14:00 - 17:00 Uhr',
-    signupRequired: true
+    timeLabel: '14:00 - 17:00 Uhr',
+    startDate: '2026-08-28T14:00:00+02:00',
+    endDate: '2026-08-28T17:00:00+02:00',
+    status: 'upcoming',
+    signupRequired: true,
+    signupEnabled: true
   },
   {
     id: 9,
@@ -98,7 +170,12 @@ export const aktuellesData: AktuellesItem[] = [
     fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
     location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
     time: '14:00 - 17:00 Uhr',
-    signupRequired: true
+    timeLabel: '14:00 - 17:00 Uhr',
+    startDate: '2026-09-25T14:00:00+02:00',
+    endDate: '2026-09-25T17:00:00+02:00',
+    status: 'upcoming',
+    signupRequired: true,
+    signupEnabled: true
   },
   {
     id: 10,
@@ -109,7 +186,12 @@ export const aktuellesData: AktuellesItem[] = [
     fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
     location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
     time: '14:00 - 17:00 Uhr',
-    signupRequired: true
+    timeLabel: '14:00 - 17:00 Uhr',
+    startDate: '2026-10-30T14:00:00+02:00',
+    endDate: '2026-10-30T17:00:00+02:00',
+    status: 'upcoming',
+    signupRequired: true,
+    signupEnabled: true
   }
 ]
 
@@ -118,7 +200,27 @@ export function getAktuellesItems(): AktuellesItem[] {
 }
 
 export function getEventItems(): AktuellesItem[] {
-  return aktuellesData.filter(item => item.type === 'event')
+  return getStaticEventItems()
+}
+
+export function getStaticEventItems(): AktuellesItem[] {
+  const now = new Date()
+  
+  return aktuellesData
+    .filter(item => item.type === 'event')
+    .map(item => {
+      // Parse the event date to determine if it's past
+      const itemDate = item.startDate ? new Date(item.startDate) : null
+      const isPast = itemDate && itemDate < now
+      
+      return {
+        ...item,
+        // Explicitly set signup to false if event is past
+        signupEnabled: isPast ? false : (item.signupEnabled ?? item.signupRequired ?? false),
+        media: item.media ?? [],
+        status: isPast ? 'past' : (item.status ?? 'upcoming'),
+      }
+    })
 }
 
 /**
@@ -190,5 +292,72 @@ function parseDate(dateStr: string): Date {
     return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]))
   }
   return new Date(dateStr)
+}
+
+const DEFAULT_SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+
+export async function fetchEventsFromCms(): Promise<EventsFeed> {
+  const endpoint =
+    typeof window === 'undefined'
+      ? `${DEFAULT_SITE_URL}/api/events`
+      : '/api/events'
+
+  const response = await fetch(endpoint, {
+    cache: 'no-store',
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch events: ${response.status}`)
+  }
+
+  const data = (await response.json()) as EventsApiResponse
+  if (!data.success) {
+    throw new Error('Events API returned an error')
+  }
+
+  return {
+    upcoming: data.upcoming.map(mapEventFromApi),
+    past: data.past.map(mapEventFromApi),
+    generatedAt: data.generatedAt,
+  }
+}
+
+function mapEventFromApi(event: EventsApiEvent): AktuellesItem {
+  const fallbackDate = event.startDate
+    ? new Date(event.startDate).toLocaleDateString('de-CH')
+    : ''
+
+  const previewImage = event.media?.find(media => media.type === 'image')
+
+  return {
+    id: event.id,
+    date: event.dateLabel || fallbackDate,
+    title: event.title,
+    description: event.description,
+    type: 'event',
+    fullDescription: event.fullDescription,
+    location: event.location,
+    time: event.timeLabel,
+    timeLabel: event.timeLabel,
+    startDate: event.startDate,
+    endDate: event.endDate,
+    status: event.status ?? 'upcoming',
+    signupEnabled: event.signupEnabled,
+    signupRequired: event.signupEnabled,
+    signupNotes: event.signupNotes,
+    imageUrl: previewImage?.url,
+    media: event.media,
+    url: event.url,
+    parentTitle: event.parentTitle,
+  }
+}
+
+export function getFallbackEventsFeed(): EventsFeed {
+  return {
+    upcoming: getStaticEventItems(),
+    past: [],
+  }
 }
 

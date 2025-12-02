@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { getAktuellesItems, getEventItems, AktuellesItem } from './AktuellesData'
+import { getAktuellesItems, AktuellesItem } from './AktuellesData'
 import { AktuellesItemComponent } from './AktuellesItem'
 import { ItemDetailModal } from './ItemDetailModal'
+import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 export function AktuellesTabs() {
   const aktuellesItems = getAktuellesItems()
-  const eventItems = getEventItems()
+  const { upcoming: eventItems, isLoading } = useEventsFeed(3)
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -53,16 +54,23 @@ export function AktuellesTabs() {
             <h3>Nächste Events</h3>
           </div>
           <div className="card-body">
-            <div className="events-list">
-              {eventItems.map((item, index) => (
-                <AktuellesItemComponent 
-                  key={item.id || index} 
-                  item={item} 
-                  variant="event"
-                  onClick={handleItemClick}
-                />
-              ))}
-            </div>
+            {isLoading ? (
+              <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+            ) : (
+              <div className="events-list">
+                {eventItems.map((item, index) => (
+                  <AktuellesItemComponent 
+                    key={item.id || index} 
+                    item={item} 
+                    variant="event"
+                    onClick={handleItemClick}
+                  />
+                ))}
+                {eventItems.length === 0 && (
+                  <p style={{ color: 'var(--text-secondary)' }}>Keine Events geplant.</p>
+                )}
+              </div>
+            )}
             <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
               Alle Events ansehen
             </Link>

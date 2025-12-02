@@ -15,7 +15,15 @@ export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }:
   const displayVariant = item.type === 'instagram' ? 'aktuelles' : (variant || 'aktuelles')
   const className = displayVariant === 'event' ? 'event-item' : 'aktuelles-item'
   const isInstagram = item.type === 'instagram'
-  const hasDetails = item.fullDescription || item.location || item.time || (item.type === 'event' && item.signupRequired) || isInstagram
+  const canRegister = item.type === 'event' && (item.signupEnabled ?? item.signupRequired ?? false)
+  const hasDetails =
+    item.fullDescription ||
+    item.location ||
+    item.time ||
+    item.timeLabel ||
+    canRegister ||
+    isInstagram ||
+    (item.media && item.media.length > 0)
   
   const handleClick = () => {
     if (isInstagram && item.instagram_url) {

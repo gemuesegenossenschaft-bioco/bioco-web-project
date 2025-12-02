@@ -5,16 +5,18 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Hero } from '@/components/Hero'
 import { CTA } from '@/components/CTA'
-import { getAktuellesItems, getEventItems, AktuellesItem } from '@/components/AktuellesData'
+import { getAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import { PeaBullet } from '@/components/PeaBullet'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 export default function Home() {
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(3)
 
   const handleItemClick = (item: AktuellesItem) => {
     setSelectedItem(item)
@@ -145,16 +147,23 @@ export default function Home() {
                 <h3>Nächste Events</h3>
               </div>
               <div className="card-body">
-                <div className="events-list">
-                  {getEventItems().map((item, index) => (
-                    <AktuellesItemComponent 
-                      key={item.id || index} 
-                      item={item} 
-                      variant="event"
-                      onClick={handleItemClick}
-                    />
-                  ))}
-                </div>
+                {eventsLoading ? (
+                  <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+                ) : (
+                  <div className="events-list">
+                    {eventItems.map((item, index) => (
+                      <AktuellesItemComponent 
+                        key={item.id || index} 
+                        item={item} 
+                        variant="event"
+                        onClick={handleItemClick}
+                      />
+                    ))}
+                    {eventItems.length === 0 && (
+                      <p style={{ color: 'var(--text-secondary)' }}>Keine Events geplant.</p>
+                    )}
+                  </div>
+                )}
                 <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
                   Alle Events ansehen
                 </Link>

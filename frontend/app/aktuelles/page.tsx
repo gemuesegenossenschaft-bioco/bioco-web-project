@@ -4,14 +4,15 @@ import { useState, useEffect } from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
-import { getAktuellesItems, getEventItems, getAllAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
+import { getAktuellesItems, getAllAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import Link from 'next/link'
+import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 export default function AktuellesPage() {
   const staticAktuellesItems = getAktuellesItems()
-  const eventItems = getEventItems()
+  const { upcoming: eventItems, past, isLoading: eventsLoading, error: eventsError } = useEventsFeed()
   const [allAktuellesItems, setAllAktuellesItems] = useState<AktuellesItem[]>(staticAktuellesItems)
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -87,19 +88,59 @@ export default function AktuellesPage() {
                 <h3>Nächste Events</h3>
               </div>
               <div className="card-body">
-                <div className="events-list">
-                  {eventItems.map((item, index) => (
-                    <AktuellesItemComponent 
-                      key={item.id || index} 
-                      item={item} 
-                      variant="event"
-                      onClick={handleItemClick}
-                    />
-                  ))}
-                </div>
+                {eventsLoading ? (
+                  <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+                ) : (
+                  <div className="events-list">
+                    {eventItems.map((item, index) => (
+                      <AktuellesItemComponent 
+                        key={item.id || index} 
+                        item={item} 
+                        variant="event"
+                        onClick={handleItemClick}
+                      />
+                    ))}
+                    {eventItems.length === 0 && (
+                      <p style={{ color: 'var(--text-secondary)' }}>Keine Events geplant.</p>
+                    )}
+                  </div>
+                )}
               </div>
             </section>
           </div>
+
+          {past.length > 0 && (
+            <section id="G-03" className="bento-card past-events-card">
+              <div className="card-header">
+                <h3>Vergangene Events</h3>
+              </div>
+              <div className="card-body past-events-grid">
+                {past.map((item, index) => (
+                  <button
+                    key={item.id || index}
+                    className="past-event-tile"
+                    onClick={() => handleItemClick(item)}
+                  >
+                    {item.media?.[0] && (
+                      <div className="past-event-media">
+                        {item.media[0].type === 'image' ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={item.media[0].url} alt={item.media[0].description || item.title} />
+                        ) : (
+                          <video src={item.media[0].url} muted playsInline />
+                        )}
+                      </div>
+                    )}
+                    <div className="past-event-meta">
+                      <p className="past-event-date">{item.date}</p>
+                      <p className="past-event-title">{item.title}</p>
+                      <span className="past-event-cta">Rückblick ansehen →</span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* Möchtest du uns kennenlernen - Am Ende */}
           <section id="B-06" className="bento-card bento-card-fullwidth kennenlernen-card">
