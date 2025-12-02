@@ -26,6 +26,20 @@ export default function AbosPage() {
       <Header />
       <main className="main-content">
         <div className="bento-grid">
+          {/* Page Header with H1 */}
+          <section className="bento-card bento-card-fullwidth">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Dein wöchentliches Gemüseabo</h1>
+            </div>
+            <div className="card-body">
+              <p className="card-text">
+                Wöchentlich frisches Demeter-Gemüse direkt vom Geisshof in deinen Gemüsekorb. 
+                Hier erfährst du alles über unsere Abo-Modelle, Preise und wie du Mitglied werden kannst.
+              </p>
+            </div>
+          </section>
+
           <section id="C-01" className="bento-card bento-card-large">
             <div className="plant-pattern"></div>
             <div className="card-header">

@@ -24,6 +24,20 @@ export default function MitmachenPage() {
       <Header />
       <main className="main-content">
         <div className="bento-grid">
+          {/* Page Header with H1 */}
+          <section className="bento-card bento-card-fullwidth">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Mitmachen bei biocò</h1>
+            </div>
+            <div className="card-body">
+              <p className="card-text">
+                Werde Teil unserer Gemüsegenossenschaft und erlebe solidarische Landwirtschaft hautnah. 
+                Hier erfährst du, wie du dich einbringen kannst und was Mitarbeit bei biocò bedeutet.
+              </p>
+            </div>
+          </section>
+
           <section id="D-01" className="bento-card bento-card-large">
             <div className="plant-pattern"></div>
             <div className="card-header">

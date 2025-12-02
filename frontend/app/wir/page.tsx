@@ -24,6 +24,20 @@ export default function WirPage() {
       <Header />
       <main className="main-content">
         <div className="bento-grid">
+          {/* Page Header with H1 */}
+          <section className="bento-card bento-card-fullwidth">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Über uns: Die biocò Gemüsegenossenschaft</h1>
+            </div>
+            <div className="card-body">
+              <p className="card-text">
+                Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. 
+                Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere solidarische Landwirtschaft prägen.
+              </p>
+            </div>
+          </section>
+
           {/* Erste Zeile: Wir */}
           <section id="F-01" className="bento-card bento-card-large">
             <div className="plant-pattern"></div>
