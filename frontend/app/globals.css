@@ -2337,6 +2337,7 @@ footer a:hover {
 /* Saisonkalender */
 .saisonkalender {
   margin-top: var(--spacing-md);
+  width: 100%;
 }
 
 .kalender-tabs {
@@ -2346,6 +2347,7 @@ footer a:hover {
   margin-bottom: var(--spacing-md);
   border-bottom: 2px solid #333;
   padding-bottom: var(--spacing-sm);
+  width: 100%;
 }
 
 .kalender-tab {
@@ -2391,6 +2393,7 @@ footer a:hover {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-md);
+  width: 100%;
 }
 
 .kalender-section {
@@ -2401,6 +2404,12 @@ footer a:hover {
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
   border: 2px solid #333;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+}
+
+.kalender-section.full-width {
+  width: 100%;
+  max-width: 100%;
 }
 
 .kalender-section h4 {
@@ -2413,6 +2422,14 @@ footer a:hover {
   list-style: none;
   padding: 0;
   margin: 0;
+  width: 100%;
+}
+
+.kalender-section ul.vegetable-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--spacing-xs) var(--spacing-sm);
+  width: 100%;
 }
 
 .kalender-section li {
