@@ -566,7 +566,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                   <p style={{ marginTop: '8px', marginBottom: 0, fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                     Du kannst diese Auswahl auf der{' '}
                     <Link 
-                      href="/anpacken" 
+                      href="/mitmachen" 
                       style={{ 
                         color: 'var(--bioco-green)', 
                         textDecoration: 'underline',

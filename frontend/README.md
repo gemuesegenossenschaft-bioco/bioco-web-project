@@ -43,7 +43,7 @@ npm start
   - `page.tsx` - Homepage (A: Homepage)
   - `ernte/page.tsx` - Ernte section (B)
   - `abos/page.tsx` - Abos section (C)
-  - `anpacken/page.tsx` - Anpacken section (D)
+  - `mitmachen/page.tsx` - Mitmachen section (D)
   - `depots/page.tsx` - Depots section (E)
   - `wir/page.tsx` - Wir section (F)
   - `hofpost/page.tsx` - Hofpost section (G)

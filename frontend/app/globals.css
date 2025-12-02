@@ -1008,8 +1008,8 @@ a:hover {
   background: var(--bg-secondary);
   border-bottom: 2px solid var(--bioco-green);
   padding: var(--spacing-xs) 0;
-  position: fixed;
-  top: 0; /* Will be adjusted when utility-nav is visible */
+  position: sticky;
+  top: 0;
   left: 0;
   right: 0;
   z-index: 1001;
@@ -1194,17 +1194,16 @@ header {
   .primary-nav,
   .secondary-nav {
     display: block;
-    top: 0; /* Sticky at top of viewport */
   }
   
-  /* Position header below primary-nav */
+  /* Position header below primary-nav - not fixed anymore since primary-nav is sticky */
   header {
-    top: 76px;
+    position: relative;
   }
    
-  /* Add padding for both navbars on desktop */
+  /* Add padding for utility + primary nav */
   .main-content {
-    padding-top: 120px !important; /* Space for utility + primary nav */
+    padding-top: var(--spacing-lg) !important;
   }
 }
 

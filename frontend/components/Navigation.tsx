@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 const navigationItems = [
   { title: 'Wir', href: '/wir', id: 'F' },
   { title: 'Gemüse', href: '/gemuese', id: 'B' },
-  { title: 'Mitmachen', href: '/anpacken', id: 'D' },
+  { title: 'Mitmachen', href: '/mitmachen', id: 'D' },
   { title: 'Abos', href: '/abos', id: 'C' },
   { title: 'Standorte', href: '/standorte-depots', id: 'E' },
   { title: 'Aktuelles', href: '/aktuelles', id: 'G' },

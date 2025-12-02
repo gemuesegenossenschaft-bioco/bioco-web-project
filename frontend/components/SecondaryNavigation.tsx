@@ -8,7 +8,7 @@ import { Logo } from './Logo'
 const primaryNavItems = [
   { title: 'Wir', href: '/wir' },
   { title: 'Gemüse', href: '/gemuese' },
-  { title: 'Mitmachen', href: '/anpacken' },
+  { title: 'Mitmachen', href: '/mitmachen' },
   { title: 'Abos', href: '/abos' },
   { title: 'Aktuelles', href: '/aktuelles' },
 ]

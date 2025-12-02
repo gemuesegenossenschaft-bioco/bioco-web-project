@@ -180,7 +180,7 @@ export default function SolawiPage() {
                 </li>
                 <li>
                   <strong>Mitarbeit:</strong> Je nach Abo-Grösse arbeitet ihr 10–40 Halbtage pro 
-                  Jahr auf dem Feld mit (<Link href="/anpacken">mehr zu Mitarbeit</Link>)
+                  Jahr auf dem Feld mit (<Link href="/mitmachen">mehr zu Mitarbeit</Link>)
                 </li>
                 <li>
                   <strong>Demeter-Qualität:</strong> Unser Gemüse erfüllt die strengsten 
@@ -201,7 +201,7 @@ export default function SolawiPage() {
               <div style={{ marginTop: '24px' }}>
                 <CTA
                   text="Jetzt Mitglied werden"
-                  href="/anpacken"
+                  href="/mitmachen"
                   variant="primary"
                 />
               </div>
@@ -288,7 +288,7 @@ export default function SolawiPage() {
                 <li><Link href="/gemuese">Unser saisonales Gemüse</Link></li>
                 <li><Link href="/abos">Abo-Modelle & Preise</Link></li>
                 <li><Link href="/standorte-depots">Depots & Standorte</Link></li>
-                <li><Link href="/anpacken">Mitmachen & Mitglied werden</Link></li>
+                <li><Link href="/mitmachen">Mitmachen & Mitglied werden</Link></li>
               </ul>
             </div>
           </section>
@@ -307,7 +307,7 @@ export default function SolawiPage() {
               <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
                 <CTA
                   text="Jetzt Mitglied werden"
-                  href="/anpacken"
+                  href="/mitmachen"
                   variant="primary"
                 />
                 <CTA

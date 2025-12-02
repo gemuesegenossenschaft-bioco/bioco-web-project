@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 
 const popularPages = [
   { title: 'Gemüse', href: '/gemuese' },
-  { title: 'Anpacken', href: '/anpacken' },
+  { title: 'Mitmachen', href: '/mitmachen' },
   { title: 'Abos', href: '/abos' },
   { title: 'Wir', href: '/wir' },
   { title: 'Aktuelles', href: '/aktuelles' },

@@ -53,8 +53,8 @@ export default function Home() {
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen 
                 Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für 
                 Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/wir">solidarischer Landwirtschaft</Link>, 
-                das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/anpacken">Mitglied</Link> bringt sich ein, ob auf 
-                dem <Link href="/anpacken">Feld</Link>, in der <Link href="/anpacken">Logistik</Link> oder bei der <Link href="/anpacken">Organisation</Link>.
+                das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf 
+                dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
               </p>
               
               <p className="card-text">
@@ -102,7 +102,7 @@ export default function Home() {
                 <p className="card-text">biocò basiert auf den Prinzipien der <Link href="/wir">Solidarischen Landwirtschaft</Link>.</p>
                 <div className="pea-bullet-list">
                   <PeaBullet>
-                    <strong>Mitarbeit</strong> – <Link href="/anpacken">Anpacken auf dem Feld</Link>
+                    <strong>Mitarbeit</strong> – <Link href="/mitmachen">Mitmachen auf dem Feld</Link>
                   </PeaBullet>
                   <PeaBullet>
                     <strong>Transparenz</strong> – Solidarische Landwirtschaft
@@ -173,7 +173,7 @@ export default function Home() {
                 <div className="step-icon">1</div>
                 <div className="step-content">
                   <h3>Anmelden als Mitglied oder Schnupperabo</h3>
-                  <p>Entscheide dich für ein <Link href="/abos">Abo</Link> oder teste mit einem <Link href="/anpacken">Schnupperabo</Link></p>
+                  <p>Entscheide dich für ein <Link href="/abos">Abo</Link> oder teste mit einem <Link href="/mitmachen">Schnupperabo</Link></p>
                 </div>
               </div>
               <div className="procedure-step">
@@ -187,7 +187,7 @@ export default function Home() {
                 <div className="step-icon">3</div>
                 <div className="step-content">
                   <h3>Arbeitseinsätze planen</h3>
-                  <p>Organisiere deine <Link href="/anpacken">Mitarbeit auf dem Feld</Link> oder in der Logistik</p>
+                  <p>Organisiere deine <Link href="/mitmachen">Mitarbeit auf dem Feld</Link> oder in der Logistik</p>
                 </div>
               </div>
               <div className="procedure-step">

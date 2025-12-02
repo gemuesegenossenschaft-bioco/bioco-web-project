@@ -10,7 +10,7 @@ const allNavItems = [
   // Primary navigation items
   { title: 'Wir', href: '/wir', section: 'primary' },
   { title: 'Gemüse', href: '/gemuese', section: 'primary' },
-  { title: 'Mitmachen', href: '/anpacken', section: 'primary' },
+  { title: 'Mitmachen', href: '/mitmachen', section: 'primary' },
   { title: 'Abos', href: '/abos', section: 'primary' },
   { title: 'Aktuelles', href: '/aktuelles', section: 'primary' },
   // Utility navigation items

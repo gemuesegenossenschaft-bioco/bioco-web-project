@@ -140,7 +140,7 @@ export default function AbosPage() {
             <div style={{ marginTop: '24px' }}>
               <CTA
                 text="Jetzt Abo bestellen"
-                href="/anpacken"
+                href="/mitmachen"
                 variant="primary"
               />
             </div>
@@ -171,7 +171,7 @@ export default function AbosPage() {
             </ul>
             <CTA
               text="Probe-Abo testen"
-              href="/anpacken"
+              href="/mitmachen"
               variant="secondary"
             />
             </div>
@@ -193,7 +193,7 @@ export default function AbosPage() {
             <p><strong>Kosten:</strong> CHF 250.- pro Anteilsschein</p>
             <CTA
               text="Anteilsscheine erwerben"
-              href="/anpacken"
+              href="/mitmachen"
               variant="secondary"
             />
             </div>

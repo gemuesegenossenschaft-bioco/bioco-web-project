@@ -85,6 +85,22 @@ export function Footer() {
             <h3>Partner & Zertifizierungen</h3>
             <div className="partner-badges">
               <a 
+                href="https://www.solawi.ch" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="partner-badge"
+              >
+                <span>Solawi</span>
+              </a>
+              <a 
+                href="https://basimil.ch/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="partner-badge"
+              >
+                <span>Basimil</span>
+              </a>
+              <a 
                 href="https://www.demeter.ch" 
                 target="_blank" 
                 rel="noopener noreferrer"
