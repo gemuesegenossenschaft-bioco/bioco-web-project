@@ -1,6 +1,5 @@
 import { UtilityNavigation } from './UtilityNavigation'
 import { PrimaryNavigation } from './SecondaryNavigation'
-import { Logo } from './Logo'
 import { MobileMenu } from './MobileMenu'
 
 export function Header() {
@@ -8,16 +7,12 @@ export function Header() {
     <>
       {/* Utility Nav - Top bar, NOT sticky, scrolls away */}
       <UtilityNavigation />
-      {/* Primary Nav - Main navigation, sticky on scroll */}
+      {/* Primary Nav - Main navigation with Logo, sticky on scroll */}
       <PrimaryNavigation />
-      <header id="header">
-        <div className="header-top">
-          <div id="header-logo" className="header-logo">
-            <Logo />
-          </div>
-          <MobileMenu />
-        </div>
-      </header>
+      {/* Mobile Menu (hamburger) - only visible on mobile */}
+      <div className="mobile-header-wrapper">
+        <MobileMenu />
+      </div>
     </>
   )
 }
