@@ -182,8 +182,34 @@ export function DepotMap() {
     }
   }, [])
 
+  // Helper function to get Google Maps link
+  const getGoogleMapsLink = (depot: DepotLocation) => {
+    // Business depots (have website or are known businesses)
+    const businessDepots = ['chraettli', 'ohne', 'anixis', 'casa-flora', 'lemonia']
+    if (businessDepots.includes(depot.id)) {
+      const businessName = depot.name.replace('Depot ', '')
+      const city = depot.address.split(',').pop()?.trim() || ''
+      return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(businessName + ' ' + city)}`
+    }
+    // For private depots, use coordinates
+    return `https://www.google.com/maps/dir/?api=1&destination=${depot.lat},${depot.lng}`
+  }
+
   return (
     <>
+      {/* Abholzeiten Info */}
+      <div style={{ 
+        marginBottom: 'var(--spacing-md)', 
+        padding: 'var(--spacing-sm) var(--spacing-md)',
+        backgroundColor: 'var(--bg-secondary)',
+        borderRadius: '8px',
+        textAlign: 'center'
+      }}>
+        <p style={{ margin: 0, fontWeight: 600, color: 'var(--text-primary)' }}>
+          Abholzeiten: Dienstag und Freitag, ab 16:00 Uhr
+        </p>
+      </div>
+
       <div className="map-container">
         <div ref={mapContainerRef} className="map-wrapper" />
       </div>
@@ -201,14 +227,30 @@ export function DepotMap() {
                   {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact}</p>}
                   {depot.website && (
                     <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                      <a href={depot.website} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--bioco-green)', textDecoration: 'underline' }}>
-                        {depot.website}
+                      <a 
+                        href={depot.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={depot.id === 'chraettli' ? {
+                          color: 'white',
+                          backgroundColor: 'var(--bioco-green)',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          textDecoration: 'none',
+                          fontWeight: 'bold',
+                          display: 'inline-block'
+                        } : { 
+                          color: 'var(--bioco-green)', 
+                          textDecoration: 'underline' 
+                        }}
+                      >
+                        {depot.id === 'chraettli' ? 'Zur Chrättli Website' : depot.website}
                       </a>
                     </p>
                   )}
                   {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${depot.lat},${depot.lng}`}
+                    href={getGoogleMapsLink(depot)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-secondary"
@@ -228,14 +270,30 @@ export function DepotMap() {
                   {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>Kontakt: {depot.contact}</p>}
                   {depot.website && (
                     <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                      <a href={depot.website} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--bioco-green)', textDecoration: 'underline' }}>
-                        {depot.website}
+                      <a 
+                        href={depot.website} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        style={depot.id === 'chraettli' ? {
+                          color: 'white',
+                          backgroundColor: 'var(--bioco-green)',
+                          padding: '4px 8px',
+                          borderRadius: '4px',
+                          textDecoration: 'none',
+                          fontWeight: 'bold',
+                          display: 'inline-block'
+                        } : { 
+                          color: 'var(--bioco-green)', 
+                          textDecoration: 'underline' 
+                        }}
+                      >
+                        {depot.id === 'chraettli' ? 'Zur Chrättli Website' : depot.website}
                       </a>
                     </p>
                   )}
                   {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
                   <a
-                    href={`https://www.google.com/maps/dir/?api=1&destination=${depot.lat},${depot.lng}`}
+                    href={getGoogleMapsLink(depot)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-secondary"
