@@ -76,50 +76,23 @@ export default function Home() {
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
               </p>
               <p>
-                Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/gemuese">Anbau</Link> und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das ab 16:00 Uhr abholbereit in den <Link href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
+                Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/gemuese">Anbau</Link> und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich abholbereit in den <Link href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
               </p>
             </div>
           </section>
 
-          {/* Das ist drin */}
-          <section className="home-block col-span-12 md-col-span-6">
-            <h2>Das ist drin: Saisonal &amp; Demeter</h2>
-            <p>
-              Wöchentlich erhalten unsere Mitglieder ein <Link href="/abos">Gemüseabo</Link> mit frischem, saisonalem <Link href="/gemuese">Demeter-Gemüse</Link>.
-            </p>
-            <ul className="pea-bullet-list">
-              <PeaBullet>Wöchentlicher Gemüsekorb</PeaBullet>
-              <PeaBullet>Saisonalität – das Gemüse der Jahreszeit</PeaBullet>
-              <PeaBullet>Demeter-Qualität – höchste Bio-Standards</PeaBullet>
-            </ul>
-          </section>
-          <div className="home-block col-span-12 md-col-span-6 blob-visual">
-            <div className="image-placeholder" style={{ width: '100%', aspectRatio: '4/3', maxWidth: '400px', margin: '0 auto' }}>
+          {/* Gemeinsam, solidarisch, frisch */}
+          <section className="home-block col-span-12">
+            <h2>Gemeinsam, solidarisch, frisch</h2>
+            <div className="text-body">
+              <p>
+                Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
+              </p>
             </div>
-          </div>
-
-          {/* Gemeinschaft */}
-          <section className="home-block col-span-12 md-col-span-6">
-            <h2>Gemeinschaft &amp; Solidarität</h2>
-            <p>biocò basiert auf den Prinzipien der <Link href="/solawi">Solidarischen Landwirtschaft</Link>.</p>
-            <ul className="pea-bullet-list">
-              <PeaBullet>
-                <strong>Mitarbeit</strong> – <Link href="/mitmachen">Mitmachen auf dem Feld</Link>
-              </PeaBullet>
-              <PeaBullet>
-                <strong>Transparenz</strong> – <Link href="/solawi">Solidarische Landwirtschaft</Link>
-              </PeaBullet>
-              <PeaBullet>
-                <strong>Gemeinschaft</strong> – Jede(r) bringt sich ein
-              </PeaBullet>
-              <PeaBullet>
-                <strong>Lokal/Region</strong> – <Link href="/wir">Hof: Geisshof</Link>
-              </PeaBullet>
-            </ul>
           </section>
 
           {/* Aktuelles */}
-          <section className="home-block col-span-12 md-col-span-6">
+          <section className="home-block col-span-12">
             <h2>Aktuelles</h2>
             <div className="aktuelles-list">
               {getAktuellesItems().slice(0, 3).map((item, index) => (
@@ -137,7 +110,7 @@ export default function Home() {
           </section>
 
           {/* Schnuppertage */}
-          <section className="home-block col-span-12 md-col-span-6">
+          <section className="home-block col-span-12">
             <h2>Schnuppertage</h2>
             {eventsLoading ? (
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>

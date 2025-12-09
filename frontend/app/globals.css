@@ -3017,12 +3017,15 @@ footer a:hover {
 }
 
 .aktuelles-item {
-  background: rgba(46, 125, 50, 0.25); /* Green with 25% opacity */
+  background: rgba(46, 125, 50, 0.1); /* Green with 10% opacity */
   border: none;
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Vertical alignment */
 }
 
 .aktuelles-item h3 {
@@ -3122,12 +3125,15 @@ footer a:hover {
 }
 
 .event-item {
-  background: rgba(46, 125, 50, 0.25); /* Green with 25% opacity */
+  background: rgba(46, 125, 50, 0.1); /* Green with 10% opacity */
   border: none;
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Vertical alignment */
 }
 
 .event-item h3 {
@@ -5195,7 +5201,7 @@ footer a:hover {
   position: relative;
   z-index: 2;
   background: var(--bg-secondary);
-  padding: clamp(16px, 4vw, 32px) clamp(16px, 6vw, 96px) clamp(32px, 6vw, 64px);
+  padding: clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px) clamp(32px, 6vw, 64px); /* Increased top padding for more space after hero */
 }
 
 .home-grid-12 {
