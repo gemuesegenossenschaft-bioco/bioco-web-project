@@ -5125,7 +5125,7 @@ footer a:hover {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  margin-top: clamp(32px, 6vw, 64px); /* More space between navbar/logo and hero border */
+  margin-top: clamp(16px, 3vw, 32px); /* Decreased space by half between secondary nav and hero image */
   height: clamp(50vh, 65vh, 70vh);
   min-height: 420px;
   padding: clamp(24px, 4vw, 48px) clamp(16px, 5vw, 72px) 0;
@@ -5249,6 +5249,15 @@ footer a:hover {
   .home-block:has(.image-placeholder) {
     display: flex;
     flex-direction: column;
+    gap: clamp(24px, 6vw, 48px);
+  }
+  
+  .home-block .image-placeholder {
+    margin-bottom: clamp(16px, 4vw, 32px);
+  }
+  
+  .home-block .text-body {
+    margin-top: clamp(16px, 4vw, 32px);
   }
 }
 

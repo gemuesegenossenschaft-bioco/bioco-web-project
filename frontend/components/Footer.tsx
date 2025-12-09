@@ -52,29 +52,6 @@ export function Footer() {
               </div>
             </div>
 
-            <div className="footer-column">
-              <h3>Dokumente</h3>
-              <ul>
-                <li>
-                  <a 
-                    href="https://bioco.ch/wp-content/uploads/2018/01/1801_Beitritts-Erklaerung.pdf" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    Statuten (PDF)
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="https://bioco.ch/wp-content/uploads/2023/12/2023-Abo-Bestellung.pdf" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    Reglement (PDF)
-                  </a>
-                </li>
-              </ul>
-            </div>
           </div>
 
           <div className="footer-partners">

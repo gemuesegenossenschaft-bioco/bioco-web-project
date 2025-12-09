@@ -47,15 +47,6 @@ export default function MitmachenPage() {
               <h3>Was es braucht, damit wir gesundes Gemüse haben</h3>
             </div>
             <div className="card-body">
-              <div style={{ marginBottom: 'var(--spacing-md)' }}>
-                <Image
-                  src="/images/mitmachen/bioco_anpacken_einzel.JPG"
-                  alt="Mitarbeit bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
-                  width={800}
-                  height={600}
-                  style={{ width: '100%', height: 'auto', borderRadius: '12px' }}
-                />
-              </div>
               <h4 className="card-title">Mitarbeit bei biocò</h4>
               <p className="card-text">Jedes Mitglied bringt sich ein und unterstützt die Genossenschaft aktiv. Die Mitarbeit ist ein wichtiger Teil unserer <Link href="/solawi">solidarischen Landwirtschaft</Link>.</p>
             
