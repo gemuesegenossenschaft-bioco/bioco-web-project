@@ -107,7 +107,7 @@ export default function Home() {
           </section>
 
           {/* Aktuelles */}
-          <section className="home-block col-span-12">
+          <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
             <h2>Aktuelles</h2>
             <div className="aktuelles-list">
               {getAktuellesItems().slice(0, 3).map((item, index) => (
@@ -125,7 +125,7 @@ export default function Home() {
           </section>
 
           {/* Wie funktioniert's */}
-          <section className="home-block col-span-12">
+          <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
             <h2>Wie funktioniert&apos;s?</h2>
             <ol className="steps-list">
               <li>
@@ -147,7 +147,7 @@ export default function Home() {
           </section>
 
           {/* Schnuppertage */}
-          <section className="home-block col-span-12">
+          <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
             <h2>Schnuppertage</h2>
             {eventsLoading ? (
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
@@ -176,7 +176,7 @@ export default function Home() {
           </section>
 
           {/* Kennenlernen */}
-          <section className="home-block col-span-12">
+          <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
             <h2>Möchtest du uns kennenlernen?</h2>
             <p>
               Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.
