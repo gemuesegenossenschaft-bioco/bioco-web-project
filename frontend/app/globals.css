@@ -136,17 +136,13 @@ p {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-md);
-  margin: var(--spacing-md) 0;
+  margin: var(--spacing-md) auto; /* Center the grid */
   grid-auto-flow: dense;
-  max-width: 1400px; /* Match navbar max-width for alignment */
-  width: 100%;
-  margin-left: auto; /* Center the grid */
-  margin-right: auto; /* Center the grid */
-  padding: 0; /* Padding handled by parent .main-content */
   grid-auto-rows: min-content;
   align-content: start;
   width: 100%;
-  max-width: 100%;
+  max-width: 1400px; /* Match navbar max-width for alignment */
+  box-sizing: border-box; /* Ensure padding is included in width calculation */
 }
 
 /* Aktuelles and Events Row - Side by side on desktop */
