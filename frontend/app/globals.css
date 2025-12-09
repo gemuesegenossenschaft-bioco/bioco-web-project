@@ -1787,7 +1787,7 @@ header .header-nav-container .beet-leaves {
   position: sticky;
   top: 0;
   background: white;
-  z-index: 1002;
+  z-index: 1003;
   pointer-events: auto !important;
 }
 
@@ -1825,10 +1825,12 @@ header .header-nav-container .beet-leaves {
   justify-content: center;
   transition: all 0.2s ease;
   position: relative;
-  z-index: 1003;
+  z-index: 1004 !important; /* Higher z-index to ensure it's always clickable */
   pointer-events: auto !important;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .mobile-menu-close:hover {
