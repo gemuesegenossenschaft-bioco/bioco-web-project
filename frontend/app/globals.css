@@ -4555,7 +4555,7 @@ footer a:hover {
 
 /* Navbar Overlay */
 .navbar-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -4572,42 +4572,82 @@ footer a:hover {
   border: none;
 }
 
-.navbar-overlay .primary-nav,
-.navbar-overlay .secondary-nav {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+.navbar-overlay .utility-nav {
+  position: relative;
+  display: block; /* Make secondary nav visible */
 }
 
-.navbar-overlay .primary-nav a,
-.navbar-overlay .secondary-nav a,
-.navbar-overlay .primary-nav .btn-orange,
-.navbar-overlay .secondary-nav .btn-orange {
+.navbar-overlay .primary-nav,
+.navbar-overlay .secondary-nav {
+  position: relative;
+  width: 100%;
+}
+
+.navbar-overlay .utility-nav a {
   color: white;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-.navbar-overlay .primary-nav-logo img,
-.navbar-overlay .secondary-nav-logo img {
-  filter: none;
+.navbar-overlay .primary-nav a,
+.navbar-overlay .secondary-nav a {
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-.primary-nav.nav-scrolled,
-.secondary-nav.nav-scrolled {
+.navbar-overlay .primary-nav .btn-orange,
+.navbar-overlay .secondary-nav .btn-orange {
+  background: white;
+  border: 2px solid white;
+  color: var(--bioco-green);
+  text-shadow: none;
+}
+
+.navbar-overlay .primary-nav .btn-orange:hover,
+.navbar-overlay .secondary-nav .btn-orange:hover {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: white;
+  color: var(--bioco-green-dark);
+}
+
+.navbar-overlay .primary-nav-logo img,
+.navbar-overlay .secondary-nav-logo img {
+  filter: brightness(0) invert(1); /* Make logo white */
+}
+
+/* When scrolled out of hero: primary nav sticky, secondary nav hidden */
+.navbar-overlay:has(.primary-nav.nav-scrolled) .utility-nav {
+  display: none; /* Hide secondary nav when scrolled */
+}
+
+.primary-nav.nav-scrolled {
   position: sticky;
   top: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 2px solid var(--bioco-green);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .primary-nav.nav-scrolled a,
-.secondary-nav.nav-scrolled a,
-.primary-nav.nav-scrolled .btn-orange,
-.secondary-nav.nav-scrolled .btn-orange {
+.primary-nav.nav-scrolled .btn-orange {
   color: var(--text-primary);
   text-shadow: none;
+}
+
+.primary-nav.nav-scrolled .btn-orange {
+  background: var(--bioco-orange);
+  border: 2px solid var(--bioco-orange);
+  color: white;
+}
+
+.primary-nav.nav-scrolled .btn-orange:hover {
+  background: var(--bioco-orange-dark, var(--bioco-orange));
+  border-color: var(--bioco-orange-dark, var(--bioco-orange));
+  color: white;
+}
+
+.primary-nav.nav-scrolled .primary-nav-logo img {
+  filter: none; /* Logo back to normal colors when scrolled */
 }
 
 /* Main Content - 2 Column Grid */
@@ -4942,14 +4982,18 @@ footer a:hover {
 .hero-bleed {
   position: relative;
   width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
   height: clamp(50vh, 65vh, 70vh);
   min-height: 420px;
+  padding: 0 clamp(16px, 5vw, 72px);
 }
 
 .hero-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  border-radius: 24px 24px 0 0;
 }
 
 .hero-overlay {
@@ -4957,6 +5001,31 @@ footer a:hover {
   inset: 0;
   background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.1) 45%, transparent 100%);
   z-index: 2;
+}
+
+.hero-content {
+  position: absolute;
+  left: clamp(20px, 5vw, 64px);
+  bottom: clamp(80px, 12vh, 140px);
+  z-index: 3;
+  max-width: 600px;
+}
+
+.hero-headline {
+  font-family: 'DM Sans', sans-serif;
+  font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+  font-weight: 700;
+  color: white;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.hero-title-secondary {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-weight: 400;
+  display: block;
+  margin-top: 0.5em;
+  color: white;
 }
 
 .hero-wave {
@@ -4972,27 +5041,7 @@ footer a:hover {
   z-index: 3;
 }
 
-.hero-headline-block {
-  position: relative;
-  background: var(--bg-secondary);
-  padding: clamp(24px, 6vw, 48px) clamp(16px, 5vw, 72px) clamp(24px, 6vw, 56px);
-  margin-top: -40px;
-  z-index: 4;
-}
-
-.hero-headline {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(2.4rem, 6vw, 3.8rem);
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0 0 8px;
-}
-
-.hero-subline {
-  font-size: clamp(1.1rem, 3vw, 1.5rem);
-  color: var(--text-secondary);
-  margin: 0;
-}
+/* Hero headline block removed - text now in hero overlay */
 
 /* Scattered illustrations */
 .scatter-layer {
@@ -5023,6 +5072,8 @@ footer a:hover {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: clamp(16px, 4vw, 32px);
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .col-span-12 {
@@ -5039,6 +5090,16 @@ footer a:hover {
   }
   .md-col-span-6 {
     grid-column: span 6;
+  }
+  /* Use inner columns for content (columns 2-11) */
+  .col-span-12 {
+    grid-column: 2 / 12;
+  }
+  .md-col-span-6 {
+    grid-column: 2 / 8; /* Left column: 2-7 */
+  }
+  .md-col-span-6:nth-child(even) {
+    grid-column: 8 / 12; /* Right column: 8-11 */
   }
 }
 
@@ -5082,20 +5143,33 @@ footer a:hover {
   overflow: hidden;
 }
 
-/* Wavy cards only for news/events */
+/* Wavy cards only for news/events - smooth border, no clip-path */
 .wavy-card {
   border: 2px solid var(--bioco-green);
-  border-radius: 32px;
-  padding: clamp(16px, 4vw, 24px);
-  background: rgba(255, 255, 255, 0.9);
+  border-radius: 28px 24px 30px 26px; /* slightly irregular but smooth */
+  padding: clamp(20px, 4vw, 28px);
+  background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
-  clip-path: path('M 0,0 Q 5,6 10,0 T 20,6 T 30,0 T 40,6 T 50,0 T 60,6 T 70,0 T 80,6 T 90,0 T 100,6 L 100,100 Q 95,94 90,100 T 80,94 T 70,100 T 60,94 T 50,100 T 40,94 T 30,100 T 20,94 T 10,100 T 0,94 L 0,0 Z');
+  position: relative;
+  overflow: visible; /* ensure text isn't clipped */
 }
 
 /* Buttons - organic */
+/* Wavy organic button styling */
 .btn-organic {
-  border-radius: 28px;
-  clip-path: path('M 0,30 Q 10,0 30,10 T 70,10 T 90,0 T 100,30 T 90,70 T 70,90 T 30,90 T 10,70 Z');
+  border-radius: 28px 22px 26px 18px;
+  clip-path: polygon(
+    4% 8%, 12% 2%, 26% 6%, 36% 3%, 48% 7%, 60% 2%, 74% 6%, 86% 3%, 96% 10%,
+    98% 24%, 96% 42%, 99% 58%, 96% 76%, 98% 90%, 90% 98%, 74% 94%, 60% 98%,
+    46% 94%, 32% 98%, 18% 94%, 8% 96%, 2% 86%, 4% 70%, 2% 54%, 6% 36%, 2% 20%
+  );
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-organic:hover {
+  transform: translateY(-2px) rotate(-0.5deg);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.16);
 }
 
 /* Steps */

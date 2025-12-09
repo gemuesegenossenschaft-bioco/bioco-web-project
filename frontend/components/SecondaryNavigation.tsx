@@ -21,7 +21,11 @@ export function PrimaryNavigation() {
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 10)
+    const onScroll = () => {
+      // Trigger when scrolling out of hero (approximately 65vh hero height)
+      const heroHeight = window.innerHeight * 0.65
+      setScrolled(window.scrollY > heroHeight - 80)
+    }
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)

@@ -61,18 +61,16 @@ export default function Home() {
             style={{ objectFit: 'cover' }}
           />
           <div className="hero-overlay" />
+          <div className="hero-content">
+            <h1 className="hero-headline">
+              Gemeinsam Gemüse anbauen und geniessen.<br />
+              <span className="hero-title-secondary">
+                Solidarische Landwirtschaft in der Region Baden-Brugg.
+              </span>
+            </h1>
+          </div>
           <div className="hero-wave" />
         </div>
-      </section>
-
-      {/* Headline below wave */}
-      <section className="hero-headline-block">
-        <h1 className="hero-headline">
-          Gemeinsam Gemüse anbauen und geniessen.<br />
-          <span className="hero-title-secondary">
-            Solidarische Landwirtschaft in der Region Baden-Brugg.
-          </span>
-        </h1>
       </section>
 
       {/* Scattered illustrations */}
