@@ -5244,6 +5244,14 @@ footer a:hover {
   padding: 0;
 }
 
+/* Mobile: use flexbox for order property to ensure image always above text */
+@media (max-width: 767px) {
+  .home-block > div {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
 .home-block h2 {
   font-family: 'DM Sans', sans-serif;
   font-size: clamp(1.4rem, 3vw, 1.9rem); /* Smaller than h1 */
