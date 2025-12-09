@@ -87,7 +87,7 @@ export default function Home() {
           </section>
 
           {/* Gemeinsam, solidarisch, frisch - Row 2, Two Columns */}
-          <section className="two-column-section" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
+          <section className="two-column-section">
             <div className="two-column-image">
               <Image
                 src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
