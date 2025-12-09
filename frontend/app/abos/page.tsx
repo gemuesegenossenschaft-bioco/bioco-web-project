@@ -25,29 +25,21 @@ export default function AbosPage() {
       <ProductSchema />
       <Header />
       <main className="main-content">
-        <div className="bento-grid">
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
           {/* Page Header with H1 */}
-          <section className="bento-card bento-card-fullwidth">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Dein wöchentliches Gemüseabo</h1>
-            </div>
-            <div className="card-body">
-              <p className="card-text">
-                Wöchentlich frisches Demeter-Gemüse direkt vom Geisshof in deinen Gemüsekorb. 
-                Mit deinem Gemüseabo unterstützt du unsere <Link href="/solawi">solidarische Landwirtschaft (Solawi)</Link> und wirst Teil unserer Gemüsegenossenschaft.
-                Hier erfährst du alles über unsere Abo-Modelle, Preise und wie du Mitglied werden kannst.
-              </p>
-            </div>
+          <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>Dein wöchentliches Gemüseabo</h1>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+              Wöchentlich frisches Demeter-Gemüse direkt vom Geisshof in deinen Gemüsekorb. 
+              Mit deinem Gemüseabo unterstützt du unsere <Link href="/solawi">solidarische Landwirtschaft (Solawi)</Link> und wirst Teil unserer Gemüsegenossenschaft.
+              Hier erfährst du alles über unsere Abo-Modelle, Preise und wie du Mitglied werden kannst.
+            </p>
           </section>
 
-          <section id="C-01" className="bento-card bento-card-large bento-card-flat">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Gemüse-Abos</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">Das Gemüseabo läuft vom 1. Januar bis zum 31. Dezember. Ohne Kündigung verlängert sich das Gemüseabo jeweils um ein Kalenderjahr. Die Kündigungsfrist beträgt zwei Monate auf Ende eines Kalenderjahres.</p>
+          <section id="C-01" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Gemüse-Abos</h2>
+            <div style={{ marginTop: '24px' }}>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Das Gemüseabo läuft vom 1. Januar bis zum 31. Dezember. Ohne Kündigung verlängert sich das Gemüseabo jeweils um ein Kalenderjahr. Die Kündigungsfrist beträgt zwei Monate auf Ende eines Kalenderjahres.</p>
             
             <div className="pricing-table">
               <table>
@@ -125,44 +117,44 @@ export default function AbosPage() {
             <div style={{ marginTop: '24px', textAlign: 'center' }}>
               <Link
                 href="/bioco-werden"
-                className="btn btn-orange"
+                className="btn btn-orange btn-organic"
                 style={{ display: 'inline-block', fontSize: '1.125rem', padding: '16px 32px' }}
               >
                 Jetzt Abo wählen
               </Link>
             </div>
             
-            <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
-              <p><strong>Anteilsscheine:</strong> Jeder Anteilsschein kostet CHF 250.- und ist eine Bedingung für den Bezug eines Gemüsekorbes. Du kannst zusätzliche Anteilsscheine erwerben, um die Genossenschaft stärker zu unterstützen.</p>
-              <p style={{ marginTop: '12px' }}><strong>💡 Tipp:</strong> Geteilte Körbe sparen CHF 110 pro Jahr und reduzieren Logistikaufwand. Wir empfehlen, Körbe zu teilen!</p>
+            <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}><strong>Anteilsscheine:</strong> Jeder Anteilsschein kostet CHF 250.- und ist eine Bedingung für den Bezug eines Gemüsekorbes. Du kannst zusätzliche Anteilsscheine erwerben, um die Genossenschaft stärker zu unterstützen.</p>
+              <p style={{ marginTop: '12px', fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}><strong>💡 Tipp:</strong> Geteilte Körbe sparen CHF 110 pro Jahr und reduzieren Logistikaufwand. Wir empfehlen, Körbe zu teilen!</p>
             </div>
 
-            <div style={{ marginTop: '16px' }}>
-              <h3>Was ist im Gemüsekorb?</h3>
-              <p className="card-text">
+            <div style={{ marginTop: '32px' }}>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>Was ist im Gemüsekorb?</h3>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>
                 Bestellen Sie Ihr Biogemüse direkt vom Hof: Unsere Bio Gemüse Kiste kommt 
                 wöchentlich frisch vom Geisshof. Die wöchentliche Bio Gemüse Lieferung landet 
                 in einem unserer Depots, wo Sie Ihren Gemüsekorb abholen können.
               </p>
-              <ul style={{ marginTop: '12px' }}>
+              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginTop: '12px', marginBottom: '16px' }}>
                 <li>Wöchentlicher Gemüsekorb mit saisonalem Gemüse</li>
                 <li>Demeter-Qualität – höchste Bio-Standards</li>
                 <li>Frisch vom Geisshof in Gebenstorf</li>
                 <li>Abholung in einem der <Link href="/standorte-depots">Standorte</Link> (ab 16:00 uhr abholbereit)</li>
               </ul>
-              <p><Link href="/gemuese">Mehr über unsere Ernte erfahren →</Link></p>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}><Link href="/gemuese">Mehr über unsere Ernte erfahren →</Link></p>
             </div>
 
-            <div style={{ marginTop: '16px' }}>
-              <h3>Zahlungsweise</h3>
-              <p>Die erste Rechnung wird per 31. Januar fällig. Du kannst wählen:</p>
-              <ul>
+            <div style={{ marginTop: '32px' }}>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>Zahlungsweise</h3>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Die erste Rechnung wird per 31. Januar fällig. Du kannst wählen:</p>
+              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                 <li><strong>Quartalsweise:</strong> Du bezahlst vierteljährlich</li>
                 <li><strong>Ganzes Jahr:</strong> Du bezahlst den gesamten Jahresbeitrag einmalig</li>
               </ul>
             </div>
 
-            <div style={{ marginTop: '24px' }}>
+            <div style={{ marginTop: '32px' }}>
               <CTA
                 text="Jetzt Abo bestellen"
                 href="/mitmachen"
@@ -172,24 +164,19 @@ export default function AbosPage() {
             </div>
           </section>
 
-          <section id="C-02" className="bento-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Probe-Abo</h3>
+          <section id="C-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Probe-Abo</h2>
+            <div style={{ position: 'relative', width: '100%', maxWidth: '500px', aspectRatio: '4/3', marginBottom: '24px', borderRadius: '24px', overflow: 'hidden' }}>
+              <Image
+                src="/images/abos/probeabo-bioco.JPG"
+                alt="Gemüseabo mit frischem Demeter-Gemüse aus der Region Baden"
+                fill
+                style={{ objectFit: 'cover', objectPosition: 'center bottom' }}
+              />
             </div>
-            <div className="card-body">
-              <div style={{ marginBottom: '16px', overflow: 'hidden', borderRadius: '12px', aspectRatio: '4/3' }}>
-                <Image
-                  src="/images/abos/probeabo-bioco.JPG"
-                  alt="Gemüseabo mit frischem Demeter-Gemüse aus der Region Baden"
-                  width={800}
-                  height={600}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center bottom', borderRadius: '12px' }}
-                />
-              </div>
-              <p className="card-text">Möchtest du biocò erst einmal kennenlernen? Teste unser Gemüseabo für 3 Monate.</p>
-            <p><strong>Details:</strong></p>
-            <ul>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>Möchtest du biocò erst einmal kennenlernen? Teste unser Gemüseabo für 3 Monate.</p>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}><strong>Details:</strong></p>
+            <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
               <li>3 Monate Gemüsekorb</li>
               <li>Proportionaler Anteil am Jahrespreis</li>
               <li>Flexible Umstellung auf Jahresabo möglich</li>
@@ -199,72 +186,53 @@ export default function AbosPage() {
               href="/mitmachen"
               variant="secondary"
             />
-            </div>
           </section>
 
-          <section id="C-03" className="bento-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Anteilsscheine ohne Gemüsekorb</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">Du möchtest biocò unterstützen, ohne ein Gemüseabo zu beziehen? Das ist möglich!</p>
-            <p><strong>Vorteile:</strong></p>
-            <ul>
+          <section id="C-03" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Anteilsscheine ohne Gemüsekorb</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>Du möchtest biocò unterstützen, ohne ein Gemüseabo zu beziehen? Das ist möglich!</p>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}><strong>Vorteile:</strong></p>
+            <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
               <li>Unterstützung der Genossenschaft</li>
               <li>Vorrang auf der Warteliste für einen Gemüsekorb</li>
               <li>Mitspracherecht in der Genossenschaft</li>
             </ul>
-            <p><strong>Kosten:</strong> CHF 250.- pro Anteilsschein</p>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}><strong>Kosten:</strong> CHF 250.- pro Anteilsschein</p>
             <CTA
               text="Anteilsscheine erwerben"
               href="/mitmachen"
               variant="secondary"
             />
-            </div>
           </section>
 
-          <section className="bento-card events-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Nächste Events</h3>
-            </div>
-            <div className="card-body">
+          <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Nächste Events</h2>
+            <div style={{ marginTop: '24px' }}>
               <EventsBanner showTitle={false} variant="embedded" />
             </div>
           </section>
 
-          <section id="C-04" className="bento-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Zusatz-Abos</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">In Planung: Partnerangebote wie Eier, Brot, Tofu und weitere regionale Produkte.</p>
-              <p className="card-text">Diese werden in Zukunft zusätzlich zum Gemüsekorb angeboten.</p>
-            </div>
+          <section id="C-04" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Zusatz-Abos</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>In Planung: Partnerangebote wie Eier, Brot, Tofu und weitere regionale Produkte.</p>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Diese werden in Zukunft zusätzlich zum Gemüsekorb angeboten.</p>
           </section>
 
           {/* Möchtest du uns kennenlernen - Am Ende */}
-          <section id="B-06" className="bento-card bento-card-fullwidth kennenlernen-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Möchtest du uns kennenlernen?</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
-              <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
-                <CTA
-                  text="Nimm Kontakt auf"
-                  href="/kontakt"
-                  variant="primary"
-                />
-                <CTA
-                  text="Zu uns finden"
-                  href="/standorte-depots"
-                  variant="secondary"
-                />
-              </div>
+          <section id="B-06" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Möchtest du uns kennenlernen?</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
+            <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+              <CTA
+                text="Nimm Kontakt auf"
+                href="/kontakt"
+                variant="primary"
+              />
+              <CTA
+                text="Zu uns finden"
+                href="/standorte-depots"
+                variant="secondary"
+              />
             </div>
           </section>
         </div>

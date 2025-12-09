@@ -19,19 +19,14 @@ export default function BiocoWerdenPage() {
     <>
       <Header />
       <main className="main-content">
-        <div className="bento-grid">
-          <section className="bento-card bento-card-fullwidth">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>biocò werden</h1>
-            </div>
-            <div className="card-body">
-              <p className="card-text">
-                Wähle dein Gemüseabo und werde Teil unserer Gemüsegenossenschaft. 
-                Deine Auswahl wird automatisch ins Anmeldeformular übernommen.
-              </p>
-              <PricingCalculator />
-            </div>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
+          <section>
+            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>biocò werden</h1>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '32px' }}>
+              Wähle dein Gemüseabo und werde Teil unserer Gemüsegenossenschaft. 
+              Deine Auswahl wird automatisch ins Anmeldeformular übernommen.
+            </p>
+            <PricingCalculator />
           </section>
         </div>
       </main>

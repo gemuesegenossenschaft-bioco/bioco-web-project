@@ -22,221 +22,186 @@ export default function WirPage() {
     <>
       <Header />
       <main className="main-content">
-        <div className="bento-grid">
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
           {/* Page Header with H1 */}
-          <section className="bento-card bento-card-fullwidth">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Über uns: Die biocò Gemüsegenossenschaft</h1>
-            </div>
-            <div className="card-body">
-              <p className="card-text">
-                Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. 
-                Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <Link href="/solawi">solidarische Landwirtschaft</Link> prägen.
-              </p>
-            </div>
+          <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>Über uns: Die biocò Gemüsegenossenschaft</h1>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+              Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. 
+              Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <Link href="/solawi">solidarische Landwirtschaft</Link> prägen.
+            </p>
           </section>
 
           {/* Erste Zeile: Wir */}
-          <section id="F-01" className="bento-card bento-card-large">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Wir</h3>
-            </div>
-            <div className="card-body">
-              <h4 className="card-title">Team & Hof</h4>
-              <p className="card-text">biocò ist eine Gemeinschaft von engagierten Menschen, die gemeinsam für frisches, regionales <Link href="/gemuese">Demeter-Gemüse</Link> sorgen.</p>
+          <section id="F-01" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Wir</h2>
+            <h3 style={{ fontSize: '1.5rem', marginTop: '16px', marginBottom: '12px' }}>Team & Hof</h3>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>biocò ist eine Gemeinschaft von engagierten Menschen, die gemeinsam für frisches, regionales <Link href="/gemuese">Demeter-Gemüse</Link> sorgen.</p>
             
-            <div className="team-grid">
-              <div className="team-card">
-                <div className="team-card-image" style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginTop: '24px' }}>
+              <div>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
                   <Image
                     src="/images/team/hofteam_matthias.JPG"
                     alt="Matthias vom Hof-Team - Demeter Landwirtschaft Geisshof"
-                    width={300}
-                    height={300}
-                    style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: '8px' }}
+                    fill
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <h3>Matthias</h3>
                 <p>Hof-Team</p>
               </div>
               
-              <div className="team-card">
-                <div className="team-card-image" style={{ marginBottom: '16px' }}>
+              <div>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
                   <Image
                     src="/images/team/bioco_hofteam_christian.JPG"
                     alt="Michael vom Hof-Team - Demeter Landwirtschaft Geisshof"
-                    width={300}
-                    height={300}
-                    style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: '8px' }}
+                    fill
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <h3>Michael</h3>
                 <p>Hof-Team</p>
               </div>
               
-              <div className="team-card">
-                <div className="team-card-image" style={{ marginBottom: '16px' }}>
+              <div>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
                   <Image
                     src="/images/team/alle-mitglieder-bioco.jpeg"
                     alt="Mitglieder der Gemüsegenossenschaft biocò - Solidarische Landwirtschaft Baden"
-                    width={800}
-                    height={600}
-                    style={{ width: '100%', height: 'auto', objectFit: 'cover', borderRadius: '8px' }}
+                    fill
+                    style={{ objectFit: 'cover' }}
                   />
                 </div>
                 <h3>Alle Mitglieder</h3>
                 <p>Jede(r) Genossenschafter/in bringt sich ein – ob bei der Feldarbeit, in der Logistik oder bei Events.</p>
               </div>
               
-              <div className="team-card">
-                <div className="team-card-image" style={{ marginBottom: '16px', aspectRatio: '1', overflow: 'hidden', borderRadius: '8px' }}>
+              <div>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
                   <Image
                     src="/images/team/betriebsgruppe.JPG"
                     alt="Betriebsgruppe der Gemüsegenossenschaft biocò Gebenstorf"
-                    width={800}
-                    height={600}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'bottom', borderRadius: '8px' }}
+                    fill
+                    style={{ objectFit: 'cover', objectPosition: 'bottom' }}
                   />
                 </div>
                 <h3>Betriebsgruppe (BG)</h3>
                 <p>Die Betriebsgruppe koordiniert den Anbau, die Logistik und die Organisation der Genossenschaft.</p>
               </div>
             </div>
-            </div>
           </section>
 
-          <section id="F-01b" className="bento-card bento-card-large">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Der Geisshof</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">
-                Wir bewirtschaften einen Bio Bauernhof in Baden – genauer gesagt den Geisshof in 
-                Gebenstorf im Aargau. Seit 2014 ist dieser Ort das Herzstück von biocò, wo wir 
-                Bio-Gemüse in Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg 
-                versorgen wir die Region mit frischem, saisonalem Gemüse. Hier finden die Feldarbeit, 
-                die Gemüseaufbereitung und viele gemeinsame Anlässe statt.
-              </p>
+          <section id="F-01b" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Der Geisshof</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+              Wir bewirtschaften einen Bio Bauernhof in Baden – genauer gesagt den Geisshof in 
+              Gebenstorf im Aargau. Seit 2014 ist dieser Ort das Herzstück von biocò, wo wir 
+              Bio-Gemüse in Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg 
+              versorgen wir die Region mit frischem, saisonalem Gemüse. Hier finden die Feldarbeit, 
+              die Gemüseaufbereitung und viele gemeinsame Anlässe statt.
+            </p>
               
-              <div className="geisshof-images-grid">
-                <div>
-                  <Image
-                    src="/images/hof/bioco_hof_luftaufnahme_grosses-feld.JPG"
-                    alt="Bio-Gemüse Anbaufläche auf dem Geisshof Gebenstorf"
-                    width={800}
-                    height={600}
-                    style={{ width: '100%', height: 'auto', borderRadius: '12px' }}
-                  />
-                </div>
-                <div>
-                  <Image
-                    src="/images/hof/bioco_hof_luftaufnahme-kleines-feld.JPG"
-                    alt="Demeter Gemüsefeld auf dem Geisshof in Gebenstorf"
-                    width={800}
-                    height={600}
-                    style={{ width: '100%', height: 'auto', borderRadius: '12px' }}
-                  />
-                </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+                <Image
+                  src="/images/hof/bioco_hof_luftaufnahme_grosses-feld.JPG"
+                  alt="Bio-Gemüse Anbaufläche auf dem Geisshof Gebenstorf"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
-              
-              <p style={{ marginTop: 'var(--spacing-md)' }}>
-                <Link href="/standorte-depots" className="btn btn-secondary" style={{ display: 'inline-block' }}>
-                  Anfahrtsweg zum Geisshof
-                </Link>
-              </p>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+                <Image
+                  src="/images/hof/bioco_hof_luftaufnahme-kleines-feld.JPG"
+                  alt="Demeter Gemüsefeld auf dem Geisshof in Gebenstorf"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
             </div>
+              
+            <p style={{ marginTop: '16px' }}>
+              <Link href="/standorte-depots" className="btn btn-secondary btn-organic" style={{ display: 'inline-block' }}>
+                Anfahrtsweg zum Geisshof
+              </Link>
+            </p>
           </section>
 
-          <section id="F-02" className="bento-card bento-card-large">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Mission & Leitbild</h3>
-            </div>
-            <div className="card-body">
+          <section id="F-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Mission & Leitbild</h2>
             
-            <div className="mission-values">
-              <div className="mission-item">
-                <h3>Solidarität</h3>
-                <p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '24px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Solidarität</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>
                   Wir teilen Arbeit und Ertrag. Solidarische Landwirtschaft bedeutet, 
                   dass Produzentinnen und Konsumentinnen zusammenarbeiten und füreinander einstehen.
                 </p>
                 <p style={{ marginTop: '12px' }}>
-                  <Link href="/solawi" className="btn btn-secondary" style={{ display: 'inline-block', fontSize: '0.875rem' }}>
+                  <Link href="/solawi" className="btn btn-secondary btn-organic" style={{ display: 'inline-block', fontSize: '0.875rem' }}>
                     → Mehr über solidarische Landwirtschaft erfahren
                   </Link>
                 </p>
               </div>
               
-              <div className="mission-item">
-                <h3>Nachhaltigkeit</h3>
-                <p>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Nachhaltigkeit</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                   Wir arbeiten nach biologisch-dynamischen Prinzipien (Demeter) und fördern 
                   Biodiversität, Kreislaufwirtschaft und gesunde Böden.
                 </p>
               </div>
               
-              <div className="mission-item">
-                <h3>Gemeinschaft</h3>
-                <p>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Gemeinschaft</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                   biocò lebt von der Gemeinschaft. Jede(r) bringt sich ein, lernt voneinander und 
                   gestaltet die Genossenschaft aktiv mit.
                 </p>
               </div>
               
-              <div className="mission-item">
-                <h3>Regionalität</h3>
-                <p>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Regionalität</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                   Unser Gemüse wächst direkt in der Region Baden-Brugg. Kurze Wege, frische Ernte, 
                   lokale Verbundenheit.
                 </p>
               </div>
             </div>
 
-            <div style={{ marginTop: '24px' }}>
-              <h3>Gotti-System</h3>
-              <p>
+            <div style={{ marginTop: '32px' }}>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>Gotti-System</h3>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                 Neumitglieder werden von einem "Gotti" oder "Götti" (Paten) begleitet. Dieses System 
                 hilft neuen Mitgliedern, sich in der Genossenschaft zurechtzufinden und zeigt ihnen 
                 die Abläufe und Möglichkeiten der Mitarbeit.
               </p>
             </div>
-            </div>
           </section>
 
-          <section id="F-03" className="bento-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Geschichte</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">
-                Die Gemüsegenossenschaft biocò wurde 2014 in Gebenstorf im Aargau gegründet. 
-                Aus einer kleinen Gruppe engagierter Menschen aus Baden, Brugg und der Region 
-                wurde eine lebendige Gemeinschaft, die solidarische Landwirtschaft lebt.
-              </p>
-              <p className="card-text">
-                Gestartet wurde auf dem Geisshof in Gebenstorf, wo wir bis heute unser Gemüse anbauen. 
-                Über die Jahre haben wir die Anbaufläche erweitert, neue Standorte (Depots) für die 
-                Gemüseabholung geschaffen und die Strukturen der Genossenschaft weiterentwickelt.
-              </p>
-              <p className="card-text">
-                Heute versorgen wir Mitglieder in der Region Baden-Brugg wöchentlich mit frischem, 
-                saisonalem Demeter-Gemüse und leben gemeinsam die Prinzipien der Solidarischen Landwirtschaft.
-              </p>
-            </div>
+          <section id="F-03" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Geschichte</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              Die Gemüsegenossenschaft biocò wurde 2014 in Gebenstorf im Aargau gegründet. 
+              Aus einer kleinen Gruppe engagierter Menschen aus Baden, Brugg und der Region 
+              wurde eine lebendige Gemeinschaft, die solidarische Landwirtschaft lebt.
+            </p>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              Gestartet wurde auf dem Geisshof in Gebenstorf, wo wir bis heute unser Gemüse anbauen. 
+              Über die Jahre haben wir die Anbaufläche erweitert, neue Standorte (Depots) für die 
+              Gemüseabholung geschaffen und die Strukturen der Genossenschaft weiterentwickelt.
+            </p>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+              Heute versorgen wir Mitglieder in der Region Baden-Brugg wöchentlich mit frischem, 
+              saisonalem Demeter-Gemüse und leben gemeinsam die Prinzipien der Solidarischen Landwirtschaft.
+            </p>
           </section>
 
-          <section id="F-04" className="bento-card bento-card-large">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Timeline</h3>
-            </div>
-            <div className="card-body">
-              <div className="timeline">
+          <section id="F-04" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Timeline</h2>
+            <div className="timeline" style={{ marginTop: '24px' }}>
               <div className="timeline-item">
                 <div className="timeline-year">2013</div>
                 <div className="timeline-content">
@@ -285,44 +250,33 @@ export default function WirPage() {
                 </div>
               </div>
             </div>
-            </div>
           </section>
 
-          <section className="bento-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Mitmachen?</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">Werde Teil unserer Gemeinschaft und unterstütze die solidarische Landwirtschaft.</p>
+          <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Mitmachen?</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>Werde Teil unserer Gemeinschaft und unterstütze die solidarische Landwirtschaft.</p>
             <CTA
               text="Jetzt Mitglied werden"
               href="/mitmachen"
               variant="primary"
             />
-            </div>
           </section>
 
           {/* Möchtest du uns kennenlernen - Am Ende */}
-          <section id="B-06" className="bento-card bento-card-fullwidth kennenlernen-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Möchtest du uns kennenlernen?</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
-              <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
-                <CTA
-                  text="Nimm Kontakt auf"
-                  href="/kontakt"
-                  variant="primary"
-                />
-                <CTA
-                  text="Zu uns finden"
-                  href="/standorte-depots"
-                  variant="secondary"
-                />
-              </div>
+          <section id="B-06" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Möchtest du uns kennenlernen?</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
+            <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+              <CTA
+                text="Nimm Kontakt auf"
+                href="/kontakt"
+                variant="primary"
+              />
+              <CTA
+                text="Zu uns finden"
+                href="/standorte-depots"
+                variant="secondary"
+              />
             </div>
           </section>
         </div>

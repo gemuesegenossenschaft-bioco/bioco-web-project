@@ -61,18 +61,15 @@ export default function AktuellesPage() {
     <>
       <Header />
       <main className="main-content">
-        <div className="bento-grid">
-          <section id="G-01" className="bento-card bento-card-flat">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Aktuelles</h3>
-            </div>
-            <div className="card-body">
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
+          <section id="G-01" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>Aktuelles</h1>
+            <div style={{ marginTop: '24px' }}>
               {isLoading ? (
-                <p style={{ color: 'var(--text-secondary)' }}>Lade Beiträge...</p>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Lade Beiträge...</p>
               ) : (
                 <div className="aktuelles-list">
-                  {allAktuellesItems.map((item, index) => (
+                  {allAktuellesItems.slice(0, 3).map((item, index) => (
                     <AktuellesItemComponent 
                       key={item.id || item.instagram_id || index} 
                       item={item} 
@@ -81,24 +78,28 @@ export default function AktuellesPage() {
                     />
                   ))}
                   {allAktuellesItems.length === 0 && (
-                    <p style={{ color: 'var(--text-secondary)' }}>Keine Beiträge verfügbar.</p>
+                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Keine Beiträge verfügbar.</p>
+                  )}
+                  {allAktuellesItems.length > 3 && (
+                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                      <Link href="/aktuelles" className="btn btn-secondary btn-organic" style={{ display: 'inline-block' }}>
+                        Alle Neuigkeiten
+                      </Link>
+                    </div>
                   )}
                 </div>
               )}
             </div>
           </section>
 
-          <section id="G-02" className="bento-card bento-card-flat events-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Schnuppertage</h3>
-            </div>
-            <div className="card-body">
+          <section id="G-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Schnuppertage</h2>
+            <div style={{ marginTop: '24px' }}>
               {eventsLoading ? (
-                <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
               ) : (
                 <div className="events-list">
-                  {schnuppertageEvents.map((item, index) => (
+                  {schnuppertageEvents.slice(0, 3).map((item, index) => (
                     <AktuellesItemComponent 
                       key={item.id || index} 
                       item={item} 
@@ -107,13 +108,20 @@ export default function AktuellesPage() {
                     />
                   ))}
                   {schnuppertageEvents.length === 0 && (
-                    <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
+                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
+                  )}
+                  {schnuppertageEvents.length > 3 && (
+                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                      <Link href="/aktuelles" className="btn btn-secondary btn-organic" style={{ display: 'inline-block' }}>
+                        Alle Schnuppertage
+                      </Link>
+                    </div>
                   )}
                 </div>
               )}
               <div
                 style={{
-                  marginTop: '16px',
+                  marginTop: '24px',
                   background: 'var(--bioco-green)',
                   color: '#fff',
                   padding: '14px',
@@ -122,12 +130,12 @@ export default function AktuellesPage() {
                   boxShadow: 'var(--shadow-sm)',
                 }}
               >
-                <p className="card-text" style={{ marginBottom: '8px', color: '#fff' }}>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', marginBottom: '8px', color: '#fff' }}>
                   Neugierig? Schau vorbei und mach mit. Erlebe an unseren Schnuppertagen, wie solidarische Landwirtschaft funktioniert – direkt auf dem Geisshof in Gebenstorf, umgeben von Natur, Wildpflanzen, auf unserem sonnigen Feld. Als Dank für deine Mithilfe erhältst du eine Tasche frisch geerntetes Demeter-Gemüse und ein kleines zVieri spendiert.
                 </p>
                 <Link
                   href="/mitmachen"
-                  className="btn btn-secondary"
+                  className="btn btn-secondary btn-organic"
                   style={{
                     display: 'inline-block',
                     marginTop: '4px',
@@ -142,14 +150,11 @@ export default function AktuellesPage() {
             </div>
           </section>
 
-          <section id="G-02b" className="bento-card bento-card-flat">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Weitere Events</h3>
-            </div>
-            <div className="card-body">
+          <section id="G-02b" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Weitere Events</h2>
+            <div style={{ marginTop: '24px' }}>
               {eventsLoading ? (
-                <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
               ) : (
                 <div className="events-list">
                   {otherEvents.map((item, index) => (
@@ -161,7 +166,7 @@ export default function AktuellesPage() {
                     />
                   ))}
                   {otherEvents.length === 0 && (
-                    <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine weiteren Events geplant.</p>
+                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine weiteren Events geplant.</p>
                   )}
                 </div>
               )}
@@ -202,25 +207,20 @@ export default function AktuellesPage() {
           )}
 
           {/* Möchtest du uns kennenlernen - Am Ende */}
-          <section id="B-06" className="bento-card bento-card-fullwidth kennenlernen-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Möchtest du uns kennenlernen?</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
-              <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
-                <CTA
-                  text="Nimm Kontakt auf"
-                  href="/kontakt"
-                  variant="primary"
-                />
-                <CTA
-                  text="Zu uns finden"
-                  href="/standorte-depots"
-                  variant="secondary"
-                />
-              </div>
+          <section id="B-06" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Möchtest du uns kennenlernen?</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
+            <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+              <CTA
+                text="Nimm Kontakt auf"
+                href="/kontakt"
+                variant="primary"
+              />
+              <CTA
+                text="Zu uns finden"
+                href="/standorte-depots"
+                variant="secondary"
+              />
             </div>
           </section>
         </div>
