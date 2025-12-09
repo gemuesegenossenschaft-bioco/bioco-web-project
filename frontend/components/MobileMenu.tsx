@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { TriColorHamburgerIcon } from './TriColorHamburgerIcon'
+import { Menu, X } from 'lucide-react'
 
 // All navigation items for mobile - combines primary and utility nav
 const allNavItems = [
@@ -48,7 +48,7 @@ export function MobileMenu() {
           aria-label="Toggle menu"
           aria-expanded={isOpen}
         >
-          <TriColorHamburgerIcon width={30} height={20} />
+          {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
       {isOpen && (

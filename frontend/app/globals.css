@@ -1013,6 +1013,13 @@ a:hover {
   display: inline-block;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  overflow: hidden; /* Enable clipping */
+}
+
+.logo-link img {
+  /* Crop 20px from bottom of logo on all pages */
+  clip-path: inset(0 0 20px 0);
+  margin-bottom: -20px; /* Compensate for clipped area */
 }
 
 .logo-link:hover {
@@ -1195,23 +1202,26 @@ a:hover {
 .secondary-nav-logo img {
   max-height: 40px;
   width: auto;
+  /* Crop 20px from bottom */
+  clip-path: inset(0 0 20px 0);
+  margin-bottom: -20px; /* Compensate for clipped area */
 }
 
 @media (max-width: 767px) {
+  /* Hide entire primary nav on mobile - only show hamburger button */
   .primary-nav,
   .secondary-nav {
-    padding: var(--spacing-xs) 0;
+    display: none !important;
   }
-
-  .primary-nav-container,
-  .secondary-nav-container {
-    padding: 0 var(--spacing-sm);
-    gap: var(--spacing-sm);
+  
+  /* Hide utility nav on mobile too */
+  .utility-nav {
+    display: none !important;
   }
-
-  .primary-nav ul,
-  .secondary-nav ul {
-    display: none; /* Hide desktop nav links on mobile, use hamburger menu instead */
+  
+  /* Show hamburger button */
+  .mobile-header-actions {
+    display: flex !important;
   }
 }
 
@@ -1224,7 +1234,7 @@ a:hover {
   padding: 0;
   align-items: center;
   justify-content: flex-start;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* Prevent wrapping that could cause visual duplication */
 }
 
 @media (max-width: 767px) {
@@ -1237,6 +1247,13 @@ a:hover {
 .primary-nav li,
 .secondary-nav li {
   padding: 0;
+  flex-shrink: 0; /* Prevent list items from shrinking */
+}
+
+/* Ensure only one button is visible - prevent duplicates */
+.primary-nav li:has(.btn-orange),
+.secondary-nav li:has(.btn-orange) {
+  margin-left: auto; /* Push button to the right */
 }
 
 .primary-nav a,
@@ -1276,6 +1293,10 @@ a:hover {
   font-weight: 600;
   padding: 8px 16px;
   border-radius: var(--radius-sm);
+  position: relative;
+  z-index: 1;
+  white-space: nowrap; /* Prevent text wrapping */
+  flex-shrink: 0; /* Prevent button from shrinking */
 }
 
 .primary-nav .btn-orange:hover,
@@ -1471,32 +1492,16 @@ header .header-nav-container .beet-leaves {
   background: transparent;
 }
 
-.hamburger-icon,
-.bean-menu-icon {
+/* Simple hamburger icon styling - using lucide-react Menu/X icons */
+.mobile-menu-toggle svg {
   display: block;
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
+  transition: all 0.2s ease;
 }
 
-.hamburger-icon path,
-.mobile-menu-toggle svg path {
-  transition: all 0.3s ease;
-  stroke: currentColor;
-  stroke-width: 3;
-  fill: currentColor;
-}
-
-.bean-menu-icon {
-  transition: all 0.3s ease;
-}
-
-.bean-menu-icon path {
-  transition: all 0.3s ease;
-}
-
-.mobile-menu-toggle:hover .bean-menu-icon {
-  transform: scale(1.1);
-  opacity: 0.9;
+.mobile-menu-toggle:hover svg {
+  opacity: 0.8;
 }
 
 .desktop-nav {
@@ -2900,7 +2905,7 @@ footer a:hover {
 }
 
 .aktuelles-item {
-  background: var(--bg-secondary);
+  background: rgba(46, 125, 50, 0.5); /* Green with 50% opacity */
   border: none;
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
@@ -3005,7 +3010,7 @@ footer a:hover {
 }
 
 .event-item {
-  background: var(--bg-secondary);
+  background: rgba(46, 125, 50, 0.5); /* Green with 50% opacity */
   border: none;
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
@@ -4574,7 +4579,7 @@ footer a:hover {
 /* Navbar Overlay - positioned within hero */
 .navbar-overlay {
   position: absolute;
-  top: 0;
+  top: clamp(24px, 4vw, 48px);
   left: 0;
   right: 0;
   width: 100%;
@@ -4983,15 +4988,14 @@ footer a:hover {
   margin: 0 auto;
   height: clamp(50vh, 65vh, 70vh);
   min-height: 420px;
-  padding: 0 clamp(16px, 5vw, 72px);
+  padding: clamp(24px, 4vw, 48px) clamp(16px, 5vw, 72px) 0;
 }
 
 .hero-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: 24px 24px 0 0;
-  clip-path: inset(0 0 0 0 round 24px 24px 0 0);
+  border-radius: 24px;
 }
 
 .hero-overlay {
@@ -5003,15 +5007,15 @@ footer a:hover {
 
 .hero-content {
   position: absolute;
-  left: clamp(20px, 5vw, 64px);
-  bottom: clamp(80px, 12vh, 140px);
+  left: clamp(60px, calc(5vw + 40px), 104px); /* Moved 40px to the right */
+  bottom: clamp(100px, calc(12vh + 20px), 160px); /* Moved 20px up */
   z-index: 3;
   max-width: 600px;
 }
 
 .hero-headline {
   font-family: 'DM Sans', sans-serif;
-  font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+  font-size: clamp(1.75rem, calc(3.5vw + 0.25rem), 2.5rem); /* Increased by ~4pt */
   font-weight: 700;
   color: white;
   margin: 0;
@@ -5019,42 +5023,34 @@ footer a:hover {
 }
 
 .hero-title-secondary {
-  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-size: clamp(1.25rem, calc(2.5vw + 0.25rem), 1.65rem); /* Increased by ~4pt */
   font-weight: 400;
   display: block;
   margin-top: 0.5em;
   color: white;
 }
 
-.hero-wave {
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  width: 100%;
-  height: 120px;
-  background: var(--bg-secondary);
-  /* Wavy top edge with rounded bottom corners */
-  clip-path: path('M 0,0 Q 50,30 100,20 T 200,25 T 300,15 T 400,30 T 500,20 T 600,28 T 700,18 T 800,32 T 900,22 T 1000,30 T 1100,20 T 1200,28 L 1200,96 Q 1200,120 1176,120 L 24,120 Q 0,120 0,96 Z');
-  z-index: 3;
-}
+/* Hero wave removed - using uniform rounded corners instead */
 
 /* Hero headline block removed - text now in hero overlay */
 
 /* Scattered illustrations */
 .scatter-layer {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  min-height: 100vh; /* Cover at least the viewport height */
   pointer-events: none;
   z-index: 1;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .scatter-item {
   position: absolute;
-  opacity: 0.15;
+  opacity: 0.2; /* Increased opacity for better visibility */
   filter: saturate(0.9);
+  mix-blend-mode: multiply; /* Better blending with background */
 }
 
 /* Main container & grid */

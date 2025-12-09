@@ -32,26 +32,25 @@ export default function Home() {
   }
 
   const illustrations = [
-    { src: '/images/illustrations/aubergine.svg', left: '6%', top: '18%', size: 120, rotate: -6, opacity: 0.08 },
-    { src: '/images/illustrations/blumenkohl_mit_vogel.svg', left: '78%', top: '12%', size: 160, rotate: 4, opacity: 0.06 },
-    { src: '/images/illustrations/fenchel.svg', left: '12%', top: '48%', size: 140, rotate: -3, opacity: 0.08 },
-    { src: '/images/illustrations/kohlrabi.svg', left: '70%', top: '42%', size: 130, rotate: 8, opacity: 0.07 },
-    { src: '/images/illustrations/lauch_mit_schnecke.svg', left: '18%', top: '72%', size: 150, rotate: -5, opacity: 0.06 },
-    { src: '/images/illustrations/radieschen.svg', left: '82%', top: '68%', size: 110, rotate: 3, opacity: 0.07 },
-    { src: '/images/illustrations/ruebli.svg', left: '44%', top: '30%', size: 130, rotate: -2, opacity: 0.07 },
-    { src: '/images/illustrations/schmetterling.svg', left: '56%', top: '16%', size: 80, rotate: 10, opacity: 0.05 },
-    { src: '/images/illustrations/schmetterling2.svg', left: '30%', top: '60%', size: 90, rotate: -8, opacity: 0.05 },
-    { src: '/images/illustrations/zwiebel.svg', left: '60%', top: '80%', size: 120, rotate: 6, opacity: 0.06 },
+    { src: '/images/illustrations/aubergine.svg', left: '6%', top: '18%', size: 120, rotate: -6, opacity: 0.25 },
+    { src: '/images/illustrations/blumenkohl_mit_vogel.svg', left: '78%', top: '12%', size: 160, rotate: 4, opacity: 0.22 },
+    { src: '/images/illustrations/fenchel.svg', left: '12%', top: '48%', size: 140, rotate: -3, opacity: 0.25 },
+    { src: '/images/illustrations/kohlrabi.svg', left: '70%', top: '42%', size: 130, rotate: 8, opacity: 0.23 },
+    { src: '/images/illustrations/lauch_mit_schnecke.svg', left: '18%', top: '72%', size: 150, rotate: -5, opacity: 0.22 },
+    { src: '/images/illustrations/radieschen.svg', left: '82%', top: '68%', size: 110, rotate: 3, opacity: 0.23 },
+    { src: '/images/illustrations/ruebli.svg', left: '44%', top: '30%', size: 130, rotate: -2, opacity: 0.23 },
+    { src: '/images/illustrations/schmetterling.svg', left: '56%', top: '16%', size: 80, rotate: 10, opacity: 0.21 },
+    { src: '/images/illustrations/schmetterling2.svg', left: '30%', top: '60%', size: 90, rotate: -8, opacity: 0.21 },
+    { src: '/images/illustrations/zwiebel.svg', left: '60%', top: '80%', size: 120, rotate: 6, opacity: 0.22 },
   ]
 
   return (
     <div className="page-shell">
-      <div className="navbar-overlay">
-        <Header />
-      </div>
-
       {/* Hero */}
       <section className="hero-bleed">
+        <div className="navbar-overlay">
+          <Header />
+        </div>
         <div className="hero-bg">
           <Image
             src="/images/hero/bioco_hero-junge-mit-kuerbis.JPG"
@@ -63,13 +62,14 @@ export default function Home() {
           <div className="hero-overlay" />
           <div className="hero-content">
             <h1 className="hero-headline">
-              Gemeinsam Gemüse anbauen und geniessen.<br />
+              Gemeinsam Gemüse<br />
+              anbauen und geniessen.<br />
               <span className="hero-title-secondary">
-                Solidarische Landwirtschaft in der Region Baden-Brugg.
+                Solidarische Landwirtschaft<br />
+                in der Region Baden-Brugg.
               </span>
             </h1>
           </div>
-          <div className="hero-wave" />
         </div>
       </section>
 
@@ -199,10 +199,10 @@ export default function Home() {
           </div>
 
           {/* Aktuelles */}
-          <section className="home-block col-span-12 md-col-span-6 wavy-card">
+          <section className="home-block col-span-12 md-col-span-6">
             <h2>Aktuelles</h2>
             <div className="aktuelles-list">
-              {getAktuellesItems().map((item, index) => (
+              {getAktuellesItems().slice(0, 3).map((item, index) => (
                 <AktuellesItemComponent
                   key={item.id || index}
                   item={item}
@@ -217,13 +217,13 @@ export default function Home() {
           </section>
 
           {/* Schnuppertage */}
-          <section className="home-block col-span-12 md-col-span-6 wavy-card">
+          <section className="home-block col-span-12 md-col-span-6">
             <h2>Schnuppertage</h2>
             {eventsLoading ? (
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
             ) : (
               <div className="events-list">
-                {schnuppertageEvents.map((item, index) => (
+                {schnuppertageEvents.slice(0, 3).map((item, index) => (
                   <AktuellesItemComponent
                     key={item.id || index}
                     item={item}
