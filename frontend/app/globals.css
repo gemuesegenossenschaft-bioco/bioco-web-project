@@ -5246,7 +5246,7 @@ footer a:hover {
 
 /* Mobile: use flexbox for order property to ensure image always above text */
 @media (max-width: 767px) {
-  .home-block > div {
+  .home-block:has(.image-placeholder) {
     display: flex;
     flex-direction: column;
   }
