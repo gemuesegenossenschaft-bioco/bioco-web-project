@@ -138,6 +138,11 @@ p {
   gap: var(--spacing-md);
   margin: var(--spacing-md) 0;
   grid-auto-flow: dense;
+  max-width: 1400px; /* Match navbar max-width for alignment */
+  width: 100%;
+  margin-left: auto; /* Center the grid */
+  margin-right: auto; /* Center the grid */
+  padding: 0; /* Padding handled by parent .main-content */
   grid-auto-rows: min-content;
   align-content: start;
   width: 100%;
@@ -1105,13 +1110,14 @@ a:hover {
 }
 
 .utility-nav-container {
-  max-width: 100%; /* Full width */
+  max-width: 1400px; /* Match content max-width for alignment */
   width: 100%;
-  margin: 0; /* No centering */
-  padding: 0 clamp(16px, 6vw, 96px); /* Padding from edges */
+  margin: 0 auto; /* Center the container */
+  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding exactly - ESSENTIAL for alignment */
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Right align to corner */
+  justify-content: flex-end; /* Right align nav items */
+  box-sizing: border-box; /* Ensure padding is included in width calculation */
 }
 
 .utility-nav ul {
@@ -1189,12 +1195,13 @@ a:hover {
   max-width: 1400px; /* Match content max-width */
   width: 100%;
   margin: 0 auto; /* Center the container */
-  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding exactly */
+  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding exactly - ESSENTIAL for alignment */
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
   position: relative; /* For mobile hamburger positioning */
   height: 100%; /* Full height of parent navbar */
+  box-sizing: border-box; /* Ensure padding is included in width calculation */
 }
 
 .primary-nav-logo,
@@ -1375,7 +1382,7 @@ header {
 @media (max-width: 767px) {
   .primary-nav-container,
   .secondary-nav-container {
-    padding: 0 var(--spacing-xs);
+    padding: 0 clamp(16px, 6vw, 96px); /* Keep same padding as desktop for alignment */
   }
   
   .main-content {
@@ -2135,7 +2142,9 @@ header .header-nav-container .beet-leaves {
 /* Ensure bento-grid uses full width */
 .bento-grid {
   width: 100%;
-  max-width: 100%;
+  max-width: 1400px; /* Match navbar max-width for alignment */
+  margin-left: auto; /* Center the grid */
+  margin-right: auto; /* Center the grid */
 }
 
 .content {
@@ -4704,7 +4713,7 @@ footer a:hover {
   z-index: 50;
   pointer-events: none;
   background: transparent;
-  padding: 0 clamp(16px, 5vw, 72px);
+  padding: 0 clamp(16px, 6vw, 96px); /* Match content padding for alignment */
 }
 
 .navbar-overlay .primary-nav,
