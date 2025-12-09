@@ -5379,23 +5379,22 @@ footer a:hover {
   }
 }
 
-/* Veg collage stack */
-.veg-stack {
+/* Image placeholder - same shape as hero image */
+.image-placeholder {
+  background: var(--bg-tertiary);
+  border-radius: 24px; /* Same as hero image */
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  width: clamp(260px, 40vw, 420px);
-  aspect-ratio: 4 / 3;
-  margin: 0 auto;
+  overflow: hidden;
 }
-.veg-item {
+
+.image-placeholder::before {
+  content: '';
   position: absolute;
   inset: 0;
-  object-fit: contain;
-  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+  background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);
+  border-radius: 24px;
 }
-.veg-carrot { transform: translate(-10%, 10%) scale(1.05) rotate(-6deg); z-index: 3; }
-.veg-radieschen { transform: translate(10%, 8%) scale(0.95) rotate(4deg); z-index: 4; }
-.veg-kohlrabi { transform: translate(-4%, -6%) scale(1.0) rotate(-2deg); z-index: 2; }
-.veg-fenchel { transform: translate(18%, -12%) scale(0.9) rotate(6deg); z-index: 1; }
-.veg-cauliflower { transform: translate(-6%, 6%) scale(1.02) rotate(-3deg); z-index: 3; }
-.veg-onion { transform: translate(14%, 4%) scale(0.96) rotate(5deg); z-index: 2; }
-.veg-butterfly { transform: translate(8%, -18%) scale(0.8) rotate(8deg); z-index: 4; }

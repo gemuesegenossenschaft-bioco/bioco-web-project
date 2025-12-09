@@ -94,15 +94,7 @@ export default function Home() {
             </ul>
           </section>
           <div className="home-block col-span-12 md-col-span-6 blob-visual">
-            <div className="veg-stack" style={{ width: '100%', aspectRatio: '1', maxWidth: '300px', margin: '0 auto', position: 'relative' }}>
-              <Image
-                src="/images/illustrations/ruebli.svg"
-                alt="Rüebli"
-                fill
-                priority
-                className="veg-item"
-                style={{ objectFit: 'contain' }}
-              />
+            <div className="image-placeholder" style={{ width: '100%', aspectRatio: '4/3', maxWidth: '400px', margin: '0 auto' }}>
             </div>
           </div>
 
