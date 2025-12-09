@@ -60,10 +60,7 @@ export default function Home() {
           <div className="hero-gradient-overlay"></div>
         </div>
         <div className="hero-content">
-          <h1 className="hero-headline">
-            Gemeinsam Gemüse anbauen und geniessen.<br />
-            <span className="hero-title-secondary">Solidarische Landwirtschaft in der Region Baden-Brugg.</span>
-          </h1>
+          <h1 className="hero-headline"># Echt. Nah. Dein Anteil.</h1>
         </div>
         <div className="hero-torn-edge"></div>
       </section>
@@ -73,30 +70,30 @@ export default function Home() {
         <Header />
       </div>
 
+      {/* Scattered Illustrations Background */}
+      <div className="illustrations-scatter">
+        {illustrations.map((src, index) => (
+          <img
+            key={index}
+            src={src}
+            alt=""
+            className="scattered-illustration"
+            style={{
+              position: 'absolute',
+              left: `${15 + (index * 8.5)}%`,
+              top: `${20 + (index * 7)}%`,
+              width: `${80 + (index % 3) * 40}px`,
+              opacity: 0.08 + (index % 3) * 0.04,
+              transform: `rotate(${(index % 5) * 12 - 24}deg)`,
+              zIndex: 1,
+              pointerEvents: 'none',
+            }}
+          />
+        ))}
+      </div>
+
       {/* Main Content - 2 Column Grid */}
       <main className="home-main-content">
-        {/* Scattered Illustrations Background */}
-        <div className="illustrations-scatter">
-          {illustrations.map((src, index) => (
-            <img
-              key={index}
-              src={src}
-              alt=""
-              className="scattered-illustration"
-              style={{
-                position: 'absolute',
-                left: `${10 + (index * 9)}%`,
-                top: `${15 + (index * 8)}%`,
-                width: `${100 + (index % 4) * 60}px`,
-                opacity: 0.12 + (index % 3) * 0.05,
-                transform: `rotate(${(index % 7) * 15 - 30}deg)`,
-                zIndex: 1,
-                pointerEvents: 'none',
-              }}
-            />
-          ))}
-        </div>
-
         <div className="home-grid">
           
           {/* Welcome Section - Full Width */}
@@ -155,18 +152,20 @@ export default function Home() {
             </ul>
           </section>
 
-          <div className="home-section home-section-right torn-edge-element">
-            <Image
-              src="/images/gemeinschaft/bioco_kinder.JPG"
-              alt="Kinder bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
-              width={800}
-              height={600}
-              style={{ width: '100%', height: 'auto' }}
-            />
+          <div className="home-section home-section-right">
+            <div className="torn-image-wrapper">
+              <Image
+                src="/images/gemeinschaft/bioco_kinder.JPG"
+                alt="Kinder bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
+                width={800}
+                height={600}
+                className="torn-image"
+              />
+            </div>
           </div>
 
           {/* Aktuelles - Wobbly Card */}
-          <section className="home-section home-section-left wobbly-card torn-edge-element">
+          <section className="home-section home-section-left wobbly-card">
             <h2 className="home-section-title">Aktuelles</h2>
             <div className="aktuelles-list">
               {getAktuellesItems().map((item, index) => (
@@ -178,13 +177,13 @@ export default function Home() {
                 />
               ))}
             </div>
-            <Link href="/aktuelles" className="btn btn-primary btn-organic torn-edge-element" style={{ marginTop: '16px', display: 'inline-block' }}>
+            <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', display: 'inline-block' }}>
               Alle Neuigkeiten ansehen
             </Link>
           </section>
 
           {/* Schnuppertage - Wobbly Card */}
-          <section className="home-section home-section-right wobbly-card torn-edge-element">
+          <section className="home-section home-section-right wobbly-card">
             <h2 className="home-section-title">Schnuppertage</h2>
             {eventsLoading ? (
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
@@ -207,7 +206,7 @@ export default function Home() {
             )}
             <Link
               href="/mitmachen"
-              className="btn btn-primary btn-organic torn-edge-element"
+              className="btn btn-primary btn-organic"
               style={{ marginTop: '16px', display: 'inline-block' }}
             >
               Alle Schnuppertage ansehen
@@ -261,20 +260,16 @@ export default function Home() {
             <h2 className="home-section-title">Möchtest du uns kennenlernen?</h2>
             <p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
             <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
-              <div className="torn-edge-element" style={{ display: 'inline-block' }}>
-                <CTA
-                  text="Nimm Kontakt auf"
-                  href="/kontakt"
-                  variant="primary"
-                />
-              </div>
-              <div className="torn-edge-element" style={{ display: 'inline-block' }}>
-                <CTA
-                  text="Zu uns finden"
-                  href="/standorte-depots"
-                  variant="secondary"
-                />
-              </div>
+              <CTA
+                text="Nimm Kontakt auf"
+                href="/kontakt"
+                variant="primary"
+              />
+              <CTA
+                text="Zu uns finden"
+                href="/standorte-depots"
+                variant="secondary"
+              />
             </div>
           </section>
 
