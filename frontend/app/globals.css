@@ -1588,6 +1588,7 @@ header .header-nav-container .beet-leaves {
   z-index: 1001;
   display: flex;
   flex-direction: column;
+  pointer-events: auto !important;
 }
 
 .mobile-menu-cta {
@@ -1638,6 +1639,9 @@ header .header-nav-container .beet-leaves {
   transition: all 0.2s ease;
   width: 100%;
   background: white;
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
 }
 
 .mobile-nav-list a:hover,
@@ -1659,6 +1663,9 @@ header .header-nav-container .beet-leaves {
   width: calc(100% - 2 * clamp(16px, 5vw, 72px));
   padding: 12px 24px;
   border-radius: var(--radius-md);
+  position: relative;
+  z-index: 1;
+  pointer-events: auto !important;
 }
 
 .mobile-nav-list .btn-orange:hover {
@@ -1750,7 +1757,8 @@ header .header-nav-container .beet-leaves {
   position: sticky;
   top: 0;
   background: white;
-  z-index: 10;
+  z-index: 1002;
+  pointer-events: auto !important;
 }
 
 .mobile-menu-title {
@@ -1771,12 +1779,9 @@ header .header-nav-container .beet-leaves {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  min-width: 20px;
-  width: 20px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
+  z-index: 1002;
+  pointer-events: auto !important;
 }
 
 .mobile-menu-close:hover {
@@ -5272,14 +5277,17 @@ footer a:hover {
     min-height: auto;
     height: auto;
     padding: clamp(24px, 4vw, 48px) clamp(16px, 5vw, 72px) clamp(20px, 4vw, 32px);
+    display: flex;
+    flex-direction: column; /* Stack image and text vertically */
   }
   
   .hero-bg {
-    position: relative; /* Change from absolute to relative */
+    position: relative !important; /* Change from absolute to relative */
     width: 100%;
     aspect-ratio: 1; /* Make hero square on mobile */
     height: auto;
     padding-bottom: 0;
+    order: 1; /* Image first */
   }
   
   .hero-overlay {
@@ -5287,12 +5295,15 @@ footer a:hover {
   }
   
   .hero-content {
-    position: relative; /* Change from absolute to relative - text below image */
-    left: 0;
-    bottom: 0;
+    position: relative !important; /* Change from absolute to relative - text below image */
+    left: 0 !important;
+    bottom: 0 !important;
+    top: 0 !important;
     margin-top: clamp(20px, 4vw, 32px);
     padding: 0;
     max-width: 100%;
+    order: 2; /* Text second (below image) */
+    z-index: auto; /* Remove z-index stacking */
   }
   
   .hero-headline {

@@ -98,7 +98,7 @@ export function MobileMenu() {
                 <li>
                   <Link
                     href="/anmeldung"
-                    className="btn btn-orange"
+                    className="btn btn-orange btn-organic"
                     onClick={handleLinkClick}
                   >
                     biocò werden
