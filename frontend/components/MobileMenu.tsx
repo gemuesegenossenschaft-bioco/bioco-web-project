@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
+import { Logo } from './Logo'
 
 // Primary navigation items
 const primaryNavItems = [
@@ -71,6 +72,9 @@ export function MobileMenu() {
         >
           <nav className="mobile-menu" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-menu-header">
+              <div className="mobile-menu-logo">
+                <Logo />
+              </div>
               <button
                 className="mobile-menu-close"
                 onClick={(e) => {
