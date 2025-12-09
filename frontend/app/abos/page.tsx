@@ -122,6 +122,16 @@ export default function AbosPage() {
               </table>
             </div>
             
+            <div style={{ marginTop: '24px', textAlign: 'center' }}>
+              <Link
+                href="/bioco-werden"
+                className="btn btn-orange"
+                style={{ display: 'inline-block', fontSize: '1.125rem', padding: '16px 32px' }}
+              >
+                Jetzt Abo wählen
+              </Link>
+            </div>
+            
             <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
               <p><strong>Anteilsscheine:</strong> Jeder Anteilsschein kostet CHF 250.- und ist eine Bedingung für den Bezug eines Gemüsekorbes. Du kannst zusätzliche Anteilsscheine erwerben, um die Genossenschaft stärker zu unterstützen.</p>
               <p style={{ marginTop: '12px' }}><strong>💡 Tipp:</strong> Geteilte Körbe sparen CHF 110 pro Jahr und reduzieren Logistikaufwand. Wir empfehlen, Körbe zu teilen!</p>
