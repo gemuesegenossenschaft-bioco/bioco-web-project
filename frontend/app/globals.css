@@ -5147,7 +5147,7 @@ footer a:hover {
 .hero-content {
   position: absolute;
   left: clamp(16px, 5vw, 72px); /* Align with Willkommen section padding */
-  bottom: clamp(120px, calc(15vh + 20px), 180px); /* Move up - higher bottom value */
+  top: clamp(90px, calc(3vw + 70px), 120px); /* Align with logo height */
   z-index: 3;
   max-width: 600px;
 }
@@ -5167,6 +5167,33 @@ footer a:hover {
   display: block;
   margin-top: 0.5em;
   color: white;
+}
+
+/* Secondary Navigation at bottom of hero */
+.hero-utility-nav {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 4;
+  padding: 0 clamp(16px, 6vw, 96px);
+  padding-bottom: clamp(16px, 3vw, 24px);
+}
+
+.hero-utility-nav .utility-nav {
+  background: transparent;
+  border-bottom: none;
+}
+
+.hero-utility-nav .utility-nav a {
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.hero-utility-nav .utility-nav a:hover {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.2) !important;
+  text-shadow: none !important;
 }
 
 /* Hero wave removed - using uniform rounded corners instead */
@@ -5406,7 +5433,7 @@ footer a:hover {
   .hero-bg {
     position: relative !important; /* Change from absolute to relative */
     width: 100%;
-    aspect-ratio: 1; /* Make hero square on mobile */
+    aspect-ratio: 4/3; /* Make hero longer on mobile (was 1, now 4/3) */
     height: auto;
     padding-bottom: 0;
     order: 1; /* Image first */
@@ -5425,7 +5452,7 @@ footer a:hover {
     position: absolute !important; /* Keep absolute positioning on mobile */
     left: clamp(24px, 5vw, 72px) !important; /* Left aligned with padding */
     bottom: 0 !important; /* Stick to bottom border of hero image */
-    padding-bottom: clamp(24px, 4vw, 48px) !important; /* Padding from bottom edge */
+    padding-bottom: clamp(40px, 6vw, 64px) !important; /* More padding from bottom edge - moved text down */
     top: auto !important;
     margin-top: 0 !important;
     max-width: 100%;
