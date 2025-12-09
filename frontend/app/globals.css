@@ -30,9 +30,9 @@
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.2), 0 4px 8px rgba(0, 0, 0, 0.15);
-  --radius-sm: 15px;
-  --radius-md: 25px;
-  --radius-lg: 35px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
   --spacing-xs: 8px;
   --spacing-sm: 16px;
   --spacing-md: 24px;
@@ -202,7 +202,7 @@ p {
   min-width: 0;
   background-color: var(--tile-bg);
   border: none;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-lg);
   padding: 0;
   overflow: visible;
   transition: all 0.3s ease;
@@ -261,7 +261,7 @@ p {
   margin-bottom: 0;
   background-color: rgba(33, 37, 41, 0.03);
   border-bottom: none;
-  border-radius: 3px 3px 0 0/23px 23px 0 0;
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
   font-family: 'DM Sans', sans-serif;
   font-weight: 600;
 }
@@ -466,7 +466,7 @@ h4.card-title {
   white-space: nowrap;
   background-color: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
@@ -551,7 +551,7 @@ h4.card-title {
   padding: 0.5rem 1rem;
   background-color: rgba(33, 37, 41, 0.03);
   border-top: 1px solid #333;
-  border-radius: 0 0 3px 3px/0 0 23px 5px;
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
 }
@@ -741,7 +741,7 @@ button,
   padding: 12px 24px;
   font-size: 1rem;
   text-align: center;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   transition: all 0.2s ease;
   text-decoration: none;
   cursor: pointer;
@@ -827,7 +827,7 @@ input[type="submit"].cta-button,
   padding: 12px 24px;
   font-size: 1rem;
   text-align: center;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   transition: all 0.2s ease;
   text-decoration: none;
   cursor: pointer;
@@ -1066,9 +1066,7 @@ a:hover {
 
   .primary-nav ul,
   .secondary-nav ul {
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    row-gap: var(--spacing-xs);
+    display: none; /* Hide desktop nav links on mobile, use hamburger menu instead */
   }
 }
 
@@ -1101,7 +1099,7 @@ a:hover {
   display: flex;
   align-items: center;
   padding: 8px 16px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
   font-size: 0.875rem;
   color: var(--text-secondary);
@@ -1132,7 +1130,7 @@ a:hover {
   letter-spacing: 0.05em;
   font-weight: 600;
   padding: 8px 16px;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
 }
 
 .primary-nav .btn-orange:hover,
@@ -1192,7 +1190,7 @@ header {
     margin: 0 auto var(--spacing-sm) auto !important;
     padding: 0 !important;
     box-sizing: border-box;
-    border-radius: 5px 5px 5px 5px/25px 25px 25px 5px !important;
+    border-radius: var(--radius-lg) !important;
   }
 }
 
@@ -1218,7 +1216,7 @@ header {
 header .header-nav-container {
   background: transparent;
   border: none;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   padding: var(--spacing-xs) var(--spacing-md);
   box-shadow: var(--shadow-sm);
   display: inline-flex;
@@ -1369,7 +1367,7 @@ header .header-nav-container .beet-leaves {
   width: 100%;
   max-width: 320px;
   position: relative;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   max-height: 90vh;
   overflow-y: auto;
@@ -1409,7 +1407,7 @@ header .header-nav-container .beet-leaves {
   display: flex;
   align-items: center;
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   text-decoration: none;
   font-weight: 500;
@@ -1483,7 +1481,7 @@ header .header-nav-container .beet-leaves {
 .mobile-menu-secondary .secondary-nav a {
   color: var(--text-primary);
   padding: var(--spacing-sm) var(--spacing-md);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
@@ -1545,7 +1543,7 @@ header .header-nav-container .beet-leaves {
   cursor: pointer;
   padding: 4px 6px;
   color: var(--text-secondary);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   font-weight: 700;
   line-height: 1;
   transition: all 0.2s ease;
@@ -1603,7 +1601,7 @@ header .header-nav-container .beet-leaves {
 .header-nav a {
   display: block;
   padding: 10px 16px;
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   font-weight: 500;
   color: var(--text-primary);
   transition: all 0.2s ease;
@@ -1924,7 +1922,7 @@ header .header-nav-container .beet-leaves {
   border: 2px solid rgba(46, 125, 50, 0.3);
   padding: var(--spacing-lg);
   margin: var(--spacing-lg) 0;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-lg);
   position: relative;
   overflow: visible;
   box-shadow: var(--shadow-md);
@@ -2037,7 +2035,7 @@ main ul:not(.pea-bullet-list) li::before,
   color: white;
   padding: 4px 12px;
   border: 2px solid #E88200;
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   font-size: 0.75rem;
   transform: rotate(10deg);
   transform-origin: center;
@@ -2064,7 +2062,7 @@ select,
   width: 100%;
   margin: 4px 0;
   font-size: 1rem;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
   box-sizing: border-box;
@@ -2132,7 +2130,7 @@ select:focus,
 
 .is-invalid-group {
   border: 2px solid #dc3545;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   padding: 8px;
   background-color: rgba(220, 53, 69, 0.05);
 }
@@ -2160,13 +2158,13 @@ select:focus,
 .form-control-lg {
   padding: 0.5rem 1rem;
   font-size: 1.25rem;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
 }
 
 .form-control-sm {
   padding: 0.25rem 0.5rem;
   font-size: 0.875rem;
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
 }
 
 input[type="checkbox"],
@@ -2174,7 +2172,7 @@ input[type="radio"] {
   width: 20px;
   height: 20px;
   border: 2px solid #333;
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: 6px;
   cursor: pointer;
   appearance: none;
   position: relative;
@@ -2223,7 +2221,7 @@ input[type="radio"]:checked::after {
   color: #155724;
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
@@ -2235,7 +2233,7 @@ input[type="radio"]:checked::after {
   color: #721c24;
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
 }
 
@@ -2328,7 +2326,7 @@ footer a:hover {
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 0.875rem;
   transition: all 0.2s ease;
@@ -2389,7 +2387,7 @@ footer a:hover {
   font-size: 1rem;
   background: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
   cursor: pointer;
   box-shadow: var(--shadow-sm);
@@ -2407,7 +2405,7 @@ footer a:hover {
   font-weight: 700;
   padding: var(--spacing-md);
   background: var(--bg-secondary);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   border: none;
   box-shadow: var(--shadow-md);
   width: 100%;
@@ -2466,7 +2464,7 @@ footer a:hover {
   padding: var(--spacing-xs) var(--spacing-md);
   background: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   font-size: 0.875rem;
   color: var(--text-secondary);
   cursor: pointer;
@@ -2497,7 +2495,7 @@ footer a:hover {
   font-size: 1rem;
   background: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   color: var(--text-secondary);
   cursor: pointer;
   box-shadow: var(--shadow-sm);
@@ -2512,7 +2510,7 @@ footer a:hover {
 .gallery-item {
   aspect-ratio: 4/3;
   overflow: hidden;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   border: none;
   box-shadow: var(--shadow-md);
 }
@@ -2537,7 +2535,7 @@ footer a:hover {
   font-weight: 700;
   margin-bottom: var(--spacing-sm);
   border: none;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   overflow: visible;
   box-shadow: var(--shadow-md);
 }
@@ -2595,7 +2593,7 @@ footer a:hover {
   font-weight: 700;
   padding: var(--spacing-md);
   background: var(--bg-secondary);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   border: none;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-md);
@@ -2661,7 +2659,7 @@ footer a:hover {
   font-weight: 700;
   padding: var(--spacing-md);
   background: var(--bg-secondary);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   border: none;
   box-shadow: var(--shadow-md);
 }
@@ -2757,7 +2755,7 @@ footer a:hover {
 .aktuelles-item {
   background: var(--bg-secondary);
   border: none;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-md);
@@ -2862,7 +2860,7 @@ footer a:hover {
 .event-item {
   background: var(--bg-secondary);
   border: none;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   padding: var(--spacing-md);
   margin-bottom: var(--spacing-md);
   box-shadow: var(--shadow-md);
@@ -2989,7 +2987,7 @@ footer a:hover {
   gap: var(--spacing-md);
   padding: var(--spacing-md);
   background: var(--bg-secondary);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   border: none;
   box-shadow: var(--shadow-md);
   transition: all 0.2s ease;
@@ -3054,7 +3052,7 @@ footer a:hover {
   max-height: 300px;
   margin-top: var(--spacing-md);
   margin-bottom: var(--spacing-md);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   border: 2px solid #333;
   box-shadow: var(--shadow-sm);
@@ -3079,7 +3077,7 @@ footer a:hover {
 .location-card-combined {
   background: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-sm);
   display: grid;
@@ -3103,7 +3101,7 @@ footer a:hover {
 .location-directions {
   background: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-sm);
 }
@@ -3151,7 +3149,7 @@ footer a:hover {
 .direction-item {
   padding: var(--spacing-sm);
   background: var(--bg-primary);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
 }
 
@@ -3195,7 +3193,7 @@ footer a:hover {
   border-spacing: 0;
   background: var(--bg-primary);
   border: 2px solid #333;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   overflow: visible;
   box-shadow: var(--shadow-md);
 }
@@ -3259,7 +3257,7 @@ footer a:hover {
   background: var(--bioco-green);
   color: white;
   border: 2px solid var(--bioco-green);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -3278,7 +3276,7 @@ footer a:hover {
   background: var(--text-secondary);
   color: white;
   border: 2px solid var(--text-secondary);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   font-size: 0.875rem;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -3327,7 +3325,7 @@ footer a:hover {
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -3379,7 +3377,7 @@ footer a:hover {
   height: 8px;
   background: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: var(--spacing-sm);
   box-shadow: var(--shadow-sm);
@@ -3390,7 +3388,7 @@ footer a:hover {
   height: 8px;
   background: var(--bg-secondary);
   border: 2px solid #333;
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   margin-bottom: var(--spacing-sm);
   box-shadow: var(--shadow-sm);
@@ -3401,7 +3399,7 @@ footer a:hover {
 .progress-bar .progress-bar {
   height: 100%;
   background: var(--bioco-green);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   transition: width 0.3s ease;
   border: none;
   box-shadow: none;
@@ -3418,7 +3416,7 @@ footer a:hover {
 .progress .progress-bar {
   height: 100%;
   background: var(--bioco-green);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   transition: width 0.3s ease;
   border: none;
   box-shadow: none;
@@ -3433,7 +3431,7 @@ footer a:hover {
   height: 100%;
   background: var(--bioco-green);
   transition: width 0.3s ease;
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
 }
 
 .progress-text {
@@ -3517,7 +3515,7 @@ footer a:hover {
   font-weight: 700;
   padding: var(--spacing-md);
   background: var(--bg-secondary);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -3602,7 +3600,7 @@ footer a:hover {
   font-weight: 700;
   padding: var(--spacing-md);
   background: var(--bg-secondary);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   border: none;
   box-shadow: var(--shadow-md);
 }
@@ -3659,7 +3657,7 @@ footer a:hover {
   background: var(--text-primary);
   color: white;
   border: 2px solid rgba(0, 0, 0, 0.3);
-  border-radius: 3px 3px 3px 3px/15px 15px 15px 3px;
+  border-radius: var(--radius-sm);
   font-size: 0.875rem;
   line-height: 1.4;
   white-space: nowrap;
@@ -3693,7 +3691,7 @@ footer a:hover {
   font-weight: 700;
   padding: var(--spacing-lg);
   background: var(--bg-secondary);
-  border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+  border-radius: var(--radius-md);
   border: none;
   box-shadow: var(--shadow-md);
   min-height: auto;
@@ -4200,7 +4198,7 @@ footer a:hover {
 
   #C-01 .pricing-table tr {
     border: 1px solid #333;
-    border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+    border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
     padding: var(--spacing-md);
     background: var(--bg-primary);
@@ -4271,7 +4269,7 @@ footer a:hover {
 
   .pricing-calculator .pricing-table tr {
     border: 1px solid #333;
-    border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
+    border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
     padding: var(--spacing-md);
     background: var(--bg-primary);

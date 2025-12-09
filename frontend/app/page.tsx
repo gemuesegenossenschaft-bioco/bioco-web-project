@@ -11,10 +11,16 @@ import { ItemDetailModal } from '@/components/ItemDetailModal'
 import { PeaBullet } from '@/components/PeaBullet'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 export default function Home() {
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(3)
+  const schnuppertageEvents = eventItems.filter((item) =>
+    (item.title || '').toLowerCase().includes('schnuppertag')
+  )
 
   const handleItemClick = (item: AktuellesItem) => {
     setSelectedItem(item)
@@ -134,6 +140,41 @@ export default function Home() {
                 </div>
                 <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
                   Alle Neuigkeiten ansehen
+                </Link>
+              </div>
+            </section>
+
+            <section id="A-08" className="bento-card bento-card-flat events-card">
+              <div className="plant-pattern"></div>
+              <div className="card-header">
+                <h3>Schnuppertage</h3>
+              </div>
+              <div className="card-body">
+                {eventsLoading ? (
+                  <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+                ) : (
+                  <div className="events-list">
+                    {schnuppertageEvents.map((item, index) => (
+                      <AktuellesItemComponent
+                        key={item.id || index}
+                        item={item}
+                        variant="event"
+                        onClick={handleItemClick}
+                      />
+                    ))}
+                    {schnuppertageEvents.length === 0 && (
+                      <p style={{ color: 'var(--text-secondary)' }}>
+                        Aktuell sind keine Schnuppertage geplant.
+                      </p>
+                    )}
+                  </div>
+                )}
+                <Link
+                  href="/mitmachen"
+                  className="btn btn-primary"
+                  style={{ marginTop: '16px', display: 'inline-block' }}
+                >
+                  Alle Schnuppertage ansehen
                 </Link>
               </div>
             </section>
