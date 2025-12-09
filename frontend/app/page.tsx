@@ -126,24 +126,26 @@ export default function Home() {
 
           {/* Wie funktioniert's */}
           <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>Wie funktioniert&apos;s?</h2>
-            <ol className="steps-list">
-              <li>
-                <strong>Anmelden als Mitglied oder Schnupperabo.</strong> Entscheide dich für ein <Link href="/abos">Abo</Link> oder teste mit einem <Link href="/mitmachen">Schnupperabo</Link>.
-              </li>
-              <li>
-                <strong>Rechnung bezahlen.</strong> Du erhältst eine Rechnung und bezahlst den Beitrag für dein Abo.
-              </li>
-              <li>
-                <strong>Arbeitseinsätze planen.</strong> Organisiere deine Mitarbeit auf dem Feld oder in der Logistik.
-              </li>
-              <li>
-                <strong>Gemüse abholen.</strong> Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/standorte-depots">Standorte</Link> ab.
-              </li>
-              <li>
-                <strong>Geniessen und teilen.</strong> Geniesse dein frisches Gemüse und teile deine Erlebnisse mit uns auf <a href="https://www.instagram.com/bioco.ch" target="_blank" rel="noopener noreferrer">Instagram</a>.
-              </li>
-            </ol>
+            <div className="wie-funktionierts-box">
+              <h2>Wie funktioniert&apos;s?</h2>
+              <ol className="steps-list">
+                <li>
+                  <strong>Anmelden als Mitglied oder Schnupperabo.</strong> Entscheide dich für ein <Link href="/abos">Abo</Link> oder teste mit einem <Link href="/mitmachen">Schnupperabo</Link>.
+                </li>
+                <li>
+                  <strong>Rechnung bezahlen.</strong> Du erhältst eine Rechnung und bezahlst den Beitrag für dein Abo.
+                </li>
+                <li>
+                  <strong>Arbeitseinsätze planen.</strong> Organisiere deine Mitarbeit auf dem Feld oder in der Logistik.
+                </li>
+                <li>
+                  <strong>Gemüse abholen.</strong> Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/standorte-depots">Standorte</Link> ab.
+                </li>
+                <li>
+                  <strong>Geniessen und teilen.</strong> Geniesse dein frisches Gemüse und teile deine Erlebnisse mit uns auf <a href="https://www.instagram.com/bioco.ch" target="_blank" rel="noopener noreferrer">Instagram</a>.
+                </li>
+              </ol>
+            </div>
           </section>
 
           {/* Schnuppertage */}
