@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { TriColorHamburgerIcon } from './TriColorHamburgerIcon'
@@ -21,7 +21,19 @@ const allNavItems = [
 
 export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+
+  useEffect(() => {
+    const onScroll = () => {
+      // Trigger when scrolling out of hero (approximately 65vh hero height)
+      const heroHeight = window.innerHeight * 0.65
+      setScrolled(window.scrollY > heroHeight - 80)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const handleLinkClick = () => {
     setIsOpen(false)
@@ -31,7 +43,7 @@ export function MobileMenu() {
     <>
       <div className="mobile-header-actions">
         <button
-          className="mobile-menu-toggle"
+          className={`mobile-menu-toggle ${scrolled ? 'scrolled' : ''}`}
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
           aria-expanded={isOpen}
@@ -49,7 +61,6 @@ export function MobileMenu() {
         >
           <nav className="mobile-menu" onClick={(e) => e.stopPropagation()}>
             <div className="mobile-menu-header">
-              <h3 className="mobile-menu-title">Menü</h3>
               <button
                 className="mobile-menu-close"
                 onClick={() => setIsOpen(false)}

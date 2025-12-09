@@ -11,9 +11,9 @@ export function TriColorHamburgerIcon({
 }: TriColorHamburgerIconProps) {
   const lineRadius = strokeWidth / 2
   const colors = [
-    'var(--bioco-green, #2E7D32)',
-    'var(--bioco-orange, #FF8C00)',
-    'var(--bioco-beet, #8B0000)',
+    'currentColor',
+    'currentColor',
+    'currentColor',
   ]
   const spacing = (height - strokeWidth * colors.length) / (colors.length + 1)
 

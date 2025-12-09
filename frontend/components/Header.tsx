@@ -10,9 +10,7 @@ export function Header() {
       {/* Primary Nav - Main navigation with Logo, sticky on scroll */}
       <PrimaryNavigation />
       {/* Mobile Menu (hamburger) - only visible on mobile */}
-      <div className="mobile-header-wrapper">
-        <MobileMenu />
-      </div>
+      <MobileMenu />
     </>
   )
 }
