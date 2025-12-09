@@ -67,9 +67,8 @@ export default function Home() {
 
       {/* Main content */}
       <main className="home-container">
-        <div className="home-grid-12">
-          {/* Willkommen - Row 1, Two Columns */}
-          <section className="two-column-section">
+        {/* Willkommen - Row 1, Two Columns */}
+        <section className="two-column-section">
             <div className="two-column-text">
               <h2>Willkommen bei biocò</h2>
               <p>
@@ -104,8 +103,9 @@ export default function Home() {
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes Mitglied bringt sich ein, ob auf dem Feld, in der Logistik oder bei der Organisation.
               </p>
             </div>
-          </section>
+        </section>
 
+        <div className="home-grid-12">
           {/* Aktuelles */}
           <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
             <h2>Aktuelles</h2>
