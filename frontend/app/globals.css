@@ -5341,25 +5341,25 @@ footer a:hover {
   }
   
   .hero-content {
-    position: relative !important; /* Change from absolute to relative - text below image */
-    left: 0 !important;
-    bottom: 0 !important;
-    top: 0 !important;
-    margin-top: clamp(20px, 4vw, 32px);
-    padding: 0;
+    position: absolute !important; /* Keep absolute positioning on mobile */
+    left: clamp(24px, 5vw, 72px) !important; /* Left aligned with padding */
+    bottom: 0 !important; /* Stick to bottom border of hero image */
+    padding-bottom: clamp(24px, 4vw, 48px) !important; /* Padding from bottom edge */
+    top: auto !important;
+    margin-top: 0 !important;
     max-width: 100%;
     order: 2; /* Text second (below image) */
-    z-index: auto; /* Remove z-index stacking */
+    z-index: 3; /* Keep z-index for overlay */
   }
   
   .hero-headline {
     font-size: clamp(1.5rem, 4vw, 2rem);
-    color: var(--text-primary) !important; /* Black text on mobile */
+    color: white !important; /* White text on mobile */
     text-align: left; /* Left aligned */
   }
   
   .hero-title-secondary {
-    color: var(--text-primary) !important; /* Black text on mobile */
+    color: white !important; /* White text on mobile */
     text-align: left; /* Left aligned */
   }
   
