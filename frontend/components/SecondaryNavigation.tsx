@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
+import { Menu, X } from 'lucide-react'
 import { Logo } from './Logo'
 
 // Primary navigation items (main menu)
@@ -15,9 +17,29 @@ const primaryNavItems = [
 
 export function PrimaryNavigation() {
   const pathname = usePathname()
+  const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10)
+    onScroll()
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    if (!isMobileOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsMobileOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [isMobileOpen])
+
+  const handleNavClick = () => setIsMobileOpen(false)
 
   return (
-    <nav className="primary-nav">
+    <nav className={`primary-nav ${scrolled ? 'nav-scrolled' : ''}`}>
       <div className="primary-nav-container">
         <div className="primary-nav-logo">
           <Logo />
@@ -31,6 +53,7 @@ export function PrimaryNavigation() {
                 <Link 
                   href={item.href}
                   className={isActive ? 'active' : ''}
+                  onClick={handleNavClick}
                 >
                   {item.title}
                 </Link>
@@ -41,12 +64,50 @@ export function PrimaryNavigation() {
             <Link 
               href="/anmeldung" 
               className="btn btn-orange"
+              onClick={handleNavClick}
             >
               biocò werden
             </Link>
           </li>
         </ul>
+        <button
+          className="nav-mobile-toggle"
+          aria-label="Navigation öffnen"
+          onClick={() => setIsMobileOpen(!isMobileOpen)}
+        >
+          {isMobileOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
+
+      {isMobileOpen && (
+        <div className="nav-drawer">
+          <ul>
+            {primaryNavItems.map((item) => {
+              const isActive = pathname === item.href
+              return (
+                <li key={item.href}>
+                  <Link
+                    href={item.href}
+                    className={isActive ? 'active' : ''}
+                    onClick={handleNavClick}
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              )
+            })}
+            <li>
+              <Link
+                href="/anmeldung"
+                className="btn btn-orange"
+                onClick={handleNavClick}
+              >
+                biocò werden
+              </Link>
+            </li>
+          </ul>
+        </div>
+      )}
     </nav>
   )
 }

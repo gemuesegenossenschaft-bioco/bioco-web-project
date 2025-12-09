@@ -1,5 +1,7 @@
 'use client'
 
+import Image from 'next/image'
+import Link from 'next/link'
 import { useState } from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
@@ -8,15 +10,13 @@ import { getAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import { PeaBullet } from '@/components/PeaBullet'
-import Image from 'next/image'
-import Link from 'next/link'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 export default function Home() {
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(3)
+  const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(6)
   const schnuppertageEvents = eventItems.filter((item) =>
     (item.title || '').toLowerCase().includes('schnuppertag')
   )
@@ -31,110 +31,127 @@ export default function Home() {
     setSelectedItem(null)
   }
 
-  // Illustration assets for scattering
   const illustrations = [
-    '/images/illustrations/aubergine.svg',
-    '/images/illustrations/blumenkohl_mit_vogel.svg',
-    '/images/illustrations/fenchel.svg',
-    '/images/illustrations/kohlrabi.svg',
-    '/images/illustrations/lauch_mit_schnecke.svg',
-    '/images/illustrations/radieschen.svg',
-    '/images/illustrations/ruebli.svg',
-    '/images/illustrations/schmetterling.svg',
-    '/images/illustrations/schmetterling2.svg',
-    '/images/illustrations/zwiebel.svg',
+    { src: '/images/illustrations/aubergine.svg', left: '6%', top: '18%', size: 120, rotate: -6, opacity: 0.08 },
+    { src: '/images/illustrations/blumenkohl_mit_vogel.svg', left: '78%', top: '12%', size: 160, rotate: 4, opacity: 0.06 },
+    { src: '/images/illustrations/fenchel.svg', left: '12%', top: '48%', size: 140, rotate: -3, opacity: 0.08 },
+    { src: '/images/illustrations/kohlrabi.svg', left: '70%', top: '42%', size: 130, rotate: 8, opacity: 0.07 },
+    { src: '/images/illustrations/lauch_mit_schnecke.svg', left: '18%', top: '72%', size: 150, rotate: -5, opacity: 0.06 },
+    { src: '/images/illustrations/radieschen.svg', left: '82%', top: '68%', size: 110, rotate: 3, opacity: 0.07 },
+    { src: '/images/illustrations/ruebli.svg', left: '44%', top: '30%', size: 130, rotate: -2, opacity: 0.07 },
+    { src: '/images/illustrations/schmetterling.svg', left: '56%', top: '16%', size: 80, rotate: 10, opacity: 0.05 },
+    { src: '/images/illustrations/schmetterling2.svg', left: '30%', top: '60%', size: 90, rotate: -8, opacity: 0.05 },
+    { src: '/images/illustrations/zwiebel.svg', left: '60%', top: '80%', size: 120, rotate: 6, opacity: 0.06 },
   ]
 
   return (
-    <>
-      {/* Full-Bleed Hero Section */}
-      <section className="home-bleed-hero">
-        <div className="hero-bg-image">
+    <div className="page-shell">
+      <Header />
+
+      {/* Hero */}
+      <section className="hero-bleed">
+        <div className="hero-bg">
           <Image
-            src="/images/hero/header_homepage.JPG"
-            alt="Geisshof in Gebenstorf"
+            src="/images/hero/bioco_hero-junge-mit-kuerbis.JPG"
+            alt="Solidarische Landwirtschaft auf dem Feld"
             fill
             priority
             style={{ objectFit: 'cover' }}
           />
-          <div className="hero-gradient-overlay"></div>
+          <div className="hero-overlay" />
+          <div className="hero-wave" />
         </div>
-        <div className="hero-content">
-          <h1 className="hero-headline"># Echt. Nah. Dein Anteil.</h1>
-        </div>
-        <div className="hero-torn-edge"></div>
       </section>
 
-      {/* Navbar Overlay */}
-      <div className="navbar-overlay">
-        <Header />
-      </div>
+      {/* Headline below wave */}
+      <section className="hero-headline-block">
+        <h1 className="hero-headline"># Echt. Nah. Dein Anteil.</h1>
+        <p className="hero-subline">Solidarische Landwirtschaft in der Region Baden-Brugg.</p>
+      </section>
 
-      {/* Scattered Illustrations Background */}
-      <div className="illustrations-scatter">
-        {illustrations.map((src, index) => (
+      {/* Scattered illustrations */}
+      <div className="scatter-layer" aria-hidden>
+        {illustrations.map((item, idx) => (
           <img
-            key={index}
-            src={src}
+            key={idx}
+            src={item.src}
             alt=""
-            className="scattered-illustration"
+            className="scatter-item"
             style={{
-              position: 'absolute',
-              left: `${15 + (index * 8.5)}%`,
-              top: `${20 + (index * 7)}%`,
-              width: `${80 + (index % 3) * 40}px`,
-              opacity: 0.08 + (index % 3) * 0.04,
-              transform: `rotate(${(index % 5) * 12 - 24}deg)`,
-              zIndex: 1,
-              pointerEvents: 'none',
+              left: item.left,
+              top: item.top,
+              width: item.size,
+              opacity: item.opacity,
+              transform: `rotate(${item.rotate}deg)`
             }}
           />
         ))}
       </div>
 
-      {/* Main Content - 2 Column Grid */}
-      <main className="home-main-content">
-        <div className="home-grid">
-          
-          {/* Welcome Section - Full Width */}
-          <section className="home-section home-section-full">
-            <h2 className="home-section-title">Willkommen bei biocò</h2>
-            <div className="home-text-content">
+      {/* Main content */}
+      <main className="home-container">
+        <div className="home-grid-12">
+          {/* Willkommen */}
+          <section className="home-block col-span-12">
+            <h2>Willkommen bei biocò</h2>
+            <div className="text-body">
               <p>
-                Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen 
-                Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für 
-                Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, 
-                das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf 
-                dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
+                Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
               </p>
               <p>
-                Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude 
-                an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen 
-                und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/gemuese">Anbau</Link> und erleben, 
-                wie aus einem Samen frisches Bio-Gemüse wird, das ab 16:00 uhr abholbereit in den 
-                <Link href="/standorte-depots"> Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
+                Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/gemuese">Anbau</Link> und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das ab 16:00 Uhr abholbereit in den <Link href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
               </p>
             </div>
           </section>
 
-          {/* Das ist drin - 2 Column */}
-          <section className="home-section home-section-left">
-            <h2 className="home-section-title">Das ist drin: Saisonal & Demeter</h2>
-            <p>Wöchentlich erhalten unsere Mitglieder ein <Link href="/abos">Gemüseabo</Link> mit frischem, saisonalem <Link href="/gemuese">Demeter-Gemüse</Link>.</p>
+          {/* Das ist drin */}
+          <section className="home-block col-span-12 md-col-span-6">
+            <h2>Das ist drin: Saisonal &amp; Demeter</h2>
+            <p>
+              Wöchentlich erhalten unsere Mitglieder ein <Link href="/abos">Gemüseabo</Link> mit frischem, saisonalem <Link href="/gemuese">Demeter-Gemüse</Link>.
+            </p>
             <ul className="pea-bullet-list">
               <PeaBullet>Wöchentlicher Gemüsekorb</PeaBullet>
               <PeaBullet>Saisonalität – das Gemüse der Jahreszeit</PeaBullet>
               <PeaBullet>Demeter-Qualität – höchste Bio-Standards</PeaBullet>
             </ul>
           </section>
-
-          <div className="home-section home-section-right">
-            {/* Empty visual column or illustration */}
+          <div className="home-block col-span-12 md-col-span-6 blob-visual">
+            <div className="veg-stack">
+              <Image
+                src="/images/illustrations/ruebli.svg"
+                alt="Rüebli"
+                fill
+                priority
+                className="veg-item veg-carrot"
+              />
+              <Image
+                src="/images/illustrations/radieschen.svg"
+                alt="Radieschen"
+                fill
+                priority
+                className="veg-item veg-radieschen"
+              />
+              <Image
+                src="/images/illustrations/kohlrabi.svg"
+                alt="Kohlrabi"
+                fill
+                priority
+                className="veg-item veg-kohlrabi"
+              />
+              <Image
+                src="/images/illustrations/fenchel.svg"
+                alt="Fenchel"
+                fill
+                priority
+                className="veg-item veg-fenchel"
+              />
+            </div>
           </div>
 
-          {/* Gemeinschaft - 2 Column with Image */}
-          <section className="home-section home-section-left">
-            <h2 className="home-section-title">Gemeinschaft & Solidarität</h2>
+          {/* Gemeinschaft */}
+          <section className="home-block col-span-12 md-col-span-6">
+            <h2>Gemeinschaft &amp; Solidarität</h2>
             <p>biocò basiert auf den Prinzipien der <Link href="/solawi">Solidarischen Landwirtschaft</Link>.</p>
             <ul className="pea-bullet-list">
               <PeaBullet>
@@ -151,27 +168,40 @@ export default function Home() {
               </PeaBullet>
             </ul>
           </section>
-
-          <div className="home-section home-section-right">
-            <div className="torn-image-wrapper">
+          <div className="home-block col-span-12 md-col-span-6 blob-visual">
+            <div className="veg-stack">
               <Image
-                src="/images/gemeinschaft/bioco_kinder.JPG"
-                alt="Kinder bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
-                width={800}
-                height={600}
-                className="torn-image"
+                src="/images/illustrations/blumenkohl_mit_vogel.svg"
+                alt="Blumenkohl mit Vogel"
+                fill
+                priority
+                className="veg-item veg-cauliflower"
+              />
+              <Image
+                src="/images/illustrations/zwiebel.svg"
+                alt="Zwiebel"
+                fill
+                priority
+                className="veg-item veg-onion"
+              />
+              <Image
+                src="/images/illustrations/schmetterling2.svg"
+                alt="Schmetterling"
+                fill
+                priority
+                className="veg-item veg-butterfly"
               />
             </div>
           </div>
 
-          {/* Aktuelles - Wobbly Card */}
-          <section className="home-section home-section-left wobbly-card">
-            <h2 className="home-section-title">Aktuelles</h2>
+          {/* Aktuelles */}
+          <section className="home-block col-span-12 md-col-span-6 wavy-card">
+            <h2>Aktuelles</h2>
             <div className="aktuelles-list">
               {getAktuellesItems().map((item, index) => (
-                <AktuellesItemComponent 
-                  key={item.id || index} 
-                  item={item} 
+                <AktuellesItemComponent
+                  key={item.id || index}
+                  item={item}
                   variant="aktuelles"
                   onClick={handleItemClick}
                 />
@@ -182,9 +212,9 @@ export default function Home() {
             </Link>
           </section>
 
-          {/* Schnuppertage - Wobbly Card */}
-          <section className="home-section home-section-right wobbly-card">
-            <h2 className="home-section-title">Schnuppertage</h2>
+          {/* Schnuppertage */}
+          <section className="home-block col-span-12 md-col-span-6 wavy-card">
+            <h2>Schnuppertage</h2>
             {eventsLoading ? (
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
             ) : (
@@ -198,9 +228,7 @@ export default function Home() {
                   />
                 ))}
                 {schnuppertageEvents.length === 0 && (
-                  <p style={{ color: 'var(--text-secondary)' }}>
-                    Aktuell sind keine Schnuppertage geplant.
-                  </p>
+                  <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
                 )}
               </div>
             )}
@@ -213,74 +241,44 @@ export default function Home() {
             </Link>
           </section>
 
-          {/* Wie funktioniert's - Full Width */}
-          <section className="home-section home-section-full">
-            <h2 className="home-section-title">Wie funktioniert's?</h2>
-            <div className="procedure-steps">
-              <div className="procedure-step">
-                <div className="step-icon">1</div>
-                <div className="step-content">
-                  <h3>Anmelden als Mitglied oder Schnupperabo</h3>
-                  <p>Entscheide dich für ein <Link href="/abos">Abo</Link> oder teste mit einem <Link href="/mitmachen">Schnupperabo</Link></p>
-                </div>
-              </div>
-              <div className="procedure-step">
-                <div className="step-icon">2</div>
-                <div className="step-content">
-                  <h3>Rechnung bezahlen</h3>
-                  <p>Du erhältst eine Rechnung und bezahlst den Beitrag für dein Abo</p>
-                </div>
-              </div>
-              <div className="procedure-step">
-                <div className="step-icon">3</div>
-                <div className="step-content">
-                  <h3>Arbeitseinsätze planen</h3>
-                  <p>Organisiere deine <Link href="/mitmachen">Mitarbeit auf dem Feld</Link> oder in der Logistik</p>
-                </div>
-              </div>
-              <div className="procedure-step">
-                <div className="step-icon">4</div>
-                <div className="step-content">
-                  <h3>Gemüse abholen</h3>
-                  <p>Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/standorte-depots">Standorte</Link> ab</p>
-                </div>
-              </div>
-              <div className="procedure-step">
-                <div className="step-icon">5</div>
-                <div className="step-content">
-                  <h3>Geniessen und teilen</h3>
-                  <p>Geniesse dein frisches Gemüse und teile deine Erlebnisse mit uns auf <a href="https://www.instagram.com/bioco.ch" target="_blank" rel="noopener noreferrer">Instagram</a></p>
-                </div>
-              </div>
-            </div>
+          {/* Wie funktioniert's */}
+          <section className="home-block col-span-12">
+            <h2>Wie funktioniert&apos;s?</h2>
+            <ol className="steps-list">
+              <li>
+                <strong>Anmelden als Mitglied oder Schnupperabo.</strong> Entscheide dich für ein <Link href="/abos">Abo</Link> oder teste mit einem <Link href="/mitmachen">Schnupperabo</Link>.
+              </li>
+              <li>
+                <strong>Rechnung bezahlen.</strong> Du erhältst eine Rechnung und bezahlst den Beitrag für dein Abo.
+              </li>
+              <li>
+                <strong>Arbeitseinsätze planen.</strong> Organisiere deine <Link href="/mitmachen">Mitarbeit auf dem Feld</Link> oder in der Logistik.
+              </li>
+              <li>
+                <strong>Gemüse abholen.</strong> Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/standorte-depots">Standorte</Link> ab.
+              </li>
+              <li>
+                <strong>Geniessen und teilen.</strong> Geniesse dein frisches Gemüse und teile deine Erlebnisse mit uns auf <a href="https://www.instagram.com/bioco.ch" target="_blank" rel="noopener noreferrer">Instagram</a>.
+              </li>
+            </ol>
           </section>
 
-          {/* Kennenlernen - Full Width */}
-          <section className="home-section home-section-full">
-            <h2 className="home-section-title">Möchtest du uns kennenlernen?</h2>
-            <p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
-            <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
-              <CTA
-                text="Nimm Kontakt auf"
-                href="/kontakt"
-                variant="primary"
-              />
-              <CTA
-                text="Zu uns finden"
-                href="/standorte-depots"
-                variant="secondary"
-              />
+          {/* Kennenlernen */}
+          <section className="home-block col-span-12">
+            <h2>Möchtest du uns kennenlernen?</h2>
+            <p>
+              Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.
+            </p>
+            <div className="cta-row">
+              <CTA text="Nimm Kontakt auf" href="/kontakt" variant="primary" />
+              <CTA text="Zu uns finden" href="/standorte-depots" variant="secondary" />
             </div>
           </section>
-
         </div>
       </main>
+
       <Footer />
-      <ItemDetailModal 
-        item={selectedItem} 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
-      />
-    </>
+      <ItemDetailModal item={selectedItem} isOpen={isModalOpen} onClose={handleCloseModal} />
+    </div>
   )
 }
