@@ -947,6 +947,12 @@ button.btn-orange:hover {
   transform: translateY(-1px);
 }
 
+/* Orange button with organic styling */
+.btn-orange.btn-organic:hover {
+  transform: translateY(-2px) rotate(-0.5deg);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.16);
+}
+
 /* Pricing Calculator - "Jetzt mitmachen!" Button in Orange */
 .pricing-calculator .btn-primary,
 .pricing-calculator button.btn-primary {
@@ -2251,12 +2257,12 @@ header .header-nav-container .beet-leaves {
   line-height: 1.5;
 }
 
-/* Global bullet styling */
+/* Global bullet styling - Normal bullet points */
 main ul:not(.pea-bullet-list),
 .bento-card ul:not(.pea-bullet-list),
 .content ul:not(.pea-bullet-list) {
-  list-style: none;
-  padding-left: 0;
+  list-style: disc;
+  padding-left: 20px;
   margin-left: 0;
 }
 
@@ -2264,23 +2270,8 @@ main ul:not(.pea-bullet-list) li,
 .bento-card ul:not(.pea-bullet-list) li,
 .content ul:not(.pea-bullet-list) li {
   position: relative;
-  padding-left: 26px;
+  padding-left: 0;
   margin: 8px 0;
-}
-
-main ul:not(.pea-bullet-list) li::before,
-.bento-card ul:not(.pea-bullet-list) li::before,
-.content ul:not(.pea-bullet-list) li::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0.45rem;
-  width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  background: var(--bioco-green);
-  border: 1px solid var(--bioco-green);
-  box-shadow: inset -2px 1px 2px rgba(255, 255, 255, 0.25);
 }
 
 /* Forms */
@@ -2610,7 +2601,8 @@ footer a:hover {
 /* Saisonkalender */
 .saisonkalender {
   margin-top: var(--spacing-md);
-  width: min(900px, 100%);
+  width: 100%;
+  max-width: 100%;
 }
 
 .kalender-tabs {
@@ -4793,6 +4785,7 @@ footer a:hover {
   left: 0;
   right: 0;
   width: 100%;
+  margin-top: 0; /* Remove margin when sticky */
   background: var(--bg-secondary); /* Same background as rest of website */
   backdrop-filter: none; /* Remove blur */
   border-bottom: 2px solid var(--bioco-green); /* Full width green divider */
@@ -5206,6 +5199,8 @@ footer a:hover {
   position: relative;
   z-index: 2;
   background: var(--bg-secondary);
+  max-width: 1400px;
+  margin: 0 auto;
   padding: clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px) clamp(32px, 6vw, 64px); /* Increased top padding for more space after hero */
 }
 
@@ -5382,34 +5377,6 @@ footer a:hover {
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.16);
 }
 
-/* Wie funktioniert's Box */
-.wie-funktionierts-box {
-  background: rgba(255, 140, 0, 0.05); /* Orange with 5% opacity */
-  border-radius: 28px 22px 26px 18px;
-  width: calc(100% + 45%); /* 20% more than before (25% + 20% = 45%) */
-  margin-left: -22.5%;
-  margin-right: -22.5%;
-  clip-path: polygon(
-    4% 8%, 12% 2%, 26% 6%, 36% 3%, 48% 7%, 60% 2%, 74% 6%, 86% 3%, 96% 10%,
-    98% 24%, 96% 42%, 99% 58%, 96% 76%, 98% 90%, 90% 98%, 74% 94%, 60% 98%,
-    46% 94%, 32% 98%, 18% 94%, 8% 96%, 2% 86%, 4% 70%, 2% 54%, 6% 36%, 2% 20%
-  );
-  padding: clamp(32px, 5vw, 64px);
-}
-
-/* Steps */
-.steps-list {
-  list-style: decimal;
-  padding-left: 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  color: var(--text-secondary);
-}
-
-.steps-list strong {
-  color: var(--text-primary);
-}
 
 /* CTA row */
 .cta-row {

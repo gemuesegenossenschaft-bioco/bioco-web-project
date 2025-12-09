@@ -32,83 +32,84 @@ export default function GemusePage() {
             </p>
           </section>
 
-          <section id="B-04" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+          <section id="B-04" style={{ marginBottom: 'clamp(48px, 8vw, 96px)', width: '100%', maxWidth: '100%' }}>
             <h2>Saisonkalender</h2>
             <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Wann ist welches Gemüse verfügbar? Entdecke unsere saisonale Vielfalt.</p>
-            <Saisonkalender />
+            <div style={{ width: '100%', maxWidth: '100%' }}>
+              <Saisonkalender />
+            </div>
           </section>
 
-          {/* Demeter und Pictures nebeneinander (50/50) */}
-          <div className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <section id="B-05" className="two-column-text">
-              <h2>Demeter-Qualität</h2>
-              <div style={{ marginTop: '16px' }}>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Warum Demeter?</h3>
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                  Demeter ist die höchste Qualitätsstufe im biologischen Landbau. Als Demeter-zertifizierter Betrieb 
-                  gehen wir über die Anforderungen von Bio Suisse hinaus und arbeiten nach den strengsten 
-                  biologisch-dynamischen Richtlinien.
-                </p>
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                  Unser Gemüse wächst auf dem Geisshof in Gebenstorf im Rahmen unserer <Link href="/solawi">solidarischen Landwirtschaft (Solawi)</Link> – direkt aus der Region Baden-Brugg.
-                </p>
+          {/* Demeter - Single Column */}
+          <section id="B-05" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Demeter-Qualität</h2>
+            <div style={{ marginTop: '16px' }}>
+              <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Warum Demeter?</h3>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                Demeter ist die höchste Qualitätsstufe im biologischen Landbau. Als Demeter-zertifizierter Betrieb 
+                gehen wir über die Anforderungen von Bio Suisse hinaus und arbeiten nach den strengsten 
+                biologisch-dynamischen Richtlinien.
+              </p>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                Unser Gemüse wächst auf dem Geisshof in Gebenstorf im Rahmen unserer <Link href="/solawi">solidarischen Landwirtschaft (Solawi)</Link> – direkt aus der Region Baden-Brugg.
+              </p>
+              
+              <div className="demeter-accordion" style={{ marginBottom: '24px' }}>
+                <details>
+                  <summary>Biologisch-dynamische Landwirtschaft</summary>
+                  <p>
+                    Die biologisch-dynamische Landwirtschaft betrachtet den Hof als lebendigen Organismus. 
+                    Wir arbeiten mit speziellen Präparaten, die die Bodenfruchtbarkeit und Pflanzengesundheit fördern. 
+                    Der Mond- und Planetenrhythmus wird in die Anbauplanung einbezogen.
+                  </p>
+                </details>
                 
-                <div className="demeter-accordion" style={{ marginBottom: '24px' }}>
-                  <details>
-                    <summary>Biologisch-dynamische Landwirtschaft</summary>
-                    <p>
-                      Die biologisch-dynamische Landwirtschaft betrachtet den Hof als lebendigen Organismus. 
-                      Wir arbeiten mit speziellen Präparaten, die die Bodenfruchtbarkeit und Pflanzengesundheit fördern. 
-                      Der Mond- und Planetenrhythmus wird in die Anbauplanung einbezogen.
-                    </p>
-                  </details>
-                  
-                  <details>
-                    <summary>Kein Einsatz von synthetischen Mitteln</summary>
-                    <p>
-                      Wir verzichten vollständig auf synthetische Dünger, Pestizide und Herbizide. Stattdessen 
-                      setzen wir auf natürliche Methoden zur Bodenpflege, Schädlingsbekämpfung und 
-                      Pflanzenstärkung.
-                    </p>
-                  </details>
-                  
-                  <details>
-                    <summary>Kreislaufwirtschaft</summary>
-                    <p>
-                      Auf dem Geisshof betreiben wir eine geschlossene Kreislaufwirtschaft. Kompost, 
-                      Gründüngung und Fruchtfolgen sorgen für gesunde Böden und nachhaltige Erträge.
-                    </p>
-                  </details>
-                  
-                  <details>
-                    <summary>Biodiversität</summary>
-                    <p>
-                      Wir fördern die Artenvielfalt durch Hecken, Blumenstreifen und vielfältige Fruchtfolgen. 
-                      Dies schafft Lebensraum für Nützlinge und trägt zu einem gesunden Ökosystem bei.
-                    </p>
-                  </details>
-                </div>
-
-                <p style={{ marginTop: '16px' }}>
-                  <a 
-                    href="https://www.demeter.ch" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary btn-organic"
-                    style={{ display: 'inline-block' }}
-                  >
-                    Mehr über Demeter erfahren →
-                  </a>
-                </p>
+                <details>
+                  <summary>Kein Einsatz von synthetischen Mitteln</summary>
+                  <p>
+                    Wir verzichten vollständig auf synthetische Dünger, Pestizide und Herbizide. Stattdessen 
+                    setzen wir auf natürliche Methoden zur Bodenpflege, Schädlingsbekämpfung und 
+                    Pflanzenstärkung.
+                  </p>
+                </details>
+                
+                <details>
+                  <summary>Kreislaufwirtschaft</summary>
+                  <p>
+                    Auf dem Geisshof betreiben wir eine geschlossene Kreislaufwirtschaft. Kompost, 
+                    Gründüngung und Fruchtfolgen sorgen für gesunde Böden und nachhaltige Erträge.
+                  </p>
+                </details>
+                
+                <details>
+                  <summary>Biodiversität</summary>
+                  <p>
+                    Wir fördern die Artenvielfalt durch Hecken, Blumenstreifen und vielfältige Fruchtfolgen. 
+                    Dies schafft Lebensraum für Nützlinge und trägt zu einem gesunden Ökosystem bei.
+                  </p>
+                </details>
               </div>
-            </section>
 
-            <section id="B-02" style={{ width: '100%' }}>
-              <h2>Was wir anbauen</h2>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Einblicke in unsere Ernte, den Anbau und die Gemeinschaft</p>
-              <Gallery />
-            </section>
-          </div>
+              <p style={{ marginTop: '16px' }}>
+                <a 
+                  href="https://www.demeter.ch" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-organic"
+                  style={{ display: 'inline-block' }}
+                >
+                  Mehr über Demeter erfahren →
+                </a>
+              </p>
+            </div>
+          </section>
+
+          {/* Was wir anbauen - Single Column */}
+          <section id="B-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Was wir anbauen</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Einblicke in unsere Ernte, den Anbau und die Gemeinschaft</p>
+            <Gallery />
+          </section>
 
           {/* Möchtest du uns kennenlernen - Am Ende */}
           <section id="B-06" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>

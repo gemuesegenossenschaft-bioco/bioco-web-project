@@ -116,7 +116,7 @@ export function ContactForm() {
         />
       </div>
 
-      <input type="submit" value="Absenden" className="cta-button" />
+      <input type="submit" value="Absenden" className="btn btn-primary btn-organic" />
     </form>
   )
 }

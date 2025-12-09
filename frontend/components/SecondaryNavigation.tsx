@@ -20,14 +20,20 @@ export function PrimaryNavigation() {
 
   useEffect(() => {
     const onScroll = () => {
-      // Trigger when scrolling out of hero (approximately 65vh hero height)
-      const heroHeight = window.innerHeight * 0.65
-      setScrolled(window.scrollY > heroHeight - 80)
+      // Auf Unterseiten (kein Hero): sofort sticky
+      const isHomePage = pathname === '/'
+      if (!isHomePage) {
+        setScrolled(window.scrollY > 0)
+      } else {
+        // Auf Homepage: erst nach Hero sticky
+        const heroHeight = window.innerHeight * 0.65
+        setScrolled(window.scrollY > heroHeight - 80)
+      }
     }
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [pathname])
 
 
   return (

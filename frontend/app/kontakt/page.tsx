@@ -49,7 +49,7 @@ export default function ContactPage() {
               </Link>
             </div>
 
-            <div style={{ marginTop: 'var(--spacing-lg)', paddingTop: 'var(--spacing-md)', borderTop: '2px solid var(--border-color)' }}>
+            <div style={{ marginTop: 'var(--spacing-lg)', paddingTop: 'var(--spacing-md)' }}>
               <h4 style={{ marginBottom: 'var(--spacing-sm)', color: 'var(--text-primary)' }}>
                 Allgemeine Anfragen
               </h4>

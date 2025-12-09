@@ -164,46 +164,41 @@ export default function AbosPage() {
             </div>
           </section>
 
-          <section id="C-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>Probe-Abo</h2>
-            <div style={{ position: 'relative', width: '100%', maxWidth: '500px', aspectRatio: '4/3', marginBottom: '24px', borderRadius: '24px', overflow: 'hidden' }}>
-              <Image
-                src="/images/abos/probeabo-bioco.JPG"
-                alt="Gemüseabo mit frischem Demeter-Gemüse aus der Region Baden"
-                fill
-                style={{ objectFit: 'cover', objectPosition: 'center bottom' }}
+          {/* Probe-Abo und Anteilsscheine - Two Columns */}
+          <div className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <section id="C-02" className="two-column-text">
+              <h2>Probe-Abo</h2>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px', marginTop: '16px' }}>Möchtest du biocò erst einmal kennenlernen? Teste unser Gemüseabo für 3 Monate.</p>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}><strong>Details:</strong></p>
+              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                <li>3 Monate Gemüsekorb</li>
+                <li>Proportionaler Anteil am Jahrespreis</li>
+                <li>Flexible Umstellung auf Jahresabo möglich</li>
+              </ul>
+              <CTA
+                text="Probe-Abo testen"
+                href="/mitmachen"
+                variant="secondary"
               />
-            </div>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>Möchtest du biocò erst einmal kennenlernen? Teste unser Gemüseabo für 3 Monate.</p>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}><strong>Details:</strong></p>
-            <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-              <li>3 Monate Gemüsekorb</li>
-              <li>Proportionaler Anteil am Jahrespreis</li>
-              <li>Flexible Umstellung auf Jahresabo möglich</li>
-            </ul>
-            <CTA
-              text="Probe-Abo testen"
-              href="/mitmachen"
-              variant="secondary"
-            />
-          </section>
+            </section>
 
-          <section id="C-03" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>Anteilsscheine ohne Gemüsekorb</h2>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>Du möchtest biocò unterstützen, ohne ein Gemüseabo zu beziehen? Das ist möglich!</p>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}><strong>Vorteile:</strong></p>
-            <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              <li>Unterstützung der Genossenschaft</li>
-              <li>Vorrang auf der Warteliste für einen Gemüsekorb</li>
-              <li>Mitspracherecht in der Genossenschaft</li>
-            </ul>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}><strong>Kosten:</strong> CHF 250.- pro Anteilsschein</p>
-            <CTA
-              text="Anteilsscheine erwerben"
-              href="/mitmachen"
-              variant="secondary"
-            />
-          </section>
+            <section id="C-03" className="two-column-text">
+              <h2>Anteilsscheine ohne Gemüsekorb</h2>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px', marginTop: '16px' }}>Du möchtest biocò unterstützen, ohne ein Gemüseabo zu beziehen? Das ist möglich!</p>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}><strong>Vorteile:</strong></p>
+              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                <li>Unterstützung der Genossenschaft</li>
+                <li>Vorrang auf der Warteliste für einen Gemüsekorb</li>
+                <li>Mitspracherecht in der Genossenschaft</li>
+              </ul>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}><strong>Kosten:</strong> CHF 250.- pro Anteilsschein</p>
+              <CTA
+                text="Anteilsscheine erwerben"
+                href="/mitmachen"
+                variant="secondary"
+              />
+            </section>
+          </div>
 
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
             <h2>Nächste Events</h2>
