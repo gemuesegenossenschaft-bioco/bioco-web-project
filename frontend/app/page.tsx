@@ -78,7 +78,7 @@ export default function Home() {
             </div>
             <div
               className="image-placeholder md:col-span-5 md:col-start-7 md:order-2"
-              style={{ width: '100%', aspectRatio: '4/3', order: 1 }}
+              style={{ width: '100%', aspectRatio: '4/3', maxWidth: '500px', order: 1 }}
             >
               <Image
                 src="/images/mitmachen/zusammen-arbeiten.JPG"
@@ -94,7 +94,7 @@ export default function Home() {
           <section className="home-block col-span-12 md:grid md:grid-cols-12 md:gap-x-8" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
             <div
               className="image-placeholder md:col-span-5 md:col-start-2 md:order-1"
-              style={{ width: '100%', aspectRatio: '3/4', order: 1 }}
+              style={{ width: '100%', aspectRatio: '3/4', maxWidth: '500px', order: 1 }}
             >
               <Image
                 src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
