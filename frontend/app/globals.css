@@ -1172,7 +1172,7 @@ a:hover {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   padding: calc(var(--spacing-xs) * 0.5) 0; /* Reduce padding by 50% - close to border */
-  margin-top: calc(var(--spacing-xs) * 0.2); /* Reduce space between secondary and primary nav by 60% (0.5 * 0.4 = 0.2) */
+  margin-top: calc(var(--spacing-xs) * 0.2 - 30px); /* Decrease space between secondary and primary nav by 30px */
   position: sticky;
   top: 0;
   left: 0;
@@ -3012,7 +3012,7 @@ footer a:hover {
 .aktuelles-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-xs); /* Decreased spacing between items */
   margin: var(--spacing-md) 0;
 }
 
@@ -3120,7 +3120,7 @@ footer a:hover {
 .events-list {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--spacing-xs); /* Decreased spacing between items */
   margin: var(--spacing-md) 0;
 }
 
@@ -4697,7 +4697,7 @@ footer a:hover {
 /* Navbar Overlay - positioned within hero */
 .navbar-overlay {
   position: absolute;
-  top: 0; /* Move closer to border */
+  top: clamp(40px, 6vw, 64px); /* More space between hero border and navbar/logo */
   left: 0;
   right: 0;
   width: 100%;
@@ -5134,7 +5134,7 @@ footer a:hover {
 .hero-bg {
   position: absolute;
   inset: 0;
-  top: 20px; /* Move hero image down by 20px */
+  top: 0; /* Hero image at top */
   overflow: hidden;
   border-radius: 24px;
 }
@@ -5335,7 +5335,7 @@ footer a:hover {
 .events-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-xs); /* Decreased spacing between items */
 }
 
 @media (max-width: 767px) {
