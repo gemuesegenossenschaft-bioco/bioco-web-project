@@ -1277,6 +1277,17 @@ a:hover {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 1100;
   }
+  
+  /* Ensure hamburger menu is visible when navbar is scrolled */
+  .primary-nav.nav-scrolled .mobile-header-actions,
+  .secondary-nav.nav-scrolled .mobile-header-actions {
+    display: flex !important;
+    position: absolute;
+    top: 50%;
+    right: clamp(16px, 5vw, 72px);
+    transform: translateY(-50%);
+    z-index: 1201 !important;
+  }
 }
 
 .primary-nav ul,
@@ -1514,7 +1525,19 @@ header .header-nav-container .beet-leaves {
     top: 50%;
     right: clamp(16px, 5vw, 72px);
     transform: translateY(-50%);
-    z-index: 1200; /* Higher than navbar (1100) to ensure clickability */
+    z-index: 1200 !important; /* Higher than navbar (1100) to ensure clickability */
+    display: flex !important; /* Always visible on mobile */
+  }
+  
+  /* Ensure hamburger is visible when navbar is scrolled/fixed */
+  .primary-nav.nav-scrolled .mobile-header-actions,
+  .secondary-nav.nav-scrolled .mobile-header-actions {
+    position: absolute;
+    top: 50%;
+    right: clamp(16px, 5vw, 72px);
+    transform: translateY(-50%);
+    z-index: 1201 !important;
+    display: flex !important;
   }
 }
 
