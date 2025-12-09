@@ -106,7 +106,7 @@ export function MobileMenu() {
                 })}
                 <li>
                   <Link
-                    href="/mitmachen"
+                    href="/bioco-werden"
                     className="btn btn-orange btn-organic"
                     onClick={handleLinkClick}
                   >

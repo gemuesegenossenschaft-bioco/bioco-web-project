@@ -53,7 +53,7 @@ export function PrimaryNavigation() {
           })}
           <li>
             <Link 
-              href="/mitmachen" 
+              href="/bioco-werden" 
               className="btn btn-orange btn-organic"
             >
               biocò werden
