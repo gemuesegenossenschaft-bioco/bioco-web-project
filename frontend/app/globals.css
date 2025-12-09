@@ -5350,8 +5350,13 @@ footer a:hover {
     order: 1; /* Image first */
   }
   
+  /* Move navbar overlay down so logo is inside hero image */
+  .navbar-overlay {
+    top: clamp(24px, 4vw, 48px) !important; /* Move down to be inside hero image */
+  }
+  
   .hero-overlay {
-    display: none; /* Hide overlay on mobile since text is below */
+    display: block; /* Show overlay on mobile for text readability */
   }
   
   .hero-content {
