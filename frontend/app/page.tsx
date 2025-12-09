@@ -1,10 +1,8 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
-import { Hero } from '@/components/Hero'
 import { CTA } from '@/components/CTA'
 import { getAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
@@ -33,222 +31,192 @@ export default function Home() {
     setSelectedItem(null)
   }
 
-  const runwayRef = useRef<HTMLDivElement | null>(null)
-  const firstSectionRef = useRef<HTMLElement | null>(null)
-  const [duckVisible, setDuckVisible] = useState(false)
-  const [duckHasRun, setDuckHasRun] = useState(false)
-
-  useEffect(() => {
-    const runwayEl = runwayRef.current
-    const nextEl = firstSectionRef.current
-    if (!runwayEl || !nextEl) return
-
-    const runwayObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !duckHasRun) {
-            setDuckVisible(true)
-            setDuckHasRun(true)
-          }
-        })
-      },
-      { threshold: 0.15 }
-    )
-
-    const nextObserver = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setDuckVisible(false)
-          }
-        })
-      },
-      { threshold: 0.1 }
-    )
-
-    runwayObserver.observe(runwayEl)
-    nextObserver.observe(nextEl)
-
-    return () => {
-      runwayObserver.disconnect()
-      nextObserver.disconnect()
-    }
-  }, [duckHasRun])
+  // Illustration assets for scattering
+  const illustrations = [
+    '/images/illustrations/aubergine.svg',
+    '/images/illustrations/blumenkohl_mit_vogel.svg',
+    '/images/illustrations/fenchel.svg',
+    '/images/illustrations/kohlrabi.svg',
+    '/images/illustrations/lauch_mit_schnecke.svg',
+    '/images/illustrations/radieschen.svg',
+    '/images/illustrations/ruebli.svg',
+    '/images/illustrations/schmetterling.svg',
+    '/images/illustrations/schmetterling2.svg',
+    '/images/illustrations/zwiebel.svg',
+  ]
 
   return (
     <>
-      <Header />
-      <Hero
-        title={
-          <>
-            Gemeinsam Gemüse anbauen und geniessen.<br />
-            <span className="hero-title-secondary">Solidarische Landwirtschaft in der Region Baden-Brugg.</span>
-          </>
-        }
-        image={{
-          url: '/images/hero/bioco_hero-junge-mit-kuerbis.JPG',
-          description: 'Person in grüner Jacke hält einen Kürbis auf dem Feld'
-        }}
-      />
-      <div ref={runwayRef} className="duck-runway" aria-hidden="true">
-        {duckVisible && (
-          <motion.img
-            src="/images/illustrations/animated/ente_walk_right.svg"
-            alt=""
-            className="duck-sprite"
-            initial={{ x: '-20vw', opacity: 0 }}
-            animate={{ x: '110vw', opacity: 1 }}
-            transition={{ duration: 4.5, ease: 'easeInOut' }}
-            onAnimationComplete={() => setDuckVisible(false)}
+      {/* Full-Bleed Hero Section */}
+      <section className="home-bleed-hero">
+        <div className="hero-bg-image">
+          <Image
+            src="/images/hero/header_homepage.JPG"
+            alt="Geisshof in Gebenstorf"
+            fill
+            priority
+            style={{ objectFit: 'cover' }}
           />
-        )}
+          <div className="hero-gradient-overlay"></div>
+        </div>
+        <div className="hero-content">
+          <h1 className="hero-headline"># Echt. Nah. Dein Anteil.</h1>
+        </div>
+        <div className="hero-torn-edge"></div>
+      </section>
+
+      {/* Navbar Overlay */}
+      <div className="navbar-overlay">
+        <Header />
       </div>
-      <main className="main-content">
-        <div className="bento-grid">
-          <section
-            id="A-02"
-            className="bento-card bento-card-large"
-            ref={firstSectionRef}
-          >
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Willkommen bei biocò</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">
+
+      {/* Scattered Illustrations Background */}
+      <div className="illustrations-scatter">
+        {illustrations.map((src, index) => (
+          <img
+            key={index}
+            src={src}
+            alt=""
+            className="scattered-illustration"
+            style={{
+              position: 'absolute',
+              left: `${15 + (index * 8.5)}%`,
+              top: `${20 + (index * 7)}%`,
+              width: `${80 + (index % 3) * 40}px`,
+              opacity: 0.08 + (index % 3) * 0.04,
+              transform: `rotate(${(index % 5) * 12 - 24}deg)`,
+              zIndex: 1,
+              pointerEvents: 'none',
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Main Content - 2 Column Grid */}
+      <main className="home-main-content">
+        <div className="home-grid">
+          
+          {/* Welcome Section - Full Width */}
+          <section className="home-section home-section-full">
+            <h2 className="home-section-title">Willkommen bei biocò</h2>
+            <div className="home-text-content">
+              <p>
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen 
                 Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für 
                 Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, 
                 das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf 
                 dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
               </p>
-              
-              <p className="card-text">
+              <p>
                 Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude 
                 an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen 
                 und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/gemuese">Anbau</Link> und erleben, 
                 wie aus einem Samen frisches Bio-Gemüse wird, das ab 16:00 uhr abholbereit in den 
                 <Link href="/standorte-depots"> Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
               </p>
-              <div className="button-group"></div>
             </div>
           </section>
 
-          <section id="A-03" className="bento-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Das ist drin: Saisonal & Demeter</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">Wöchentlich erhalten unsere Mitglieder ein <Link href="/abos">Gemüseabo</Link> mit frischem, saisonalem <Link href="/gemuese">Demeter-Gemüse</Link>.</p>
-              <ul className="pea-bullet-list">
-                <PeaBullet>Wöchentlicher Gemüsekorb</PeaBullet>
-                <PeaBullet>Saisonalität – das Gemüse der Jahreszeit</PeaBullet>
-                <PeaBullet>Demeter-Qualität – höchste Bio-Standards</PeaBullet>
-              </ul>
-            </div>
+          {/* Das ist drin - 2 Column */}
+          <section className="home-section home-section-left">
+            <h2 className="home-section-title">Das ist drin: Saisonal & Demeter</h2>
+            <p>Wöchentlich erhalten unsere Mitglieder ein <Link href="/abos">Gemüseabo</Link> mit frischem, saisonalem <Link href="/gemuese">Demeter-Gemüse</Link>.</p>
+            <ul className="pea-bullet-list">
+              <PeaBullet>Wöchentlicher Gemüsekorb</PeaBullet>
+              <PeaBullet>Saisonalität – das Gemüse der Jahreszeit</PeaBullet>
+              <PeaBullet>Demeter-Qualität – höchste Bio-Standards</PeaBullet>
+            </ul>
           </section>
 
-          <div className="home-middle-row">
-            <section id="A-04" className="bento-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Gemeinschaft & Solidarität</h3>
-              </div>
-              <div className="card-body">
-                <div className="torn-image-frame" style={{ marginBottom: '16px' }}>
-                  <Image
-                    src="/images/gemeinschaft/bioco_kinder.JPG"
-                    alt="Kinder bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
-                    width={800}
-                    height={600}
-                    className="torn-image"
-                  />
-                </div>
-                <p className="card-text">biocò basiert auf den Prinzipien der <Link href="/solawi">Solidarischen Landwirtschaft</Link>.</p>
-                <ul className="pea-bullet-list">
-                  <PeaBullet>
-                    <strong>Mitarbeit</strong> – <Link href="/mitmachen">Mitmachen auf dem Feld</Link>
-                  </PeaBullet>
-                  <PeaBullet>
-                    <strong>Transparenz</strong> – <Link href="/solawi">Solidarische Landwirtschaft</Link>
-                  </PeaBullet>
-                  <PeaBullet>
-                    <strong>Gemeinschaft</strong> – Jede(r) bringt sich ein
-                  </PeaBullet>
-                  <PeaBullet>
-                    <strong>Lokal/Region</strong> – <Link href="/wir">Hof: Geisshof</Link>
-                  </PeaBullet>
-                </ul>
-              </div>
-            </section>
-
-            <section id="A-07" className="bento-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Aktuelles</h3>
-              </div>
-              <div className="card-body">
-                <div className="aktuelles-list">
-                  {getAktuellesItems().map((item, index) => (
-                    <AktuellesItemComponent 
-                      key={item.id || index} 
-                      item={item} 
-                      variant="aktuelles"
-                      onClick={handleItemClick}
-                    />
-                  ))}
-                </div>
-                <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', display: 'inline-block' }}>
-                  Alle Neuigkeiten ansehen
-                </Link>
-              </div>
-            </section>
-
-            <section id="A-08" className="bento-card bento-card-flat events-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Schnuppertage</h3>
-              </div>
-              <div className="card-body">
-                {eventsLoading ? (
-                  <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
-                ) : (
-                  <div className="events-list">
-                    {schnuppertageEvents.map((item, index) => (
-                      <AktuellesItemComponent
-                        key={item.id || index}
-                        item={item}
-                        variant="event"
-                        onClick={handleItemClick}
-                      />
-                    ))}
-                    {schnuppertageEvents.length === 0 && (
-                      <p style={{ color: 'var(--text-secondary)' }}>
-                        Aktuell sind keine Schnuppertage geplant.
-                      </p>
-                    )}
-                  </div>
-                )}
-                <Link
-                  href="/mitmachen"
-                  className="btn btn-primary btn-organic"
-                  style={{ marginTop: '16px', display: 'inline-block' }}
-                >
-                  Alle Schnuppertage ansehen
-                </Link>
-              </div>
-            </section>
-
+          <div className="home-section home-section-right">
+            {/* Empty visual column or illustration */}
           </div>
 
-          <section id="A-05" className="bento-card bento-card-fullwidth">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Wie funktioniert's?</h3>
+          {/* Gemeinschaft - 2 Column with Image */}
+          <section className="home-section home-section-left">
+            <h2 className="home-section-title">Gemeinschaft & Solidarität</h2>
+            <p>biocò basiert auf den Prinzipien der <Link href="/solawi">Solidarischen Landwirtschaft</Link>.</p>
+            <ul className="pea-bullet-list">
+              <PeaBullet>
+                <strong>Mitarbeit</strong> – <Link href="/mitmachen">Mitmachen auf dem Feld</Link>
+              </PeaBullet>
+              <PeaBullet>
+                <strong>Transparenz</strong> – <Link href="/solawi">Solidarische Landwirtschaft</Link>
+              </PeaBullet>
+              <PeaBullet>
+                <strong>Gemeinschaft</strong> – Jede(r) bringt sich ein
+              </PeaBullet>
+              <PeaBullet>
+                <strong>Lokal/Region</strong> – <Link href="/wir">Hof: Geisshof</Link>
+              </PeaBullet>
+            </ul>
+          </section>
+
+          <div className="home-section home-section-right">
+            <div className="torn-image-wrapper">
+              <Image
+                src="/images/gemeinschaft/bioco_kinder.JPG"
+                alt="Kinder bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
+                width={800}
+                height={600}
+                className="torn-image"
+              />
             </div>
-            <div className="card-body">
-              <div className="procedure-steps">
+          </div>
+
+          {/* Aktuelles - Wobbly Card */}
+          <section className="home-section home-section-left wobbly-card">
+            <h2 className="home-section-title">Aktuelles</h2>
+            <div className="aktuelles-list">
+              {getAktuellesItems().map((item, index) => (
+                <AktuellesItemComponent 
+                  key={item.id || index} 
+                  item={item} 
+                  variant="aktuelles"
+                  onClick={handleItemClick}
+                />
+              ))}
+            </div>
+            <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', display: 'inline-block' }}>
+              Alle Neuigkeiten ansehen
+            </Link>
+          </section>
+
+          {/* Schnuppertage - Wobbly Card */}
+          <section className="home-section home-section-right wobbly-card">
+            <h2 className="home-section-title">Schnuppertage</h2>
+            {eventsLoading ? (
+              <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+            ) : (
+              <div className="events-list">
+                {schnuppertageEvents.map((item, index) => (
+                  <AktuellesItemComponent
+                    key={item.id || index}
+                    item={item}
+                    variant="event"
+                    onClick={handleItemClick}
+                  />
+                ))}
+                {schnuppertageEvents.length === 0 && (
+                  <p style={{ color: 'var(--text-secondary)' }}>
+                    Aktuell sind keine Schnuppertage geplant.
+                  </p>
+                )}
+              </div>
+            )}
+            <Link
+              href="/mitmachen"
+              className="btn btn-primary btn-organic"
+              style={{ marginTop: '16px', display: 'inline-block' }}
+            >
+              Alle Schnuppertage ansehen
+            </Link>
+          </section>
+
+          {/* Wie funktioniert's - Full Width */}
+          <section className="home-section home-section-full">
+            <h2 className="home-section-title">Wie funktioniert's?</h2>
+            <div className="procedure-steps">
               <div className="procedure-step">
                 <div className="step-icon">1</div>
                 <div className="step-content">
@@ -285,31 +253,26 @@ export default function Home() {
                 </div>
               </div>
             </div>
+          </section>
+
+          {/* Kennenlernen - Full Width */}
+          <section className="home-section home-section-full">
+            <h2 className="home-section-title">Möchtest du uns kennenlernen?</h2>
+            <p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
+            <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+              <CTA
+                text="Nimm Kontakt auf"
+                href="/kontakt"
+                variant="primary"
+              />
+              <CTA
+                text="Zu uns finden"
+                href="/standorte-depots"
+                variant="secondary"
+              />
             </div>
           </section>
 
-          {/* Möchtest du uns kennenlernen - Am Ende */}
-          <section id="B-06" className="bento-card bento-card-fullwidth kennenlernen-card">
-            <div className="plant-pattern"></div>
-            <div className="card-header">
-              <h3>Möchtest du uns kennenlernen?</h3>
-            </div>
-            <div className="card-body">
-              <p className="card-text">Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
-              <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
-                <CTA
-                  text="Nimm Kontakt auf"
-                  href="/kontakt"
-                  variant="primary"
-                />
-                <CTA
-                  text="Zu uns finden"
-                  href="/standorte-depots"
-                  variant="secondary"
-                />
-              </div>
-            </div>
-          </section>
         </div>
       </main>
       <Footer />
