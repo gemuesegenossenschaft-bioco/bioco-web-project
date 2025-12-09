@@ -25,6 +25,7 @@
   --text-primary: #1a1a1a;
   --text-secondary: #4a4a4a;
   --text-tertiary: #6b6b6b;
+  --tile-bg: #faf9f7;
   --border-color: #e1e4e8;
   --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -199,7 +200,7 @@ p {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  background-color: #faf9f7;
+  background-color: var(--tile-bg);
   border: none;
   border-radius: 5px 5px 5px 5px/25px 25px 25px 5px;
   padding: 0;
@@ -207,6 +208,16 @@ p {
   transition: all 0.3s ease;
   box-shadow: var(--shadow-md);
   margin-bottom: 0;
+}
+
+/* Flat variant: use when inner tiles/cards already provide visual box */
+.bento-card.bento-card-flat {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.bento-card.bento-card-flat::before {
+  display: none;
 }
 
 /* Backwards compatibility: add padding to direct children if they're not card structure elements */
@@ -1012,8 +1023,8 @@ a:hover {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1001;
-  display: none; /* Hidden on mobile by default, shown in mobile menu */
+  z-index: 1100;
+  display: block;
   box-sizing: border-box;
   min-height: 60px;
 }
@@ -1023,7 +1034,7 @@ a:hover {
   max-width: 100%;
   width: 100%;
   margin: 0;
-  padding: 0 150px;
+  padding: 0 clamp(var(--spacing-sm), 6vw, 150px);
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -1042,9 +1053,22 @@ a:hover {
 }
 
 @media (max-width: 767px) {
-  .primary-nav-logo,
-  .secondary-nav-logo {
-    display: none;
+  .primary-nav,
+  .secondary-nav {
+    padding: var(--spacing-xs) 0;
+  }
+
+  .primary-nav-container,
+  .secondary-nav-container {
+    padding: 0 var(--spacing-sm);
+    gap: var(--spacing-sm);
+  }
+
+  .primary-nav ul,
+  .secondary-nav ul {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    row-gap: var(--spacing-xs);
   }
 }
 
@@ -1063,7 +1087,7 @@ a:hover {
 @media (max-width: 767px) {
   .primary-nav ul,
   .secondary-nav ul {
-    justify-content: flex-end;
+    justify-content: flex-start;
   }
 }
 
@@ -1128,7 +1152,7 @@ header {
   position: fixed;
   top: 0;
   right: 0;
-  z-index: 1002;
+  z-index: 1200;
   padding: var(--spacing-sm);
   display: block;
 }
@@ -1147,7 +1171,7 @@ header {
   }
   
   .main-content {
-    padding: var(--spacing-lg) 0 8px 0 !important;
+    padding: calc(var(--spacing-lg) + 72px) 0 8px 0 !important;
     max-width: 100%;
     width: 100%;
     margin: 0;
@@ -1670,7 +1694,7 @@ header .header-nav-container .beet-leaves {
 
 /* Hero Section - Bento Card Style */
 .hero {
-  background: transparent;
+  background: var(--tile-bg);
   padding: var(--spacing-lg) 0 0 0;
   margin-top: calc(var(--spacing-xl) / 2);
   margin-bottom: 0;
@@ -1685,7 +1709,7 @@ header .header-nav-container .beet-leaves {
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
-  padding: 0 150px;
+  padding: 0 clamp(var(--spacing-sm), 5vw, 150px);
 }
 
 .hero-image-card {
@@ -1735,7 +1759,7 @@ header .header-nav-container .beet-leaves {
 
 .hero-title {
   font-family: 'DM Sans', sans-serif;
-  font-size: 1.4rem;
+  font-size: clamp(2rem, 3vw + 1rem, 2.6rem);
   font-weight: 500;
   line-height: 1.2;
   letter-spacing: -0.015em;
@@ -1945,33 +1969,15 @@ header .header-nav-container .beet-leaves {
 
 /* Pea Bullet Lists */
 .pea-bullet-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-sm);
   margin: var(--spacing-sm) 0;
-  padding: 0;
-  list-style: none;
+  padding-left: var(--spacing-lg);
+  list-style: disc;
+  color: var(--text-primary);
 }
 
 .pea-bullet {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--spacing-sm);
-}
-
-.pea-bullet-icon {
-  width: 13.5px;
-  height: 13.5px;
-  background: var(--bioco-green);
-  border: 1px solid var(--bioco-green);
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 0.4rem;
-  box-shadow: inset -2px 1px 2px rgba(255, 255, 255, 0.25);
-}
-
-.pea-bullet-content {
-  flex: 1;
+  margin: var(--spacing-xs) 0;
+  line-height: 1.5;
 }
 
 /* Global bullet styling */
@@ -2337,7 +2343,7 @@ footer a:hover {
 /* Saisonkalender */
 .saisonkalender {
   margin-top: var(--spacing-md);
-  width: 100%;
+  width: min(900px, 100%);
 }
 
 .kalender-tabs {
@@ -2427,8 +2433,8 @@ footer a:hover {
 
 .kalender-section ul.vegetable-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: var(--spacing-xs) var(--spacing-sm);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-sm);
   width: 100%;
 }
 
@@ -2831,6 +2837,10 @@ footer a:hover {
 .events-card {
   background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(76, 175, 80, 0.05) 100%);
   border: none;
+}
+
+.bento-card.bento-card-flat.events-card {
+  background: transparent;
 }
 
 .events-card .card-header {

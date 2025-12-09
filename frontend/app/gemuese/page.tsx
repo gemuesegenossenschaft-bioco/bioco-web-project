@@ -3,7 +3,6 @@ import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import { Gallery } from '@/components/Gallery'
 import { Saisonkalender } from '@/components/Saisonkalender'
-import { EventsSection } from '@/components/EventsSection'
 import Link from 'next/link'
 import { Metadata } from 'next'
 
@@ -38,21 +37,16 @@ export default function GemusePage() {
             </div>
           </section>
 
-          {/* Erste Zeile: Saisonkalender (2/3) und Events (1/3) */}
-          <div className="ernte-top-row">
-            <section id="B-04" className="bento-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h2>Saisonkalender</h2>
-              </div>
-              <div className="card-body">
-                <p className="card-text">Wann ist welches Gemüse verfügbar? Entdecke unsere saisonale Vielfalt.</p>
-                <Saisonkalender />
-              </div>
-            </section>
-
-            <EventsSection limit={3} />
-          </div>
+          <section id="B-04" className="bento-card bento-card-fullwidth">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h2>Saisonkalender</h2>
+            </div>
+            <div className="card-body">
+              <p className="card-text">Wann ist welches Gemüse verfügbar? Entdecke unsere saisonale Vielfalt.</p>
+              <Saisonkalender />
+            </div>
+          </section>
 
           {/* Dritte Zeile: Demeter und Pictures nebeneinander (50/50) */}
           <div className="ernte-bottom-row">
@@ -68,6 +62,9 @@ export default function GemusePage() {
                     Demeter ist die höchste Qualitätsstufe im biologischen Landbau. Als Demeter-zertifizierter Betrieb 
                     gehen wir über die Anforderungen von Bio Suisse hinaus und arbeiten nach den strengsten 
                     biologisch-dynamischen Richtlinien.
+                  </p>
+                  <p>
+                    Unser Gemüse wächst auf dem Geisshof in Gebenstorf im Rahmen unserer <Link href="/solawi">solidarischen Landwirtschaft (Solawi)</Link> – direkt aus der Region Baden-Brugg.
                   </p>
                   
                   <div className="demeter-accordion">

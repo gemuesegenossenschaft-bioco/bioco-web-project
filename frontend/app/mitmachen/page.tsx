@@ -1,8 +1,7 @@
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
-import { EventsBanner } from '@/components/EventsBanner'
 import { CTA } from '@/components/CTA'
-import { EventsSection } from '@/components/EventsSection'
+import { getStaticEventItems } from '@/components/AktuellesData'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -19,6 +18,10 @@ export const metadata: Metadata = {
 }
 
 export default function MitmachenPage() {
+  const schnuppertage = getStaticEventItems().filter(
+    (item) => item.status !== 'past'
+  )
+
   return (
     <>
       <Header />
@@ -32,7 +35,7 @@ export default function MitmachenPage() {
             </div>
             <div className="card-body">
               <p className="card-text">
-                Werde Teil unserer Gemüsegenossenschaft und erlebe solidarische Landwirtschaft hautnah. 
+                Werde Teil unserer Gemüsegenossenschaft und erlebe <Link href="/solawi">solidarische Landwirtschaft</Link> hautnah. 
                 Hier erfährst du, wie du dich einbringen kannst und was Mitarbeit bei biocò bedeutet.
               </p>
             </div>
@@ -54,7 +57,7 @@ export default function MitmachenPage() {
                 />
               </div>
               <h4 className="card-title">Mitarbeit bei biocò</h4>
-              <p className="card-text">Jedes Mitglied bringt sich ein und unterstützt die Genossenschaft aktiv. Die Mitarbeit ist ein wichtiger Teil der <Link href="/wir">solidarischen Landwirtschaft</Link>.</p>
+              <p className="card-text">Jedes Mitglied bringt sich ein und unterstützt die Genossenschaft aktiv. Die Mitarbeit ist ein wichtiger Teil unserer <Link href="/solawi">solidarischen Landwirtschaft</Link>.</p>
             
             <div style={{ marginTop: '16px' }}>
             </div>
@@ -82,10 +85,10 @@ export default function MitmachenPage() {
               </ul>
             </div>
 
-            <div style={{ marginTop: '24px' }}>
+            <div id="anmelden" style={{ marginTop: '24px' }}>
               <CTA
                 text="Jetzt anmelden"
-                href="/mitmachen"
+                href="#anmelden"
                 variant="primary"
               />
             </div>
@@ -117,49 +120,107 @@ export default function MitmachenPage() {
             </div>
           </section>
 
-          {/* Events und Familien & Kinder nebeneinander */}
-          <div className="ernte-bottom-row">
-            <EventsSection limit={3} />
-
-            <section id="D-03" className="bento-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Familien & Kinder auf dem Geisshof</h3>
+          <section id="D-02b" className="bento-card bento-card-flat events-card">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h3>Schnuppertage</h3>
+            </div>
+            <div className="card-body">
+              <h4 className="card-title" style={{ color: 'var(--bioco-green-dark)' }}>
+                Komm schnuppern: So geht solidarischer Gemüseanbau.
+              </h4>
+              <p className="card-text">
+                Möchtest du dein Gemüse in Gemeinschaft anbauen und erfahren, wie es sich anfühlt, Teil einer Solawi zu sein?
+                Dann komm an einen unserer Schnuppertage vorbei. Geniesse einen Nachmittag auf dem Geisshof in Gebenstorf AG,
+                auf dem Feld umgeben von Natur und Tieren, Wildpflanzen, Bäumen, Beerensträuchern und Kräuterspirale.
+              </p>
+              <p className="card-text">
+                Für deine Mithilfe am Schnuppernachmittag bekommst du als Dankeschön eine Tasche voll frisch geerntetem Demeter-Gemüse
+                und ein kleines zVieri von uns spendiert. Nach dem Schnuppernachmittag darfst du gerne noch auf dem Gemeinschaftsplatz bleiben
+                und etwas grillieren – es hat eine Feuerstelle, einen Sandkasten und viel Wiese. Neugierig? Schau vorbei und mach mit.
+              </p>
+              <div className="events-list">
+                {schnuppertage.map((item, idx) => (
+                  <div key={item.id || idx} className="event-item">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <strong style={{ color: 'var(--bioco-green-dark)' }}>{item.title}</strong>
+                      <span style={{ color: 'var(--text-secondary)' }}>{item.date}</span>
+                      {item.timeLabel && (
+                        <span style={{ color: 'var(--text-secondary)' }}>{item.timeLabel}</span>
+                      )}
+                    </div>
+                    <p className="card-text" style={{ margin: '8px 0' }}>
+                      Jeweils 14 - 17 Uhr in Gebenstorf AG
+                    </p>
+                    <p className="card-text">
+                      Wir sind eine solidarische Landwirtschaft und bauen auf unserem Hof biologisches Gemüse in Demeter Qualität selber an.
+                      Du möchtest bioco Luft schnuppern und dabei mehr erfahren? Wir bieten Schnuppertage auf dem Hof an. Was dich erwartet:
+                    </p>
+                    <ul>
+                      <li>Gemeinschaft auf dem Feld, umgeben von Natur</li>
+                      <li>Unser Hof liegt auf einem Hügel über Gebenstorf AG</li>
+                      <li>Deine Hilfe auf dem Feld</li>
+                      <li>Danke: du bekommst eine Tasche frisch geerntetes Demeter-Gemüse</li>
+                      <li>Kleines zVieri von uns spendiert</li>
+                      <li>Hof und Demeteranbau kennenlernen</li>
+                      <li>Möglichkeit anschliessend auf dem Gemeinschaftsplatz zu bräteln</li>
+                    </ul>
+                    <p className="card-text">
+                      Uns ist ein achtsamer Umgang mit der Natur wichtig, wir lassen viel Platz für Wildpflanzen, haben eine Kräuterspirale,
+                      eine Naschecke mit Beeren, Sandkasten und Enten auf dem Hof. Auf dem Gemeinschaftsplatz hat es einen Sandkasten für Kinder
+                      und eine Feuerstelle. Falls du noch bleiben möchtest, kannst du anschliessend gerne etwas über dem Feuer bräteln.
+                      Ein kleines zVieri wird spendiert und du hast auch die Gelegenheit, den Hof kennenzulernen und Fragen zum Demeter-Anbau zu stellen.
+                    </p>
+                    <p className="card-text" style={{ fontStyle: 'italic', color: 'var(--text-secondary)' }}>
+                      Hinweis: Formulareingänge gehen an medien@bioco.ch.
+                    </p>
+                    <Link href="#anmelden" className="btn btn-secondary" style={{ marginTop: '8px', alignSelf: 'flex-start' }}>
+                      Jetzt anmelden
+                    </Link>
+                  </div>
+                ))}
               </div>
-              <div className="card-body">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 'var(--spacing-md)', alignItems: 'start' }}>
-                  <div>
-                    <Image
-                      src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
-                      alt="Frisch geerntetes Demeter-Gemüse vom Geisshof"
-                      width={800}
-                      height={600}
-                      style={{ width: '100%', height: 'auto', borderRadius: '12px' }}
-                    />
-                  </div>
-                  <div>
-                    <h4 className="card-title">Kinder sind willkommen</h4>
-                    <p className="card-text">
-                      Familien und Kinder sind sehr regelmässige Helfer auf dem Geisshof. Die Einbindung von Kindern 
-                      in den Prozess des Gemüseanbaus ist ein zentraler Bestandteil der biocò-Kultur.
-                    </p>
-                    <p className="card-text">
-                      Auf dem Geisshof erleben Kinder hautnah, wie Gemüse wächst, gepflegt wird und geerntet wird. 
-                      Sie lernen spielerisch den Kreislauf der Natur kennen und entwickeln ein tiefes Verständnis für 
-                      die Herkunft ihrer Nahrung. Diese praktische Erfahrung prägt nicht nur ihr Verhältnis zu Lebensmitteln, 
-                      sondern stärkt auch das Gemeinschaftsgefühl zwischen den Generationen.
-                    </p>
-                    <p className="card-text">
-                      Die Elki-Gruppe organisiert spezielle Aktivitäten für Familien, bei denen Kinder aktiv mithelfen 
-                      können – sei es beim Säen, Jäten, Ernten oder beim gemeinsamen Verarbeiten des Gemüses. Diese 
-                      gemeinsamen Erlebnisse schaffen bleibende Erinnerungen und fördern das Verständnis für nachhaltige 
-                      Landwirtschaft von klein auf.
-                    </p>
-                  </div>
+            </div>
+          </section>
+
+          <section id="D-03" className="bento-card">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h3>Familien & Kinder auf dem Geisshof</h3>
+            </div>
+            <div className="card-body">
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 'var(--spacing-md)', alignItems: 'start' }}>
+                <div>
+                  <Image
+                    src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
+                    alt="Frisch geerntetes Demeter-Gemüse vom Geisshof"
+                    width={800}
+                    height={600}
+                    style={{ width: '100%', height: 'auto', borderRadius: '12px' }}
+                  />
+                </div>
+                <div>
+                  <h4 className="card-title">Kinder sind willkommen</h4>
+                  <p className="card-text">
+                    Familien und Kinder sind sehr regelmässige Helfer auf dem Geisshof. Die Einbindung von Kindern 
+                    in den Prozess des Gemüseanbaus ist ein zentraler Bestandteil der biocò-Kultur.
+                  </p>
+                  <p className="card-text">
+                    Auf dem Geisshof erleben Kinder hautnah, wie Gemüse wächst, gepflegt wird und geerntet wird. 
+                    Sie lernen spielerisch den Kreislauf der Natur kennen und entwickeln ein tiefes Verständnis für 
+                    die Herkunft ihrer Nahrung. Diese praktische Erfahrung prägt nicht nur ihr Verhältnis zu Lebensmitteln, 
+                    sondern stärkt auch das Gemeinschaftsgefühl zwischen den Generationen.
+                  </p>
+                  <p className="card-text">
+                    Die Elki-Gruppe organisiert spezielle Aktivitäten für Familien, bei denen Kinder aktiv mithelfen 
+                    können – sei es beim Säen, Jäten, Ernten oder beim gemeinsamen Verarbeiten des Gemüses. Diese 
+                    gemeinsamen Erlebnisse schaffen bleibende Erinnerungen und fördern das Verständnis für nachhaltige 
+                    Landwirtschaft von klein auf.
+                  </p>
                 </div>
               </div>
-            </section>
-          </div>
+            </div>
+          </section>
 
           {/* Möchtest du uns kennenlernen - Am Ende */}
           <section id="B-06" className="bento-card bento-card-fullwidth kennenlernen-card">

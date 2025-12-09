@@ -11,12 +11,10 @@ import { ItemDetailModal } from '@/components/ItemDetailModal'
 import { PeaBullet } from '@/components/PeaBullet'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 export default function Home() {
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(3)
 
   const handleItemClick = (item: AktuellesItem) => {
     setSelectedItem(item)
@@ -33,11 +31,10 @@ export default function Home() {
       <Hero
         title={
           <>
-            Frisches Demeter Gemüse.<br />
-            <span className="hero-title-secondary">Fast jede Woche.</span>
+            Gemeinsam Gemüse anbauen und geniessen.<br />
+            <span className="hero-title-secondary">Solidarische Landwirtschaft in der Region Baden-Brugg.</span>
           </>
         }
-        subtitle=""
         image={{
           url: '/images/hero/bioco_hero-junge-mit-kuerbis.JPG',
           description: 'Person in grüner Jacke hält einen Kürbis auf dem Feld'
@@ -54,14 +51,14 @@ export default function Home() {
               <p className="card-text">
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen 
                 Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für 
-                Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/wir">solidarischer Landwirtschaft</Link>, 
+                Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, 
                 das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf 
                 dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
               </p>
               
               <p className="card-text">
                 Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude 
-                an der Arbeit. Das ist <Link href="/wir">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen 
+                an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen 
                 und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/gemuese">Anbau</Link> und erleben, 
                 wie aus einem Samen frisches Bio-Gemüse wird, das ab 16:00 uhr abholbereit in den 
                 <Link href="/standorte-depots"> Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
@@ -77,11 +74,11 @@ export default function Home() {
             </div>
             <div className="card-body">
               <p className="card-text">Wöchentlich erhalten unsere Mitglieder ein <Link href="/abos">Gemüseabo</Link> mit frischem, saisonalem <Link href="/gemuese">Demeter-Gemüse</Link>.</p>
-              <div className="pea-bullet-list">
+              <ul className="pea-bullet-list">
                 <PeaBullet>Wöchentlicher Gemüsekorb</PeaBullet>
                 <PeaBullet>Saisonalität – das Gemüse der Jahreszeit</PeaBullet>
                 <PeaBullet>Demeter-Qualität – höchste Bio-Standards</PeaBullet>
-              </div>
+              </ul>
             </div>
           </section>
 
@@ -101,13 +98,13 @@ export default function Home() {
                     style={{ width: '100%', height: 'auto', borderRadius: '12px' }}
                   />
                 </div>
-                <p className="card-text">biocò basiert auf den Prinzipien der <Link href="/wir">Solidarischen Landwirtschaft</Link>.</p>
-                <div className="pea-bullet-list">
+                <p className="card-text">biocò basiert auf den Prinzipien der <Link href="/solawi">Solidarischen Landwirtschaft</Link>.</p>
+                <ul className="pea-bullet-list">
                   <PeaBullet>
                     <strong>Mitarbeit</strong> – <Link href="/mitmachen">Mitmachen auf dem Feld</Link>
                   </PeaBullet>
                   <PeaBullet>
-                    <strong>Transparenz</strong> – Solidarische Landwirtschaft
+                    <strong>Transparenz</strong> – <Link href="/solawi">Solidarische Landwirtschaft</Link>
                   </PeaBullet>
                   <PeaBullet>
                     <strong>Gemeinschaft</strong> – Jede(r) bringt sich ein
@@ -115,7 +112,7 @@ export default function Home() {
                   <PeaBullet>
                     <strong>Lokal/Region</strong> – <Link href="/wir">Hof: Geisshof</Link>
                   </PeaBullet>
-                </div>
+                </ul>
               </div>
             </section>
 
@@ -141,34 +138,6 @@ export default function Home() {
               </div>
             </section>
 
-            <section id="A-08" className="bento-card events-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Nächste Events</h3>
-              </div>
-              <div className="card-body">
-                {eventsLoading ? (
-                  <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
-                ) : (
-                  <div className="events-list">
-                    {eventItems.map((item, index) => (
-                      <AktuellesItemComponent 
-                        key={item.id || index} 
-                        item={item} 
-                        variant="event"
-                        onClick={handleItemClick}
-                      />
-                    ))}
-                    {eventItems.length === 0 && (
-                      <p style={{ color: 'var(--text-secondary)' }}>Keine Events geplant.</p>
-                    )}
-                  </div>
-                )}
-                <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
-                  Alle Events ansehen
-                </Link>
-              </div>
-            </section>
           </div>
 
           <section id="A-05" className="bento-card bento-card-fullwidth">

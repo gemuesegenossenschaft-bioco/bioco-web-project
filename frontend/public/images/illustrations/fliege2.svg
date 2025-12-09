@@ -1,0 +1,55 @@
+<svg viewBox="0 0 68.414888 56.911636" xmlns="http://www.w3.org/2000/svg">
+  <path d="M104 572 c8 -16 22 -35 31 -42 15 -13 45 -62 45 -75 0 -3 -20 -5 -44
+-5 -45 0 -106 -17 -106 -29 0 -12 53 -58 88 -75 l33 -17 -39 -38 c-35 -34 -72
+-110 -72 -148 0 -21 117 -5 169 23 56 31 63 30 55 -3 -11 -43 -44 -84 -80 -99
+-19 -8 -34 -19 -34 -24 0 -13 1 -13 41 4 45 19 83 61 108 118 20 48 52 74 78
+64 21 -8 10 -62 -19 -93 -12 -13 -18 -26 -15 -30 13 -12 48 31 58 73 9 36 16
+44 41 50 49 10 58 -26 22 -83 -8 -13 -10 -23 -4 -23 14 0 37 40 45 80 9 40 19
+50 56 50 27 0 39 16 39 50 0 36 59 31 104 -8 15 -13 14 -9 -4 15 -27 38 -48
+47 -84 37 -23 -5 -26 -3 -26 20 0 21 11 33 52 59 32 20 45 33 35 35 -26 5 -76
+-26 -92 -58 -18 -35 -20 -36 -50 -12 -19 15 -38 18 -103 16 l-80 -3 -107 100
+c-74 68 -115 99 -132 99 -23 0 -23 -1 -9 -28z" fill="var(--bioco-green, #2e7d32)" fill-rule="evenodd"/>
+  <path d="M98 603 c6 -2 18 -2 25 0 6 3 1 5 -13 5 -14 0 -19 -2 -12 -5z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M140 596 c0 -2 8 -10 18 -17 15 -13 16 -12 3 4 -13 16 -21 21 -21 13z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M135 520 c10 -11 20 -20 23 -20 3 0 -3 9 -13 20 -10 11 -20 20 -23
+20 -3 0 3 -9 13 -20z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M262 485 c26 -27 49 -47 51 -45 2 3 -20 25 -47 50 l-51 44 47 -49z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M678 463 c6 -2 9 -10 6 -15 -4 -7 -2 -8 4 -4 18 11 14 26 -5 25 -11
+0 -13 -3 -5 -6z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M599 433 c-13 -17 -13 -17 6 -3 11 8 22 16 24 17 2 2 0 3 -6 3 -6 0
+-17 -8 -24 -17z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M644 424 c-18 -14 -18 -15 4 -4 12 6 22 13 22 15 0 8 -5 6 -26 -11z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M20 424 c0 -6 15 -23 33 -40 l32 -29 -30 35 c-16 19 -31 37 -32 39
+-2 2 -3 0 -3 -5z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M330 426 c0 -2 8 -10 18 -17 15 -13 16 -12 3 4 -13 16 -21 21 -21 13z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M533 390 c32 -25 34 -25 47 3 11 21 10 21 -4 3 -15 -18 -17 -18 -34
+-3 -10 9 -22 17 -27 17 -4 0 4 -9 18 -20z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M600 395 c-7 -9 -11 -17 -9 -20 3 -2 10 5 17 15 14 24 10 26 -8 5z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M630 356 c0 -2 9 -6 20 -9 11 -3 18 -1 14 4 -5 9 -34 13 -34 5z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M598 343 c7 -3 16 -2 19 1 4 3 -2 6 -13 5 -11 0 -14 -3 -6 -6z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M687 326 c5 -16 2 -17 -18 -11 -20 6 -18 2 10 -19 19 -14 36 -26 37
+-26 7 0 -4 31 -19 51 -11 17 -15 18 -10 5z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M610 320 c-8 -5 -10 -10 -5 -10 6 0 17 5 25 10 8 5 11 10 5 10 -5 0
+-17 -5 -25 -10z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M378 203 c5 -21 7 -23 10 -9 2 10 0 22 -6 28 -6 6 -7 0 -4 -19z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M448 223 c6 -2 18 -2 25 0 6 3 1 5 -13 5 -14 0 -19 -2 -12 -5z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M314 195 c-9 -14 -15 -27 -13 -30 3 -2 12 10 21 26 21 36 15 39 -8 4z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M410 209 c0 -5 5 -7 10 -4 6 3 10 8 10 11 0 2 -4 4 -10 4 -5 0 -10
+-5 -10 -11z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M236 182 c-2 -4 4 -8 15 -8 10 0 19 4 19 8 0 4 -6 8 -14 8 -8 0 -17
+-4 -20 -8z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M401 174 c0 -11 3 -14 6 -6 3 7 2 16 -1 19 -3 4 -6 -2 -5 -13z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M31 144 c0 -11 3 -14 6 -6 3 7 2 16 -1 19 -3 4 -6 -2 -5 -13z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M180 150 c-9 -6 -10 -10 -3 -10 6 0 15 5 18 10 8 12 4 12 -15 0z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M352 137 c-25 -26 -29 -47 -9 -47 14 0 57 41 57 54 0 4 -11 -6 -24
+-21 -13 -15 -28 -25 -32 -20 -4 4 3 18 16 32 13 14 21 25 18 25 -2 0 -14 -10
+-26 -23z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M246 133 c-6 -14 -5 -15 5 -6 7 7 10 15 7 18 -3 3 -9 -2 -12 -12z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M290 142 c0 -7 -17 -31 -37 -54 -35 -41 -36 -41 -4 -13 36 33 56 64
+47 73 -3 3 -6 0 -6 -6z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M452 138 c-7 -7 -12 -16 -12 -20 0 -15 27 -8 41 10 11 14 11 15 -1 5
+-20 -18 -35 -16 -20 2 15 18 9 20 -8 3z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M98 133 c12 -2 32 -2 45 0 12 2 2 4 -23 4 -25 0 -35 -2 -22 -4z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M214 88 l-19 -23 23 19 c21 18 27 26 19 26 -2 0 -12 -10 -23 -22z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+  <path d="M147 53 c-10 -9 -9 -33 1 -33 4 0 8 9 8 20 0 23 0 22 -9 13z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+</svg>

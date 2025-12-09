@@ -25,15 +25,17 @@ export default function SolawiPage() {
           <section className="bento-card bento-card-fullwidth">
             <div className="plant-pattern"></div>
             <div className="card-header">
-              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Was ist Solidarische Landwirtschaft?</h1>
+              <h1 style={{ fontSize: '2.5rem', margin: 0 }}>Was ist eine Solawi?</h1>
             </div>
             <div className="card-body">
               <p className="card-text" style={{ fontSize: '1.125rem', lineHeight: '1.75' }}>
-                Solidarische Landwirtschaft (kurz: Solawi oder SoLaWi) ist ein alternatives Konzept, 
-                bei dem Konsument:innen und Produzent:innen gemeinsam Verantwortung für die 
-                Lebensmittelproduktion übernehmen. Anstatt Gemüse einzeln im Laden zu kaufen, 
-                finanzieren Mitglieder gemeinsam einen landwirtschaftlichen Betrieb und teilen 
-                sich die Ernte – samt Erträgen, Risiken und Freuden.
+                Eine Solawi – Solidarische Landwirtschaft – ist eine gemeinschaftliche Form des Wirtschaftens,
+                bei der Verbraucherinnen und Produzentinnen eine Partnerschaft eingehen. Die Mitglieder tragen
+                gemeinsam die Kosten der landwirtschaftlichen Produktion und erhalten im Gegenzug einen
+                regelmässigen Anteil an frischem Bio-Gemüse aus lokalem Anbau.
+              </p>
+              <p className="card-text" style={{ fontSize: '1.125rem', lineHeight: '1.75', marginTop: 'var(--spacing-sm)' }}>
+                Statt anonym einzukaufen, entsteht eine direkte, verlässliche Verbindung zu dem Hof, der uns ernährt.
               </p>
             </div>
           </section>
@@ -46,30 +48,22 @@ export default function SolawiPage() {
             </div>
             <div className="card-body">
               <p className="card-text">
-                Das Konzept der Solidarischen Landwirtschaft stammt ursprünglich aus Japan 
-                (Teikei-Bewegung) und den USA (Community Supported Agriculture, CSA). In der 
-                Schweiz und Deutschland verbreitet sich das Solawi-Konzept seit den 2000er Jahren.
-              </p>
-              
-              <p className="card-text">
-                <strong>Kernprinzip:</strong> Nicht das einzelne Produkt (z.B. ein Kilogramm Karotten) 
-                wird verkauft, sondern die Mitglieder einer Solawi finanzieren gemeinsam die 
-                Betriebskosten eines Bauernhofs für ein Jahr. Dafür erhalten sie das ganze Jahr 
-                über einen Anteil der Ernte – ob reichlich oder weniger üppig, je nach Saison 
-                und Wetter.
+                In einer Solawi tragen alle Beteiligten die Verantwortung für die Lebensmittelproduktion gemeinsam.
+                Die Mitglieder finanzieren nicht einzelne Produkte, sondern unterstützen den landwirtschaftlichen
+                Betrieb als Ganzes – mit ihren Beiträgen und oft auch mit ihrer Zeit. Im Gegenzug teilen sie die Ernte:
+                was auf dem Feld wächst, landet direkt im gemeinsamen Gemüsekorb.
               </p>
 
               <p className="card-text">
-                Die <strong>SoLaWi</strong> basiert auf <strong>Vertrauen</strong>, 
-                <strong> Transparenz</strong> und <strong>Gemeinschaft</strong>. Es geht nicht 
-                um Gewinnmaximierung, sondern um faire Bedingungen für alle Beteiligten und 
-                um ökologisch nachhaltige Landwirtschaft.
+                Solidarische Landwirtschaft lebt von <strong>Vertrauen</strong>, <strong>Transparenz</strong> und
+                <strong> Gemeinschaft</strong>. Statt anonymer Märkte stehen Menschen und Beziehungen im Zentrum:
+                Mitglieder wissen, wer ihr Gemüse anbaut – und der Hof weiss, für wen er arbeitet.
               </p>
             </div>
           </section>
 
           {/* Wie funktioniert es? */}
-          <section className="bento-card bento-card-large">
+          <section className="bento-card bento-card-large bento-card-flat">
             <div className="plant-pattern"></div>
             <div className="card-header">
               <h2>Wie funktioniert Solidarische Landwirtschaft?</h2>
@@ -158,14 +152,24 @@ export default function SolawiPage() {
             </div>
             <div className="card-body">
               <p className="card-text">
-                Die <strong>Gemüsegenossenschaft biocò</strong> ist eine Solawi in der Region 
-                Baden-Brugg. Seit 2014 bewirtschaften wir den Geisshof in Gebenstorf nach 
-                biologisch-dynamischen Prinzipien (Demeter-zertifiziert) und leben das 
-                Solawi-Konzept mit über 100 Mitgliedern.
+                Auch bei bioco leben wir dieses Prinzip: Unsere Solawi ist Teil des Geisshofs in Gebenstorf AG,
+                der nach strengen biologisch-dynamischen Grundsätzen arbeitet. Das bedeutet geschlossene Kreisläufe,
+                schonende Bodenbewirtschaftung und Gemüse, das wirklich aus der Region kommt.
               </p>
 
               <p className="card-text">
-                <strong>So funktioniert's bei biocò:</strong>
+                Mit deinem Anteil und deiner Mitarbeit unterstützt du nicht nur den Anbau hochwertiger Demeter-Gemüsekisten,
+                sondern auch eine Landwirtschaft, die sozial, ökologisch und langfristig tragfähig ist. Als lokale
+                Gemüsegenossenschaft im Aargau leben wir Transparenz, Beteiligung und echte Nähe.
+              </p>
+
+              <p className="card-text">
+                Bei bioco bist du nicht nur Abnehmer*in, sondern Teil des Ganzen: Als Mitglied hilfst du bei der Feldarbeit mit,
+                erlebst die Jahreszeiten auf dem Acker und siehst, wie echtes Bio-Gemüse aus solidarischer Landwirtschaft entsteht.
+              </p>
+
+              <p className="card-text">
+                <strong>So funktioniert unsere Solawi in der Praxis:</strong>
               </p>
 
               <ul>
@@ -193,9 +197,11 @@ export default function SolawiPage() {
               </ul>
 
               <p className="card-text">
-                Bei biocò erleben Mitglieder hautnah, wie aus einem Samen eine Karotte wird, 
-                wie Arbeit und Ernte geteilt werden und wie solidarische Landwirtschaft 
-                in der Praxis funktioniert.
+                Als Teil von bioco wirst du zudem Mitglied einer lebendigen, offenen Gemeinschaft rund um den
+                einzigartig gelegenen Geisshof. Wir treffen uns zu Anlässen wie Open-Air-Kino auf dem Hof, Fondue über dem Feuer,
+                Kräutergruppen-Treffen oder gemütlichen Nachmittagen am Gemeinschaftsplatz. Natur, Tiere, Sandkasten,
+                eine aktive Eltern-Kind-Gruppe sowie gemeinsame Einsätze mit frisch gekochtem Essen machen unsere Solawi
+                zu einem Ort, an dem man sich schnell zuhause fühlt.
               </p>
 
               <div style={{ marginTop: '24px' }}>
@@ -324,4 +330,3 @@ export default function SolawiPage() {
     </>
   )
 }
-

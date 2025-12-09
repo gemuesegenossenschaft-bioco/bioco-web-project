@@ -103,7 +103,6 @@ export function Saisonkalender() {
 
       <div className="kalender-content">
         <div className="kalender-section full-width">
-          <h4>Gemüse im Korb</h4>
           <ul className="vegetable-list">
             {vegetables.length > 0 ? (
               vegetables.map((item, i) => <li key={i}>{item}</li>)

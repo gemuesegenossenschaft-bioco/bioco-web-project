@@ -35,12 +35,13 @@ export default function AbosPage() {
             <div className="card-body">
               <p className="card-text">
                 Wöchentlich frisches Demeter-Gemüse direkt vom Geisshof in deinen Gemüsekorb. 
+                Mit deinem Gemüseabo unterstützt du unsere <Link href="/solawi">solidarische Landwirtschaft (Solawi)</Link> und wirst Teil unserer Gemüsegenossenschaft.
                 Hier erfährst du alles über unsere Abo-Modelle, Preise und wie du Mitglied werden kannst.
               </p>
             </div>
           </section>
 
-          <section id="C-01" className="bento-card bento-card-large">
+          <section id="C-01" className="bento-card bento-card-large bento-card-flat">
             <div className="plant-pattern"></div>
             <div className="card-header">
               <h3>Gemüse-Abos</h3>

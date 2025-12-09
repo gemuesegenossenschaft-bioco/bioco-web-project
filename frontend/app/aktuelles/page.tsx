@@ -50,64 +50,123 @@ export default function AktuellesPage() {
     setSelectedItem(null)
   }
 
+  const schnuppertageEvents = eventItems.filter((item) =>
+    (item.title || '').toLowerCase().includes('schnuppertag')
+  )
+  const otherEvents = eventItems.filter(
+    (item) => !(item.title || '').toLowerCase().includes('schnuppertag')
+  )
+
   return (
     <>
       <Header />
       <main className="main-content">
         <div className="bento-grid">
-          <div className="aktuelles-events-row">
-            <section id="G-01" className="bento-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Aktuelles</h3>
-              </div>
-              <div className="card-body">
-                {isLoading ? (
-                  <p style={{ color: 'var(--text-secondary)' }}>Lade Beiträge...</p>
-                ) : (
-                  <div className="aktuelles-list">
-                    {allAktuellesItems.map((item, index) => (
-                      <AktuellesItemComponent 
-                        key={item.id || item.instagram_id || index} 
-                        item={item} 
-                        variant="aktuelles"
-                        onClick={handleItemClick}
-                      />
-                    ))}
-                    {allAktuellesItems.length === 0 && (
-                      <p style={{ color: 'var(--text-secondary)' }}>Keine Beiträge verfügbar.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </section>
+          <section id="G-01" className="bento-card bento-card-flat">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h3>Aktuelles</h3>
+            </div>
+            <div className="card-body">
+              {isLoading ? (
+                <p style={{ color: 'var(--text-secondary)' }}>Lade Beiträge...</p>
+              ) : (
+                <div className="aktuelles-list">
+                  {allAktuellesItems.map((item, index) => (
+                    <AktuellesItemComponent 
+                      key={item.id || item.instagram_id || index} 
+                      item={item} 
+                      variant="aktuelles"
+                      onClick={handleItemClick}
+                    />
+                  ))}
+                  {allAktuellesItems.length === 0 && (
+                    <p style={{ color: 'var(--text-secondary)' }}>Keine Beiträge verfügbar.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
 
-            <section id="G-02" className="bento-card events-card">
-              <div className="plant-pattern"></div>
-              <div className="card-header">
-                <h3>Nächste Events</h3>
+          <section id="G-02" className="bento-card bento-card-flat events-card">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h3>Schnuppertage</h3>
+            </div>
+            <div className="card-body">
+              {eventsLoading ? (
+                <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+              ) : (
+                <div className="events-list">
+                  {schnuppertageEvents.map((item, index) => (
+                    <AktuellesItemComponent 
+                      key={item.id || index} 
+                      item={item} 
+                      variant="event"
+                      onClick={handleItemClick}
+                    />
+                  ))}
+                  {schnuppertageEvents.length === 0 && (
+                    <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
+                  )}
+                </div>
+              )}
+              <div
+                style={{
+                  marginTop: '16px',
+                  background: 'var(--bioco-green)',
+                  color: '#fff',
+                  padding: '14px',
+                  borderRadius: '10px',
+                  border: '1px solid var(--bioco-green)',
+                  boxShadow: 'var(--shadow-sm)',
+                }}
+              >
+                <p className="card-text" style={{ marginBottom: '8px', color: '#fff' }}>
+                  Neugierig? Schau vorbei und mach mit. Erlebe an unseren Schnuppertagen, wie solidarische Landwirtschaft funktioniert – direkt auf dem Geisshof in Gebenstorf, umgeben von Natur, Wildpflanzen, auf unserem sonnigen Feld. Als Dank für deine Mithilfe erhältst du eine Tasche frisch geerntetes Demeter-Gemüse und ein kleines zVieri spendiert.
+                </p>
+                <Link
+                  href="/mitmachen"
+                  className="btn btn-secondary"
+                  style={{
+                    display: 'inline-block',
+                    marginTop: '4px',
+                    background: '#fff',
+                    color: 'var(--bioco-green)',
+                    borderColor: '#fff',
+                  }}
+                >
+                  Zur Mitmachen-Seite
+                </Link>
               </div>
-              <div className="card-body">
-                {eventsLoading ? (
-                  <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
-                ) : (
-                  <div className="events-list">
-                    {eventItems.map((item, index) => (
-                      <AktuellesItemComponent 
-                        key={item.id || index} 
-                        item={item} 
-                        variant="event"
-                        onClick={handleItemClick}
-                      />
-                    ))}
-                    {eventItems.length === 0 && (
-                      <p style={{ color: 'var(--text-secondary)' }}>Keine Events geplant.</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </section>
-          </div>
+            </div>
+          </section>
+
+          <section id="G-02b" className="bento-card bento-card-flat">
+            <div className="plant-pattern"></div>
+            <div className="card-header">
+              <h3>Weitere Events</h3>
+            </div>
+            <div className="card-body">
+              {eventsLoading ? (
+                <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+              ) : (
+                <div className="events-list">
+                  {otherEvents.map((item, index) => (
+                    <AktuellesItemComponent 
+                      key={item.id || index} 
+                      item={item} 
+                      variant="event"
+                      onClick={handleItemClick}
+                    />
+                  ))}
+                  {otherEvents.length === 0 && (
+                    <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine weiteren Events geplant.</p>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
 
           {past.length > 0 && (
             <section id="G-03" className="bento-card past-events-card">

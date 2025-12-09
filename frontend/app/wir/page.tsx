@@ -2,7 +2,6 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { EventsBanner } from '@/components/EventsBanner'
 import { CTA } from '@/components/CTA'
-import { EventsSection } from '@/components/EventsSection'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -33,7 +32,7 @@ export default function WirPage() {
             <div className="card-body">
               <p className="card-text">
                 Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. 
-                Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere solidarische Landwirtschaft prägen.
+                Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <Link href="/solawi">solidarische Landwirtschaft</Link> prägen.
               </p>
             </div>
           </section>
@@ -66,7 +65,7 @@ export default function WirPage() {
               <div className="team-card">
                 <div className="team-card-image" style={{ marginBottom: '16px' }}>
                   <Image
-                    src="/images/team/bioco_hofteam_michael.JPG"
+                    src="/images/team/bioco_hofteam_christian.JPG"
                     alt="Michael vom Hof-Team - Demeter Landwirtschaft Geisshof"
                     width={300}
                     height={300}
@@ -107,9 +106,6 @@ export default function WirPage() {
             </div>
             </div>
           </section>
-
-          {/* Nächste Events - Full Width */}
-          <EventsSection limit={3} />
 
           <section id="F-01b" className="bento-card bento-card-large">
             <div className="plant-pattern"></div>
@@ -242,39 +238,47 @@ export default function WirPage() {
             <div className="card-body">
               <div className="timeline">
               <div className="timeline-item">
-                <div className="timeline-year">2014</div>
+                <div className="timeline-year">2013</div>
                 <div className="timeline-content">
                   <h3>Gründung</h3>
-                  <p>biocò wird als Gemüsegenossenschaft gegründet und startet den Anbau auf dem Geisshof.</p>
+                  <p>Die Gründung von biocò fand am 15.11.2013 statt. Da war die Betriebsgruppe bereits sehr, sehr aktiv.</p>
                 </div>
               </div>
               
               <div className="timeline-item">
-                <div className="timeline-year">2015</div>
+                <div className="timeline-year">2014</div>
                 <div className="timeline-content">
-                  <h3>Erste Erweiterung</h3>
-                  <p>Die Anzahl der Mitglieder wächst, erste Depots werden eingerichtet.</p>
+                  <h3>Erste Gartensaison</h3>
+                  <p>War dann die erste Gartensaison und ab da gab es die ersten Depots.</p>
                 </div>
               </div>
               
               <div className="timeline-item">
-                <div className="timeline-year">2016-2018</div>
+                <div className="timeline-year">2016</div>
                 <div className="timeline-content">
-                  <h3>Strukturelle Entwicklung</h3>
-                  <p>Betriebsgruppe wird etabliert, Strukturen werden professionalisiert, neue Standorte entstehen.</p>
+                  <h3>Packraum</h3>
+                  <p>Der Packraum wird erstellt und in Betrieb genommen. Ein wichtiger Schritt für die Genossenschaft.</p>
                 </div>
               </div>
               
               <div className="timeline-item">
                 <div className="timeline-year">2019-2023</div>
                 <div className="timeline-content">
-                  <h3>Wachstum & Konsolidierung</h3>
+                  <h3>Mitgliederwachstum</h3>
                   <p>Weiteres Wachstum der Mitgliederzahl, Optimierung der Anbauplanung und Logistik.</p>
                 </div>
               </div>
               
               <div className="timeline-item">
-                <div className="timeline-year">2024</div>
+                <div className="timeline-year">2023</div>
+                <div className="timeline-content">
+                  <h3>Laufenten</h3>
+                  <p>Wir haben zwei Pärchen Laufenten auf dem Hof, die uns bei der Schneckenjagd unterstützen.</p>
+                </div>
+              </div>
+              
+              <div className="timeline-item">
+                <div className="timeline-year">2025</div>
                 <div className="timeline-content">
                   <h3>Neue Website</h3>
                   <p>Launch der neuen Website mit modernem Design und verbesserter Benutzerführung.</p>
