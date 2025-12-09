@@ -1810,6 +1810,10 @@ header .header-nav-container .beet-leaves {
   filter: none !important; /* Logo in color, not white */
 }
 
+.mobile-menu-logo .logo-link:hover {
+  opacity: 1 !important; /* No hover effect in mobile menu */
+}
+
 .mobile-menu-title {
   display: none; /* Remove title */
 }
