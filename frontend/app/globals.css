@@ -1150,7 +1150,7 @@ a:hover {
   padding: 4px 12px;
   font-weight: 400;
   font-size: 0.8125rem;
-  color: var(--text-secondary);
+  color: var(--text-primary); /* Black text */
   text-decoration: none;
   transition: all 0.2s ease;
 }
@@ -4665,7 +4665,7 @@ footer a:hover {
 /* Navbar Overlay - positioned within hero */
 .navbar-overlay {
   position: absolute;
-  top: clamp(24px, 4vw, 48px);
+  top: 0; /* Move closer to border */
   left: 0;
   right: 0;
   width: 100%;
@@ -4675,20 +4675,12 @@ footer a:hover {
   padding: 0 clamp(16px, 5vw, 72px);
 }
 
-.navbar-overlay .utility-nav,
 .navbar-overlay .primary-nav,
 .navbar-overlay .secondary-nav,
 .navbar-overlay .mobile-header-actions {
   pointer-events: auto;
   background: transparent;
   border: none;
-}
-
-.navbar-overlay .utility-nav {
-  position: relative;
-  display: block; /* Make secondary nav visible */
-  max-width: 1400px;
-  margin: 0 auto;
 }
 
 .navbar-overlay .primary-nav,
@@ -4699,10 +4691,6 @@ footer a:hover {
   margin: 0 auto;
 }
 
-.navbar-overlay .utility-nav a {
-  color: white;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-}
 
 .navbar-overlay .primary-nav a,
 .navbar-overlay .secondary-nav a {

@@ -3,7 +3,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { Header } from '@/components/Header'
+import { UtilityNavigation } from '@/components/UtilityNavigation'
+import { PrimaryNavigation } from '@/components/SecondaryNavigation'
+import { MobileMenu } from '@/components/MobileMenu'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import { getAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
@@ -33,10 +35,13 @@ export default function Home() {
 
   return (
     <div className="page-shell">
+      {/* Secondary Navigation - Outside hero */}
+      <UtilityNavigation />
       {/* Hero */}
       <section className="hero-bleed">
         <div className="navbar-overlay">
-          <Header />
+          <PrimaryNavigation />
+          <MobileMenu />
         </div>
         <div className="hero-bg">
           <Image
