@@ -1095,7 +1095,7 @@ a:hover {
 .utility-nav {
   background: var(--bg-tertiary, #f5f5f5);
   border-bottom: 1px solid var(--border-color);
-  padding: var(--spacing-xs) 0;
+  padding: calc(var(--spacing-xs) * 0.5) 0; /* Reduce padding by 50% - close to border */
   position: relative; /* NOT sticky - scrolls away */
   z-index: 1000;
   display: none; /* Hidden on mobile by default */
@@ -1106,7 +1106,7 @@ a:hover {
   max-width: 1400px; /* Match content max-width */
   width: 100%;
   margin: 0 auto; /* Center the container */
-  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding */
+  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding exactly */
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1163,7 +1163,8 @@ a:hover {
 .secondary-nav {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
-  padding: var(--spacing-xs) 0;
+  padding: calc(var(--spacing-xs) * 0.5) 0; /* Reduce padding by 50% - close to border */
+  margin-top: calc(var(--spacing-xs) * 0.5); /* Reduce space between secondary and primary nav by 50% */
   position: sticky;
   top: 0;
   left: 0;
@@ -1179,7 +1180,7 @@ a:hover {
   max-width: 1400px; /* Match content max-width */
   width: 100%;
   margin: 0 auto; /* Center the container */
-  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding */
+  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding exactly */
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -5033,6 +5034,7 @@ footer a:hover {
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
+  margin-top: clamp(24px, 4vw, 48px); /* Add spacing on top of hero */
   height: clamp(50vh, 65vh, 70vh);
   min-height: 420px;
   padding: clamp(24px, 4vw, 48px) clamp(16px, 5vw, 72px) 0;
@@ -5089,6 +5091,7 @@ footer a:hover {
   left: 0;
   width: 100vw;
   height: 100vh;
+  min-height: 100vh;
   pointer-events: none;
   z-index: 1;
   overflow: visible;
@@ -5096,9 +5099,10 @@ footer a:hover {
 
 .scatter-item {
   position: absolute;
-  opacity: 0.4; /* Increased opacity for better visibility */
-  filter: saturate(0.9);
-  /* Removed mix-blend-mode: multiply - it was making illustrations invisible on light backgrounds */
+  opacity: 0.6 !important; /* Force higher opacity for visibility */
+  filter: saturate(1);
+  display: block !important; /* Ensure they're displayed */
+  visibility: visible !important; /* Force visibility */
 }
 
 /* Main container & grid */
