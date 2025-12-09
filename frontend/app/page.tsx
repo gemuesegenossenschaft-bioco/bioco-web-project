@@ -68,33 +68,38 @@ export default function Home() {
       {/* Main content */}
       <main className="home-container">
         <div className="home-grid-12">
-          {/* Willkommen - Two Column Layout */}
-          <section className="home-block col-span-12">
-            <div className="welcome-framed-box">
-              <div className="md:grid md:grid-cols-2 md:gap-x-8">
-                <div className="text-body">
-                  <h2>Willkommen bei biocò</h2>
-                  <p>
-                    Bei der biocò Gemüsegenossenschaft teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den Anbau und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich abholbereit in den <Link href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
-                  </p>
-                </div>
-                <div className="image-placeholder" style={{ width: '100%', aspectRatio: '4/3', maxWidth: '600px', margin: '0 auto' }}>
-                  <Image
-                    src="/images/mitmachen/bioco_anpacken_einzel.JPG"
-                    alt="Mitarbeit bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
-                    fill
-                    priority
-                    style={{ objectFit: 'cover', borderRadius: '24px' }}
-                  />
-                </div>
-              </div>
+          {/* Willkommen - Row 1, Two Columns */}
+          <section className="home-block col-span-12 md:grid md:grid-cols-2 md:gap-x-8">
+            <div className="text-body">
+              <h2>Willkommen bei biocò</h2>
+              <p>
+                Bei der biocò Gemüsegenossenschaft teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den Anbau und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich abholbereit in den <Link href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
+              </p>
+            </div>
+            <div className="image-placeholder" style={{ width: '100%', aspectRatio: '4/3', maxWidth: '600px', margin: '0 auto' }}>
+              <Image
+                src="/images/mitmachen/zusammen-arbeiten.JPG"
+                alt="Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg"
+                fill
+                priority
+                style={{ objectFit: 'cover', borderRadius: '24px' }}
+              />
             </div>
           </section>
 
-          {/* Gemeinsam, solidarisch, frisch */}
-          <section className="home-block col-span-12">
-            <h2>Gemeinsam, solidarisch, frisch</h2>
+          {/* Gemeinsam, solidarisch, frisch - Row 2, Two Columns */}
+          <section className="home-block col-span-12 md:grid md:grid-cols-2 md:gap-x-8" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
+            <div className="image-placeholder" style={{ width: '100%', aspectRatio: '3/4', maxWidth: '600px', margin: '0 auto' }}>
+              <Image
+                src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
+                alt="Frisch geerntetes Demeter-Gemüse vom Geisshof"
+                fill
+                priority
+                style={{ objectFit: 'cover', borderRadius: '24px' }}
+              />
+            </div>
             <div className="text-body">
+              <h2>Gemeinsam, solidarisch, frisch</h2>
               <p>
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes Mitglied bringt sich ein, ob auf dem Feld, in der Logistik oder bei der Organisation.
               </p>
