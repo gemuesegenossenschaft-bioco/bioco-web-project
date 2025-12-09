@@ -46,7 +46,9 @@ export default function Home() {
 
   return (
     <div className="page-shell">
-      <Header />
+      <div className="navbar-overlay">
+        <Header />
+      </div>
 
       {/* Hero */}
       <section className="hero-bleed">
@@ -65,8 +67,12 @@ export default function Home() {
 
       {/* Headline below wave */}
       <section className="hero-headline-block">
-        <h1 className="hero-headline"># Echt. Nah. Dein Anteil.</h1>
-        <p className="hero-subline">Solidarische Landwirtschaft in der Region Baden-Brugg.</p>
+        <h1 className="hero-headline">
+          Gemeinsam Gemüse anbauen und geniessen.<br />
+          <span className="hero-title-secondary">
+            Solidarische Landwirtschaft in der Region Baden-Brugg.
+          </span>
+        </h1>
       </section>
 
       {/* Scattered illustrations */}
