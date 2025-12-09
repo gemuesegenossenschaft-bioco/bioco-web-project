@@ -54,7 +54,7 @@ export function PrimaryNavigation() {
           <li>
             <Link 
               href="/anmeldung" 
-              className="btn btn-orange"
+              className="btn btn-orange btn-organic"
             >
               biocò werden
             </Link>

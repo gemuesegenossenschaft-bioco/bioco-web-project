@@ -32,16 +32,16 @@ export default function Home() {
   }
 
   const illustrations = [
-    { src: '/images/illustrations/aubergine.svg', left: '6%', top: '18%', size: 120, rotate: -6, opacity: 0.25 },
-    { src: '/images/illustrations/blumenkohl_mit_vogel.svg', left: '78%', top: '12%', size: 160, rotate: 4, opacity: 0.22 },
-    { src: '/images/illustrations/fenchel.svg', left: '12%', top: '48%', size: 140, rotate: -3, opacity: 0.25 },
-    { src: '/images/illustrations/kohlrabi.svg', left: '70%', top: '42%', size: 130, rotate: 8, opacity: 0.23 },
-    { src: '/images/illustrations/lauch_mit_schnecke.svg', left: '18%', top: '72%', size: 150, rotate: -5, opacity: 0.22 },
-    { src: '/images/illustrations/radieschen.svg', left: '82%', top: '68%', size: 110, rotate: 3, opacity: 0.23 },
-    { src: '/images/illustrations/ruebli.svg', left: '44%', top: '30%', size: 130, rotate: -2, opacity: 0.23 },
-    { src: '/images/illustrations/schmetterling.svg', left: '56%', top: '16%', size: 80, rotate: 10, opacity: 0.21 },
-    { src: '/images/illustrations/schmetterling2.svg', left: '30%', top: '60%', size: 90, rotate: -8, opacity: 0.21 },
-    { src: '/images/illustrations/zwiebel.svg', left: '60%', top: '80%', size: 120, rotate: 6, opacity: 0.22 },
+    { src: '/images/illustrations/aubergine.svg', left: '6%', top: '18%', size: 120, rotate: -6, opacity: 0.4 },
+    { src: '/images/illustrations/blumenkohl_mit_vogel.svg', left: '78%', top: '12%', size: 160, rotate: 4, opacity: 0.38 },
+    { src: '/images/illustrations/fenchel.svg', left: '12%', top: '48%', size: 140, rotate: -3, opacity: 0.4 },
+    { src: '/images/illustrations/kohlrabi.svg', left: '70%', top: '42%', size: 130, rotate: 8, opacity: 0.39 },
+    { src: '/images/illustrations/lauch_mit_schnecke.svg', left: '18%', top: '72%', size: 150, rotate: -5, opacity: 0.38 },
+    { src: '/images/illustrations/radieschen.svg', left: '82%', top: '68%', size: 110, rotate: 3, opacity: 0.39 },
+    { src: '/images/illustrations/ruebli.svg', left: '44%', top: '30%', size: 130, rotate: -2, opacity: 0.39 },
+    { src: '/images/illustrations/schmetterling.svg', left: '56%', top: '16%', size: 80, rotate: 10, opacity: 0.37 },
+    { src: '/images/illustrations/schmetterling2.svg', left: '30%', top: '60%', size: 90, rotate: -8, opacity: 0.37 },
+    { src: '/images/illustrations/zwiebel.svg', left: '60%', top: '80%', size: 120, rotate: 6, opacity: 0.38 },
   ]
 
   return (

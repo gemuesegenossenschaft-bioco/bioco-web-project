@@ -343,14 +343,14 @@ p {
 .btn-secondary.btn-organic {
   background: white;
   color: var(--bioco-green);
-  border-color: var(--bioco-green);
+  border: none; /* Remove green border */
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
 .btn-secondary.btn-organic:hover {
   background: var(--bg-tertiary);
   color: var(--bioco-green-dark);
-  border-color: var(--bioco-green-dark);
+  border: none; /* Remove border on hover too */
   transform: translateY(-2px) rotate(0.5deg);
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.16);
 }
@@ -1013,13 +1013,6 @@ a:hover {
   display: inline-block;
   cursor: pointer;
   transition: opacity 0.2s ease;
-  overflow: hidden; /* Enable clipping */
-}
-
-.logo-link img {
-  /* Crop 20px from bottom of logo on all pages */
-  clip-path: inset(0 0 20px 0);
-  margin-bottom: -20px; /* Compensate for clipped area */
 }
 
 .logo-link:hover {
@@ -1110,10 +1103,10 @@ a:hover {
 }
 
 .utility-nav-container {
-  max-width: 100%;
+  max-width: 1400px; /* Match content max-width */
   width: 100%;
-  margin: 0;
-  padding: 0 150px;
+  margin: 0 auto; /* Center the container */
+  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding */
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -1183,13 +1176,14 @@ a:hover {
 
 .primary-nav-container,
 .secondary-nav-container {
-  max-width: 100%;
+  max-width: 1400px; /* Match content max-width */
   width: 100%;
-  margin: 0;
-  padding: 0 clamp(var(--spacing-sm), 6vw, 150px);
+  margin: 0 auto; /* Center the container */
+  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding */
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
+  position: relative; /* For mobile hamburger positioning */
 }
 
 .primary-nav-logo,
@@ -1202,26 +1196,54 @@ a:hover {
 .secondary-nav-logo img {
   max-height: 40px;
   width: auto;
-  /* Crop 20px from bottom */
-  clip-path: inset(0 0 20px 0);
-  margin-bottom: -20px; /* Compensate for clipped area */
 }
 
 @media (max-width: 767px) {
-  /* Hide entire primary nav on mobile - only show hamburger button */
+  /* On mobile: show primary nav but hide nav links, show logo and hamburger */
   .primary-nav,
   .secondary-nav {
+    display: block !important; /* Show navbar container */
+    position: sticky;
+    top: 0;
+    z-index: 1100;
+  }
+  
+  /* Hide utility nav on mobile */
+  .utility-nav {
     display: none !important;
   }
   
-  /* Hide utility nav on mobile too */
-  .utility-nav {
+  /* Hide nav links on mobile - only show logo */
+  .primary-nav ul,
+  .secondary-nav ul {
     display: none !important;
+  }
+  
+  /* Show logo on mobile */
+  .primary-nav-logo,
+  .secondary-nav-logo {
+    display: flex !important;
   }
   
   /* Show hamburger button */
   .mobile-header-actions {
     display: flex !important;
+  }
+  
+  /* Mobile navbar should have same sticky behavior as desktop */
+  .primary-nav.nav-scrolled,
+  .secondary-nav.nav-scrolled {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    background: var(--bg-secondary); /* Same background as rest of website */
+    backdrop-filter: none; /* Remove blur */
+    border-bottom: 2px solid var(--bioco-green); /* Full width green divider */
+    border-radius: 0 0 24px 24px; /* Squircle shape - rounded bottom corners */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    z-index: 1100;
   }
 }
 
@@ -1443,6 +1465,16 @@ header .header-nav-container .beet-leaves {
   z-index: 100;
   padding: 8px clamp(16px, 5vw, 72px);
   pointer-events: auto;
+}
+
+@media (max-width: 767px) {
+  .mobile-header-actions {
+    position: absolute;
+    top: 50%;
+    right: clamp(16px, 5vw, 72px);
+    transform: translateY(-50%);
+    z-index: 101;
+  }
 }
 
 @media (max-width: 767px) {
@@ -2905,7 +2937,7 @@ footer a:hover {
 }
 
 .aktuelles-item {
-  background: rgba(46, 125, 50, 0.5); /* Green with 50% opacity */
+  background: rgba(46, 125, 50, 0.25); /* Green with 25% opacity */
   border: none;
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
@@ -3010,7 +3042,7 @@ footer a:hover {
 }
 
 .event-item {
-  background: rgba(46, 125, 50, 0.5); /* Green with 50% opacity */
+  background: rgba(46, 125, 50, 0.25); /* Green with 25% opacity */
   border: none;
   border-radius: var(--radius-md);
   padding: var(--spacing-md);
@@ -4644,6 +4676,20 @@ footer a:hover {
   filter: brightness(0) invert(1); /* Make logo white */
 }
 
+@media (max-width: 767px) {
+  /* On mobile, logo should be white when over hero */
+  .navbar-overlay .primary-nav-logo img,
+  .navbar-overlay .secondary-nav-logo img {
+    filter: brightness(0) invert(1); /* Make logo white */
+  }
+  
+  /* When scrolled, logo should be normal color */
+  .primary-nav.nav-scrolled .primary-nav-logo img,
+  .secondary-nav.nav-scrolled .secondary-nav-logo img {
+    filter: none; /* Logo back to normal colors when scrolled */
+  }
+}
+
 /* When scrolled out of hero: primary nav sticky, secondary nav hidden */
 .primary-nav.nav-scrolled {
   position: fixed;
@@ -4651,9 +4697,10 @@ footer a:hover {
   left: 0;
   right: 0;
   width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 2px solid var(--bioco-green);
+  background: var(--bg-secondary); /* Same background as rest of website */
+  backdrop-filter: none; /* Remove blur */
+  border-bottom: 2px solid var(--bioco-green); /* Full width green divider */
+  border-radius: 0 0 24px 24px; /* Squircle shape - rounded bottom corners */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   z-index: 1000;
   padding: 0 clamp(16px, 5vw, 72px);
@@ -4994,6 +5041,7 @@ footer a:hover {
 .hero-bg {
   position: absolute;
   inset: 0;
+  top: 20px; /* Move hero image down by 20px */
   overflow: hidden;
   border-radius: 24px;
 }
@@ -5007,8 +5055,8 @@ footer a:hover {
 
 .hero-content {
   position: absolute;
-  left: clamp(60px, calc(5vw + 40px), 104px); /* Moved 40px to the right */
-  bottom: clamp(100px, calc(12vh + 20px), 160px); /* Moved 20px up */
+  left: clamp(80px, calc(5vw + 60px), 124px); /* Moved 20px more to the right */
+  bottom: clamp(90px, calc(12vh + 10px), 150px); /* Moved 10px lower */
   z-index: 3;
   max-width: 600px;
 }
@@ -5036,11 +5084,11 @@ footer a:hover {
 
 /* Scattered illustrations */
 .scatter-layer {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  min-height: 100vh; /* Cover at least the viewport height */
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
   z-index: 1;
   overflow: visible;
@@ -5048,9 +5096,9 @@ footer a:hover {
 
 .scatter-item {
   position: absolute;
-  opacity: 0.2; /* Increased opacity for better visibility */
+  opacity: 0.4; /* Increased opacity for better visibility */
   filter: saturate(0.9);
-  mix-blend-mode: multiply; /* Better blending with background */
+  /* Removed mix-blend-mode: multiply - it was making illustrations invisible on light backgrounds */
 }
 
 /* Main container & grid */
@@ -5197,11 +5245,43 @@ footer a:hover {
 
 @media (max-width: 767px) {
   .hero-bleed {
-    min-height: 360px;
+    min-height: auto;
+    height: auto;
+    padding: clamp(24px, 4vw, 48px) clamp(16px, 5vw, 72px) clamp(20px, 4vw, 32px);
   }
+  
+  .hero-bg {
+    position: relative; /* Change from absolute to relative */
+    width: 100%;
+    aspect-ratio: 1; /* Make hero square on mobile */
+    height: auto;
+    padding-bottom: 0;
+  }
+  
+  .hero-overlay {
+    display: none; /* Hide overlay on mobile since text is below */
+  }
+  
+  .hero-content {
+    position: relative; /* Change from absolute to relative - text below image */
+    left: 0;
+    bottom: 0;
+    margin-top: clamp(20px, 4vw, 32px);
+    padding: 0;
+    max-width: 100%;
+  }
+  
   .hero-headline {
-    font-size: 2rem;
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    color: var(--text-primary) !important; /* Black text on mobile */
+    text-align: left; /* Left aligned */
   }
+  
+  .hero-title-secondary {
+    color: var(--text-primary) !important; /* Black text on mobile */
+    text-align: left; /* Left aligned */
+  }
+  
   .hero-headline-block {
     margin-top: -24px;
     padding-top: 32px;
