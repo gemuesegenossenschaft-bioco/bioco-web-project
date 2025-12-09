@@ -4689,6 +4689,19 @@ footer a:hover {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
+.navbar-overlay .primary-nav a:hover,
+.navbar-overlay .secondary-nav a:hover {
+  color: white !important; /* White text on hover */
+  background: var(--bioco-green) !important; /* Green background on hover */
+  font-weight: 700; /* Bold text on hover */
+  text-decoration: none;
+  transform: translateY(-1px); /* Slight lift effect */
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.4); /* Subtle shadow for depth */
+  border-radius: 8px; /* Rounded corners */
+  transition: all 0.2s ease;
+  text-shadow: none !important; /* Remove text shadow on hover for clarity */
+}
+
 .navbar-overlay .primary-nav .btn-orange,
 .navbar-overlay .secondary-nav .btn-orange {
   background: white;
@@ -4699,9 +4712,13 @@ footer a:hover {
 
 .navbar-overlay .primary-nav .btn-orange:hover,
 .navbar-overlay .secondary-nav .btn-orange:hover {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: white;
-  color: var(--bioco-green-dark);
+  background: var(--bioco-green) !important; /* Green background on hover */
+  border-color: var(--bioco-green) !important; /* Green border on hover */
+  color: white !important; /* White text on hover */
+  font-weight: 700; /* Bold text on hover */
+  transform: translateY(-2px) scale(1.05); /* Lift and slight scale */
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4); /* More prominent shadow */
+  transition: all 0.2s ease;
 }
 
 .navbar-overlay .primary-nav-logo img,
