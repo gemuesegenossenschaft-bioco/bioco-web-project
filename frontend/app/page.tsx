@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { motion } from 'framer-motion'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Hero } from '@/components/Hero'
@@ -31,6 +32,49 @@ export default function Home() {
     setIsModalOpen(false)
     setSelectedItem(null)
   }
+
+  const runwayRef = useRef<HTMLDivElement | null>(null)
+  const firstSectionRef = useRef<HTMLElement | null>(null)
+  const [duckVisible, setDuckVisible] = useState(false)
+  const [duckHasRun, setDuckHasRun] = useState(false)
+
+  useEffect(() => {
+    const runwayEl = runwayRef.current
+    const nextEl = firstSectionRef.current
+    if (!runwayEl || !nextEl) return
+
+    const runwayObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !duckHasRun) {
+            setDuckVisible(true)
+            setDuckHasRun(true)
+          }
+        })
+      },
+      { threshold: 0.15 }
+    )
+
+    const nextObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setDuckVisible(false)
+          }
+        })
+      },
+      { threshold: 0.1 }
+    )
+
+    runwayObserver.observe(runwayEl)
+    nextObserver.observe(nextEl)
+
+    return () => {
+      runwayObserver.disconnect()
+      nextObserver.disconnect()
+    }
+  }, [duckHasRun])
+
   return (
     <>
       <Header />
@@ -46,9 +90,26 @@ export default function Home() {
           description: 'Person in grüner Jacke hält einen Kürbis auf dem Feld'
         }}
       />
+      <div ref={runwayRef} className="duck-runway" aria-hidden="true">
+        {duckVisible && (
+          <motion.img
+            src="/images/illustrations/animated/ente_walk_right.svg"
+            alt=""
+            className="duck-sprite"
+            initial={{ x: '-20vw', opacity: 0 }}
+            animate={{ x: '110vw', opacity: 1 }}
+            transition={{ duration: 4.5, ease: 'easeInOut' }}
+            onAnimationComplete={() => setDuckVisible(false)}
+          />
+        )}
+      </div>
       <main className="main-content">
         <div className="bento-grid">
-          <section id="A-02" className="bento-card bento-card-large">
+          <section
+            id="A-02"
+            className="bento-card bento-card-large"
+            ref={firstSectionRef}
+          >
             <div className="plant-pattern"></div>
             <div className="card-header">
               <h3>Willkommen bei biocò</h3>
@@ -95,13 +156,13 @@ export default function Home() {
                 <h3>Gemeinschaft & Solidarität</h3>
               </div>
               <div className="card-body">
-                <div style={{ marginBottom: '16px' }}>
+                <div className="torn-image-frame" style={{ marginBottom: '16px' }}>
                   <Image
                     src="/images/gemeinschaft/bioco_kinder.JPG"
                     alt="Kinder bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
                     width={800}
                     height={600}
-                    style={{ width: '100%', height: 'auto', borderRadius: '12px' }}
+                    className="torn-image"
                   />
                 </div>
                 <p className="card-text">biocò basiert auf den Prinzipien der <Link href="/solawi">Solidarischen Landwirtschaft</Link>.</p>
@@ -138,7 +199,7 @@ export default function Home() {
                     />
                   ))}
                 </div>
-                <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
+                <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', display: 'inline-block' }}>
                   Alle Neuigkeiten ansehen
                 </Link>
               </div>
@@ -171,7 +232,7 @@ export default function Home() {
                 )}
                 <Link
                   href="/mitmachen"
-                  className="btn btn-primary"
+                  className="btn btn-primary btn-organic"
                   style={{ marginTop: '16px', display: 'inline-block' }}
                 >
                   Alle Schnuppertage ansehen
