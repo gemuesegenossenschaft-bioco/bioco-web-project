@@ -5244,20 +5244,71 @@ footer a:hover {
   padding: 0;
 }
 
-/* Mobile: use flexbox for order property to ensure image always above text */
+/* Two Column Layout - Clean Implementation */
+.two-column-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(24px, 6vw, 48px);
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 6vw, 96px);
+}
+
+.two-column-text {
+  max-width: 600px;
+  width: 100%;
+}
+
+.two-column-image {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  aspect-ratio: 4 / 3;
+  border-radius: 24px;
+  overflow: hidden;
+  background: var(--bg-tertiary);
+}
+
+/* Desktop: Side by side */
+@media (min-width: 768px) {
+  .two-column-section {
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(32px, 5vw, 64px);
+    align-items: start;
+  }
+  
+  /* First section: text left, image right */
+  .two-column-section:first-of-type .two-column-text {
+    grid-column: 1;
+  }
+  
+  .two-column-section:first-of-type .two-column-image {
+    grid-column: 2;
+  }
+  
+  /* Second section: image left, text right */
+  .two-column-section:nth-of-type(2) .two-column-image {
+    grid-column: 1;
+  }
+  
+  .two-column-section:nth-of-type(2) .two-column-text {
+    grid-column: 2;
+  }
+}
+
+/* Mobile: Image always above text */
 @media (max-width: 767px) {
-  .home-block:has(.image-placeholder) {
-    display: flex;
-    flex-direction: column;
-    gap: clamp(24px, 6vw, 48px);
+  .two-column-section {
+    grid-template-columns: 1fr;
   }
   
-  .home-block .image-placeholder {
-    margin-bottom: clamp(16px, 4vw, 32px);
+  .two-column-section .two-column-image {
+    order: 1;
   }
   
-  .home-block .text-body {
-    margin-top: clamp(16px, 4vw, 32px);
+  .two-column-section .two-column-text {
+    order: 2;
   }
 }
 
