@@ -104,9 +104,31 @@ export default function Home() {
                 />
               ))}
             </div>
-            <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', display: 'inline-block' }}>
+            <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '32px', marginBottom: '48px', display: 'inline-block' }}>
               Alle Neuigkeiten ansehen
             </Link>
+          </section>
+
+          {/* Wie funktioniert's */}
+          <section className="home-block col-span-12">
+            <h2>Wie funktioniert&apos;s?</h2>
+            <ol className="steps-list">
+              <li>
+                <strong>Anmelden als Mitglied oder Schnupperabo.</strong> Entscheide dich für ein <Link href="/abos">Abo</Link> oder teste mit einem <Link href="/mitmachen">Schnupperabo</Link>.
+              </li>
+              <li>
+                <strong>Rechnung bezahlen.</strong> Du erhältst eine Rechnung und bezahlst den Beitrag für dein Abo.
+              </li>
+              <li>
+                <strong>Arbeitseinsätze planen.</strong> Organisiere deine <Link href="/mitmachen">Mitarbeit auf dem Feld</Link> oder in der Logistik.
+              </li>
+              <li>
+                <strong>Gemüse abholen.</strong> Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/standorte-depots">Standorte</Link> ab.
+              </li>
+              <li>
+                <strong>Geniessen und teilen.</strong> Geniesse dein frisches Gemüse und teile deine Erlebnisse mit uns auf <a href="https://www.instagram.com/bioco.ch" target="_blank" rel="noopener noreferrer">Instagram</a>.
+              </li>
+            </ol>
           </section>
 
           {/* Schnuppertage */}
@@ -132,32 +154,10 @@ export default function Home() {
             <Link
               href="/mitmachen"
               className="btn btn-primary btn-organic"
-              style={{ marginTop: '16px', display: 'inline-block' }}
+              style={{ marginTop: '32px', marginBottom: '48px', display: 'inline-block' }}
             >
               Alle Schnuppertage ansehen
             </Link>
-          </section>
-
-          {/* Wie funktioniert's */}
-          <section className="home-block col-span-12">
-            <h2>Wie funktioniert&apos;s?</h2>
-            <ol className="steps-list">
-              <li>
-                <strong>Anmelden als Mitglied oder Schnupperabo.</strong> Entscheide dich für ein <Link href="/abos">Abo</Link> oder teste mit einem <Link href="/mitmachen">Schnupperabo</Link>.
-              </li>
-              <li>
-                <strong>Rechnung bezahlen.</strong> Du erhältst eine Rechnung und bezahlst den Beitrag für dein Abo.
-              </li>
-              <li>
-                <strong>Arbeitseinsätze planen.</strong> Organisiere deine <Link href="/mitmachen">Mitarbeit auf dem Feld</Link> oder in der Logistik.
-              </li>
-              <li>
-                <strong>Gemüse abholen.</strong> Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/standorte-depots">Standorte</Link> ab.
-              </li>
-              <li>
-                <strong>Geniessen und teilen.</strong> Geniesse dein frisches Gemüse und teile deine Erlebnisse mit uns auf <a href="https://www.instagram.com/bioco.ch" target="_blank" rel="noopener noreferrer">Instagram</a>.
-              </li>
-            </ol>
           </section>
 
           {/* Kennenlernen */}
