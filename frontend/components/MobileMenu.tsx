@@ -5,18 +5,20 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 
-// All navigation items for mobile - combines primary and utility nav
-const allNavItems = [
-  // Primary navigation items
-  { title: 'Wir', href: '/wir', section: 'primary' },
-  { title: 'Gemüse', href: '/gemuese', section: 'primary' },
-  { title: 'Mitmachen', href: '/mitmachen', section: 'primary' },
-  { title: 'Abos', href: '/abos', section: 'primary' },
-  { title: 'Aktuelles', href: '/aktuelles', section: 'primary' },
-  // Utility navigation items
-  { title: 'Standorte', href: '/standorte-depots', section: 'utility' },
-  { title: 'Kontakt', href: '/kontakt', section: 'utility' },
-  { title: 'Intranet', href: '/intranet', section: 'utility' },
+// Primary navigation items
+const primaryNavItems = [
+  { title: 'Wir', href: '/wir' },
+  { title: 'Gemüse', href: '/gemuese' },
+  { title: 'Mitmachen', href: '/mitmachen' },
+  { title: 'Abos', href: '/abos' },
+  { title: 'Aktuelles', href: '/aktuelles' },
+]
+
+// Utility navigation items (secondary nav)
+const utilityNavItems = [
+  { title: 'Standorte', href: '/standorte-depots' },
+  { title: 'Kontakt', href: '/kontakt' },
+  { title: 'Intranet', href: '/intranet' },
 ]
 
 export function MobileMenu() {
@@ -26,9 +28,17 @@ export function MobileMenu() {
 
   useEffect(() => {
     const onScroll = () => {
-      // Trigger when scrolling out of hero (approximately 65vh hero height)
-      const heroHeight = window.innerHeight * 0.65
-      setScrolled(window.scrollY > heroHeight - 80)
+      // Find the h1 title element to detect when scrolling past it
+      const heroTitle = document.querySelector('.hero-content h1')
+      if (heroTitle) {
+        const titleRect = heroTitle.getBoundingClientRect()
+        // When h1 title is scrolled past (above viewport)
+        setScrolled(titleRect.bottom < 0)
+      } else {
+        // Fallback: trigger when scrolling out of hero (approximately 65vh hero height)
+        const heroHeight = window.innerHeight * 0.65
+        setScrolled(window.scrollY > heroHeight - 80)
+      }
     }
     onScroll()
     window.addEventListener('scroll', onScroll)
@@ -71,7 +81,7 @@ export function MobileMenu() {
             </div>
             <div className="mobile-menu-primary-section">
               <ul className="mobile-nav-list">
-                {allNavItems.map((item) => {
+                {primaryNavItems.map((item) => {
                   const isActive = pathname === item.href
                   return (
                     <li key={item.href}>
@@ -94,6 +104,24 @@ export function MobileMenu() {
                     biocò werden
                   </Link>
                 </li>
+              </ul>
+            </div>
+            <div className="mobile-menu-secondary-section">
+              <ul className="mobile-nav-list">
+                {utilityNavItems.map((item) => {
+                  const isActive = pathname === item.href
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        className={isActive ? 'active' : ''}
+                        onClick={handleLinkClick}
+                      >
+                        {item.title}
+                      </Link>
+                    </li>
+                  )
+                })}
               </ul>
             </div>
           </nav>

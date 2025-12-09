@@ -1139,7 +1139,8 @@ a:hover {
 }
 
 .utility-nav a:hover {
-  color: var(--bioco-green);
+  color: var(--bioco-green); /* Green text on hover */
+  font-weight: 700; /* Bold text on hover */
   text-decoration: none;
 }
 
@@ -1302,8 +1303,8 @@ a:hover {
 
 .primary-nav a:hover,
 .secondary-nav a:hover {
-  color: white; /* White text on hover */
-  background: var(--bioco-green); /* Green background on hover */
+  color: var(--bioco-green); /* Green text on hover */
+  background: transparent; /* No background change */
   font-weight: 700; /* Bold text on hover */
   text-decoration: none;
 }
@@ -1473,7 +1474,7 @@ header .header-nav-container .beet-leaves {
   position: absolute;
   top: 0;
   right: 0;
-  z-index: 100;
+  z-index: 1200; /* Higher than navbar to ensure clickability */
   padding: 8px clamp(16px, 5vw, 72px);
   pointer-events: auto;
 }
@@ -1484,7 +1485,7 @@ header .header-nav-container .beet-leaves {
     top: 50%;
     right: clamp(16px, 5vw, 72px);
     transform: translateY(-50%);
-    z-index: 101;
+    z-index: 1200; /* Higher than navbar (1100) to ensure clickability */
   }
 }
 
@@ -1523,12 +1524,14 @@ header .header-nav-container .beet-leaves {
   box-shadow: none;
   line-height: 1;
   color: white; /* Default white over hero */
-  z-index: 100;
+  z-index: 1201; /* Higher than parent to ensure clickability */
+  position: relative;
+  pointer-events: auto !important; /* Force clickability */
 }
 
-/* When scrolled, hamburger should be black */
+/* When scrolled past h1 title on mobile, hamburger should be black */
 .mobile-menu-toggle.scrolled {
-  color: var(--text-primary);
+  color: var(--text-primary) !important; /* Black text when scrolled */
 }
 
 .mobile-menu-toggle:hover {
@@ -1600,7 +1603,13 @@ header .header-nav-container .beet-leaves {
 
 .mobile-menu-primary-section {
   padding-bottom: var(--spacing-md);
-  border-bottom: 2px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.mobile-menu-secondary-section {
+  padding-top: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
 }
 
 /* Mobile nav list - custom list for mobile menu */
