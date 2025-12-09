@@ -5142,8 +5142,8 @@ footer a:hover {
 
 .hero-content {
   position: absolute;
-  left: clamp(80px, calc(5vw + 60px), 124px); /* Moved 20px more to the right */
-  bottom: clamp(90px, calc(12vh + 10px), 150px); /* Moved 10px lower */
+  left: clamp(16px, 5vw, 72px); /* Align with Willkommen section padding */
+  bottom: clamp(120px, calc(15vh + 20px), 180px); /* Move up - higher bottom value */
   z-index: 3;
   max-width: 600px;
 }
