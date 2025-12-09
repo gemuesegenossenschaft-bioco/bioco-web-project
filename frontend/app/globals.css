@@ -929,23 +929,6 @@ button.btn-secondary:hover {
   transform: translateY(-1px);
 }
 
-/* View All buttons - green border/text, green background/white text on hover */
-.btn-view-all,
-button.btn-view-all {
-  background: transparent;
-  color: var(--bioco-green);
-  border-color: var(--bioco-green);
-}
-
-.btn-view-all:hover,
-button.btn-view-all:hover {
-  background: var(--bioco-green);
-  color: white;
-  border-color: var(--bioco-green);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
 /* Orange button - Only for Mitmachen */
 .btn-orange,
 button.btn-orange {

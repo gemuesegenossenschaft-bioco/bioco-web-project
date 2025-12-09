@@ -139,7 +139,7 @@ export default function Home() {
                 />
               ))}
             </div>
-            <Link href="/aktuelles" className="btn btn-view-all btn-organic" style={{ marginTop: '16px', display: 'inline-block' }}>
+            <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', display: 'inline-block' }}>
               Alle Neuigkeiten ansehen
             </Link>
           </section>
@@ -166,7 +166,7 @@ export default function Home() {
             )}
             <Link
               href="/mitmachen"
-              className="btn btn-view-all btn-organic"
+              className="btn btn-primary btn-organic"
               style={{ marginTop: '16px', display: 'inline-block' }}
             >
               Alle Schnuppertage ansehen
