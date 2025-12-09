@@ -79,38 +79,38 @@ export function Footer() {
 
           <div className="footer-partners">
             <h3>Partner & Zertifizierungen</h3>
-            <div className="partner-badges">
+            <div className="partner-links">
               <a 
                 href="https://www.solawi.ch" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="partner-badge"
+                className="partner-link"
               >
-                <span>Solawi</span>
+                Solawi
               </a>
               <a 
                 href="https://basimil.ch/" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="partner-badge"
+                className="partner-link"
               >
-                <span>Basimilch</span>
+                Basimilch
               </a>
               <a 
                 href="https://www.demeter.ch" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="partner-badge"
+                className="partner-link"
               >
-                <span>Demeter</span>
+                Demeter
               </a>
               <a 
                 href="https://www.bio-suisse.ch" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="partner-badge"
+                className="partner-link"
               >
-                <span>Bio Suisse</span>
+                Bio Suisse
               </a>
             </div>
             <p style={{ marginTop: '16px', fontSize: '14px', color: 'var(--text-secondary)' }}>
