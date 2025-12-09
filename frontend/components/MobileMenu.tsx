@@ -76,7 +76,7 @@ export function MobileMenu() {
                 })}
                 <li>
                   <Link
-                    href="/mitmachen"
+                    href="/anmeldung"
                     className="btn btn-orange"
                     onClick={handleLinkClick}
                   >

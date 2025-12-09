@@ -48,7 +48,7 @@ export default function ContactPage() {
                 <p className="card-text" style={{ marginBottom: 'var(--spacing-sm)' }}>
                   Interessierst du dich für ein Gemüseabo oder möchtest du mehr über die Mitgliedschaft erfahren? Hier findest du alle Informationen zur Anmeldung.
                 </p>
-                <Link href="/mitmachen" className="btn btn-primary" style={{ display: 'inline-block' }}>
+                <Link href="/anmeldung" className="btn btn-primary" style={{ display: 'inline-block' }}>
                   biocò werden →
                 </Link>
               </div>

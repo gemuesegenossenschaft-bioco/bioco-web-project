@@ -39,7 +39,7 @@ export function PrimaryNavigation() {
           })}
           <li>
             <Link 
-              href="/mitmachen" 
+              href="/anmeldung" 
               className="btn btn-orange"
             >
               biocò werden

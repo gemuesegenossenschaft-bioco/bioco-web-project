@@ -112,3 +112,70 @@ export function getAllIllustrationNames(): IllustrationName[] {
   return Object.keys(ILLUSTRATION_NAMES) as IllustrationName[]
 }
 
+/**
+ * Animated creature types
+ */
+export type AnimatedCreatureName = 'biene' | 'ente' | 'ente_right' | 'schnecke'
+
+/**
+ * Mapping of animated creature names to their German/English descriptions
+ */
+export const ANIMATED_CREATURE_NAMES: Record<AnimatedCreatureName, { de: string; en: string }> = {
+  biene: { de: 'Biene', en: 'Bee' },
+  ente: { de: 'Ente', en: 'Duck' },
+  ente_right: { de: 'Ente (rechts)', en: 'Duck (right)' },
+  schnecke: { de: 'Schnecke', en: 'Snail' },
+}
+
+interface AnimatedCreatureProps {
+  /** Name of the animated creature */
+  name: AnimatedCreatureName
+  /** Optional width (default: auto) */
+  width?: number
+  /** Optional height (default: auto) */
+  height?: number
+  /** Optional className for styling */
+  className?: string
+  /** Optional opacity (default: 1) */
+  opacity?: number
+  /** Optional alt text */
+  alt?: string
+}
+
+/**
+ * Component to display animated bioco creatures
+ * - biene: Bee with flapping wings
+ * - ente: Duck walking and opening beak (left-facing)
+ * - ente_right: Duck walking and opening beak (right-facing)
+ * - schnecke: Snail sliding
+ */
+export function AnimatedCreature({
+  name,
+  width,
+  height,
+  className = '',
+  opacity = 1,
+  alt,
+}: AnimatedCreatureProps) {
+  let src: string
+  if (name === 'ente_right') {
+    src = `/images/illustrations/animated/ente_walk_right.svg`
+  } else {
+    const animationSuffix = name === 'biene' ? 'flap' : name === 'ente' ? 'walk' : 'slide'
+    src = `/images/illustrations/animated/${name}_${animationSuffix}.svg`
+  }
+  const defaultAlt = alt || `Bioco Illustration ${ANIMATED_CREATURE_NAMES[name].en} by Selina Kallen`
+
+  return (
+    <Image
+      src={src}
+      alt={defaultAlt}
+      width={width}
+      height={height}
+      className={className}
+      style={{ opacity }}
+      unoptimized
+    />
+  )
+}
+
