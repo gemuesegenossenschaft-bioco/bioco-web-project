@@ -89,12 +89,12 @@ h1 {
 }
 
 h2 {
-  font-size: calc(1.325rem + 0.9vw);
+  font-size: calc(1.125rem + 0.7vw); /* Smaller than h1 */
 }
 
 @media (min-width: 1200px) {
   h2 {
-    font-size: 2rem;
+    font-size: 1.75rem; /* Smaller than h1 (2.5rem) */
   }
 }
 
@@ -1100,6 +1100,8 @@ a:hover {
   z-index: 1000;
   display: none; /* Hidden on mobile by default */
   box-sizing: border-box;
+  height: 40px; /* Fixed height for consistent alignment */
+  min-height: 40px;
 }
 
 .utility-nav-container {
@@ -1172,6 +1174,7 @@ a:hover {
   z-index: 1100;
   display: block;
   box-sizing: border-box;
+  height: 60px; /* Fixed height for consistent alignment */
   min-height: 60px;
 }
 
@@ -1185,18 +1188,23 @@ a:hover {
   align-items: center;
   gap: var(--spacing-md);
   position: relative; /* For mobile hamburger positioning */
+  height: 100%; /* Full height of parent navbar */
 }
 
 .primary-nav-logo,
 .secondary-nav-logo {
   flex-shrink: 0;
   margin-right: auto; /* Push logo to the left */
+  display: flex;
+  align-items: center;
+  height: 100%; /* Match navbar height */
 }
 
 .primary-nav-logo img,
 .secondary-nav-logo img {
-  max-height: 40px;
+  height: 50px; /* Fixed height to match navbar (60px navbar - 10px padding = 50px) */
   width: auto;
+  object-fit: contain;
 }
 
 @media (max-width: 767px) {
@@ -1294,8 +1302,9 @@ a:hover {
 
 .primary-nav a:hover,
 .secondary-nav a:hover {
-  color: var(--bioco-green);
-  background: var(--bg-primary);
+  color: white; /* White text on hover */
+  background: var(--bioco-green); /* Green background on hover */
+  font-weight: 700; /* Bold text on hover */
   text-decoration: none;
 }
 
@@ -1324,9 +1333,10 @@ a:hover {
 
 .primary-nav .btn-orange:hover,
 .secondary-nav .btn-orange:hover {
-  background: transparent;
-  border-color: var(--bioco-orange);
-  color: var(--bioco-orange);
+  background: var(--bioco-green); /* Green background on hover */
+  border-color: var(--bioco-green); /* Green border on hover */
+  color: white; /* White text on hover */
+  font-weight: 700; /* Bold text on hover */
 }
 
 /* Old header element - hidden, navigation is now in PrimaryNavigation */
@@ -4725,9 +4735,10 @@ footer a:hover {
 }
 
 .primary-nav.nav-scrolled .btn-orange:hover {
-  background: var(--bioco-orange-dark, var(--bioco-orange));
-  border-color: var(--bioco-orange-dark, var(--bioco-orange));
-  color: white;
+  background: var(--bioco-green); /* Green background on hover */
+  border-color: var(--bioco-green); /* Green border on hover */
+  color: white; /* White text on hover */
+  font-weight: 700; /* Bold text on hover */
 }
 
 .primary-nav.nav-scrolled .primary-nav-logo img {
@@ -5155,7 +5166,7 @@ footer a:hover {
 
 .home-block h2 {
   font-family: 'DM Sans', sans-serif;
-  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  font-size: clamp(1.4rem, 3vw, 1.9rem); /* Smaller than h1 */
   margin-bottom: 12px;
   color: var(--text-primary);
 }
