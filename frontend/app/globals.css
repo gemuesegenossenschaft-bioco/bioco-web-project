@@ -1105,13 +1105,13 @@ a:hover {
 }
 
 .utility-nav-container {
-  max-width: 1400px; /* Match content max-width */
+  max-width: 100%; /* Full width */
   width: 100%;
-  margin: 0 auto; /* Center the container */
-  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding exactly - same as primary nav */
+  margin: 0; /* No centering */
+  padding: 0 clamp(16px, 6vw, 96px); /* Padding from edges */
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Align to the same column/end as primary nav */
+  justify-content: flex-end; /* Right align to corner */
 }
 
 .utility-nav ul {
@@ -4697,7 +4697,7 @@ footer a:hover {
 /* Navbar Overlay - positioned within hero */
 .navbar-overlay {
   position: absolute;
-  top: clamp(40px, 6vw, 64px); /* More space between hero border and navbar/logo */
+  top: clamp(20px, 3vw, 32px); /* Decreased space by 50% between hero border and navbar/logo */
   left: 0;
   right: 0;
   width: 100%;
@@ -5306,6 +5306,18 @@ footer a:hover {
 .btn-organic:hover {
   transform: translateY(-2px) rotate(-0.5deg);
   box-shadow: 0 12px 20px rgba(0, 0, 0, 0.16);
+}
+
+/* Welcome Framed Box */
+.welcome-framed-box {
+  background: rgba(255, 140, 0, 0.1); /* Orange with 10% opacity */
+  clip-path: polygon(
+    4% 8%, 12% 2%, 26% 6%, 36% 3%, 48% 7%, 60% 2%, 74% 6%, 86% 3%, 96% 10%,
+    98% 24%, 96% 42%, 99% 58%, 96% 76%, 98% 90%, 90% 98%, 74% 94%, 60% 98%,
+    46% 94%, 32% 98%, 18% 94%, 8% 96%, 2% 86%, 4% 70%, 2% 54%, 6% 36%, 2% 20%
+  );
+  padding: clamp(24px, 4vw, 48px);
+  border-radius: 28px 22px 26px 18px;
 }
 
 /* Steps */

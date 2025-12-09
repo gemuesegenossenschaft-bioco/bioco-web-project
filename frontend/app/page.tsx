@@ -68,16 +68,26 @@ export default function Home() {
       {/* Main content */}
       <main className="home-container">
         <div className="home-grid-12">
-          {/* Willkommen */}
+          {/* Willkommen - Two Column Layout */}
           <section className="home-block col-span-12">
-            <h2>Willkommen bei biocò</h2>
-            <div className="text-body">
-              <p>
-                Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
-              </p>
-              <p>
-                Bei uns teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den <Link href="/gemuese">Anbau</Link> und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich abholbereit in den <Link href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
-              </p>
+            <div className="welcome-framed-box">
+              <div className="md:grid md:grid-cols-2 md:gap-x-8">
+                <div className="text-body">
+                  <h2>Willkommen bei biocò</h2>
+                  <p>
+                    Bei der biocò Gemüsegenossenschaft teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den Anbau und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich abholbereit in den <Link href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
+                  </p>
+                </div>
+                <div className="image-placeholder" style={{ width: '100%', aspectRatio: '4/3', maxWidth: '600px', margin: '0 auto' }}>
+                  <Image
+                    src="/images/mitmachen/bioco_anpacken_einzel.JPG"
+                    alt="Mitarbeit bei solidarischer Landwirtschaft auf dem Geisshof Gebenstorf"
+                    fill
+                    priority
+                    style={{ objectFit: 'cover', borderRadius: '24px' }}
+                  />
+                </div>
+              </div>
             </div>
           </section>
 
@@ -86,7 +96,7 @@ export default function Home() {
             <h2>Gemeinsam, solidarisch, frisch</h2>
             <div className="text-body">
               <p>
-                Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes <Link href="/mitmachen">Mitglied</Link> bringt sich ein, ob auf dem <Link href="/mitmachen">Feld</Link>, in der <Link href="/mitmachen">Logistik</Link> oder bei der <Link href="/mitmachen">Organisation</Link>.
+                Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes Mitglied bringt sich ein, ob auf dem Feld, in der Logistik oder bei der Organisation.
               </p>
             </div>
           </section>
@@ -120,7 +130,7 @@ export default function Home() {
                 <strong>Rechnung bezahlen.</strong> Du erhältst eine Rechnung und bezahlst den Beitrag für dein Abo.
               </li>
               <li>
-                <strong>Arbeitseinsätze planen.</strong> Organisiere deine <Link href="/mitmachen">Mitarbeit auf dem Feld</Link> oder in der Logistik.
+                <strong>Arbeitseinsätze planen.</strong> Organisiere deine Mitarbeit auf dem Feld oder in der Logistik.
               </li>
               <li>
                 <strong>Gemüse abholen.</strong> Wöchentlich holst du deinen Gemüsekorb in einem der <Link href="/standorte-depots">Standorte</Link> ab.
