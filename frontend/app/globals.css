@@ -5312,6 +5312,9 @@ footer a:hover {
 .wie-funktionierts-box {
   background: rgba(255, 140, 0, 0.1); /* Orange with 10% opacity */
   border-radius: 28px 22px 26px 18px;
+  width: calc(100% + 20%);
+  margin-left: -10%;
+  margin-right: -10%;
   clip-path: polygon(
     4% 8%, 12% 2%, 26% 6%, 36% 3%, 48% 7%, 60% 2%, 74% 6%, 86% 3%, 96% 10%,
     98% 24%, 96% 42%, 99% 58%, 96% 76%, 98% 90%, 90% 98%, 74% 94%, 60% 98%,
