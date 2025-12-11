@@ -5409,9 +5409,13 @@ footer a:hover {
 /* Mobile: Image always above text */
 @media (max-width: 767px) {
   .two-column-section {
-    grid-template-columns: 1fr;
     display: flex;
     flex-direction: column;
+  }
+
+  /* Make two-column-text use display: contents so its children become flex children */
+  .two-column-text {
+    display: contents;
   }
 
   /* Title (h2) always appears first - above images */
@@ -5423,15 +5427,10 @@ footer a:hover {
   /* Images appear second - after titles */
   .two-column-section .two-column-image {
     order: 2;
+    margin-bottom: var(--spacing-md);
   }
 
   /* Body text (p) appears third - below images */
-  .two-column-text {
-    order: 3;
-    display: flex;
-    flex-direction: column;
-  }
-
   .two-column-text p {
     order: 3;
   }
