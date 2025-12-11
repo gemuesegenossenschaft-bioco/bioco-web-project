@@ -2508,8 +2508,17 @@ footer {
   border-top: 2px solid #333;
   background: var(--bg-secondary);
   margin-top: var(--spacing-xl);
-  padding: var(--spacing-xl) var(--spacing-md);
+  padding: var(--spacing-xl) 0;
   box-shadow: var(--shadow-sm);
+}
+
+/* Footer content wrapper - aligns with logo position */
+#footer-content {
+  max-width: 1400px; /* Match nav container max-width */
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 6vw, 96px); /* Match logo/nav container left padding */
+  box-sizing: border-box;
 }
 
 footer ul {
