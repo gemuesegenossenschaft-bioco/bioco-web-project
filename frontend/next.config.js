@@ -85,6 +85,26 @@ const nextConfig = {
         destination: '/wir',
         permanent: true,
       },
+      {
+        source: '/impressionen',
+        destination: '/mitmachen',
+        permanent: true,
+      },
+      {
+        source: '/wp-content/uploads/2017/07/1704_Gemüseabo.pdf',
+        destination: '/abos',
+        permanent: true,
+      },
+      {
+        source: '/presse',
+        destination: '/wir',
+        permanent: true,
+      },
+      {
+        source: '/home/home',
+        destination: '/',
+        permanent: true,
+      },
     ]
   },
 }
