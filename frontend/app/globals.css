@@ -2683,8 +2683,9 @@ footer a:hover {
 }
 
 .kalender-section.full-width {
-  width: 100%;
-  max-width: 100%;
+  width: calc(100% + clamp(16px, 6vw, 96px));
+  max-width: calc(100% + clamp(16px, 6vw, 96px));
+  margin-right: calc(-1 * clamp(16px, 6vw, 96px));
 }
 
 .kalender-section h4 {
