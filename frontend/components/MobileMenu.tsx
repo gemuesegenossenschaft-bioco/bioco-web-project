@@ -79,7 +79,7 @@ export function MobileMenu() {
     <>
       <div className="mobile-header-actions">
         <button
-          className={`mobile-menu-toggle ${scrolled ? 'scrolled' : ''}`}
+          className="mobile-menu-toggle"
           onClick={() => setIsOpen(!isOpen)}
           aria-label="Toggle menu"
           aria-expanded={isOpen}
