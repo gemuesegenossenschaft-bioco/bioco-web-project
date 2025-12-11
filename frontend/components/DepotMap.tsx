@@ -244,16 +244,8 @@ export function DepotMap() {
                           href={depot.website} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          style={{
-                            color: 'white',
-                            backgroundColor: 'var(--bioco-green)',
-                            padding: '6px 12px',
-                            borderRadius: '4px',
-                            textDecoration: 'none',
-                            fontWeight: '600',
-                            display: 'inline-block',
-                            fontSize: '0.875rem'
-                          }}
+                          className="btn btn-primary"
+                          style={{ display: 'inline-block' }}
                         >
                           Zur Website →
                         </a>
@@ -299,16 +291,8 @@ export function DepotMap() {
                           href={depot.website} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          style={{
-                            color: 'white',
-                            backgroundColor: 'var(--bioco-green)',
-                            padding: '6px 12px',
-                            borderRadius: '4px',
-                            textDecoration: 'none',
-                            fontWeight: '600',
-                            display: 'inline-block',
-                            fontSize: '0.875rem'
-                          }}
+                          className="btn btn-primary"
+                          style={{ display: 'inline-block' }}
                         >
                           Zur Website →
                         </a>
