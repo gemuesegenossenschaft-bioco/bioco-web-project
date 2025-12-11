@@ -1174,17 +1174,17 @@ a:hover {
   }
 }
 
-/* Primary Navigation (renamed from Secondary) - Sticky */
+/* Primary Navigation (renamed from Secondary) - NOT sticky */
 .primary-nav,
 .secondary-nav {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   padding: calc(var(--spacing-xs) * 0.5) 0; /* Reduce padding by 50% - close to border */
   margin-top: clamp(32px, 6vw, 64px); /* Increased spacing from top on sub pages */
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative; /* No sticky behavior */
+  top: auto;
+  left: auto;
+  right: auto;
   z-index: 1100;
   display: block;
   box-sizing: border-box;
@@ -1570,6 +1570,7 @@ header .header-nav-container .beet-leaves {
 }
 
 @media (max-width: 767px) {
+  /* Hamburger menu aligned with logo on same bar */
   .mobile-header-actions {
     position: absolute;
     top: 50%;
@@ -1579,23 +1580,17 @@ header .header-nav-container .beet-leaves {
     display: flex !important; /* Always visible on mobile */
   }
   
-  /* Ensure hamburger is visible when navbar is scrolled/fixed */
-  .primary-nav.nav-scrolled .mobile-header-actions,
-  .secondary-nav.nav-scrolled .mobile-header-actions {
+  /* Ensure hamburger is positioned relative to nav container */
+  .primary-nav .mobile-header-actions,
+  .secondary-nav .mobile-header-actions,
+  .primary-nav-container .mobile-header-actions,
+  .secondary-nav-container .mobile-header-actions {
     position: absolute;
     top: 50%;
     right: clamp(16px, 5vw, 72px);
     transform: translateY(-50%);
     z-index: 1201 !important;
     display: flex !important;
-  }
-
-  /* Sub pages: pin hamburger to top-right instead of mid-page */
-  body:not([data-pathname="/"]) .mobile-header-actions {
-    position: fixed;
-    top: clamp(12px, 4vw, 28px);
-    right: clamp(16px, 5vw, 32px);
-    transform: none;
   }
 }
 
@@ -4997,19 +4992,19 @@ footer a:hover {
   }
 }
 
-/* When scrolled out of hero: primary nav sticky, secondary nav hidden */
+/* When scrolled out of hero: primary nav NOT sticky */
 .primary-nav.nav-scrolled {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative; /* No sticky behavior */
+  top: auto;
+  left: auto;
+  right: auto;
   width: 100%;
-  margin-top: 0; /* Remove margin when sticky */
+  margin-top: clamp(32px, 6vw, 64px); /* Keep margin */
   background: var(--bg-secondary); /* Same background as rest of website */
   backdrop-filter: none; /* Remove blur */
-  border-bottom: 2px solid var(--bioco-green); /* Full width green divider */
-  border-radius: 0 0 24px 24px; /* Squircle shape - rounded bottom corners */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--border-color); /* Regular border */
+  border-radius: 0; /* No rounded corners */
+  box-shadow: none; /* No shadow */
   z-index: 1000;
   padding: 0 clamp(16px, 5vw, 72px);
 }
