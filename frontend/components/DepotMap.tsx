@@ -218,7 +218,7 @@ export function DepotMap() {
         <div className="location-addresses">
           <h4>Depot-Standorte</h4>
           <div className="address-list">
-            <div style={{ marginBottom: 'var(--spacing-lg)', paddingBottom: 'var(--spacing-lg)', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ marginBottom: 'var(--spacing-lg)', paddingBottom: 'var(--spacing-lg)', borderBottom: 'none' }}>
               <h5 style={{ 
                 color: 'black', 
                 marginBottom: 'var(--spacing-md)',
@@ -233,7 +233,7 @@ export function DepotMap() {
                     padding: 'var(--spacing-md)',
                     backgroundColor: 'var(--bg-secondary)',
                     borderRadius: '8px',
-                    border: '1px solid var(--border-color)'
+                    border: 'none'
                   }}>
                     <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '8px' }}>{depot.name}</strong>
                     <p style={{ marginBottom: '8px' }}>{depot.address}</p>
@@ -288,7 +288,7 @@ export function DepotMap() {
                     padding: 'var(--spacing-md)',
                     backgroundColor: 'var(--bg-secondary)',
                     borderRadius: '8px',
-                    border: '1px solid var(--border-color)'
+                    border: 'none'
                   }}>
                     <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '8px' }}>{depot.name}</strong>
                     <p style={{ marginBottom: '8px' }}>{depot.address}</p>
