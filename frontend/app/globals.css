@@ -1650,21 +1650,30 @@ header .header-nav-container .beet-leaves {
   /* On sub pages: hamburger MUST be black */
   body:not([data-pathname="/"]) .mobile-menu-toggle,
   body:not([data-pathname="/"]) .primary-nav .mobile-menu-toggle,
-  body:not([data-pathname="/"]) .secondary-nav .mobile-menu-toggle {
-    color: var(--text-primary) !important; /* Black on sub pages */
+  body:not([data-pathname="/"]) .secondary-nav .mobile-menu-toggle,
+  body:not([data-pathname="/"]) .mobile-header-actions .mobile-menu-toggle {
+    color: #000000 !important; /* Explicit black on sub pages */
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   /* On home page when scrolled past hero: hamburger MUST be black */
   body[data-pathname="/"].nav-scrolled .mobile-menu-toggle,
   body[data-pathname="/"] .primary-nav.nav-scrolled .mobile-menu-toggle,
-  body[data-pathname="/"] .secondary-nav.nav-scrolled .mobile-menu-toggle {
-    color: var(--text-primary) !important; /* Black when scrolled past hero */
+  body[data-pathname="/"] .secondary-nav.nav-scrolled .mobile-menu-toggle,
+  body[data-pathname="/"].nav-scrolled .mobile-header-actions .mobile-menu-toggle {
+    color: #000000 !important; /* Explicit black when scrolled past hero */
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
   /* On home page when over hero: hamburger is white */
   body[data-pathname="/"]:not(.nav-scrolled) .primary-nav:not(.nav-scrolled) .mobile-menu-toggle,
-  body[data-pathname="/"]:not(.nav-scrolled) .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle {
-    color: white !important; /* White when over hero */
+  body[data-pathname="/"]:not(.nav-scrolled) .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle,
+  body[data-pathname="/"]:not(.nav-scrolled) .mobile-header-actions .mobile-menu-toggle {
+    color: #ffffff !important; /* Explicit white when over hero */
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 }
 
@@ -1674,11 +1683,17 @@ header .header-nav-container .beet-leaves {
 
 /* Simple hamburger icon styling - using lucide-react Menu/X icons */
 .mobile-menu-toggle svg {
-  display: block;
-  width: 24px;
-  height: 24px;
+  display: block !important;
+  width: 24px !important;
+  height: 24px !important;
   transition: all 0.2s ease;
-  stroke: currentColor; /* Use currentColor so it inherits from button color */
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 2 !important;
+  stroke-linecap: round !important;
+  stroke-linejoin: round !important;
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 .mobile-menu-toggle:hover svg {
@@ -1687,23 +1702,36 @@ header .header-nav-container .beet-leaves {
 
 /* Ensure SVG stroke is black on sub pages and when scrolled past hero */
 @media (max-width: 767px) {
+  /* Force visibility and black color on sub pages */
   body:not([data-pathname="/"]) .mobile-menu-toggle svg,
   body:not([data-pathname="/"]) .primary-nav .mobile-menu-toggle svg,
-  body:not([data-pathname="/"]) .secondary-nav .mobile-menu-toggle svg {
-    stroke: var(--text-primary) !important; /* Black on sub pages */
+  body:not([data-pathname="/"]) .secondary-nav .mobile-menu-toggle svg,
+  body:not([data-pathname="/"]) .mobile-header-actions .mobile-menu-toggle svg {
+    stroke: #000000 !important; /* Explicit black on sub pages */
+    fill: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
-  /* Ensure SVG stroke is black when scrolled past hero on home page */
+  /* Force visibility and black color when scrolled past hero on home page */
   body[data-pathname="/"].nav-scrolled .mobile-menu-toggle svg,
   body[data-pathname="/"] .primary-nav.nav-scrolled .mobile-menu-toggle svg,
-  body[data-pathname="/"] .secondary-nav.nav-scrolled .mobile-menu-toggle svg {
-    stroke: var(--text-primary) !important; /* Black when scrolled past hero */
+  body[data-pathname="/"] .secondary-nav.nav-scrolled .mobile-menu-toggle svg,
+  body[data-pathname="/"].nav-scrolled .mobile-header-actions .mobile-menu-toggle svg {
+    stroke: #000000 !important; /* Explicit black when scrolled past hero */
+    fill: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   
-  /* Ensure SVG stroke is white when over hero on home page */
+  /* White when over hero on home page */
   body[data-pathname="/"]:not(.nav-scrolled) .primary-nav:not(.nav-scrolled) .mobile-menu-toggle svg,
-  body[data-pathname="/"]:not(.nav-scrolled) .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle svg {
-    stroke: white !important; /* White when over hero */
+  body[data-pathname="/"]:not(.nav-scrolled) .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle svg,
+  body[data-pathname="/"]:not(.nav-scrolled) .mobile-header-actions .mobile-menu-toggle svg {
+    stroke: #ffffff !important; /* Explicit white when over hero */
+    fill: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
 }
 
