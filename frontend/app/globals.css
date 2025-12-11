@@ -5009,21 +5009,32 @@ footer a:hover {
   }
 }
 
-/* When scrolled out of hero: primary nav NOT sticky */
+/* When scrolled out of hero: primary nav sticky on desktop home page */
 .primary-nav.nav-scrolled {
-  position: relative; /* No sticky behavior */
-  top: auto;
-  left: auto;
-  right: auto;
+  position: sticky; /* Keep sticky on desktop */
+  top: 0;
+  left: 0;
+  right: 0;
   width: 100%;
-  margin-top: clamp(32px, 6vw, 64px); /* Keep margin */
+  margin-top: 0; /* Remove margin when sticky */
   background: var(--bg-secondary); /* Same background as rest of website */
   backdrop-filter: none; /* Remove blur */
   border-bottom: 1px solid var(--border-color); /* Regular border */
   border-radius: 0; /* No rounded corners */
   box-shadow: none; /* No shadow */
-  z-index: 1000;
-  padding: 0 clamp(16px, 5vw, 72px);
+  z-index: 1100;
+}
+
+/* On desktop home page: ensure sticky behavior when scrolled */
+@media (min-width: 768px) {
+  body[data-pathname="/"] .primary-nav.nav-scrolled,
+  body[data-pathname="/"] .secondary-nav.nav-scrolled {
+    position: sticky !important;
+    top: 0 !important;
+    background: var(--bg-secondary) !important;
+    border-bottom: 1px solid var(--border-color) !important;
+    margin-top: 0 !important;
+  }
 }
 
 .primary-nav.nav-scrolled ~ .utility-nav,
@@ -5725,10 +5736,73 @@ footer a:hover {
     z-index: 3; /* Keep z-index for overlay */
   }
   
+  /* Bento-shaped box around hero text on mobile */
+  .hero-content::before {
+    content: '';
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    right: -12px;
+    bottom: -12px;
+    background: rgba(255, 255, 255, 0.1); /* White background with 10% opacity */
+    border-radius: 24px 18px 28px 20px;
+    clip-path: polygon(
+      2% 4%,
+      8% 0%,
+      16% 6%,
+      24% 2%,
+      32% 8%,
+      40% 3%,
+      48% 7%,
+      56% 2%,
+      64% 9%,
+      72% 4%,
+      80% 8%,
+      88% 3%,
+      96% 7%,
+      99% 15%,
+      98% 25%,
+      99% 35%,
+      97% 45%,
+      99% 55%,
+      97% 65%,
+      99% 75%,
+      97% 85%,
+      99% 95%,
+      94% 99%,
+      86% 95%,
+      78% 99%,
+      70% 95%,
+      62% 99%,
+      54% 94%,
+      46% 99%,
+      38% 95%,
+      30% 99%,
+      22% 94%,
+      14% 99%,
+      8% 95%,
+      2% 99%,
+      0% 90%,
+      2% 80%,
+      0% 70%,
+      2% 60%,
+      0% 50%,
+      2% 40%,
+      0% 30%,
+      2% 20%,
+      0% 10%
+    );
+    z-index: -1; /* Behind the text */
+    pointer-events: none;
+  }
+  
   .hero-headline {
     font-size: clamp(1.75rem, 4vw, 2.25rem); /* Increased by 4pt (0.25rem) */
     color: white !important; /* White text on mobile */
     text-align: left; /* Left aligned on mobile */
+    position: relative; /* Ensure z-index works */
+    z-index: 1; /* Above the bento box */
+    padding: 12px; /* Padding inside the bento box */
   }
 
   .hero-title-secondary {
