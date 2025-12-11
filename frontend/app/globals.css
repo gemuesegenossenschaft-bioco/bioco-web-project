@@ -1603,14 +1603,24 @@ header .header-nav-container .beet-leaves {
   
   /* When navbar is scrolled (past hero), hamburger should be black */
   .primary-nav.nav-scrolled .mobile-menu-toggle,
-  .secondary-nav.nav-scrolled .mobile-menu-toggle {
+  .secondary-nav.nav-scrolled .mobile-menu-toggle,
+  .navbar-overlay .primary-nav.nav-scrolled ~ * .mobile-menu-toggle,
+  .navbar-overlay .secondary-nav.nav-scrolled ~ * .mobile-menu-toggle {
     color: var(--text-primary) !important; /* Black when scrolled */
   }
   
   /* When navbar is not scrolled (over hero), hamburger should be white */
   .primary-nav:not(.nav-scrolled) .mobile-menu-toggle,
-  .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle {
+  .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle,
+  .navbar-overlay .primary-nav:not(.nav-scrolled) ~ * .mobile-menu-toggle,
+  .navbar-overlay .secondary-nav:not(.nav-scrolled) ~ * .mobile-menu-toggle {
     color: white !important; /* White when over hero */
+  }
+  
+  /* Also check if navbar-overlay parent has scrolled navbar */
+  .primary-nav.nav-scrolled ~ .mobile-header-actions .mobile-menu-toggle,
+  .secondary-nav.nav-scrolled ~ .mobile-header-actions .mobile-menu-toggle {
+    color: var(--text-primary) !important; /* Black when scrolled */
   }
 }
 
