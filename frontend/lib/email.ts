@@ -45,10 +45,19 @@ export async function sendFormEmail({ formType, data, subject }: FormSubmission)
       reply_to: data.email || FROM_EMAIL,
     })
 
+    if (result.error) {
+      console.error('Resend API error:', result.error)
+      throw new Error(result.error.message || 'Failed to send email via Resend')
+    }
+
     return { success: true, id: result.data?.id }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Resend email error:', error)
-    throw error
+    // Re-throw with more context
+    if (error?.message) {
+      throw error
+    }
+    throw new Error(error?.message || 'Failed to send email')
   }
 }
 

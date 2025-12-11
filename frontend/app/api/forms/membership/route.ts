@@ -20,10 +20,23 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Membership form error:', error)
+    
+    // Provide more detailed error message
+    let errorMessage = 'Es ist ein Fehler aufgetreten.'
+    if (error?.message) {
+      if (error.message.includes('RESEND_API_KEY')) {
+        errorMessage = 'E-Mail-Konfiguration fehlt. Bitte kontaktieren Sie den Administrator.'
+      } else if (error.message.includes('email') || error.message.includes('domain')) {
+        errorMessage = 'E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.'
+      } else {
+        errorMessage = error.message
+      }
+    }
+    
     return NextResponse.json(
-      { success: false, error: 'Es ist ein Fehler aufgetreten.' },
+      { success: false, error: errorMessage },
       { status: 500 }
     )
   }

@@ -294,11 +294,12 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
         body: JSON.stringify(formData),
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-
       const data = await response.json()
+
+      if (!response.ok) {
+        // Extract error message from response
+        throw new Error(data.error || `HTTP error! status: ${response.status}`)
+      }
 
       if (data.success) {
         setSubmitted(true)
@@ -308,9 +309,10 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
         setFieldErrors({ submit: data.error || 'Es ist ein Fehler aufgetreten.' })
         setIsSubmitting(false)
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Form submission error:', err)
-      setFieldErrors({ submit: 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.' })
+      const errorMessage = err?.message || 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.'
+      setFieldErrors({ submit: errorMessage })
       setIsSubmitting(false)
     }
   }
