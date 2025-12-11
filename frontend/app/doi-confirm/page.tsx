@@ -78,19 +78,19 @@ function DOIConfirmContent() {
                 <h3>Anmeldung bestätigt</h3>
               </div>
               <div className="card-body">
-                <p className="card-text">Vielen Dank! Ihre Anmeldung wurde erfolgreich bestätigt.</p>
+                <p className="card-text">Vielen Dank! Deine Anmeldung wurde erfolgreich bestätigt.</p>
                 
                 {formType === 'subscribe' && (
-                  <p className="card-text">Sie erhalten ab sofort unseren Newsletter.</p>
+                  <p className="card-text">Du erhältst ab sofort unseren Newsletter.</p>
                 )}
                 {formType === 'visit' && (
-                  <p className="card-text">Wir haben Ihre Anmeldung für den Tag der offenen Tür erhalten und werden uns bald bei Ihnen melden.</p>
+                  <p className="card-text">Wir haben deine Anmeldung für den Tag der offenen Tür erhalten und melden uns bald bei dir.</p>
                 )}
                 {formType === 'waiting_list' && (
-                  <p className="card-text">Wir haben Sie auf die Warteliste gesetzt und werden uns bei Verfügbarkeit bei Ihnen melden.</p>
+                  <p className="card-text">Wir haben dich auf die Warteliste gesetzt und melden uns bei dir, sobald ein Platz frei wird.</p>
                 )}
                 {formType === 'contact' && (
-                  <p className="card-text">Wir haben Ihre Nachricht erhalten und werden uns bald bei Ihnen melden.</p>
+                  <p className="card-text">Wir haben deine Nachricht erhalten und melden uns bald bei dir.</p>
                 )}
               </div>
             </section>

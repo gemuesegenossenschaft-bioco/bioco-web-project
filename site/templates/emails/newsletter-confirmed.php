@@ -9,11 +9,11 @@
 	
 	<h1 style="color: #0066cc;">Newsletter-Anmeldung bestätigt</h1>
 	
-	<p>Guten Tag<?php echo !empty($data['name']) ? ' ' . htmlspecialchars($data['name']) : ''; ?>,</p>
+	<p>Hallo<?php echo !empty($data['name']) ? ' ' . htmlspecialchars($data['name']) : ''; ?>,</p>
 	
-	<p>vielen Dank für Ihre Anmeldung zu unserem Newsletter. Ihre Anmeldung wurde erfolgreich bestätigt.</p>
+	<p>vielen Dank für deine Anmeldung zu unserem Newsletter. Deine Anmeldung wurde erfolgreich bestätigt.</p>
 	
-	<p>Sie erhalten ab sofort regelmäßig Neuigkeiten von bioco.ch.</p>
+	<p>Du erhältst ab sofort regelmässig Neuigkeiten von bioco.ch.</p>
 	
 	<hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
 	
