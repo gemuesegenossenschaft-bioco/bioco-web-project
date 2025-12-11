@@ -2664,75 +2664,41 @@ footer a:hover {
 }
 
 .kalender-content {
+  width: 100%;
+  margin-top: var(--spacing-md);
+}
+
+.vegetable-list {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-md);
-  width: 100%;
-}
-
-.kalender-section {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
-  padding: var(--spacing-md);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-  border: none;
-  box-shadow: var(--shadow-md);
-  width: 100%;
-  max-width: 100%;
-}
-
-.kalender-section.full-width {
-  width: calc(100% + clamp(16px, 6vw, 96px));
-  max-width: calc(100% + clamp(16px, 6vw, 96px));
-  margin-right: calc(-1 * clamp(16px, 6vw, 96px));
-}
-
-.kalender-section h4 {
-  font-size: 1rem;
-  margin-bottom: var(--spacing-sm);
-  color: var(--bioco-green);
-}
-
-.kalender-section ul {
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing-xs) var(--spacing-md);
   list-style: none;
   padding: 0;
   margin: 0;
   width: 100%;
 }
 
-.kalender-section ul.vegetable-list {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: calc(var(--spacing-sm) * 2) var(--spacing-md); /* doubled vertical gap, horizontal gap */
-  width: 100%;
-  margin: 0;
-  padding: 0;
-  align-items: baseline; /* Align items to baseline for cleaner wrapping */
-}
-
-.kalender-section li {
+.vegetable-list li {
   padding: 0;
   margin: 0;
   color: var(--text-secondary);
-  list-style: none; /* Remove disc bullets */
-  white-space: nowrap;
-  position: relative;
-  line-height: 1.5; /* Tighter line height for less vertical spacing */
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-/* Add separator after each item except the last */
-.kalender-section li:not(:last-child)::after {
-  content: ' • ';
-  margin-left: var(--spacing-sm);
-  color: var(--text-tertiary);
-  font-weight: 400;
-}
-
-.kalender-section li.empty {
+.vegetable-list li.empty {
+  grid-column: 1 / -1;
   color: var(--text-tertiary);
   font-style: italic;
+}
+
+/* Mobile: single column */
+@media (max-width: 767px) {
+  .vegetable-list {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-xs);
+  }
 }
 
 /* Gallery */
