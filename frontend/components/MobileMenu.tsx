@@ -34,33 +34,67 @@ export function MobileMenu() {
       const isHomePage = pathname === '/'
       
       if (!isHomePage) {
-        // On subpages: scrolled state immediately when scrolling
-        setScrolled(window.scrollY > 0)
+        // On subpages: always in scrolled state (no state change)
+        setScrolled(true)
+        document.body.classList.add('nav-scrolled')
       } else {
         // On home page: only change state after leaving the hero image
         const heroBleed = document.querySelector('.hero-bleed')
         if (heroBleed) {
           const heroRect = heroBleed.getBoundingClientRect()
           // When hero image bottom is scrolled past (above viewport)
-          setScrolled(heroRect.bottom < 0)
+          const isScrolled = heroRect.bottom < 0
+          setScrolled(isScrolled)
+          if (isScrolled) {
+            document.body.classList.add('nav-scrolled')
+          } else {
+            document.body.classList.remove('nav-scrolled')
+          }
         } else {
           // Fallback: check for hero-bg element
           const heroBg = document.querySelector('.hero-bg')
           if (heroBg) {
             const heroRect = heroBg.getBoundingClientRect()
-            setScrolled(heroRect.bottom < 0)
+            const isScrolled = heroRect.bottom < 0
+            setScrolled(isScrolled)
+            if (isScrolled) {
+              document.body.classList.add('nav-scrolled')
+            } else {
+              document.body.classList.remove('nav-scrolled')
+            }
           } else {
             // Final fallback: use viewport height calculation
             const heroHeight = window.innerHeight * 0.65
-            setScrolled(window.scrollY > heroHeight)
+            const isScrolled = window.scrollY > heroHeight
+            setScrolled(isScrolled)
+            if (isScrolled) {
+              document.body.classList.add('nav-scrolled')
+            } else {
+              document.body.classList.remove('nav-scrolled')
+            }
           }
         }
       }
     }
     onScroll()
     window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      // Don't remove nav-scrolled on cleanup as it might be needed for sub pages
+    }
   }, [pathname])
+  
+  // Hide navbar when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.classList.add('mobile-menu-open')
+    } else {
+      document.body.classList.remove('mobile-menu-open')
+    }
+    return () => {
+      document.body.classList.remove('mobile-menu-open')
+    }
+  }, [isOpen])
 
   const handleLinkClick = (href: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()

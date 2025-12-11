@@ -3,6 +3,7 @@ import './globals.css'
 import { MatomoScript } from '@/components/MatomoScript'
 import { MarkerScript } from '@/components/MarkerScript'
 import { OrganizationSchema, LocalBusinessSchema } from '@/components/StructuredData'
+import { PathnameBodyClass } from '@/components/PathnameBodyClass'
 
 export const metadata: Metadata = {
   title: 'biocò | Bio-Gemüse aus der Region Baden-Brugg',
@@ -31,6 +32,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
       </head>
       <body>
+        <PathnameBodyClass />
         <OrganizationSchema />
         <LocalBusinessSchema />
         {children}

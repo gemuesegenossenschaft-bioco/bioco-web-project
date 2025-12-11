@@ -20,10 +20,11 @@ export function PrimaryNavigation() {
 
   useEffect(() => {
     const onScroll = () => {
-      // Auf Unterseiten (kein Hero): sofort sticky
+      // Auf Unterseiten (kein Hero): immer im scrolled state (kein State-Wechsel)
       const isHomePage = pathname === '/'
       if (!isHomePage) {
-        setScrolled(window.scrollY > 0)
+        // On sub pages: always in scrolled state (no state change)
+        setScrolled(true)
       } else {
         // Auf Homepage: erst nach Hero sticky - detect when hero image is scrolled past
         const heroBleed = document.querySelector('.hero-bleed')

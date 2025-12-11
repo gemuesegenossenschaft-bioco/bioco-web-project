@@ -1231,9 +1231,16 @@ a:hover {
     top: 0;
     z-index: 1100;
     background: var(--bg-secondary) !important; /* Same background as rest of website - not transparent */
-    border-bottom: 3px solid var(--bioco-green) !important; /* 1pt bigger divider (3px instead of 2px) */
+    border-bottom: 2px solid var(--bioco-green) !important; /* 2px divider (1pt less) */
     margin-top: 0 !important; /* Remove margin to prevent jumping */
+    margin-bottom: clamp(24px, 4vw, 48px) !important; /* More space beneath divider */
     transition: none !important; /* Prevent jumping animation */
+  }
+  
+  /* Hide navbar when mobile menu is open */
+  body.mobile-menu-open .primary-nav,
+  body.mobile-menu-open .secondary-nav {
+    display: none !important;
   }
   
   /* Hide utility nav on mobile */
@@ -1273,12 +1280,19 @@ a:hover {
     width: 100%;
     background: var(--bg-secondary); /* Same background as rest of website */
     backdrop-filter: none; /* Remove blur */
-    border-bottom: 3px solid var(--bioco-green); /* 1pt bigger divider (3px instead of 2px) */
+    border-bottom: 2px solid var(--bioco-green); /* 2px divider (1pt less) */
     border-radius: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 1100;
     margin-top: 0; /* Remove margin to prevent jumping */
+    margin-bottom: clamp(24px, 4vw, 48px) !important; /* More space beneath divider */
     transition: none; /* Prevent jumping animation */
+  }
+  
+  /* Hide navbar when mobile menu is open (even when scrolled) */
+  body.mobile-menu-open .primary-nav.nav-scrolled,
+  body.mobile-menu-open .secondary-nav.nav-scrolled {
+    display: none !important;
   }
   
   /* Ensure hamburger menu is visible when navbar is scrolled */
