@@ -104,6 +104,9 @@ export default function Home() {
               <p>
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes Mitglied bringt sich ein, ob auf dem Feld, in der Logistik oder bei der Organisation.
               </p>
+              <div style={{ marginTop: '16px' }}>
+                <CTA text="was bei uns wächst" href="/gemuese" variant="secondary" />
+              </div>
             </div>
         </section>
 
