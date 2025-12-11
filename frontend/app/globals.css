@@ -1180,7 +1180,7 @@ a:hover {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   padding: calc(var(--spacing-xs) * 0.5) 0; /* Reduce padding by 50% - close to border */
-  margin-top: clamp(16px, 3vw, 32px); /* Add spacing from top so it doesn't stick to browser window */
+  margin-top: clamp(32px, 6vw, 64px); /* Increased spacing from top on sub pages */
   position: sticky;
   top: 0;
   left: 0;
