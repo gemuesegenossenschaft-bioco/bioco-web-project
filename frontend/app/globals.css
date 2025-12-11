@@ -1227,8 +1227,8 @@ a:hover {
   .primary-nav,
   .secondary-nav {
     display: block !important; /* Show navbar container */
-    position: sticky;
-    top: 0;
+    position: relative; /* No sticky behavior on mobile */
+    top: auto;
     z-index: 1100;
     margin-top: 0 !important; /* Remove margin to prevent jumping */
     transition: none !important; /* Prevent jumping animation */
@@ -1303,19 +1303,19 @@ a:hover {
   /* Mobile navbar should have same sticky behavior as desktop */
   .primary-nav.nav-scrolled,
   .secondary-nav.nav-scrolled {
-    position: sticky; /* Keep sticky instead of fixed to prevent jumping */
-    top: 0;
-    left: 0;
-    right: 0;
+    position: relative; /* Disable sticky on mobile */
+    top: auto;
+    left: auto;
+    right: auto;
     width: 100%;
-    background: var(--bg-secondary) !important; /* MUST have background when scrolled */
+    background: var(--bg-secondary) !important; /* Default background when scrolled/other states */
     backdrop-filter: none; /* Remove blur */
-    border-bottom: 2px solid var(--bioco-green) !important; /* MUST have border when scrolled */
+    border-bottom: 2px solid var(--bioco-green) !important; /* Divider remains */
     border-radius: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 1100;
     margin-top: 0; /* Remove margin to prevent jumping */
-    margin-bottom: clamp(24px, 4vw, 48px) !important; /* More space beneath divider */
+    margin-bottom: clamp(24px, 4vw, 48px) !important; /* Space beneath divider */
     transition: none; /* Prevent jumping animation */
   }
   
