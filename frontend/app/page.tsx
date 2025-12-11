@@ -56,10 +56,10 @@ export default function Home() {
           <div className="hero-content">
             <h1 className="hero-headline">
               Gemeinsam Gemüse<br />
-              anbauen und geniessen.<br />
+              anbauen und geniessen<br />
               <span className="hero-title-secondary">
                 Solidarische Landwirtschaft<br />
-                in der Region Baden-Brugg.
+                in der Region Baden-Brugg
               </span>
             </h1>
           </div>
