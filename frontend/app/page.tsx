@@ -120,13 +120,13 @@ export default function Home() {
                 />
               ))}
             </div>
-            <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '32px', marginBottom: '48px', display: 'inline-block' }}>
+            <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', marginBottom: '16px', display: 'inline-block' }}>
               Alle Neuigkeiten ansehen
             </Link>
           </section>
 
           {/* Schnuppertage */}
-          <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
+          <section className="home-block col-span-12" style={{ marginTop: 'clamp(24px, 4vw, 48px)' }}>
             <h2>Schnuppertage</h2>
             {eventsLoading ? (
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
@@ -148,14 +148,14 @@ export default function Home() {
             <Link
               href="/mitmachen"
               className="btn btn-primary btn-organic"
-              style={{ marginTop: '32px', marginBottom: '48px', display: 'inline-block' }}
+              style={{ marginTop: '16px', marginBottom: '16px', display: 'inline-block' }}
             >
               Alle Schnuppertage ansehen
             </Link>
           </section>
 
           {/* Kennenlernen */}
-          <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
+          <section className="home-block col-span-12" style={{ marginTop: 'clamp(24px, 4vw, 48px)' }}>
             <h2>Möchtest du uns kennenlernen?</h2>
             <p>
               Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.
