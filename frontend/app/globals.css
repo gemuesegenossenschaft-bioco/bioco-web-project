@@ -5524,7 +5524,7 @@ footer a:hover {
     position: absolute !important; /* Keep absolute positioning on mobile */
     left: calc(clamp(16px, 6vw, 96px) + 50px) !important; /* Match logo left position + 50px */
     right: clamp(16px, 6vw, 96px) !important; /* Right padding for better text wrapping */
-    bottom: clamp(40px, 8vw, 80px) !important;
+    bottom: clamp(80px, calc(8vw + 40px), 120px) !important; /* 40px higher from bottom */
     top: auto !important;
     padding-bottom: 0 !important;
     margin-top: 0 !important;
@@ -5536,13 +5536,13 @@ footer a:hover {
   .hero-headline {
     font-size: clamp(1.75rem, 4vw, 2.25rem); /* Increased by 4pt (0.25rem) */
     color: white !important; /* White text on mobile */
-    text-align: center; /* Center aligned on mobile */
+    text-align: left; /* Left aligned on mobile */
   }
 
   .hero-title-secondary {
     font-size: clamp(1.375rem, 3.5vw, 1.75rem); /* Increased by 4pt (0.25rem) */
     color: white !important; /* White text on mobile */
-    text-align: center; /* Center aligned on mobile */
+    text-align: left; /* Left aligned on mobile */
   }
   
   .hero-headline-block {
