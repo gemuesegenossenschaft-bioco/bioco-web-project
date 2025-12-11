@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Menu, X } from 'lucide-react'
 import { Logo } from './Logo'
 
@@ -26,6 +26,7 @@ export function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   useEffect(() => {
     const onScroll = () => {
@@ -46,8 +47,17 @@ export function MobileMenu() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (href: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault()
     setIsOpen(false)
+    router.push(href)
+    // Scroll to top after navigation
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      })
+    }, 100)
   }
 
   return (
@@ -97,7 +107,7 @@ export function MobileMenu() {
                       <Link
                         href={item.href}
                         className={isActive ? 'active' : ''}
-                        onClick={handleLinkClick}
+                        onClick={handleLinkClick(item.href)}
                       >
                         {item.title}
                       </Link>
@@ -108,7 +118,7 @@ export function MobileMenu() {
                   <Link
                     href="/bioco-werden"
                     className="btn btn-orange btn-organic"
-                    onClick={handleLinkClick}
+                    onClick={handleLinkClick('/bioco-werden')}
                   >
                     biocò werden
                   </Link>
@@ -124,7 +134,7 @@ export function MobileMenu() {
                       <Link
                         href={item.href}
                         className={isActive ? 'active' : ''}
-                        onClick={handleLinkClick}
+                        onClick={handleLinkClick(item.href)}
                       >
                         {item.title}
                       </Link>

@@ -120,9 +120,9 @@ export default function Home() {
                 />
               ))}
             </div>
-            <Link href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', marginBottom: '16px', display: 'inline-block' }}>
+            <ScrollToTopLink href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', marginBottom: '16px', display: 'inline-block' }}>
               Alle Neuigkeiten ansehen
-            </Link>
+            </ScrollToTopLink>
           </section>
 
           {/* Schnuppertage */}
@@ -145,13 +145,13 @@ export default function Home() {
                 )}
               </div>
             )}
-            <Link
+            <ScrollToTopLink
               href="/mitmachen"
               className="btn btn-primary btn-organic"
               style={{ marginTop: '16px', marginBottom: '16px', display: 'inline-block' }}
             >
               Alle Schnuppertage ansehen
-            </Link>
+            </ScrollToTopLink>
           </section>
 
           {/* Kennenlernen */}
