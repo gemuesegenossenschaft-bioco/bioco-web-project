@@ -5358,6 +5358,12 @@ footer a:hover {
   padding: clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px) clamp(32px, 6vw, 64px); /* Increased top padding for more space after hero */
 }
 
+@media (max-width: 767px) {
+  .home-container {
+    padding-top: clamp(18px, calc(8vw - 30px), 66px) !important; /* Reduced by 30px on mobile */
+  }
+}
+
 .home-grid-12 {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
