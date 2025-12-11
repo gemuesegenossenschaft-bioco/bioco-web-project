@@ -1286,11 +1286,11 @@ a:hover {
     display: flex !important;
   }
   
-  /* Move logo 20px down and 20px left on sub pages (mobile) */
+  /* Move logo 20px down and -20px left on sub pages (mobile) */
   body:not([data-pathname="/"]) .primary-nav-logo,
   body:not([data-pathname="/"]) .secondary-nav-logo {
     margin-top: 20px !important;
-    margin-left: 20px !important;
+    margin-left: -20px !important;
   }
   
   /* Show hamburger button - always visible on mobile */
