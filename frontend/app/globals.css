@@ -4678,9 +4678,32 @@ footer a:hover {
     margin-bottom: var(--spacing-sm);
   }
 
-  #C-01 .pricing-table td:nth-child(3),
+  #C-01 .pricing-table td:nth-child(3) {
+    font-size: 1rem;
+    position: relative;
+    padding-left: 0;
+  }
+  
+  #C-01 .pricing-table td:nth-child(3)::before {
+    content: "Jährlicher Abobeitrag: ";
+    display: block;
+    font-weight: 600;
+    color: var(--bioco-green);
+    margin-bottom: 4px;
+  }
+  
   #C-01 .pricing-table td:nth-child(4) {
     font-size: 1rem;
+    position: relative;
+    padding-left: 0;
+  }
+  
+  #C-01 .pricing-table td:nth-child(4)::before {
+    content: "Einmaliger Anteilsschein: ";
+    display: block;
+    font-weight: 600;
+    color: var(--bioco-green);
+    margin-bottom: 4px;
   }
 
   #C-01 .pricing-table td:nth-child(5) {
@@ -5752,73 +5775,10 @@ footer a:hover {
     z-index: 3; /* Keep z-index for overlay */
   }
   
-  /* Bento-shaped box around hero text on mobile */
-  .hero-content::before {
-    content: '';
-    position: absolute;
-    top: -12px;
-    left: -12px;
-    right: -12px;
-    bottom: -12px;
-    background: rgba(255, 255, 255, 0.1); /* White background with 10% opacity */
-    border-radius: 24px 18px 28px 20px;
-    clip-path: polygon(
-      2% 4%,
-      8% 0%,
-      16% 6%,
-      24% 2%,
-      32% 8%,
-      40% 3%,
-      48% 7%,
-      56% 2%,
-      64% 9%,
-      72% 4%,
-      80% 8%,
-      88% 3%,
-      96% 7%,
-      99% 15%,
-      98% 25%,
-      99% 35%,
-      97% 45%,
-      99% 55%,
-      97% 65%,
-      99% 75%,
-      97% 85%,
-      99% 95%,
-      94% 99%,
-      86% 95%,
-      78% 99%,
-      70% 95%,
-      62% 99%,
-      54% 94%,
-      46% 99%,
-      38% 95%,
-      30% 99%,
-      22% 94%,
-      14% 99%,
-      8% 95%,
-      2% 99%,
-      0% 90%,
-      2% 80%,
-      0% 70%,
-      2% 60%,
-      0% 50%,
-      2% 40%,
-      0% 30%,
-      2% 20%,
-      0% 10%
-    );
-    z-index: -1; /* Behind the text */
-    pointer-events: none;
-  }
-  
   .hero-headline {
     font-size: clamp(1.75rem, 4vw, 2.25rem); /* Increased by 4pt (0.25rem) */
     color: white !important; /* White text on mobile */
     text-align: left; /* Left aligned on mobile */
-    position: relative; /* Ensure z-index works */
-    z-index: 1; /* Above the bento box */
-    padding: 12px; /* Padding inside the bento box */
   }
 
   .hero-title-secondary {
