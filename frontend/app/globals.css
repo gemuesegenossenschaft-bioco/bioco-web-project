@@ -1174,22 +1174,34 @@ a:hover {
   }
 }
 
-/* Primary Navigation (renamed from Secondary) - NOT sticky */
+/* Primary Navigation (renamed from Secondary) - Sticky on desktop */
 .primary-nav,
 .secondary-nav {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   padding: calc(var(--spacing-xs) * 0.5) 0; /* Reduce padding by 50% - close to border */
   margin-top: clamp(32px, 6vw, 64px); /* Increased spacing from top on sub pages */
-  position: relative; /* No sticky behavior */
-  top: auto;
-  left: auto;
-  right: auto;
+  position: sticky; /* Sticky on desktop */
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 1100;
   display: block;
   box-sizing: border-box;
   height: 60px; /* Fixed height for consistent alignment */
   min-height: 60px;
+}
+
+/* On sub pages (desktop): ensure sticky with divider and white background */
+@media (min-width: 768px) {
+  body:not([data-pathname="/"]) .primary-nav,
+  body:not([data-pathname="/"]) .secondary-nav {
+    position: sticky !important;
+    top: 0 !important;
+    background: var(--bg-secondary) !important; /* White background */
+    border-bottom: 1px solid var(--border-color) !important; /* Divider line */
+    margin-top: clamp(32px, 6vw, 64px) !important;
+  }
 }
 
 .primary-nav-container,
@@ -1272,6 +1284,12 @@ a:hover {
   .primary-nav-logo,
   .secondary-nav-logo {
     display: flex !important;
+  }
+  
+  /* Move logo 10px lower on sub pages (mobile) */
+  body:not([data-pathname="/"]) .primary-nav-logo,
+  body:not([data-pathname="/"]) .secondary-nav-logo {
+    margin-top: 10px !important;
   }
   
   /* Show hamburger button - always visible on mobile */
