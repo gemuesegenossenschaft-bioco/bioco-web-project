@@ -58,7 +58,7 @@ export default function StandortePage() {
             <GeisshofMap />
           </section>
 
-          <section id="E-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+          <section id="E-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)', scrollMarginTop: '100px' }}>
             <h2>Depot-Standorte für Gemüseabholung</h2>
             <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
               Hier findest du alle Depot-Standorte, an denen du dein Gemüse abholen kannst. 
