@@ -154,7 +154,7 @@ export default function MitmachenPage() {
                   <p style={{ fontSize: '1.05rem', lineHeight: '1.7', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '8px' }}>
                     Hinweis: Formulareingänge gehen an medien@bioco.ch.
                   </p>
-                  <Link href="#anmelden" className="btn btn-primary btn-organic" style={{ display: 'inline-block', marginTop: '8px' }}>
+                  <Link href="#anmelden" className="btn btn-orange btn-organic" style={{ display: 'inline-block', marginTop: '8px' }}>
                     Jetzt anmelden
                   </Link>
                 </div>
