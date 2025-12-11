@@ -54,7 +54,17 @@ const ABO_CONFIG = {
   doppel: { price: 2350, shares: 4, people: '4-6 Personen', hours: 40 },
 }
 
-const DEPOTS = ['Baden', 'Brugg', 'Wettingen', 'Windisch', 'Ennetbaden']
+const DEPOTS = [
+  'Depot Chrättli',
+  'Depot Ohne',
+  'Depot Anixis',
+  'Casa Flora',
+  'Depot Geisshof',
+  'Depot Kupperhaus',
+  'Depot Ennetbaden',
+  'Depot Lemonia',
+  'Depot Lägernstrasse'
+]
 const DAYS = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag']
 const TIMES = ['morgens', 'nachmittags', 'abends']
 const ACTIVITY_AREAS = [
