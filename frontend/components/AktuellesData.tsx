@@ -1,3 +1,5 @@
+import { SITE_URL } from '@/lib/cmsClient'
+
 // Shared data source for Aktuelles and Events
 // Structure designed to be easily replaceable with ProcessWire API data
 export type EventStatus = 'upcoming' | 'past'
@@ -295,7 +297,7 @@ function parseDate(dateStr: string): Date {
 }
 
 const DEFAULT_SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
+  SITE_URL ||
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
 
 export async function fetchEventsFromCms(): Promise<EventsFeed> {
@@ -305,7 +307,7 @@ export async function fetchEventsFromCms(): Promise<EventsFeed> {
       : '/api/events'
 
   const response = await fetch(endpoint, {
-    cache: 'no-store',
+    cache: 'force-cache',
   })
 
   if (!response.ok) {

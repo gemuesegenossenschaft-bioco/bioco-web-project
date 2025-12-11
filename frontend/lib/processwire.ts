@@ -1,6 +1,4 @@
-// ProcessWire API client for headless CMS
-
-const API_URL = process.env.NEXT_PUBLIC_PROCESSWIRE_API_URL || process.env.PROCESSWIRE_API_URL || 'http://localhost/api'
+import { cmsApiUrl, cmsFetchOptions } from './cmsClient'
 
 export interface PageData {
   id: number
@@ -28,9 +26,10 @@ export interface PageData {
 
 export async function getPageData(path: string): Promise<PageData | null> {
   try {
-    const response = await fetch(`${API_URL}/pages${path}`, {
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
-    })
+    const response = await fetch(
+      cmsApiUrl(`/pages.php?path=${encodeURIComponent(path || '/')}`),
+      cmsFetchOptions(600)
+    )
     
     if (!response.ok) {
       return null
@@ -45,9 +44,7 @@ export async function getPageData(path: string): Promise<PageData | null> {
 
 export async function getNavigation(): Promise<PageData[]> {
   try {
-    const response = await fetch(`${API_URL}/navigation`, {
-      next: { revalidate: 300 }, // Revalidate every 5 minutes
-    })
+    const response = await fetch(cmsApiUrl('/navigation.php'), cmsFetchOptions(1800))
     
     if (!response.ok) {
       return []

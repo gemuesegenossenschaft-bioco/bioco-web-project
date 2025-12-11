@@ -17,7 +17,7 @@ If you prefer to configure via file, create a `vercel.json` in the project root:
 
 ```json
 {
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/.next",
   "installCommand": "cd frontend && npm install",
   "framework": "nextjs",
@@ -29,9 +29,10 @@ If you prefer to configure via file, create a `vercel.json` in the project root:
 
 Set these in Vercel Dashboard → Settings → Environment Variables:
 
-- `PROCESSWIRE_API_URL` - API URL for ProcessWire backend
-- `MATOMO_URL` - Matomo analytics URL (optional)
-- `MATOMO_SITE_ID` - Matomo site ID (optional)
+- `PROCESSWIRE_BASE_URL` (and `NEXT_PUBLIC_PROCESSWIRE_BASE_URL` if needed) – ProcessWire origin, e.g. `https://bioco.ch`
+- `PROCESSWIRE_API_TOKEN` – optional bearer token if API is protected
+- `NEXT_PUBLIC_SITE_URL` – canonical site URL, e.g. `https://bioco.ch`
+- `MATOMO_URL` / `MATOMO_SITE_ID` – optional Matomo analytics
 
 ## Build Verification
 
@@ -41,3 +42,13 @@ The project should build successfully with:
 - TypeScript 5.0.0
 
 All dependencies are correctly listed in `frontend/package.json`.
+
+## Domain setup
+
+1. Add `bioco.ch` (and `www.bioco.ch` if you keep it) under Vercel → Domains for this project.
+2. Set `bioco.ch` as the primary domain and configure a redirect either from `www` → root or vice versa.
+3. DNS records:
+   - Root: ALIAS/ANAME to `cname.vercel-dns.com` (or A record to Vercel IPv4/IPv6 targets if your DNS host lacks ALIAS support).
+   - `www`: CNAME to `cname.vercel-dns.com`.
+   - Add TXT for domain verification if prompted.
+4. After propagation, verify HTTPS works on `https://bioco.ch` and check redirects.

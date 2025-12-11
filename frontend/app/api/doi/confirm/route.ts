@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const PROCESSWIRE_API = process.env.PROCESSWIRE_API_URL || 'http://localhost/api'
+import { buildCmsHeaders, cmsApiUrl } from '@/lib/cmsClient'
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,9 +14,13 @@ export async function GET(request: NextRequest) {
     }
 
     // Send to ProcessWire API
-    const response = await fetch(`${PROCESSWIRE_API}/doi/confirm?token=${token}`, {
-      method: 'GET',
-    })
+    const response = await fetch(
+      cmsApiUrl(`/doi.php/confirm?token=${encodeURIComponent(token)}`),
+      {
+        method: 'GET',
+        headers: buildCmsHeaders(),
+      }
+    )
 
     const data = await response.json()
 

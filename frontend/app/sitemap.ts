@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next'
+import { SITE_URL } from '@/lib/cmsClient'
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://bioco.ch'
+  const baseUrl = SITE_URL || 'https://bioco.ch'
   
   return [
     {
@@ -45,12 +46,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/mitmachen`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.7,
     },
     {
       url: `${baseUrl}/aktuelles`,

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const PROCESSWIRE_API = process.env.PROCESSWIRE_API_URL || 'http://localhost/api'
+import { buildCmsHeaders, cmsApiUrl } from '@/lib/cmsClient'
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,10 +14,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Send to ProcessWire API
-    const response = await fetch(`${PROCESSWIRE_API}/forms/waiting-list`, {
+    const response = await fetch(cmsApiUrl('/forms.php/waiting-list'), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        ...(buildCmsHeaders() || {}),
       },
       body: JSON.stringify(body),
     })

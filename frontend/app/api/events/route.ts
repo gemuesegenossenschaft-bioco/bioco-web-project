@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
+import { buildCmsHeaders, cmsApiUrl, cmsFetchOptions } from '@/lib/cmsClient'
 
-const CMS_API_URL =
-  process.env.PROCESSWIRE_API_URL ?? process.env.NEXT_PUBLIC_PROCESSWIRE_API_URL
-const CMS_API_TOKEN = process.env.PROCESSWIRE_API_TOKEN
+export const revalidate = 300
+export const dynamic = 'force-static'
 
 // Fallback response when API is unavailable
 const FALLBACK_RESPONSE = {
@@ -15,20 +15,20 @@ const FALLBACK_RESPONSE = {
 
 export async function GET() {
   // If API URL not configured, return empty but successful response
-  if (!CMS_API_URL) {
-    console.warn('PROCESSWIRE_API_URL not configured, using fallback')
+  if (!process.env.PROCESSWIRE_BASE_URL && !process.env.PROCESSWIRE_API_URL) {
+    console.warn('PROCESSWIRE base URL not configured, using fallback')
     return NextResponse.json(FALLBACK_RESPONSE, { status: 200 })
   }
 
   try {
-    const response = await fetch(`${CMS_API_URL}/events`, {
-      headers: CMS_API_TOKEN
-        ? { Authorization: `Bearer ${CMS_API_TOKEN}` }
-        : undefined,
-      next: { revalidate: 300 },
-      // Add timeout to fail fast
-      signal: AbortSignal.timeout(5000),
-    })
+    const response = await fetch(
+      cmsApiUrl('/events.php'),
+      {
+        ...cmsFetchOptions(revalidate),
+        headers: buildCmsHeaders(),
+        signal: AbortSignal.timeout(5000),
+      }
+    )
 
     if (!response.ok) {
       console.warn(`Events API returned ${response.status}, using fallback`)
@@ -43,7 +43,9 @@ export async function GET() {
       return NextResponse.json(FALLBACK_RESPONSE, { status: 200 })
     }
     
-    return NextResponse.json(data, { status: 200 })
+    const res = NextResponse.json(data, { status: 200 })
+    res.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=300')
+    return res
   } catch (error) {
     console.warn('Failed to fetch ProcessWire events, using fallback:', error)
     return NextResponse.json(FALLBACK_RESPONSE, { status: 200 })
