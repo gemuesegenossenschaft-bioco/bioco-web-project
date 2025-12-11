@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
@@ -11,36 +11,12 @@ import Link from 'next/link'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 export default function AktuellesPage() {
-  const staticAktuellesItems = getAktuellesItems()
+  const allAktuellesItems = getAllAktuellesItems()
   const { upcoming: eventItems, past, isLoading: eventsLoading, error: eventsError } = useEventsFeed()
-  const [allAktuellesItems, setAllAktuellesItems] = useState<AktuellesItem[]>(staticAktuellesItems)
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-
-  // Load Instagram posts on mount
-  useEffect(() => {
-    const loadInstagramPosts = async () => {
-      try {
-        const items = await getAllAktuellesItems()
-        setAllAktuellesItems(items)
-      } catch (error) {
-        console.error('Error loading Instagram posts:', error)
-        // Fallback to static items
-        setAllAktuellesItems(staticAktuellesItems)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    
-    loadInstagramPosts()
-  }, [])
 
   const handleItemClick = (item: AktuellesItem) => {
-    // Don't open modal for Instagram posts (they open in new tab)
-    if (item.type === 'instagram') {
-      return
-    }
     setSelectedItem(item)
     setIsModalOpen(true)
   }
@@ -65,30 +41,26 @@ export default function AktuellesPage() {
           <section id="G-01" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
             <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>Aktuelles</h1>
             <div style={{ marginTop: '24px' }}>
-              {isLoading ? (
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Lade Beiträge...</p>
-              ) : (
-                <div className="aktuelles-list">
-                  {allAktuellesItems.slice(0, 3).map((item, index) => (
-                    <AktuellesItemComponent 
-                      key={item.id || item.instagram_id || index} 
+              <div className="aktuelles-list">
+                {allAktuellesItems.slice(0, 3).map((item, index) => (
+                  <AktuellesItemComponent 
+                    key={item.id || index} 
                       item={item} 
                       variant="aktuelles"
                       onClick={handleItemClick}
                     />
                   ))}
-                  {allAktuellesItems.length === 0 && (
-                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Keine Beiträge verfügbar.</p>
-                  )}
-                  {allAktuellesItems.length > 3 && (
-                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                      <Link href="/aktuelles" className="btn btn-secondary btn-organic" style={{ display: 'inline-block' }}>
-                        Alle Neuigkeiten
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
+                {allAktuellesItems.length === 0 && (
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Keine Beiträge verfügbar.</p>
+                )}
+                {allAktuellesItems.length > 3 && (
+                  <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                    <Link href="/aktuelles" className="btn btn-secondary btn-organic" style={{ display: 'inline-block' }}>
+                      Alle Neuigkeiten
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
           </section>
 

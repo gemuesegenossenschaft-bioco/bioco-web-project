@@ -15,7 +15,7 @@ export interface AktuellesItem {
   date: string
   title: string
   description: string
-  type: 'aktuelles' | 'event' | 'instagram'
+  type: 'aktuelles' | 'event'
   // Extended fields for detail view
   fullDescription?: string
   location?: string
@@ -34,9 +34,6 @@ export interface AktuellesItem {
   body?: string // Full content from ProcessWire
   url?: string // ProcessWire page URL
   parentTitle?: string
-  // Instagram-specific fields
-  instagram_id?: string
-  instagram_url?: string
 }
 
 interface EventsApiEvent {
@@ -226,62 +223,10 @@ export function getStaticEventItems(): AktuellesItem[] {
 }
 
 /**
- * Fetch Instagram posts from API
- * Returns Instagram posts formatted as AktuellesItem
+ * Get all Aktuelles items
  */
-export async function getInstagramPosts(): Promise<AktuellesItem[]> {
-  try {
-    const response = await fetch('/api/instagram', {
-      next: { revalidate: 3600 } // Revalidate every hour
-    })
-    
-    if (!response.ok) {
-      return []
-    }
-    
-    const data = await response.json()
-    
-    if (!data.success || !data.posts) {
-      return []
-    }
-    
-    // Convert Instagram posts to AktuellesItem format
-    return data.posts.map((post: any) => ({
-      id: post.instagram_id || post.id,
-      date: post.date,
-      title: post.title,
-      description: post.body ? post.body.substring(0, 150) + (post.body.length > 150 ? '...' : '') : '',
-      type: 'instagram' as const,
-      fullDescription: post.body,
-      imageUrl: post.imageUrl,
-      instagram_id: post.instagram_id,
-      instagram_url: post.instagram_url || post.url,
-      url: post.instagram_url || post.url
-    }))
-  } catch (error) {
-    console.error('Error fetching Instagram posts:', error)
-    return []
-  }
-}
-
-/**
- * Get all Aktuelles items including Instagram posts
- */
-export async function getAllAktuellesItems(): Promise<AktuellesItem[]> {
-  const staticItems = getAktuellesItems()
-  const instagramPosts = await getInstagramPosts()
-  
-  // Combine and sort by date (newest first)
-  const allItems = [...staticItems, ...instagramPosts]
-  
-  // Sort by date (parse date strings)
-  allItems.sort((a, b) => {
-    const dateA = parseDate(a.date)
-    const dateB = parseDate(b.date)
-    return dateB.getTime() - dateA.getTime()
-  })
-  
-  return allItems
+export function getAllAktuellesItems(): AktuellesItem[] {
+  return getAktuellesItems()
 }
 
 /**

@@ -27,10 +27,7 @@ export function OrganizationSchema() {
       "areaServed": "CH",
       "availableLanguage": "de"
     },
-    "foundingDate": "2014",
-    "sameAs": [
-      "https://www.instagram.com/bioco.ch/"
-    ]
+    "foundingDate": "2014"
   }
 
   return (
