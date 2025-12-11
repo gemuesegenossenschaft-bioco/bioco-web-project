@@ -5472,12 +5472,12 @@ footer a:hover {
   background: var(--bg-secondary);
   max-width: 1400px;
   margin: 0 auto;
-  padding: clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px) clamp(32px, 6vw, 64px); /* Increased top padding for more space after hero */
+  padding: clamp(0px, calc(8vw - 50px), 46px) clamp(16px, 6vw, 96px) clamp(32px, 6vw, 64px); /* Reduced top padding by 50px */
 }
 
 @media (max-width: 767px) {
   .home-container {
-    padding-top: clamp(18px, calc(8vw - 30px), 66px) !important; /* Reduced by 30px on mobile */
+    padding-top: clamp(0px, calc(8vw - 80px), 16px) !important; /* Reduced by 50px more on mobile (total 80px reduction) */
   }
 }
 
