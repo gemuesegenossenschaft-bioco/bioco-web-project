@@ -1230,11 +1230,24 @@ a:hover {
     position: sticky;
     top: 0;
     z-index: 1100;
-    background: var(--bg-secondary) !important; /* Same background as rest of website - not transparent */
-    border-bottom: 2px solid var(--bioco-green) !important; /* 2px divider (1pt less) */
     margin-top: 0 !important; /* Remove margin to prevent jumping */
-    margin-bottom: clamp(24px, 4vw, 48px) !important; /* More space beneath divider */
     transition: none !important; /* Prevent jumping animation */
+  }
+  
+  /* On home page: navbar is transparent until hero is scrolled past */
+  body[data-pathname="/"] .primary-nav:not(.nav-scrolled),
+  body[data-pathname="/"] .secondary-nav:not(.nav-scrolled) {
+    background: transparent !important; /* Transparent when over hero */
+    border-bottom: none !important; /* No border when transparent */
+    margin-bottom: 0 !important;
+  }
+  
+  /* On sub pages: navbar always has background */
+  body:not([data-pathname="/"]) .primary-nav,
+  body:not([data-pathname="/"]) .secondary-nav {
+    background: var(--bg-secondary) !important; /* Same background as rest of website */
+    border-bottom: 2px solid var(--bioco-green) !important; /* 2px divider */
+    margin-bottom: clamp(24px, 4vw, 48px) !important; /* More space beneath divider */
   }
   
   /* Hide navbar when mobile menu is open */
@@ -1278,9 +1291,9 @@ a:hover {
     left: 0;
     right: 0;
     width: 100%;
-    background: var(--bg-secondary); /* Same background as rest of website */
+    background: var(--bg-secondary) !important; /* MUST have background when scrolled */
     backdrop-filter: none; /* Remove blur */
-    border-bottom: 2px solid var(--bioco-green); /* 2px divider (1pt less) */
+    border-bottom: 2px solid var(--bioco-green) !important; /* MUST have border when scrolled */
     border-radius: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 1100;
@@ -1615,22 +1628,23 @@ header .header-nav-container .beet-leaves {
     display: flex !important;
   }
   
-  /* On sub pages (not home page): hamburger is always black */
-  body:not([data-pathname="/"]) .mobile-menu-toggle {
+  /* On sub pages: hamburger MUST be black */
+  body:not([data-pathname="/"]) .mobile-menu-toggle,
+  body:not([data-pathname="/"]) .primary-nav .mobile-menu-toggle,
+  body:not([data-pathname="/"]) .secondary-nav .mobile-menu-toggle {
     color: var(--text-primary) !important; /* Black on sub pages */
   }
   
-  /* When navbar is scrolled (past hero on home page), hamburger should be black */
-  body.nav-scrolled .mobile-menu-toggle,
-  .primary-nav.nav-scrolled .mobile-menu-toggle,
-  .secondary-nav.nav-scrolled .mobile-menu-toggle {
-    color: var(--text-primary) !important; /* Black when scrolled */
+  /* On home page when scrolled past hero: hamburger MUST be black */
+  body[data-pathname="/"].nav-scrolled .mobile-menu-toggle,
+  body[data-pathname="/"] .primary-nav.nav-scrolled .mobile-menu-toggle,
+  body[data-pathname="/"] .secondary-nav.nav-scrolled .mobile-menu-toggle {
+    color: var(--text-primary) !important; /* Black when scrolled past hero */
   }
   
-  /* When navbar is not scrolled (over hero on home page), hamburger should be white */
-  body[data-pathname="/"]:not(.nav-scrolled) .mobile-menu-toggle,
-  body:not(.nav-scrolled) .primary-nav:not(.nav-scrolled) .mobile-menu-toggle,
-  body:not(.nav-scrolled) .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle {
+  /* On home page when over hero: hamburger is white */
+  body[data-pathname="/"]:not(.nav-scrolled) .primary-nav:not(.nav-scrolled) .mobile-menu-toggle,
+  body[data-pathname="/"]:not(.nav-scrolled) .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle {
     color: white !important; /* White when over hero */
   }
 }
