@@ -30,22 +30,37 @@ export function MobileMenu() {
 
   useEffect(() => {
     const onScroll = () => {
-      // Find the h1 title element to detect when scrolling past it
-      const heroTitle = document.querySelector('.hero-content h1')
-      if (heroTitle) {
-        const titleRect = heroTitle.getBoundingClientRect()
-        // When h1 title is scrolled past (above viewport)
-        setScrolled(titleRect.bottom < 0)
+      // Check if we're on the home page
+      const isHomePage = pathname === '/'
+      
+      if (!isHomePage) {
+        // On subpages: scrolled state immediately when scrolling
+        setScrolled(window.scrollY > 0)
       } else {
-        // Fallback: trigger when scrolling out of hero (approximately 65vh hero height)
-        const heroHeight = window.innerHeight * 0.65
-        setScrolled(window.scrollY > heroHeight - 80)
+        // On home page: only change state after leaving the hero image
+        const heroBleed = document.querySelector('.hero-bleed')
+        if (heroBleed) {
+          const heroRect = heroBleed.getBoundingClientRect()
+          // When hero image bottom is scrolled past (above viewport)
+          setScrolled(heroRect.bottom < 0)
+        } else {
+          // Fallback: check for hero-bg element
+          const heroBg = document.querySelector('.hero-bg')
+          if (heroBg) {
+            const heroRect = heroBg.getBoundingClientRect()
+            setScrolled(heroRect.bottom < 0)
+          } else {
+            // Final fallback: use viewport height calculation
+            const heroHeight = window.innerHeight * 0.65
+            setScrolled(window.scrollY > heroHeight)
+          }
+        }
       }
     }
     onScroll()
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [pathname])
 
   const handleLinkClick = (href: string) => (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault()

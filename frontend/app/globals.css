@@ -1584,9 +1584,34 @@ header .header-nav-container .beet-leaves {
   pointer-events: auto !important; /* Force clickability */
 }
 
-/* When scrolled past h1 title on mobile, hamburger should be black */
+/* When scrolled past hero on mobile, hamburger should be black */
 .mobile-menu-toggle.scrolled {
   color: var(--text-primary) !important; /* Black text when scrolled */
+}
+
+/* Hamburger menu button - always visible, black when scrolled */
+.mobile-menu-toggle {
+  color: white; /* White when over hero */
+  transition: color 0.2s ease;
+}
+
+@media (max-width: 767px) {
+  /* Hamburger is always visible on mobile */
+  .mobile-header-actions {
+    display: flex !important;
+  }
+  
+  /* When navbar is scrolled (past hero), hamburger should be black */
+  .primary-nav.nav-scrolled .mobile-menu-toggle,
+  .secondary-nav.nav-scrolled .mobile-menu-toggle {
+    color: var(--text-primary) !important; /* Black when scrolled */
+  }
+  
+  /* When navbar is not scrolled (over hero), hamburger should be white */
+  .primary-nav:not(.nav-scrolled) .mobile-menu-toggle,
+  .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle {
+    color: white !important; /* White when over hero */
+  }
 }
 
 .mobile-menu-toggle:hover {

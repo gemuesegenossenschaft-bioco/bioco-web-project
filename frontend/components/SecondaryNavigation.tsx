@@ -25,9 +25,24 @@ export function PrimaryNavigation() {
       if (!isHomePage) {
         setScrolled(window.scrollY > 0)
       } else {
-        // Auf Homepage: erst nach Hero sticky
-        const heroHeight = window.innerHeight * 0.65
-        setScrolled(window.scrollY > heroHeight - 80)
+        // Auf Homepage: erst nach Hero sticky - detect when hero image is scrolled past
+        const heroBleed = document.querySelector('.hero-bleed')
+        if (heroBleed) {
+          const heroRect = heroBleed.getBoundingClientRect()
+          // When hero image bottom is scrolled past (above viewport)
+          setScrolled(heroRect.bottom < 0)
+        } else {
+          // Fallback: check for hero-bg element
+          const heroBg = document.querySelector('.hero-bg')
+          if (heroBg) {
+            const heroRect = heroBg.getBoundingClientRect()
+            setScrolled(heroRect.bottom < 0)
+          } else {
+            // Final fallback: use viewport height calculation
+            const heroHeight = window.innerHeight * 0.65
+            setScrolled(window.scrollY > heroHeight)
+          }
+        }
       }
     }
     onScroll()
