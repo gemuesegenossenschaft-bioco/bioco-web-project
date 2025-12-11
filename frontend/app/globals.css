@@ -4644,7 +4644,8 @@ footer a:hover {
 
 .hero-content {
   position: absolute;
-  bottom: 80px;
+  /* Align top with logo: navbar-overlay top + nav container vertical center offset */
+  top: clamp(20px, 3vw, 32px);
   left: clamp(var(--spacing-md), 8vw, 120px);
   z-index: 3;
   max-width: 600px;
@@ -5147,7 +5148,8 @@ footer a:hover {
 .hero-content {
   position: absolute;
   left: clamp(16px, 5vw, 72px); /* Align with Willkommen section padding */
-  top: clamp(90px, calc(3vw + 70px), 120px); /* Align with logo height */
+  /* Align top with logo: navbar-overlay top matches logo starting line */
+  top: clamp(20px, 3vw, 32px);
   z-index: 3;
   max-width: 600px;
 }
@@ -5455,9 +5457,10 @@ footer a:hover {
     position: absolute !important; /* Keep absolute positioning on mobile */
     left: clamp(16px, 5vw, 72px) !important; /* Left aligned with padding */
     right: clamp(16px, 5vw, 72px) !important; /* Right padding for better text wrapping */
-    bottom: 0 !important; /* Nest text at bottom of hero section */
-    padding-bottom: clamp(40px, 8vw, 80px) !important; /* More breathing room at bottom */
-    top: auto !important;
+    /* Align top with logo: navbar-overlay top matches logo starting line on mobile */
+    top: clamp(24px, 4vw, 48px) !important;
+    bottom: auto !important;
+    padding-bottom: 0 !important;
     margin-top: 0 !important;
     max-width: 100%;
     order: 2; /* Text second (below image) */
