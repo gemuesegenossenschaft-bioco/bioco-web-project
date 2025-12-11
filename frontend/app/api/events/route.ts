@@ -14,6 +14,11 @@ const FALLBACK_RESPONSE = {
 }
 
 export async function GET() {
+  // ProcessWire fetches disabled for now - return fallback
+  return NextResponse.json(FALLBACK_RESPONSE, { status: 200 })
+  
+  // TODO: Re-enable ProcessWire fetching when ready
+  /*
   // If API URL not configured, return empty but successful response
   if (!process.env.PROCESSWIRE_BASE_URL && !process.env.PROCESSWIRE_API_URL) {
     console.warn('PROCESSWIRE base URL not configured, using fallback')
@@ -50,5 +55,6 @@ export async function GET() {
     console.warn('Failed to fetch ProcessWire events, using fallback:', error)
     return NextResponse.json(FALLBACK_RESPONSE, { status: 200 })
   }
+  */
 }
 

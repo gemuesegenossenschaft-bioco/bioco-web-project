@@ -31,7 +31,7 @@ export function buildCmsHeaders(): HeadersInit | undefined {
 export function cmsFetchOptions(revalidateSeconds: number) {
   return {
     next: { revalidate: revalidateSeconds },
-    cache: 'force-cache' as RequestCache,
+    // Removed cache: 'force-cache' to avoid conflict with revalidate
   }
 }
 
