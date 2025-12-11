@@ -4596,16 +4596,14 @@ footer a:hover {
   }
 
   /* Flip abos table axes for mobile - display as vertical cards (earlier breakpoint) */
+  /* Simple list format for abos on mobile */
   #C-01 .pricing-table {
     display: block;
   }
 
   #C-01 .pricing-table table,
   #C-01 .pricing-table thead,
-  #C-01 .pricing-table tbody,
-  #C-01 .pricing-table th,
-  #C-01 .pricing-table td,
-  #C-01 .pricing-table tr {
+  #C-01 .pricing-table tbody {
     display: block;
   }
 
@@ -4614,52 +4612,51 @@ footer a:hover {
   }
 
   #C-01 .pricing-table tr {
+    display: block;
     border: none;
     border-radius: var(--radius-md);
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-lg);
     background: var(--bg-primary);
     box-shadow: var(--shadow-sm);
   }
 
   #C-01 .pricing-table td {
+    display: block;
     border: none;
-    padding: var(--spacing-xs) 0;
+    padding: var(--spacing-sm) 0;
     text-align: left;
-  }
-
-  #C-01 .pricing-table td {
-    position: relative;
-    padding-left: 120px;
+    position: static;
+    padding-left: 0;
+    margin-bottom: var(--spacing-xs);
   }
 
   #C-01 .pricing-table td:before {
-    content: attr(data-label);
+    display: none;
+  }
+
+  #C-01 .pricing-table td:first-child {
+    font-size: 1.25rem;
     font-weight: 700;
     color: var(--bioco-green);
-    position: absolute;
-    left: 0;
-    width: 110px;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--border-color);
   }
 
-  #C-01 .pricing-table td:first-child:before {
-    content: "Gemüsekorb:";
+  #C-01 .pricing-table td:nth-child(2) {
+    margin-bottom: var(--spacing-sm);
   }
 
-  #C-01 .pricing-table td:nth-child(2):before {
-    content: "Personen:";
+  #C-01 .pricing-table td:nth-child(3),
+  #C-01 .pricing-table td:nth-child(4) {
+    font-size: 1rem;
   }
 
-  #C-01 .pricing-table td:nth-child(3):before {
-    content: "Jahrespreis:";
-  }
-
-  #C-01 .pricing-table td:nth-child(4):before {
-    content: "Anteilsscheine:";
-  }
-
-  #C-01 .pricing-table td:nth-child(5):before {
-    content: "Mitarbeit pro Jahr:";
+  #C-01 .pricing-table td:nth-child(5) {
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
   }
 
   #C-01 .pricing-table td:empty {
@@ -4783,15 +4780,9 @@ footer a:hover {
     margin-bottom: var(--spacing-sm) !important;
   }
 
-  /* More spacing in pricing table cards on mobile */
-  #C-01 .pricing-table td {
-    padding: var(--spacing-sm) 0 !important;
-    margin-bottom: var(--spacing-xs) !important;
-  }
-
+  /* Clean spacing for abos list on mobile */
   #C-01 .pricing-table tr {
-    margin-bottom: var(--spacing-lg) !important;
-    padding: var(--spacing-lg) !important;
+    margin-bottom: var(--spacing-xl) !important;
   }
 
   /* More spacing in two-column sections on mobile */
