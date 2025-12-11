@@ -87,6 +87,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(0)
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   
   // Read URL parameters
@@ -279,6 +280,9 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
     e.preventDefault()
     if (!validateStep(5)) return
 
+    setIsSubmitting(true)
+    setFieldErrors({}) // Clear previous errors
+
     trackEvent('Form', 'Membership', 'Submit')
 
     try {
@@ -290,16 +294,24 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
         body: JSON.stringify(formData),
       })
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
+
       const data = await response.json()
 
       if (data.success) {
+        setSubmitted(true)
         // Redirect to thank you page
         router.push('/anmeldung/danke')
       } else {
         setFieldErrors({ submit: data.error || 'Es ist ein Fehler aufgetreten.' })
+        setIsSubmitting(false)
       }
     } catch (err) {
+      console.error('Form submission error:', err)
       setFieldErrors({ submit: 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.' })
+      setIsSubmitting(false)
     }
   }
 
@@ -937,8 +949,9 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                 <button
                   type="submit"
                   className="btn btn-primary"
+                  disabled={isSubmitting}
                 >
-                  Anmeldung einreichen
+                  {isSubmitting ? 'Wird gesendet...' : 'Anmeldung einreichen'}
                 </button>
               )}
             </div>
