@@ -1570,21 +1570,29 @@ header .header-nav-container .beet-leaves {
 }
 
 @media (max-width: 767px) {
-  /* Hamburger menu aligned with logo on same bar */
+  /* Hamburger menu - fixed at top on sub pages, aligned with logo on home page */
   .mobile-header-actions {
-    position: absolute;
-    top: 50%;
-    right: clamp(16px, 5vw, 72px);
-    transform: translateY(-50%);
+    position: fixed;
+    top: clamp(12px, 4vw, 28px);
+    right: clamp(16px, 5vw, 32px);
+    transform: none;
     z-index: 1200 !important; /* Higher than navbar (1100) to ensure clickability */
     display: flex !important; /* Always visible on mobile */
   }
   
-  /* Ensure hamburger is positioned relative to nav container */
-  .primary-nav .mobile-header-actions,
-  .secondary-nav .mobile-header-actions,
-  .primary-nav-container .mobile-header-actions,
-  .secondary-nav-container .mobile-header-actions {
+  /* On home page: align with logo in navbar */
+  body[data-pathname="/"] .mobile-header-actions {
+    position: absolute;
+    top: 50%;
+    right: clamp(16px, 5vw, 72px);
+    transform: translateY(-50%);
+  }
+  
+  /* Ensure hamburger is positioned correctly relative to nav container on home */
+  body[data-pathname="/"] .primary-nav .mobile-header-actions,
+  body[data-pathname="/"] .secondary-nav .mobile-header-actions,
+  body[data-pathname="/"] .primary-nav-container .mobile-header-actions,
+  body[data-pathname="/"] .secondary-nav-container .mobile-header-actions {
     position: absolute;
     top: 50%;
     right: clamp(16px, 5vw, 72px);
