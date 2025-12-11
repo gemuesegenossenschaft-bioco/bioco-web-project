@@ -311,8 +311,11 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
       }
 
       // Success - redirect to thank you page
+      console.log('Submission successful, redirecting...')
       setSubmitted(true)
-      router.push('/anmeldung/danke')
+      setIsSubmitting(false) // Reset submitting state before redirect
+      // Use window.location for more reliable redirect
+      window.location.href = '/anmeldung/danke'
     } catch (err: any) {
       console.error('Form submission error:', err)
       const errorMessage = err?.message || 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.'
