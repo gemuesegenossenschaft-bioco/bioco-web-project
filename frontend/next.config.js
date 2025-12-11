@@ -43,6 +43,50 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/der-geisshof',
+        destination: '/wir',
+        permanent: true,
+      },
+      {
+        source: '/depotstandorte',
+        destination: '/standorte-depots',
+        permanent: true,
+      },
+      {
+        source: '/was-steckt-hinter-bioco',
+        destination: '/mitmachen',
+        permanent: true,
+      },
+      {
+        source: '/bioco-die-genossenschaft',
+        destination: '/mitmachen',
+        permanent: true,
+      },
+      {
+        source: '/intranet-dokumente',
+        destination: '/intranet',
+        permanent: true,
+      },
+      {
+        source: '/solidarische-landwirtschaft',
+        destination: '/solawi',
+        permanent: true,
+      },
+      {
+        source: '/das-leitbild-von-bioco',
+        destination: '/wir',
+        permanent: true,
+      },
+      {
+        source: '/links',
+        destination: '/wir',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 module.exports = nextConfig
