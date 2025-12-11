@@ -2704,20 +2704,29 @@ footer a:hover {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 0;
+  gap: var(--spacing-sm) var(--spacing-md); /* horizontal and vertical gap */
   width: 100%;
   margin: 0;
   padding: 0;
+  align-items: baseline; /* Align items to baseline for cleaner wrapping */
 }
 
 .kalender-section li {
   padding: 0;
   margin: 0;
   color: var(--text-secondary);
-  list-style: disc;
-  list-style-position: inside;
-  margin-right: var(--spacing-sm);
+  list-style: none; /* Remove disc bullets */
   white-space: nowrap;
+  position: relative;
+  line-height: 1.5; /* Tighter line height for less vertical spacing */
+}
+
+/* Add separator after each item except the last */
+.kalender-section li:not(:last-child)::after {
+  content: ' • ';
+  margin-left: var(--spacing-sm);
+  color: var(--text-tertiary);
+  font-weight: 400;
 }
 
 .kalender-section li.empty {
@@ -2734,7 +2743,8 @@ footer a:hover {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
+  width: 100%;
 }
 
 .gallery-filter {
@@ -2783,7 +2793,8 @@ footer a:hover {
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
+  width: 100%;
 }
 
 .gallery-item {
@@ -4202,6 +4213,7 @@ footer a:hover {
 
   .gallery-grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
   }
 
   .abo-buttons {
