@@ -4683,7 +4683,7 @@ footer a:hover {
 .hero-content {
   position: absolute;
   bottom: clamp(40px, 8vw, 80px);
-  left: clamp(16px, 6vw, 96px); /* Match logo left position exactly */
+  left: calc(clamp(16px, 6vw, 96px) + 20px); /* Match logo left position + 20px */
   z-index: 3;
   max-width: 600px;
 }
@@ -5108,7 +5108,7 @@ footer a:hover {
   }
 
   .hero-content {
-    left: var(--spacing-md);
+    left: calc(var(--spacing-md) + 20px);
     bottom: 60px;
   }
 }
@@ -5185,7 +5185,7 @@ footer a:hover {
 .hero-content {
   position: absolute;
   bottom: clamp(40px, 8vw, 80px);
-  left: clamp(16px, 6vw, 96px); /* Match logo left position exactly */
+  left: calc(clamp(16px, 6vw, 96px) + 20px); /* Match logo left position + 20px */
   z-index: 3;
   max-width: 600px;
 }
@@ -5491,7 +5491,7 @@ footer a:hover {
   
   .hero-content {
     position: absolute !important; /* Keep absolute positioning on mobile */
-    left: clamp(16px, 6vw, 96px) !important; /* Match logo left position exactly */
+    left: calc(clamp(16px, 6vw, 96px) + 20px) !important; /* Match logo left position + 20px */
     right: clamp(16px, 6vw, 96px) !important; /* Right padding for better text wrapping */
     bottom: clamp(40px, 8vw, 80px) !important;
     top: auto !important;
