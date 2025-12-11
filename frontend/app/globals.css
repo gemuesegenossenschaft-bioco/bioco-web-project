@@ -1678,10 +1678,33 @@ header .header-nav-container .beet-leaves {
   width: 24px;
   height: 24px;
   transition: all 0.2s ease;
+  stroke: currentColor; /* Use currentColor so it inherits from button color */
 }
 
 .mobile-menu-toggle:hover svg {
   opacity: 0.8;
+}
+
+/* Ensure SVG stroke is black on sub pages and when scrolled past hero */
+@media (max-width: 767px) {
+  body:not([data-pathname="/"]) .mobile-menu-toggle svg,
+  body:not([data-pathname="/"]) .primary-nav .mobile-menu-toggle svg,
+  body:not([data-pathname="/"]) .secondary-nav .mobile-menu-toggle svg {
+    stroke: var(--text-primary) !important; /* Black on sub pages */
+  }
+  
+  /* Ensure SVG stroke is black when scrolled past hero on home page */
+  body[data-pathname="/"].nav-scrolled .mobile-menu-toggle svg,
+  body[data-pathname="/"] .primary-nav.nav-scrolled .mobile-menu-toggle svg,
+  body[data-pathname="/"] .secondary-nav.nav-scrolled .mobile-menu-toggle svg {
+    stroke: var(--text-primary) !important; /* Black when scrolled past hero */
+  }
+  
+  /* Ensure SVG stroke is white when over hero on home page */
+  body[data-pathname="/"]:not(.nav-scrolled) .primary-nav:not(.nav-scrolled) .mobile-menu-toggle svg,
+  body[data-pathname="/"]:not(.nav-scrolled) .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle svg {
+    stroke: white !important; /* White when over hero */
+  }
 }
 
 .desktop-nav {
