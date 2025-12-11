@@ -12,11 +12,13 @@ export function ContactForm() {
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setIsSubmitting(true)
 
     trackEvent('Form', 'Contact', 'Submit')
 
@@ -29,15 +31,23 @@ export function ContactForm() {
         body: JSON.stringify(formData),
       })
 
-      const data = await response.json()
-
-      if (data.success) {
-        setSubmitted(true)
-      } else {
-        setError(data.error || 'Es ist ein Fehler aufgetreten.')
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        data = { success: false, error: `Server error: ${response.status} ${response.statusText}` }
       }
-    } catch (err) {
-      setError('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.')
+
+      if (!response.ok || !data.success) {
+        setError(data.error || `HTTP error! status: ${response.status}`)
+      } else {
+        setSubmitted(true)
+      }
+    } catch (err: any) {
+      console.error('Contact form error:', err)
+      setError(err?.message || 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -116,7 +126,12 @@ export function ContactForm() {
         />
       </div>
 
-      <input type="submit" value="Absenden" className="btn btn-primary btn-organic" />
+      <input 
+        type="submit" 
+        value={isSubmitting ? 'Wird gesendet...' : 'Absenden'} 
+        className="btn btn-primary btn-organic" 
+        disabled={isSubmitting}
+      />
     </form>
   )
 }

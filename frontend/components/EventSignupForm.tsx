@@ -32,17 +32,24 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
         body: JSON.stringify({ ...formData, eventId, eventTitle }),
       })
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        data = { success: false, error: `Server error: ${response.status} ${response.statusText}` }
+      }
 
-      if (data.success) {
+      if (!response.ok || !data.success) {
+        setSubmitStatus('error')
+        console.error('Event signup error:', data.error || `HTTP error! status: ${response.status}`)
+      } else {
         setSubmitStatus('success')
         if (onSuccess) {
           setTimeout(() => onSuccess(), 2000)
         }
-      } else {
-        setSubmitStatus('error')
       }
     } catch (error) {
+      console.error('Event signup error:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
