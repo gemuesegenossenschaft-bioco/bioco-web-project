@@ -231,10 +231,33 @@ function formatLabel(key: string): string {
   return labels[key] || key.charAt(0).toUpperCase() + key.slice(1)
 }
 
+function formatDateFull(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(d.getTime())) return String(date)
+  
+  const months = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+  ]
+  
+  const day = d.getDate()
+  const month = months[d.getMonth()]
+  const year = d.getFullYear()
+  
+  return `${day}. ${month} ${year}`
+}
+
 function formatValue(value: any): string {
   if (value === null || value === undefined) return '-'
   if (typeof value === 'boolean') return value ? 'Ja' : 'Nein'
   if (Array.isArray(value)) return value.join(', ')
   if (typeof value === 'object') return JSON.stringify(value, null, 2)
+  
+  // Check if it's a date string (ISO format or YYYY-MM-DD)
+  const datePattern = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?/
+  if (typeof value === 'string' && datePattern.test(value)) {
+    return formatDateFull(value)
+  }
+  
   return String(value)
 }
