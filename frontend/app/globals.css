@@ -5410,14 +5410,39 @@ footer a:hover {
 @media (max-width: 767px) {
   .two-column-section {
     grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
   }
-  
-  .two-column-section .two-column-image {
+
+  /* Title (h2) always appears first - above images */
+  .two-column-text h2 {
     order: 1;
+    margin-bottom: var(--spacing-md);
   }
-  
-  .two-column-section .two-column-text {
+
+  /* Images appear second - after titles */
+  .two-column-section .two-column-image {
     order: 2;
+  }
+
+  /* Body text (p) appears third - below images */
+  .two-column-text {
+    order: 3;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .two-column-text p {
+    order: 3;
+  }
+
+  .two-column-text h3 {
+    order: 4;
+  }
+
+  .two-column-text ul,
+  .two-column-text ol {
+    order: 5;
   }
 }
 
