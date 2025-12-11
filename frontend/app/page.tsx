@@ -11,6 +11,7 @@ import { CTA } from '@/components/CTA'
 import { getAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
+import { ScrollToTopLink } from '@/components/ScrollToTopLink'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 export default function Home() {
