@@ -1230,6 +1230,10 @@ a:hover {
     position: sticky;
     top: 0;
     z-index: 1100;
+    background: var(--bg-secondary) !important; /* Same background as rest of website - not transparent */
+    border-bottom: 3px solid var(--bioco-green) !important; /* 1pt bigger divider (3px instead of 2px) */
+    margin-top: 0 !important; /* Remove margin to prevent jumping */
+    transition: none !important; /* Prevent jumping animation */
   }
   
   /* Hide utility nav on mobile */
@@ -1249,25 +1253,32 @@ a:hover {
     display: flex !important;
   }
   
-  /* Show hamburger button */
+  /* Show hamburger button - always visible on mobile */
   .mobile-header-actions {
     display: flex !important;
+    position: absolute;
+    top: 50%;
+    right: clamp(16px, 5vw, 72px);
+    transform: translateY(-50%);
+    z-index: 1201 !important;
   }
   
   /* Mobile navbar should have same sticky behavior as desktop */
   .primary-nav.nav-scrolled,
   .secondary-nav.nav-scrolled {
-    position: fixed;
+    position: sticky; /* Keep sticky instead of fixed to prevent jumping */
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
     background: var(--bg-secondary); /* Same background as rest of website */
     backdrop-filter: none; /* Remove blur */
-    border-bottom: 2px solid var(--bioco-green); /* Full width green divider */
-    border-radius: 0 0 24px 24px; /* Squircle shape - rounded bottom corners */
+    border-bottom: 3px solid var(--bioco-green); /* 1pt bigger divider (3px instead of 2px) */
+    border-radius: 0;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     z-index: 1100;
+    margin-top: 0; /* Remove margin to prevent jumping */
+    transition: none; /* Prevent jumping animation */
   }
   
   /* Ensure hamburger menu is visible when navbar is scrolled */
