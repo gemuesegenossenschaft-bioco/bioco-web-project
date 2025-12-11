@@ -2704,7 +2704,7 @@ footer a:hover {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: var(--spacing-sm) var(--spacing-md); /* horizontal and vertical gap */
+  gap: calc(var(--spacing-sm) * 2) var(--spacing-md); /* doubled vertical gap, horizontal gap */
   width: 100%;
   margin: 0;
   padding: 0;
