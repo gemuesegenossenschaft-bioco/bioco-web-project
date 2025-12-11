@@ -70,14 +70,11 @@ export interface EventsFeed {
 export const aktuellesData: AktuellesItem[] = [
   {
     id: 3,
-    date: '27. November 2025',
-    title: 'Außerordentliche Generalversammlung',
-    description: 'Wichtige Informationen für alle Genossenschafter/innen',
+    date: '1. Januar 2026',
+    title: 'Bald kommt mehr!',
+    description: 'Wir haben viel zu erzählen aber hatten noch nicht Zeit es aufzuschreiben.',
     type: 'aktuelles',
-    fullDescription: 'Wir laden alle Genossenschafter/innen zur außerordentlichen Generalversammlung ein. Es werden wichtige Themen besprochen, die die Zukunft der Genossenschaft betreffen. Deine Teilnahme ist wichtig!',
-    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
-    time: '19:00 Uhr',
-    signupRequired: false
+    fullDescription: 'Wir haben viel zu erzählen aber hatten noch nicht Zeit es aufzuschreiben.',
   },
   // Schnuppertage 2026
   {
