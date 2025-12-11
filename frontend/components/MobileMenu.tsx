@@ -134,18 +134,6 @@ export function MobileMenu() {
               <div className="mobile-menu-logo">
                 <Logo />
               </div>
-              <button
-                className="mobile-menu-close"
-                onClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setIsOpen(false)
-                }}
-                aria-label="Close menu"
-                type="button"
-              >
-                ×
-              </button>
             </div>
             <div className="mobile-menu-primary-section">
               <ul className="mobile-nav-list">
