@@ -251,7 +251,6 @@ export function DepotMap() {
                         </a>
                       </p>
                     )}
-                    {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
                     <a
                       href={getGoogleMapsLink(depot)}
                       target="_blank"
@@ -298,7 +297,6 @@ export function DepotMap() {
                         </a>
                       </p>
                     )}
-                    {depot.notes && <p style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)', fontStyle: 'italic', marginBottom: 'var(--spacing-sm)' }}>{depot.notes}</p>}
                     <a
                       href={getGoogleMapsLink(depot)}
                       target="_blank"
