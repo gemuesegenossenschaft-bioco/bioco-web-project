@@ -5714,7 +5714,7 @@ footer a:hover {
   
   .hero-content {
     position: absolute !important; /* Keep absolute positioning on mobile */
-    left: 10px !important; /* 10px from border of picture element */
+    left: 0 !important; /* No spacing/border left of text */
     right: clamp(16px, 6vw, 96px) !important; /* Right padding for better text wrapping */
     bottom: 60px !important; /* 60px from lower border */
     top: auto !important;
