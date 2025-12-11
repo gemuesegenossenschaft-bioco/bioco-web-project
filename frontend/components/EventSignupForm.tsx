@@ -157,7 +157,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
           color: 'var(--bioco-beet)',
           borderRadius: '8px'
         }}>
-          Es ist ein Fehler aufgetreten. Bitte versuche es erneut.
+          Die Anmeldung konnte nicht gesendet werden. Bitte versuche es erneut oder kontaktiere uns direkt.
         </div>
       )}
 

@@ -39,13 +39,14 @@ export function ContactForm() {
       }
 
       if (!response.ok || !data.success) {
-        setError(data.error || `HTTP error! status: ${response.status}`)
+        const errorMessage = data.error || 'Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder senden Sie uns eine E-Mail direkt an info@bioco.ch'
+        setError(errorMessage)
       } else {
         setSubmitted(true)
       }
     } catch (err: any) {
       console.error('Contact form error:', err)
-      setError(err?.message || 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.')
+      setError('Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder senden Sie uns eine E-Mail direkt an info@bioco.ch')
     } finally {
       setIsSubmitting(false)
     }
@@ -54,7 +55,7 @@ export function ContactForm() {
   if (submitted) {
     return (
       <div className="form-success bento-card">
-        <p>Vielen Dank! Sie erhalten in Kürze eine Bestätigungs-E-Mail.</p>
+        <p>Vielen Dank für Ihre Nachricht! Wir melden uns so schnell wie möglich bei Ihnen.</p>
       </div>
     )
   }
