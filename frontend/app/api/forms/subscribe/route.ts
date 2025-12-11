@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { buildCmsHeaders, cmsApiUrl } from '@/lib/cmsClient'
+import { sendFormEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,26 +13,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send to ProcessWire API
-    const response = await fetch(cmsApiUrl('/forms.php/subscribe'), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(buildCmsHeaders() || {}),
-      },
-      body: JSON.stringify(body),
+    // Send email via Resend
+    await sendFormEmail({
+      formType: 'subscribe',
+      data: body,
     })
 
-    const data = await response.json()
-
-    if (data.success) {
-      return NextResponse.json({ success: true })
-    } else {
-      return NextResponse.json(
-        { success: false, error: data.error || 'Es ist ein Fehler aufgetreten.' },
-        { status: 400 }
-      )
-    }
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Subscribe form error:', error)
     return NextResponse.json(

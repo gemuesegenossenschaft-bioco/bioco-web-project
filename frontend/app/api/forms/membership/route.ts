@@ -6,7 +6,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate required fields
-    if (!body.name || !body.email || !body.phone || !body.visit_date || !body.participants || !body.privacy_accept) {
+    if (!body.firstName || !body.lastName || !body.email || !body.address || !body.zip || !body.city || !body.privacyAccept) {
       return NextResponse.json(
         { success: false, error: 'Bitte füllen Sie alle Pflichtfelder aus.' },
         { status: 400 }
@@ -15,13 +15,13 @@ export async function POST(request: NextRequest) {
 
     // Send email via Resend
     await sendFormEmail({
-      formType: 'visit',
+      formType: 'membership',
       data: body,
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Visit day form error:', error)
+    console.error('Membership form error:', error)
     return NextResponse.json(
       { success: false, error: 'Es ist ein Fehler aufgetreten.' },
       { status: 500 }

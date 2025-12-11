@@ -26,19 +26,21 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
     setSubmitStatus('idle')
 
     try {
-      // TODO: Replace with ProcessWire API call when ready
-      // const response = await fetch('/api/forms/event-signup', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ ...formData, eventId })
-      // })
-      
-      // For now: simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setSubmitStatus('success')
-      if (onSuccess) {
-        setTimeout(() => onSuccess(), 2000)
+      const response = await fetch('/api/forms/event-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, eventId, eventTitle }),
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        setSubmitStatus('success')
+        if (onSuccess) {
+          setTimeout(() => onSuccess(), 2000)
+        }
+      } else {
+        setSubmitStatus('error')
       }
     } catch (error) {
       setSubmitStatus('error')

@@ -6,22 +6,23 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
 
     // Validate required fields
-    if (!body.name || !body.email || !body.phone || !body.visit_date || !body.participants || !body.privacy_accept) {
+    if (!body.name || !body.email) {
       return NextResponse.json(
         { success: false, error: 'Bitte füllen Sie alle Pflichtfelder aus.' },
         { status: 400 }
       )
     }
 
-    // Send email via Resend
+    // Send email via Resend (same recipient as visit form)
     await sendFormEmail({
-      formType: 'visit',
+      formType: 'event-signup',
       data: body,
+      subject: body.eventTitle ? `Event-Anmeldung: ${body.eventTitle}` : 'Neue Event-Anmeldung',
     })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('Visit day form error:', error)
+    console.error('Event signup form error:', error)
     return NextResponse.json(
       { success: false, error: 'Es ist ein Fehler aufgetreten.' },
       { status: 500 }
