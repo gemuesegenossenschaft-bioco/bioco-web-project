@@ -58,7 +58,8 @@ export function GeisshofMap() {
           <a href="https://maps.app.goo.gl/1ESuXVJwUUEd5SzX8" 
              target="_blank" 
              rel="noopener noreferrer"
-             style="display: inline-block; margin-top: 8px; padding: 12px 24px; background: #2e7d32; color: #ffffff; border: 2px solid #2e7d32; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.08);">
+             class="btn btn-primary btn-organic"
+             style="display: inline-block; margin-top: 8px;">
             Route anzeigen →
           </a>
         </div>
@@ -99,7 +100,7 @@ export function GeisshofMap() {
                 href="https://maps.app.goo.gl/1ESuXVJwUUEd5SzX8"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn btn-primary"
+                className="btn btn-primary btn-organic"
               >
                 Route planen →
               </a>

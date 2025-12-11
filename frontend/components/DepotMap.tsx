@@ -244,7 +244,7 @@ export function DepotMap() {
                           href={depot.website} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          className="btn btn-primary"
+                          className="btn btn-primary btn-organic"
                           style={{ display: 'inline-block' }}
                         >
                           Zur Website →
@@ -255,7 +255,7 @@ export function DepotMap() {
                       href={getGoogleMapsLink(depot)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-secondary"
+                      className="btn btn-secondary btn-organic"
                       style={{ marginTop: 'var(--spacing-sm)', display: 'inline-block' }}
                     >
                       Route planen →
@@ -290,7 +290,7 @@ export function DepotMap() {
                           href={depot.website} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          className="btn btn-primary"
+                          className="btn btn-primary btn-organic"
                           style={{ display: 'inline-block' }}
                         >
                           Zur Website →
@@ -301,7 +301,7 @@ export function DepotMap() {
                       href={getGoogleMapsLink(depot)}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-secondary"
+                      className="btn btn-secondary btn-organic"
                       style={{ marginTop: 'var(--spacing-sm)', display: 'inline-block' }}
                     >
                       Route planen →
