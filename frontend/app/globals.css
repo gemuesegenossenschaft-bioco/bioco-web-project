@@ -3512,7 +3512,11 @@ footer a:hover {
 }
 
 .pricing-table tr:hover {
-  background: var(--bg-secondary);
+  background: rgba(46, 125, 50, 0.1);
+}
+
+.pricing-calculator .pricing-table tr {
+  background: rgba(46, 125, 50, 0.1);
 }
 
 .pricing-table .total-row {
@@ -3608,8 +3612,8 @@ footer a:hover {
   font-family: 'DM Sans', sans-serif;
   font-weight: 700;
   padding: var(--spacing-md);
-  background: var(--bg-secondary);
-  border: 2px solid #333;
+  background: rgba(46, 125, 50, 0.1);
+  border: none;
   border-radius: var(--radius-md);
   text-align: center;
   cursor: pointer;
@@ -4561,7 +4565,7 @@ footer a:hover {
     border-radius: var(--radius-md);
     margin-bottom: var(--spacing-md);
     padding: var(--spacing-md);
-    background: var(--bg-primary);
+    background: rgba(46, 125, 50, 0.1);
     box-shadow: var(--shadow-sm);
   }
 
