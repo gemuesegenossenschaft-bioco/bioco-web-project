@@ -1242,12 +1242,13 @@ a:hover {
     margin-bottom: 0 !important;
   }
   
-  /* On sub pages: navbar always has background */
+  /* On sub pages: simple bar, no divider, no stickiness */
   body:not([data-pathname="/"]) .primary-nav,
   body:not([data-pathname="/"]) .secondary-nav {
-    background: var(--bg-secondary) !important; /* Same background as rest of website */
-    border-bottom: 2px solid var(--bioco-green) !important; /* 2px divider */
-    margin-bottom: clamp(24px, 4vw, 48px) !important; /* More space beneath divider */
+    background: var(--bg-secondary) !important;
+    border-bottom: none !important; /* Remove divider */
+    margin-bottom: 0 !important; /* No extra spacing */
+    box-shadow: none !important;
   }
   
   /* Hide navbar when mobile menu is open */
@@ -1310,12 +1311,12 @@ a:hover {
     width: 100%;
     background: var(--bg-secondary) !important; /* Default background when scrolled/other states */
     backdrop-filter: none; /* Remove blur */
-    border-bottom: 2px solid var(--bioco-green) !important; /* Divider remains */
+    border-bottom: none !important; /* No divider on mobile */
     border-radius: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    box-shadow: none !important;
     z-index: 1100;
     margin-top: 0; /* Remove margin to prevent jumping */
-    margin-bottom: clamp(24px, 4vw, 48px) !important; /* Space beneath divider */
+    margin-bottom: 0 !important; /* No extra spacing */
     transition: none; /* Prevent jumping animation */
   }
   
