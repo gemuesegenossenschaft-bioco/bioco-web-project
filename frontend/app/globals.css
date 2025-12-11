@@ -1589,6 +1589,14 @@ header .header-nav-container .beet-leaves {
     z-index: 1201 !important;
     display: flex !important;
   }
+
+  /* Sub pages: pin hamburger to top-right instead of mid-page */
+  body:not([data-pathname="/"]) .mobile-header-actions {
+    position: fixed;
+    top: clamp(12px, 4vw, 28px);
+    right: clamp(16px, 5vw, 32px);
+    transform: none;
+  }
 }
 
 @media (max-width: 767px) {
