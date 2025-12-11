@@ -1020,6 +1020,9 @@ a:hover {
   display: inline-block;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  pointer-events: auto !important;
+  z-index: 1;
+  position: relative;
 }
 
 .logo-link:hover {
@@ -4942,6 +4945,18 @@ footer a:hover {
   pointer-events: auto;
   background: transparent;
   border: none;
+}
+
+/* Ensure logo link is always clickable */
+.navbar-overlay .primary-nav-logo,
+.navbar-overlay .secondary-nav-logo,
+.navbar-overlay .logo-link,
+.primary-nav-logo .logo-link,
+.secondary-nav-logo .logo-link,
+.primary-nav .logo-link,
+.secondary-nav .logo-link {
+  pointer-events: auto !important;
+  cursor: pointer !important;
 }
 
 .navbar-overlay .primary-nav,
