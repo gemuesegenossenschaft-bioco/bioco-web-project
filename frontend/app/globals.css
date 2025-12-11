@@ -5512,7 +5512,7 @@ footer a:hover {
   
   /* Move navbar overlay down so logo is inside hero image */
   .navbar-overlay {
-    top: clamp(24px, 4vw, 48px) !important; /* Move down to be inside hero image */
+    top: clamp(39px, calc(4vw + 15px), 63px) !important; /* Move down to be inside hero image + 15px lower */
   }
   
   .hero-overlay {
