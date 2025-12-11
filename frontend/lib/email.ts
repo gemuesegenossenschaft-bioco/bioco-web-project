@@ -1,7 +1,5 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 // Email recipients for different form types
 const FORM_RECIPIENTS: Record<string, string[]> = {
   contact: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch'],
@@ -15,6 +13,12 @@ const FORM_RECIPIENTS: Record<string, string[]> = {
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@bioco.ch'
 const FROM_NAME = process.env.RESEND_FROM_NAME || 'biocò'
 
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) throw new Error('RESEND_API_KEY is not configured')
+  return new Resend(apiKey)
+}
+
 interface FormSubmission {
   formType: keyof typeof FORM_RECIPIENTS
   data: Record<string, any>
@@ -22,9 +26,7 @@ interface FormSubmission {
 }
 
 export async function sendFormEmail({ formType, data, subject }: FormSubmission) {
-  if (!process.env.RESEND_API_KEY) {
-    throw new Error('RESEND_API_KEY is not configured')
-  }
+  const resend = getResendClient()
 
   const recipients = FORM_RECIPIENTS[formType]
   if (!recipients || recipients.length === 0) {
@@ -40,7 +42,7 @@ export async function sendFormEmail({ formType, data, subject }: FormSubmission)
       to: recipients,
       subject: emailSubject,
       html: htmlContent,
-      replyTo: data.email || FROM_EMAIL,
+      reply_to: data.email || FROM_EMAIL,
     })
 
     return { success: true, id: result.data?.id }
@@ -178,7 +180,7 @@ function formatMembershipEmail(data: Record<string, any>): string {
       <head>
         <meta charset="utf-8">
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font family: Arial, sans-serif; line-height: 1.6; color: #333; }
           table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         </style>
       </head>
