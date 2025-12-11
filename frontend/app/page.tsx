@@ -34,6 +34,10 @@ export default function Home() {
 
   return (
     <div className="page-shell">
+      {/* Secondary Navigation - Above hero */}
+      <div className="hero-utility-nav">
+        <UtilityNavigation />
+      </div>
       {/* Hero */}
       <section className="hero-bleed">
         <div className="navbar-overlay">
@@ -59,10 +63,6 @@ export default function Home() {
               </span>
             </h1>
           </div>
-        </div>
-        {/* Secondary Navigation - At bottom of hero */}
-        <div className="hero-utility-nav">
-          <UtilityNavigation />
         </div>
       </section>
 
