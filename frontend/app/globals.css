@@ -4608,6 +4608,70 @@ footer a:hover {
     font-size: 1.125rem;
     margin-bottom: var(--spacing-xs);
   }
+
+  /* Abos page: More spacing between text elements on mobile */
+  #C-01 p,
+  #C-01 ul,
+  #C-01 ol,
+  #C-02 p,
+  #C-02 ul,
+  #C-02 ol,
+  #C-03 p,
+  #C-03 ul,
+  #C-03 ol,
+  #C-04 p {
+    margin-top: var(--spacing-md) !important;
+    margin-bottom: var(--spacing-md) !important;
+  }
+
+  #C-01 h3,
+  #C-02 h2,
+  #C-03 h2,
+  #C-04 h2 {
+    margin-top: var(--spacing-lg) !important;
+    margin-bottom: var(--spacing-md) !important;
+  }
+
+  #C-01 li,
+  #C-02 li,
+  #C-03 li {
+    margin-bottom: var(--spacing-sm) !important;
+  }
+
+  /* More spacing in pricing table cards on mobile */
+  #C-01 .pricing-table td {
+    padding: var(--spacing-sm) 0 !important;
+    margin-bottom: var(--spacing-xs) !important;
+  }
+
+  #C-01 .pricing-table tr {
+    margin-bottom: var(--spacing-lg) !important;
+    padding: var(--spacing-lg) !important;
+  }
+
+  /* More spacing in two-column sections on mobile */
+  .two-column-section {
+    gap: var(--spacing-lg) !important;
+    margin-bottom: var(--spacing-xl) !important;
+  }
+
+  .two-column-text {
+    margin-bottom: var(--spacing-lg) !important;
+  }
+
+  .two-column-text p {
+    margin-top: var(--spacing-md) !important;
+    margin-bottom: var(--spacing-md) !important;
+  }
+
+  .two-column-text ul {
+    margin-top: var(--spacing-md) !important;
+    margin-bottom: var(--spacing-md) !important;
+  }
+
+  .two-column-text li {
+    margin-bottom: var(--spacing-sm) !important;
+  }
 }
 
 /* ============================================
