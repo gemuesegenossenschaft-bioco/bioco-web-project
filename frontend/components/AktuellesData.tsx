@@ -82,7 +82,7 @@ export const aktuellesData: AktuellesItem[] = [
   // Schnuppertage 2026
   {
     id: 4,
-    date: '28.04.2026',
+    date: '28. April 2026',
     title: 'Schnuppertag April',
     description: 'Lerne biocò und den Geisshof kennen',
     type: 'event',
@@ -98,7 +98,7 @@ export const aktuellesData: AktuellesItem[] = [
   },
   {
     id: 5,
-    date: '29.05.2026',
+    date: '29. Mai 2026',
     title: 'Schnuppertag Mai',
     description: 'Lerne biocò und den Geisshof kennen',
     type: 'event',
@@ -114,7 +114,7 @@ export const aktuellesData: AktuellesItem[] = [
   },
   {
     id: 6,
-    date: '26.06.2026',
+    date: '26. Juni 2026',
     title: 'Schnuppertag Juni',
     description: 'Lerne biocò und den Geisshof kennen',
     type: 'event',
@@ -130,7 +130,7 @@ export const aktuellesData: AktuellesItem[] = [
   },
   {
     id: 7,
-    date: '31.07.2026',
+    date: '31. Juli 2026',
     title: 'Schnuppertag Juli',
     description: 'Lerne biocò und den Geisshof kennen',
     type: 'event',
@@ -146,7 +146,7 @@ export const aktuellesData: AktuellesItem[] = [
   },
   {
     id: 8,
-    date: '28.08.2026',
+    date: '28. August 2026',
     title: 'Schnuppertag August',
     description: 'Lerne biocò und den Geisshof kennen',
     type: 'event',
@@ -162,7 +162,7 @@ export const aktuellesData: AktuellesItem[] = [
   },
   {
     id: 9,
-    date: '25.09.2026',
+    date: '25. September 2026',
     title: 'Schnuppertag September',
     description: 'Lerne biocò und den Geisshof kennen',
     type: 'event',
@@ -178,7 +178,7 @@ export const aktuellesData: AktuellesItem[] = [
   },
   {
     id: 10,
-    date: '30.10.2026',
+    date: '30. Oktober 2026',
     title: 'Schnuppertag Oktober',
     description: 'Lerne biocò und den Geisshof kennen',
     type: 'event',
@@ -230,10 +230,29 @@ export function getAllAktuellesItems(): AktuellesItem[] {
 }
 
 /**
+ * Format date to German format: "27. November 2025"
+ */
+function formatDateFull(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(d.getTime())) return ''
+  
+  const months = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+  ]
+  
+  const day = d.getDate()
+  const month = months[d.getMonth()]
+  const year = d.getFullYear()
+  
+  return `${day}. ${month} ${year}`
+}
+
+/**
  * Parse German date string to Date object
  */
 function parseDate(dateStr: string): Date {
-  // Format: "DD.MM.YYYY"
+  // Format: "DD.MM.YYYY" or "DD. Month YYYY"
   const parts = dateStr.split('.')
   if (parts.length === 3) {
     return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]))
@@ -273,7 +292,7 @@ export async function fetchEventsFromCms(): Promise<EventsFeed> {
 
 function mapEventFromApi(event: EventsApiEvent): AktuellesItem {
   const fallbackDate = event.startDate
-    ? new Date(event.startDate).toLocaleDateString('de-CH')
+    ? formatDateFull(event.startDate)
     : ''
 
   const previewImage = event.media?.find(media => media.type === 'image')
