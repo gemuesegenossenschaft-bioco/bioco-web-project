@@ -294,21 +294,25 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
         body: JSON.stringify(formData),
       })
 
-      const data = await response.json()
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        // If JSON parsing fails, create a basic error response
+        data = { success: false, error: `Server error: ${response.status} ${response.statusText}` }
+      }
 
-      if (!response.ok) {
+      if (!response.ok || !data.success) {
         // Extract error message from response
-        throw new Error(data.error || `HTTP error! status: ${response.status}`)
+        const errorMessage = data.error || `HTTP error! status: ${response.status}`
+        setFieldErrors({ submit: errorMessage })
+        setIsSubmitting(false)
+        return
       }
 
-      if (data.success) {
-        setSubmitted(true)
-        // Redirect to thank you page
-        router.push('/anmeldung/danke')
-      } else {
-        setFieldErrors({ submit: data.error || 'Es ist ein Fehler aufgetreten.' })
-        setIsSubmitting(false)
-      }
+      // Success - redirect to thank you page
+      setSubmitted(true)
+      router.push('/anmeldung/danke')
     } catch (err: any) {
       console.error('Form submission error:', err)
       const errorMessage = err?.message || 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.'
