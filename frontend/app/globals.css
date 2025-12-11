@@ -2716,7 +2716,7 @@ footer a:hover {
   color: var(--text-secondary);
   list-style: disc;
   list-style-position: inside;
-  margin-right: var(--spacing-md);
+  margin-right: var(--spacing-sm);
   white-space: nowrap;
 }
 
