@@ -162,7 +162,7 @@ export function DepotMap() {
             ${depot.address}<br>
             <small><strong>${depot.day}</strong></small><br>
             ${depot.contact ? `<small>Kontakt: ${depot.contact}</small><br>` : ''}
-            ${depot.website ? `<small><a href="${depot.website}" target="_blank" rel="noopener noreferrer">Website</a></small>` : ''}
+            ${depot.website ? `<a href="${depot.website}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 8px; padding: 12px 24px; background: var(--bioco-green); color: #ffffff; border: 2px solid var(--bioco-green); border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;">Zur Website →</a>` : ''}
           </div>
         `
         marker.bindPopup(popupContent)

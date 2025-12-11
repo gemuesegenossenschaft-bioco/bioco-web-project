@@ -58,7 +58,7 @@ export function GeisshofMap() {
           <a href="https://maps.app.goo.gl/1ESuXVJwUUEd5SzX8" 
              target="_blank" 
              rel="noopener noreferrer"
-             style="color: #2e7d32; text-decoration: underline;">
+             style="display: inline-block; margin-top: 8px; padding: 12px 24px; background: var(--bioco-green); color: #ffffff; border: 2px solid var(--bioco-green); border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s ease;">
             Route anzeigen →
           </a>
         </div>
