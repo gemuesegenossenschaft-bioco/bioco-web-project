@@ -19,7 +19,23 @@ export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
       onClick()
     }
     
-    // Determine scroll target based on href
+    // Check if it's an anchor link (starts with #)
+    if (href.startsWith('#')) {
+      // For anchor links, scroll to the element on the same page
+      const element = document.getElementById(href.substring(1))
+      if (element) {
+        const headerOffset = 100
+        const elementPosition = element.getBoundingClientRect().top
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        })
+      }
+      return
+    }
+    
+    // Determine scroll target based on href for specific pages
     let scrollTarget: string | null = null
     if (href === '/kontakt') {
       scrollTarget = 'kontakt-formular'
@@ -43,7 +59,15 @@ export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
         }
       }, 100)
     } else {
+      // For other pages, scroll to top after navigation
       router.push(href)
+      // Wait for navigation to complete, then scroll to top
+      setTimeout(() => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        })
+      }, 100)
     }
   }
   
