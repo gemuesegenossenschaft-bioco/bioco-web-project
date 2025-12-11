@@ -1281,6 +1281,23 @@ a:hover {
     right: clamp(16px, 5vw, 72px);
     transform: translateY(-50%);
     z-index: 1201 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Ensure hamburger is visible on sub pages */
+  body:not([data-pathname="/"]) .mobile-header-actions {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Ensure hamburger is visible when scrolled past hero on home page */
+  body[data-pathname="/"] .primary-nav.nav-scrolled .mobile-header-actions,
+  body[data-pathname="/"] .secondary-nav.nav-scrolled .mobile-header-actions {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
   
   /* Mobile navbar should have same sticky behavior as desktop */
@@ -1317,6 +1334,8 @@ a:hover {
     right: clamp(16px, 5vw, 72px);
     transform: translateY(-50%);
     z-index: 1201 !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }
 
