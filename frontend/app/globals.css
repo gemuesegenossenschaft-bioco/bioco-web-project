@@ -1247,6 +1247,8 @@ a:hover {
     z-index: 1100;
     margin-top: 0 !important; /* Remove margin to prevent jumping */
     transition: none !important; /* Prevent jumping animation */
+    background: transparent !important; /* Transparent by default on mobile */
+    border-bottom: none !important; /* No border by default */
   }
   
   /* On home page: navbar is transparent until hero is scrolled past */
