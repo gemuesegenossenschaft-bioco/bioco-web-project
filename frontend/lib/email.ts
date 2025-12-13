@@ -2,12 +2,12 @@ import { Resend } from 'resend'
 
 // Email recipients for different form types
 const FORM_RECIPIENTS: Record<string, string[]> = {
-  contact: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch'],
-  subscribe: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch'],
+  contact: ['info@bioco.ch', 'intranet@bioco.ch', 'gueneyextern@gmail.com'],
+  subscribe: ['info@bioco.ch', 'intranet@bioco.ch'],
   visit: ['medien@bioco.ch'],
   'event-signup': ['medien@bioco.ch'], // Same as visit
-  'waiting-list': ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch'],
-  membership: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch'],
+  'waiting-list': ['info@bioco.ch', 'intranet@bioco.ch'],
+  membership: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch', 'gueneyextern@gmail.com'],
 }
 
 const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@bioco.ch'
