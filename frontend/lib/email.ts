@@ -1,4 +1,4 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
 // Email recipients for different form types
 const FORM_RECIPIENTS: Record<string, string[]> = {
@@ -10,13 +10,40 @@ const FORM_RECIPIENTS: Record<string, string[]> = {
   membership: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch', 'gueneyextern@gmail.com'],
 }
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@bioco.ch'
-const FROM_NAME = process.env.RESEND_FROM_NAME || 'biocò'
+// Safety BCC recipients - always included to ensure no emails are lost
+const SAFETY_BCC = ['info@bioco.ch']
 
-function getResendClient() {
-  const apiKey = process.env.RESEND_API_KEY
-  if (!apiKey) throw new Error('RESEND_API_KEY is not configured')
-  return new Resend(apiKey)
+const FROM_EMAIL = process.env.SMTP_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'noreply@bioco.ch'
+const FROM_NAME = process.env.SMTP_FROM_NAME || process.env.RESEND_FROM_NAME || 'biocò'
+
+/**
+ * Get SMTP transporter for Novatrend mail server
+ * Uses mail.bioco.ch with credentials from environment variables
+ */
+function getSMTPTransporter() {
+  const host = process.env.SMTP_HOST || 'mail.bioco.ch'
+  const port = parseInt(process.env.SMTP_PORT || '465', 10)
+  const secure = process.env.SMTP_SECURE !== 'false' && port === 465 // SSL for port 465, STARTTLS for 587
+  const user = process.env.SMTP_USER || 'test@bioco.ch'
+  const pass = process.env.SMTP_PASS
+
+  if (!pass) {
+    throw new Error('SMTP_PASS is not configured')
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: {
+      user,
+      pass,
+    },
+    // For port 587 with STARTTLS
+    ...(port === 587 && {
+      requireTLS: true,
+    }),
+  })
 }
 
 interface FormSubmission {
@@ -25,8 +52,32 @@ interface FormSubmission {
   subject?: string
 }
 
+/**
+ * Log email send attempt (for monitoring - no deletion)
+ */
+function logEmailAttempt(
+  formType: string,
+  recipients: string[],
+  success: boolean,
+  error?: any
+) {
+  const timestamp = new Date().toISOString()
+  const logEntry = {
+    timestamp,
+    formType,
+    recipients,
+    success,
+    error: error?.message || error,
+  }
+  
+  console.log('[EMAIL]', JSON.stringify(logEntry))
+  
+  // In production, you might want to also log to a file or monitoring service
+  // but we're not deleting anything - just logging for debugging
+}
+
 export async function sendFormEmail({ formType, data, subject }: FormSubmission) {
-  const resend = getResendClient()
+  const transporter = getSMTPTransporter()
 
   const recipients = FORM_RECIPIENTS[formType]
   if (!recipients || recipients.length === 0) {
@@ -37,27 +88,29 @@ export async function sendFormEmail({ formType, data, subject }: FormSubmission)
   const htmlContent = formatFormEmail(formType, data)
 
   try {
-    const result = await resend.emails.send({
+    const mailOptions = {
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
-      to: recipients,
+      to: recipients.join(', '),
+      bcc: SAFETY_BCC.join(', '), // Always BCC to safety addresses
       subject: emailSubject,
       html: htmlContent,
-      reply_to: data.email || FROM_EMAIL,
-    })
-
-    if (result.error) {
-      console.error('Resend API error:', result.error)
-      throw new Error(result.error.message || 'Failed to send email via Resend')
+      replyTo: data.email || FROM_EMAIL,
     }
 
-    return { success: true, id: result.data?.id }
+    const info = await transporter.sendMail(mailOptions)
+    
+    logEmailAttempt(formType, recipients, true)
+    
+    return { success: true, id: info.messageId }
   } catch (error: any) {
-    console.error('Resend email error:', error)
+    logEmailAttempt(formType, recipients, false, error)
+    console.error('SMTP email error:', error)
+    
     // Re-throw with more context
     if (error?.message) {
-      throw error
+      throw new Error(`Failed to send email via SMTP: ${error.message}`)
     }
-    throw new Error(error?.message || 'Failed to send email')
+    throw new Error('Failed to send email via SMTP')
   }
 }
 
@@ -189,7 +242,7 @@ function formatMembershipEmail(data: Record<string, any>): string {
       <head>
         <meta charset="utf-8">
         <style>
-          body { font family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
           table { width: 100%; border-collapse: collapse; margin: 20px 0; }
         </style>
       </head>

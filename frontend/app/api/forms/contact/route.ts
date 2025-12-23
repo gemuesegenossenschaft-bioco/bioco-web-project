@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send email via Resend
+    // Send email via SMTP
     await sendFormEmail({
       formType: 'contact',
       data: body,

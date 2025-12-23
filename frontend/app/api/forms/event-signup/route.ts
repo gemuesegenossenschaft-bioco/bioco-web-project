@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send email via Resend (same recipient as visit form)
+    // Send email via SMTP (same recipient as visit form)
     await sendFormEmail({
       formType: 'event-signup',
       data: body,

@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send email via Resend
+    // Send email via SMTP
     await sendFormEmail({
       formType: 'membership',
       data: body,
@@ -26,9 +26,9 @@ export async function POST(request: NextRequest) {
     // Provide more detailed error message
     let errorMessage = 'Es ist ein Fehler aufgetreten.'
     if (error?.message) {
-      if (error.message.includes('RESEND_API_KEY')) {
+      if (error.message.includes('SMTP_PASS') || error.message.includes('SMTP')) {
         errorMessage = 'E-Mail-Konfiguration fehlt. Bitte kontaktieren Sie den Administrator.'
-      } else if (error.message.includes('email') || error.message.includes('domain')) {
+      } else if (error.message.includes('email') || error.message.includes('domain') || error.message.includes('SMTP')) {
         errorMessage = 'E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.'
       } else {
         errorMessage = error.message
