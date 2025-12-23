@@ -2,12 +2,12 @@ import nodemailer from 'nodemailer'
 
 // Email recipients for different form types
 const FORM_RECIPIENTS: Record<string, string[]> = {
-  contact: ['info@bioco.ch', 'intranet@bioco.ch', 'gueneyextern@gmail.com'],
+  contact: ['info@bioco.ch', 'intranet@bioco.ch'],
   subscribe: ['info@bioco.ch', 'intranet@bioco.ch'],
   visit: ['medien@bioco.ch'],
   'event-signup': ['medien@bioco.ch'], // Same as visit
   'waiting-list': ['info@bioco.ch', 'intranet@bioco.ch'],
-  membership: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch', 'gueneyextern@gmail.com'],
+  membership: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch'],
 }
 
 // Safety BCC recipients - always included to ensure no emails are lost

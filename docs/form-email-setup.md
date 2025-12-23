@@ -46,12 +46,12 @@ SMTP_FROM_NAME=biocò
 
 ## Form Types
 
-- `contact` - Contact form → info@bioco.ch, intranet@bioco.ch, gueneyextern@gmail.com
+- `contact` - Contact form → info@bioco.ch, intranet@bioco.ch
 - `subscribe` - Newsletter subscription → info@bioco.ch, intranet@bioco.ch
 - `visit` - Visit day / Schnuppertag registration → medien@bioco.ch
 - `event-signup` - Event signup → medien@bioco.ch (same as visit)
 - `waiting-list` - Waiting list registration → info@bioco.ch, intranet@bioco.ch
-- `membership` - Membership form → info@bioco.ch, medien@bioco.ch, intranet@bioco.ch, gueneyextern@gmail.com
+- `membership` - Membership form → info@bioco.ch, medien@bioco.ch, intranet@bioco.ch
 
 ## Safety Features
 
