@@ -2,18 +2,9 @@
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
-// Bootstrap ProcessWire (api/ is at root level)
-require_once __DIR__ . '/../index.php';
 
 $pages = wire('pages');
+$sanitizer = wire('sanitizer');
 
 $response = [
     'success' => true,
@@ -22,32 +13,68 @@ $response = [
     'past' => [],
 ];
 
+// Safely find events with error handling
 try {
-    $now = time();
     $events = $pages->find('template=event, sort=event_start');
-    
-    foreach ($events as $event) {
-        $eventData = [
-            'id' => $event->id,
-            'title' => $event->title,
-            'url' => $event->url,
-            'start' => $event->event_start ? date(DATE_ATOM, $event->event_start) : null,
-            'end' => $event->event_end ? date(DATE_ATOM, $event->event_end) : null,
-            'location' => $event->event_location ?? '',
-            'description' => $event->body ?? '',
-            'signupEnabled' => (bool) $event->signup_enabled,
-            'status' => $event->event_status ?? 'upcoming',
-        ];
-        
-        $eventEnd = $event->event_end ?: $event->event_start;
-        if ($eventEnd && $eventEnd < $now) {
-            $response['past'][] = $eventData;
-        } else {
-            $response['upcoming'][] = $eventData;
-        }
-    }
-} catch (\Exception $e) {
-    error_log('Events API error: ' . $e->getMessage());
+} catch (Exception $e) {
+    error_log('Failed to query events: ' . $e->getMessage());
+    echo json_encode($response);
+    exit;
 }
 
-echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+foreach($events as $event) {
+    // Ensure status is always set, default to 'upcoming'
+    $status = $event->event_status && in_array($event->event_status, ['upcoming', 'past']) 
+        ? $event->event_status 
+        : 'upcoming';
+    $media = [];
+
+    foreach($event->event_media as $file) {
+        /** @var Pagefile $file */
+        $media[] = [
+            'url' => $file->httpUrl(),
+            'description' => $file->description,
+            'type' => mediaTypeFromExtension($file->ext),
+        ];
+    }
+
+    // Only add events that have required fields
+    if (!$event->title || !$event->event_start) {
+        continue;
+    }
+    
+    // Ensure past events don't have signup enabled
+    $signupEnabled = ($status === 'upcoming') ? (bool) $event->event_signup_enabled : false;
+    
+    $response[$status][] = [
+        'id' => $event->id,
+        'title' => $event->title,
+        'description' => $event->event_summary ?: ($event->body ? $sanitizer->truncate($event->body, 200) : ''),
+        'fullDescription' => $event->body ?: '',
+        'location' => $event->event_location ?: '',
+        'startDate' => $event->event_start ? $event->event_start->format(DATE_ATOM) : null,
+        'endDate' => $event->event_end ? $event->event_end->format(DATE_ATOM) : null,
+        'dateLabel' => $event->event_start ? $event->event_start->format('d.m.Y') : '',
+        'timeLabel' => $event->event_start && $event->event_end
+            ? $event->event_start->format('H:i') . ' - ' . $event->event_end->format('H:i') . ' Uhr'
+            : '',
+        'signupEnabled' => $signupEnabled,
+        'signupNotes' => $event->event_signup_notes ?: '',
+        'status' => $status,
+        'media' => $media,
+        'url' => $event->httpUrl(),
+        'parentTitle' => $event->parent?->title ?: '',
+    ];
+}
+
+echo json_encode($response);
+
+/**
+ * @param string $ext
+ */
+function mediaTypeFromExtension($ext): string
+{
+    $videoExtensions = ['mp4', 'mov', 'webm'];
+    return in_array(strtolower($ext), $videoExtensions, true) ? 'video' : 'image';
+}
+

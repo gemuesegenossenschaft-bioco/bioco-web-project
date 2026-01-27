@@ -151,7 +151,7 @@ class DOIManager extends WireData implements Module {
 		$mail = wireMail();
 		$mail->to($email);
 		$mail->from($config->email_from, $config->email_from_name);
-		$mail->subject('Bitte bestätigen Sie Ihre Anmeldung');
+		$mail->subject('Bitte bestätige deine Anmeldung');
 		
 		// Load email template
 		$templateFile = $config->paths->templates . "emails/doi-confirmation.php";
@@ -165,9 +165,10 @@ class DOIManager extends WireData implements Module {
 			$emailBody = ob_get_clean();
 		} else {
 			// Fallback email content
-			$emailBody = "Bitte bestätigen Sie Ihre Anmeldung durch Klick auf folgenden Link:\n\n";
+			$emailBody = "Hallo,\n\nvielen Dank für deine Anmeldung auf bioco.ch. Bitte bestätige deine Anmeldung durch Klick auf folgenden Link:\n\n";
 			$emailBody .= $confirmationUrl . "\n\n";
-			$emailBody .= "Dieser Link ist 24 Stunden gültig.";
+			$emailBody .= "Dieser Link ist 24 Stunden gültig.\n\n";
+			$emailBody .= "Falls du dich nicht angemeldet hast, kannst du diese E-Mail ignorieren.";
 		}
 		
 		$mail->bodyHTML($emailBody);

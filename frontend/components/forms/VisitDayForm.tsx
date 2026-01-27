@@ -45,7 +45,7 @@ export function VisitDayForm() {
 
   if (submitted) {
     return (
-      <div className="form-success wireframe-box">
+      <div className="form-success bento-card">
         <p>Vielen Dank für Ihre Anmeldung! Bitte bestätigen Sie Ihre Anmeldung über den Link in der E-Mail, die wir Ihnen gesendet haben.</p>
       </div>
     )
@@ -54,7 +54,7 @@ export function VisitDayForm() {
   return (
     <form onSubmit={handleSubmit} className="visit-form">
       {error && (
-        <div className="form-error wireframe-box">
+        <div className="form-error bento-card">
           <p>{error}</p>
         </div>
       )}

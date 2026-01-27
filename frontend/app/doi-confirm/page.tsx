@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { trackEvent } from '@/components/MatomoScript'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import Link from 'next/link'
 
 function DOIConfirmContent() {
   const searchParams = useSearchParams()
@@ -51,9 +52,12 @@ function DOIConfirmContent() {
       <>
         <Header />
         <main className="main-content">
-          <div className="content-grid">
-            <section className="content-card">
-              <p>Bitte warten...</p>
+          <div className="bento-grid">
+            <section className="bento-card">
+              <div className="plant-pattern"></div>
+              <div className="card-body">
+                <p className="card-text">Bitte warten...</p>
+              </div>
             </section>
           </div>
         </main>
@@ -66,34 +70,42 @@ function DOIConfirmContent() {
     <>
       <Header />
       <main className="main-content">
-        <div className="content-grid">
-          <section className="content-card">
-            {confirmed ? (
-              <div className="doi-confirmed">
-                <h2>Anmeldung bestätigt</h2>
-                <p>Vielen Dank! Ihre Anmeldung wurde erfolgreich bestätigt.</p>
+        <div className="bento-grid">
+          {confirmed ? (
+            <section className="bento-card bento-card-large">
+              <div className="plant-pattern"></div>
+              <div className="card-header">
+                <h3>Anmeldung bestätigt</h3>
+              </div>
+              <div className="card-body">
+                <p className="card-text">Vielen Dank! Deine Anmeldung wurde erfolgreich bestätigt.</p>
                 
                 {formType === 'subscribe' && (
-                  <p>Sie erhalten ab sofort unseren Newsletter.</p>
+                  <p className="card-text">Du erhältst ab sofort unseren Newsletter.</p>
                 )}
                 {formType === 'visit' && (
-                  <p>Wir haben Ihre Anmeldung für den Tag der offenen Tür erhalten und werden uns bald bei Ihnen melden.</p>
+                  <p className="card-text">Wir haben deine Anmeldung für den Tag der offenen Tür erhalten und melden uns bald bei dir.</p>
                 )}
                 {formType === 'waiting_list' && (
-                  <p>Wir haben Sie auf die Warteliste gesetzt und werden uns bei Verfügbarkeit bei Ihnen melden.</p>
+                  <p className="card-text">Wir haben dich auf die Warteliste gesetzt und melden uns bei dir, sobald ein Platz frei wird.</p>
                 )}
                 {formType === 'contact' && (
-                  <p>Wir haben Ihre Nachricht erhalten und werden uns bald bei Ihnen melden.</p>
+                  <p className="card-text">Wir haben deine Nachricht erhalten und melden uns bald bei dir.</p>
                 )}
               </div>
-            ) : (
-              <div className="doi-error">
-                <h2>Bestätigung fehlgeschlagen</h2>
-                <p>{error}</p>
-                <p><a href="/">Zurück zur Startseite</a></p>
+            </section>
+          ) : (
+            <section className="bento-card bento-card-large">
+              <div className="plant-pattern"></div>
+              <div className="card-header">
+                <h3>Bestätigung fehlgeschlagen</h3>
               </div>
-            )}
-          </section>
+              <div className="card-body">
+                <p className="card-text">{error}</p>
+                <p className="card-text"><Link href="/">Zurück zur Startseite</Link></p>
+              </div>
+            </section>
+          )}
         </div>
       </main>
       <Footer />
@@ -107,9 +119,12 @@ export default function DOIConfirmPage() {
       <>
         <Header />
         <main className="main-content">
-          <div className="content-grid">
-            <section className="content-card">
-              <p>Bitte warten...</p>
+          <div className="bento-grid">
+            <section className="bento-card">
+              <div className="plant-pattern"></div>
+              <div className="card-body">
+                <p className="card-text">Bitte warten...</p>
+              </div>
             </section>
           </div>
         </main>

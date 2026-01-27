@@ -1,49 +1,37 @@
-// ProcessWire API client for headless CMS
-
-const API_URL = process.env.NEXT_PUBLIC_PROCESSWIRE_API_URL || process.env.PROCESSWIRE_API_URL || 'http://localhost/api'
-
-export interface PageSection {
-  id?: string
-  title?: string
-  content?: string
-}
-
-export interface PageImage {
-  url: string
-  description: string
-  width?: number
-  height?: number
-}
+import { cmsApiUrl, cmsFetchOptions } from './cmsClient'
 
 export interface PageData {
   id: number
   title: string
   url: string
-  template?: string
   body?: string
-  hero_title?: string
+  logo_image?: {
+    url: string
+    description: string
+  }
+  hero_image?: {
+    url: string
+    description: string
+  }
   hero_subtitle?: string
-  summary?: string
-  logo_image?: PageImage
-  hero_image?: PageImage
   sidebar_content?: string
-  gallery_images?: PageImage[]
+  gallery_images?: Array<{
+    url: string
+    description: string
+  }>
   footer_content?: string
   css_variant?: string
-  sections?: PageSection[]
   children?: PageData[]
 }
 
 export async function getPageData(path: string): Promise<PageData | null> {
   try {
-    // Ensure path has proper format for API
-    const apiPath = path.startsWith('/') ? path : `/${path}`
-    const response = await fetch(`${API_URL}/pages?path=${encodeURIComponent(apiPath)}`, {
-      next: { revalidate: 60 }, // Revalidate every 60 seconds
-    })
+    const response = await fetch(
+      cmsApiUrl(`/pages.php?path=${encodeURIComponent(path || '/')}`),
+      cmsFetchOptions(600)
+    )
     
     if (!response.ok) {
-      console.error('API response not ok:', response.status)
       return null
     }
     
@@ -56,9 +44,7 @@ export async function getPageData(path: string): Promise<PageData | null> {
 
 export async function getNavigation(): Promise<PageData[]> {
   try {
-    const response = await fetch(`${API_URL}/navigation`, {
-      next: { revalidate: 300 }, // Revalidate every 5 minutes
-    })
+    const response = await fetch(cmsApiUrl('/navigation.php'), cmsFetchOptions(1800))
     
     if (!response.ok) {
       return []

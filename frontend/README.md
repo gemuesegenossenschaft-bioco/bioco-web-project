@@ -14,16 +14,18 @@ npm install
 2. Configure environment variables:
 Create a `.env.local` file:
 ```env
-# ProcessWire API URL (for headless CMS)
-NEXT_PUBLIC_PROCESSWIRE_API_URL=https://staging.bioco.ch/api
-PROCESSWIRE_API_URL=https://staging.bioco.ch/api
+# ProcessWire base URL (headless CMS)
+NEXT_PUBLIC_PROCESSWIRE_BASE_URL=https://bioco.ch
+PROCESSWIRE_BASE_URL=https://bioco.ch
+# Optional bearer token if your ProcessWire API is protected
+# PROCESSWIRE_API_TOKEN=your-token
 
 # Matomo Analytics (Cookieless - Swiss DSG compliant)
 NEXT_PUBLIC_MATOMO_URL=https://your-matomo-instance.com/
 NEXT_PUBLIC_MATOMO_SITE_ID=1
 
 # Site URL
-NEXT_PUBLIC_SITE_URL=https://staging.bioco.ch
+NEXT_PUBLIC_SITE_URL=https://bioco.ch
 ```
 
 3. Run development server:
@@ -43,7 +45,7 @@ npm start
   - `page.tsx` - Homepage (A: Homepage)
   - `ernte/page.tsx` - Ernte section (B)
   - `abos/page.tsx` - Abos section (C)
-  - `anpacken/page.tsx` - Anpacken section (D)
+  - `mitmachen/page.tsx` - Mitmachen section (D)
   - `depots/page.tsx` - Depots section (E)
   - `wir/page.tsx` - Wir section (F)
   - `hofpost/page.tsx` - Hofpost section (G)
@@ -82,13 +84,15 @@ The site follows the sitemap structure with sections A-I:
 ## ProcessWire API Endpoints
 
 The frontend expects ProcessWire API endpoints at:
-- `GET /api/pages?path=/` - Get page data
-- `GET /api/navigation` - Get navigation items
-- `POST /api/forms/contact` - Submit contact form
-- `POST /api/forms/subscribe` - Submit newsletter subscription
-- `POST /api/forms/visit` - Submit visit day registration
-- `POST /api/forms/waiting-list` - Submit waiting list form
-- `GET /api/doi/confirm?token=...` - Confirm DOI token
+- `GET /site/api/pages.php?path=/` - Get page data
+- `GET /site/api/navigation.php` - Get navigation items
+- `GET /site/api/events.php` - Read event listings
+- `GET /site/api/instagram.php` - Read Instagram feed
+- `POST /site/api/forms.php/contact` - Submit contact form
+- `POST /site/api/forms.php/subscribe` - Submit newsletter subscription
+- `POST /site/api/forms.php/visit` - Submit visit day registration
+- `POST /site/api/forms.php/waiting-list` - Submit waiting list form
+- `GET /site/api/doi.php/confirm?token=...` - Confirm DOI token
 
 **Note**: For now, deeper database functionalities are not implemented. The ProcessWire API endpoints should be configured but may not have full database integration. This will be implemented in a later phase.
 

@@ -1,17 +1,16 @@
 import { SubscribeForm } from '@/components/forms/SubscribeForm'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
-import { Hero } from '@/components/Hero'
 
 export default function NewsletterPage() {
   return (
     <>
       <Header />
-      <Hero title="Newsletter" subtitle="Bleib auf dem Laufenden" />
       <main className="main-content">
-        <div className="content-grid">
-          <section className="content-card">
-            <h2>Newsletter abonnieren</h2>
+        <div className="bento-grid">
+          <section className="bento-card bento-card-large">
+            <div className="plant-pattern"></div>
+            <h1>Newsletter abonnieren</h1>
             <SubscribeForm />
           </section>
         </div>

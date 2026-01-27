@@ -1,24 +1,54 @@
+'use client'
+
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const navigationItems = [
-  { title: 'Ernte', href: '/ernte', id: 'B' },
-  { title: 'Abos', href: '/abos', id: 'C' },
-  { title: 'Anpacken', href: '/anpacken', id: 'D' },
-  { title: 'Depots', href: '/depots', id: 'E' },
   { title: 'Wir', href: '/wir', id: 'F' },
-  { title: 'Hofpost', href: '/hofpost', id: 'G' },
-  { title: 'Kundenportal', href: '/kundenportal', id: 'I' },
+  { title: 'Gemüse', href: '/gemuese', id: 'B' },
+  { title: 'Mitmachen', href: '/mitmachen', id: 'D' },
+  { title: 'Abos', href: '/abos', id: 'C' },
+  { title: 'Standorte', href: '/standorte-depots', id: 'E' },
+  { title: 'Aktuelles', href: '/aktuelles', id: 'G' },
 ]
 
-export function Navigation() {
+interface NavigationProps {
+  onLinkClick?: () => void
+  hideMitmachen?: boolean
+}
+
+export function Navigation({ onLinkClick, hideMitmachen = false }: NavigationProps = {}) {
+  const pathname = usePathname()
+
   return (
     <nav id="header-nav" className="header-nav">
-      <ul className="nav-list">
-        {navigationItems.map((item) => (
-          <li key={item.id} className="nav-item">
-            <Link href={item.href} className="nav-link">{item.title}</Link>
+      <ul>
+        {navigationItems.map((item) => {
+          const isActive = pathname === item.href
+          
+          return (
+            <li key={item.id}>
+              <Link 
+                href={item.href} 
+                className={isActive ? 'nav-active' : ''}
+                onClick={onLinkClick}
+              >
+                {item.title}
+              </Link>
+            </li>
+          )
+        })}
+        {!hideMitmachen && (
+          <li>
+            <Link 
+              href="/bioco-werden" 
+              className="btn btn-orange"
+              onClick={onLinkClick}
+            >
+              biocò werden
+            </Link>
           </li>
-        ))}
+        )}
       </ul>
     </nav>
   )

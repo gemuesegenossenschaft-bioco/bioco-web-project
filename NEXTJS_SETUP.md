@@ -138,6 +138,13 @@ server {
 - `NEXT_PUBLIC_MATOMO_URL` - Matomo instance URL
 - `NEXT_PUBLIC_MATOMO_SITE_ID` - Matomo site ID
 - `NEXT_PUBLIC_SITE_URL` - Site URL for email links
+- `SMTP_HOST` - SMTP server host (default: `mail.bioco.ch`)
+- `SMTP_PORT` - SMTP port (default: `465` for SSL)
+- `SMTP_SECURE` - Use SSL (default: `true` for port 465)
+- `SMTP_USER` - SMTP username (e.g., `noreply@bioco.ch`)
+- `SMTP_PASS` - SMTP password
+- `SMTP_FROM_EMAIL` - From email address (default: `noreply@bioco.ch`)
+- `SMTP_FROM_NAME` - From name (default: `biocò`)
 
 ### ProcessWire (site/config.php)
 - `$config->email_from = 'hallo@bioco.ch'`

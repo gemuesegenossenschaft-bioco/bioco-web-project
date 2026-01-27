@@ -1,0 +1,104 @@
+<svg viewBox="0 0 300 180" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes walk {
+      0% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+      12.5% { transform: translateX(2px) translateY(-1px) rotate(-1deg); }
+      25% { transform: translateX(3px) translateY(-2px) rotate(-2deg); }
+      37.5% { transform: translateX(2px) translateY(-1px) rotate(-1deg); }
+      50% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+      62.5% { transform: translateX(-2px) translateY(-1px) rotate(1deg); }
+      75% { transform: translateX(-3px) translateY(-2px) rotate(2deg); }
+      87.5% { transform: translateX(-2px) translateY(-1px) rotate(1deg); }
+      100% { transform: translateX(0px) translateY(0px) rotate(0deg); }
+    }
+    @keyframes headBob {
+      0%, 100% { transform: translateY(0px); }
+      25% { transform: translateY(-1px); }
+      50% { transform: translateY(0px); }
+      75% { transform: translateY(-1px); }
+    }
+    @keyframes beakOpen {
+      0%, 60% { transform: rotate(0deg) scaleY(1); }
+      70%, 80% { transform: rotate(1deg) scaleY(1.08); }
+      90%, 100% { transform: rotate(0deg) scaleY(1); }
+    }
+    @keyframes legMove {
+      0% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+      25% { transform: translateY(-2px) translateX(0.5px) rotate(-4deg); }
+      50% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+      75% { transform: translateY(-2px) translateX(-0.5px) rotate(4deg); }
+      100% { transform: translateY(0px) translateX(0px) rotate(0deg); }
+    }
+    @keyframes bodySway {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(-1.5deg); }
+      50% { transform: rotate(0deg); }
+      75% { transform: rotate(1.5deg); }
+    }
+    .duck-body {
+      animation: walk 1.4s ease-in-out infinite;
+      transform-origin: center;
+    }
+    .duck-head {
+      animation: headBob 0.7s ease-in-out infinite;
+    }
+    .duck-beak {
+      animation: beakOpen 2.5s ease-in-out infinite;
+      transform-origin: 95% 50%;
+    }
+    .leg-left {
+      animation: legMove 0.7s ease-in-out infinite;
+      transform-origin: 50% 0%;
+    }
+    .leg-right {
+      animation: legMove 0.7s ease-in-out infinite;
+      animation-delay: 0.35s;
+      transform-origin: 50% 0%;
+    }
+    .body-ellipse {
+      animation: bodySway 1.4s ease-in-out infinite;
+      transform-origin: center;
+    }
+  </style>
+  
+  <g class="duck-body">
+    <!-- Main body (simplified, single shape, tilted down a bit) - beet color -->
+    <g class="body-ellipse">
+      <ellipse cx="130" cy="110" rx="70" ry="32" fill="var(--bioco-beet, #8b0000)" fill-opacity="0.85" fill-rule="evenodd" transform="rotate(20 130 110)"/>
+    </g>
+    
+    <!-- Tail - simplified curled drake feathers pointing downward (dark beet) -->
+    <path d="M60 118 Q50 128 55 133 Q57 140 60 138 Z" fill="var(--bioco-beet, #8b0000)" fill-rule="evenodd"/>
+    
+    <!-- Neck (SIMPLIFIED, thicker, clear separation between head and body, bioco green) -->
+    <path d="M160 87 Q180 58 200 61 Q195 92 180 94 Q165 92 160 87 Z" fill="var(--bioco-green, #2e7d32)" fill-rule="evenodd"/>
+    
+    <!-- Head (bioco green, elegant rounded shape, moved up even more - starts at body border) -->
+    <g class="duck-head">
+      <ellipse cx="200" cy="55" rx="26" ry="20" fill="var(--bioco-green, #2e7d32)" fill-rule="evenodd"/>
+      
+      <!-- Eye (small, dark, positioned correctly) -->
+      <circle cx="203" cy="52" r="3.5" fill="var(--bioco-beet, #8b0000)"/>
+      <circle cx="203.5" cy="51.5" r="1.5" fill="white"/>
+      
+      <!-- Beak (flat, broad, elegant duck bill) -->
+      <g class="duck-beak">
+        <path d="M225 55 Q235 56 240 58 Q235 60 225 60 Q220 58 225 55 Z" fill="var(--bioco-orange, #ff8c00)" fill-opacity="0.95" fill-rule="evenodd"/>
+        <path d="M225 55 Q230 56 235 58 Q230 60 225 60" stroke="var(--bioco-beet, #8b0000)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+      </g>
+    </g>
+    
+    <!-- Legs (bioco orange, elegant, positioned for proud upright stance) -->
+    <g class="leg-left">
+      <path d="M110 145 Q110 155 105 165" stroke="var(--bioco-orange, #ff8c00)" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <!-- Webbed foot -->
+      <path d="M105 165 Q100 170 95 170 Q98 173 102 173 Q105 171 105 165" stroke="var(--bioco-orange, #ff8c00)" stroke-width="3.5" fill="var(--bioco-orange, #ff8c00)" fill-opacity="0.9" stroke-linecap="round"/>
+    </g>
+    
+    <g class="leg-right">
+      <path d="M140 145 Q140 155 145 165" stroke="var(--bioco-orange, #ff8c00)" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <!-- Webbed foot -->
+      <path d="M145 165 Q150 170 155 170 Q152 173 148 173 Q145 171 145 165" stroke="var(--bioco-orange, #ff8c00)" stroke-width="3.5" fill="var(--bioco-orange, #ff8c00)" fill-opacity="0.9" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>

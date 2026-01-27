@@ -1,17 +1,16 @@
 import { VisitDayForm } from '@/components/forms/VisitDayForm'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
-import { Hero } from '@/components/Hero'
 
 export default function VisitDayPage() {
   return (
     <>
       <Header />
-      <Hero title="Tag der offenen Tür" subtitle="Besuche uns auf dem Geisshof" />
       <main className="main-content">
-        <div className="content-grid">
-          <section className="content-card">
-            <h2>Anmeldung</h2>
+        <div className="bento-grid">
+          <section className="bento-card bento-card-large">
+            <div className="plant-pattern"></div>
+            <h1>Tag der offenen Tür - Anmeldung</h1>
             <VisitDayForm />
           </section>
         </div>

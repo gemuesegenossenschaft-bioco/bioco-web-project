@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const PROCESSWIRE_API = process.env.PROCESSWIRE_API_URL || 'http://localhost/api'
+import { sendFormEmail } from '@/lib/email'
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,25 +13,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send to ProcessWire API
-    const response = await fetch(`${PROCESSWIRE_API}/forms/contact`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(body),
+    // Send email via SMTP
+    await sendFormEmail({
+      formType: 'contact',
+      data: body,
+      subject: `Kontaktanfrage: ${body.subject}`,
     })
 
-    const data = await response.json()
-
-    if (data.success) {
-      return NextResponse.json({ success: true })
-    } else {
-      return NextResponse.json(
-        { success: false, error: data.error || 'Es ist ein Fehler aufgetreten.' },
-        { status: 400 }
-      )
-    }
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Contact form error:', error)
     return NextResponse.json(

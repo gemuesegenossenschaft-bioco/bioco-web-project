@@ -12,11 +12,13 @@ export function ContactForm() {
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setIsSubmitting(true)
 
     trackEvent('Form', 'Contact', 'Submit')
 
@@ -29,22 +31,31 @@ export function ContactForm() {
         body: JSON.stringify(formData),
       })
 
-      const data = await response.json()
-
-      if (data.success) {
-        setSubmitted(true)
-      } else {
-        setError(data.error || 'Es ist ein Fehler aufgetreten.')
+      let data
+      try {
+        data = await response.json()
+      } catch (parseError) {
+        data = { success: false, error: `Server error: ${response.status} ${response.statusText}` }
       }
-    } catch (err) {
-      setError('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.')
+
+      if (!response.ok || !data.success) {
+        const errorMessage = data.error || 'Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder senden Sie uns eine E-Mail direkt an info@bioco.ch'
+        setError(errorMessage)
+      } else {
+        setSubmitted(true)
+      }
+    } catch (err: any) {
+      console.error('Contact form error:', err)
+      setError('Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder senden Sie uns eine E-Mail direkt an info@bioco.ch')
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   if (submitted) {
     return (
-      <div className="form-success wireframe-box">
-        <p>Vielen Dank! Sie erhalten in Kürze eine Bestätigungs-E-Mail.</p>
+      <div className="form-success bento-card">
+        <p>Vielen Dank für Ihre Nachricht! Wir melden uns so schnell wie möglich bei Ihnen.</p>
       </div>
     )
   }
@@ -52,7 +63,7 @@ export function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="contact-form">
       {error && (
-        <div className="form-error wireframe-box">
+        <div className="form-error bento-card">
           <p>{error}</p>
         </div>
       )}
@@ -116,7 +127,12 @@ export function ContactForm() {
         />
       </div>
 
-      <input type="submit" value="Absenden" className="cta-button" />
+      <input 
+        type="submit" 
+        value={isSubmitting ? 'Wird gesendet...' : 'Absenden'} 
+        className="btn btn-primary btn-organic" 
+        disabled={isSubmitting}
+      />
     </form>
   )
 }

@@ -1,8 +1,10 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+import { ReactNode } from 'react'
+
 interface HeroProps {
-  title: string
+  title: ReactNode
   subtitle?: string
   image?: {
     url: string
@@ -13,32 +15,38 @@ interface HeroProps {
 export function Hero({ title, subtitle, image }: HeroProps) {
   return (
     <section id="hero" className="hero">
-      <div className="hero-content">
-        {image && (
-          <div id="hero-image" className="hero-image">
-            <Image
-              src={image.url}
-              alt={image.description}
-              width={1200}
-              height={400}
-              style={{ objectFit: 'cover', width: '100%', height: 'auto', borderRadius: '12px' }}
-            />
-          </div>
-        )}
-        <div id="hero-text" className="hero-text">
-          <h1 id="hero-title" className="hero-title">{title}</h1>
-          {subtitle && (
-            <p id="hero-subtitle" className="hero-subtitle">{subtitle}</p>
-          )}
-          <div className="hero-buttons">
-            <Link href="/ernte" className="btn btn-primary">
-              Was wir anbauen
-            </Link>
-            <Link href="/wir" className="btn btn-secondary">
-              Uns kennenlernen
-            </Link>
+      <div className="hero-container">
+        <div className="hero-text-card bento-card">
+          <div className="hero-content">
+            <div className="hero-text">
+              {subtitle && (
+                <p className="hero-subtitle">{subtitle}</p>
+              )}
+              <h1 className="hero-title">{title}</h1>
+              <div className="hero-buttons">
+                <Link href="/gemuese" className="btn btn-primary">
+                  Welche Gemüse haben Saison
+                </Link>
+                <Link href="/wir" className="btn btn-secondary">
+                  Lerne uns kennen
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
+        {image && (
+          <div className="hero-image-card bento-card">
+            <div className="hero-image-container">
+              <Image
+                src={image.url}
+                alt={image.description}
+                fill
+                style={{ objectFit: 'cover' }}
+                priority
+              />
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )

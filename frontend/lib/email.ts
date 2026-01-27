@@ -100,7 +100,7 @@ export async function sendFormEmail({ formType, data, subject }: FormSubmission)
     const info = await transporter.sendMail(mailOptions)
     
     logEmailAttempt(formType, recipients, true)
-
+    
     return { success: true, id: info.messageId }
   } catch (error: any) {
     logEmailAttempt(formType, recipients, false, error)
