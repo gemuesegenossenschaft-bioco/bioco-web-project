@@ -20,7 +20,8 @@ const API_TOKEN = process.env.PROCESSWIRE_API_TOKEN
 
 export function cmsApiUrl(path: string): string {
   const safePath = path.startsWith('/') ? path : `/${path}`
-  return `${RESOLVED_BASE_URL}/site/api${safePath}`
+  // API is at root /api/ level (not /site/api/)
+  return `${RESOLVED_BASE_URL}/api${safePath}`
 }
 
 export function buildCmsHeaders(): HeadersInit | undefined {
