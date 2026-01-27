@@ -4,7 +4,13 @@ export interface PageData {
   id: number
   title: string
   url: string
+  template?: string
   body?: string
+  hero_title?: string
+  hero_subtitle?: string
+  summary?: string
+  cta_text?: string
+  cta_url?: string
   logo_image?: {
     url: string
     description: string
@@ -13,7 +19,6 @@ export interface PageData {
     url: string
     description: string
   }
-  hero_subtitle?: string
   sidebar_content?: string
   gallery_images?: Array<{
     url: string
@@ -21,6 +26,11 @@ export interface PageData {
   }>
   footer_content?: string
   css_variant?: string
+  sections?: Array<{
+    id?: string
+    title?: string
+    content?: string
+  }>
   children?: PageData[]
 }
 

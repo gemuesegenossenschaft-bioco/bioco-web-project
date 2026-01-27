@@ -43,7 +43,7 @@ $pageData = [
 ];
 
 // Text fields
-$textFields = ['body', 'hero_title', 'hero_subtitle', 'summary', 'sidebar_content', 'footer_content', 'css_variant'];
+$textFields = ['body', 'hero_title', 'hero_subtitle', 'summary', 'sidebar_content', 'footer_content', 'css_variant', 'cta_text', 'cta_url'];
 foreach($textFields as $field) {
     if($page->hasField($field) && $page->$field) {
         $pageData[$field] = $page->$field;

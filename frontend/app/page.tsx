@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { UtilityNavigation } from '@/components/UtilityNavigation'
 import { PrimaryNavigation } from '@/components/SecondaryNavigation'
 import { MobileMenu } from '@/components/MobileMenu'
@@ -13,6 +13,18 @@ import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import { ScrollToTopLink } from '@/components/ScrollToTopLink'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
+
+// Default content (fallback when CMS unavailable)
+const DEFAULT_CONTENT = {
+  hero_title: 'Gemeinsam Gemüse anbauen und geniessen',
+  hero_subtitle: 'Solidarische Landwirtschaft in der Region Baden-Brugg',
+  welcome_title: 'Willkommen bei biocò',
+  welcome_text: 'Bei der biocò Gemüsegenossenschaft teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit.',
+  section2_title: 'Gemeinsam, solidarisch, frisch',
+  section2_text: 'Seit 2014 bewirtschaften wir den Geisshof in Gebenstorf nach biologisch-dynamischen Prinzipien und liefern Demeter-Gemüse in höchster Bio-Qualität.',
+  kennenlernen_title: 'Möchtest du uns kennenlernen?',
+  kennenlernen_text: 'Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.',
+}
 
 export default function Home() {
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)

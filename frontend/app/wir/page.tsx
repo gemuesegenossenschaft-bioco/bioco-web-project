@@ -5,6 +5,7 @@ import { CTA } from '@/components/CTA'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
+import { getPageData } from '@/lib/processwire'
 
 export const metadata: Metadata = {
   title: 'Über uns | Bio Bauernhof Baden | biocò Gemüsegenossenschaft',
@@ -17,19 +18,36 @@ export const metadata: Metadata = {
   },
 }
 
-export default function WirPage() {
+// Default content (used as fallback when CMS unavailable)
+const DEFAULT = {
+  title: 'biocò: Die Gemüsegenossenschaft',
+  intro: 'Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere solidarische Landwirtschaft prägen.',
+}
+
+export default async function WirPage() {
+  // Fetch CMS data (returns null if unavailable)
+  const cmsData = await getPageData('/wir/')
+  
+  // Use CMS content if available, otherwise use defaults
+  const pageTitle = cmsData?.hero_title || DEFAULT.title
+  const pageIntro = cmsData?.summary || DEFAULT.intro
   return (
     <>
       <Header />
       <main className="main-content">
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
-          {/* Page Header with H1 */}
+          {/* Page Header with H1 - CMS editable via summary field */}
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
             <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>biocò:<br />Die Gemüse-<br />genossenschaft</h1>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-              Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. 
-              Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <Link href="/solawi">solidarische Landwirtschaft</Link> prägen.
-            </p>
+            {cmsData?.summary ? (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                 dangerouslySetInnerHTML={{ __html: cmsData.summary }} />
+            ) : (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. 
+                Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <Link href="/solawi">solidarische Landwirtschaft</Link> prägen.
+              </p>
+            )}
           </section>
 
           {/* Erste Zeile: Wir */}
