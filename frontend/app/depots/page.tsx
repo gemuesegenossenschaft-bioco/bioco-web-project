@@ -51,9 +51,6 @@ function DynamicDepotsContent({ data }: { data: PageData }) {
 }
 
 export default async function DepotsPage() {
-  const data = await getPageData('/depots/')
-  if (data && (data.body || data.sections?.length)) {
-    return <DynamicDepotsContent data={data} />
-  }
+  // Always show static content (production version)
   return <StaticDepotsContent />
 }

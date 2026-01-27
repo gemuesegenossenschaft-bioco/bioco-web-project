@@ -66,9 +66,6 @@ function DynamicWirContent({ data }: { data: PageData }) {
 }
 
 export default async function WirPage() {
-  const data = await getPageData('/wir/')
-  if (data && (data.body || data.sections?.length)) {
-    return <DynamicWirContent data={data} />
-  }
+  // Always show static content (production version)
   return <StaticWirContent />
 }

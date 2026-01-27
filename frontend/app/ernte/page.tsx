@@ -65,9 +65,6 @@ function DynamicErnteContent({ data }: { data: PageData }) {
 }
 
 export default async function ErntePage() {
-  const data = await getPageData('/ernte/')
-  if (data && (data.body || data.sections?.length)) {
-    return <DynamicErnteContent data={data} />
-  }
+  // Always show static content (production version)
   return <StaticErnteContent />
 }

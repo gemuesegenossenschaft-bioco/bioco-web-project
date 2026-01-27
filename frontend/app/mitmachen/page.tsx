@@ -75,9 +75,6 @@ function DynamicMitmachenContent({ data }: { data: PageData }) {
 }
 
 export default async function MitmachenPage() {
-  const data = await getPageData('/mitmachen/')
-  if (data && (data.body || data.sections?.length)) {
-    return <DynamicMitmachenContent data={data} />
-  }
+  // Always show static content (production version)
   return <StaticMitmachenContent />
 }

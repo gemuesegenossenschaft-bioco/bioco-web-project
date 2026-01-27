@@ -53,9 +53,6 @@ function DynamicKundenportalContent({ data }: { data: PageData }) {
 }
 
 export default async function KundenportalPage() {
-  const data = await getPageData('/kundenportal/')
-  if (data && (data.body || data.sections?.length)) {
-    return <DynamicKundenportalContent data={data} />
-  }
+  // Always show static content (production version)
   return <StaticKundenportalContent />
 }

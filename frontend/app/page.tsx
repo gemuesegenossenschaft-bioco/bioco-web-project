@@ -162,15 +162,7 @@ function DynamicHomeContent({ data }: { data: PageData }) {
 }
 
 export default async function Home() {
-  // Fetch page data from ProcessWire
-  const data = await getPageData('/')
-  
-  // If CMS has content (body or sections), use dynamic content
-  // Otherwise fall back to static content
-  if (data && (data.body || (data.sections && data.sections.length > 0))) {
-    return <DynamicHomeContent data={data} />
-  }
-  
-  // Fallback to static content
+  // Always show static content (production version)
+  // CMS content will be used in future when fully populated
   return <StaticHomeContent />
 }

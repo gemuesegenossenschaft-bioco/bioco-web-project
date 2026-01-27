@@ -53,9 +53,6 @@ function DynamicAnpackenContent({ data }: { data: PageData }) {
 }
 
 export default async function AnpackenPage() {
-  const data = await getPageData('/anpacken/')
-  if (data && (data.body || data.sections?.length)) {
-    return <DynamicAnpackenContent data={data} />
-  }
+  // Always show static content (production version)
   return <StaticAnpackenContent />
 }

@@ -56,9 +56,6 @@ function DynamicHofpostContent({ data }: { data: PageData }) {
 }
 
 export default async function HofpostPage() {
-  const data = await getPageData('/hofpost/')
-  if (data && (data.body || data.sections?.length)) {
-    return <DynamicHofpostContent data={data} />
-  }
+  // Always show static content (production version)
   return <StaticHofpostContent />
 }

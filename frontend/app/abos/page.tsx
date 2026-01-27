@@ -64,9 +64,6 @@ function DynamicAbosContent({ data }: { data: PageData }) {
 }
 
 export default async function AbosPage() {
-  const data = await getPageData('/abos/')
-  if (data && (data.body || data.sections?.length)) {
-    return <DynamicAbosContent data={data} />
-  }
+  // Always show static content (production version)
   return <StaticAbosContent />
 }
