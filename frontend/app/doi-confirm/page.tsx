@@ -50,11 +50,11 @@ function DOIConfirmContent() {
     return (
       <>
         <Header />
-        <main className="wireframe-box main-content">
-          <div className="wireframe-content">
-            <div className="wireframe-box content">
+        <main className="main-content">
+          <div className="content-grid">
+            <section className="content-card">
               <p>Bitte warten...</p>
-            </div>
+            </section>
           </div>
         </main>
         <Footer />
@@ -65,11 +65,11 @@ function DOIConfirmContent() {
   return (
     <>
       <Header />
-      <main className="wireframe-box main-content">
-        <div className="wireframe-content">
-          <div className="wireframe-box content">
+      <main className="main-content">
+        <div className="content-grid">
+          <section className="content-card">
             {confirmed ? (
-              <div className="doi-confirmed wireframe-box">
+              <div className="doi-confirmed">
                 <h2>Anmeldung bestätigt</h2>
                 <p>Vielen Dank! Ihre Anmeldung wurde erfolgreich bestätigt.</p>
                 
@@ -87,13 +87,13 @@ function DOIConfirmContent() {
                 )}
               </div>
             ) : (
-              <div className="doi-error wireframe-box">
+              <div className="doi-error">
                 <h2>Bestätigung fehlgeschlagen</h2>
                 <p>{error}</p>
                 <p><a href="/">Zurück zur Startseite</a></p>
               </div>
             )}
-          </div>
+          </section>
         </div>
       </main>
       <Footer />
@@ -106,11 +106,11 @@ export default function DOIConfirmPage() {
     <Suspense fallback={
       <>
         <Header />
-        <main className="wireframe-box main-content">
-          <div className="wireframe-content">
-            <div className="wireframe-box content">
+        <main className="main-content">
+          <div className="content-grid">
+            <section className="content-card">
               <p>Bitte warten...</p>
-            </div>
+            </section>
           </div>
         </main>
         <Footer />

@@ -5,8 +5,10 @@ import { EventsBanner } from '@/components/EventsBanner'
 import { CTA } from '@/components/CTA'
 import Link from 'next/link'
 import { CarrotIcon, LeafIcon, PlantIcon, SeedIcon } from '@/components/Icon'
+import { getPageData, PageData } from '@/lib/processwire'
 
-export default function Home() {
+// Static fallback content (used when CMS data not available)
+function StaticHomeContent() {
   return (
     <>
       <Header />
@@ -121,4 +123,54 @@ export default function Home() {
       <Footer />
     </>
   )
+}
+
+// Dynamic content from CMS
+function DynamicHomeContent({ data }: { data: PageData }) {
+  const heroTitle = data.hero_title || 'Frisches Demeter-Gemüse – fast jede Woche.'
+  const heroSubtitle = data.hero_subtitle || ''
+
+  return (
+    <>
+      <Header />
+      <Hero title={heroTitle} subtitle={heroSubtitle} />
+      <main className="main-content">
+        <div className="content-grid">
+          {/* Render body content if available */}
+          {data.body && (
+            <section className="content-card">
+              <div dangerouslySetInnerHTML={{ __html: data.body }} />
+            </section>
+          )}
+
+          {/* Render sections from CMS */}
+          {data.sections && data.sections.map((section, index) => (
+            <section key={section.id || index} id={section.id} className="content-card">
+              {section.title && <h2>{section.title}</h2>}
+              {section.content && (
+                <div dangerouslySetInnerHTML={{ __html: section.content }} />
+              )}
+            </section>
+          ))}
+
+          <EventsBanner />
+        </div>
+      </main>
+      <Footer />
+    </>
+  )
+}
+
+export default async function Home() {
+  // Fetch page data from ProcessWire
+  const data = await getPageData('/')
+  
+  // If CMS has content (body or sections), use dynamic content
+  // Otherwise fall back to static content
+  if (data && (data.body || (data.sections && data.sections.length > 0))) {
+    return <DynamicHomeContent data={data} />
+  }
+  
+  // Fallback to static content
+  return <StaticHomeContent />
 }

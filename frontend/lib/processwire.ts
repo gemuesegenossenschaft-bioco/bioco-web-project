@@ -2,37 +2,48 @@
 
 const API_URL = process.env.NEXT_PUBLIC_PROCESSWIRE_API_URL || process.env.PROCESSWIRE_API_URL || 'http://localhost/api'
 
+export interface PageSection {
+  id?: string
+  title?: string
+  content?: string
+}
+
+export interface PageImage {
+  url: string
+  description: string
+  width?: number
+  height?: number
+}
+
 export interface PageData {
   id: number
   title: string
   url: string
+  template?: string
   body?: string
-  logo_image?: {
-    url: string
-    description: string
-  }
-  hero_image?: {
-    url: string
-    description: string
-  }
+  hero_title?: string
   hero_subtitle?: string
+  summary?: string
+  logo_image?: PageImage
+  hero_image?: PageImage
   sidebar_content?: string
-  gallery_images?: Array<{
-    url: string
-    description: string
-  }>
+  gallery_images?: PageImage[]
   footer_content?: string
   css_variant?: string
+  sections?: PageSection[]
   children?: PageData[]
 }
 
 export async function getPageData(path: string): Promise<PageData | null> {
   try {
-    const response = await fetch(`${API_URL}/pages${path}`, {
+    // Ensure path has proper format for API
+    const apiPath = path.startsWith('/') ? path : `/${path}`
+    const response = await fetch(`${API_URL}/pages?path=${encodeURIComponent(apiPath)}`, {
       next: { revalidate: 60 }, // Revalidate every 60 seconds
     })
     
     if (!response.ok) {
+      console.error('API response not ok:', response.status)
       return null
     }
     
