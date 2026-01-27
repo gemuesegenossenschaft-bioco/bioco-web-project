@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>biocò – Mockup V3 Magazin/Bento</title>
+  <style>
+:root{
+  --bg:#FAF4EE; --ink:#1A1A1A; --muted:#6B6B6B;
+  --brand:#2D6A4F; --accent:#8FB996;
+  --card:#FFFFFF; --border:#E6E2DA;
+  --max:1120px; --r:16px; --space:clamp(12px,2vw,20px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--brand);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:var(--max);margin:0 auto;padding:0 var(--space)}
+header{position:sticky;top:0;background:rgba(250,244,238,.92);backdrop-filter:saturate(180%) blur(6px);
+  border-bottom:1px solid var(--border);z-index:10}
+.nav{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:.6rem 0}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:700}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.menu{display:flex;gap:.9rem;flex-wrap:wrap;align-items:center}
+.menu a{padding:.4rem .6rem;border-radius:10px}
+.menu a[aria-current="page"]{background:var(--card);border:1px solid var(--border)}
+.cta{background:var(--brand);color:white;padding:.55rem .9rem;border-radius:999px;font-weight:600;display:inline-block}
+.cta:hover{opacity:.9;text-decoration:none}
+section h2{margin:0 0 8px}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:clamp(12px,2.2vw,18px)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2vw,18px)}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,2vw,18px)}
+.imgwrap{aspect-ratio:3/2;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#ddd}
+.imgwrap img{width:100%;height:100%;object-fit:cover;display:block}
+footer{margin-top:40px;border-top:1px solid var(--border);background:#fff5;backdrop-filter:blur(2px)}
+.footgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:18px;padding:16px 0}
+@media (max-width:900px){
+  .grid3,.grid2{grid-template-columns:1fr}
+  .footgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container nav">
+    <div class="brand"><span class="dot" aria-hidden="true"></span> biocò · Region Baden-Brugg</div>
+    <nav class="menu" aria-label="Hauptnavigation">
+      <a href="#home" aria-current="page">Home</a>
+      <a href="#so-funktionierts">So funktioniert’s</a>
+      <a href="#mitglied-werden">Mitglied werden</a>
+      <a href="#abholen">Abholen</a>
+      <a href="#mitmachen">Mitmachen</a>
+      <a href="#aktuelles">News</a>
+      <a href="#kontakt">Über uns & Kontakt</a>
+      <a class="cta" href="#mitglied-werden">Mitglied werden</a>
+    </nav>
+  </div>
+</header>
+<main id="home" class="container">
+
+<section class="hero" aria-labelledby="h-hero" style="padding:clamp(20px,4vw,36px) 0">
+  <h1 id="h-hero" style="font-size:clamp(28px,4.2vw,44px);line-height:1.1;margin:.2rem 0">
+    Gemeinschaft. Feld. Ernte. – Geschichten aus der Genossenschaft
+  </h1>
+  <p class="muted" style="max-width:60ch">Magazinartiger Einstieg mit Bento-Raster: News, Einsätze, Depots – alles auf einen Blick.</p>
+  <div class="imgwrap" style="margin-top:10px"><img src="assets/images/hero_v3.jpg" alt="Feldarbeit"></div>
+</section>
+<!-- organic section divider -->
+<div aria-hidden="true" style="height:40px;background:
+  radial-gradient(120% 50% at 50% 100%, var(--bg) 32%, transparent 33%) ,
+  radial-gradient(120% 60% at 0% 0%, var(--bg) 49%, transparent 50%),
+  radial-gradient(120% 60% at 100% 0%, var(--bg) 49%, transparent 50%);
+  mask-image: linear-gradient(#000,#000);"></div>
+
+<section id="magazin" aria-labelledby="h-mag">
+  <h2 id="h-mag">Magazin</h2>
+  <div class="grid3" style="grid-auto-rows:1fr">
+    <a class="card" href="#story1" style="grid-column:span 2">
+      <div class="imgwrap" style="aspect-ratio:16/9"><img src="assets/images/mag_01.jpg" alt="Story groß"></div>
+      <h3>Erntehelfer:innen im Fokus</h3><p class="muted">Wie gemeinsame Einsätze unsere Gemeinschaft stärken.</p>
+    </a>
+    <a class="card" href="#story2">
+      <div class="imgwrap"><img src="assets/images/mag_02.jpg" alt="Story klein"></div>
+      <h3>Depot Baden</h3><p class="muted">Abholzeiten & Tipps für Erstbesuche.</p>
+    </a>
+    <a class="card" href="#story3">
+      <div class="imgwrap"><img src="assets/images/mag_03.jpg" alt="Story klein 2"></div>
+      <h3>Was wächst gerade?</h3><p class="muted">Ein Blick in die Beete – Saisonkalender.</p>
+    </a>
+    <a class="card" href="#einsatz" style="grid-column:span 3">
+      <div class="imgwrap" style="aspect-ratio:21/9"><img src="assets/images/mag_04.jpg" alt="Einsatzplan"></div>
+      <h3>Einsatzplan</h3><p class="muted">Die nächsten Termine – jetzt Slot buchen.</p>
+    </a>
+  </div>
+</section>
+
+</main>
+<footer>
+  <div class="container footgrid">
+    <div>
+      <strong>Mitgliederbereich</strong><br>
+      <span class="muted">Login & Konto (Urlaub, Daten, Belege)</span>
+    </div>
+    <div>
+      <strong>Dokumente</strong><br>
+      <a href="#">GV & Protokolle</a><br>
+      <a href="#">Verteilplan & Spesen</a>
+    </div>
+    <div>
+      <strong>Rechtliches</strong><br>
+      <a href="#">Impressum & Datenschutz</a>
+    </div>
+  </div>
+  <div class="container" style="padding-bottom:16px"><small class="muted">© biocò · Mockups (V1–V3)</small></div>
+</footer>
+</body>
+</html>

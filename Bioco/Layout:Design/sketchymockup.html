@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="de-CH">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>BioCo – Sketchy Demo</title>
+
+  <!-- Hand-Schrift + gut lesbare Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand+SC&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ====== BioCo Sketchy Tokens ====== */
+    :root{
+      --bioco-green:#39A935;   /* BioCo-Grün */
+      --bioco-orange:#F29100;  /* Karotte */
+      --bioco-beet:#86203D;    /* Rande */
+      --bioco-ink:#403B36;     /* Fineliner */
+      --bioco-bg:#FFFDF8;      /* Off-White */
+      --stroke:2.5px;          /* Strichstärke */
+      --radius:14px;
+      --shadow:4px 4px 0 var(--bioco-ink);
+      --shadow-sm:2px 2px 0 var(--bioco-ink);
+      --gap:14px;
+      --maxw:1000px;
+    }
+
+    /* ====== Reset (knapp) ====== */
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
+    img{max-width:100%;height:auto}
+    button{font-family:inherit}
+
+    /* ====== Base ====== */
+    body{
+      background: var(--bioco-bg);
+      color: var(--bioco-ink);
+      font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      line-height:1.45;
+    }
+    .wrap{max-width:var(--maxw);margin:0 auto;padding:clamp(12px,3vw,20px)}
+
+    /* Papier-Feeling (sehr dezent) */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background:
+        radial-gradient(rgba(64,59,54,.04) 1px, transparent 1px) 0 0/10px 10px;
+      pointer-events:none;
+      mix-blend-mode:multiply;
+    }
+
+    /* ====== Sketchy-Bausteine ====== */
+    .sketch{
+      border:var(--stroke) solid var(--bioco-green);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      background:#fff;
+    }
+    .sketch--alt{ border-color:var(--bioco-beet); }
+    .sketch--ghost{
+      background:transparent;
+      border-style:dashed;
+    }
+    .hand{ font-family:"Patrick Hand SC", cursive; letter-spacing:.2px }
+    .ink{ color:var(--bioco-ink) }
+
+    /* leichte „wobbly“ Optik */
+    .wobble{ transform:rotate(-.1deg) }
+    .wobble:nth-child(2n){ transform:rotate(.15deg) }
+
+    /* Fokus sichtbar */
+    :focus-visible{
+      outline:3px solid var(--bioco-orange);
+      outline-offset:3px;
+      border-radius:10px;
+    }
+
+    /* ====== Header / Nav ====== */
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter:saturate(1.1) blur(2px);
+    }
+    .nav{
+      display:flex; align-items:center; gap:var(--gap);
+      padding:10px 12px;
+      background:var(--bioco-bg);
+      border-bottom:var(--stroke) solid var(--bioco-green);
+      box-shadow:0 3px 0 var(--bioco-ink);
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; text-decoration:none;
+      color:var(--bioco-ink);
+    }
+    .brand__title{ font-weight:700; font-size:1.1rem }
+    .nav__spacer{ flex:1 }
+    .nav a{
+      color:var(--bioco-ink); text-decoration:none;
+      padding:6px 10px; border:var(--stroke) solid var(--bioco-green);
+      border-radius:10px; box-shadow:var(--shadow-sm); background:#fff;
+      font-weight:600;
+    }
+    .nav a:hover{ background:var(--bioco-green); color:#fff }
+
+    /* ====== Hero ====== */
+    .hero{
+      display:grid; gap:var(--gap);
+      padding:clamp(16px,4vw,28px);
+      margin-top:12px;
+    }
+    .hero h1{
+      font-family:"Patrick Hand SC", cursive;
+      font-size:clamp(1.8rem,5vw,2.8rem);
+      margin:0 0 6px;
+      color:var(--bioco-beet);
+      text-shadow:1px 1px 0 var(--bioco-ink);
+    }
+    .hero p{ margin:0 0 12px; max-width:60ch }
+    .cta{
+      display:flex; flex-wrap:wrap; gap:10px;
+    }
+    .btn{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:10px 14px;
+      background:var(--bioco-orange); color:white;
+      border:var(--stroke) solid var(--bioco-green);
+      border-radius:12px; box-shadow:var(--shadow);
+      text-decoration:none; font-weight:700;
+      transition:transform .08s ease, box-shadow .08s ease, background .08s ease;
+    }
+    .btn:hover{ background:var(--bioco-green) }
+    .btn:active{ transform:translate(2px,2px); box-shadow:2px 2px 0 var(--bioco-ink) }
+
+    /* ====== Banner "Nächste Events" ====== */
+    .banner{
+      margin:18px 0;
+      padding:10px 12px;
+      background:#fff;
+      border:var(--stroke) solid var(--bioco-beet);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+    }
+    .badge{
+      display:inline-block; padding:6px 10px; margin-right:8px;
+      background:var(--bioco-green); color:#fff; border-radius:10px;
+      box-shadow:var(--shadow-sm);
+      font-weight:700;
+    }
+
+    /* ====== Cards / Grid ====== */
+    .grid{
+      display:grid; gap:var(--gap);
+      grid-template-columns:1fr;
+    }
+    @media (min-width:720px){
+      .grid{ grid-template-columns:repeat(3,1fr) }
+      .hero{ grid-template-columns:1.1fr .9fr; align-items:center }
+    }
+    .card{
+      padding:14px;
+      display:flex; flex-direction:column; gap:10px;
+    }
+    .card h3{ margin:0; font-family:"Patrick Hand SC", cursive; font-size:1.5rem }
+    .card p{ margin:0 }
+    .card .more{ margin-top:auto }
+    .chip{
+      display:inline-block; background:#fff;
+      border:var(--stroke) solid var(--bioco-green);
+      padding:4px 8px; border-radius:999px; box-shadow:var(--shadow-sm);
+      font-weight:600;
+    }
+
+    /* ====== Footer ====== */
+    footer{
+      margin-top:26px;
+      color:#fff; background:var(--bioco-beet);
+      border-top:var(--stroke) solid var(--bioco-green);
+      box-shadow:0 -4px 0 var(--bioco-ink);
+    }
+    footer .wrap{display:grid; gap:8px}
+    small{opacity:.9}
+
+    /* ====== Inline-Veggie-Illustrationen ====== */
+    .veg{ width:80px; height:auto; filter: drop-shadow(2px 2px 0 var(--bioco-ink)); }
+    .hero .veg{ width:120px }
+  </style>
+</head>
+
+<body>
+  <!-- ===== Header / Navigation ===== -->
+  <header>
+    <nav class="nav wrap" aria-label="Hauptnavigation">
+      <a class="brand wobble" href="#">
+        <!-- Mini-SVG-Logo im Sketchy-Stil -->
+        <svg class="veg" viewBox="0 0 120 120" role="img" aria-label="BioCo Symbol: Karotte & Rande">
+          <!-- Karotte -->
+          <path d="M40 35 C30 25, 25 20, 23 15 C33 18, 38 23, 42 30" fill="none" stroke="var(--bioco-green)" stroke-width="5" stroke-linecap="round"/>
+          <path d="M52 40 C60 55, 58 80, 45 95 C30 105, 18 90, 28 72 C35 58, 40 48, 52 40 Z"
+                fill="var(--bioco-orange)" stroke="var(--bioco-green)" stroke-width="5" />
+          <!-- Rande -->
+          <path d="M88 36 C108 36, 112 62, 96 78 C82 92, 58 80, 62 60 C66 42, 76 36, 88 36 Z"
+                fill="var(--bioco-beet)" stroke="var(--bioco-green)" stroke-width="5" />
+          <path d="M92 20 C90 26, 100 28, 104 34" fill="none" stroke="var(--bioco-green)" stroke-width="5" stroke-linecap="round"/>
+        </svg>
+        <span class="brand__title hand">BioCo</span>
+      </a>
+      <span class="nav__spacer" aria-hidden="true"></span>
+      <a href="#angebot">Angebot</a>
+      <a href="#mitmachen">Mitmachen</a>
+      <a href="#kontakt">Kontakt</a>
+    </nav>
+  </header>
+
+  <main class="wrap" id="main">
+    <!-- ===== Hero ===== -->
+    <section class="hero sketch wobble" aria-labelledby="hero-title">
+      <div>
+        <h1 id="hero-title" class="hand">Gemüse aus der Region. Fair. Saisonal. Gemeinsam.</h1>
+        <p>BioCo ist die Gemüsegenossenschaft für Baden/Brugg. Wir bauen solidarisch an, teilen Ernte und Verantwortung – transparent, lokal, lecker.</p>
+        <div class="cta">
+          <a class="btn" href="#abo"><span aria-hidden="true">🥕</span> Abo wählen</a>
+          <a class="btn" href="#besuch"><span aria-hidden="true">👋</span> Hof besuchen</a>
+          <a class="btn" href="#einsatz"><span aria-hidden="true">🧤</span> Einsatz planen</a>
+        </div>
+      </div>
+
+      <!-- Deko-Veggie -->
+      <div class="wobble" aria-hidden="true" style="justify-self:center;text-align:center">
+        <svg class="veg" viewBox="0 0 120 160">
+          <path d="M60 18 C40 8, 30 20, 28 28 C36 26, 44 28, 54 36" fill="none" stroke="var(--bioco-green)" stroke-width="6" stroke-linecap="round"/>
+          <path d="M72 40 C90 62, 86 110, 58 134 C34 150, 18 126, 30 96 C40 70, 52 52, 72 40 Z"
+                fill="var(--bioco-orange)" stroke="var(--bioco-green)" stroke-width="6"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ===== Banner: Nächste Events (nicht ganz unten) ===== -->
+    <section class="banner wobble" aria-labelledby="events-title">
+      <strong id="events-title" class="badge hand">Nächste Events</strong>
+      <span class="hand">Sa 16.11. – Feldtag & Degustation · Mi 27.11. – Infoabend · Sa 07.12. – Wintermarkt</span>
+    </section>
+
+    <!-- ===== Drei Kern-Karten ===== -->
+    <section class="grid" aria-label="Kernbereiche">
+      <article class="card sketch wobble" id="angebot">
+        <h3>Gemüse-Abo</h3>
+        <p>Saisonal, ohne Umweg. Wöchentlich oder zweiwöchentlich. Depot in deiner Nähe.</p>
+        <div class="more">
+          <span class="chip">ab CHF 19/Woche</span>
+        </div>
+      </article>
+
+      <article class="card sketch sketch--alt wobble" id="mitmachen">
+        <h3>Mitmachen</h3>
+        <p>Solidarische Landwirtschaft heisst: Wir tragen gemeinsam. Pro Abo wenige Einsatztage pro Saison.</p>
+        <div class="more">
+          <span class="chip">🧤 3–5 Einsätze/Jahr</span>
+        </div>
+      </article>
+
+      <article class="card sketch wobble" id="besuch">
+        <h3>Besuchen & Führungen</h3>
+        <p>Komm vorbei, lerne Team, Böden und Sorten kennen. Ideal für Schulklassen und Vereine.</p>
+        <div class="more">
+          <span class="chip">👨‍🌾 Termine monatlich</span>
+        </div>
+      </article>
+    </section>
+
+    <!-- ===== Info-Block (dashed/ghost) ===== -->
+    <section class="card sketch sketch--ghost wobble" style="margin-top:var(--gap)">
+      <h3 class="hand" id="abo">Wie läuft ein Abo?</h3>
+      <p>Du wählst Grösse & Depot, wir liefern wöchentlich saisonales Gemüse. Transparent, ohne Zwischenhandel – mehr Wert auf dem Feld, weniger Food Waste.</p>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    <div class="wrap">
+      <strong class="hand">BioCo – Gemüsegonossenschaft Region Baden Brugg</strong>
+      <small>Kontakt: <a class="ink" href="mailto:hallo@bioco.ch">hallo@bioco.ch</a> · Datenschutz: keine Tracking-Cookies, nur Matomo cookieless.</small>
+    </div>
+  </footer>
+</body>
+</html>

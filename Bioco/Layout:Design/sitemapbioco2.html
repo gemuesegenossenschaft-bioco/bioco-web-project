@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BioCo – Sitemap × Rows Matrix (Mobile-First, linked)</title>
+<style>
+  :root{
+    --c-home:#E6F5E6;
+    --c-gemuese:#E6F0FF;
+    --c-konzept:#FFF2E6;      /* So funktioniert's */
+    --c-angebot:#F3E6FF;      /* Das Angebot */
+    --c-mitarbeit:#FFF8CC;    /* Mitarbeit */
+    --c-mitmachen:#FFE6EE;    /* Mitmachen! (CTA) */
+    --c-mitglieder:#E8F8FF;   /* Für Mitglieder */
+    --c-footer:#F6F6F6;       /* Footer Nav */
+    --c-orphans:#F0F0FF;      /* Orphans & External */
+    --grid:#ddd;
+    --mvp:#2e7d32;
+    --phase:#c62828;
+    --txt:#1f1f1f;
+  }
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;color:var(--txt);line-height:1.45}
+  h1{font-size:1.35rem;margin:0 0 10px}
+  .legend{font-size:.92rem;margin:6px 0 16px;color:#444}
+  .badge{display:inline-block;font-size:.7rem;line-height:1;padding:4px 6px;border-radius:999px;color:#fff}
+  .mvp{background:var(--mvp)}
+  .phase{background:var(--phase)}
+  table{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed;border:1px solid var(--grid);background:#fff;border-radius:12px;overflow:hidden}
+  th,td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);vertical-align:top;padding:12px 14px}
+  th:last-child,td:last-child{border-right:none}
+  tr:last-child td{border-bottom:none}
+  thead th{position:sticky;top:0;background:#fff;z-index:2}
+  th.row{width:260px;background:#fafafa;position:sticky;left:0;z-index:1;text-align:left}
+  .home{background:var(--c-home)}
+  .gemuese{background:var(--c-gemuese)}
+  .konzept{background:var(--c-konzept)}
+  .angebot{background:var(--c-angebot)}
+  .mitarbeit{background:var(--c-mitarbeit)}
+  .mitmachen{background:var(--c-mitmachen)}
+  .mitglieder{background:var(--c-mitglieder)}
+  .footer{background:var(--c-footer)}
+  .orphans{background:var(--c-orphans)}
+  .title{font-weight:700;margin-bottom:6px}
+  ul{margin:6px 0 0 1rem;padding:0}
+  li{margin:.18rem 0}
+  .dim{opacity:.92}
+  /* Link chips in Zielspalten-Farben */
+  .chip{display:inline-block;padding:0 6px;border-radius:6px;font-weight:700}
+  .chip-home{background:var(--c-home)}
+  .chip-gemuese{background:var(--c-gemuese)}
+  .chip-konzept{background:var(--c-konzept)}
+  .chip-angebot{background:var(--c-angebot)}
+  .chip-mitarbeit{background:var(--c-mitarbeit)}
+  .chip-mitmachen{background:var(--c-mitmachen)}
+  .chip-mitglieder{background:var(--c-mitglieder)}
+  .chip-footer{background:var(--c-footer)}
+  .chip-orphans{background:var(--c-orphans)}
+</style>
+</head>
+<body>
+  <h1>BioCo – Colored Sitemap × Rows Matrix (Mobile-First, verlinkt)</h1>
+  <div class="legend">
+    Spalten = Navigation (Hamburger & Footer), Zeilen = definierte Rows/Sektionen. 
+    <span class="badge mvp">MVP</span> = Startversion, <span class="badge phase">Phase&nbsp;2</span> = später.
+    Verlinkungen sind als farbige <strong>Chips</strong> markiert: <em>„Bezeichnung“</em> in Ziel-Farbe mit Pfeil <code>--&gt; ROW</code>.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="row">Rows / Sektionen</th>
+        <th class="home">Start (Homepage)</th>
+        <th class="gemuese">Unser Gemüse</th>
+        <th class="konzept">So funktioniert’s (CSA)</th>
+        <th class="angebot">Das Angebot</th>
+        <th class="mitarbeit">Mitarbeit</th>
+        <th class="mitmachen">Mitmachen!</th>
+        <th class="mitglieder">Für Mitglieder</th>
+        <th class="footer">Footer-Navigation</th>
+        <th class="orphans">Orphans & External</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Sticky Header -->
+      <tr>
+        <th class="row">A-01 Sticky Header <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">Logo + ☰</div>
+          <ul>
+            <li>Fixe Höhe, klare Typo, gute Zielgrössen (Icons ≥44px tappable).</li>
+            <li><span class="chip-mitmachen">Mitmachen!</span> --> F-01 Hero (Mitmachen)</li>
+            <li><span class="chip-mitglieder">Für Mitglieder</span> --> G-01 Gateway Hero</li>
+            <li class="dim"><em>Suche optional als Icon (später).</em></li>
+          </ul>
+        </td>
+        <td class="gemuese">Identisch.</td>
+        <td class="konzept">Identisch.</td>
+        <td class="angebot">Identisch.</td>
+        <td class="mitarbeit">Identisch.</td>
+        <td class="mitmachen">Identisch.</td>
+        <td class="mitglieder">Identisch.</td>
+        <td class="footer"></td>
+        <td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Hero -->
+      <tr>
+        <th class="row">A-02 Hero <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Frisches Demeter-Gemüse. Jede Woche…“</div>
+          <ul>
+            <li>Subline: „Werde Teil der biocò Gemüsegenossenschaft in Baden & Brugg.“</li>
+            <li><strong>CTA primär:</strong> <span class="chip-mitmachen">Jetzt Mitglied werden</span> --> F-04 Anmeldung</li>
+            <li><strong>CTA sekundär:</strong> <span class="chip-mitmachen">Zuerst testen? Zum Probe-Abo</span> --> F-02 Zuerst testen?</li>
+            <li class="dim">Hintergrund: authentisches Hof-/Ernte-/Team-Foto, freundlich & hell.</li>
+          </ul>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Product VP -->
+      <tr>
+        <th class="row">A-03 Value Prop – Produkt <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Das ist drin: Saisonal & Demeter.“</div>
+          <ul>
+            <li>Card 1: „Dein wöchentlicher Korb“ – Foto voller Gemüsekorb.</li>
+            <li>Card 2: „Frische Saisonalität“ – Close-up eines saisonalen Gemüses.</li>
+            <li>Card 3: „Höchste Bio-Qualität“ – Demeter-Logo auf hellem Hintergrund.</li>
+            <li><span class="chip-gemuese">Unser Gemüse entdecken</span> --> B-01 Hero „Unser Gemüse“</li>
+          </ul>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Community VP -->
+      <tr>
+        <th class="row">A-04 Value Prop – Community <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Mehr als nur Gemüse: Unsere Gemeinschaft.“</div>
+          <ul>
+            <li>Icon+Text: Mitarbeit – „Pack mit an auf dem Feld.“</li>
+            <li>Icon+Text: Transparenz – „Du weisst, woher’s kommt.“</li>
+            <li>Icon+Text: Gotti-System – „Wir helfen dir beim Start.“</li>
+            <li>Icon+Text: Lokal – „Gemeinsam für die Region.“</li>
+            <li><span class="chip-konzept">So funktioniert’s</span> --> C-01 Konzept</li>
+          </ul>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Dual Funnel -->
+      <tr>
+        <th class="row">A-05 Dual-Funnel CTA <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Dein Weg zu biocò“</div>
+          <ul>
+            <li>Box A: „Unverbindlich kennenlernen“ – <span class="chip-konzept">Alle Termine & Anmeldung</span> --> C-03 Info-Veranstaltung</li>
+            <li>Box B: „Das Probe-Abo“ – <span class="chip-mitmachen">Zum Probe-Abo</span> --> F-02 Zuerst testen?</li>
+            <li class="dim">Illustrationen: kleiner Kalender & Korb-Piktogramm.</li>
+          </ul>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: News -->
+      <tr>
+        <th class="row">A-06 Hofberichte (News) <span class="badge phase">Phase&nbsp;2</span></th>
+        <td class="home">
+          <div class="title">„Aktuell vom Hof“</div>
+          <ul>
+            <li>Horizontale Karten (2–3) mit Bild & Teaser.</li>
+            <li><span class="chip-orphans">Alle Hofberichte lesen</span> --> O-02 Blog/Hofbericht</li>
+            <li class="dim">Fotos: Feldernte/Team-Momente, Rezept-Closeups.</li>
+          </ul>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Trust -->
+      <tr>
+        <th class="row">A-07 Trust Bar <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">Partner-Leiste</div>
+          <ul>
+            <li>Demeter · Bio Suisse · lokale Partner (einfarbige Logos).</li>
+            <li class="dim"><em>Verlinkung zu Partnern optional, wenn Vereinbarungen bestehen.</em></li>
+          </ul>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- GEMÜSE page -->
+      <tr>
+        <th class="row">B-01 Hero „Unser Gemüse“ <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="gemuese">
+          <div class="title">„Unser Gemüse: Frisch, Lokal, Demeter.“</div>
+          <ul>
+            <li>Intro: Vielfalt, gemeinsame Verantwortung, hohe Qualität.</li>
+            <li class="dim">Hero-Foto: ruhiger Korb-Shot (natürliches Licht).</li>
+          </ul>
+        </td>
+        <td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-02 Galerie <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="gemuese">
+          <div class="title">„Einblick in die Ernte“</div>
+          <ul>
+            <li>Filter (scrollbar): Alles · Körbe · Auf dem Feld · Gemüse-Portraits.</li>
+            <li>2-Spalten Grid auf Mobile, Tap-to-enlarge.</li>
+            <li class="dim">Fotos: authentisch, ungestellt, farbtreu.</li>
+          </ul>
+        </td>
+        <td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-03 Saisonkalender <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="gemuese">
+          <div class="title">„Was wächst wann?“</div>
+          <ul>
+            <li>Tabs (Jan–Dez) mit Listen: „Jetzt“, „Bald“, „Lagerware“.</li>
+            <li class="dim">Illustration: keine – klare Tags/Badges genügen.</li>
+          </ul>
+        </td>
+        <td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td

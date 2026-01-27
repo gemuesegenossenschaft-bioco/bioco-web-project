@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Workshop Map – Story & Content Journey (Post-it Style)</title>
+<style>
+  :root{
+    --bg:#fafaf7; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --brand:#0ea5e9;
+    --must:#b7f0b1;   /* Muss (Must) */
+    --should:#fff3b0; /* Soll (Should) */
+    --could:#ffd1a8;  /* Kann (Could) */
+    --wont:#ffc0da;   /* Won't have (Nicht jetzt) – pink */
+    --new:#d1d5db;    /* New/Unklar – grau */
+    --sticky-shadow: 0 8px 20px rgba(0,0,0,.06);
+    --radius:14px;
+  }
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:saturate(1.2) blur(8px);
+    background:rgba(250,250,247,.92); border-bottom:1px solid var(--line);
+  }
+  .wrap{width:100%;margin:0 auto;padding:14px 18px;max-width:none}
+  h1{font-size:20px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:13px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .btn{
+    appearance:none;border:1px solid var(--line);background:white;color:var(--ink);
+    padding:8px 12px;border-radius:10px;cursor:pointer;box-shadow:var(--sticky-shadow);
+  }
+  .tabs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--brand);color:white;border-color:var(--brand)}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .sw{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.08);display:inline-block;margin-right:6px}
+  .grid{
+    margin:18px auto; width:100%; background:#fff;border:1px solid var(--line);
+    border-radius:18px; overflow:auto; box-shadow:var(--sticky-shadow)
+  }
+  .board{display:none;padding:12px}
+  .board.active{display:block}
+  .table{display:grid; gap:1px; background:var(--line)}
+  .cell{background:#fff; min-height:130px; padding:10px; position:relative}
+  .head{background:#f8fafc;font-weight:600}
+  .rowhead{background:#f8fafc;font-weight:600;white-space:nowrap}
+
+  /* Sticky notes */
+  .sticky{
+    position:relative; display:inline-block; min-width:120px; max-width:260px; padding:10px 12px 28px;
+    margin:6px; border-radius:var(--radius); box-shadow:var(--sticky-shadow);
+    cursor:grab; user-select:none; border:1px solid rgba(0,0,0,.06);
+    transform:rotate(var(--rot, -1deg));
+  }
+  .sticky.selected{outline:2px solid #60a5fa; outline-offset:2px}
+  .sticky .text{outline:none}
+
+  /* LEFT: Content-Link (C) */
+  .lbar{
+    position:absolute; left:8px; bottom:6px; display:flex; gap:6px; align-items:center;
+  }
+  .linkbtn{
+    width:20px;height:20px;border-radius:6px;border:1px solid rgba(0,0,0,.18);
+    background:#fff; font-weight:700; font-size:12px; line-height:18px; text-align:center;
+    cursor:pointer; box-shadow:var(--sticky-shadow);
+  }
+  .linkbtn[data-hasurl="true"]{ background:#eef2ff; border-color:#c7d2fe }
+  .linkdot{ width:8px;height:8px;border-radius:50%; background:#8b5cf6; border:1px solid rgba(0,0,0,.15) }
+
+  /* RIGHT: Farben + Delete */
+  .bar{position:absolute; right:8px; bottom:6px; display:flex; gap:6px}
+  .dot{width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.15); cursor:pointer}
+  .del{border:none;background:transparent;cursor:pointer;color:#ef4444;font-size:16px}
+
+  /* Colors */
+  .must{background:var(--must)}
+  .should{background:var(--should)}
+  .could{background:var(--could)}
+  .wont{background:var(--wont)}
+  .new{background:var(--new)}
+
+  .hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+  .footer{color:var(--muted);font-size:12px;padding:20px;text-align:center}
+
+  /* ===== Print / PDF ===== */
+  @media print{
+    @page { size: A3 landscape; margin: 12mm }
+    header{ position:static; background:#fff; border:none; }
+    .toolbar, .tabs .tab[aria-selected="false"]{ display:none !important; }
+    .wrap{ padding:0 }
+    .grid{ box-shadow:none; border:1px solid #bbb }
+    .sticky{ box-shadow:none; border:1px solid rgba(0,0,0,.2) }
+    .legend{ margin:6px 0 12px }
+    .board{ display:block !important; break-after:page }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Workshop Map – Story Mapping & Content Journey</h1>
+      <div class="sub">C-Icon auf dem Post-it: Content-Link hinterlegen/öffnen · CSV Import/Export · PDF-Druck (A3 quer)</div>
+      <div class="tabs">
+        <button class="tab" aria-selected="true" data-target="#story">User Story Map</button>
+        <button class="tab" aria-selected="false" data-target="#journey">Customer Journey Map</button>
+      </div>
+      <div class="toolbar">
+        <button id="addCol" class="btn">+ Spalte</button>
+        <button id="addRow" class="btn">+ Zeile</button>
+        <button id="reset" class="btn">Board leeren</button>
+        <button id="exportCSV" class="btn">Export CSV</button>
+        <label class="btn" style="cursor:pointer">
+          Import CSV
+          <input id="importCSV" type="file" accept=".csv,text/csv" style="display:none">
+        </label>
+        <button id="printPDF" class="btn">Drucken / PDF</button>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--must)"></i>Must (Muss)</span>
+        <span><i class="sw" style="background:var(--should)"></i>Should (Soll)</span>
+        <span><i class="sw" style="background:var(--could)"></i>Could (Kann)</span>
+        <span><i class="sw" style="background:var(--wont)"></i>Won’t have (Nicht jetzt)</span>
+        <span><i class="sw" style="background:var(--new)"></i>New (Klärung)</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="story" class="board active" aria-label="User Story Map">
+    <div class="grid"><div id="storyTable" class="table" role="grid"></div></div>
+    <p class="wrap hint">Doppelklick in Zelle → neues Post-it. Links unten „C“ für Content-Link. Rechts: Farben (MoSCoW) & Löschen.</p>
+  </section>
+
+  <section id="journey" class="board" aria-label="Customer Journey Map">
+    <div class="grid"><div id="journeyTable" class="table" role="grid"></div></div>
+    <p class="wrap hint">Spalten = Journey-Schritte. Zeilen = Personas/Zielgruppen. Zellen doppelklicken für neue Post-its.</p>
+  </section>
+
+  <div class="footer">Speichert lokal (localStorage) · Keine externen Libraries</div>
+
+<script>
+/* ===== Utils ===== */
+const $ = s => document.querySelector(s);
+const uuid = () => Math.random().toString(36).slice(2);
+const storageKey = 'bioco-workshop-stable-v1';
+
+const LABEL = {
+  must: 'Must (Muss)',
+  should: 'Should (Soll)',
+  could: 'Could (Kann)',
+  wont: "Won’t have (Nicht jetzt)",
+  new: 'New (Klärung)'
+};
+
+/* ===== Stickies ===== */
+function makeSticky(text='Neue Notiz', color='must', rotation=2, url=''){
+  const s = document.createElement('div');
+  s.className = `sticky ${color}`;
+  s.draggable = true;
+  s.dataset.id = uuid();
+  if(url) s.dataset.url = url;
+  s.style.setProperty('--rot', (Math.random()*rotation*2-rotation).toFixed(2)+'deg');
+
+  const t = document.createElement('div');
+  t.className = 'text';
+  t.contentEditable = 'true';
+  t.textContent = text;
+
+  /* LEFT BAR: Content-Link (C) */
+  const lbar = document.createElement('div');
+  lbar.className = 'lbar';
+  const linkBtn = document.createElement('button');
+  linkBtn.className = 'linkbtn';
+  linkBtn.title = url ? `Content öffnen: ${url}` : 'Content-Link hinzufügen';
+  linkBtn.textContent = 'C';
+  if(url) linkBtn.dataset.hasurl = 'true';
+  const linkDot = document.createElement('span');
+  linkDot.className = 'linkdot';
+  linkDot.title = url ? 'Content verknüpft' : 'kein Link';
+
+  linkBtn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const current = s.dataset.url || '';
+    if(current){
+      window.open(current, '_blank', 'noopener');
+    }else{
+      const val = prompt('Content-URL hinzufügen (https://...)', 'https://');
+      if(val && /^https?:\/\//i.test(val.trim())){
+        s.dataset.url = val.trim();
+        linkBtn.dataset.hasurl = 'true';
+        linkBtn.title = `Content öffnen: ${s.dataset.url}`;
+        linkDot.title = 'Content verknüpft';
+        saveState();
+      }else if(val){
+        alert('Bitte eine gültige URL mit http(s) angeben.');
+      }
+    }
+  });
+  linkBtn.addEventListener('contextmenu', (e)=>{
+    e.preventDefault();
+    const current = s.dataset.url || '';
+    const val = prompt('Content-URL bearbeiten oder leer lassen, um zu entfernen:', current);
+    if(val===null) return;
+    const trimmed = (val||'').trim();
+    if(trimmed===''){
+      delete s.dataset.url;
+      linkBtn.removeAttribute('data-hasurl');
+      linkBtn.title = 'Content-Link hinzufügen';
+      linkDot.title = 'kein Link';
+      saveState();
+    }else if(/^https?:\/\//i.test(trimmed)){
+      s.dataset.url = trimmed;
+      linkBtn.dataset.hasurl = 'true';
+      linkBtn.title = `Content öffnen: ${s.dataset.url}`;
+      linkDot.title = 'Content verknüpft';
+      saveState();
+    }else{
+      alert('Bitte eine gültige URL mit http(s) angeben.');
+    }
+  });
+
+  lbar.appendChild(linkBtn);
+  lbar.appendChild(linkDot);
+
+  /* RIGHT BAR: Farben + Löschen */
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  ['must','should','could','wont','new'].forEach(c=>{
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = LABEL[c];
+    d.style.background = getComputedStyle(document.documentElement).getPropertyValue(`--${c}`);
+    d.addEventListener('click', e=>{
+      e.stopPropagation();
+      s.className = `sticky ${c}`;
+      saveState();
+    });
+    bar.appendChild(d);
+  });
+  const del = document.createElement('button');
+  del.className='del'; del.title='Löschen'; del.innerHTML='&times;';
+  del.addEventListener('click', ()=>{ s.remove(); saveState(); });
+  bar.appendChild(del);
+
+  s.appendChild(t);
+  s.appendChild(lbar);
+  s.appendChild(bar);
+
+  s.addEventListener('click', ()=>{
+    document.querySelectorAll('.sticky.selected').forEach(n=>n.classList.remove('selected'));
+    s.classList.add('selected');
+  });
+
+  s.addEventListener('dragstart', e=>{
+    e.dataTransfer.setData('text/plain', s.dataset.id);
+  });
+
+  t.addEventListener('input', saveState);
+  return s;
+}
+
+/* ===== Table build/restore ===== */
+function buildTable(el, rows, cols, preset){
+  el.style.gridTemplateColumns = `220px repeat(${cols-1}, minmax(240px, 1fr))`;
+  el.innerHTML = '';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.rc = `${r}:${c}`;
+      cell.setAttribute('role','gridcell');
+      const isTop = r===0, isLeft = c===0;
+
+      if(isTop && isLeft){
+        cell.classList.add('head'); cell.textContent = preset.topLeft || '';
+      } else if(isTop){
+        cell.classList.add('head'); cell.contentEditable = 'true'; cell.dataset.header = 'col';
+        cell.textContent = preset.cols[c] || `Schritt ${c}`;
+      } else if(isLeft){
+        cell.classList.add('rowhead'); cell.contentEditable = 'true'; cell.dataset.header = 'row';
+        cell.textContent = preset.rows[r] || `Lane ${r}`;
+      } else {
+        cell.addEventListener('dblclick', ()=>{ cell.appendChild(makeSticky()); saveState(); });
+        cell.addEventListener('dragover', e=>{ e.preventDefault(); cell.style.outline='2px dashed #94a3b8'; });
+        cell.addEventListener('dragleave', ()=>{ cell.style.outline='none'; });
+        cell.addEventListener('drop', e=>{
+          e.preventDefault(); cell.style.outline='none';
+          const id = e.dataTransfer.getData('text/plain');
+          const sticky = document.querySelector(`.sticky[data-id="${id}"]`);
+          if(sticky) cell.appendChild(sticky);
+          saveState();
+        });
+      }
+      if(cell.isContentEditable){ cell.addEventListener('input', saveState); }
+      el.appendChild(cell);
+    }
+  }
+}
+
+function serializeTable(el){
+  const out = { cols: el.style.gridTemplateColumns, headers:{rows:[],cols:[]}, cells:[] };
+  const cells = el.querySelectorAll('.cell');
+  cells.forEach(cell=>{
+    const data = { rc: cell.dataset.rc, header: cell.dataset.header || null, html: cell.isContentEditable ? cell.innerHTML : null, stickies: [] };
+    cell.querySelectorAll('.sticky').forEach(st=>{
+      const color = ['must','should','could','wont','new'].find(c=>st.classList.contains(c)) || 'must';
+      const url = st.dataset.url || '';
+      data.stickies.push({
+        text: st.querySelector('.text').innerText.replace(/\s+/g,' ').trim(),
+        color, url
+      });
+    });
+    out.cells.push(data);
+  });
+  const firstRowCount = Array.from(cells).filter(c=>c.dataset.rc.startsWith('0:')).length;
+  const rowCount = Array.from(cells).filter(c=>c.dataset.rc.endsWith(':0')).length;
+  for(let c=1;c<firstRowCount;c++){
+    const head = el.querySelector(`.cell[data-rc="0:${c}"]`); out.headers.cols.push(head ? head.textContent.trim() : `Spalte ${c}`);
+  }
+  for(let r=1;r<rowCount;r++){
+    const head = el.querySelector(`.cell[data-rc="${r}:0"]`); out.headers.rows.push(head ? head.textContent.trim() : `Zeile ${r}`);
+  }
+  return out;
+}
+function restoreTable(el, state){
+  if(!state) return;
+  el.style.gridTemplateColumns = state.cols || el.style.gridTemplateColumns;
+  el.querySelectorAll('.cell').forEach(cell=>{
+    const s = state.cells.find(x=>x.rc===cell.dataset.rc);
+    if(!s) return;
+    if(s.header && cell.isContentEditable){
+      cell.innerHTML = s.html || '';
+    } else if(!s.header){
+      s.stickies?.forEach(st=> cell.appendChild(makeSticky(st.text, st.color, 2, st.url || '')));
+    }
+  });
+}
+
+/* ===== Defaults ===== */
+const defaults = {
+  story:{
+    rows: 5, cols: 6,
+    preset: {
+      topLeft: 'Backbone / Lanes',
+      cols: ['Über uns','Mitmachen','Abo/Bestellung','Kalender/Abholen','News/Blog','Kontakt'],
+      rows: [null,'Neumitglied','Mitglied (bestehend)','Partner*in','Presse/Öffentlichkeit']
+    }
+  },
+  journey:{
+    rows: 6, cols: 6,
+    preset: {
+      topLeft: 'Persona / Schritt',
+      cols: ['Entdecken','Verstehen','Entscheiden','Teilnehmen','Mitmachen','Bleiben'],
+      rows: [null,'Interessierte Person','Neumitglied','Mitglied (aktiv)','Partner*in','Spender*in']
+    }
+  }
+};
+
+/* ===== Init ===== */
+const storyTable = $('#storyTable');
+const journeyTable = $('#journeyTable');
+
+function init(){
+  buildTable(storyTable, defaults.story.rows, defaults.story.cols, defaults.story.preset);
+  buildTable(journeyTable, defaults.journey.rows, defaults.journey.cols, defaults.journey.preset);
+
+  const state = JSON.parse(localStorage.getItem(storageKey) || 'null');
+  if(state){
+    restoreTable(storyTable, state.story);
+    restoreTable(journeyTable, state.journey);
+    document.querySelectorAll('.tab').forEach(t=>{
+      const active = t.dataset.target === (state.activeTab || '#story');
+      t.setAttribute('aria-selected', active ? 'true':'false');
+      document.querySelector(t.dataset.target).classList.toggle('active', active);
+    });
+  }
+}
+init();
+
+/* ===== Save ===== */
+function saveState(){
+  const state = {
+    activeTab: document.querySelector('.tab[aria-selected="true"]').dataset.target,
+    story: serializeTable(storyTable),
+    journey: serializeTable(journeyTable)
+  };
+  localStorage.setItem(storageKey, JSON.stringify(state));
+}
+
+/* ===== Tabs ===== */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+    tab.setAttribute('aria-selected','true');
+    document.querySelectorAll('.board').forEach(b=>b.classList.remove('active'));
+    document.querySelector(tab.dataset.target).classList.add('active');
+    saveState();
+  });
+});
+
+/* ===== Controls ===== */
+function gridShape(activeTable){
+  const cells = activeTable.querySelectorAll('.cell');
+  const cols = Array.from(cells).filter(c=>c.dataset.rc.startsWith('0:')).length;
+  const rows = Array.from(cells).filter(c=>c.dataset.rc.endsWith(':0')).length;
+  return {rows, cols};
+}
+function addColumn(activeTable){
+  const {rows, cols} = gridShape(activeTable);
+  const snapshot = serializeTable(activeTable);
+  buildTable(activeTable, rows, cols+1, {topLeft:'',cols:[],rows:[]});
+  restoreTable(activeTable, snapshot);
+  saveState();
+}
+function addRow(activeTable){
+  const {rows, cols} = gridShape(activeTable);
+  const snapshot = serializeTable(activeTable);
+  buildTable(activeTable, rows+1, cols, {topLeft:'',cols:[],rows:[]});
+  restoreTable(activeTable, snapshot);
+  saveState();
+}
+function activeTableEl(){ return document.querySelector('.board.active .table'); }
+$('#addCol').addEventListener('click', ()=> addColumn(activeTableEl()));
+$('#addRow').addEventListener('click', ()=> addRow(activeTableEl()));
+$('#reset').addEventListener('click', ()=>{
+  if(!confirm('Wirklich alle Post-its und Header dieses Boards löschen?')) return;
+  const isStory = document.querySelector('#story').classList.contains('active');
+  if(isStory){
+    buildTable(storyTable, defaults.story.rows, defaults.story.cols, defaults.story.preset);
+  } else {
+    buildTable(journeyTable, defaults.journey.rows, defaults.journey.cols, defaults.journey.preset);
+  }
+  saveState();
+});
+
+/* ===== CSV Export ===== */
+function tableToRows(name, tableEl){
+  const state = serializeTable(tableEl);
+  const rows = [];
+  const colHeads = state.headers.cols;
+  const rowHeads = state.headers.rows;
+  for(let r=1; r<=rowHeads.length; r++){
+    for(let c=1; c<=colHeads.length; c++){
+      const cell = state.cells.find(x=>x.rc===`${r}:${c}`);
+      const has = cell && cell.stickies && cell.stickies.length;
+      if(has){
+        cell.stickies.forEach(s=>{
+          rows.push({Board:name, Row:rowHeads[r-1]||'', Column:colHeads[c-1]||'', Label:LABEL[s.color]||s.color, Text:s.text});
+        });
+      }else{
+        rows.push({Board:name, Row:rowHeads[r-1]||'', Column:colHeads[c-1]||'', Label:'', Text:''});
+      }
+    }
+  }
+  return rows;
+}
+function toCSV(rows){
+  const headers = ['Board','Row','Column','Label','Text'];
+  const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  return [headers.join(','), ...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\n');
+}
+$('#exportCSV').addEventListener('click', ()=>{
+  const rows = [
+    ...tableToRows('User Story Map', storyTable),
+    ...tableToRows('Customer Journey Map', journeyTable)
+  ];
+  const csv = toCSV(rows);
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'workshop-map.csv';
+  a.click();
+});
+
+/* ===== CSV Import =====
+   Erwartet: Board,Row,Column,Label,Text
+*/
+$('#importCSV').addEventListener('change', async (e)=>{
+  const file = e.target.files?.[0];
+  if(!file) return;
+  const text = await file.text();
+  const lines = text.split(/\r?\n/).filter(Boolean);
+  const [header, ...rows] = lines;
+  const idx = header.split(',').map(h=>h.trim().toLowerCase());
+  const iBoard = idx.indexOf('board');
+  const iRow = idx.indexOf('row');
+  const iCol = idx.indexOf('column');
+  const iLabel = idx.indexOf('label');
+  const iText = idx.indexOf('text');
+  if(iBoard<0||iRow<0||iCol<0||iLabel<0||iText<0){ alert('CSV-Header nicht erkannt. Erwartet: Board,Row,Column,Label,Text'); return; }
+
+  function ensureHeaders(tableEl, rowLabel, colLabel){
+    const state = serializeTable(tableEl);
+    let rIndex = state.headers.rows.indexOf(rowLabel);
+    let cIndex = state.headers.cols.indexOf(colLabel);
+    // add row if missing
+    if(rIndex === -1){
+      const {rows, cols} = (()=>{
+        const cells = tableEl.querySelectorAll('.cell');
+        return {
+          cols: Array.from(cells).filter(c=>c.dataset.rc.startsWith('0:')).length,
+          rows: Array.from(cells).filter(c=>c.dataset.rc.endsWith(':0')).length
+        };
+      })();
+      const snap = serializeTable(tableEl);
+      buildTable(tableEl, rows+1, cols, {topLeft:'',cols:[],rows:[]});
+      restoreTable(tableEl, snap);
+      const newRowCell = tableEl.querySelector(`.cell[data-rc="${rows}:0"]`);
+      newRowCell.textContent = rowLabel;
+      rIndex = rows-1;
+    }
+    // add column if missing
+    const cells2 = tableEl.querySelectorAll('.cell');
+    const colsNow = Array.from(cells2).filter(c=>c.dataset.rc.startsWith('0:')).length;
+    if(cIndex === -1){
+      const rowsNow = Array.from(cells2).filter(c=>c.dataset.rc.endsWith(':0')).length;
+      const snap2 = serializeTable(tableEl);
+      buildTable(tableEl, rowsNow, colsNow+1, {topLeft:'',cols:[],rows:[]});
+      restoreTable(tableEl, snap2);
+      const newColCell = tableEl.querySelector(`.cell[data-rc="0:${colsNow}"]`);
+      newColCell.textContent = colLabel;
+      cIndex = colsNow-1;
+    }
+    const rPos = rIndex + 1, cPos = cIndex + 1;
+    return tableEl.querySelector(`.cell[data-rc="${rPos}:${cPos}"]`);
+  }
+
+  // naive CSV parser
+  rows.forEach(line=>{
+    const parts = []; let cur='', inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch==='"'){ if(line[i+1]==='"'){cur+='"'; i++;} else {inQ=!inQ;} }
+      else if(ch===',' && !inQ){ parts.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    parts.push(cur);
+    const board=(parts[iBoard]||'').trim().toLowerCase();
+    const rowL =(parts[iRow]||'').trim();
+    const colL =(parts[iCol]||'').trim();
+    const label=(parts[iLabel]||'').trim().toLowerCase();
+    const textV=(parts[iText]||'').trim();
+
+    const tableEl = board.includes('journey') ? journeyTable : storyTable;
+    const target = ensureHeaders(tableEl, rowL, colL);
+    if(!target) return;
+
+    let cls='must';
+    if(label.includes('muss')||label==='must') cls='must';
+    else if(label.includes('soll')||label==='should') cls='should';
+    else if(label.includes('kann')||label==='could') cls='could';
+    else if(label.includes('nicht jetzt')||label.includes("won't")||label.includes("won’t")) cls='wont';
+    else if(label.includes('neu')||label.includes('klär')||label==='new') cls='new';
+
+    target.appendChild(makeSticky(textV||' ', cls));
+  });
+
+  saveState();
+  alert('CSV importiert.');
+  e.target.value = '';
+});
+
+/* ===== Print ===== */
+$('#printPDF').addEventListener('click', ()=> window.print());
+
+/* ===== Autosave on unload ===== */
+window.addEventListener('beforeunload', saveState);
+</script>
+</body>
+</html>

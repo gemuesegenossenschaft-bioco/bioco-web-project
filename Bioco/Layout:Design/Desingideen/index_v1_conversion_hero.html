@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>biocò – Mockup V1 Conversion-Hero</title>
+  <style>
+:root{
+  --bg:#FAF4EE; --ink:#1A1A1A; --muted:#6B6B6B;
+  --brand:#2D6A4F; --accent:#8FB996;
+  --card:#FFFFFF; --border:#E6E2DA;
+  --max:1120px; --r:16px; --space:clamp(12px,2vw,20px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+a{color:var(--brand);text-decoration:none}
+a:hover{text-decoration:underline}
+.container{max-width:var(--max);margin:0 auto;padding:0 var(--space)}
+header{position:sticky;top:0;background:rgba(250,244,238,.92);backdrop-filter:saturate(180%) blur(6px);
+  border-bottom:1px solid var(--border);z-index:10}
+.nav{display:flex;align-items:center;gap:12px;justify-content:space-between;padding:.6rem 0}
+.brand{display:flex;align-items:center;gap:.6rem;font-weight:700}
+.brand .dot{width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.menu{display:flex;gap:.9rem;flex-wrap:wrap;align-items:center}
+.menu a{padding:.4rem .6rem;border-radius:10px}
+.menu a[aria-current="page"]{background:var(--card);border:1px solid var(--border)}
+.cta{background:var(--brand);color:white;padding:.55rem .9rem;border-radius:999px;font-weight:600;display:inline-block}
+.cta:hover{opacity:.9;text-decoration:none}
+section h2{margin:0 0 8px}
+.muted{color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:clamp(12px,2.2vw,18px)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,2vw,18px)}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(12px,2vw,18px)}
+.imgwrap{aspect-ratio:3/2;border-radius:20px;overflow:hidden;border:1px solid var(--border);background:#ddd}
+.imgwrap img{width:100%;height:100%;object-fit:cover;display:block}
+footer{margin-top:40px;border-top:1px solid var(--border);background:#fff5;backdrop-filter:blur(2px)}
+.footgrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:18px;padding:16px 0}
+@media (max-width:900px){
+  .grid3,.grid2{grid-template-columns:1fr}
+  .footgrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="container nav">
+    <div class="brand"><span class="dot" aria-hidden="true"></span> biocò · Region Baden-Brugg</div>
+    <nav class="menu" aria-label="Hauptnavigation">
+      <a href="#home" aria-current="page">Home</a>
+      <a href="#so-funktionierts">So funktioniert’s</a>
+      <a href="#mitglied-werden">Mitglied werden</a>
+      <a href="#abholen">Abholen</a>
+      <a href="#mitmachen">Mitmachen</a>
+      <a href="#aktuelles">News</a>
+      <a href="#kontakt">Über uns & Kontakt</a>
+      <a class="cta" href="#mitglied-werden">Mitglied werden</a>
+    </nav>
+  </div>
+</header>
+<main id="home" class="container">
+
+<section class="hero" aria-labelledby="h-hero" style="display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(14px,3vw,28px);align-items:center;padding:clamp(20px,4vw,36px) 0">
+  <div>
+    <h1 id="h-hero" style="font-size:clamp(28px,4.2vw,44px);line-height:1.1;margin:.2rem 0">
+      Frisches Demeter-Gemüse – solidarisch angebaut, wöchentlich verteilt.
+    </h1>
+    <p class="muted" style="max-width:46ch">
+      biocò ist eine Gemüsegenossenschaft in der Region Baden-Brugg. Seit 2014 bauen wir auf dem Geisshof in Gebenstorf vielfältiges Biogemüse an und verteilen es an unsere Genossenschafter:innen.
+    </p>
+    <div class="hero-cta" style="display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.8rem">
+      <a class="cta" href="#mitglied-werden">Jetzt Mitglied werden</a>
+      <a class="card" href="#so-funktionierts" style="padding:.55rem .9rem;border-radius:999px">So funktioniert’s</a>
+    </div>
+  </div>
+  <figure class="imgwrap" aria-label="Gemüseernte">
+    <img src="assets/images/hero_v1.jpg" alt="Frische Ernte auf dem Feld">
+  </figure>
+</section>
+
+<section aria-labelledby="h-nutzen">
+  <h2 id="h-nutzen">Warum biocò?</h2>
+  <div class="grid3">
+    <div class="card">
+      <h3>Gemeinsam & fair</h3>
+      <p>Solidarische Landwirtschaft: Kosten tragen wir gemeinsam – Ernte teilen wir miteinander.</p>
+    </div>
+    <div class="card">
+      <h3>Bio aus der Nähe</h3>
+      <p>Demeter-Qualität vom Geisshof in Gebenstorf – kurze Wege, maximale Frische.</p>
+    </div>
+    <div class="card">
+      <h3>Mitarbeiten & lernen</h3>
+      <p>Mithelfen auf dem Feld stärkt die Gemeinschaft und schafft Nähe zur Natur.</p>
+    </div>
+  </div>
+</section>
+
+<section id="so-funktionierts" aria-labelledby="h-how" style="margin:10px 0 28px">
+  <h2 id="h-how">So funktioniert’s</h2>
+  <div class="grid3">
+    <div class="card"><b>1</b><h3>Anteil wählen</h3><p>Gemüse-Abo (Anteil) wählen und Genossenschaft beitreten.</p></div>
+    <div class="card"><b>2</b><h3>Mitarbeiten</h3><p>Einige Einsätze im Jahr – Feldarbeit verbindet und macht Freude.</p></div>
+    <div class="card"><b>3</b><h3>Abholen</h3><p>Wöchentlich frisches Gemüse im Depot deiner Wahl abholen.</p></div>
+  </div>
+</section>
+
+<section id="aktuelles" aria-labelledby="h-news">
+  <h2 id="h-news">Aktuelles</h2>
+  <div class="grid3">
+    <a class="card" href="#news1"><div class="imgwrap"><img src="assets/images/news_01.jpg" alt="Aktionstag"></div><h3>Schnuppertag auf dem Geisshof</h3><p class="muted">Komm vorbei, lerne uns kennen, stelle Fragen rund um Solawi.</p></a>
+    <a class="card" href="#news2"><div class="imgwrap"><img src="assets/images/news_02.jpg" alt="Markt/Depot"></div><h3>Kleidertausch im Diesellokal</h3><p class="muted">Gemeinschaft pflegen, Ressourcen teilen – wir sind dabei.</p></a>
+    <a class="card" href="#news3"><div class="imgwrap"><img src="assets/images/news_03.jpg" alt="Ernte"></div><h3>Erntedank / Aktionstag</h3><p class="muted">Gemeinsam anpacken, ernten, austauschen – alle willkommen.</p></a>
+  </div>
+</section>
+
+<section id="mitglied-werden" aria-labelledby="h-join">
+  <h2 id="h-join">Mitglied werden</h2>
+  <p class="muted">Interesse? Melde dich unverbindlich – wir haben zeitweise freie Abos und freuen uns auf dich.</p>
+  <p><a class="cta" href="#kontakt">Jetzt Interesse melden</a></p>
+</section>
+
+</main>
+<footer>
+  <div class="container footgrid">
+    <div>
+      <strong>Mitgliederbereich</strong><br>
+      <span class="muted">Login & Konto (Urlaub, Daten, Belege)</span>
+    </div>
+    <div>
+      <strong>Dokumente</strong><br>
+      <a href="#">GV & Protokolle</a><br>
+      <a href="#">Verteilplan & Spesen</a>
+    </div>
+    <div>
+      <strong>Rechtliches</strong><br>
+      <a href="#">Impressum & Datenschutz</a>
+    </div>
+  </div>
+  <div class="container" style="padding-bottom:16px"><small class="muted">© biocò · Mockups (V1–V3)</small></div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BioCo – Sitemap × Rows Matrix (A–I, fortlaufende Rows)</title>
+<style>
+  :root{
+    /* Spaltenfarben */
+    --c-A:#E6F5E6;  /* A Homepage */
+    --c-B:#E6F0FF;  /* B Ernte */
+    --c-C:#F3E6FF;  /* C Abos */
+    --c-D:#FFF8CC;  /* D Anpacken */
+    --c-E:#E8F8FF;  /* E Depots */
+    --c-F:#FFE6EE;  /* F Wir */
+    --c-G:#EAF4FF;  /* G Hofpost */
+    --c-H:#F9E6F6;  /* H Mitmachen! */
+    --c-I:#EDECF9;  /* I Kundenportal 👤 */
+    --c-J:#F6F6F6;  /* J Footer */
+    --c-K:#F0F0FF;  /* K Orphans & External */
+    --grid:#ddd; --mvp:#2e7d32; --phase:#c62828;
+  }
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;color:#222;line-height:1.45}
+  h1{font-size:1.35rem;margin:0 0 10px}
+  .legend{font-size:.92rem;margin:6px 0 16px;color:#444}
+  .badge{display:inline-block;font-size:.7rem;line-height:1;padding:4px 6px;border-radius:999px;color:#fff}
+  .mvp{background:var(--mvp)} .phase{background:var(--phase)}
+  table{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed;border:1px solid var(--grid);background:#fff;border-radius:12px;overflow:hidden}
+  th,td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);vertical-align:top;padding:12px 14px}
+  th:last-child,td:last-child{border-right:none} tr:last-child td{border-bottom:none}
+  thead th{position:sticky;top:0;background:#fff;z-index:2}
+  th.row{width:260px;background:#fafafa;position:sticky;left:0;z-index:1;text-align:left}
+  .A{background:var(--c-A)} .B{background:var(--c-B)} .C{background:var(--c-C)} .D{background:var(--c-D)}
+  .E{background:var(--c-E)} .F{background:var(--c-F)} .G{background:var(--c-G)} .H{background:var(--c-H)}
+  .I{background:var(--c-I)} .J{background:var(--c-J)} .K{background:var(--c-K)}
+  .title{font-weight:700;margin-bottom:6px} .small{font-size:.92rem} .dim{opacity:.9}
+  ul{margin:6px 0 0 18px;padding:0} li{margin:4px 0}
+  /* farbige Link-Labels (Zielspalte) */
+  .link-A{color:#2e7d32} .link-B{color:#2b50ff} .link-C{color:#7a2bff} .link-D{color:#9a7a00}
+  .link-E{color:#0081b8} .link-F{color:#ff3b6b} .link-G{color:#0a66c2} .link-H{color:#b30073}
+  .link-I{color:#5a54d6} .link-J{color:#666} .link-K{color:#5b5bff}
+</style>
+</head>
+<body>
+  <h1>BioCo – Colored Sitemap × Rows Matrix (A–I, Mobile-First)</h1>
+  <div class="legend">
+    Spalten = Navigationsbereiche (A–I), Zeilen = definierte Rows. <span class="badge mvp">MVP</span> = Startversion, <span class="badge phase">Phase&nbsp;2</span> = später. 
+    Kreuzverlinkungen: <code>Element --&gt; [Ziel / Row]</code> mit Farbe der Zielspalte.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="row">Rows / Sektionen</th>
+        <th class="A">A — Homepage</th>
+        <th class="B">B — Ernte</th>
+        <th class="C">C — Abos</th>
+        <th class="D">D — Anpacken</th>
+        <th class="E">E — Depots</th>
+        <th class="F">F — Wir</th>
+        <th class="G">G — Hofpost</th>
+        <th class="H">H — Mitmachen!</th>
+        <th class="I">I — Kundenportal 👤</th>
+        <th class="J">J — Footer</th>
+        <th class="K">K — Orphans & External</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- A: Homepage -->
+      <tr>
+        <th class="row">A-01 Sticky Header <span class="badge mvp">MVP</span></th>
+        <td class="A"><div class="title">Logo + ☰</div><ul class="small"><li>Logo tap = Start.</li><li>Hamburger öffnet Navigation.</li></ul></td>
+        <td class="B">Identisch.</td><td class="C">Identisch.</td><td class="D">Identisch.</td><td class="E">Identisch.</td><td class="F">Identisch.</td><td class="G">Identisch.</td>
+        <td class="H"><ul class="small"><li>Top-CTA „Mitmachen!“ im Menü.</li></ul></td>
+        <td class="I"><ul class="small"><li>👤 Gateway zu Logins.</li></ul></td>
+        <td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">A-02 Hero <span class="badge mvp">MVP</span></th>
+        <td class="A">
+          <div class="title">„Frisches Demeter-Gemüse. Jede Woche …“</div>
+          <ul class="small">
+            <li>CTA: <strong>Jetzt Mitglied werden</strong> <span class="link-H">--&gt; [Mitmachen! / H-04 Anmeldung]</span></li>
+            <li>CTA: <strong>Zuerst testen?</strong> <span class="link-H">--&gt; [Mitmachen! / H-02 Zuerst testen?]</span></li>
+            <li class="dim">Foto: authentischer Hof-/Ernte-Shot.</li>
+          </ul>
+        </td>
+        <td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">A-03 Value Prop – Produkt <span class="badge mvp">MVP</span></th>
+        <td class="A">
+          <div class="title">„Das ist drin: Saisonal & Demeter.“</div>
+          <ul class="small">
+            <li>Cards: Wöchentlicher Korb; Saisonalität; Demeter.</li>
+            <li>CTA: <strong>Ernte entdecken</strong> <span class="link-B">--&gt; [Ernte / B-01 Hero]</span></li>
+          </ul>
+        </td>
+        <td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">A-04 Value Prop – Gemeinschaft <span class="badge mvp">MVP</span></th>
+        <td class="A">
+          <ul class="small">
+            <li>Mitarbeit <span class="link-D">--&gt; [Anpacken / D-01 Info]</span></li>
+            <li>Transparenz (CSA) <span class="link-A">--&gt; [Homepage / A-06 Konzept-Überblick]</span></li>
+            <li>Gotti-System <span class="link-F">--&gt; [Wir / F-02 Mission/Leitbild]</span></li>
+            <li>Lokal/Region <span class="link-F">--&gt; [Wir / F-01 Team & Hof]</span></li>
+          </ul>
+        </td>
+        <td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">A-05 Dual-Funnel CTA <span class="badge mvp">MVP</span></th>
+        <td class="A">
+          <ul class="small">
+            <li>Info-Event <span class="link-E">--&gt; [Depots / E-02 Nächste Events]</span> <span class="dim">(oder Eventliste)</span></li>
+            <li>Probe-Abo <span class="link-C">--&gt; [Abos / C-02 Probe-Abo]</span> · <span class="link-H">--&gt; [Mitmachen! / H-02]</span></li>
+          </ul>
+        </td>
+        <td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">A-06 Konzept-Überblick (CSA, 3 Schritte) <span class="badge mvp">MVP</span></th>
+        <td class="A">
+          <ul class="small">
+            <li>Schritte: Anmeldung → Bestätigung/Rechnung → Abholen.</li>
+            <li>Hinweis: geteiltes Risiko & Mitarbeit.</li>
+            <li class="dim">Piktos, kurze Absätze.</li>
+          </ul>
+        </td>
+        <td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">A-07 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"><ul class="small"><li>Kompakter Banner mit 2–3 kommenden Terminen; Link zur vollen Eventliste <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li></ul></td>
+        <td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">A-08 Trust Bar <span class="badge mvp">MVP</span></th>
+        <td class="A"><ul class="small"><li>Demeter · Bio Suisse · lokale Partner (einfarbige Logos).</li></ul></td>
+        <td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- B: Ernte -->
+      <tr>
+        <th class="row">B-01 Hero <span class="badge mvp">MVP</span></th>
+        <td class="A"></td>
+        <td class="B"><div class="title">„Unser Gemüse: Frisch, lokal, Demeter.“</div><ul class="small"><li>Intro Vielfalt & Qualität.</li><li class="dim">Hero-Foto: Korb.</li></ul></td>
+        <td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">B-02 Galerie <span class="badge mvp">MVP</span></th>
+        <td class="A"></td>
+        <td class="B"><ul class="small"><li>Filter: Alles · Körbe · Feld · Portraits.</li><li>Grid: 2-Spalten mobil.</li></ul></td>
+        <td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">B-03 Saisonkalender <span class="badge mvp">MVP</span></th>
+        <td class="A"></td>
+        <td class="B"><ul class="small"><li>Tabs Jan–Dez → Listen: Jetzt/Bald/Lagerware.</li></ul></td>
+        <td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">B-04 Demeter-Qualität <span class="badge mvp">MVP</span></th>
+        <td class="A"></td>
+        <td class="B"><ul class="small"><li>„Warum Demeter?“ – kurzer Text + Akkordeon.</li></ul></td>
+        <td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">B-05 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td>
+        <td class="B"><ul class="small"><li>Hinweis auf Feldtage/Erntehilfen; Link zur Eventliste <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li></ul></td>
+        <td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">B-06 CTA <span class="badge mvp">MVP</span></th>
+        <td class="A"></td>
+        <td class="B"><ul class="small"><li><strong>Jetzt Abo sichern</strong> <span class="link-H">--&gt; [Mitmachen! / H-04 Anmeldung]</span></li></ul></td>
+        <td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- C: Abos -->
+      <tr>
+        <th class="row">C-01 Gemüse-Abos <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td>
+        <td class="C"><ul class="small"><li>Halb/Standard/Doppel – Leistungen & Preise.</li><li>Link <span class="link-H">--&gt; [Mitmachen! / H-04]</span></li></ul></td>
+        <td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">C-02 Probe-Abo <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td>
+        <td class="C"><ul class="small"><li>3-Monats-Test; Link <span class="link-H">--&gt; [Mitmachen! / H-02]</span></li></ul></td>
+        <td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">C-03 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td>
+        <td class="C"><ul class="small"><li>Info-Sessions/Einführungen; Link zur Eventliste <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li></ul></td>
+        <td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">C-04 Zusatz-Abos <span class="badge phase">Phase&nbsp;2</span></th>
+        <td class="A"></td><td class="B"></td>
+        <td class="C"><ul class="small"><li>Partnerangebote (Eier, Brot, _Tofu_).</li></ul></td>
+        <td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- D: Anpacken -->
+      <tr>
+        <th class="row">D-01 Anpacken – Info <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td>
+        <td class="D"><ul class="small"><li>Umfang ~4 Halbtage/Jahr; Beispiele: Feld/Logistik.</li><li>Link <span class="link-H">--&gt; [Mitmachen! / H-04]</span></li></ul></td>
+        <td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">D-02 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td>
+        <td class="D"><ul class="small"><li>Helfereinsätze/Workdays; Link <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li></ul></td>
+        <td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- E: Depots -->
+      <tr>
+        <th class="row">E-01 Depots – Map & Liste <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td>
+        <td class="E"><ul class="small"><li>Karte Baden/Brugg/Wettingen/Windisch/Ennetbaden.</li><li>Adressliste + Zeiten (falls vorhanden).</li></ul></td>
+        <td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">E-02 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td>
+        <td class="E"><ul class="small"><li>Depot-Meetups/Abhol-Infos; Link <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li></ul></td>
+        <td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- F: Wir -->
+      <tr>
+        <th class="row">F-01 Wir – Team & Hof <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td>
+        <td class="F"><ul class="small"><li>Profilkarten Team; Hof: Geisshof (Gebenstorf).</li></ul></td>
+        <td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">F-02 Wir – Mission/Leitbild <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td>
+        <td class="F"><ul class="small"><li>Werte, Solidarität, _Gotti-System (Kurzinfo)_.</li></ul></td>
+        <td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">F-03 Wir – Geschichte (Text) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td>
+        <td class="F"><ul class="small"><li>Gründung 2014; Entwicklung in Region Baden-Brugg; Depots.</li></ul></td>
+        <td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">F-04 Wir – Geschichte (Timeline) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td>
+        <td class="F"><ul class="small"><li>Timeline (Jahre, Meilensteine, Fotos optional).</li></ul></td>
+        <td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">F-05 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td>
+        <td class="F"><ul class="small"><li>Vorstellungen/Generalversammlung; Link <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li></ul></td>
+        <td class="G"></td><td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- G: Hofpost -->
+      <tr>
+        <th class="row">G-01 Hofpost Übersicht <span class="badge phase">Phase&nbsp;2</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td>
+        <td class="G"><ul class="small"><li>Blog/News mit Karten-Grid; Einzelansichten.</li></ul></td>
+        <td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">G-02 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td>
+        <td class="G"><ul class="small"><li>Zentrale Eventliste (Quelle für Banner); Filter/Tags optional.</li></ul></td>
+        <td class="H"></td><td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- H: Mitmachen! -->
+      <tr>
+        <th class="row">H-01 Hero <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"><div class="title">„Werde jetzt Teil von biocò“</div><ul class="small"><li>Kurze Einleitung; Foto Hände+Gemüse.</li></ul></td>
+        <td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">H-02 Zuerst testen? <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"><ul class="small"><li>Info-Event <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li><li>Probe-Abo <span class="link-C">--&gt; [Abos / C-02]</span></li></ul></td>
+        <td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">H-03 Commitment-Check <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"><ul class="small"><li>Checkliste: Anteile, Beitrag, Bindung, Mitarbeit, Risiko.</li></ul></td>
+        <td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">H-04 Anmeldung (Smart Form) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"><ul class="small"><li>Angaben → Abo → Anteile (cond.) → Depot/Zahlung → Mitarbeit (cond.) → Bestätigung; Sticky Summary.</li></ul></td>
+        <td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">H-05 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"><ul class="small"><li>Onboarding-Termine/Info-Sessions; Link <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li></ul></td>
+        <td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">H-06 Nächstes (3 Schritte) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"><ul class="small"><li>Bestätigungs-Mail → Rechnung → Start.</li></ul></td>
+        <td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+      <tr>
+        <th class="row">H-07 Warteliste (conditional) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"><ul class="small"><li>Kurzformular: Vorname, Name, E-Mail, Wunsch-Abo; ersetzt H-04 wenn voll.</li></ul></td>
+        <td class="I"></td><td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- I: Kundenportal -->
+      <tr>
+        <th class="row">I-01 Gateway via 👤 <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"></td>
+        <td class="I"><ul class="small"><li>Kachel: Mitglieder-Portal (extern).</li><li>Kachel: Einsatzplanung (extern).</li></ul></td>
+        <td class="J"></td><td class="K"><ul class="small"><li>Externe Ziel-Links gelistet.</li></ul></td>
+      </tr>
+      <tr>
+        <th class="row">I-02 Nächste Events (Banner) <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td>
+        <td class="H"></td>
+        <td class="I"><ul class="small"><li>Hinweis auf relevante Mitglieder-Events; Link <span class="link-G">--&gt; [Hofpost / G-02 Nächste Events]</span></li></ul></td>
+        <td class="J"></td><td class="K"></td>
+      </tr>
+
+      <!-- J: Footer -->
+      <tr>
+        <th class="row">J-01 Footer-Links <span class="badge mvp">MVP</span></th>
+        <td class="A"></td><td class="B"></td><td class="C"></td><td class="D"></td><td class="E"></td><td class="F"></td><td class="G"></td><td class="H"></td><td class="I"></td>
+        <td class="J">
+          <div class="title">Kontakt · Impressum · Datenschutz · Statuten · Social</div>
+          <ul class="small"><li>Kontakt: Geisshof, 5412 Gebenstorf; E-Mail; <em>_Telefon (falls vorhanden)_</em></li></ul>
+        </td>
+        <td class="K"><ul class="small"><li>PDFs: Statuten, Reglement, Jahresbericht</li><li>Social-Profile</li><li>Partner: Demeter, Bio Suisse</li></ul></td>
+      </tr>
+
+    </tbody>
+  </table>
+</body>
+</html>

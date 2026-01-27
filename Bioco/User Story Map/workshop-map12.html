@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>User Story Map</title>
+<style>
+  :root{
+    --bg:#fafaf7; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb;
+    --must:#b7f0b1; --should:#fff3b0; --could:#ffd1a8; --wont:#ffc0da; --new:#d1d5db;
+    --row-activity:#eaf7ff; --row-task:#f5eaff;
+    --sticky-shadow:0 8px 20px rgba(0,0,0,.06); --radius:14px;
+  }
+  body{margin:0;background:var(--bg);font:15px system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--ink)}
+  header{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);backdrop-filter:blur(8px)}
+  .wrap{padding:12px 18px}
+  h1{margin:0;font-size:20px;display:inline}
+  .proj-input{font:15px system-ui; padding:6px 10px; border:1px solid var(--line); border-radius:8px; margin-left:10px; min-width:220px}
+  .toolbar{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}
+  .btn{padding:6px 12px;border:1px solid var(--line);border-radius:8px;background:#fff;cursor:pointer;box-shadow:var(--sticky-shadow)}
+  .legend{margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;font-size:13px}
+  .sw{display:inline-block;width:14px;height:14px;border:1px solid #999;margin-right:4px}
+  .board{padding:14px}
+  .grid{background:#fff;border:1px solid var(--line);border-radius:16px;overflow:auto;box-shadow:var(--sticky-shadow)}
+  .roles-wrap{background:#fff;border-bottom:2px solid var(--line)}
+  .roles{display:grid;column-gap:8px}
+  .roles .cell{background:#f8fafc;padding:10px;min-height:50px;position:relative;font-weight:600}
+  .roles .resizer{position:absolute;right:-4px;top:0;width:8px;height:100%;cursor:col-resize}
+  .divider{height:10px;background:repeating-linear-gradient(90deg,transparent 0 14px,#e5e7eb 14px 15px,transparent 15px 30px)}
+  .table{display:grid;column-gap:8px}
+  .cell{background:#fff;min-height:120px;padding:8px;position:relative;border-top:1px solid var(--line)}
+  .rowhead{background:#f8fafc;font-weight:600;user-select:text}
+  .map-head .cell{min-height:20px}
+  .map-head .resizer{position:absolute;right:-4px;top:0;width:8px;height:100%;cursor:col-resize}
+  .cell[data-row-type="activity"]:not([data-rc$=":0"]){background:var(--row-activity)}
+  .cell[data-row-type="task"]:not([data-rc$=":0"]){background:var(--row-task)}
+  .sticky{display:inline-block;min-width:120px;max-width:260px;padding:10px 12px 26px;margin:6px;border-radius:var(--radius);
+    box-shadow:var(--sticky-shadow);border:1px solid #ccc;cursor:grab;user-select:none;position:relative}
+  .sticky .text{outline:none}
+  .bar{position:absolute;bottom:4px;right:6px;display:flex;gap:6px}
+  .dot{width:16px;height:16px;border-radius:50%;border:1px solid #666;cursor:pointer}
+  .del{background:none;border:none;color:#e11;cursor:pointer;font-size:16px}
+  .must{background:var(--must)} .should{background:var(--should)} .could{background:var(--could)} .wont{background:var(--wont)} .new{background:var(--new)}
+  .sticky.grouped{outline:3px solid var(--grp,#111)}
+  .group-chip{position:absolute;top:-8px;left:-8px;background:#111;color:#fff;font-size:10px;padding:2px 6px;border-radius:999px}
+  @media print{@page{size:A3 landscape;margin:12mm} .toolbar{display:none} .grid{box-shadow:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>User Story Map</h1>
+    <input id="projectTitle" class="proj-input" placeholder="Projekttitel…" />
+    <div class="toolbar">
+      <button id="addRole" class="btn">+ Rolle</button>
+      <button id="addStoryRow" class="btn">+ Zeile</button>
+      <button id="exportCSV" class="btn">Export CSV</button>
+      <label class="btn">Import CSV<input id="importCSV" type="file" accept=".csv" style="display:none"></label>
+      <button id="reset" class="btn">Alles löschen</button>
+      <button id="printPDF" class="btn">Drucken/PDF</button>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--must)"></i>Must (Muss)</span>
+      <span><i class="sw" style="background:var(--should)"></i>Should (Soll)</span>
+      <span><i class="sw" style="background:var(--could)"></i>Could (Kann)</span>
+      <span><i class="sw" style="background:var(--wont)"></i>Won’t have (Nicht jetzt)</span>
+      <span><i class="sw" style="background:var(--new)"></i>New (Standard)</span>
+    </div>
+  </div>
+</header>
+
+<section class="board">
+  <div class="grid">
+    <div class="roles-wrap"><div id="rolesTable" class="roles"></div></div>
+    <div class="divider"></div>
+    <div id="storyHead" class="table map-head"></div>
+    <div id="storyTable" class="table"></div>
+  </div>
+</section>
+
+<script>
+const $=s=>document.querySelector(s), uuid=()=>Math.random().toString(36).slice(2);
+const LABEL={must:'Must',should:'Should',could:'Could',wont:"Won’t",new:"New"};
+const storageKey='storymap-v3';
+
+function save(){
+  const st={roles:Array.from($('#rolesTable .cell.head')).slice(1).map(c=>c.textContent.trim()),
+            rows:Array.from($('#storyTable .rowhead')).map(c=>c.textContent.trim()),
+            data:serialize(),proj:$('#projectTitle').value};
+  localStorage.setItem(storageKey,JSON.stringify(st));
+  document.title= st.proj?`User Story Map – ${st.proj}`:'User Story Map';
+}
+function load(){try{return JSON.parse(localStorage.getItem(storageKey))}catch{return null}}
+
+function makeSticky(text='Neue Notiz',color='new'){
+  const s=document.createElement('div');s.className=`sticky ${color}`;s.draggable=true;s.dataset.id=uuid();
+  const t=document.createElement('div');t.className='text';t.contentEditable='true';t.textContent=text;
+  const selectAll=()=>{const r=document.createRange();r.selectNodeContents(t);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(r);}
+  t.addEventListener('focus',selectAll);
+  t.addEventListener('click',e=>{e.stopPropagation();if(document.activeElement!==t){t.focus();selectAll();}});
+  t.addEventListener('mousedown',e=>e.stopPropagation());
+  const bar=document.createElement('div');bar.className='bar';
+  ;['must','should','could','wont','new'].forEach(c=>{const d=document.createElement('button');d.className='dot';d.style.background=getComputedStyle(document.documentElement).getPropertyValue(`--${c}`);d.onclick=e=>{s.className=`sticky ${c}`;save()};bar.appendChild(d)})
+  const del=document.createElement('button');del.className='del';del.innerHTML='×';del.onclick=()=>{s.remove();save()};bar.appendChild(del);
+  s.appendChild(t);s.appendChild(bar);
+  s.ondragstart=e=>e.dataTransfer.setData('id',s.dataset.id);
+  t.oninput=save;
+  return s;
+}
+
+function buildRoles(names){
+  $('#rolesTable').innerHTML='<div class="cell head label">Rollen</div>';
+  names.forEach((n,i)=>{const c=document.createElement('div');c.className='cell head';c.textContent=n||`Rolle ${i+1}`;
+    c.contentEditable='true';c.oninput=save;
+    c.oncontextmenu=e=>{e.preventDefault();if(confirm(`Spalte „${c.textContent}” löschen?`)){names.splice(i,1);buildAll(names,Array.from($('#storyTable .rowhead')).map(n=>n.textContent));}};
+    $('#rolesTable').appendChild(c);});
+}
+function buildHead(cols){$('#storyHead').innerHTML='<div class="cell"></div>'+cols.map(()=>'<div class="cell"></div>').join('')}
+function buildTable(rows,cols){$('#storyTable').innerHTML=rows.map((r,ri)=>['<div class="cell rowhead" contenteditable oninput="saveRow(this)" oncontextmenu="delRow('+ri+')">'+r+'</div>'].concat(cols.map((_,ci)=>`<div class="cell" data-rc="${ri}:${ci+1}" ondblclick="newCard(this)"></div>`)).join('')).join('')}
+function buildAll(roles,rows){buildRoles(roles);buildHead(roles);buildTable(rows,roles);save();}
+function saveRow(el){save()}
+function delRow(i){if(confirm('Zeile löschen?')){const roles=Array.from($('#rolesTable .cell.head')).slice(1).map(c=>c.textContent);const rows=Array.from($('#storyTable .rowhead')).map(c=>c.textContent);rows.splice(i,1);buildAll(roles,rows)}}
+function newCard(cell){const st=makeSticky();cell.appendChild(st);save();setTimeout(()=>{st.querySelector('.text').focus();const r=document.createRange();r.selectNodeContents(st.querySelector('.text'));const sel=window.getSelection();sel.removeAllRanges();sel.addRange(r)},0)}
+
+function serialize(){const out=[];$('#storyTable .cell').forEach(c=>{if(c.dataset.rc){const [r,cx]=c.dataset.rc.split(':');c.querySelectorAll('.sticky').forEach(st=>{const col=['must','should','could','wont','new'].find(k=>st.classList.contains(k))||'new';out.push({r:parseInt(r),c:parseInt(cx),text:st.querySelector('.text').innerText.trim(),color:col});});}});return out;}
+function restore(data){data.forEach(it=>{const cell=$(`#storyTable .cell[data-rc="${it.r}:${it.c}"]`);if(cell){cell.appendChild(makeSticky(it.text,it.color));}})}
+
+$('#addRole').onclick=()=>{const roles=Array.from($('#rolesTable .cell.head')).slice(1).map(c=>c.textContent);roles.push('Neue Rolle');buildAll(roles,Array.from($('#storyTable .rowhead')).map(c=>c.textContent));}
+$('#addStoryRow').onclick=()=>{const roles=Array.from($('#rolesTable .cell.head')).slice(1).map(c=>c.textContent);const rows=Array.from($('#storyTable .rowhead')).map(c=>c.textContent);rows.push('Neue Zeile');buildAll(roles,rows);}
+$('#reset').onclick=()=>{if(confirm('Alles löschen?')){buildAll(['Rolle A','Rolle B'],['User Activity','User Task','Stories']);}}
+$('#exportCSV').onclick=()=>{const rows=Array.from($('#storyTable .rowhead')).map(c=>c.textContent);const roles=Array.from($('#rolesTable .cell.head')).slice(1).map(c=>c.textContent);let csv='Board,Row,Column,Label,Text\n';$('#storyTable .cell').forEach(c=>{if(c.dataset.rc){const [ri,ci]=c.dataset.rc.split(':');const row=rows[ri];const col=roles[ci-1];if(c.querySelectorAll('.sticky').length){c.querySelectorAll('.sticky').forEach(st=>{const colr=['must','should','could','wont','new'].find(k=>st.classList.contains(k))||'new';csv+=`User Story Map,"${row}","${col}",${colr},"${st.querySelector('.text').innerText}"\n`})}else{csv+=`User Story Map,"${row}","${col}","",""\n`}}});const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='user-story-map.csv';a.click();}
+$('#importCSV').onchange=async e=>{const file=e.target.files[0];if(!file)return;const text=await file.text();const lines=text.trim().split(/\r?\n/).slice(1);const roles=Array.from($('#rolesTable .cell.head')).slice(1).map(c=>c.textContent);const rows=Array.from($('#storyTable .rowhead')).map(c=>c.textContent);lines.forEach(l=>{const m=l.match(/^(?:[^,]*),"(.*)","(.*)",([^,]*),"(.*)"$/);if(!m)return;let [_,row,col,color,textv]=m;if(!rows.includes(row)){rows.push(row);}if(!roles.includes(col)){roles.push(col);} });buildAll(roles,rows);lines.forEach(l=>{const m=l.match(/^(?:[^,]*),"(.*)","(.*)",([^,]*),"(.*)"$/);if(!m)return;let [_,row,col,color,textv]=m;const ri=rows.indexOf(row);const ci=roles.indexOf(col)+1;const cell=$(`#storyTable .cell[data-rc="${ri}:${ci}"]`);if(cell)cell.appendChild(makeSticky(textv,color));});save();alert('Import fertig')}
+$('#printPDF').onclick=()=>window.print()
+
+// Init
+const st=load();if(st){buildAll(st.roles||['Rolle A','Rolle B'],st.rows||['User Activity','User Task','Stories']);restore(st.data||[]);$('#projectTitle').value=st.proj||'';document.title=st.proj?`User Story Map – ${st.proj}`:'User Story Map';}else{buildAll(['Rolle A','Rolle B'],['User Activity','User Task','Stories']);}
+$('#projectTitle').oninput=save;
+</script>
+</body>
+</html>

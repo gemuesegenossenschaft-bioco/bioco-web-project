@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BioCo – Sitemap × Rows Matrix (aktualisierte Navigation)</title>
+<style>
+  :root{
+    /* Spaltenfarben */
+    --c-home:#E6F5E6;          /* Homepage (Logo) */
+    --c-ernte:#E6F0FF;         /* Ernte (Produkt) */
+    --c-konzept:#FFF2E6;       /* Konzept (CSA) */
+    --c-abos:#F3E6FF;          /* Abos (Kosten/Pläne) */
+    --c-anpacken:#FFF8CC;      /* Anpacken (Mithilfe) */
+    --c-depots:#E8F8FF;        /* Depots (Standorte) */
+    --c-wir:#FFE6EE;           /* Wir (Team/Mission) */
+    --c-hofpost:#EAF4FF;       /* Hofpost (Blog/News) */
+    --c-mitmachen:#F9E6F6;     /* Mitmachen! (Haupt-CTA) */
+    --c-portal:#EDECF9;        /* Kundenportal-Icon 👤 */
+    --c-footer:#F6F6F6;        /* Footer Nav */
+    --c-orphans:#F0F0FF;       /* Orphans & External */
+
+    --grid:#ddd;
+    --mvp:#2e7d32;
+    --phase:#c62828;
+  }
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;color:#222;line-height:1.45}
+  h1{font-size:1.35rem;margin:0 0 10px}
+  .legend{font-size:.92rem;margin:6px 0 16px;color:#444}
+  .badge{display:inline-block;font-size:.7rem;line-height:1;padding:4px 6px;border-radius:999px;color:#fff}
+  .mvp{background:var(--mvp)}
+  .phase{background:var(--phase)}
+
+  table{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed;border:1px solid var(--grid);background:#fff;border-radius:12px;overflow:hidden}
+  th,td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);vertical-align:top;padding:12px 14px}
+  th:last-child,td:last-child{border-right:none}
+  tr:last-child td{border-bottom:none}
+  thead th{position:sticky;top:0;background:#fff;z-index:2}
+  th.row{width:260px;background:#fafafa;position:sticky;left:0;z-index:1;text-align:left}
+
+  /* Spaltenhintergründe */
+  .home{background:var(--c-home)}
+  .ernte{background:var(--c-ernte)}
+  .konzept{background:var(--c-konzept)}
+  .abos{background:var(--c-abos)}
+  .anpacken{background:var(--c-anpacken)}
+  .depots{background:var(--c-depots)}
+  .wir{background:var(--c-wir)}
+  .hofpost{background:var(--c-hofpost)}
+  .mitmachen{background:var(--c-mitmachen)}
+  .portal{background:var(--c-portal)}
+  .footer{background:var(--c-footer)}
+  .orphans{background:var(--c-orphans)}
+
+  .title{font-weight:700;margin-bottom:6px}
+  .small{font-size:.92rem}
+  .dim{opacity:.9}
+  ul{margin:6px 0 0 18px;padding:0}
+  li{margin:4px 0}
+
+  /* farbige Link-Labels (zeigen Zielspalte) */
+  .link-home{color:#2e7d32}
+  .link-ernte{color:#2b50ff}
+  .link-konzept{color:#ff7f00}
+  .link-abos{color:#7a2bff}
+  .link-anpacken{color:#9a7a00}
+  .link-depots{color:#0081b8}
+  .link-wir{color:#ff3b6b}
+  .link-hofpost{color:#0a66c2}
+  .link-mitmachen{color:#b30073}
+  .link-portal{color:#5a54d6}
+  .link-footer{color:#666}
+  .link-orphans{color:#5b5bff}
+</style>
+</head>
+<body>
+  <h1>BioCo – Colored Sitemap × Rows Matrix (Mobile-First, aktualisierte Navigation)</h1>
+  <div class="legend">
+    Spalten = neue Navigationsstruktur inkl. „Kundenportal-Icon 👤“. Zeilen = definierte Rows/Abschnitte. 
+    <span class="badge mvp">MVP</span> = Startversion, <span class="badge phase">Phase&nbsp;2</span> = später.
+    Kreuzverlinkungen sind als farbige Labels der Zielspalte ausgezeichnet: <code>Element --> [Ziel / Row]</code>.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="row">Rows / Sektionen</th>
+        <th class="home">Homepage (Startseite)<br><span class="small dim">Logo; Alternativen: Start, Home, Willkommen, Übersicht, Daheim</span></th>
+        <th class="ernte">Ernte<br><span class="small dim">Alternativen: Gemüse, Angebot, Produkte, Vielfalt, Korb-Inhalt</span></th>
+        <th class="konzept">Konzept<br><span class="small dim">Alternativen: Prinzip, Modell, Idee, Ablauf, Solidarisch</span></th>
+        <th class="abos">Abos<br><span class="small dim">Alternativen: Kosten, Beitrag, Preise, Angebote, Übersicht</span></th>
+        <th class="anpacken">Anpacken<br><span class="small dim">Alternativen: Einsatz, Mithilfe, Helfen, Engagement, Teilnahme</span></th>
+        <th class="depots">Depots<br><span class="small dim">Alternativen: Orte, Standorte, Abholung, Abholorte, Verteilung</span></th>
+        <th class="wir">Wir<br><span class="small dim">Alternativen: Team, Mission, ÜberUns, Genossenschaft, Menschen</span></th>
+        <th class="hofpost">Hofpost<br><span class="small dim">Alternativen: Aktuell, Blog, News, Neues, Berichte</span></th>
+        <th class="mitmachen">Mitmachen! (Haupt-CTA)<br><span class="small dim">Alternativen: Beitreten!, Anmelden!, Starten!, Einsteigen!, Dabei sein!</span></th>
+        <th class="portal">Kundenportal-Icon 👤<br><span class="small dim">Alternativen (Text/aria): Mitglieder, Portal, Login, MeinKonto, Service</span></th>
+        <th class="footer">Footer-Navigation</th>
+        <th class="orphans">Orphans & External</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Sticky Header -->
+      <tr>
+        <th class="row">A-01 Sticky Header <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">Logo + ☰</div>
+          <ul class="small">
+            <li>Logo tap = Start.</li>
+            <li>Hamburger-Menü öffnet Mobile-Navigation.</li>
+          </ul>
+        </td>
+        <td class="ernte">Identisch.</td>
+        <td class="konzept">Identisch.</td>
+        <td class="abos">Identisch.</td>
+        <td class="anpacken">Identisch.</td>
+        <td class="depots">Identisch.</td>
+        <td class="wir">Identisch.</td>
+        <td class="hofpost">Identisch.</td>
+        <td class="mitmachen">
+          <ul class="small"><li><strong>Primärer CTA</strong> „Mitmachen!“ in Menü-Top.</li></ul>
+        </td>
+        <td class="portal">
+          <ul class="small"><li>👤 Icon führt zum Gateway/externen Portal.</li></ul>
+        </td>
+        <td class="footer"></td>
+        <td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Hero -->
+      <tr>
+        <th class="row">A-02 Hero <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Frisches Demeter-Gemüse. Jede Woche …“</div>
+          <ul class="small">
+            <li>CTA (filled): <strong>Jetzt Mitglied werden</strong> 
+              <span class="link-mitmachen">--> [Mitmachen! / F-04 Anmeldung]</span></li>
+            <li>CTA (outlined): <strong>Zuerst testen? Zum Probe-Abo</strong> 
+              <span class="link-mitmachen">--> [Mitmachen! / F-02 Zuerst testen?]</span></li>
+            <li class="dim">Foto: authentisches Hof-/Ernte-/Team-Foto.</li>
+          </ul>
+        </td>
+        <td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Product VP -->
+      <tr>
+        <th class="row">A-03 Value Prop – Produkt <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Das ist drin: Saisonal & Demeter.“</div>
+          <ul class="small">
+            <li>Card: Wöchentlicher Korb <span class="dim">(Foto: voller Korb)</span></li>
+            <li>Card: Frische Saisonalität <span class="dim">(Foto: Saison-Gemüse)</span></li>
+            <li>Card: Höchste Bio-Qualität <span class="dim">(Demeter-Logo)</span></li>
+            <li>CTA: <strong>Ernte entdecken</strong> 
+              <span class="link-ernte">--> [Ernte / B-01 Hero]</span></li>
+          </ul>
+        </td>
+        <td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Community VP -->
+      <tr>
+        <th class="row">A-04 Value Prop – Gemeinschaft <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Mehr als nur Gemüse: Unsere Gemeinschaft.“</div>
+          <ul class="small">
+            <li>[Icon] Mitarbeit: Pack mit an. <span class="link-anpacken">--> [Anpacken / E-01 Info]</span></li>
+            <li>[Icon] Transparenz. <span class="link-konzept">--> [Konzept / C-01 Überblick]</span></li>
+            <li>[Icon] Gotti-System. <span class="link-konzept">--> [Konzept / <em>_C-04 Gotti (Annahme)_</em>]</span></li>
+            <li>[Icon] Lokal/Region. <span class="link-wir">--> [Wir / C-05 Team & Region]</span></li>
+            <li>CTA: <strong>So funktioniert’s</strong> <span class="link-konzept">--> [Konzept / C-01 Überblick]</span></li>
+            <li class="dim">Icons: Hand/Lupe/Herz/Standort.</li>
+          </ul>
+        </td>
+        <td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Dual Funnel -->
+      <tr>
+        <th class="row">A-05 Dual-Funnel CTA <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Dein Weg zu biocò“</div>
+          <ul class="small">
+            <li>Info-Veranstaltung: <strong>Alle Termine & Anmeldung</strong> 
+              <span class="link-konzept">--> [Konzept / C-03 Info-Veranstaltung]</span></li>
+            <li>Probe-Abo: <strong>Zum Probe-Abo</strong> 
+              <span class="link-abos">--> [Abos / D-02 Probe-Abo]</span> und 
+              <span class="link-mitmachen">--> [Mitmachen! / F-02 Zuerst testen?]</span></li>
+          </ul>
+        </td>
+        <td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Hofpost -->
+      <tr>
+        <th class="row">A-06 Hofpost (News) <span class="badge phase">Phase&nbsp;2</span></th>
+        <td class="home">
+          <div class="title">„Aktuell vom Hof“</div>
+          <ul class="small">
+            <li>Karten: Tomatenernte; Rezept der Woche …</li>
+            <li>CTA: <strong>Alle Hofpost-Beiträge</strong> 
+              <span class="link-hofpost">--> [Hofpost / H-01 Übersicht]</span></li>
+            <li class="dim">Fotos: Feldernte, Team, Rezept-Closeups.</li>
+          </ul>
+        </td>
+        <td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Trust -->
+      <tr>
+        <th class="row">A-07 Trust Bar <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">Partner-Leiste</div>
+          <ul class="small">
+            <li>Demeter · Bio Suisse · lokale Partner.</li>
+            <li class="dim">Einfarbige Logos auf hellem Band.</li>
+          </ul>
+        </td>
+        <td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- ERNTE page -->
+      <tr>
+        <th class="row">B-01 Hero „Ernte“ <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="ernte">
+          <div class="title">„Unser Gemüse: Frisch, lokal, Demeter.“</div>
+          <ul class="small">
+            <li>Intro: Vielfalt, Qualität, gemeinsames Risiko.</li>
+            <li class="dim">Foto: ruhiger Korb-Shot als Hero.</li>
+          </ul>
+        </td>
+        <td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-02 Galerie <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="ernte">
+          <div class="title">„Einblick in die Ernte“</div>
+          <ul class="small">
+            <li>Filter: Alles · Körbe · Auf dem Feld · Portraits.</li>
+            <li>Grid: 2-Spalten mobil, tap-to-enlarge.</li>
+            <li class="dim">Fotos: authentisch, ungestellt.</li>
+          </ul>
+        </td>
+        <td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-03 Saisonkalender <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="ernte">
+          <div class="title">„Was wächst wann?“</div>
+          <ul class="small">
+            <li>Tabs (Jan–Dez) → Listen: Jetzt/Bald/Lagerware.</li>
+            <li class="dim">Illustration: klare Badges & Listen.</li>
+          </ul>
+        </td>
+        <td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-04 Demeter-Qualität <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="ernte">
+          <div class="title">„Warum Demeter?“</div>
+          <ul class="small">
+            <li>Logo + kurzer Erklärungstext.</li>
+            <li>Akkordeon: „Was heisst das für uns?“</li>
+            <li class="dim">Grafik: Demeter-Logo, evtl. Boden-Makro.</li>
+          </ul>
+        </td>
+        <td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-05 CTA <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="ernte">
+          <ul class="small">
+            <li>CTA: <strong>Jetzt dein Abo sichern</strong> 
+              <span class="link-mitmachen">--> [Mitmachen! / F-04 Anmeldung]</span></li>
+          </ul>
+        </td>
+        <td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- KONZEPT -->
+      <tr>
+        <th class="row">C-01 Konzept-Überblick <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td>
+        <td class="konzept">
+          <div class="title">CSA kurz erklärt</div>
+          <ul class="small">
+            <li>3 Schritte: Anmeldung → Bestätigung/Rechnung → Abholen.</li>
+            <li>Hinweis: gemeinsames Risiko & Mitarbeit.</li>
+            <li class="dim">Piktos: drei einfache Symbole.</li>
+          </ul>
+        </td>
+        <td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- ABOS -->
+      <tr>
+        <th class="row">D-01 Gemüse-Abos <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td>
+        <td class="abos">
+          <div class="title">Abo-Details</div>
+          <ul class="small">
+            <li>Halb/Standard/Doppel – Leistungen, Preise, Zielgruppen.</li>
+            <li>Link: <strong>Mitmachen</strong> 
+              <span class="link-mitmachen">--> [Mitmachen! / F-04 Anmeldung]</span></li>
+            <li class="dim">Kacheln/Icons: 1-, 2-, 4-Korb.</li>
+          </ul>
+        </td>
+        <td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">D-02 Probe-Abo <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td>
+        <td class="abos">
+          <div class="title">3-Monats-Test</div>
+          <ul class="small">
+            <li>Kurzbeschreibung + Konditionen.</li>
+            <li>Link: <strong>Zum Probe-Abo</strong> 
+              <span class="link-mitmachen">--> [Mitmachen! / F-02 Zuerst testen?]</span></li>
+            <li class="dim">Sticker/Badge-Illustration „Test“.</li>
+          </ul>
+        </td>
+        <td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">D-03 Zusatz-Abos <span class="badge phase">Phase&nbsp;2</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td>
+        <td class="abos">
+          <div class="title">Partnerangebote</div>
+          <ul class="small">
+            <li>Eier, Brot, <em>_Tofu (Annahme)_</em> – kurze Beschreibungen.</li>
+            <li>Links zu Partnern <em>_(sofern vorhanden)_</em>.</li>
+            <li class="dim">Produkt-Icons.</li>
+          </ul>
+        </td>
+        <td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- ANPACKEN -->
+      <tr>
+        <th class="row">E-01 Anpacken (Info) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td>
+        <td class="anpacken">
+          <div class="title">Was bedeutet Mithilfe?</div>
+          <ul class="small">
+            <li>Umfang: ca. 4 Halbtage/Jahr.</li>
+            <li>Beispiele: Feldarbeit, Verteilung/Logistik.</li>
+            <li>Link: <strong>Mitmachen</strong> 
+              <span class="link-mitmachen">--> [Mitmachen! / F-04 Anmeldung]</span></li>
+            <li class="dim">Icon: Handschaufel/Handschuhe.</li>
+          </ul>
+        </td>
+        <td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- DEPOTS (neu eigenständige Spalte) -->
+      <tr>
+        <th class="row">C-02 Depots (Map & Liste) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td>
+        <td class="depots">
+          <div class="title">Standorte & Abholung</div>
+          <ul class="small">
+            <li>Interaktive Karte (Baden/Brugg/Wettingen/Windisch/Ennetbaden).</li>
+            <li>Adressliste mit Zeiten <em>_(falls vorhanden)_</em>.</li>
+            <li class="dim">Kartenkachel + Standort-Pins.</li>
+          </ul>
+        </td>
+        <td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- WIR -->
+      <tr>
+        <th class="row">C-05 Wir: Team & Hof <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td>
+        <td class="wir">
+          <div class="title">Menschen & Mission</div>
+          <ul class="small">
+            <li>Profilkarten Team; Hof: Geisshof, Gebenstorf.</li>
+            <li>Werte/Leitbild kurz.</li>
+            <li class="dim">Porträts vor neutralem Hintergrund.</li>
+          </ul>
+        </td>
+        <td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOFPOST -->
+      <tr>
+        <th class="row">H-01 Hofpost Übersicht <span class="badge phase">Phase&nbsp;2</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td>
+        <td class="hofpost">
+          <div class="title">Blog/News</div>
+          <ul class="small">
+            <li>Karten-Grid mit Filtern <em>_(optional)_</em>.</li>
+            <li>Einzelansichten mit Bild, Datum, Tags.</li>
+            <li class="dim">Fotos: Feldernte/Rezepte/Events.</li>
+          </ul>
+        </td>
+        <td class="mitmachen"></td><td class="portal"></td><td class="footer"></td><td class="orphans">
+          <ul class="small"><li>Falls separat betrieben, als externer Link aufführen.</li></ul>
+        </td>
+      </tr>
+
+      <!-- MITMACHEN conversion page -->
+      <tr>
+        <th class="row">F-01 Hero „Mitmachen!“ <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td>
+        <td class="mitmachen">
+          <div class="title">„Werde jetzt Teil von biocò“</div>
+          <ul class="small">
+            <li>Klare Headline + kurze Einleitung.</li>
+            <li class="dim">Foto: Hände + Gemüse (nah, hell).</li>
+          </ul>
+        </td>
+        <td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-02 Zuerst testen? <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td>
+        <td class="mitmachen">
+          <div class="title">Info-Event & Probe-Abo</div>
+          <ul class="small">
+            <li>Karte: „Alle Termine & Anmeldung“ <span class="link-konzept">--> [Konzept / C-03 Info-Veranstaltung]</span></li>
+            <li>Karte: „Zum Probe-Abo“ <span class="link-abos">--> [Abos / D-02 Probe-Abo]</span></li>
+            <li class="dim">Icons: Kalender · kleiner Korb.</li>
+          </ul>
+        </td>
+        <td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-03 Commitment-Check <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td>
+        <td class="mitmachen">
+          <div class="title">Erwartungen</div>
+          <ul class="small">
+            <li>Checkliste: Anteile, Jahresbeitrag, Bindung, Mitarbeit, Risiko.</li>
+            <li>Weiter zum Formular.</li>
+          </ul>
+        </td>
+        <td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-04 Anmeldung (Smart Form) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td>
+        <td class="mitmachen">
+          <div class="title">Formular Schritte 1–6</div>
+          <ul class="small">
+            <li>Angaben · Abo · Anteilscheine (conditional) · Depot/Zahlung · Mitarbeit (conditional) · Bestätigung.</li>
+            <li>Sticky Summary (Kosten).</li>
+          </ul>
+        </td>
+        <td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-05 Nächstes (3 Schritte) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td>
+        <td class="mitmachen">
+          <ul class="small">
+            <li>Bestätigungs-E-Mail → Rechnung → Start.</li>
+          </ul>
+        </td>
+        <td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-06 Warteliste (conditional) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td>
+        <td class="mitmachen">
+          <ul class="small">
+            <li>Kurzformular: Vorname, Name, E-Mail, Wunsch-Abo.</li>
+            <li>Ersetzt F-04 wenn voll.</li>
+          </ul>
+        </td>
+        <td class="portal"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- KUNDENPORTAL ICON (ersetzt "Für Mitglieder" als Hauptmenüpunkt) -->
+      <tr>
+        <th class="row">G-01 Gateway via 👤 <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td>
+        <td class="portal">
+          <div class="title">Mitglieder-Gateway</div>
+          <ul class="small">
+            <li>Kachel: „Mitglieder-Portal (Login)“ <span class="link-orphans">--> [Orphans / Portal extern]</span></li>
+            <li>Kachel: „Mitarbeit-Planung (Login)“ <span class="link-orphans">--> [Orphans / Einsatzplanung extern]</span></li>
+          </ul>
+        </td>
+        <td class="footer"></td>
+        <td class="orphans">
+          <ul class="small"><li>Portal-Login extern · Einsatzplanung extern.</li></ul>
+        </td>
+      </tr>
+
+      <!-- FOOTER NAV -->
+      <tr>
+        <th class="row">Footer-Links <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="ernte"></td><td class="konzept"></td><td class="abos"></td><td class="anpacken"></td><td class="depots"></td><td class="wir"></td><td class="hofpost"></td><td class="mitmachen"></td><td class="portal"></td>
+        <td class="footer">
+          <div class="title">Footer Navigation</div>
+          <ul class="small">
+            <li>Kontakt – Geisshof, 5412 Gebenstorf; E-Mail; <em>_Telefon (Annahme)_</em></li>
+            <li>Impressum – Verein/Genossenschaft.</li>
+            <li>Datenschutz – DSG, Matomo cookieless.</li>
+            <li>Statuten – PDF Download.</li>
+            <li>Social – <em>_Instagram/Facebook (Annahme)_</em></li>
+          </ul>
+        </td>
+        <td class="orphans">
+          <ul class="small">
+            <li>Blog/Hofpost separat (falls extern).</li>
+            <li>Externe Partnerseiten (Demeter, Bio Suisse).</li>
+            <li>Social-Profile.</li>
+          </ul>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</body>
+</html>

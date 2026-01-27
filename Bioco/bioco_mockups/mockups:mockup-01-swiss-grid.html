@@ -1,0 +1,316 @@
+diff --git a//dev/null b/mockups/mockup-01-swiss-grid.html
+index 0000000000000000000000000000000000000000..fc94c2268f8c86416eca4beee12a82cc86a7dee8 100644
+--- a//dev/null
++++ b/mockups/mockup-01-swiss-grid.html
+@@ -0,0 +1,311 @@
++<!DOCTYPE html>
++<html lang="de">
++<head>
++  <meta charset="UTF-8" />
++  <meta name="viewport" content="width=device-width, initial-scale=1" />
++  <title>Mockup 01 · Swiss Grid – BioCo</title>
++  <link rel="stylesheet" href="assets/css/tokens.css" />
++  <style>
++    main {
++      max-width: 1120px;
++      margin: 0 auto;
++      padding: 120px 24px 80px;
++      display: grid;
++      grid-template-columns: repeat(12, 1fr);
++      gap: 24px;
++    }
++
++    .hero {
++      grid-column: 1 / -1;
++      display: grid;
++      grid-template-columns: repeat(12, 1fr);
++      gap: 24px;
++      align-items: center;
++      margin-bottom: 80px;
++    }
++
++    .hero-copy {
++      grid-column: 1 / span 6;
++      display: flex;
++      flex-direction: column;
++      gap: 24px;
++    }
++
++    .hero-copy h1 {
++      font-size: var(--font-size-h1);
++      line-height: var(--line-height-h1);
++      margin: 0;
++    }
++
++    .hero-media {
++      grid-column: 7 / span 6;
++    }
++
++    .cta-group {
++      display: flex;
++      gap: 16px;
++      flex-wrap: wrap;
++    }
++
++    .stats {
++      grid-column: 1 / -1;
++      display: grid;
++      grid-template-columns: repeat(4, 1fr);
++      gap: 24px;
++    }
++
++    .stats .card {
++      min-height: 200px;
++    }
++
++    .offer {
++      grid-column: 1 / -1;
++      display: grid;
++      grid-template-columns: repeat(12, 1fr);
++      gap: 24px;
++      align-items: stretch;
++    }
++
++    .offer .card {
++      grid-column: span 4;
++      display: flex;
++      flex-direction: column;
++      gap: 16px;
++    }
++
++    .price-table {
++      grid-column: 1 / -1;
++    }
++
++    .price-table table {
++      width: 100%;
++      border-collapse: collapse;
++      overflow: hidden;
++      border-radius: var(--radius-card);
++    }
++
++    .price-table th,
++    .price-table td {
++      padding: 20px 24px;
++      border-bottom: 1px solid var(--color-stein);
++    }
++
++    .price-table thead th {
++      background-color: var(--color-bioco-green-light);
++    }
++
++    .faq {
++      grid-column: 1 / span 8;
++      display: grid;
++      gap: 16px;
++    }
++
++    .news {
++      grid-column: 9 / -1;
++      display: grid;
++      gap: 16px;
++    }
++
++    .faq details,
++    .news article {
++      border: 1px solid var(--color-stein);
++      border-radius: var(--radius-card);
++      padding: 20px 24px;
++      background-color: var(--color-white);
++    }
++
++    .faq summary {
++      font-weight: 600;
++      cursor: pointer;
++    }
++
++    @media (max-width: 960px) {
++      main {
++        grid-template-columns: repeat(6, 1fr);
++      }
++
++      .hero {
++        grid-template-columns: repeat(6, 1fr);
++      }
++
++      .hero-copy,
++      .hero-media {
++        grid-column: 1 / -1;
++      }
++
++      .stats {
++        grid-template-columns: repeat(2, 1fr);
++      }
++
++      .offer .card {
++        grid-column: span 6;
++      }
++
++      .faq {
++        grid-column: 1 / -1;
++      }
++
++      .news {
++        grid-column: 1 / -1;
++      }
++    }
++
++    @media (max-width: 600px) {
++      .stats {
++        grid-template-columns: 1fr;
++      }
++
++      .offer .card {
++        grid-column: 1 / -1;
++      }
++    }
++  </style>
++</head>
++<body>
++  <a class="skip-link" href="#main">Zum Inhalt springen</a>
++  <nav aria-label="Hauptnavigation">
++    <div class="nav-container">
++      <a href="https://www.bioco.ch" aria-label="BioCo Startseite">
++        <img src="https://www.bioco.ch/wp-content/uploads/2022/10/bioco-logo.svg" alt="BioCo" width="140" height="40" />
++      </a>
++      <div class="nav-folders">
++        <details open>
++          <summary>Programm</summary>
++          <ul>
++            <li><a href="#angebot">Gemüse-Abos</a></li>
++            <li><a href="#team">Team</a></li>
++            <li><a href="#faq">Fragen</a></li>
++          </ul>
++        </details>
++        <details>
++          <summary>Mitmachen</summary>
++          <ul>
++            <li><a href="#preise">Preise</a></li>
++            <li><a href="#kontakt">Kontakt</a></li>
++          </ul>
++        </details>
++      </div>
++    </div>
++  </nav>
++  <main id="main">
++    <section class="hero" id="angebot">
++      <div class="hero-copy">
++        <p class="hero-eyebrow">BioCo Gemüse-Abo Basel</p>
++        <h1>Gemeinsam gesund essen.</h1>
++        <p>BioCo ist die Gemüsekooperative für Basel-Stadt &amp; Baselland. Unser wöchentliches Abo bringt dir saisonales Gemüse von Hof Wagenburg und anderen Bio-Betrieben der Region. Über 700 Mitglieder teilen sich Ernte, Verantwortung und gute Küche.</p>
++        <div class="cta-group">
++          <a class="button-primary" data-cta="hero-mitmachen" href="https://www.bioco.ch/mitglied-werden/">Mitmachen</a>
++          <a class="button-secondary" data-cta="hero-angebot" href="https://www.bioco.ch/gemuese-abo/">Angebot ansehen</a>
++        </div>
++      </div>
++      <figure class="hero-media">
++        <img src="https://www.bioco.ch/wp-content/uploads/2023/06/bioco-erntekorb.jpg" alt="Erntekorb mit saisonalem Gemüse aus dem BioCo-Abo" loading="lazy" width="720" height="540" />
++        <figcaption>Frisch aus der Region: Fenchel, Karotten, Zucchetti und Salate aus der Lieferung KW 38.</figcaption>
++      </figure>
++    </section>
++
++    <section class="stats" aria-label="Kennzahlen">
++      <article class="card">
++        <h2 class="section-title">705 Mitglieder</h2>
++        <p>Aktive Haushalte beteiligen sich an der solidarischen Landwirtschaft von BioCo.</p>
++      </article>
++      <article class="card">
++        <h2 class="section-title">24 Abholorte</h2>
++        <p>Vom Matthäusquartier bis Münchenstein: flexible Slots für deinen Korb.</p>
++      </article>
++      <article class="card">
++        <h2 class="section-title">40 Gemüsearten</h2>
++        <p>Über das Jahr verteilt – vom Winterkabis bis zur Sommer-Tomate.</p>
++      </article>
++      <article class="card">
++        <h2 class="section-title">100% Bio Suisse</h2>
++        <p>Unsere Partnerhöfe wirtschaften nach strengen Bio Suisse Richtlinien.</p>
++      </article>
++    </section>
++
++    <section class="offer" aria-labelledby="preise">
++      <article class="card">
++        <h2 id="preise">Abo S</h2>
++        <p>Für 1–2 Personen. Wöchentlicher Korb mit 5–6 Gemüsesorten.</p>
++        <p><strong>CHF 26.– pro Woche</strong></p>
++        <a class="button-primary" data-cta="abo-s" href="https://www.bioco.ch/gemuese-abo/#preise">Jetzt reservieren</a>
++      </article>
++      <article class="card">
++        <h2>Abo M</h2>
++        <p>Für 2–3 Personen. Enthält zusätzlich Blattgemüse und Obst.</p>
++        <p><strong>CHF 34.– pro Woche</strong></p>
++        <a class="button-primary" data-cta="abo-m" href="https://www.bioco.ch/gemuese-abo/#preise">Platz sichern</a>
++      </article>
++      <article class="card">
++        <h2>Abo L</h2>
++        <p>Für Familien oder WG. 9+ Komponenten inkl. Vorratsgemüse.</p>
++        <p><strong>CHF 44.– pro Woche</strong></p>
++        <a class="button-primary" data-cta="abo-l" href="https://www.bioco.ch/gemuese-abo/#preise">Warteliste</a>
++      </article>
++    </section>
++
++    <section class="price-table" aria-labelledby="leistung">
++      <h2 id="leistung" class="section-title">Was steckt im Gemüse-Abo?</h2>
++      <table class="table" aria-describedby="leistung">
++        <thead>
++          <tr>
++            <th scope="col">Monat</th>
++            <th scope="col">Highlights</th>
++            <th scope="col">Liefernde Höfe</th>
++          </tr>
++        </thead>
++        <tbody>
++          <tr>
++            <td>Oktober</td>
++            <td>Kürbis Muscat, Federkohl, Asia-Salate, Lagerkarotten</td>
++            <td>Hof Wagenburg, Biohof Tschäpperli</td>
++          </tr>
++          <tr>
++            <td>November</td>
++            <td>Sellerie, Schwarzwurzeln, Chinakohl, Äpfel Topaz</td>
++            <td>Gmüesabo Birsmattehof, Biohof Wendelinhof</td>
++          </tr>
++          <tr>
++            <td>Dezember</td>
++            <td>Randen, Pastinaken, Nüsslisalat, Winterkohl</td>
++            <td>Hof Obere Wanne, Biohof Langenbruck</td>
++          </tr>
++        </tbody>
++      </table>
++    </section>
++
++    <section class="faq" id="faq" aria-label="Häufige Fragen">
++      <h2 class="section-title">FAQ</h2>
++      <details>
++        <summary>Wie funktioniert der Depotwechsel?</summary>
++        <p>Du kannst dein Depot jede Woche bis Dienstag 12 Uhr im Mitgliederportal wechseln. In Basel stehen Depotstandorte in Kleinbasel, Gundeli, Bruderholz und Riehen zur Verfügung.</p>
++      </details>
++      <details>
++        <summary>Gibt es Feriengutschriften?</summary>
++        <p>Ja. Du kannst bis zu sechs Lieferpausen pro Jahr eintragen und erhältst dafür Gutschriften, die du an Freund*innen weitergeben kannst.</p>
++      </details>
++      <details>
++        <summary>Wie engagieren sich Mitglieder?</summary>
++        <p>Pro Abo leisten Mitglieder jährlich 12 Stunden Mitarbeit auf dem Feld, im Depot oder in Projektgruppen wie Kommunikation &amp; Bildung.</p>
++      </details>
++    </section>
++
++    <aside class="news" aria-labelledby="news-title">
++      <h2 id="news-title" class="section-title">Aktuelles</h2>
++      <article>
++        <h3>Herbstfest am Hof Wagenburg</h3>
++        <p>30. September, 11–16 Uhr in Allschwil mit Feldrundgang, Kürbissuppe &amp; Saatgutbörse.</p>
++      </article>
++      <article>
++        <h3>Mitgliederforum Basel</h3>
++        <p>Diskussion zur neuen Depotstruktur, 14. November im Stellwerk, Anmeldung im Nextcloud.</p>
++      </article>
++    </aside>
++  </main>
++  <footer id="kontakt">
++    <h2 class="section-title">Kontakt</h2>
++    <p>BioCo Gemüsekooperative · Vogesenstrasse 92 · 4056 Basel · <a href="mailto:info@bioco.ch">info@bioco.ch</a></p>
++    <p>Newsletter Double-Opt-In aktiv. Daten werden in der Schweiz gespeichert.</p>
++  </footer>
++</body>
++</html>

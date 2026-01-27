@@ -1,0 +1,17 @@
+Workshop Map – Story Mapping & Content Journey
+Ctrl + Alt + Shift + M = ausgewähltes Sticky aus der Story Map in den Wartebereich verschieben
+Story Map
+Content Journey
+Wartebereich
++ Spalte
++ Zeile
+Board leeren
+Export CSV
+Export PNG
+Must (Muss)
+Should (Soll)
+Could (Kann)
+Won’t have (Nicht jetzt)
+New (Klärung)
+
+Speichert lokal · PNG & CSV Export

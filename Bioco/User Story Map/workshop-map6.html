@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Workshop Map – User Story Map & Journey (resizable + MVP Slice)</title>
+<style>
+  :root{
+    --bg:#fafaf7; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --brand:#0ea5e9;
+    --must:#b7f0b1;   /* Muss (Must) */
+    --should:#fff3b0; /* Soll (Should) */
+    --could:#ffd1a8;  /* Kann (Could) */
+    --wont:#ffc0da;   /* Won't have (Nicht jetzt) – pink */
+    --new:#d1d5db;    /* New/Unklar – grau */
+    --lane-activity:#e0f2fe; /* hellblau */
+    --lane-task:#fff3b0;     /* gelb */
+    --lane-stories:#d1fae5;  /* grünlich */
+    --sticky-shadow: 0 8px 20px rgba(0,0,0,.06);
+    --radius:14px;
+  }
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:saturate(1.2) blur(8px);
+    background:rgba(250,250,247,.92); border-bottom:1px solid var(--line);
+  }
+  .wrap{width:100%;margin:0 auto;padding:14px 18px;max-width:none}
+  h1{font-size:20px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:13px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .btn{
+    appearance:none;border:1px solid var(--line);background:white;color:var(--ink);
+    padding:8px 12px;border-radius:10px;cursor:pointer;box-shadow:var(--sticky-shadow);
+  }
+  .tabs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--brand);color:white;border-color:var(--brand)}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .sw{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.08);display:inline-block;margin-right:6px}
+
+  .grid{
+    margin:18px auto; width:100%; background:#fff;border:1px solid var(--line);
+    border-radius:18px; overflow:auto; box-shadow:var(--sticky-shadow); position:relative;
+  }
+  .board{display:none;padding:12px}
+  .board.active{display:block}
+  .table{display:grid; gap:1px; background:var(--line); position:relative}
+  .cell{background:#fff; min-height:140px; padding:10px; position:relative}
+  .head{background:#f8fafc;font-weight:600; position:relative}
+  .rowhead{background:#f8fafc;font-weight:700;white-space:nowrap}
+
+  /* Lanes einfärben */
+  .lane-activity .cell{ background:var(--lane-activity) }
+  .lane-task .cell{ background:var(--lane-task) }
+  .lane-stories .cell{ background:var(--lane-stories) }
+  .lane-activity .rowhead,
+  .lane-task .rowhead,
+  .lane-stories .rowhead{ background:transparent }
+
+  /* Sticky notes */
+  .sticky{
+    position:relative; display:inline-block; min-width:120px; max-width:260px; padding:10px 12px 28px;
+    margin:6px; border-radius:var(--radius); box-shadow:var(--sticky-shadow);
+    cursor:grab; user-select:none; border:1px solid rgba(0,0,0,.06);
+    transform:rotate(var(--rot, -1deg));
+  }
+  .sticky .text{outline:none}
+  .bar{position:absolute; right:8px; bottom:6px; display:flex; gap:6px}
+  .dot{width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.15); cursor:pointer}
+  .del{border:none;background:transparent;cursor:pointer;color:#ef4444;font-size:16px}
+
+  /* Colors */
+  .must{background:var(--must)}
+  .should{background:var(--should)}
+  .could{background:var(--could)}
+  .wont{background:var(--wont)}
+  .new{background:var(--new)}
+
+  /* Resizer (Spaltenbreite anpassen) */
+  .resizer{
+    position:absolute; top:0; right:-4px; width:8px; height:100%; cursor:col-resize;
+    background:transparent;
+  }
+  .resizer:hover{ background:rgba(14,165,233,.12) }
+  .head-controls{
+    display:flex; gap:8px; align-items:center; margin-top:6px; font-weight:400;
+  }
+  .head-controls label{font-size:11px;color:#334155}
+  .head-controls select{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:2px 6px;background:#fff}
+
+  /* MVP Slice */
+  #mvpSlice{ position:absolute; left:0; top:0; pointer-events:none }
+  .mvp-label{
+    position:absolute; left:8px; top:8px; background:#ef4444; color:#fff; font-size:11px;
+    padding:2px 6px; border-radius:999px; box-shadow:var(--sticky-shadow)
+  }
+
+  .hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+  .footer{color:var(--muted);font-size:12px;padding:20px;text-align:center}
+
+  /* ===== Print / PDF ===== */
+  @media print{
+    @page { size: A3 landscape; margin: 12mm }
+    header{ position:static; background:#fff; border:none; }
+    .toolbar, .tabs .tab[aria-selected="false"]{ display:none !important; }
+    .wrap{ padding:0 }
+    .grid{ box-shadow:none; border:1px solid #bbb }
+    .sticky{ box-shadow:none; border:1px solid rgba(0,0,0,.2) }
+    .legend{ margin:6px 0 12px }
+    .board{ display:block !important; break-after:page }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>User Story Map & Customer Journey</h1>
+      <div class="sub">
+        Story Map: oben Rollen (Spalten) · links Lanes: <b>User Activity</b>, <b>User Task</b>, <b>Stories</b>.
+        Spaltenbreite per Griff ziehen · MVP per Dropdown in jedem Spaltenkopf.
+      </div>
+      <div class="tabs">
+        <button class="tab" aria-selected="true" data-target="#story">User Story Map</button>
+        <button class="tab" aria-selected="false" data-target="#journey">Customer Journey Map</button>
+      </div>
+      <div class="toolbar">
+        <button id="addCol" class="btn">+ Spalte</button>
+        <button id="addRowStory" class="btn">+ Extra-Row (Story)</button>
+        <button id="reset" class="btn">Board leeren</button>
+        <button id="exportCSV" class="btn">Export CSV</button>
+        <label class="btn" style="cursor:pointer">
+          Import CSV
+          <input id="importCSV" type="file" accept=".csv,text/csv" style="display:none">
+        </label>
+        <button id="printPDF" class="btn">Drucken / PDF</button>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--must)"></i>Must (Muss)</span>
+        <span><i class="sw" style="background:var(--should)"></i>Should (Soll)</span>
+        <span><i class="sw" style="background:var(--could)"></i>Could (Kann)</span>
+        <span><i class="sw" style="background:var(--wont)"></i>Won’t have (Nicht jetzt)</span>
+        <span><i class="sw" style="background:var(--new)"></i>New (Klärung)</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- STORY MAP -->
+  <section id="story" class="board active" aria-label="User Story Map">
+    <div class="grid">
+      <svg id="mvpSlice"></svg>
+      <div id="storyTable" class="table" role="grid"></div>
+      <div class="mvp-label">MVP Slice</div>
+    </div>
+    <p class="wrap hint">Doppelklick in Zelle → neues Post-it. Rechts unten am Post-it: Farben (MoSCoW) & Löschen.
+      In jedem Spaltenkopf: MVP-Dropdown (–/Activity/Task/Stories) + Resizer zum Ziehen.</p>
+  </section>
+
+  <!-- JOURNEY MAP (klassisch, unverändert) -->
+  <section id="journey" class="board" aria-label="Customer Journey Map">
+    <div class="grid"><div id="journeyTable" class="table" role="grid"></div></div>
+    <p class="wrap hint">Spalten = Journey-Schritte. Zeilen = Personas/Zielgruppen. Zellen doppelklicken für neue Post-its.</p>
+  </section>
+
+  <div class="footer">Speichert lokal (localStorage) · CSV Import/Export · PDF-Druck</div>
+
+<script>
+/* ===== Utils ===== */
+const $ = s => document.querySelector(s);
+const storageKey = 'bioco-usm-v1';
+const uuid = () => Math.random().toString(36).slice(2);
+
+const LABEL = {
+  must: 'Must (Muss)',
+  should: 'Should (Soll)',
+  could: 'Could (Kann)',
+  wont: "Won’t have (Nicht jetzt)",
+  new: 'New (Klärung)'
+};
+
+/* ===== Sticky ===== */
+function makeSticky(text='Neue Notiz', color='must', rotation=2){
+  const s = document.createElement('div');
+  s.className = `sticky ${color}`;
+  s.draggable = true;
+  s.dataset.id = uuid();
+  s.style.setProperty('--rot', (Math.random()*rotation*2-rotation).toFixed(2)+'deg');
+
+  const t = document.createElement('div');
+  t.className = 'text';
+  t.contentEditable = 'true';
+  t.textContent = text;
+
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  ['must','should','could','wont','new'].forEach(c=>{
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = LABEL[c];
+    d.style.background = getComputedStyle(document.documentElement).getPropertyValue(`--${c}`);
+    d.addEventListener('click', e=>{
+      e.stopPropagation();
+      s.className = `sticky ${c}`;
+      saveState();
+    });
+    bar.appendChild(d);
+  });
+  const del = document.createElement('button');
+  del.className='del'; del.title='Löschen'; del.innerHTML='&times;';
+  del.addEventListener('click', ()=>{ s.remove(); saveState(); });
+  bar.appendChild(del);
+
+  s.appendChild(t);
+  s.appendChild(bar);
+
+  s.addEventListener('dragstart', e=> e.dataTransfer.setData('text/plain', s.dataset.id));
+  t.addEventListener('input', saveState);
+  return s;
+}
+
+/* ===== Grids ===== */
+function buildStoryTable(el, cols, roleNames){
+  // rows: 0 header; 1 Activity; 2 Task; 3 Stories
+  const totalCols = cols + 1; // + row-head col
+  el.style.gridTemplateColumns = `220px ${Array(cols).fill('minmax(240px,1fr)').join(' ')}`;
+  el.innerHTML = '';
+  const rows = 4;
+  // helper to mark lane rows
+  const laneClass = r => r===1?'lane-activity':r===2?'lane-task':r===3?'lane-stories':'';
+
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<totalCols;c++){
+      const cell = document.createElement('div');
+      cell.className = `cell ${laneClass(r)}`;
+      cell.dataset.rc = `${r}:${c}`;
+
+      const isTop = r===0, isLeft = c===0;
+      if(isTop && isLeft){
+        cell.classList.add('head');
+        cell.innerHTML = 'Layer / Rollen';
+      } else if(isTop){
+        // Column headers (Roles) with MVP selector + resizer
+        cell.classList.add('head');
+        cell.contentEditable = 'true';
+        cell.textContent = roleNames[c-1] || `Rolle ${c}`;
+        // controls
+        const controls = document.createElement('div');
+        controls.className = 'head-controls';
+        const lab = document.createElement('label'); lab.textContent = 'MVP:';
+        const sel = document.createElement('select');
+        sel.innerHTML = `
+          <option value="0">–</option>
+          <option value="1">Activity</option>
+          <option value="2">Task</option>
+          <option value="3">Stories</option>`;
+        sel.addEventListener('change', drawSlice);
+        controls.appendChild(lab); controls.appendChild(sel);
+        cell.appendChild(controls);
+        // resizer
+        const rz = document.createElement('div');
+        rz.className='resizer';
+        enableResizer(rz, c); // pass column index (including rowhead offset)
+        cell.appendChild(rz);
+        // persist header edits
+        cell.addEventListener('input', saveState);
+      } else if(isLeft){
+        cell.classList.add('rowhead');
+        cell.contentEditable = 'false';
+        cell.textContent = r===1 ? 'User Activity' : r===2 ? 'User Task' : 'Stories';
+      } else {
+        // Dropzone
+        cell.addEventListener('dblclick', ()=>{ cell.appendChild(makeSticky()); saveState(); });
+        cell.addEventListener('dragover', e=>{ e.preventDefault(); cell.style.outline='2px dashed #94a3b8'; });
+        cell.addEventListener('dragleave', ()=>{ cell.style.outline='none'; });
+        cell.addEventListener('drop', e=>{
+          e.preventDefault(); cell.style.outline='none';
+          const id = e.dataTransfer.getData('text/plain');
+          const sticky = document.querySelector(`.sticky[data-id="${id}"]`);
+          if(sticky) cell.appendChild(sticky);
+          saveState();
+        });
+      }
+
+      el.appendChild(cell);
+    }
+  }
+}
+
+function buildJourneyTable(el, rows, cols, preset){
+  el.style.gridTemplateColumns = `220px repeat(${cols-1}, minmax(240px,1fr))`;
+  el.innerHTML = '';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.rc = `${r}:${c}`;
+
+      const isTop = r===0, isLeft = c===0;
+      if(isTop && isLeft){
+        cell.classList.add('head'); cell.textContent = preset.topLeft || '';
+      } else if(isTop){
+        cell.classList.add('head'); cell.contentEditable = 'true'; cell.dataset.header = 'col';
+        cell.textContent = preset.cols[c] || `Schritt ${c}`;
+        cell.addEventListener('input', saveState);
+      } else if(isLeft){
+        cell.classList.add('rowhead'); cell.contentEditable = 'true'; cell.dataset.header = 'row';
+        cell.textContent = preset.rows[r] || `Lane ${r}`;
+        cell.addEventListener('input', saveState);
+      } else {
+        cell.addEventListener('dblclick', ()=>{ cell.appendChild(makeSticky()); saveState(); });
+        cell.addEventListener('dragover', e=>{ e.preventDefault(); cell.style.outline='2px dashed #94a3b8'; });
+        cell.addEventListener('dragleave', ()=>{ cell.style.outline='none'; });
+        cell.addEventListener('drop', e=>{
+          e.preventDefault(); cell.style.outline='none';
+          const id = e.dataTransfer.getData('text/plain');
+          const sticky = document.querySelector(`.sticky[data-id="${id}"]`);
+          if(sticky) cell.appendChild(sticky);
+          saveState();
+        });
+      }
+      el.appendChild(cell);
+    }
+  }
+}
+
+/* ===== Column Resizer ===== */
+let colWidths = []; // in px for story table (excluding rowhead)
+function enableResizer(handle, colIndexIncludingRowHead){
+  handle.addEventListener('mousedown', (e)=>{
+    e.preventDefault();
+    const table = $('#storyTable');
+    const tableRect = table.getBoundingClientRect();
+    const colIndex = colIndexIncludingRowHead - 1; // exclude rowhead
+    const startX = e.clientX;
+    const currentWidth = colWidths[colIndex] || 240;
+
+    const onMove = (ev)=>{
+      const delta = ev.clientX - startX;
+      const newW = Math.max(160, Math.min(600, currentWidth + delta));
+      colWidths[colIndex] = newW;
+      applyColumnWidths();
+    };
+    const onUp = ()=>{
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+      saveState();
+    };
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+}
+function applyColumnWidths(){
+  const table = $('#storyTable');
+  const parts = ['220px', ...getStoryColCount().map((_,i)=> (colWidths[i] ? `${colWidths[i]}px` : 'minmax(240px,1fr)'))];
+  table.style.gridTemplateColumns = parts.join(' ');
+  drawSlice(); // keep SVG aligned
+}
+function getStoryColCount(){
+  // returns array of indexes for columns (excluding rowhead)
+  const headerCells = $('#storyTable').querySelectorAll('.cell[data-rc^="0:"]:not([data-rc="0:0"])');
+  return Array.from(headerCells).map((_,i)=>i);
+}
+
+/* ===== MVP Slice (SVG Polyline) ===== */
+function drawSlice(){
+  const svg = $('#mvpSlice');
+  const grid = svg.parentElement;
+  const table = $('#storyTable');
+  const rect = grid.getBoundingClientRect();
+  svg.setAttribute('width', rect.width);
+  svg.setAttribute('height', rect.height);
+
+  // read per-column selection
+  const heads = table.querySelectorAll('.cell.head:not([data-rc="0:0"])');
+  const points = [];
+  heads.forEach((h,idx)=>{
+    const sel = h.querySelector('select');
+    const level = parseInt(sel?.value||'0',10); // 0=none, 1=Activity, 2=Task, 3=Stories
+    if(level===0){ points.push(null); return; }
+    const col = idx+1; // since 0:0 is rowhead
+    const targetCell = table.querySelector(`.cell[data-rc="${level}:${col}"]`);
+    if(!targetCell) { points.push(null); return; }
+    const r = targetCell.getBoundingClientRect();
+    points.push({ x: (r.left + r.right)/2 - rect.left, y: (r.top + r.bottom)/2 - rect.top });
+  });
+
+  // build path (skip gaps)
+  const path = [];
+  for(let i=0;i<points.length;i++){
+    if(points[i]){ path.push(points[i]); }
+    else{
+      path.push('M'); // gap marker
+    }
+  }
+
+  // render: clear
+  svg.innerHTML = '';
+  // one continuous polyline across consecutive points; break on gaps
+  let segment = [];
+  const addSegment = ()=>{
+    if(segment.length<2) { segment = []; return; }
+    const pl = document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    pl.setAttribute('fill','none');
+    pl.setAttribute('stroke','#ef4444');
+    pl.setAttribute('stroke-width','4');
+    pl.setAttribute('points', segment.map(p=>`${p.x},${p.y}`).join(' '));
+    pl.setAttribute('stroke-linejoin','round');
+    pl.setAttribute('stroke-linecap','round');
+    svg.appendChild(pl);
+    segment = [];
+  };
+  for(const p of path){
+    if(p==='M'){ addSegment(); }
+    else{ segment.push(p); }
+  }
+  addSegment();
+}
+
+/* ===== Serialization (Story + Journey) ===== */
+function serializeStory(){
+  const el = $('#storyTable');
+  const out = { cols: colWidths, headers:[], cells:{} };
+  // headers & MVP selections
+  const heads = el.querySelectorAll('.cell.head:not([data-rc="0:0"])');
+  heads.forEach((h, idx)=>{
+    const title = (h.firstChild?.nodeType===3 ? h.firstChild.nodeValue : h.childNodes[0]?.nodeValue) || h.childNodes[0]?.textContent || h.textContent || '';
+    const sel = h.querySelector('select'); const level = parseInt(sel?.value||'0',10);
+    out.headers[idx] = { title: title.trim(), mvp: level };
+  });
+  // cells
+  el.querySelectorAll('.cell').forEach(cell=>{
+    const [r,c] = cell.dataset.rc.split(':').map(n=>parseInt(n,10));
+    if(r===0||c===0) return;
+    const key = `${r}:${c}`;
+    out.cells[key] = [];
+    cell.querySelectorAll('.sticky').forEach(st=>{
+      const color = ['must','should','could','wont','new'].find(k=>st.classList.contains(k)) || 'must';
+      out.cells[key].push({ text: st.querySelector('.text').innerText.replace(/\s+/g,' ').trim(), color });
+    });
+  });
+  return out;
+}
+function restoreStory(data){
+  if(!data) return;
+  // widths
+  if(Array.isArray(data.cols)) { colWidths = data.cols; applyColumnWidths(); }
+  // headers
+  const heads = $('#storyTable').querySelectorAll('.cell.head:not([data-rc="0:0"])');
+  heads.forEach((h,idx)=>{
+    const info = data.headers?.[idx];
+    if(!info) return;
+    // set title (first text node)
+    h.childNodes[0].nodeValue = (info.title||'').trim();
+    const sel = h.querySelector('select'); if(sel) sel.value = (info.mvp||0);
+  });
+  // cells
+  Object.entries(data.cells||{}).forEach(([rc, arr])=>{
+    const cell = $('#storyTable').querySelector(`.cell[data-rc="${rc}"]`);
+    if(!cell) return;
+    arr.forEach(it=> cell.appendChild(makeSticky(it.text, it.color)));
+  });
+  drawSlice();
+}
+
+function serializeJourney(){
+  const el = $('#journeyTable');
+  const out = { headers:{rows:[],cols:[]}, cells:{} };
+  // headers
+  const firstRow = el.querySelectorAll('.cell[data-rc^="0:"]:not([data-rc="0:0"])');
+  firstRow.forEach((c,idx)=> out.headers.cols[idx] = c.textContent.trim());
+  const firstCol = el.querySelectorAll('.cell[data-rc$=":0"]:not([data-rc="0:0"])');
+  firstCol.forEach((r,idx)=> out.headers.rows[idx] = r.textContent.trim());
+  // cells
+  el.querySelectorAll('.cell').forEach(cell=>{
+    const [r,c] = cell.dataset.rc.split(':').map(n=>parseInt(n,10));
+    if(r===0||c===0) return;
+    const key = `${r}:${c}`;
+    out.cells[key] = [];
+    cell.querySelectorAll('.sticky').forEach(st=>{
+      const color = ['must','should','could','wont','new'].find(k=>st.classList.contains(k)) || 'must';
+      out.cells[key].push({ text: st.querySelector('.text').innerText.replace(/\s+/g,' ').trim(), color });
+    });
+  });
+  return out;
+}
+function restoreJourney(data){
+  if(!data) return;
+  // headers
+  data.headers?.cols?.forEach((title,idx)=>{
+    const cell = $('#journeyTable').querySelector(`.cell[data-rc="0:${idx+1}"]`);
+    if(cell){ cell.textContent = title; }
+  });
+  data.headers?.rows?.forEach((title,idx)=>{
+    const cell = $('#journeyTable').querySelector(`.cell[data-rc="${idx+1}:0"]`);
+    if(cell){ cell.textContent = title; }
+  });
+  // cells
+  Object.entries(data.cells||{}).forEach(([rc, arr])=>{
+    const cell = $('#journeyTable').querySelector(`.cell[data-rc="${rc}"]`);
+    if(!cell) return;
+    arr.forEach(it=> cell.appendChild(makeSticky(it.text, it.color)));
+  });
+}
+
+/* ===== CSV ===== */
+function toCSV(rows){
+  const headers = ['Board','Row','Column','Label','Text'];
+  const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  return [headers.join(','), ...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\n');
+}
+function tableToRowsStory(){
+  const el = $('#storyTable');
+  const rows = [];
+  const colHeads = Array.from(el.querySelectorAll('.cell[data-rc^="0:"]:not([data-rc="0:0"])')).map(c=>c.childNodes[0].nodeValue?.trim() || c.textContent.trim());
+  const rowHeads = ['User Activity','User Task','Stories'];
+  for(let r=1;r<=3;r++){
+    for(let c=1;c<=colHeads.length;c++){
+      const cell = el.querySelector(`.cell[data-rc="${r}:${c}"]`);
+      const labelRow = rowHeads[r-1];
+      const labelCol = colHeads[c-1]||`Rolle ${c}`;
+      const stickies = cell ? cell.querySelectorAll('.sticky') : [];
+      if(stickies.length){
+        stickies.forEach(st=>{
+          const color = ['must','should','could','wont','new'].find(k=>st.classList.contains(k)) || 'must';
+          rows.push({Board:'User Story Map', Row:labelRow, Column:labelCol, Label:LABEL[color], Text:st.querySelector('.text').innerText});
+        });
+      }else{
+        rows.push({Board:'User Story Map', Row:labelRow, Column:labelCol, Label:'', Text:''});
+      }
+    }
+  }
+  return rows;
+}
+function tableToRowsJourney(){
+  const el = $('#journeyTable');
+  const rows = [];
+  const colHeads = Array.from(el.querySelectorAll('.cell[data-rc^="0:"]:not([data-rc="0:0"])`)).map(c=>c.textContent.trim());
+  const rowHeads = Array.from(el.querySelectorAll('.cell[data-rc$=":0"]:not([data-rc="0:0"])`)).map(c=>c.textContent.trim());
+  for(let r=1;r<=rowHeads.length;r++){
+    for(let c=1;c<=colHeads.length;c++){
+      const cell = el.querySelector(`.cell[data-rc="${r}:${c}"]`);
+      const stickies = cell ? cell.querySelectorAll('.sticky') : [];
+      if(stickies.length){
+        stickies.forEach(st=>{
+          const color = ['must','should','could','wont','new'].find(k=>st.classList.contains(k)) || 'must';
+          rows.push({Board:'Customer Journey Map', Row:rowHeads[r-1], Column:colHeads[c-1], Label:LABEL[color], Text:st.querySelector('.text').innerText});
+        });
+      }else{
+        rows.push({Board:'Customer Journey Map', Row:rowHeads[r-1], Column:colHeads[c-1], Label:'', Text:''});
+      }
+    }
+  }
+  return rows;
+}
+
+/* ===== Defaults ===== */
+const storyDefaultRoles = ['Interessent*in','Neumitglied','Bestandsmitglied','Partner*in','Presse/ÖA'];
+const journeyDefaults = {
+  rows: 6, cols: 6,
+  preset: {
+    topLeft: 'Persona / Schritt',
+    cols: ['Entdecken','Verstehen','Entscheiden','Teilnehmen','Mitmachen','Bleiben'],
+    rows: [null,'Interessierte Person','Neumitglied','Mitglied (aktiv)','Partner*in','Spender*in']
+  }
+};
+
+/* ===== Boot ===== */
+const storyTable = $('#storyTable');
+const journeyTable = $('#journeyTable');
+
+function init(){
+  buildStoryTable(storyTable, storyDefaultRoles.length, storyDefaultRoles);
+  buildJourneyTable(journeyTable, journeyDefaults.rows, journeyDefaults.cols, journeyDefaults.preset);
+
+  const state = JSON.parse(localStorage.getItem(storageKey)||'null');
+  if(state){
+    restoreStory(state.story);
+    restoreJourney(state.journey);
+  }
+  drawSlice();
+}
+init();
+
+/* ===== Save/Restore Wrapper ===== */
+function saveState(){
+  const state = {
+    activeTab: document.querySelector('.tab[aria-selected="true"]').dataset.target,
+   

@@ -1,0 +1,316 @@
+import nodemailer from 'nodemailer'
+
+// Email recipients for different form types
+const FORM_RECIPIENTS: Record<string, string[]> = {
+  contact: ['info@bioco.ch', 'intranet@bioco.ch'],
+  subscribe: ['info@bioco.ch', 'intranet@bioco.ch'],
+  visit: ['medien@bioco.ch'],
+  'event-signup': ['medien@bioco.ch'], // Same as visit
+  'waiting-list': ['info@bioco.ch', 'intranet@bioco.ch'],
+  membership: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch'],
+}
+
+// Safety BCC recipients - always included to ensure no emails are lost
+const SAFETY_BCC = ['info@bioco.ch']
+
+const FROM_EMAIL = process.env.SMTP_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'noreply@bioco.ch'
+const FROM_NAME = process.env.SMTP_FROM_NAME || process.env.RESEND_FROM_NAME || 'biocò'
+
+/**
+ * Get SMTP transporter for Novatrend mail server
+ * Uses mail.bioco.ch with credentials from environment variables
+ */
+function getSMTPTransporter() {
+  const host = process.env.SMTP_HOST || 'mail.bioco.ch'
+  const port = parseInt(process.env.SMTP_PORT || '465', 10)
+  const secure = process.env.SMTP_SECURE !== 'false' && port === 465 // SSL for port 465, STARTTLS for 587
+  const user = process.env.SMTP_USER || 'test@bioco.ch'
+  const pass = process.env.SMTP_PASS
+
+  if (!pass) {
+    throw new Error('SMTP_PASS is not configured')
+  }
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure,
+    auth: {
+      user,
+      pass,
+    },
+    // For port 587 with STARTTLS
+    ...(port === 587 && {
+      requireTLS: true,
+    }),
+  })
+}
+
+interface FormSubmission {
+  formType: keyof typeof FORM_RECIPIENTS
+  data: Record<string, any>
+  subject?: string
+}
+
+/**
+ * Log email send attempt (for monitoring - no deletion)
+ */
+function logEmailAttempt(
+  formType: string,
+  recipients: string[],
+  success: boolean,
+  error?: any
+) {
+  const timestamp = new Date().toISOString()
+  const logEntry = {
+    timestamp,
+    formType,
+    recipients,
+    success,
+    error: error?.message || error,
+  }
+  
+  console.log('[EMAIL]', JSON.stringify(logEntry))
+  
+  // In production, you might want to also log to a file or monitoring service
+  // but we're not deleting anything - just logging for debugging
+}
+
+export async function sendFormEmail({ formType, data, subject }: FormSubmission) {
+  const transporter = getSMTPTransporter()
+
+  const recipients = FORM_RECIPIENTS[formType]
+  if (!recipients || recipients.length === 0) {
+    throw new Error(`No recipient configured for form type: ${formType}`)
+  }
+
+  const emailSubject = subject || getDefaultSubject(formType)
+  const htmlContent = formatFormEmail(formType, data)
+
+  try {
+    const mailOptions = {
+      from: `${FROM_NAME} <${FROM_EMAIL}>`,
+      to: recipients.join(', '),
+      bcc: SAFETY_BCC.join(', '), // Always BCC to safety addresses
+      subject: emailSubject,
+      html: htmlContent,
+      replyTo: data.email || FROM_EMAIL,
+    }
+
+    const info = await transporter.sendMail(mailOptions)
+    
+    logEmailAttempt(formType, recipients, true)
+
+    return { success: true, id: info.messageId }
+  } catch (error: any) {
+    logEmailAttempt(formType, recipients, false, error)
+    console.error('SMTP email error:', error)
+    
+    // Re-throw with more context
+    if (error?.message) {
+      throw new Error(`Failed to send email via SMTP: ${error.message}`)
+    }
+    throw new Error('Failed to send email via SMTP')
+  }
+}
+
+function getDefaultSubject(formType: string): string {
+  const subjects: Record<string, string> = {
+    contact: 'Neue Kontaktanfrage',
+    subscribe: 'Neue Newsletter-Anmeldung',
+    visit: 'Neue Anmeldung Schnuppertag/Tag der offenen Tür',
+    'event-signup': 'Neue Event-Anmeldung',
+    'waiting-list': 'Neue Anmeldung Warteliste',
+    membership: 'Neue Mitgliedschaftsanmeldung',
+  }
+  return subjects[formType] || 'Neue Formularanfrage'
+}
+
+function formatFormEmail(formType: string, data: Record<string, any>): string {
+  // For membership form, include all fields in detail
+  if (formType === 'membership') {
+    return formatMembershipEmail(data)
+  }
+
+  const fields = Object.entries(data)
+    .filter(([key]) => key !== 'privacy_accept' && key !== 'commitmentAccepted')
+    .map(([key, value]) => {
+      const label = formatLabel(key)
+      return `<tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee; width: 200px;">${label}:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${formatValue(value)}</td></tr>`
+    })
+    .join('')
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <h2>Neue Formularanfrage: ${getDefaultSubject(formType)}</h2>
+        <table>
+          ${fields}
+        </table>
+        <p style="margin-top: 20px; font-size: 12px; color: #666;">
+          Diese E-Mail wurde automatisch über das Kontaktformular auf bioco.ch gesendet.
+        </p>
+      </body>
+    </html>
+  `
+}
+
+function formatMembershipEmail(data: Record<string, any>): string {
+  const sections: string[] = []
+
+  // Personal Information
+  sections.push(`
+    <h3 style="margin-top: 20px; color: #2e7d32;">Persönliche Daten</h3>
+    <table>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee; width: 200px;">Vorname:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.firstName || '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Nachname:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.lastName || '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Adresse:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.address || '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">PLZ:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.zip || '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Ort:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.city || '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Telefon:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.phone || '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">E-Mail:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.email || '-'}</td></tr>
+    </table>
+  `)
+
+  // Membership & Abo
+  sections.push(`
+    <h3 style="margin-top: 20px; color: #2e7d32;">Mitgliedschaft & Gemüsekorb</h3>
+    <table>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee; width: 200px;">Mitgliedschaftstyp:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.membershipType === 'abo' ? 'Mit Gemüsekorb' : 'Nur Anteilsscheine'}</td></tr>
+      ${data.membershipType === 'abo' ? `
+        <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Gemüsekorb:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${formatAboType(data.aboType)}</td></tr>
+        <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Zusätzliche Anteilsscheine:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.additionalShares || 0}</td></tr>
+      ` : `
+        <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Anteilsscheine (ohne Gemüsekorb):</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.sharesOnly || 0}</td></tr>
+      `}
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Depot:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.depot || '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Zahlungsweise:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.paymentType === 'quarterly' ? 'Quartalsweise' : 'Ganzes Jahr'}</td></tr>
+    </table>
+  `)
+
+  // Mitarbeit
+  sections.push(`
+    <h3 style="margin-top: 20px; color: #2e7d32;">Mitarbeit</h3>
+    <table>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee; width: 200px;">Bevorzugte Tage:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${Array.isArray(data.preferredDays) ? data.preferredDays.join(', ') : '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Bevorzugte Zeiten:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${Array.isArray(data.preferredTimes) ? data.preferredTimes.join(', ') : '-'}</td></tr>
+      <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Tätigkeitsbereiche:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${Array.isArray(data.activityAreas) ? data.activityAreas.join(', ') : '-'}</td></tr>
+      ${data.otherActivity ? `<tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Weitere Tätigkeiten:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.otherActivity}</td></tr>` : ''}
+    </table>
+  `)
+
+  // Zusatzabos
+  if (Array.isArray(data.zusatzabos) && data.zusatzabos.length > 0 || data.weitereProdukte) {
+    sections.push(`
+      <h3 style="margin-top: 20px; color: #2e7d32;">Zusatzabos & Weitere Produkte</h3>
+      <table>
+        ${Array.isArray(data.zusatzabos) && data.zusatzabos.length > 0 ? `<tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee; width: 200px;">Interesse an:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.zusatzabos.join(', ')}</td></tr>` : ''}
+        ${data.weitereProdukte ? `<tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;">Weitere Produkte:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${data.weitereProdukte}</td></tr>` : ''}
+      </table>
+    `)
+  }
+
+  // Commitment
+  if (Array.isArray(data.commitmentAccepted)) {
+    const commitments = [
+      'Ich verstehe, dass ich regelmässig auf dem Hof mitarbeiten muss.',
+      'Ich bin bereit, die finanziellen Verpflichtungen zu übernehmen.',
+      'Ich akzeptiere die Genossenschaftsstatuten.',
+      'Ich bin bereit, Teil der Gemeinschaft zu sein.',
+    ]
+    sections.push(`
+      <h3 style="margin-top: 20px; color: #2e7d32;">Verpflichtungen</h3>
+      <table>
+        ${data.commitmentAccepted.map((accepted: boolean, index: number) => `
+          <tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee; width: 200px;">${commitments[index] || `Verpflichtung ${index + 1}`}:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${accepted ? '✓ Akzeptiert' : '✗ Nicht akzeptiert'}</td></tr>
+        `).join('')}
+      </table>
+    `)
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+          table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <h2>Neue Mitgliedschaftsanmeldung</h2>
+        ${sections.join('')}
+        <p style="margin-top: 20px; font-size: 12px; color: #666;">
+          Diese E-Mail wurde automatisch über das Anmeldeformular auf bioco.ch gesendet.
+        </p>
+      </body>
+    </html>
+  `
+}
+
+function formatAboType(aboType: string): string {
+  const types: Record<string, string> = {
+    halb: 'Halb (1 Person, CHF 750.-, 1 Anteil)',
+    standard: 'Standard (2-3 Personen, CHF 1\'280.-, 2 Anteile)',
+    doppel: 'Doppel (4-6 Personen, CHF 2\'350.-, 4 Anteile)',
+    none: 'Kein Gemüsekorb',
+  }
+  return types[aboType] || aboType
+}
+
+function formatLabel(key: string): string {
+  const labels: Record<string, string> = {
+    name: 'Name',
+    email: 'E-Mail',
+    phone: 'Telefon',
+    subject: 'Betreff',
+    message: 'Nachricht',
+    visit_date: 'Gewünschtes Datum',
+    participants: 'Anzahl Personen',
+    notes: 'Anmerkungen',
+    interest: 'Interesse',
+    eventTitle: 'Event',
+    eventId: 'Event ID',
+  }
+  return labels[key] || key.charAt(0).toUpperCase() + key.slice(1)
+}
+
+function formatDateFull(date: Date | string): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  if (isNaN(d.getTime())) return String(date)
+  
+  const months = [
+    'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+  ]
+  
+  const day = d.getDate()
+  const month = months[d.getMonth()]
+  const year = d.getFullYear()
+  
+  return `${day}. ${month} ${year}`
+}
+
+function formatValue(value: any): string {
+  if (value === null || value === undefined) return '-'
+  if (typeof value === 'boolean') return value ? 'Ja' : 'Nein'
+  if (Array.isArray(value)) return value.join(', ')
+  if (typeof value === 'object') return JSON.stringify(value, null, 2)
+  
+  // Check if it's a date string (ISO format or YYYY-MM-DD)
+  const datePattern = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2})?/
+  if (typeof value === 'string' && datePattern.test(value)) {
+    return formatDateFull(value)
+  }
+  
+  return String(value)
+}

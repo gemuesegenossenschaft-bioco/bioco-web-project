@@ -1,0 +1,149 @@
+{
+  "spacing": {
+    "xxs": { "$type": "dimension", "$value": "4px" },
+    "xs":  { "$type": "dimension", "$value": "8px" },
+    "sm":  { "$type": "dimension", "$value": "12px" },
+    "md":  { "$type": "dimension", "$value": "16px" },
+    "lg":  { "$type": "dimension", "$value": "24px" },
+    "xl":  { "$type": "dimension", "$value": "32px" },
+    "xxl": { "$type": "dimension", "$value": "48px" }
+  },
+  "radius": {
+    "sm": { "$type": "dimension", "$value": "4px" },
+    "md": { "$type": "dimension", "$value": "8px" },
+    "lg": { "$type": "dimension", "$value": "12px" }
+  },
+  "grid_mobile": {
+    "cols":   { "$type": "number", "$value": 4 },
+    "gutter": { "$type": "dimension", "$value": "16px" },
+    "margin": { "$type": "dimension", "$value": "16px" },
+    "maxWidth": { "$type": "dimension", "$value": "360px" },
+    "frameWidth": { "$type": "dimension", "$value": "360px" }
+  },
+  "grid_desktop": {
+    "cols":   { "$type": "number", "$value": 12 },
+    "gutter": { "$type": "dimension", "$value": "24px" },
+    "margin": { "$type": "dimension", "$value": "120px" },
+    "maxWidth": { "$type": "dimension", "$value": "1200px" },
+    "frameWidth": { "$type": "dimension", "$value": "1440px" }
+  },
+  "type_family": {
+    "ui": { "$type": "fontFamily", "$value": "Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" }
+  },
+  "type_scale": {
+    "h1":   { "$type": "dimension", "$value": "32px" },
+    "h2":   { "$type": "dimension", "$value": "24px" },
+    "h3":   { "$type": "dimension", "$value": "20px" },
+    "h4":   { "$type": "dimension", "$value": "18px" },
+    "body": { "$type": "dimension", "$value": "16px" },
+    "small":{ "$type": "dimension", "$value": "14px" },
+    "micro":{ "$type": "dimension", "$value": "12px" }
+  },
+  "type_lineHeight": {
+    "tight":   { "$type": "number", "$value": 1.2 },
+    "default": { "$type": "number", "$value": 1.45 },
+    "loose":   { "$type": "number", "$value": 1.6 }
+  },
+  "button_sizes": {
+    "sm_py": { "$type": "dimension", "$value": "8px"  },
+    "sm_px": { "$type": "dimension", "$value": "12px" },
+    "md_py": { "$type": "dimension", "$value": "12px" },
+    "md_px": { "$type": "dimension", "$value": "16px" },
+    "lg_py": { "$type": "dimension", "$value": "14px" },
+    "lg_px": { "$type": "dimension", "$value": "20px" }
+  },
+  "button_radius": { "value": { "$type": "dimension", "$value": "8px" } },
+  "icon_size": {
+    "sm": { "$type": "dimension", "$value": "16px" },
+    "md": { "$type": "dimension", "$value": "20px" },
+    "lg": { "$type": "dimension", "$value": "24px" }
+  },
+
+  "logic_seo": {
+    "homepage_hero_seo": { "$type": "string", "$value": "seo=solawi" }
+  },
+  "logic_priority": {
+    "waitlist_priority": { "$type": "string", "$value": "H-07 → priority=member" },
+    "addon_basi": { "$type": "string", "$value": "C-04 → vendor=basi, fridge=true, minSubs=2" },
+    "anpacken_hours": { "$type": "string", "$value": "D-01 → 20h/40h ≈ 3.3h/Monat" }
+  },
+
+  "components_contracts": {
+    "Hero":         { "$type": "string", "$value": "layout=image-left|image-right|none; seo=solawi|neutral; ctas=1|2" },
+    "Card-Grid":    { "$type": "string", "$value": "cols=2|3|4" },
+    "Button":       { "$type": "string", "$value": "kind=primary|secondary|ghost; size=sm|md|lg; state=default|hover|pressed|disabled" },
+    "Tabs":         { "$type": "string", "$value": "style=underline|contained; count=3|5" },
+    "Accordion":    { "$type": "string", "$value": "icon=chevron|plus" },
+    "Event-Banner": { "$type": "string", "$value": "density=compact|cozy|comfy" },
+    "Recipe-Card":  { "$type": "string", "$value": "media=image|none; meta=time|season" },
+    "AddOn":        { "$type": "string", "$value": "vendor=basi|other; size=small|regular|large; fridge=true|false; minSubs=1|2" },
+    "Waitlist":     { "$type": "string", "$value": "priority=member|public" },
+    "Route":        { "$type": "string", "$value": "mode=ov|velo|walk; detail=mini|full" }
+  },
+
+  "rows_map_10_Homepage": {
+    "A-01": { "$type": "string", "$value": "Header: auth=anon, menu=hamburger, cta=mitmachen · MVP" },
+    "A-02": { "$type": "string", "$value": "Card-Grid cols=3 + Button primary + Button ghost · MVP" },
+    "A-03": { "$type": "string", "$value": "Hero layout=image-right, seo=solawi, ctas=2 · MVP" },
+    "A-04": { "$type": "string", "$value": "Card-Grid cols=2 · MVP" },
+    "A-05": { "$type": "string", "$value": "Dual-CTA bar · MVP" },
+    "A-06": { "$type": "string", "$value": "3-step Concept · MVP" },
+    "A-07": { "$type": "string", "$value": "Event-Banner density=compact · MVP" },
+    "A-08": { "$type": "string", "$value": "Trust logos bar · MVP" },
+    "A-09": { "$type": "string", "$value": "Info + Button → Depots/Mitmachen · MVP" }
+  },
+  "rows_map_20_Ernte": {
+    "B-01": { "$type": "string", "$value": "Hero · MVP" },
+    "B-02": { "$type": "string", "$value": "Gallery · MVP" },
+    "B-03": { "$type": "string", "$value": "Recipe-Card grid (media=image, meta=season) · MVP" },
+    "B-04": { "$type": "string", "$value": "Accordion · MVP" },
+    "B-05": { "$type": "string", "$value": "Event-Banner · MVP" },
+    "B-06": { "$type": "string", "$value": "CTA card + Button → 80_Mitmachen · MVP" }
+  },
+  "rows_map_30_Anpacken": {
+    "D-01": { "$type": "string", "$value": "Text + hours (20h/40h ≈ 3.3h/Monat) + CTA · MVP" },
+    "D-02": { "$type": "string", "$value": "Chips: Stammtisch, BG, Elki, Kräutergruppe · MVP" },
+    "D-03": { "$type": "string", "$value": "Event-Banner (from 70/G-02) · MVP" }
+  },
+  "rows_map_40_Abos": {
+    "C-01": { "$type": "string", "$value": "Pricing + Körbli weight placeholders; CTA → 80/H-04 · MVP" },
+    "C-02": { "$type": "string", "$value": "Probe-Abo · Phase 2" },
+    "C-04": { "$type": "string", "$value": "AddOn vendor=basi, fridge=true, minSubs=2; sizes; weitere Produkte · MVP" }
+  },
+  "rows_map_50_Depots": {
+    "E-01": { "$type": "string", "$value": "Depots map + list (include 'Wir als Depot') · MVP" },
+    "E-02": { "$type": "string", "$value": "Event-Banner · MVP" },
+    "E-03": { "$type": "string", "$value": "Route OV/velo/zu Fuss (detail=mini) · MVP" }
+  },
+  "rows_map_60_Wir": {
+    "F-01": { "$type": "string", "$value": "Team · MVP" },
+    "F-02": { "$type": "string", "$value": "Mission/Leitbild · MVP" },
+    "F-03": { "$type": "string", "$value": "Geschichte Text (Geisshof, BioCo) · MVP" },
+    "F-04": { "$type": "string", "$value": "Timeline + quote cards · MVP" },
+    "F-06": { "$type": "string", "$value": "Quiz (lokales KI-Modell) · Phase 2" }
+  },
+  "rows_map_70_Hofpost": {
+    "G-01": { "$type": "string", "$value": "Hofpost Übersicht · Phase 2" },
+    "G-02": { "$type": "string", "$value": "Nächste Events (Zentral-Liste) — tags: Zuzüger/QV Baden · MVP" }
+  },
+  "rows_map_80_Mitmachen": {
+    "H-01": { "$type": "string", "$value": "Hero · MVP" },
+    "H-02": { "$type": "string", "$value": "Zuerst testen? → links to 70/G-02 and 40/C-02 · MVP" },
+    "H-03": { "$type": "string", "$value": "Commitment-Check · MVP" },
+    "H-04": { "$type": "string", "$value": "Anmeldung (Smart Form) — progressive steps; Sticky Summary · MVP" },
+    "H-05": { "$type": "string", "$value": "Event-Banner · MVP" },
+    "H-06": { "$type": "string", "$value": "Nächstes (3 Schritte) · MVP" },
+    "H-07": { "$type": "string", "$value": "Warteliste (conditional) — priority=member · MVP" }
+  },
+  "rows_map_90_Kundenportal": {
+    "I-01": { "$type": "string", "$value": "Gateway via 👤 — external tiles · MVP" },
+    "I-02": { "$type": "string", "$value": "Nächste Events (Banner) · MVP" }
+  },
+  "rows_map_95_Footer": {
+    "J-01": { "$type": "string", "$value": "Footer links — Kontakt/Impressum/Datenschutz/Statuten/Social · MVP" }
+  },
+  "rows_map_99_Orphans": {
+    "K-01": { "$type": "string", "$value": "Labels klären · To-do" },
+    "K-02": { "$type": "string", "$value": "Körbli-Gewichte: Datenquelle anbinden · To-do" }
+  }
+}

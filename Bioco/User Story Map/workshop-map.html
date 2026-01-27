@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Workshop Map – Story & Content Journey (Post-it Style)</title>
+<style>
+  :root{
+    --bg:#fafaf7; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --brand:#0ea5e9;
+    --must:#b7f0b1;   /* Muss (Must) */
+    --should:#fff3b0; /* Soll (Should) */
+    --could:#ffd1a8;  /* Kann (Could) */
+    --wont:#e5e7eb;   /* Nicht jetzt (Won't have) */
+    --risk:#ffc0da;   /* Risiko/Offen */
+    --new:#ffffff;    /* New/Unklar */
+    --sticky-shadow: 0 8px 20px rgba(0,0,0,.06);
+    --radius:14px;
+  }
+  html,body{height:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:saturate(1.2) blur(8px);
+    background:rgba(250,250,247,.85); border-bottom:1px solid var(--line);
+  }
+  .wrap{max-width:1200px;margin:0 auto;padding:14px 18px}
+  h1{font-size:20px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:13px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .btn{
+    appearance:none;border:1px solid var(--line);background:white;color:var(--ink);
+    padding:8px 12px;border-radius:10px;cursor:pointer;box-shadow:var(--sticky-shadow);
+  }
+  .btn:hover{border-color:#d1d5db}
+  .tabs{display:flex;gap:8px;margin-top:10px}
+  .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--brand);color:white;border-color:var(--brand)}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .sw{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.08);display:inline-block;margin-right:6px}
+  .grid{
+    margin:18px auto; max-width:1200px; background:#fff;border:1px solid var(--line);
+    border-radius:18px; overflow:auto; box-shadow:var(--sticky-shadow)
+  }
+  .board{display:none;padding:12px}
+  .board.active{display:block}
+  .table{
+    display:grid; gap:1px; background:var(--line);
+  }
+  .cell{
+    background:#fff; min-height:130px; padding:10px; position:relative;
+    overflow:visible;
+  }
+  .head{background:#f8fafc;font-weight:600}
+  .rowhead{background:#f8fafc;font-weight:600;white-space:nowrap}
+  .cell[contenteditable="true"]{outline:2px dashed transparent}
+  .cell:focus-within{outline:2px dashed #cbd5e1; outline-offset:-6px}
+  /* Sticky notes */
+  .sticky{
+    position:relative; display:inline-block; min-width:120px; max-width:240px; padding:10px 12px 28px;
+    margin:6px; border-radius:var(--radius); box-shadow:var(--sticky-shadow);
+    cursor:grab; user-select:none; transform:rotate(var(--rot, -1deg));
+    border:1px solid rgba(0,0,0,.06);
+  }
+  .sticky:active{cursor:grabbing}
+  .sticky.selected{outline:2px solid #60a5fa; outline-offset:2px}
+  .sticky .text{outline:none}
+  .sticky .bar{
+    position:absolute; right:8px; bottom:6px; display:flex; gap:6px; align-items:center;
+  }
+  .dot{
+    width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.15); cursor:pointer;
+  }
+  .del{border:none;background:transparent;cursor:pointer;color:#ef4444;font-size:16px;line-height:1}
+  /* Colors */
+  .must{background:var(--must)}
+  .should{background:var(--should)}
+  .could{background:var(--could)}
+  .wont{background:var(--wont)}
+  .risk{background:var(--risk)}
+  .new{background:var(--new)}
+  /* Helper */
+  .hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+  .footer{color:var(--muted);font-size:12px;padding:20px 18px;text-align:center}
+  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;border:1px solid var(--line);border-bottom-width:2px;padding:0 .35em;border-radius:6px;background:#fff}
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap" role="region" aria-label="Kopfbereich">
+      <h1>Workshop Map – Story Mapping & Content Journey</h1>
+      <div class="sub">
+        Doppelklick in eine Zelle → neues Post-it. Ziehen & ablegen, Text direkt bearbeiten.
+        Speichert automatisch. <strong>⌘/Ctrl + T</strong> → ausgewähltes Sticky in den <em>Wartebereich</em> (Journey) übertragen.
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Boards">
+        <button class="tab" role="tab" aria-selected="true" data-target="#story">Story Map</button>
+        <button class="tab" role="tab" aria-selected="false" data-target="#journey">Content Journey Map</button>
+      </div>
+
+      <div class="toolbar" role="toolbar" aria-label="Aktionen">
+        <button id="addCol" class="btn">+ Spalte</button>
+        <button id="addRow" class="btn">+ Zeile</button>
+        <button id="reset" class="btn">Board leeren</button>
+        <button id="exportCSV" class="btn">Export CSV</button>
+        <button id="exportPNG" class="btn">Export PNG (aktuelles Board)</button>
+        <span class="hint">Tipps: <span class="kbd">Doppelklick</span> = neues Post-it · <span class="kbd">⌘/Ctrl + S</span> = Speichern · <span class="kbd">⌘/Ctrl + T</span> = in Wartebereich</span>
+      </div>
+
+      <div class="legend" aria-label="Legende">
+        <span><i class="sw" style="background:var(--must)"></i>Must <small>(Muss)</small></span>
+        <span><i class="sw" style="background:var(--should)"></i>Should <small>(Soll)</small></span>
+        <span><i class="sw" style="background:var(--could)"></i>Could <small>(Kann)</small></span>
+        <span><i class="sw" style="background:var(--wont)"></i>Won’t have <small>(Nicht jetzt)</small></span>
+        <span><i class="sw" style="background:var(--risk)"></i>Risiko/Offen</span>
+        <span><i class="sw" style="background:var(--new);border:1px solid #d1d5db"></i>New <small>(zu klären)</small></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- STORY MAP BOARD -->
+  <section id="story" class="board active" aria-labelledby="tab-story">
+    <div class="wrap">
+      <div class="grid">
+        <div id="storyTable" class="table" role="grid" aria-label="Story Map"></div>
+      </div>
+      <p class="hint">Obere Zeile = Backbone/Epics (bearbeitbar). Unterhalb: Stories pro Epic. Release-Schnitte via Farben (MoSCoW) markieren.</p>
+    </div>
+  </section>
+
+  <!-- CONTENT JOURNEY BOARD -->
+  <section id="journey" class="board" aria-labelledby="tab-journey">
+    <div class="wrap">
+      <div class="grid">
+        <div id="journeyTable" class="table" role="grid" aria-label="Content Journey Map"></div>
+      </div>
+      <p class="hint">Spalten = Journey-Schritte. Zeilen = Personas/Zielgruppen. Oben: <strong>Wartebereich</strong> für offene/zu klärende Themen.</p>
+    </div>
+  </section>
+
+  <div class="footer">Made for fast workshops · keine externen Libraries · speichert lokal</div>
+
+<script>
+/* ========== Utility ========== */
+const $ = sel => document.querySelector(sel);
+const uuid = () => Math.random().toString(36).slice(2);
+const storageKey = 'bioco-workshop-v2';
+
+const MOSCOW_LABEL = {
+  must: 'Must (Muss)',
+  should: 'Should (Soll)',
+  could: 'Could (Kann)',
+  wont: "Won't have (Nicht jetzt)",
+  risk: 'Risiko/Offen',
+  new: 'New (zu klären)'
+};
+
+function saveState(){
+  const state = {
+    activeTab: document.querySelector('.tab[aria-selected="true"]').dataset.target,
+    story: serializeTable($('#storyTable')),
+    journey: serializeTable($('#journeyTable'))
+  };
+  localStorage.setItem(storageKey, JSON.stringify(state));
+}
+function loadState(){
+  const raw = localStorage.getItem(storageKey);
+  return raw ? JSON.parse(raw) : null;
+}
+function download(filename, blobOrText, type='text/plain') {
+  const blob = blobOrText instanceof Blob ? blobOrText : new Blob([blobOrText], {type});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+/* ========== Sticky Notes ========== */
+let lastSelectedSticky = null;
+
+function makeSticky(text='Neue Notiz', color='must', rotationRange=2){
+  const s = document.createElement('div');
+  s.className = `sticky ${color}`;
+  s.draggable = true;
+  s.dataset.id = uuid();
+  const rot = (Math.random()*rotationRange*2 - rotationRange).toFixed(2);
+  s.style.setProperty('--rot', rot+'deg');
+
+  const t = document.createElement('div');
+  t.className = 'text';
+  t.contentEditable = 'true';
+  t.role = 'textbox';
+  t.ariaLabel = 'Sticky Text';
+  t.textContent = text;
+
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  const colors = ['must','should','could','wont','risk','new'];
+  colors.forEach(c=>{
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = MOSCOW_LABEL[c] || c;
+    d.style.background = getComputedStyle(document.documentElement).getPropertyValue(`--${c}`);
+    if(c==='new'){ d.style.border='1px solid #d1d5db'; }
+    d.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      s.classList.remove('must','should','could','wont','risk','new');
+      s.classList.add(c);
+      saveState();
+    });
+    bar.appendChild(d);
+  });
+  const del = document.createElement('button');
+  del.className='del'; del.title='Löschen'; del.innerHTML='&times;';
+  del.addEventListener('click', (e)=>{ e.stopPropagation(); s.remove(); saveState(); if(lastSelectedSticky===s) lastSelectedSticky=null; });
+  bar.appendChild(del);
+
+  // selection
+  s.addEventListener('click', (e)=>{
+    document.querySelectorAll('.sticky.selected').forEach(n=>n.classList.remove('selected'));
+    s.classList.add('selected');
+    lastSelectedSticky = s;
+  });
+
+  // Drag & drop events
+  s.addEventListener('dragstart', e=>{
+    e.dataTransfer.setData('text/plain', s.dataset.id);
+    const crt = s.cloneNode(true); crt.style.opacity=.6; crt.style.position='absolute'; crt.style.top='-9999px';
+    document.body.appendChild(crt); e.dataTransfer.setDragImage(crt, 20, 20);
+    setTimeout(()=>document.body.removeChild(crt),0);
+  });
+
+  s.appendChild(t);
+  s.appendChild(bar);
+  // Persist on edits
+  t.addEventListener('input', ()=>saveState());
+  return s;
+}
+
+/* ========== Tables ========== */
+function buildTable(el, rows, cols, preset){
+  el.style.gridTemplateColumns = `220px repeat(${cols-1}, minmax(200px, 1fr))`;
+  el.innerHTML = '';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.rc = `${r}:${c}`;
+      cell.setAttribute('role','gridcell');
+
+      const isTop = r===0, isLeft = c===0;
+      if(isTop && isLeft){
+        cell.classList.add('head');
+        cell.textContent = preset.topLeft || '';
+      } else if(isTop){
+        cell.classList.add('head');
+        cell.contentEditable = 'true';
+        cell.dataset.header = 'col';
+        cell.textContent = preset.cols[c] || `Schritt ${c}`;
+      } else if(isLeft){
+        cell.classList.add('rowhead');
+        cell.contentEditable = 'true';
+        cell.dataset.header = 'row';
+        cell.textContent = preset.rows[r] || `Lane ${r}`;
+      } else {
+        // drop zone
+        cell.addEventListener('dragover', e=>{ e.preventDefault(); cell.style.outline='2px dashed #94a3b8'; });
+        cell.addEventListener('dragleave', ()=>{ cell.style.outline='none'; });
+        cell.addEventListener('drop', e=>{
+          e.preventDefault(); cell.style.outline='none';
+          const id = e.dataTransfer.getData('text/plain');
+          const sticky = document.querySelector(`.sticky[data-id="${id}"]`);
+          if(sticky) cell.appendChild(sticky);
+          saveState();
+        });
+        cell.addEventListener('dblclick', ()=>{
+          const s = makeSticky();
+          cell.appendChild(s);
+          saveState();
+        });
+      }
+      if(cell.isContentEditable){
+        cell.addEventListener('input', ()=>saveState());
+      }
+      el.appendChild(cell);
+    }
+  }
+}
+
+function serializeTable(el){
+  const out = {
+    cols: el.style.gridTemplateColumns,
+    headers: { rows:[], cols:[] },
+    cells: [] // {rc, header?, html, stickies:[{text,color}]}
+  };
+  const cells = el.querySelectorAll('.cell');
+  cells.forEach(cell=>{
+    const data = { rc: cell.dataset.rc, header: cell.dataset.header || null, html: cell.isContentEditable ? cell.innerHTML : null, stickies: [] };
+    cell.querySelectorAll('.sticky').forEach(st=>{
+      const colorClass = ['must','should','could','wont','risk','new'].find(c=>st.classList.contains(c)) || 'must';
+      data.stickies.push({
+        text: st.querySelector('.text').innerText.replace(/\s+/g,' ').trim(),
+        color: colorClass
+      });
+    });
+    out.cells.push(data);
+  });
+  // extract headers
+  const firstRowCount = Array.from(cells).filter(c=>c.dataset.rc.startsWith('0:')).length;
+  const rowCount = Array.from(cells).filter(c=>c.dataset.rc.endsWith(':0')).length;
+  for(let c=1;c<firstRowCount;c++){
+    const head = el.querySelector(`.cell[data-rc="0:${c}"]`);
+    out.headers.cols.push(head ? head.textContent.trim() : `Spalte ${c}`);
+  }
+  for(let r=1;r<rowCount;r++){
+    const head = el.querySelector(`.cell[data-rc="${r}:0"]`);
+    out.headers.rows.push(head ? head.textContent.trim() : `Zeile ${r}`);
+  }
+  return out;
+}
+function restoreTable(el, state){
+  if(!state) return;
+  el.style.gridTemplateColumns = state.cols || el.style.gridTemplateColumns;
+  el.querySelectorAll('.cell').forEach(cell=>{
+    const s = state.cells.find(x=>x.rc===cell.dataset.rc);
+    if(!s) return;
+    if(s.header && cell.isContentEditable){
+      cell.innerHTML = s.html || '';
+    } else if(!s.header){
+      s.stickies?.forEach(st=>{
+        const node = makeSticky(st.text, st.color);
+        cell.appendChild(node);
+      });
+    }
+  });
+}
+
+/* ========== Defaults (inkl. Wartebereich oben) ========== */
+const defaults = {
+  story:{
+    rows: 5, cols: 6,
+    preset: {
+      topLeft: 'Backbone / Lanes',
+      cols: ['Über uns','Mitmachen','Abo/Bestellung','Kalender/Abholen','News/Blog','Kontakt'],
+      rows: [null,'Neumitglied','Mitglied (bestehend)','Partner*in','Presse/Öffentlichkeit']
+    }
+  },
+  journey:{
+    rows: 7, cols: 6,
+    preset: {
+      topLeft: 'Persona / Schritt',
+      cols: ['Entdecken','Verstehen','Entscheiden','Teilnehmen','Mitmachen','Bleiben'],
+      rows: [null,'Wartebereich','Interessierte Person','Neumitglied','Mitglied (aktiv)','Partner*in','Spender*in']
+    }
+  }
+};
+
+const storyTable = $('#storyTable');
+const journeyTable = $('#journeyTable');
+
+/* ========== Init ========== */
+function init(){
+  buildTable(storyTable, defaults.story.rows, defaults.story.cols, defaults.story.preset);
+  buildTable(journeyTable, defaults.journey.rows, defaults.journey.cols, defaults.journey.preset);
+  const state = loadState();
+  if(state){
+    document.querySelectorAll('.tab').forEach(t=>{
+      const active = t.dataset.target === state.activeTab;
+      t.setAttribute('aria-selected', active ? 'true':'false');
+      document.querySelector(t.dataset.target).classList.toggle('active', active);
+    });
+    restoreTable(storyTable, state.story);
+    restoreTable(journeyTable, state.journey);
+  }
+}
+init();
+
+/* ========== Tab logic ========== */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+    tab.setAttribute('aria-selected','true');
+    document.querySelectorAll('.board').forEach(b=>b.classList.remove('active'));
+    document.querySelector(tab.dataset.target).classList.add('active');
+    saveState();
+  });
+});
+
+/* ========== Controls: add row/col, reset ========== */
+function gridShape(activeTable){
+  const cells = activeTable.querySelectorAll('.cell');
+  const cols = Array.from(cells).filter(c=>c.dataset.rc.startsWith('0:')).length;
+  const rows = Array.from(cells).filter(c=>c.dataset.rc.endsWith(':0')).length;
+  return {rows, cols};
+}
+function addColumn(activeTable){
+  const {rows, cols} = gridShape(activeTable);
+  const snapshot = serializeTable(activeTable);
+  buildTable(activeTable, rows, cols+1, {topLeft:'',cols:[],rows:[]});
+  restoreTable(activeTable, snapshot);
+  saveState();
+}
+function addRow(activeTable){
+  const {rows, cols} = gridShape(activeTable);
+  const snapshot = serializeTable(activeTable);
+  buildTable(activeTable, rows+1, cols, {topLeft:'',cols:[],rows:[]});
+  restoreTable(activeTable, snapshot);
+  saveState();
+}
+function activeTableEl(){
+  return document.querySelector('.board.active .table');
+}
+
+$('#addCol').addEventListener('click', ()=> addColumn(activeTableEl()));
+$('#addRow').addEventListener('click', ()=> addRow(activeTableEl()));
+$('#reset').addEventListener('click', ()=>{
+  if(!confirm('Wirklich alle Post-its und Header dieses Boards löschen?')) return;
+  const isStory = document.querySelector('#story').classList.contains('active');
+  if(isStory){
+    buildTable(storyTable, defaults.story.rows, defaults.story.cols, defaults.story.preset);
+  } else {
+    buildTable(journeyTable, defaults.journey.rows, defaults.journey.cols, defaults.journey.preset);
+  }
+  saveState();
+});
+
+/* ========== Keyboard: Save + Transfer to Wartebereich ========== */
+window.addEventListener('keydown', (e)=>{
+  const key = e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey) && key==='s'){
+    e.preventDefault(); saveState();
+    const before = document.title;
+    document.title = '✓ Gespeichert • ' + before.replace(/^✓ Gespeichert • /,'');
+    setTimeout(()=>document.title = before.replace(/^✓ Gespeichert • /,''), 1200);
+  }
+  if((e.ctrlKey||e.metaKey) && key==='t'){
+    // transfer selected sticky from STORY → JOURNEY Wartebereich
+    e.preventDefault();
+    if(!lastSelectedSticky){
+      alert('Bitte zuerst ein Sticky in der Story Map auswählen (anklicken).');
+      return;
+    }
+    // nur wenn Story-Board aktiv oder Sticky darin ist
+    const inStory = lastSelectedSticky.closest('#story') !== null;
+    if(!inStory){
+      alert('Das ausgewählte Sticky ist nicht in der Story Map.');
+      return;
+    }
+    // Zielzelle: Journey, Zeile "Wartebereich" (erste Datenzeile), Spalte 1 (erste Journey-Phase)
+    const warteRowIndex = 1; // r=1 ist Wartebereich (r=0 ist Header)
+    const targetCell = journeyTable.querySelector(`.cell[data-rc="${warteRowIndex}:1"]`);
+    if(!targetCell){ alert('Wartebereich nicht gefunden.'); return; }
+    // Clone as NEW + extra wonky rotation
+    const text = lastSelectedSticky.querySelector('.text').innerText;
+    const clone = makeSticky(text || 'Zu klären', 'new', 10); // verrenkter (rotationRange=10)
+    targetCell.appendChild(clone);
+    // optional: Mark original?
+    lastSelectedSticky.classList.add('risk'); // optionales Signal: transferiert
+    saveState();
+    // Wechsle auf Journey-Tab für Sichtbarkeit
+    document.querySelector('.tab[data-target="#journey"]').click();
+  }
+});
+
+/* ========== CSV Export (beide Boards) ========== */
+function tableToRows(name, tableEl){
+  const state = serializeTable(tableEl);
+  const rows = [];
+  // Build index helpers
+  const colHeads = state.headers.cols;
+  const rowHeads = state.headers.rows;
+  // iterate cells (skip headers)
+  state.cells.forEach(c=>{
+    const [r,cx] = c.rc.split(':').map(n=>parseInt(n,10));
+    if(r===0 || cx===0) return; // skip header cells
+    const rowLabel = rowHeads[r-1] || '';
+    const colLabel = colHeads[cx-1] || '';
+    if(!c.stickies || c.stickies.length===0){
+      // also include empty cells? Usually no. Skip.
+      return;
+    }
+    c.stickies.forEach(s=>{
+      rows.push({
+        Board: name,
+        Row: rowLabel,
+        Column: colLabel,
+        Label: MOSCOW_LABEL[s.color] || s.color,
+        Text: s.text
+      });
+    });
+  });
+  return rows;
+}
+function toCSV(rows){
+  if(rows.length===0) return 'Board,Row,Column,Label,Text\n';
+  const headers = Object.keys(rows[0]);
+  const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+  const lines = [headers.join(',')];
+  rows.forEach(r=> lines.push(headers.map(h=>esc(r[h])).join(',')));
+  return lines.join('\n');
+}
+$('#exportCSV').addEventListener('click', ()=>{
+  const rows = [
+    ...tableToRows('Story Map', storyTable),
+    ...tableToRows('Content Journey', journeyTable)
+  ];
+  const csv = toCSV(rows);
+  download('workshop-map.csv', csv, 'text/csv');
+});
+
+/* ========== PNG Export (aktuelles Board) ========== */
+/* Ohne externe Libs via SVG foreignObject Snapshot */
+function exportActiveBoardPNG(){
+  const board = document.querySelector('.board.active .grid');
+  const rect = board.getBoundingClientRect();
+  const clone = board.cloneNode(true);
+  clone.style.margin = '0';
+  clone.style.maxWidth = rect.width + 'px';
+
+  const html = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${Math.ceil(rect.width)}" height="${Math.ceil(rect.height)}">
+    <foreignObject x="0" y="0" width="100%" height="100%">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="width:${Math.ceil(rect.width)}px;height:${Math.ceil(rect.height)}px;">
+        ${clone.outerHTML}
+      </div>
+    </foreignObject>
+  </svg>`;
+
+  const svgBlob = new Blob([html], {type:'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(svgBlob);
+
+  const img = new Image();
+  img.onload = ()=>{
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(rect.width);
+    canvas.height = Math.ceil(rect.height);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg') || '#ffffff';
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img,0,0);
+    canvas.toBlob(blob=>{
+      download('workshop-board.png', blob, 'image/png');
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+  img.onerror = ()=>{ alert('PNG-Export nicht möglich (Browser-Sicherheitsbeschränkung). Tipp: auf Desktop in Chrome/Edge/Firefox öffnen.'); URL.revokeObjectURL(url); };
+  img.src = url;
+}
+$('#exportPNG').addEventListener('click', exportActiveBoardPNG);
+
+/* Autosave on unload */
+window.addEventListener('beforeunload', saveState);
+</script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Workshop Map – Story & Content Journey (Post-it Style)</title>
+<style>
+  :root{
+    --bg:#fafaf7; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --brand:#0ea5e9;
+    --must:#b7f0b1;   /* Muss (Must) */
+    --should:#fff3b0; /* Soll (Should) */
+    --could:#ffd1a8;  /* Kann (Could) */
+    --wont:#FFC0CB;   /* Nicht jetzt (Won't have) */
+    --new:#d1d5db;    /* New/Unklar (Grau) */
+    --sticky-shadow: 0 8px 20px rgba(0,0,0,.06);
+    --radius:14px;
+  }
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  header{
+    position:sticky; top:0; z-index:20;
+    backdrop-filter:saturate(1.2) blur(8px);
+    background:rgba(250,250,247,.92); border-bottom:1px solid var(--line);
+  }
+  .wrap{width:100%;margin:0 auto;padding:14px 18px;max-width:none}
+  h1{font-size:20px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:13px}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .btn{
+    appearance:none;border:1px solid var(--line);background:white;color:var(--ink);
+    padding:8px 12px;border-radius:10px;cursor:pointer;box-shadow:var(--sticky-shadow);
+  }
+  .tabs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--brand);color:white;border-color:var(--brand)}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .sw{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.08);display:inline-block;margin-right:6px}
+  .grid{
+    margin:18px auto; width:100%; background:#fff;border:1px solid var(--line);
+    border-radius:18px; overflow:auto; box-shadow:var(--sticky-shadow)
+  }
+  .board{display:none;padding:12px}
+  .board.active{display:block}
+  .table{
+    display:grid; gap:1px; background:var(--line);
+  }
+  .cell{
+    background:#fff; min-height:130px; padding:10px; position:relative;
+  }
+  .head{background:#f8fafc;font-weight:600}
+  .rowhead{background:#f8fafc;font-weight:600;white-space:nowrap}
+  /* Sticky notes */
+  .sticky{
+    position:relative; display:inline-block; min-width:120px; max-width:240px; padding:10px 12px 28px;
+    margin:6px; border-radius:var(--radius); box-shadow:var(--sticky-shadow);
+    cursor:grab; user-select:none; border:1px solid rgba(0,0,0,.06);
+    transform:rotate(var(--rot, -1deg));
+  }
+  .sticky.selected{outline:2px solid #60a5fa; outline-offset:2px}
+  .sticky .text{outline:none}
+  .sticky .bar{position:absolute; right:8px; bottom:6px; display:flex; gap:6px}
+  .dot{width:16px; height:16px; border-radius:50%; border:1px solid rgba(0,0,0,.15); cursor:pointer}
+  .del{border:none;background:transparent;cursor:pointer;color:#ef4444;font-size:16px}
+  /* Colors */
+  .must{background:var(--must)}
+  .should{background:var(--should)}
+  .could{background:var(--could)}
+  .wont{background:var(--wont)}
+  .new{background:var(--new)}
+  .hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+  .footer{color:var(--muted);font-size:12px;padding:20px;text-align:center}
+</style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>Workshop Map – Story Mapping & Content Journey</h1>
+      <div class="sub"><strong>Ctrl + Alt + Shift + M</strong> = ausgewähltes Sticky aus der Story Map in den Wartebereich verschieben</div>
+      <div class="tabs">
+        <button class="tab" aria-selected="true" data-target="#story">Story Map</button>
+        <button class="tab" aria-selected="false" data-target="#journey">Content Journey</button>
+        <button class="tab" aria-selected="false" data-target="#warte">Wartebereich</button>
+      </div>
+      <div class="toolbar">
+        <button id="addCol" class="btn">+ Spalte</button>
+        <button id="addRow" class="btn">+ Zeile</button>
+        <button id="reset" class="btn">Board leeren</button>
+        <button id="exportCSV" class="btn">Export CSV</button>
+        <button id="exportPNG" class="btn">Export PNG</button>
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:var(--must)"></i>Must (Muss)</span>
+        <span><i class="sw" style="background:var(--should)"></i>Should (Soll)</span>
+        <span><i class="sw" style="background:var(--could)"></i>Could (Kann)</span>
+        <span><i class="sw" style="background:var(--wont)"></i>Won’t have (Nicht jetzt)</span>
+        <span><i class="sw" style="background:var(--new)"></i>New (Klärung)</span>
+      </div>
+    </div>
+  </header>
+
+  <section id="story" class="board active">
+    <div class="grid"><div id="storyTable" class="table" role="grid" aria-label="Story Map"></div></div>
+  </section>
+
+  <section id="journey" class="board">
+    <div class="grid"><div id="journeyTable" class="table" role="grid" aria-label="Content Journey Map"></div></div>
+  </section>
+
+  <section id="warte" class="board">
+    <div class="grid"><div id="warteTable" class="table" role="grid" aria-label="Wartebereich"></div></div>
+  </section>
+
+  <div class="footer">Speichert lokal · PNG & CSV Export</div>
+
+<script>
+/* ===== Utils ===== */
+const $ = s => document.querySelector(s);
+const uuid = () => Math.random().toString(36).slice(2);
+const storageKey = 'bioco-workshop-v3';
+let lastSelectedSticky = null;
+
+const LABEL = {
+  must: 'Must (Muss)',
+  should: 'Should (Soll)',
+  could: 'Could (Kann)',
+  wont: "Won’t have (Nicht jetzt)",
+  new: 'New (Klärung)'
+};
+
+/* ===== Stickies ===== */
+function makeSticky(text='Neue Notiz', color='must', rotation=2){
+  const s = document.createElement('div');
+  s.className = `sticky ${color}`;
+  s.draggable = true;
+  s.dataset.id = uuid();
+  s.style.setProperty('--rot', (Math.random()*rotation*2-rotation).toFixed(2)+'deg');
+
+  const t = document.createElement('div');
+  t.className = 'text';
+  t.contentEditable = 'true';
+  t.textContent = text;
+
+  const bar = document.createElement('div');
+  bar.className = 'bar';
+  ['must','should','could','wont','new'].forEach(c=>{
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.title = LABEL[c];
+    d.style.background = getComputedStyle(document.documentElement).getPropertyValue(`--${c}`);
+    d.addEventListener('click', e=>{
+      e.stopPropagation();
+      s.className = `sticky ${c}`;
+      saveState();
+    });
+    bar.appendChild(d);
+  });
+  const del = document.createElement('button');
+  del.className='del'; del.title='Löschen'; del.innerHTML='&times;';
+  del.addEventListener('click', ()=>{ s.remove(); saveState(); if(lastSelectedSticky===s) lastSelectedSticky=null; });
+  bar.appendChild(del);
+
+  s.appendChild(t); s.appendChild(bar);
+
+  s.addEventListener('click', ()=>{
+    document.querySelectorAll('.sticky.selected').forEach(n=>n.classList.remove('selected'));
+    s.classList.add('selected');
+    lastSelectedSticky = s;
+  });
+
+  s.addEventListener('dragstart', e=>{
+    e.dataTransfer.setData('text/plain', s.dataset.id);
+  });
+
+  t.addEventListener('input', saveState);
+  return s;
+}
+
+/* ===== Table build/restore ===== */
+function buildTable(el, rows, cols, preset){
+  el.style.gridTemplateColumns = `220px repeat(${cols-1}, minmax(220px, 1fr))`;
+  el.innerHTML = '';
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.dataset.rc = `${r}:${c}`;
+      cell.setAttribute('role','gridcell');
+      const isTop = r===0, isLeft = c===0;
+
+      if(isTop && isLeft){
+        cell.classList.add('head'); cell.textContent = preset.topLeft || '';
+      } else if(isTop){
+        cell.classList.add('head'); cell.contentEditable = 'true'; cell.dataset.header = 'col';
+        cell.textContent = preset.cols[c] || `Schritt ${c}`;
+      } else if(isLeft){
+        cell.classList.add('rowhead'); cell.contentEditable = 'true'; cell.dataset.header = 'row';
+        cell.textContent = preset.rows[r] || `Lane ${r}`;
+      } else {
+        cell.addEventListener('dblclick', ()=>{ cell.appendChild(makeSticky()); saveState(); });
+        cell.addEventListener('dragover', e=>{ e.preventDefault(); cell.style.outline='2px dashed #94a3b8'; });
+        cell.addEventListener('dragleave', ()=>{ cell.style.outline='none'; });
+        cell.addEventListener('drop', e=>{
+          e.preventDefault(); cell.style.outline='none';
+          const id = e.dataTransfer.getData('text/plain');
+          const sticky = document.querySelector(`.sticky[data-id="${id}"]`);
+          if(sticky) cell.appendChild(sticky);
+          saveState();
+        });
+      }
+      if(cell.isContentEditable){ cell.addEventListener('input', saveState); }
+      el.appendChild(cell);
+    }
+  }
+}
+
+function serializeTable(el){
+  const out = { cols: el.style.gridTemplateColumns, headers:{rows:[],cols:[]}, cells:[] };
+  const cells = el.querySelectorAll('.cell');
+  cells.forEach(cell=>{
+    const data = { rc: cell.dataset.rc, header: cell.dataset.header || null, html: cell.isContentEditable ? cell.innerHTML : null, stickies: [] };
+    cell.querySelectorAll('.sticky').forEach(st=>{
+      const color = ['must','should','could','wont','new'].find(c=>st.classList.contains(c)) || 'must';
+      data.stickies.push({ text: st.querySelector('.text').innerText.replace(/\s+/g,' ').trim(), color });
+    });
+    out.cells.push(data);
+  });
+  const firstRowCount = Array.from(cells).filter(c=>c.dataset.rc.startsWith('0:')).length;
+  const rowCount = Array.from(cells).filter(c=>c.dataset.rc.endsWith(':0')).length;
+  for(let c=1;c<firstRowCount;c++){
+    const head = el.querySelector(`.cell[data-rc="0:${c}"]`); out.headers.cols.push(head ? head.textContent.trim() : `Spalte ${c}`);
+  }
+  for(let r=1;r<rowCount;r++){
+    const head = el.querySelector(`.cell[data-rc="${r}:0"]`); out.headers.rows.push(head ? head.textContent.trim() : `Zeile ${r}`);
+  }
+  return out;
+}
+function restoreTable(el, state){
+  if(!state) return;
+  el.style.gridTemplateColumns = state.cols || el.style.gridTemplateColumns;
+  el.querySelectorAll('.cell').forEach(cell=>{
+    const s = state.cells.find(x=>x.rc===cell.dataset.rc);
+    if(!s) return;
+    if(s.header && cell.isContentEditable){
+      cell.innerHTML = s.html || '';
+    } else if(!s.header){
+      s.stickies?.forEach(st=> cell.appendChild(makeSticky(st.text, st.color)));
+    }
+  });
+}
+
+/* ===== Defaults ===== */
+const defaults = {
+  story:{
+    rows: 5, cols: 6,
+    preset: {
+      topLeft: 'Backbone / Lanes',
+      cols: ['Über uns','Mitmachen','Abo/Bestellung','Kalender/Abholen','News/Blog','Kontakt'],
+      rows: [null,'Neumitglied','Mitglied (bestehend)','Partner*in','Presse/Öffentlichkeit']
+    }
+  },
+  journey:{
+    rows: 6, cols: 6,
+    preset: {
+      topLeft: 'Persona / Schritt',
+      cols: ['Entdecken','Verstehen','Entscheiden','Teilnehmen','Mitmachen','Bleiben'],
+      rows: [null,'Interessierte Person','Neumitglied','Mitglied (aktiv)','Partner*in','Spender*in']
+    }
+  },
+  warte:{
+    rows: 4, cols: 2,
+    preset: {
+      topLeft: 'Ideen in Klärung',
+      cols: ['Backlog'],
+      rows: [null,'Zu klären','Abhängigkeiten','Ideenpool']
+    }
+  }
+};
+
+/* ===== Init ===== */
+const storyTable = $('#storyTable');
+const journeyTable = $('#journeyTable');
+const warteTable = $('#warteTable');
+
+function init(){
+  buildTable(storyTable, defaults.story.rows, defaults.story.cols, defaults.story.preset);
+  buildTable(journeyTable, defaults.journey.rows, defaults.journey.cols, defaults.journey.preset);
+  buildTable(warteTable, defaults.warte.rows, defaults.warte.cols, defaults.warte.preset);
+
+  const state = JSON.parse(localStorage.getItem(storageKey) || 'null');
+  if(state){
+    restoreTable(storyTable, state.story);
+    restoreTable(journeyTable, state.journey);
+    restoreTable(warteTable, state.warte);
+    document.querySelectorAll('.tab').forEach(t=>{
+      const active = t.dataset.target === (state.activeTab || '#story');
+      t.setAttribute('aria-selected', active ? 'true':'false');
+      document.querySelector(t.dataset.target).classList.toggle('active', active);
+    });
+  }
+}
+init();
+
+/* ===== Save ===== */
+function saveState(){
+  const state = {
+    activeTab: document.querySelector('.tab[aria-selected="true"]').dataset.target,
+    story: serializeTable(storyTable),
+    journey: serializeTable(journeyTable),
+    warte: serializeTable(warteTable)
+  };
+  localStorage.setItem(storageKey, JSON.stringify(state));
+}
+
+/* ===== Tabs ===== */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+    tab.setAttribute('aria-selected','true');
+    document.querySelectorAll('.board').forEach(b=>b.classList.remove('active'));
+    document.querySelector(tab.dataset.target).classList.add('active');
+    saveState();
+  });
+});
+
+/* ===== Controls ===== */
+function gridShape(activeTable){
+  const cells = activeTable.querySelectorAll('.cell');
+  const cols = Array.from(cells).filter(c=>c.dataset.rc.startsWith('0:')).length;
+  const rows = Array.from(cells).filter(c=>c.dataset.rc.endsWith(':0')).length;
+  return {rows, cols};
+}
+function addColumn(activeTable){
+  const {rows, cols} = gridShape(activeTable);
+  const snapshot = serializeTable(activeTable);
+  buildTable(activeTable, rows, cols+1, {topLeft:'',cols:[],rows:[]});
+  restoreTable(activeTable, snapshot);
+  saveState();
+}
+function addRow(activeTable){
+  const {rows, cols} = gridShape(activeTable);
+  const snapshot = serializeTable(activeTable);
+  buildTable(activeTable, rows+1, cols, {topLeft:'',cols:[],rows:[]});
+  restoreTable(activeTable, snapshot);
+  saveState();
+}
+function activeTableEl(){
+  return document.querySelector('.board.active .table');
+}
+$('#addCol').addEventListener('click', ()=> addColumn(activeTableEl()));
+$('#addRow').addEventListener('click', ()=> addRow(activeTableEl()));
+$('#reset').addEventListener('click', ()=>{
+  if(!confirm('Wirklich alle Post-its und Header dieses Boards löschen?')) return;
+  const isStory = document.querySelector('#story').classList.contains('active');
+  const isJourney = document.querySelector('#journey').classList.contains('active');
+  if(isStory){
+    buildTable(storyTable, defaults.story.rows, defaults.story.cols, defaults.story.preset);
+  } else if(isJourney){
+    buildTable(journeyTable, defaults.journey.rows, defaults.journey.cols, defaults.journey.preset);
+  } else {
+    buildTable(warteTable, defaults.warte.rows, defaults.warte.cols, defaults.warte.preset);
+  }
+  saveState();
+});
+
+/* ===== Keyboard: Save & Transfer (Ctrl+Alt+Shift+M) ===== */
+window.addEventListener('keydown', (e)=>{
+  const key = e.key.toLowerCase();
+  if((e.ctrlKey||e.metaKey) && key==='s'){ e.preventDefault(); saveState(); }
+  if(e.ctrlKey && e.altKey && e.shiftKey && key==='m'){
+    e.preventDefault();
+    if(!lastSelectedSticky){ alert('Bitte zuerst ein Sticky in der Story Map auswählen.'); return; }
+    const inStory = lastSelectedSticky.closest('#story') !== null;
+    if(!inStory){ alert('Das ausgewählte Sticky ist nicht in der Story Map.'); return; }
+    const text = lastSelectedSticky.querySelector('.text').innerText || 'Zu klären';
+    const targetCell = warteTable.querySelector(`.cell[data-rc="1:1"]`);
+    if(!targetCell){ alert('Wartebereich nicht gefunden.'); return; }
+    const clone = makeSticky(text, 'new', 10);
+    targetCell.appendChild(clone);
+    saveState();
+    document.querySelector('.tab[data-target="#warte"]').click();
+  }
+});
+
+/* ===== CSV Export (mit Platzhaltern für leere Zellen) ===== */
+function tableToRows(name, tableEl){
+  const state = serializeTable(tableEl);
+  const rows = [];
+  const colHeads = state.headers.cols;
+  const rowHeads = state.headers.rows;
+  // vollständige Matrix abbilden
+  for(let r=1; r<=rowHeads.length; r++){
+    for(let c=1; c<=colHeads.length; c++){
+      const cell = state.cells.find(x=>x.rc===`${r}:${c}`);
+      const has = cell && cell.stickies && cell.stickies.length;
+      if(has){
+        cell.stickies.forEach(s=>{
+          rows.push({Board:name, Row:rowHeads[r-1]||'', Column:colHeads[c-1]||'', Label:LABEL[s.color]||s.color, Text:s.text});
+        });
+      }else{
+        rows.push({Board:name, Row:rowHeads[r-1]||'', Column:colHeads[c-1]||'', Label:'', Text:''});
+      }
+    }
+  }
+  return rows;
+}
+function toCSV(rows){
+  const headers = ['Board','Row','Column','Label','Text'];
+  const esc = v => `"${String(v??'').replace(/"/g,'""')}"`;
+  return [headers.join(','), ...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\n');
+}
+$('#exportCSV').addEventListener('click', ()=>{
+  const rows = [
+    ...tableToRows('Story Map', storyTable),
+    ...tableToRows('Content Journey', journeyTable),
+    ...tableToRows('Wartebereich', warteTable)
+  ];
+  const csv = toCSV(rows);
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'workshop-map.csv';
+  a.click();
+});
+
+/* ===== PNG Export (Header + Legende + aktives Board) ===== */
+function exportActiveBoardPNG(){
+  const activeBoard = document.querySelector('.board.active');
+  const header = document.querySelector('header');
+  const container = document.createElement('div');
+  container.style.width = Math.max(header.scrollWidth, activeBoard.scrollWidth)+'px';
+  container.style.background = getComputedStyle(document.documentElement).getPropertyValue('--bg');
+
+  // clone header (title, legend, toolbar)
+  const headerClone = header.cloneNode(true);
+  // minimize sticky position issues
+  const boardClone = activeBoard.cloneNode(true);
+
+  container.appendChild(headerClone);
+  container.appendChild(boardClone);
+
+  const style = document.querySelector('style').outerHTML;
+
+  const html = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${container.scrollWidth||document.body.scrollWidth}" height="${header.scrollHeight + activeBoard.scrollHeight + 40}">
+    <foreignObject x="0" y="0" width="100%" height="100%">
+      <div xmlns="http://www.w3.org/1999/xhtml" style="font-family:system-ui; width:100%; background:${getComputedStyle(document.documentElement).getPropertyValue('--bg')};">
+        ${style}
+        ${container.outerHTML}
+      </div>
+    </foreignObject>
+  </svg>`;
+
+  const svgBlob = new Blob([html], {type:'image/svg+xml;charset=utf-8'});
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+  img.onload = ()=>{
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width; canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img,0,0);
+    canvas.toBlob(blob=>{
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'workshop-board.png';
+      a.click();
+      URL.revokeObjectURL(url);
+    }, 'image/png');
+  };
+  img.onerror = ()=>{ alert('PNG-Export evtl. vom Browser blockiert. Bitte in Desktop-Chrome/Edge/Firefox öffnen.'); URL.revokeObjectURL(url); };
+  img.src = url;
+}
+$('#exportPNG').addEventListener('click', exportActiveBoardPNG);
+
+/* ===== Autosave on unload ===== */
+window.addEventListener('beforeunload', saveState);
+</script>
+</body>
+</html>

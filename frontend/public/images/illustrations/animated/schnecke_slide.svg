@@ -1,0 +1,83 @@
+<svg viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes slide {
+      0% { transform: translateX(0px); }
+      100% { transform: translateX(10px); }
+    }
+    @keyframes antennaMove {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-2px) rotate(2deg); }
+    }
+    @keyframes trail {
+      0% { opacity: 0.3; }
+      50% { opacity: 0.1; }
+      100% { opacity: 0.3; }
+    }
+    .snail-body {
+      animation: slide 3s ease-in-out infinite;
+    }
+    .snail-antenna-left {
+      animation: antennaMove 2s ease-in-out infinite;
+      transform-origin: 50% 100%;
+    }
+    .snail-antenna-right {
+      animation: antennaMove 2s ease-in-out infinite;
+      animation-delay: 0.3s;
+      transform-origin: 50% 100%;
+    }
+    .slime-trail {
+      animation: trail 1.5s ease-in-out infinite;
+    }
+  </style>
+  
+  <!-- Slime trail -->
+  <g class="slime-trail">
+    <ellipse cx="50" cy="170" rx="25" ry="8" fill="var(--bioco-green, #2e7d32)" fill-opacity="0.2"/>
+    <ellipse cx="80" cy="172" rx="20" ry="6" fill="var(--bioco-green, #2e7d32)" fill-opacity="0.15"/>
+    <ellipse cx="110" cy="174" rx="15" ry="5" fill="var(--bioco-green, #2e7d32)" fill-opacity="0.1"/>
+  </g>
+  
+  <g class="snail-body">
+    <!-- Shell (spiral) -->
+    <path d="M150 120 Q160 110 170 120 Q180 130 170 140 Q160 150 150 140 Q140 130 150 120" 
+          fill="var(--bioco-beet, #8b0000)" fill-rule="evenodd"/>
+    <path d="M155 125 Q160 120 165 125 Q170 130 165 135 Q160 140 155 135 Q150 130 155 125" 
+          fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+    <circle cx="160" cy="130" r="8" fill="var(--bioco-green, #2e7d32)"/>
+    <path d="M150 120 Q155 115 160 120 Q165 125 160 130 Q155 135 150 130 Q145 125 150 120" 
+          stroke="var(--bioco-beet, #8b0000)" stroke-width="1.5" fill="none"/>
+    
+    <!-- Body (orange/green) -->
+    <ellipse cx="130" cy="150" rx="35" ry="20" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+    <ellipse cx="125" cy="148" rx="25" ry="15" fill="var(--bioco-green, #2e7d32)" fill-opacity="0.6" fill-rule="evenodd"/>
+    
+    <!-- Body pattern -->
+    <ellipse cx="120" cy="145" rx="8" ry="5" fill="var(--bioco-beet, #8b0000)" fill-opacity="0.4"/>
+    <ellipse cx="130" cy="150" rx="6" ry="4" fill="var(--bioco-beet, #8b0000)" fill-opacity="0.4"/>
+    <ellipse cx="125" cy="155" rx="7" ry="4" fill="var(--bioco-beet, #8b0000)" fill-opacity="0.4"/>
+    
+    <!-- Antennae -->
+    <g class="snail-antenna-left">
+      <path d="M115 140 Q110 130 108 120" stroke="var(--bioco-green, #2e7d32)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="108" cy="120" r="3" fill="var(--bioco-beet, #8b0000)"/>
+    </g>
+    
+    <g class="snail-antenna-right">
+      <path d="M125 138 Q120 128 118 118" stroke="var(--bioco-green, #2e7d32)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <circle cx="118" cy="118" r="3" fill="var(--bioco-beet, #8b0000)"/>
+    </g>
+    
+    <!-- Eye spots -->
+    <circle cx="118" cy="142" r="2" fill="var(--bioco-beet, #8b0000)"/>
+    <circle cx="128" cy="147" r="2" fill="var(--bioco-beet, #8b0000)"/>
+  </g>
+</svg>
+
+
+
+
+
+
+
+
+

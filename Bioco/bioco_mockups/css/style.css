@@ -1,0 +1,462 @@
+/* --- DESIGN TOKENS UND GRUNDEINSTELLUNGEN --- */
+:root {
+  /* Logo-Farben */
+  --color-bioco-gruen: #39A935;
+  --color-karotte: #F29100;
+  --color-rande: #86203D;
+  --color-weiss: #FFFFFF;
+  --color-ink: #1B1B1B;
+
+  /* Abgeleitete Töne */
+  --color-gruen-light: #7EC77C;
+  --color-gruen-dark: #2B7F28;
+  --color-karotte-light: #F7BD66;
+  --color-karotte-dark: #C27400;
+  --color-rande-light: #B06E81;
+  --color-rande-dark: #64182E;
+  --color-stein: #E7EAE5;
+  --color-paper-off-white: #FFFEFB;
+
+  /* Typografie */
+  --font-family-base: system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Arial, sans-serif;
+  --h1-size: 44px;
+  --h1-line-height: 52px;
+  --h2-size: 32px;
+  --h2-line-height: 40px;
+  --body-size: 18px;
+  --body-line-height: 28px;
+  --small-size: 14px;
+  --small-line-height: 20px;
+
+  /* Raster & Abstände (8pt Grid) */
+  --spacing-8: 8px;
+  --spacing-16: 16px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-48: 48px;
+  --spacing-64: 64px;
+  --spacing-80: 80px;
+
+  /* Komponenten */
+  --border-radius: 12px;
+  --border-radius-card: 14px;
+  --border-width: 1px;
+  --focus-outline-width: 2px;
+}
+
+/* --- GLOBALE STYLES --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family-base);
+  font-size: var(--body-size);
+  line-height: var(--body-line-height);
+  color: var(--color-ink);
+  background-color: var(--color-weiss);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 var(--spacing-24);
+}
+
+section {
+  padding: var(--spacing-80) 0;
+}
+
+/* --- TYPOGRAFIE --- */
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 var(--spacing-24) 0;
+  font-weight: 700;
+  line-height: 1.2;
+}
+h1 { font-size: var(--h1-size); line-height: var(--h1-line-height); }
+h2 { font-size: var(--h2-size); line-height: var(--h2-line-height); }
+h3 { font-size: calc(var(--body-size) * 1.5); }
+p { margin: 0 0 var(--spacing-16) 0; max-width: 75ch; }
+a { color: var(--color-bioco-gruen); text-decoration: none; }
+a:hover { text-decoration: underline; }
+small { font-size: var(--small-size); line-height: var(--small-line-height); }
+ul { padding-left: var(--spacing-24); }
+
+/* --- HEADER & FOOTER (Gemeinsam) --- */
+.site-header {
+  padding: var(--spacing-24) 0;
+  border-bottom: var(--border-width) solid var(--color-stein);
+}
+.site-header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  font-weight: 800;
+  font-size: 24px;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+.logo span { color: var(--color-bioco-gruen); }
+.main-nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  gap: var(--spacing-32);
+}
+.main-nav a {
+  font-weight: 600;
+  font-size: 16px;
+}
+.site-footer {
+  background-color: var(--color-ink);
+  color: var(--color-weiss);
+  padding: var(--spacing-48) 0;
+  margin-top: var(--spacing-80);
+}
+.site-footer a { color: var(--color-gruen-light); }
+.site-footer .container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-40);
+}
+
+/* --- KOMPONENTEN --- */
+.btn {
+  display: inline-block;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 16px;
+  border-radius: var(--border-radius);
+  border: var(--focus-outline-width) solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn:hover {
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.btn:focus-visible {
+  outline: var(--focus-outline-width) solid var(--color-gruen-light);
+  outline-offset: 2px;
+}
+.btn-primary {
+  background-color: var(--color-bioco-gruen);
+  color: var(--color-weiss);
+}
+.btn-secondary {
+  background-color: var(--color-karotte);
+  color: var(--color-weiss);
+}
+.btn-outlined {
+    background-color: transparent;
+    color: var(--color-ink);
+    border: var(--focus-outline-width) solid var(--color-ink);
+}
+.card {
+  border: var(--border-width) solid var(--color-stein);
+  border-radius: var(--border-radius-card);
+  padding: var(--spacing-32);
+  background-color: var(--color-weiss);
+}
+
+/* --- GRID HELPER --- */
+.grid { display: grid; gap: var(--spacing-32); }
+.grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-cols-12 { grid-template-columns: repeat(12, 1fr); }
+.col-span-2 { grid-column: span 2; }
+.col-span-3 { grid-column: span 3; }
+.col-span-4 { grid-column: span 4; }
+.col-span-6 { grid-column: span 6; }
+.col-span-8 { grid-column: span 8; }
+.items-center { align-items: center; }
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* --- LAYOUT-SPEZIFISCHE STYLES --- */
+
+/* 01: Swiss Grid */
+.swiss-hero-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+}
+.faq-item summary {
+  font-weight: 700;
+  cursor: pointer;
+  padding: var(--spacing-16) 0;
+  border-bottom: var(--border-width) solid var(--color-stein);
+}
+.faq-item[open] summary {
+  color: var(--color-bioco-gruen);
+}
+
+/* 02: Bauhaus Plakat */
+.bauhaus-hero {
+  background-color: var(--color-gruen-dark);
+  color: var(--color-weiss);
+  padding: 120px 0;
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+}
+.bauhaus-hero h1 {
+  font-size: 48px;
+  line-height: 56px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-ink);
+  font-weight: 700;
+  background-color: var(--color-karotte);
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  font-size: 16px;
+}
+.quote-card {
+  border: var(--border-width) solid var(--color-stein);
+  padding: var(--spacing-32);
+}
+.quote-card blockquote {
+    margin: 0;
+    font-size: 24px;
+    font-style: italic;
+    border-left: 4px solid var(--color-rande);
+    padding-left: var(--spacing-24);
+}
+
+/* 03: Werkstatt */
+.framed-box {
+  border: var(--border-width) solid var(--color-stein);
+  padding: var(--spacing-32);
+}
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-40);
+  position: relative;
+  padding-left: var(--spacing-40);
+}
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background-color: var(--color-stein);
+}
+.timeline-step {
+  position: relative;
+}
+.timeline-step::before {
+  content: attr(data-step);
+  position: absolute;
+  left: -40px;
+  top: -5px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: var(--color-karotte);
+  color: var(--color-weiss);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  border: 2px solid var(--color-weiss);
+}
+
+/* 04: Editorial Magazin */
+.editorial-container {
+  max-width: 720px; /* 70-75ch */
+}
+.pull-quote {
+  background-color: var(--color-rande);
+  color: var(--color-weiss);
+  padding: var(--spacing-32);
+  border-radius: var(--border-radius);
+  margin: var(--spacing-48) 0;
+  font-size: 24px;
+  line-height: 1.4;
+  font-style: italic;
+}
+.fact-box {
+  border: var(--border-width) solid var(--color-stein);
+  padding: var(--spacing-24);
+  margin: var(--spacing-32) 0;
+  background-color: #f9f9f9;
+}
+
+/* 05: Low Carbon */
+.low-carbon-hero {
+  text-align: center;
+  padding: var(--spacing-80) var(--spacing-24);
+}
+.link-button {
+  color: var(--color-bioco-gruen);
+  text-decoration: underline;
+  font-weight: 700;
+  font-size: var(--body-size);
+}
+.low-carbon-img {
+  border: 1px solid var(--color-stein);
+  margin-top: var(--spacing-40);
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* 06 & 10: Bento Grid */
+.bento-grid {
+  display: grid;
+  gap: var(--spacing-24);
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(100px, auto);
+}
+.bento-tile {
+  border-radius: var(--border-radius-card);
+  padding: var(--spacing-24);
+  background-color: var(--color-weiss);
+  border: var(--border-width) solid var(--color-stein);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.bento-tile img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-16);
+}
+.bento-tile.cta-tile {
+  background-color: var(--color-bioco-gruen);
+  color: var(--color-weiss);
+}
+.bento-tile.cta-tile a { color: var(--color-weiss); }
+.bento-tile.highlight-tile {
+    background-color: var(--color-rande);
+    color: var(--color-weiss);
+}
+
+/* 07: Organic Curves */
+.organic-hero {
+  position: relative;
+  background-color: var(--color-gruen-light);
+  padding: var(--spacing-80) 0;
+  color: var(--color-ink);
+}
+.section-divider {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  pointer-events: none;
+}
+.section-divider svg {
+  width: 100%;
+  height: 100%;
+}
+.wave-content {
+    padding-top: var(--spacing-80);
+    position: relative;
+}
+
+/* 08: Tufte Light */
+.tufte-layout {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--spacing-64);
+}
+.tufte-main { max-width: 70ch; }
+.tufte-sidebar .fact-tile {
+  border-top: 4px solid var(--color-bioco-gruen);
+  padding-top: var(--spacing-16);
+}
+.tufte-sidebar .fact-tile .number {
+  font-size: 48px;
+  font-weight: 700;
+  color: var(--color-bioco-gruen);
+  line-height: 1;
+}
+
+/* 09: Poster Split */
+.split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 70vh;
+  align-items: center;
+}
+.split-text { padding: var(--spacing-64); }
+.split-image {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.split-text h1 {
+    font-size: 48px;
+    line-height: 56px;
+}
+
+/* --- RESPONSIVE ANPASSUNGEN --- */
+@media (max-width: 900px) {
+  .grid-cols-2, .grid-cols-3, .grid-cols-4 {
+    grid-template-columns: 1fr;
+  }
+  .tufte-layout, .split-layout {
+    grid-template-columns: 1fr;
+  }
+  .site-header .container {
+    flex-direction: column;
+    gap: var(--spacing-24);
+  }
+  .main-nav ul {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--spacing-16);
+  }
+  .bento-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .col-span-6 { grid-column: span 2; }
+  .col-span-3 { grid-column: span 1; }
+  .bento-tile {
+      min-height: 200px;
+  }
+}
+
+@media (max-width: 600px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+    }
+    .col-span-6, .col-span-3, .col-span-2 {
+        grid-column: span 1;
+    }
+}
+/* --- Ergänzung für das Logo --- */
+.logo img {
+  max-height: 48px; /* Höhe des Logos anpassen */
+  width: auto;
+}

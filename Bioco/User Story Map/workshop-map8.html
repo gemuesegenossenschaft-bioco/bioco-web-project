@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>User Story & Journey Maps – Workshop</title>
+<style>
+  :root{
+    --bg:#fafaf7; --ink:#1f2937; --muted:#6b7280; --line:#e5e7eb; --brand:#0ea5e9;
+    --must:#b7f0b1;   --should:#fff3b0; --could:#ffd1a8; --wont:#ffc0da; --new:#d1d5db;
+    --row-activity:#eaf7ff; /* hellblau */
+    --row-task:#f5eaff;     /* helllila */
+    --gutter:8px;
+    --sticky-shadow:0 8px 20px rgba(0,0,0,.06);
+    --radius:14px;
+  }
+  html,body{height:100%;margin:0}
+  body{background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+  header{position:sticky;top:0;z-index:20;backdrop-filter:saturate(1.2) blur(8px);background:rgba(250,250,247,.92);border-bottom:1px solid var(--line)}
+  .wrap{width:100%;padding:14px 18px}
+  h1{font-size:20px;margin:0 0 6px}
+  .sub{color:var(--muted);font-size:13px}
+  .tabs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .tab{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;cursor:pointer}
+  .tab[aria-selected="true"]{background:var(--brand);color:#fff;border-color:var(--brand)}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .btn{appearance:none;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 12px;border-radius:10px;cursor:pointer;box-shadow:var(--sticky-shadow)}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:10px}
+  .sw{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.08);display:inline-block;margin-right:6px}
+
+  .board{display:none;padding:12px}
+  .board.active{display:block}
+
+  /* ===== Story Map Container mit schwebender Rollenleiste ===== */
+  .grid{position:relative;margin:18px auto;width:100%;background:#fff;border:1px solid var(--line);border-radius:18px;overflow:auto;box-shadow:var(--sticky-shadow)}
+  .roles-wrap{position:sticky;top:0;z-index:5;background:linear-gradient(#fff,#fff);border-bottom:2px solid var(--line)}
+  .roles{display:grid;column-gap:var(--gutter)}
+  .roles .cell{background:#f8fafc;min-height:64px;padding:10px;position:relative;border-top:none;border-right:0}
+  .roles .head{font-weight:600}
+  .roles .resizer{
+    position:absolute;top:0;right:-4px;width:8px;height:100%;cursor:col-resize;background:transparent;
+  }
+  .roles .resizer:hover{background:rgba(14,165,233,.12)}
+  .resizing .roles .resizer{background:rgba(14,165,233,.18)}
+
+  /* Story-Grid darunter */
+  .table{display:grid;column-gap:var(--gutter);row-gap:1px;background:#fff}
+  .cell{background:#fff;min-height:140px;padding:10px;position:relative;border-top:1px solid var(--line)}
+  .rowhead{background:#f8fafc;font-weight:600;white-space:nowrap;border-top:none}
+
+  /* Reihenfärbung (nur Inhaltsspalten, nicht die linke Kopfspalte) */
+  .cell[data-row-type="activity"]:not([data-rc$=":0"]){background:var(--row-activity)}
+  .cell[data-row-type="task"]:not([data-rc$=":0"]){background:var(--row-task)}
+  /* Stories bleiben weiß */
+
+  /* Stickies */
+  .sticky{position:relative;display:inline-block;min-width:120px;max-width:260px;padding:10px 12px 28px;margin:6px;border-radius:var(--radius);
+    box-shadow:var(--sticky-shadow);cursor:grab;user-select:none;border:1px solid rgba(0,0,0,.06);transform:rotate(var(--rot,-1deg))}
+  .sticky .text{outline:none}
+  .bar{position:absolute;right:8px;bottom:6px;display:flex;gap:6px}
+  .dot{width:16px;height:16px;border-radius:50%;border:1px solid rgba(0,0,0,.15);cursor:pointer}
+  .del{border:none;background:transparent;cursor:pointer;color:#ef4444;font-size:16px}
+  .must{background:var(--must)} .should{background:var(--should)} .could{background:var(--could)} .wont{background:var(--wont)} .new{background:var(--new)}
+
+  /* Journey */
+  .role-legend{padding:10px 18px;color:#374151;font-size:14px;border-bottom:1px dashed var(--line)}
+  .role-legend b{background:#eef2ff;border:1px solid #c7d2fe;border-radius:8px;padding:2px 8px;margin-right:6px}
+  .journey .table{display:grid;column-gap:var(--gutter);row-gap:1px}
+
+  /* Print */
+  @media print{
+    @page{size:A3 landscape;margin:12mm}
+    header{position:static;background:#fff;border:none}
+    .toolbar,.tabs .tab[aria-selected="false"]{display:none!important}
+    .wrap{padding:0}
+    .grid{box-shadow:none;border:1px solid #bbb}
+    .sticky{box-shadow:none;border:1px solid rgba(0,0,0,.2)}
+    .board{display:block!important;break-after:page}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>User Story & Journey Maps – Workshop</h1>
+    <div class="sub">Rollen in eigener Leiste oben (sticky), darunter Map mit Zeilen: <b>User Activity</b> (hellblau), <b>User Task</b> (helllila), <b>Stories</b> (weiß). Spalten der Map sind per Drag veränderbar.</div>
+    <div class="tabs">
+      <button class="tab" aria-selected="true" data-target="#story">User Story Map</button>
+      <button class="tab" aria-selected="false" data-target="#journey">Customer Journey Map</button>
+    </div>
+    <div class="toolbar">
+      <button id="addCol" class="btn">+ Rolle</button>
+      <button id="addRow" class="btn">+ Story-Zeile</button>
+      <button id="reset" class="btn">Board leeren</button>
+      <button id="exportCSV" class="btn">Export CSV</button>
+      <label class="btn" style="cursor:pointer">Import CSV<input id="importCSV" type="file" accept=".csv,text/csv" style="display:none"></label>
+      <button id="printPDF" class="btn">Drucken / PDF</button>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--must)"></i>Must (Muss)</span>
+      <span><i class="sw" style="background:var(--should)"></i>Should (Soll)</span>
+      <span><i class="sw" style="background:var(--could)"></i>Could (Kann)</span>
+      <span><i class="sw" style="background:var(--wont)"></i>Won’t have (Nicht jetzt)</span>
+      <span><i class="sw" style="background:var(--new)"></i>New (Klärung)</span>
+    </div>
+  </div>
+</header>
+
+<!-- STORY MAP -->
+<section id="story" class="board active" aria-label="User Story Map">
+  <div class="grid" id="storyGrid">
+    <!-- Sticky Rollenleiste -->
+    <div class="roles-wrap">
+      <div id="rolesTable" class="roles" role="grid"></div>
+    </div>
+    <!-- Map darunter -->
+    <div id="storyTable" class="table" role="grid"></div>
+  </div>
+  <p class="wrap hint">Doppelklick in eine Zelle → neues Post-it. Spaltenbreiten mit Griff in der Rollenleiste anpassen.</p>
+</section>
+
+<!-- JOURNEY MAP -->
+<section id="journey" class="board journey" aria-label="Customer Journey Map">
+  <div class="role-legend">Rollen: <b>Rolle A</b><b>Rolle B</b><b>Rolle C</b></div>
+  <div class="grid">
+    <div id="journeyTable" class="table" role="grid"></div>
+  </div>
+  <p class="wrap hint">Journey: Spalten = Schritte, Zeilen = Personas/Zielgruppen. Rollen werden hier nur oben angezeigt.</p>
+</section>
+
+<div class="footer">Speichert lokal (localStorage) · CSV Import/Export · PDF-Druck · Keine externen Libraries</div>
+
+<script>
+/* ===== Utils & State ===== */
+const $ = s => document.querySelector(s);
+const uuid = () => Math.random().toString(36).slice(2);
+const storageKey = 'bioco-map-v8';
+
+const LABEL = { must:'Must (Muss)', should:'Should (Soll)', could:'Could (Kann)', wont:"Won’t have (Nicht jetzt)", new:'New (Klärung)' };
+
+function save(){
+  const state = {
+    activeTab: document.querySelector('.tab[aria-selected="true"]').dataset.target,
+    roles: serializeHeaders($('#rolesTable')),
+    story: serializeTable($('#storyTable')),
+    journey: serializeTable($('#journeyTable')),
+    colWidths: getColumnWidths($('#storyTable'))
+  };
+  localStorage.setItem(storageKey, JSON.stringify(state));
+}
+function load(){ const raw=localStorage.getItem(storageKey); return raw?JSON.parse(raw):null; }
+
+/* ===== Stickies ===== */
+function makeSticky(text='Neue Notiz', color='must', rotation=2){
+  const s=document.createElement('div');
+  s.className=`sticky ${color}`; s.draggable=true; s.dataset.id=uuid();
+  s.style.setProperty('--rot',(Math.random()*rotation*2-rotation).toFixed(2)+'deg');
+  const t=document.createElement('div'); t.className='text'; t.contentEditable='true'; t.textContent=text;
+
+  const bar=document.createElement('div'); bar.className='bar';
+  ['must','should','could','wont','new'].forEach(c=>{
+    const d=document.createElement('button'); d.className='dot'; d.title=LABEL[c];
+    d.style.background=getComputedStyle(document.documentElement).getPropertyValue(`--${c}`);
+    d.onclick=e=>{e.stopPropagation(); s.className=`sticky ${c}`; save();};
+    bar.appendChild(d);
+  });
+  const del=document.createElement('button'); del.className='del'; del.title='Löschen'; del.innerHTML='&times;';
+  del.onclick=()=>{ s.remove(); save(); };
+  bar.appendChild(del);
+
+  s.appendChild(t); s.appendChild(bar);
+  s.ondragstart=e=>{ e.dataTransfer.setData('text/plain', s.dataset.id); };
+  t.oninput=save;
+  return s;
+}
+
+/* ===== Build roles header & map with synced, resizable columns ===== */
+function setGridTemplate(el, widths){ el.style.gridTemplateColumns = widths.join(' '); }
+function getColumnWidths(el){ return getComputedStyle(el).gridTemplateColumns.split(' ').map(s=>s.trim()); }
+
+function buildRoles(el, roles, widths){
+  const cols = [220, ...Array(roles.length).fill(280)];
+  const w = widths?.length === roles.length+1 ? widths : cols.map(v=>`${v}px`);
+  setGridTemplate(el, w);
+  el.innerHTML='';
+
+  // erste (linke) „Label“-Zelle (kein Resizer)
+  const head = document.createElement('div'); head.className='cell head'; head.textContent='Rollen';
+  el.appendChild(head);
+
+  roles.forEach((name, idx)=>{
+    const c = document.createElement('div');
+    c.className='cell head'; c.contentEditable='true'; c.dataset.colidx = idx+1;
+    c.textContent = name || `Rolle ${idx+1}`;
+    c.oninput = ()=>{ save(); };
+
+    const res=document.createElement('div'); res.className='resizer'; res.title='Spaltenbreite ziehen';
+    let startX=0,startW=0,colIndex=idx+1;
+    res.onmousedown = (e)=>{
+      document.body.classList.add('resizing');
+      startX=e.clientX;
+      const current=getColumnWidths($('#storyTable'));
+      startW=parseInt(current[colIndex])||280;
+      const move=(ev)=>{
+        const dx=ev.clientX-startX; const newW=Math.max(160, startW+dx);
+        current[colIndex]=`${newW}px`;
+        setGridTemplate($('#storyTable'), current);
+        setGridTemplate($('#rolesTable'), current);
+      };
+      const up=()=>{ document.removeEventListener('mousemove',move); document.removeEventListener('mouseup',up); document.body.classList.remove('resizing'); save(); };
+      document.addEventListener('mousemove',move); document.addEventListener('mouseup',up);
+    };
+    c.appendChild(res);
+    el.appendChild(c);
+  });
+}
+
+function buildStory(el, rows, rolesCount, widths){
+  const cols = [220, ...Array(rolesCount).fill(280)];
+  const w = widths?.length === rolesCount+1 ? widths : cols.map(v=>`${v}px`);
+  setGridTemplate(el, w);
+  el.innerHTML='';
+
+  for(let r=0;r<rows.length;r++){
+    for(let c=0;c<=rolesCount;c++){
+      const cell=document.createElement('div');
+      cell.className='cell'; cell.dataset.rc=`${r}:${c}`;
+      if(c===0){
+        cell.classList.add('rowhead'); cell.contentEditable='true';
+        cell.textContent = rows[r];
+        cell.oninput=save;
+      }else{
+        // Zeilen-Typ (für Färbung)
+        if(r===0) cell.dataset.rowType='activity';
+        if(r===1) cell.dataset.rowType='task';
+        // r>=2: stories (weiß)
+        cell.ondblclick=()=>{ cell.appendChild(makeSticky()); save(); };
+        cell.ondragover=e=>{ e.preventDefault(); cell.style.outline='2px dashed #94a3b8'; };
+        cell.ondragleave=()=>{ cell.style.outline='none'; };
+        cell.ondrop=e=>{ e.preventDefault(); cell.style.outline='none'; const id=e.dataTransfer.getData('text/plain'); const st=document.querySelector(`.sticky[data-id="${id}"]`); if(st) cell.appendChild(st); save(); };
+      }
+      el.appendChild(cell);
+    }
+  }
+}
+
+/* ===== Serialize / Restore ===== */
+function serializeHeaders(el){
+  const headers = []; const cells = el.querySelectorAll('.cell.head');
+  // skip first (label)
+  for(let i=1;i<cells.length;i++) headers.push(cells[i].textContent.trim());
+  return { roles: headers, cols: getColumnWidths($('#storyTable')) };
+}
+function serializeTable(el){
+  const out={ cols:getColumnWidths(el).join(' '), cells:[] , headers:{rows:[],cols:[]} };
+  const cells=el.querySelectorAll('.cell');
+  cells.forEach(cell=>{
+    const data={ rc:cell.dataset.rc, html:cell.isContentEditable?cell.innerHTML:null, stickies:[] };
+    cell.querySelectorAll('.sticky').forEach(st=>{
+      const color=['must','should','could','wont','new'].find(c=>st.classList.contains(c))||'must';
+      data.stickies.push({text:st.querySelector('.text').innerText.replace(/\s+/g,' ').trim(), color});
+    });
+    out.cells.push(data);
+  });
+  // row headers
+  const rowheads = Array.from(el.querySelectorAll('.rowhead')).map(n=>n.textContent.trim());
+  out.headers.rows = rowheads;
+  return out;
+}
+function restoreStory(el,state){
+  if(!state) return;
+  setGridTemplate(el, state.cols.split(' '));
+  el.querySelectorAll('.cell').forEach(cell=>{
+    const s=state.cells.find(x=>x.rc===cell.dataset.rc); if(!s) return;
+    if(cell.classList.contains('rowhead')){ cell.innerHTML=s.html || cell.innerHTML; }
+    else{
+      s.stickies?.forEach(st=> cell.appendChild(makeSticky(st.text, st.color)));
+    }
+  });
+}
+
+/* ===== Defaults ===== */
+const defaults = {
+  roles: ['Rolle A','Rolle B','Rolle C'],
+  storyRows: ['User Activity','User Task','Stories (1)','Stories (2)'],
+  journey:{ rows: 6, cols: 6, preset: {
+    topLeft:'Persona / Schritt',
+    cols:['Entdecken','Verstehen','Entscheiden','Teilnehmen','Mitmachen','Bleiben'],
+    rows:[null,'Interessierte Person','Neumitglied','Mitglied (aktiv)','Partner*in','Spender*in']
+  }}
+};
+
+/* ===== Build & Restore ===== */
+const rolesTable = $('#rolesTable');
+const storyTable = $('#storyTable');
+const journeyTable = $('#journeyTable');
+
+function init(){
+  const st = load();
+  const startWidths = st?.colWidths || ['220px','280px','280px','280px'];
+
+  buildRoles(rolesTable, st?.roles?.roles || defaults.roles, startWidths);
+  buildStory(storyTable, st?.story?.headers?.rows || defaults.storyRows, (st?.roles?.roles || defaults.roles).length, startWidths);
+
+  // Journey (einfaches Raster wie zuvor)
+  buildJourney(journeyTable, defaults.journey, st?.journey);
+
+  // Restore map data
+  if(st?.story) restoreStory(storyTable, st.story);
+  if(st?.journey) restoreStory(journeyTable, st.journey); // gleiche Struktur-Funktion
+
+  // Sync scroll (falls nötig: beide im gleichen Container -> automatisch)
+}
+init();
+
+/* Journey builder (einfach) */
+function buildJourney(el, def, saved){
+  const cols = [220, ...Array(def.preset.cols.length).fill(280)];
+  setGridTemplate(el, cols.map(v=>`${v}px`));
+  el.innerHTML='';
+  const rows = def.preset.rows;
+  const colsNames = def.preset.cols;
+
+  for(let r=0;r<rows.length;r++){
+    for(let c=0;c<=colsNames.length;c++){
+      const cell=document.createElement('div'); cell.className='cell'; cell.dataset.rc=`${r}:${c}`;
+      if(c===0){
+        cell.classList.add('rowhead');
+        cell.textContent = rows[r] || '';
+        cell.contentEditable = r===0 ? false : true; // Kopf oben leer
+        cell.oninput = save;
+      }else if(r===0){
+        cell.classList.add('head'); cell.textContent = colsNames[c-1];
+        // hier keine Resizer (Anforderung betrifft Story-Map)
+      }else{
+        cell.ondblclick=()=>{ cell.appendChild(makeSticky()); save(); };
+        cell.ondragover=e=>{ e.preventDefault(); cell.style.outline='2px dashed #94a3b8'; };
+        cell.ondragleave=()=>{ cell.style.outline='none'; };
+        cell.ondrop=e=>{ e.preventDefault(); cell.style.outline='none'; const id=e.dataTransfer.getData('text/plain'); const st=document.querySelector(`.sticky[data-id="${id}"]`); if(st) cell.appendChild(st); save(); };
+      }
+      el.appendChild(cell);
+    }
+  }
+  if(saved) restoreStory(el, saved);
+}
+
+/* ===== Controls ===== */
+function addRole(){
+  const currentRoles = Array.from(rolesTable.querySelectorAll('.cell.head')).slice(1).map(n=>n.textContent.trim());
+  currentRoles.push(`Rolle ${currentRoles.length+1}`);
+  const widths = getColumnWidths(storyTable); widths.push('280px');
+  buildRoles(rolesTable, currentRoles, widths);
+  buildStory(storyTable, Array.from(storyTable.querySelectorAll('.rowhead')).map(n=>n.textContent.trim()), currentRoles.length, widths);
+  save();
+}
+function addStoryRow(){
+  const rows = Array.from(storyTable.querySelectorAll('.rowhead')).map(n=>n.textContent.trim());
+  rows.push(`Stories (${rows.filter(r=>r.toLowerCase().includes('stories')).length+1})`);
+  const widths = getColumnWidths(storyTable);
+  buildStory(storyTable, rows, rolesTable.querySelectorAll('.cell.head').length-1, widths);
+  save();
+}
+
+$('#addCol').onclick=addRole;
+$('#addRow').onclick=addStoryRow;
+$('#reset').onclick=()=>{
+  if(!confirm('Wirklich alles in der aktiven Map leeren?')) return;
+  const isStory = $('#story').classList.contains('active');
+  if(isStory){
+    const widths = ['220px','280px','280px','280px'];
+    buildRoles(rolesTable, defaults.roles, widths);
+    buildStory(storyTable, defaults.storyRows, defaults.roles.length, widths);
+  }else{
+    buildJourney(journeyTable, defaults.journey);
+  }
+  save();
+};
+
+/* Tabs */
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.onclick=()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected','false'));
+    tab.setAttribute('aria-selected','true');
+    document.querySelectorAll('.board').forEach(b=>b.classList.remove('active'));
+    document.querySelector(tab.dataset.target).classList.add('active');
+    save();
+  };
+});
+
+/* ===== CSV Export/Import (nur Inhalte, nicht Rollenbreiten) ===== */
+function tableToRows(name, tableEl){
+  const state=serializeTable(tableEl); const out=[];
+  // Rekonstruiere Spalten-/Zeilenköpfe aus DOM:
+  const rows = Array.from(tableEl.querySelectorAll('.rowhead')).map(n=>n.textContent.trim());
+  const colsCount = getColumnWidths(tableEl).length - 1;
+  const cols = Array.from({length:colsCount}, (_,i)=>`Spalte ${i+1}`);
+
+  for(let r=0;r<rows.length;r++){
+    for(let c=1;c<=colsCount;c++){
+      const cell = tableEl.querySelector(`.cell[data-rc="${r}:${c}"]`);
+      const stickies = cell ? Array.from(cell.querySelectorAll('.sticky')) : [];
+      if(stickies.length){
+        stickies.forEach(st=>{
+          const color=['must','should','could','wont','new'].find(x=>st.classList.contains(x))||'must';
+          out.push({Board:name,Row:rows[r]||'',Column:cols[c-1]||'',Label:LABEL[color]||color,Text:st.querySelector('.text').innerText.trim()});
+        });
+      }else{
+        out.push({Board:name,Row:rows[r]||'',Column:cols[c-1]||'',Label:'',Text:''});
+      }
+    }
+  }
+  return out;
+}
+function toCSV(rows){ const headers=['Board','Row','Column','Label','Text']; const esc=v=>`"${String(v??'').replace(/"/g,'""')}"`; return [headers.join(','),...rows.map(r=>headers.map(h=>esc(r[h])).join(','))].join('\n'); }
+
+$('#exportCSV').onclick=()=>{
+  const rows=[...tableToRows('User Story Map', storyTable), ...tableToRows('Customer Journey Map', journeyTable)];
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([toCSV(rows)],{type:'text/csv'})); a.download='workshop-map.csv'; a.click();
+};
+
+$('#importCSV').addEventListener('change', async e=>{
+  const f=e.target.files?.[0]; if(!f) return; const txt=await f.text();
+  const lines=txt.split(/\r?\n/).filter(Boolean); const [head,...rows]=lines;
+  const idx=head.split(',').map(h=>h.trim().toLowerCase());
+  const iB=idx.indexOf('board'), iR=idx.indexOf('row'), iC=idx.indexOf('column'), iL=idx.indexOf('label'), iT=idx.indexOf('text');
+  if(iB<0||iR<0||iC<0||iL<0||iT<0){ alert('CSV-Header nicht erkannt. Erwartet: Board,Row,Column,Label,Text'); return; }
+
+  function ensureHeaders(tableEl,rowL){
+    // füge nur Reihen hinzu (Spalten nicht aus CSV gesteuert)
+    const rowsNow = Array.from(tableEl.querySelectorAll('.rowhead')).map(n=>n.textContent.trim());
+    if(!rowsNow.includes(rowL)){
+      rowsNow.push(rowL);
+      buildStory(storyTable, rowsNow, rolesTable.querySelectorAll('.cell.head').length-1, getColumnWidths(storyTable));
+    }
+  }
+
+  rows.forEach(line=>{
+    const parts=[]; let cur='',inQ=false;
+    for(let i=0;i<line.length;i++){ const ch=line[i];
+      if(ch=='"'){ if(line[i+1]=='"'){cur+='"'; i++;} else {inQ=!inQ;} }
+      else if(ch==',' && !inQ){ parts.push(cur); cur=''; }
+      else { cur+=ch; }
+    }
+    parts.push(cur);
+    const board=(parts[iB]||'').trim().toLowerCase();
+    const rowL=(parts[iR]||'').trim(); const colL=(parts[iC]||'').trim(); // colL wird nicht zum Strukturieren genutzt
+    const label=(parts[iL]||'').trim().toLowerCase(); const textV=(parts[iT]||'').trim();
+
+    const tableEl = board.includes('journey') ? journeyTable : storyTable;
+    if(tableEl===storyTable) ensureHeaders(tableEl,rowL);
+
+    // lege in der ersten passenden Spalte ab (hier simplifiziert → Spalte 1)
+    const target = tableEl.querySelector(`.cell[data-rc="0:1"]`) || tableEl.querySelector('.cell[data-rc="0:1"]');
+    let cls='must';
+    if(label.includes('muss')||label==='must') cls='must';
+    else if(label.includes('soll')||label==='should') cls='should';
+    else if(label.includes('kann')||label==='could') cls='could';
+    else if(label.includes('nicht jetzt')||label.includes("won't")||label.includes("won’t")) cls='wont';
+    else if(label.includes('neu')||label.includes('klär')||label==='new') cls='new';
+    (target||storyTable).appendChild(makeSticky(textV||' ', cls));
+  });
+
+  save(); alert('CSV importiert.');
+  e.target.value='';
+});
+
+/* Print */
+$('#printPDF').onclick=()=>window.print();
+</script>
+</body>
+</html>

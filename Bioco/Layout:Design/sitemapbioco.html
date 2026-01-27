@@ -1,0 +1,381 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BioCo – Sitemap × Rows Matrix (Mobile-First)</title>
+<style>
+  :root{
+    --c-home:#E6F5E6;
+    --c-gemuese:#E6F0FF;
+    --c-konzept:#FFF2E6;      /* So funktioniert's */
+    --c-angebot:#F3E6FF;      /* Das Angebot */
+    --c-mitarbeit:#FFF8CC;    /* Mitarbeit */
+    --c-mitmachen:#FFE6EE;    /* Mitmachen! (CTA) */
+    --c-mitglieder:#E8F8FF;   /* Für Mitglieder */
+    --c-footer:#F6F6F6;       /* Footer Nav */
+    --c-orphans:#F0F0FF;      /* Orphans & External */
+    --grid:#ddd;
+    --mvp:#2e7d32;
+    --phase:#c62828;
+  }
+  body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:24px;color:#222;line-height:1.45}
+  h1{font-size:1.35rem;margin:0 0 10px}
+  .legend{font-size:.92rem;margin:6px 0 16px;color:#444}
+  .badge{display:inline-block;font-size:.7rem;line-height:1;padding:4px 6px;border-radius:999px;color:#fff}
+  .mvp{background:var(--mvp)}
+  .phase{background:var(--phase)}
+
+  table{border-collapse:separate;border-spacing:0;width:100%;table-layout:fixed;border:1px solid var(--grid);background:#fff;border-radius:12px;overflow:hidden}
+  th,td{border-right:1px solid var(--grid);border-bottom:1px solid var(--grid);vertical-align:top;padding:12px 14px}
+  th:last-child,td:last-child{border-right:none}
+  tr:last-child td{border-bottom:none}
+  thead th{position:sticky;top:0;background:#fff;z-index:2}
+  th.row{width:240px;background:#fafafa;position:sticky;left:0;z-index:1;text-align:left}
+  .home{background:var(--c-home)}
+  .gemuese{background:var(--c-gemuese)}
+  .konzept{background:var(--c-konzept)}
+  .angebot{background:var(--c-angebot)}
+  .mitarbeit{background:var(--c-mitarbeit)}
+  .mitmachen{background:var(--c-mitmachen)}
+  .mitglieder{background:var(--c-mitglieder)}
+  .footer{background:var(--c-footer)}
+  .orphans{background:var(--c-orphans)}
+
+  .title{font-weight:600;margin-bottom:6px}
+  .small{font-size:.9rem}
+  .dim{opacity:.9}
+</style>
+</head>
+<body>
+  <h1>BioCo – Colored Sitemap × Rows Matrix (Mobile-First)</h1>
+  <div class="legend">
+    Spalten = Navigation (Hamburger-Menü & Footer), Zeilen = definierte Rows/Abschnitte. 
+    <span class="badge mvp">MVP</span> = Startversion, <span class="badge phase">Phase&nbsp;2</span> = später.
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="row">Rows / Sektionen</th>
+        <th class="home">Start (Homepage)</th>
+        <th class="gemuese">Unser Gemüse</th>
+        <th class="konzept">So funktioniert’s (CSA)</th>
+        <th class="angebot">Das Angebot</th>
+        <th class="mitarbeit">Mitarbeit</th>
+        <th class="mitmachen">Mitmachen!</th>
+        <th class="mitglieder">Für Mitglieder</th>
+        <th class="footer">Footer-Navigation</th>
+        <th class="orphans">Orphans & External</th>
+      </tr>
+    </thead>
+    <tbody>
+
+      <!-- Sticky Header -->
+      <tr>
+        <th class="row">A-01 Sticky Header <span class="badge mvp">MVP</span></th>
+        <td class="home"><div class="title">Logo + ☰</div><div class="small dim">Illustration/Foto: keine – klare, luftige Leiste mit Logo.</div></td>
+        <td class="gemuese">Identisch.</td>
+        <td class="konzept">Identisch.</td>
+        <td class="angebot">Identisch.</td>
+        <td class="mitarbeit">Identisch.</td>
+        <td class="mitmachen">Primärer CTA „Mitmachen!“ sichtbar.</td>
+        <td class="mitglieder">„Für Mitglieder“ Link sichtbar.</td>
+        <td class="footer"></td>
+        <td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Hero -->
+      <tr>
+        <th class="row">A-02 Hero <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Frisches Demeter-Gemüse. Jede Woche …“</div>
+          <div class="small">CTAs: <em>Jetzt Mitglied werden</em> (filled) · <em>Zuerst testen?</em> (outlined).</div>
+          <div class="small dim">Illustration/Foto: authentisches Hof-/Ernte-/Team-Foto im Hintergrund (hell, freundlich).</div>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Product VP -->
+      <tr>
+        <th class="row">A-03 Value Prop – Produkt <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Das ist drin: Saisonal & Demeter.“</div>
+          <div class="small">Horizontales Card-Carousel: „Wöchentlicher Korb“, „Saisonalität“, „Demeter“.</div>
+          <div class="small dim">Illustration/Foto: 1) voller Gemüsekorb, 2) nahes Saison-Gemüse, 3) Demeter-Logo on white.</div>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Community VP -->
+      <tr>
+        <th class="row">A-04 Value Prop – Community <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Mehr als nur Gemüse: Unsere Gemeinschaft.“</div>
+          <div class="small">2-Spalten Icon+Text: Mitarbeit · Transparenz · Gotti-System · Lokalität.</div>
+          <div class="small dim">Illustration/Foto: einfache line-icons (Hand, Lupe, Herz, Standort).</div>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Dual Funnel -->
+      <tr>
+        <th class="row">A-05 Dual-Funnel CTA <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">„Dein Weg zu biocò“</div>
+          <div class="small">Box A: Info-Event · Box B: Probe-Abo (3 Monate).</div>
+          <div class="small dim">Illustration/Foto: zwei schlichte Box-Illustrationen (Kalender/Handschlag).</div>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Farm News -->
+      <tr>
+        <th class="row">A-06 Hofberichte (News) <span class="badge phase">Phase&nbsp;2</span></th>
+        <td class="home">
+          <div class="title">„Aktuell vom Hof“</div>
+          <div class="small">Horizontale Karten (2-3) mit Bild + Teaser.</div>
+          <div class="small dim">Illustration/Foto: echte Feldernte/Team-Momente, Rezept-Closeups.</div>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- HOME: Trust -->
+      <tr>
+        <th class="row">A-07 Trust Bar <span class="badge mvp">MVP</span></th>
+        <td class="home">
+          <div class="title">Partner-Leiste</div>
+          <div class="small">Demeter · Bio Suisse · lokale Partner.</div>
+          <div class="small dim">Illustration/Foto: Logos in einfarbigen Versionen auf hellem Band.</div>
+        </td>
+        <td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- GEMÜSE page -->
+      <tr>
+        <th class="row">B-01 Hero „Unser Gemüse“ <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="gemuese">
+          <div class="title">„Unser Gemüse: Frisch, Lokal, Demeter.“</div>
+          <div class="small dim">Illustration/Foto: ruhiges, klares Hero-Foto eines frischen Korbs.</div>
+        </td>
+        <td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-02 Galerie <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="gemuese">
+          <div class="title">„Einblick in die Ernte“</div>
+          <div class="small">Filter: Alles · Körbe · Auf dem Feld · Portraits.</div>
+          <div class="small dim">Illustration/Foto: authentische, ungestellte Fotos (2-Spalten mobil).</div>
+        </td>
+        <td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-03 Saisonkalender <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="gemuese">
+          <div class="title">„Was wächst wann?“</div>
+          <div class="small">Tabs (Jan–Dez) → Listen: Jetzt/Bald/Lagerware.</div>
+          <div class="small dim">Illustration/Foto: keine – klare Tag-Badges und Listen.</div>
+        </td>
+        <td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-04 Demeter-Qualität <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="gemuese">
+          <div class="title">„Warum Demeter?“</div>
+          <div class="small">Logo + kurzer Erklärungstext; Akkordeon „Was heisst das für uns?“</div>
+          <div class="small dim">Illustration/Foto: Demeter-Logo (sauber, monochrom), evtl. Feldstruktur-Makro.</div>
+        </td>
+        <td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">B-05 CTA <span class="badge mvp">MVP</span></th>
+        <td class="home"></td>
+        <td class="gemuese"><div class="title">„Überzeugt?“</div><div class="small">CTA: Jetzt Abo sichern → Mitmachen!</div></td>
+        <td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- SO FUNKTIONIERT'S -->
+      <tr>
+        <th class="row">C-01 Konzept „So funktioniert’s“ <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td>
+        <td class="konzept">
+          <div class="title">CSA erklärt</div>
+          <div class="small">3-Schritte Grafik: Anmeldung → Bestätigung/Rechnung → Abholen.</div>
+          <div class="small dim">Illustration/Foto: einfache, klare Piktogramme pro Schritt.</div>
+        </td>
+        <td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">C-02 Unsere Depots <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td>
+        <td class="konzept">
+          <div class="title">Map & Liste</div>
+          <div class="small">Interaktive Karte + Adressliste der Depots.</div>
+          <div class="small dim">Illustration/Foto: einfache Kartenkachel; kleine Standort-Pins.</div>
+        </td>
+        <td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">C-03 Info-Veranstaltung <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td>
+        <td class="konzept">
+          <div class="title">Termine & Anmeldung</div>
+          <div class="small">Datums-Liste + kompaktes Anmeldeformular.</div>
+          <div class="small dim">Illustration/Foto: kleines Kalender-Icon; Hof-Foto als kleines Headerbild.</div>
+        </td>
+        <td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- DAS ANGEBOT -->
+      <tr>
+        <th class="row">D-01 Gemüse-Abos <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td>
+        <td class="angebot">
+          <div class="title">Abo-Details</div>
+          <div class="small">Halb/Standard/Doppel – Leistungen, Preise, Zielgruppen.</div>
+          <div class="small dim">Illustration/Foto: drei kleine Kachel-Illustrationen (1-, 2-, 4-Korb-Symbolik).</div>
+        </td>
+        <td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">D-02 Probe-Abo <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td>
+        <td class="angebot">
+          <div class="title">3-Monats Test</div>
+          <div class="small">Kurzbeschreibung, Konditionen, Link zum Mitmachen (vorselektiert).</div>
+          <div class="small dim">Illustration/Foto: lockere Test-Badge/Sticker-Illustration.</div>
+        </td>
+        <td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">D-03 Zusatz-Abos <span class="badge phase">Phase&nbsp;2</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td>
+        <td class="angebot">
+          <div class="title">Eier, Brot, …</div>
+          <div class="small">Partnerangebote mit kurzen Beschreibungen.</div>
+          <div class="small dim">Illustration/Foto: kleine Produkt-Icons (Ei, Brot, Tofu).</div>
+        </td>
+        <td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- MITARBEIT -->
+      <tr>
+        <th class="row">E-01 Mitarbeit (Info) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td>
+        <td class="mitarbeit">
+          <div class="title">Was bedeutet Mitarbeit?</div>
+          <div class="small">Erklärung, Beispiele, Umfang (ca. 4 Halbtage/Jahr).</div>
+          <div class="small dim">Illustration/Foto: ikonische Handschaufel/Handschuhe.</div>
+        </td>
+        <td class="mitmachen"></td><td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- MITMACHEN conversion page -->
+      <tr>
+        <th class="row">F-01 Hero „Mitmachen!“ <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td>
+        <td class="mitmachen"><div class="title">„Werde jetzt Teil von biocò“</div><div class="small dim">Illustration/Foto: freundliche Nahaufnahme Hände+Gemüse.</div></td>
+        <td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-02 Zuerst testen? <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td>
+        <td class="mitmachen">
+          <div class="title">Info-Event & Probe-Abo</div>
+          <div class="small">Zwei Karten: Termine & Anmeldung · Probe-Abo Details.</div>
+          <div class="small dim">Illustration/Foto: Kalender-Icon · kleiner Korb-Pictogramm.</div>
+        </td>
+        <td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-03 Commitment-Check <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td>
+        <td class="mitmachen">
+          <div class="title">Erwartungen</div>
+          <div class="small">Checkliste (Anteile, Beitrag, Jahr, Mitarbeit, Risiko).</div>
+          <div class="small dim">Illustration/Foto: einfache Check-Icons (grün).</div>
+        </td>
+        <td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-04 Anmeldung (Smart Form) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td>
+        <td class="mitmachen">
+          <div class="title">Formular Schritte 1–6</div>
+          <div class="small">Angaben · Abo · Anteilscheine (conditional) · Depot/Zahlung · Mitarbeit (conditional) · Bestätigung + <strong>Sticky Summary</strong>.</div>
+          <div class="small dim">Illustration/Foto: keine – strukturiertes, ruhiges Formular-Layout.</div>
+        </td>
+        <td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-05 Nächstes (3 Schritte) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td>
+        <td class="mitmachen"><div class="title">Bestätigung → Rechnung → Start</div><div class="small dim">Illustration/Foto: 3 Piktos in Linie.</div></td>
+        <td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">F-06 Warteliste (conditional) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td>
+        <td class="mitmachen"><div class="title">Kurzformular</div><div class="small">Vorname · Name · E-Mail · Wunsch-Abo.</div><div class="small dim">Illustration/Foto: none – Fokus auf Formular.</div></td>
+        <td class="mitglieder"></td><td class="footer"></td><td class="orphans"></td>
+      </tr>
+
+      <!-- FÜR MITGLIEDER -->
+      <tr>
+        <th class="row">G-01 Gateway Hero <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td>
+        <td class="mitglieder"><div class="title">„Mitgliederbereich“</div><div class="small dim">Illustration/Foto: dezente Illustration von Ordner/Link-Kacheln.</div></td>
+        <td class="footer"></td>
+        <td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">G-02 Externe Tools (Logins) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td>
+        <td class="mitglieder">
+          <div class="title">Mitglieder-Portal · Mitarbeit-Planung</div>
+          <div class="small">Externe Links als klare Kacheln.</div>
+          <div class="small dim">Illustration/Foto: kleine Login-/Kalender-Icons.</div>
+        </td>
+        <td class="footer"></td>
+        <td class="orphans">Externe: Portal-Login, Einsatzplanung</td>
+      </tr>
+      <tr>
+        <th class="row">G-03 Quick-Formulare (Accordion) <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td>
+        <td class="mitglieder">
+          <div class="title">Ferien · Adresse · Kündigung</div>
+          <div class="small dim">Illustration/Foto: none – klare Akkordeonbereiche mit Formularfeldern.</div>
+        </td>
+        <td class="footer"></td><td class="orphans"></td>
+      </tr>
+      <tr>
+        <th class="row">G-04 Downloads <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td>
+        <td class="mitglieder">
+          <div class="title">Wichtige Dokumente</div>
+          <div class="small">Statuten · Reglement · Jahresbericht.</div>
+          <div class="small dim">Illustration/Foto: kleine PDF-Icons.</div>
+        </td>
+        <td class="footer"></td>
+        <td class="orphans">PDFs: Statuten, Reglement, Jahresbericht</td>
+      </tr>
+
+      <!-- FOOTER NAV -->
+      <tr>
+        <th class="row">Footer-Links <span class="badge mvp">MVP</span></th>
+        <td class="home"></td><td class="gemuese"></td><td class="konzept"></td><td class="angebot"></td><td class="mitarbeit"></td><td class="mitmachen"></td><td class="mitglieder"></td>
+        <td class="footer">
+          <div class="small"><strong>Kontakt</strong> · <strong>Impressum</strong> · <strong>Datenschutz</strong> · <strong>Statuten</strong> · <strong>Social Icons</strong></div>
+          <div class="small dim">Illustration/Foto: schlichte Social-Icons (einfarbig).</div>
+        </td>
+        <td class="orphans">Social (extern), PDFs, evtl. externe Partnerseiten</td>
+      </tr>
+
+    </tbody>
+  </table>
+</body>
+</html>

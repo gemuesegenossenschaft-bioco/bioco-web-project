@@ -1,0 +1,70 @@
+<svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @keyframes flapWings {
+      0%, 100% { transform: rotateY(0deg); }
+      50% { transform: rotateY(25deg); }
+    }
+    @keyframes bodyBob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-3px); }
+    }
+    .wing-left {
+      animation: flapWings 0.15s ease-in-out infinite;
+      transform-origin: 60% 50%;
+    }
+    .wing-right {
+      animation: flapWings 0.15s ease-in-out infinite;
+      animation-delay: 0.075s;
+      transform-origin: 40% 50%;
+    }
+    .bee-body {
+      animation: bodyBob 0.3s ease-in-out infinite;
+    }
+  </style>
+  
+  <!-- Bee body (orange/beet stripes) -->
+  <g class="bee-body">
+    <path d="M100 90 Q95 85 100 80 Q105 75 110 80 Q115 85 110 90 Q105 95 100 90 Z" fill="var(--bioco-beet, #8b0000)" fill-rule="evenodd"/>
+    <path d="M100 100 Q95 95 100 90 Q105 85 110 90 Q115 95 110 100 Q105 105 100 100 Z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+    <path d="M100 110 Q95 105 100 100 Q105 95 110 100 Q115 105 110 110 Q105 115 100 110 Z" fill="var(--bioco-beet, #8b0000)" fill-rule="evenodd"/>
+    <path d="M100 120 Q95 115 100 110 Q105 105 110 110 Q115 115 110 120 Q105 125 100 120 Z" fill="var(--bioco-orange, #ff8c00)" fill-rule="evenodd"/>
+    
+    <!-- Head -->
+    <circle cx="100" cy="75" r="12" fill="var(--bioco-green, #2e7d32)"/>
+    
+    <!-- Antennae -->
+    <path d="M95 68 Q93 60 90 55" stroke="var(--bioco-green, #2e7d32)" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="90" cy="55" r="2" fill="var(--bioco-green, #2e7d32)"/>
+    <path d="M105 68 Q107 60 110 55" stroke="var(--bioco-green, #2e7d32)" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="110" cy="55" r="2" fill="var(--bioco-green, #2e7d32)"/>
+    
+    <!-- Legs -->
+    <path d="M90 100 Q85 105 80 110" stroke="var(--bioco-green, #2e7d32)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M110 100 Q115 105 120 110" stroke="var(--bioco-green, #2e7d32)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M92 115 Q87 120 82 125" stroke="var(--bioco-green, #2e7d32)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <path d="M108 115 Q113 120 118 125" stroke="var(--bioco-green, #2e7d32)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    
+    <!-- Stinger -->
+    <path d="M100 125 L95 135" stroke="var(--bioco-beet, #8b0000)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Wings -->
+  <g class="wing-left">
+    <path d="M85 85 Q75 75 70 85 Q75 95 85 90 Z" fill="var(--bioco-green, #2e7d32)" fill-opacity="0.3" fill-rule="evenodd"/>
+    <path d="M85 100 Q75 90 70 100 Q75 110 85 105 Z" fill="var(--bioco-green, #2e7d32)" fill-opacity="0.3" fill-rule="evenodd"/>
+  </g>
+  
+  <g class="wing-right">
+    <path d="M115 85 Q125 75 130 85 Q125 95 115 90 Z" fill="var(--bioco-green, #2e7d32)" fill-opacity="0.3" fill-rule="evenodd"/>
+    <path d="M115 100 Q125 90 130 100 Q125 110 115 105 Z" fill="var(--bioco-green, #2e7d32)" fill-opacity="0.3" fill-rule="evenodd"/>
+  </g>
+</svg>
+
+
+
+
+
+
+
+
+
