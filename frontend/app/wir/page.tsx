@@ -15,6 +15,8 @@ export const metadata: Metadata = {
 
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60
+// Debug: force dynamic while diagnosing CMS fetch issues
+export const dynamic = 'force-dynamic'
 
 // Fallback content
 const FALLBACK_INTRO = {
