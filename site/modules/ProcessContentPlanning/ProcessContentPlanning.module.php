@@ -10,6 +10,7 @@
 class ProcessContentPlanning extends Process {
 
     const TABLE_NAME = 'planning_items';
+    const DRAFT_TABLE = 'planning_draft_fields';
 
     public static function getModuleInfo() {
         return [
@@ -37,6 +38,7 @@ class ProcessContentPlanning extends Process {
     public function init() {
         parent::init();
         $this->createDatabaseTable();
+        $this->createDraftFieldsTable();
         $this->migrateDatabase();
     }
 
@@ -75,6 +77,31 @@ class ProcessContentPlanning extends Process {
     }
 
     /**
+     * Create draft fields table if not exists
+     */
+    private function createDraftFieldsTable() {
+        $table = self::DRAFT_TABLE;
+        $sql = "CREATE TABLE IF NOT EXISTS `{$table}` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `planning_item_id` int(11) NOT NULL,
+            `field_name` varchar(255) NOT NULL,
+            `field_value` longtext,
+            `field_type` varchar(50),
+            `created` int(11) NOT NULL,
+            `modified` int(11) NOT NULL,
+            PRIMARY KEY (`id`),
+            UNIQUE KEY `item_field` (`planning_item_id`, `field_name`),
+            KEY `planning_item_id` (`planning_item_id`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
+        
+        try {
+            $this->wire()->database->exec($sql);
+        } catch(\Exception $e) {
+            // Table exists
+        }
+    }
+
+    /**
      * Migrate existing table to add new columns
      */
     private function migrateDatabase() {
@@ -94,6 +121,36 @@ class ProcessContentPlanning extends Process {
         // Add owner_id if not exists
         try {
             $db->exec("ALTER TABLE `{$table}` ADD COLUMN `owner_id` int(11) DEFAULT NULL");
+        } catch(\Exception $e) {}
+        
+        // Add assignment fields
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `assigner_id` int(11) DEFAULT NULL");
+        } catch(\Exception $e) {}
+        
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `assignee_id` int(11) DEFAULT NULL");
+        } catch(\Exception $e) {}
+        
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `last_notified` int(11) DEFAULT NULL");
+        } catch(\Exception $e) {}
+        
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `notify_assignee` tinyint(1) DEFAULT 1");
+        } catch(\Exception $e) {}
+        
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `notification_frequency` varchar(20) DEFAULT 'immediate'");
+        } catch(\Exception $e) {}
+        
+        // Add indexes for assignment fields
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD KEY `assigner_id` (`assigner_id`)");
+        } catch(\Exception $e) {}
+        
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD KEY `assignee_id` (`assignee_id`)");
         } catch(\Exception $e) {}
     }
 
@@ -121,9 +178,36 @@ class ProcessContentPlanning extends Process {
         
         return $out;
     }
+    
+    /**
+     * Export planning data as SQL backup
+     */
+    public function ___executeExport() {
+        $backup = $this->wire('database')->backups();
+        
+        $tables = [self::TABLE_NAME, self::DRAFT_TABLE];
+        $filename = 'planning-backup-' . date('Y-m-d-His') . '.sql';
+        
+        try {
+            $file = $backup->backup([
+                'tables' => $tables,
+                'filename' => $filename
+            ]);
+            
+            if ($file) {
+                wireSendFile($file, ['forceDownload' => true, 'exit' => true]);
+            } else {
+                $this->error("Backup failed - no file created");
+                return $this->___execute();
+            }
+        } catch(\Exception $e) {
+            $this->error("Backup error: " . $e->getMessage());
+            return $this->___execute();
+        }
+    }
 
     /**
-     * Header with docs link and view toggle
+     * Header with docs link, view toggle, and export button
      */
     private function renderHeader($currentView) {
         $listActive = $currentView === 'list' ? 'active' : '';
@@ -132,9 +216,14 @@ class ProcessContentPlanning extends Process {
         
         return "
         <div class='planning-header'>
-            <a href='https://docs.bioco.ch' target='_blank' class='docs-link'>
-                <i class='fa fa-external-link'></i> docs.bioco.ch
-            </a>
+            <div class='header-left'>
+                <a href='https://docs.bioco.ch' target='_blank' class='docs-link'>
+                    <i class='fa fa-external-link'></i> docs.bioco.ch
+                </a>
+                <a href='{$baseUrl}export/' class='export-btn ui-button'>
+                    <i class='fa fa-download'></i> Export Backup
+                </a>
+            </div>
             <div class='view-toggle'>
                 <a href='{$baseUrl}?view=list' class='view-btn {$listActive}'>
                     <i class='fa fa-list'></i> List
@@ -192,6 +281,8 @@ class ProcessContentPlanning extends Process {
             <th>Type</th>
             <th>Priority</th>
             <th>Status</th>
+            <th>Assigned To</th>
+            <th>Assigned By</th>
             <th>Page</th>
             <th>Created</th>
             <th>Actions</th>
@@ -201,6 +292,8 @@ class ProcessContentPlanning extends Process {
             $pageLink = $this->renderPageLink($item);
             $createdDate = $this->timeAgo($item['created']);
             $resolvedBadge = $item['resolved_at'] ? "<span class='resolved-badge'>Resolved " . $this->timeAgo($item['resolved_at']) . "</span>" : '';
+            $assigneeName = $this->getOwnerName($item);
+            $assignerName = $this->getAssignerName($item);
             
             $out .= "<tr data-id='{$item['id']}'>
                 <td>
@@ -217,6 +310,8 @@ class ProcessContentPlanning extends Process {
                         <option value='done'" . ($item['status'] === 'done' ? ' selected' : '') . ">Done</option>
                     </select>
                 </td>
+                <td>{$assigneeName}</td>
+                <td>{$assignerName}</td>
                 <td>{$pageLink}</td>
                 <td class='date-cell'>{$createdDate}</td>
                 <td class='actions-cell'>
@@ -224,6 +319,7 @@ class ProcessContentPlanning extends Process {
                     <button class='delete-btn ui-button' data-id='{$item['id']}'><i class='fa fa-trash'></i></button>
                     " . $this->renderGitHubButton($item) . "
                     " . $this->renderPublishButton($item) . "
+                    " . $this->renderPublishDraftButton($item) . "
                 </td>
             </tr>";
         }
@@ -269,6 +365,7 @@ class ProcessContentPlanning extends Process {
                 <button class='delete-btn' data-id='{$item['id']}'><i class='fa fa-trash'></i></button>
                 " . $this->renderGitHubButton($item) . "
                 " . $this->renderPublishButton($item) . "
+                " . $this->renderPublishDraftButton($item) . "
             </div>
         </div>";
     }
@@ -327,6 +424,18 @@ class ProcessContentPlanning extends Process {
         $title = $isPublished ? 'Unpublish Page' : 'Publish Page';
         
         return "<button class='publish-btn ui-button' data-id='{$item['id']}' data-action='{$action}' title='{$title}'><i class='fa {$icon}'></i></button>";
+    }
+    
+    /**
+     * Render publish draft button if page is linked and drafts exist
+     */
+    private function renderPublishDraftButton($item) {
+        if (empty($item['linked_page_id'])) return '';
+        
+        $draftFields = $this->getAllDraftFields($item['id']);
+        if (empty($draftFields)) return '';
+        
+        return "<button class='publish-draft-btn ui-button' data-id='{$item['id']}' title='Publish Draft Changes'><i class='fa fa-upload'></i> Publish Draft</button>";
     }
 
     /**
@@ -416,9 +525,13 @@ class ProcessContentPlanning extends Process {
     /**
      * Get all ProcessWire users for dropdown
      */
-    private function getUserOptions() {
+    private function getUserOptions($includeEmpty = true) {
         $users = $this->wire('users')->find("roles!=guest, limit=100");
-        $options = ['<option value="">-- Select Owner --</option>'];
+        $options = [];
+        
+        if ($includeEmpty) {
+            $options[] = '<option value="">-- Select User --</option>';
+        }
         
         foreach ($users as $user) {
             $name = $this->wire('sanitizer')->entities($user->name);
@@ -429,16 +542,32 @@ class ProcessContentPlanning extends Process {
     }
 
     /**
-     * Get owner name from item
+     * Get assignee name from item
      */
     private function getOwnerName($item) {
-        if (!empty($item['owner_id'])) {
-            $user = $this->wire('users')->get($item['owner_id']);
+        // Try assignee_id first (new field), fallback to owner_id (old field)
+        $userId = $item['assignee_id'] ?? $item['owner_id'] ?? null;
+        
+        if ($userId) {
+            $user = $this->wire('users')->get($userId);
             if ($user->id) {
                 return $this->wire('sanitizer')->entities($user->name);
             }
         }
         return $this->wire('sanitizer')->entities($item['owner'] ?: '-');
+    }
+    
+    /**
+     * Get assigner name from item
+     */
+    private function getAssignerName($item) {
+        if (!empty($item['assigner_id'])) {
+            $user = $this->wire('users')->get($item['assigner_id']);
+            if ($user->id) {
+                return $this->wire('sanitizer')->entities($user->name);
+            }
+        }
+        return '-';
     }
 
     /**
@@ -454,9 +583,22 @@ class ProcessContentPlanning extends Process {
                 <h3 id='form-title'>Add Item</h3>
                 <form id='item-form'>
                     <input type='hidden' name='id' id='item-id' value=''>
+                    <div class='form-row form-row-highlight'>
+                        <label>Linked Page (Select First) *</label>
+                        <div class='page-selector'>
+                            <select name='linked_page_id' id='item-page' required>
+                                {$pageOptions}
+                            </select>
+                            <a href='#' id='edit-page-link' class='edit-page-btn' target='_blank' style='display:none;'>
+                                <i class='fa fa-external-link'></i>
+                            </a>
+                        </div>
+                        <small>Select a page to edit its content fields below</small>
+                    </div>
                     <div class='form-row'>
                         <label>Title *</label>
                         <input type='text' name='title' id='item-title' required>
+                        <small>Auto-filled from page title, but you can customize</small>
                     </div>
                     <div class='form-row'>
                         <label>Type</label>
@@ -486,26 +628,22 @@ class ProcessContentPlanning extends Process {
                         </select>
                     </div>
                     <div class='form-row'>
-                        <label>Owner</label>
-                        <select name='owner_id' id='item-owner'>
+                        <label>Assigned By (Assigner)</label>
+                        <select name='assigner_id' id='item-assigner'>
                             {$userOptions}
                         </select>
                     </div>
                     <div class='form-row'>
-                        <label>Linked Page</label>
-                        <div class='page-selector'>
-                            <select name='linked_page_id' id='item-page'>
-                                {$pageOptions}
-                            </select>
-                            <a href='#' id='edit-page-link' class='edit-page-btn' target='_blank' style='display:none;'>
-                                <i class='fa fa-external-link'></i>
-                            </a>
-                        </div>
+                        <label>Assigned To (Assignee) *</label>
+                        <select name='assignee_id' id='item-assignee' required>
+                            {$userOptions}
+                        </select>
                     </div>
                     <div class='form-row'>
                         <label>Details</label>
                         <textarea name='details' id='item-details' rows='4'></textarea>
                     </div>
+                    <div id='field-editor-container'></div>
                     <div class='form-actions'>
                         <button type='button' class='ui-button cancel-btn'>Cancel</button>
                         <button type='submit' class='ui-button ui-priority-primary'>Save</button>
@@ -530,6 +668,7 @@ class ProcessContentPlanning extends Process {
         (function() {
             const ajaxUrl = '{$ajaxUrl}';
             const adminUrl = '{$adminUrl}';
+            const currentUserId = " . $this->wire('user')->id . ";
             
             // Page selector edit link
             const pageSelect = document.getElementById('item-page');
@@ -539,10 +678,77 @@ class ProcessContentPlanning extends Process {
                 if (this.value) {
                     editPageLink.href = adminUrl + 'page/edit/?id=' + this.value;
                     editPageLink.style.display = 'inline-flex';
+                    
+                    // Auto-populate title from page title
+                    const selectedOption = this.options[this.selectedIndex];
+                    const pageTitle = selectedOption.text.split(' - ')[1] || selectedOption.text;
+                    const titleInput = document.getElementById('item-title');
+                    if (!titleInput.value || titleInput.dataset.autofilled) {
+                        titleInput.value = pageTitle;
+                        titleInput.dataset.autofilled = 'true';
+                    }
+                    
+                    // Load field editor if editing existing item
+                    const itemId = document.getElementById('item-id').value;
+                    if (itemId) {
+                        loadFieldEditor(itemId, this.value);
+                    }
                 } else {
                     editPageLink.style.display = 'none';
+                    document.getElementById('field-editor-container').innerHTML = '';
+                    document.getElementById('item-title').value = '';
+                    delete document.getElementById('item-title').dataset.autofilled;
                 }
             };
+            
+            // Load field editor for page
+            function loadFieldEditor(itemId, pageId) {
+                if (!itemId || !pageId) return;
+                
+                fetch(ajaxUrl + '?action=getfields&id=' + itemId + '&page_id=' + pageId)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.getElementById('field-editor-container').innerHTML = data.html;
+                            attachDraftSaveHandlers();
+                        }
+                    });
+            }
+            
+            // Attach save handlers to draft field buttons
+            function attachDraftSaveHandlers() {
+                document.querySelectorAll('.save-draft-btn').forEach(btn => {
+                    btn.onclick = function() {
+                        const fieldName = this.dataset.field;
+                        const itemId = this.dataset.item;
+                        const fieldInput = this.closest('.draft-field').querySelector('.draft-input');
+                        
+                        if (!fieldInput) return;
+                        
+                        let value = fieldInput.value;
+                        if (fieldInput.type === 'checkbox') {
+                            value = fieldInput.checked ? '1' : '0';
+                        }
+                        
+                        const form = new FormData();
+                        form.append('action', 'savefield');
+                        form.append('id', itemId);
+                        form.append('field_name', fieldName);
+                        form.append('field_value', value);
+                        
+                        fetch(ajaxUrl, { method: 'POST', body: form })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.textContent = 'Saved!';
+                                    setTimeout(() => { this.textContent = 'Save Draft'; }, 1500);
+                                } else {
+                                    alert('Error saving draft');
+                                }
+                            });
+                    };
+                });
+            }
             
             // Add button
             document.getElementById('add-item-btn').onclick = function() {
@@ -550,7 +756,11 @@ class ProcessContentPlanning extends Process {
                 document.getElementById('item-form').reset();
                 document.getElementById('item-id').value = '';
                 document.getElementById('item-page').value = '';
+                document.getElementById('field-editor-container').innerHTML = '';
                 editPageLink.style.display = 'none';
+                delete document.getElementById('item-title').dataset.autofilled;
+                // Auto-set assigner to current user
+                document.getElementById('item-assigner').value = currentUserId;
                 document.getElementById('item-form-overlay').style.display = 'flex';
             };
             
@@ -587,15 +797,18 @@ class ProcessContentPlanning extends Process {
                             document.getElementById('item-type').value = item.item_type;
                             document.getElementById('item-priority').value = item.priority;
                             document.getElementById('item-status').value = item.status;
-                            document.getElementById('item-owner').value = item.owner_id || '';
+                            document.getElementById('item-assigner').value = item.assigner_id || '';
+                            document.getElementById('item-assignee').value = item.assignee_id || item.owner_id || '';
                             document.getElementById('item-page').value = item.linked_page_id || '';
                             document.getElementById('item-details').value = item.details || '';
                             
                             if (item.linked_page_id) {
                                 editPageLink.href = adminUrl + 'page/edit/?id=' + item.linked_page_id;
                                 editPageLink.style.display = 'inline-flex';
+                                loadFieldEditor(item.id, item.linked_page_id);
                             } else {
                                 editPageLink.style.display = 'none';
+                                document.getElementById('field-editor-container').innerHTML = '';
                             }
                             
                             document.getElementById('item-form-overlay').style.display = 'flex';
@@ -667,6 +880,27 @@ class ProcessContentPlanning extends Process {
                         .then(data => { if (data.success) location.reload(); });
                 };
             });
+            
+            // Publish draft buttons
+            document.querySelectorAll('.publish-draft-btn').forEach(btn => {
+                btn.onclick = function() {
+                    if (!confirm('Publish all draft changes to the page?')) return;
+                    
+                    const form = new FormData();
+                    form.append('action', 'publishdraft');
+                    form.append('id', this.dataset.id);
+                    fetch(ajaxUrl, { method: 'POST', body: form })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert(data.message || 'Draft published successfully');
+                                location.reload();
+                            } else {
+                                alert(data.error || 'Error publishing draft');
+                            }
+                        });
+                };
+            });
         })();
         </script>";
     }
@@ -711,6 +945,22 @@ class ProcessContentPlanning extends Process {
                 $result = $this->unpublishPage($id);
                 echo json_encode($result);
                 break;
+            case 'savefield':
+                $fieldName = $this->wire('sanitizer')->fieldName($this->wire('input')->post('field_name'));
+                $fieldValue = $this->wire('input')->post('field_value');
+                $fieldType = $this->wire('sanitizer')->text($this->wire('input')->post('field_type'));
+                $result = $this->saveDraftFieldValue($id, $fieldName, $fieldValue, $fieldType);
+                echo json_encode(['success' => $result]);
+                break;
+            case 'publishdraft':
+                $result = $this->publishDraftChanges($id);
+                echo json_encode($result);
+                break;
+            case 'getfields':
+                $pageId = (int)$this->wire('input')->get('page_id');
+                $html = $this->renderPageFields($pageId, $id);
+                echo json_encode(['success' => true, 'html' => $html]);
+                break;
             default:
                 echo json_encode(['error' => 'Invalid action']);
         }
@@ -754,6 +1004,8 @@ class ProcessContentPlanning extends Process {
             'priority' => $san->name($input->post('priority')) ?: 'medium',
             'status' => $newStatus,
             'owner_id' => (int)$input->post('owner_id') ?: null,
+            'assigner_id' => (int)$input->post('assigner_id') ?: null,
+            'assignee_id' => (int)$input->post('assignee_id') ?: null,
             'linked_page_id' => (int)$input->post('linked_page_id') ?: null,
             'modified' => time(),
         ];
@@ -766,7 +1018,7 @@ class ProcessContentPlanning extends Process {
         $db = $this->wire()->database;
         
         if ($id) {
-            // Check if status changed to done
+            // Get old item for change detection
             $oldItem = $this->getItem($id);
             $resolvedAt = null;
             if ($newStatus === 'done' && $oldItem['status'] !== 'done') {
@@ -778,28 +1030,59 @@ class ProcessContentPlanning extends Process {
             }
             
             $sql = "UPDATE `{$table}` SET 
-                    title=?, item_type=?, details=?, priority=?, status=?, owner_id=?, linked_page_id=?, modified=?, resolved_at=?
+                    title=?, item_type=?, details=?, priority=?, status=?, owner_id=?, assigner_id=?, assignee_id=?, linked_page_id=?, modified=?, resolved_at=?
                     WHERE id=?";
             $query = $db->prepare($sql);
             $query->execute([
                 $data['title'], $data['item_type'], $data['details'],
                 $data['priority'], $data['status'], $data['owner_id'], 
+                $data['assigner_id'], $data['assignee_id'],
                 $data['linked_page_id'], $data['modified'], $resolvedAt, $id
             ]);
+            
+            // Check for changes and send notifications
+            $currentItem = $this->getItem($id);
+            
+            // Assignment change
+            if ($oldItem['assignee_id'] != $currentItem['assignee_id'] && $currentItem['assignee_id']) {
+                $this->sendNotification($currentItem['assignee_id'], $currentItem, 'Assigned to You');
+            }
+            
+            // Status change
+            if ($oldItem['status'] != $currentItem['status'] && $currentItem['assignee_id']) {
+                $statusLabels = ['backlog' => 'Backlog', 'progress' => 'In Progress', 'review' => 'Review', 'done' => 'Done'];
+                $oldStatus = $statusLabels[$oldItem['status']] ?? $oldItem['status'];
+                $newStatus = $statusLabels[$currentItem['status']] ?? $currentItem['status'];
+                $this->sendNotification($currentItem['assignee_id'], $currentItem, 'Status Changed', "Changed from <strong>{$oldStatus}</strong> to <strong>{$newStatus}</strong>");
+            }
+            
+            // Priority change to high/urgent
+            if ($oldItem['priority'] != $currentItem['priority'] && 
+                in_array($currentItem['priority'], ['high', 'urgent']) && 
+                $currentItem['assignee_id']) {
+                $this->sendNotification($currentItem['assignee_id'], $currentItem, 'Priority Changed', "Priority upgraded to <strong>{$currentItem['priority']}</strong>");
+            }
         } else {
             $data['created'] = time();
             $resolvedAt = $newStatus === 'done' ? time() : null;
             
             $sql = "INSERT INTO `{$table}` 
-                    (title, item_type, details, priority, status, owner_id, linked_page_id, created, modified, resolved_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    (title, item_type, details, priority, status, owner_id, assigner_id, assignee_id, linked_page_id, created, modified, resolved_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $query = $db->prepare($sql);
             $query->execute([
                 $data['title'], $data['item_type'], $data['details'],
                 $data['priority'], $data['status'], $data['owner_id'],
+                $data['assigner_id'], $data['assignee_id'],
                 $data['linked_page_id'], $data['created'], $data['modified'], $resolvedAt
             ]);
             $id = $db->lastInsertId();
+            
+            // Send notification for new assignment
+            if ($data['assignee_id']) {
+                $newItem = $this->getItem($id);
+                $this->sendNotification($data['assignee_id'], $newItem, 'New Task Assigned');
+            }
         }
         
         return ['success' => true, 'id' => $id];
@@ -815,17 +1098,28 @@ class ProcessContentPlanning extends Process {
 
     private function updateStatus($id, $status) {
         $table = self::TABLE_NAME;
-        $resolvedAt = $status === 'done' ? time() : null;
         
-        // Check current status
-        $item = $this->getItem($id);
-        if ($item['status'] === 'done' && $status === 'done') {
-            $resolvedAt = $item['resolved_at'];
+        // Get old item for change detection
+        $oldItem = $this->getItem($id);
+        
+        $resolvedAt = $status === 'done' ? time() : null;
+        if ($oldItem['status'] === 'done' && $status === 'done') {
+            $resolvedAt = $oldItem['resolved_at'];
         }
         
         $sql = "UPDATE `{$table}` SET status=?, modified=?, resolved_at=? WHERE id=?";
         $query = $this->wire()->database->prepare($sql);
         $query->execute([$status, time(), $resolvedAt, $id]);
+        
+        // Send notification if status changed
+        if ($oldItem['status'] != $status && $oldItem['assignee_id']) {
+            $currentItem = $this->getItem($id);
+            $statusLabels = ['backlog' => 'Backlog', 'progress' => 'In Progress', 'review' => 'Review', 'done' => 'Done'];
+            $oldStatus = $statusLabels[$oldItem['status']] ?? $oldItem['status'];
+            $newStatus = $statusLabels[$status] ?? $status;
+            $this->sendNotification($oldItem['assignee_id'], $currentItem, 'Status Changed', "Changed from <strong>{$oldStatus}</strong> to <strong>{$newStatus}</strong>");
+        }
+        
         return ['success' => true];
     }
 
@@ -867,6 +1161,262 @@ class ProcessContentPlanning extends Process {
         $page->save();
         
         return ['success' => true];
+    }
+
+    // =========================================================================
+    // DRAFT FIELD METHODS
+    // =========================================================================
+    
+    /**
+     * Get draft field value for a planning item
+     */
+    private function getDraftFieldValue($itemId, $fieldName) {
+        $table = self::DRAFT_TABLE;
+        $sql = "SELECT field_value FROM `{$table}` WHERE planning_item_id = ? AND field_name = ?";
+        $query = $this->wire()->database->prepare($sql);
+        $query->execute([$itemId, $fieldName]);
+        $result = $query->fetch(\PDO::FETCH_ASSOC);
+        return $result ? $result['field_value'] : null;
+    }
+    
+    /**
+     * Save draft field value for a planning item
+     */
+    private function saveDraftFieldValue($itemId, $fieldName, $value, $fieldType = '') {
+        $table = self::DRAFT_TABLE;
+        $now = time();
+        
+        // Check if draft already exists
+        $existing = $this->getDraftFieldValue($itemId, $fieldName);
+        
+        if ($existing !== null) {
+            // Update existing draft
+            $sql = "UPDATE `{$table}` SET field_value=?, field_type=?, modified=? WHERE planning_item_id=? AND field_name=?";
+            $query = $this->wire()->database->prepare($sql);
+            $query->execute([$value, $fieldType, $now, $itemId, $fieldName]);
+        } else {
+            // Insert new draft
+            $sql = "INSERT INTO `{$table}` (planning_item_id, field_name, field_value, field_type, created, modified) VALUES (?, ?, ?, ?, ?, ?)";
+            $query = $this->wire()->database->prepare($sql);
+            $query->execute([$itemId, $fieldName, $value, $fieldType, $now, $now]);
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Get all draft fields for a planning item
+     */
+    private function getAllDraftFields($itemId) {
+        $table = self::DRAFT_TABLE;
+        $sql = "SELECT * FROM `{$table}` WHERE planning_item_id = ?";
+        $query = $this->wire()->database->prepare($sql);
+        $query->execute([$itemId]);
+        $results = $query->fetchAll(\PDO::FETCH_ASSOC);
+        
+        $fields = [];
+        foreach ($results as $row) {
+            $fields[$row['field_name']] = $row['field_value'];
+        }
+        return $fields;
+    }
+    
+    /**
+     * Render page fields editor
+     */
+    private function renderPageFields($pageId, $planningItemId) {
+        if (!$pageId) return '';
+        
+        $page = $this->wire('pages')->get($pageId);
+        if (!$page->id) return '<div class="field-editor-error">Page not found</div>';
+        
+        $template = $page->template;
+        $out = "<div class='page-fields-editor'>";
+        $out .= "<h4>Editing Fields: {$this->wire('sanitizer')->entities($page->title)}</h4>";
+        $out .= "<div class='fields-container'>";
+        
+        foreach ($template->fields as $field) {
+            // Skip system fields
+            if (in_array($field->name, ['id', 'name', 'parent', 'template', 'status', 'created', 'modified', 'createdUser', 'modifiedUser', 'sort'])) {
+                continue;
+            }
+            
+            // Load draft value or current page value
+            $draftValue = $this->getDraftFieldValue($planningItemId, $field->name);
+            $currentValue = $page->get($field->name);
+            $value = $draftValue !== null ? $draftValue : $currentValue;
+            
+            // Render field input based on type
+            $out .= $this->renderFieldInput($field, $value, $planningItemId);
+        }
+        
+        $out .= "</div></div>";
+        return $out;
+    }
+    
+    /**
+     * Render individual field input based on type
+     */
+    private function renderFieldInput($field, $value, $planningItemId) {
+        $fieldType = $field->type->className();
+        $fieldName = $field->name;
+        $fieldLabel = $this->wire('sanitizer')->entities($field->label ?: $field->name);
+        $fieldId = "draft-field-{$fieldName}";
+        
+        $out = "<div class='draft-field' data-field='{$fieldName}' data-item='{$planningItemId}'>";
+        $out .= "<label for='{$fieldId}'>{$fieldLabel}</label>";
+        
+        switch ($fieldType) {
+            case 'FieldtypeText':
+                $val = $this->wire('sanitizer')->entities($value);
+                $out .= "<input type='text' id='{$fieldId}' name='{$fieldName}' value='{$val}' class='draft-input'>";
+                break;
+                
+            case 'FieldtypeTextarea':
+                $val = $this->wire('sanitizer')->entities($value);
+                $out .= "<textarea id='{$fieldId}' name='{$fieldName}' rows='4' class='draft-input'>{$val}</textarea>";
+                break;
+                
+            case 'FieldtypeDatetime':
+                $val = $value ? date('Y-m-d', (int)$value) : '';
+                $out .= "<input type='date' id='{$fieldId}' name='{$fieldName}' value='{$val}' class='draft-input'>";
+                break;
+                
+            case 'FieldtypeCheckbox':
+                $checked = $value ? 'checked' : '';
+                $out .= "<input type='checkbox' id='{$fieldId}' name='{$fieldName}' {$checked} class='draft-input'>";
+                break;
+                
+            case 'FieldtypeURL':
+                $val = $this->wire('sanitizer')->entities($value);
+                $out .= "<input type='url' id='{$fieldId}' name='{$fieldName}' value='{$val}' class='draft-input'>";
+                break;
+                
+            case 'FieldtypeEmail':
+                $val = $this->wire('sanitizer')->entities($value);
+                $out .= "<input type='email' id='{$fieldId}' name='{$fieldName}' value='{$val}' class='draft-input'>";
+                break;
+                
+            default:
+                // For complex types (images, files, page references), show readonly
+                $displayVal = is_object($value) ? get_class($value) : (string)$value;
+                $out .= "<div class='field-readonly'>{$this->wire('sanitizer')->entities(substr($displayVal, 0, 100))}</div>";
+                $out .= "<small>This field type ({$fieldType}) can only be edited in the page editor.</small>";
+                break;
+        }
+        
+        $out .= "<button type='button' class='save-draft-btn ui-button' data-field='{$fieldName}' data-item='{$planningItemId}'>Save Draft</button>";
+        $out .= "</div>";
+        
+        return $out;
+    }
+    
+    /**
+     * Publish draft changes to actual page
+     */
+    private function publishDraftChanges($itemId) {
+        $item = $this->getItem($itemId);
+        if (!$item || empty($item['linked_page_id'])) {
+            return ['success' => false, 'error' => 'No linked page'];
+        }
+        
+        $page = $this->wire('pages')->get($item['linked_page_id']);
+        if (!$page->id) {
+            return ['success' => false, 'error' => 'Page not found'];
+        }
+        
+        $draftFields = $this->getAllDraftFields($itemId);
+        if (empty($draftFields)) {
+            return ['success' => false, 'error' => 'No draft changes to publish'];
+        }
+        
+        $page->of(false);
+        
+        foreach ($draftFields as $fieldName => $value) {
+            if ($page->template->hasField($fieldName)) {
+                $field = $page->template->fieldgroup->getField($fieldName);
+                $fieldType = $field->type->className();
+                
+                // Convert value based on field type
+                if ($fieldType === 'FieldtypeDatetime') {
+                    $value = strtotime($value);
+                } elseif ($fieldType === 'FieldtypeCheckbox') {
+                    $value = $value ? 1 : 0;
+                }
+                
+                $page->set($fieldName, $value);
+            }
+        }
+        
+        $page->save();
+        
+        // Clear draft fields after publishing
+        $table = self::DRAFT_TABLE;
+        $sql = "DELETE FROM `{$table}` WHERE planning_item_id = ?";
+        $query = $this->wire()->database->prepare($sql);
+        $query->execute([$itemId]);
+        
+        return ['success' => true, 'message' => 'Draft changes published successfully'];
+    }
+
+    // =========================================================================
+    // EMAIL NOTIFICATION METHODS
+    // =========================================================================
+    
+    /**
+     * Send email notification to user
+     */
+    private function sendNotification($userId, $item, $changeType, $additionalInfo = '') {
+        if (!$userId) return;
+        
+        $user = $this->wire('users')->get($userId);
+        if (!$user->id || !$user->email) {
+            $this->wire()->log->save('planning-notifications', "Cannot send notification: User {$userId} has no email");
+            return;
+        }
+        
+        $itemUrl = $this->wire('pages')->get('template=admin')->httpUrl . 'content-planning/';
+        $subject = "Content Planning: {$changeType} - {$item['title']}";
+        
+        $body = "
+        <html>
+        <body style='font-family: sans-serif;'>
+            <h2>{$changeType}</h2>
+            <p><strong>Item:</strong> {$item['title']}</p>
+            <p><strong>Type:</strong> {$item['item_type']}</p>
+            <p><strong>Status:</strong> {$item['status']}</p>
+            <p><strong>Priority:</strong> {$item['priority']}</p>";
+        
+        if ($additionalInfo) {
+            $body .= "<p>{$additionalInfo}</p>";
+        }
+        
+        $body .= "
+            <p><a href='{$itemUrl}'>View Content Planning Dashboard</a></p>
+        </body>
+        </html>";
+        
+        try {
+            $mail = $this->wire('mail')->new();
+            $mail->to($user->email);
+            $mail->subject($subject);
+            $mail->bodyHTML($body);
+            $sent = $mail->send();
+            
+            if ($sent) {
+                $this->wire()->log->save('planning-notifications', "Sent '{$changeType}' notification to {$user->email} for item #{$item['id']}");
+                
+                // Update last_notified timestamp
+                $table = self::TABLE_NAME;
+                $sql = "UPDATE `{$table}` SET last_notified=? WHERE id=?";
+                $query = $this->wire()->database->prepare($sql);
+                $query->execute([time(), $item['id']]);
+            } else {
+                $this->wire()->log->save('planning-notifications', "Failed to send notification to {$user->email}");
+            }
+        } catch(\Exception $e) {
+            $this->wire()->log->save('planning-notifications', "Error sending notification: " . $e->getMessage());
+        }
     }
 
     // =========================================================================

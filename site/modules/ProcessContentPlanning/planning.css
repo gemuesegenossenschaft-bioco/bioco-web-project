@@ -482,6 +482,25 @@
     margin-top: 10px;
 }
 
+/* Header Layout */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Export Button */
+.export-btn {
+    background: #4caf50 !important;
+    color: #fff !important;
+    border-color: #4caf50 !important;
+    font-size: 13px;
+}
+.export-btn:hover {
+    background: #45a049 !important;
+    color: #fff !important;
+}
+
 /* Publish Button */
 .publish-btn {
     background: #fff3e0 !important;
@@ -489,6 +508,123 @@
 }
 .publish-btn:hover {
     background: #ffe0b2 !important;
+}
+
+/* Publish Draft Button */
+.publish-draft-btn {
+    background: #e3f2fd !important;
+    border-color: #2196F3 !important;
+    color: #1565c0 !important;
+}
+.publish-draft-btn:hover {
+    background: #bbdefb !important;
+}
+
+/* Form Row Highlight */
+.form-row-highlight {
+    background: #f0f8ff;
+    padding: 12px;
+    border-radius: 6px;
+    border: 2px solid #2196F3;
+}
+.form-row-highlight small {
+    display: block;
+    margin-top: 4px;
+    color: #666;
+    font-size: 12px;
+}
+
+.form-row small {
+    display: block;
+    margin-top: 4px;
+    color: #888;
+    font-size: 11px;
+}
+
+/* Page Fields Editor */
+.page-fields-editor {
+    margin-top: 20px;
+    padding: 16px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e0e0e0;
+}
+
+.page-fields-editor h4 {
+    margin: 0 0 16px 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    color: #333;
+}
+
+.fields-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Draft Field */
+.draft-field {
+    background: #fff;
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
+
+.draft-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #555;
+}
+
+.draft-input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+}
+
+.draft-input:focus {
+    outline: none;
+    border-color: #2196F3;
+    box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+}
+
+.save-draft-btn {
+    background: #2196F3 !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 6px 12px !important;
+    font-size: 12px !important;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.save-draft-btn:hover {
+    background: #1976D2 !important;
+}
+
+/* Readonly Field */
+.field-readonly {
+    padding: 8px 10px;
+    background: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    color: #666;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.field-editor-error {
+    padding: 12px;
+    background: #ffebee;
+    border: 1px solid #ef5350;
+    border-radius: 4px;
+    color: #c62828;
 }
 
 /* Responsive */
