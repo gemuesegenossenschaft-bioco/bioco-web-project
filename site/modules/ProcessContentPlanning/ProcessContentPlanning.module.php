@@ -15,22 +15,14 @@ class ProcessContentPlanning extends Process {
     public static function getModuleInfo() {
         return [
             'title' => 'Content Planning',
-            'version' => 200,
+            'version' => 201,
             'summary' => 'Plan content with list/kanban views, page linking, GitHub issues',
             'permission' => 'page-edit',
             'page' => [
                 'name' => 'content-planning',
-                'parent' => 'page',  // Under Pages, shows at top
+                'parent' => '',  // Empty = top-level menu item
                 'title' => 'Content Planning',
                 'icon' => 'calendar-check-o'
-            ],
-            'nav' => [
-                [
-                    'url' => 'content-planning',
-                    'label' => 'Content Planning',
-                    'icon' => 'calendar-check-o',
-                    'navJSON' => 'navJSON/"{"url":"content-planning","label":"Content Planning","icon":"calendar-check-o"}"'
-                ]
             ]
         ];
     }
