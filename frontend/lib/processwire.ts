@@ -22,10 +22,11 @@ import type {
   InstagramResponse,
   InstagramPost,
   HealthResponse,
+  SeoData,
 } from './processwire-types'
 
 // Re-export types for convenience
-export type { PageData, NavigationItem, ContentSection, GroupCard, EventItem, AktuellesNewsItem }
+export type { PageData, NavigationItem, ContentSection, GroupCard, EventItem, AktuellesNewsItem, SeoData }
 
 // ============================================================================
 // Health Check
@@ -70,6 +71,20 @@ export async function getPageSections(pageName: string): Promise<ContentSection[
     { revalidate: 60 }
   )
   return response?.sections || []
+}
+
+/**
+ * Get sections with SEO data for a specific page
+ */
+export async function getPageSectionsWithSeo(pageName: string): Promise<{ sections: ContentSection[], seo: SeoData | null }> {
+  const response = await fetchCmsJsonSafe<SectionsResponse>(
+    `/content/sections/${encodeURIComponent(pageName)}`,
+    { revalidate: 60 }
+  )
+  return {
+    sections: response?.sections || [],
+    seo: response?.seo || null,
+  }
 }
 
 // ============================================================================
@@ -180,11 +195,15 @@ export async function getInstagramPosts(limit: number = 10): Promise<InstagramPo
 export async function getPageContent(slug: string): Promise<{
   sections: ContentSection[]
   pageData: PageData | null
+  seo: SeoData | null
 }> {
-  const [sections, pageData] = await Promise.all([
-    getPageSections(slug),
+  const [sectionsData, pageData] = await Promise.all([
+    getPageSectionsWithSeo(slug),
     getPageData(`/${slug}/`),
   ])
   
-  return { sections, pageData }
+  // Prefer SEO from sections endpoint, fallback to pageData
+  const seo = sectionsData.seo || pageData?.seo || null
+  
+  return { sections: sectionsData.sections, pageData, seo }
 }

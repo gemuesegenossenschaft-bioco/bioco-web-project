@@ -90,6 +90,59 @@ function getImageData($page, $field) {
 }
 
 /**
+ * Get SEO data for a page
+ */
+function getSeoData($page) {
+    $config = wire('config');
+    
+    // Get OG image URL (og_image field, fallback to hero_image)
+    $ogImageUrl = null;
+    $ogImageWidth = null;
+    $ogImageHeight = null;
+    
+    if ($page->hasField('og_image') && $page->og_image) {
+        $ogImageUrl = $config->urls->httpRoot . ltrim($page->og_image->url, '/');
+        $ogImageWidth = $page->og_image->width;
+        $ogImageHeight = $page->og_image->height;
+    } elseif ($page->hasField('hero_image') && $page->hero_image) {
+        $ogImageUrl = $config->urls->httpRoot . ltrim($page->hero_image->url, '/');
+        $ogImageWidth = $page->hero_image->width;
+        $ogImageHeight = $page->hero_image->height;
+    }
+    
+    // Build robots data
+    $robotsIndex = !($page->hasField('robots_noindex') && $page->robots_noindex);
+    $robotsFollow = !($page->hasField('robots_nofollow') && $page->robots_nofollow);
+    
+    $seo = [
+        'title' => $page->hasField('seo_title') && $page->seo_title 
+            ? decodeText($page->seo_title) 
+            : decodeText($page->title),
+        'description' => $page->hasField('seo_description') 
+            ? decodeText($page->seo_description ?: '') 
+            : '',
+        'canonical' => $page->hasField('canonical_url') && $page->canonical_url 
+            ? $page->canonical_url 
+            : $page->httpUrl,
+        'robots' => [
+            'index' => $robotsIndex,
+            'follow' => $robotsFollow,
+        ],
+    ];
+    
+    // Add OG image if available
+    if ($ogImageUrl) {
+        $seo['ogImage'] = [
+            'url' => $ogImageUrl,
+            'width' => $ogImageWidth,
+            'height' => $ogImageHeight,
+        ];
+    }
+    
+    return $seo;
+}
+
+/**
  * Decode HTML entities for plain text fields
  * ProcessWire stores & as &amp; etc. - decode for JSON output
  */
@@ -300,6 +353,7 @@ function handleContentRequest($type, $param = null) {
             
             echo json_encode([
                 'page' => $param,
+                'seo' => getSeoData($contentPage),
                 'sections' => $sections,
             ]);
             break;
@@ -342,6 +396,7 @@ function handleContentRequest($type, $param = null) {
                     'image' => getImageUrl($homepage, 'hero_image'),
                     'imageAlt' => decodeText($homepage->get('image_alt') ?: ''),
                 ],
+                'seo' => getSeoData($homepage),
                 'sections' => [],
             ];
             
@@ -404,6 +459,7 @@ function handleContentRequest($type, $param = null) {
                 'title' => decodeText($page->title),
                 'url' => $page->url,
                 'template' => $page->template->name,
+                'seo' => getSeoData($page),
             ];
             
             // Text fields

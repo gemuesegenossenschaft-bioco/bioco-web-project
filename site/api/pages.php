@@ -34,12 +34,62 @@ if(!$page || !$page->id) {
     exit;
 }
 
+// Helper function for SEO data
+function getSeoDataLegacy($page) {
+    $config = wire('config');
+    
+    // Get OG image URL
+    $ogImageUrl = null;
+    $ogImageWidth = null;
+    $ogImageHeight = null;
+    
+    if ($page->hasField('og_image') && $page->og_image) {
+        $ogImageUrl = $config->urls->httpRoot . ltrim($page->og_image->url, '/');
+        $ogImageWidth = $page->og_image->width;
+        $ogImageHeight = $page->og_image->height;
+    } elseif ($page->hasField('hero_image') && $page->hero_image) {
+        $ogImageUrl = $config->urls->httpRoot . ltrim($page->hero_image->url, '/');
+        $ogImageWidth = $page->hero_image->width;
+        $ogImageHeight = $page->hero_image->height;
+    }
+    
+    $robotsIndex = !($page->hasField('robots_noindex') && $page->robots_noindex);
+    $robotsFollow = !($page->hasField('robots_nofollow') && $page->robots_nofollow);
+    
+    $seo = [
+        'title' => $page->hasField('seo_title') && $page->seo_title 
+            ? $page->seo_title 
+            : $page->title,
+        'description' => $page->hasField('seo_description') 
+            ? ($page->seo_description ?: '') 
+            : '',
+        'canonical' => $page->hasField('canonical_url') && $page->canonical_url 
+            ? $page->canonical_url 
+            : $page->httpUrl,
+        'robots' => [
+            'index' => $robotsIndex,
+            'follow' => $robotsFollow,
+        ],
+    ];
+    
+    if ($ogImageUrl) {
+        $seo['ogImage'] = [
+            'url' => $ogImageUrl,
+            'width' => $ogImageWidth,
+            'height' => $ogImageHeight,
+        ];
+    }
+    
+    return $seo;
+}
+
 // Build page data
 $pageData = [
     'id' => $page->id,
     'title' => $page->title,
     'url' => $page->url,
     'template' => $page->template->name,
+    'seo' => getSeoDataLegacy($page),
 ];
 
 // Text fields

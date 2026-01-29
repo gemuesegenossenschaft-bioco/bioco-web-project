@@ -312,7 +312,7 @@ class ProcessContentPlanning extends Process {
      * JavaScript for interactions
      */
     private function renderScripts() {
-        $ajaxUrl = $this->wire('page')->url;
+        $ajaxUrl = $this->wire('page')->url . 'ajax/';
         return "
         <script>
         (function() {

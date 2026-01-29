@@ -14,12 +14,64 @@ $home = $pages->get('/');
 // Get CSS variant - defaults to 'wireframe', can be overridden by template variations
 $cssVariant = $page->css_variant ? $page->css_variant : 'wireframe';
 
+// SEO data
+$seoTitle = ($page->hasField('seo_title') && $page->seo_title) ? $page->seo_title : $page->title;
+$seoDescription = ($page->hasField('seo_description') && $page->seo_description) ? $page->seo_description : '';
+$canonicalUrl = ($page->hasField('canonical_url') && $page->canonical_url) ? $page->canonical_url : $page->httpUrl;
+$robotsNoindex = $page->hasField('robots_noindex') && $page->robots_noindex;
+$robotsNofollow = $page->hasField('robots_nofollow') && $page->robots_nofollow;
+
+// OG Image: use og_image field, fallback to hero_image
+$ogImageUrl = null;
+if ($page->hasField('og_image') && $page->og_image) {
+    $ogImageUrl = $page->og_image->httpUrl;
+} elseif ($page->hasField('hero_image') && $page->hero_image) {
+    $ogImageUrl = $page->hero_image->httpUrl;
+}
+
 ?><!DOCTYPE html>
 <html lang="de">
 	<head id="html-head">
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title id="html-title"><?php echo $page->title; ?></title>
+		<title id="html-title"><?php echo htmlspecialchars($seoTitle); ?></title>
+		
+		<?php // Meta Description ?>
+		<?php if($seoDescription): ?>
+		<meta name="description" content="<?php echo htmlspecialchars($seoDescription); ?>" />
+		<?php endif; ?>
+		
+		<?php // Canonical URL ?>
+		<link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl); ?>" />
+		
+		<?php // Robots meta tag ?>
+		<?php if($robotsNoindex || $robotsNofollow): ?>
+		<meta name="robots" content="<?php echo $robotsNoindex ? 'noindex' : 'index'; ?>, <?php echo $robotsNofollow ? 'nofollow' : 'follow'; ?>" />
+		<?php endif; ?>
+		
+		<?php // Open Graph tags ?>
+		<meta property="og:title" content="<?php echo htmlspecialchars($seoTitle); ?>" />
+		<?php if($seoDescription): ?>
+		<meta property="og:description" content="<?php echo htmlspecialchars($seoDescription); ?>" />
+		<?php endif; ?>
+		<meta property="og:url" content="<?php echo htmlspecialchars($page->httpUrl); ?>" />
+		<meta property="og:type" content="website" />
+		<meta property="og:locale" content="de_CH" />
+		<meta property="og:site_name" content="biocò" />
+		<?php if($ogImageUrl): ?>
+		<meta property="og:image" content="<?php echo htmlspecialchars($ogImageUrl); ?>" />
+		<?php endif; ?>
+		
+		<?php // Twitter Card tags ?>
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="<?php echo htmlspecialchars($seoTitle); ?>" />
+		<?php if($seoDescription): ?>
+		<meta name="twitter:description" content="<?php echo htmlspecialchars($seoDescription); ?>" />
+		<?php endif; ?>
+		<?php if($ogImageUrl): ?>
+		<meta name="twitter:image" content="<?php echo htmlspecialchars($ogImageUrl); ?>" />
+		<?php endif; ?>
+		
 		<link rel="stylesheet" type="text/css" href="<?php echo $config->urls->templates; ?>styles/<?php echo $cssVariant; ?>.css" />
 	</head>
 	<body id="html-body">

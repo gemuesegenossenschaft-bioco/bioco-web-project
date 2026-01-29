@@ -7,8 +7,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { ProductSchema } from '@/components/StructuredData'
+import { getPageSectionsWithSeo } from '@/lib/processwire'
+import { generateMetadata as generateSeoMetadata } from '@/lib/seo'
 
-export const metadata: Metadata = {
+// Static fallback metadata
+const FALLBACK_METADATA: Metadata = {
   title: 'Gemüseabo Baden | Demeter Gemüse wöchentlich | biocò',
   description: 'Gemüseabo für die Region Baden-Brugg: Wöchentlich frisches Bio-Gemüse in Demeter-Qualität. Solidarische Landwirtschaft vom Geisshof Gebenstorf.',
   keywords: 'gemüseabo, demeter gemüse, bio gemüse, baden, brugg, gebenstorf, wöchentlicher gemüsekorb',
@@ -17,6 +20,21 @@ export const metadata: Metadata = {
     description: 'Gemüseabo für die Region Baden-Brugg: Wöchentlich frisches Bio-Gemüse in Demeter-Qualität.',
     type: 'website',
   },
+}
+
+// Dynamic metadata from CMS
+export async function generateMetadata(): Promise<Metadata> {
+  const { seo } = await getPageSectionsWithSeo('abos')
+  
+  if (seo?.title || seo?.description) {
+    return generateSeoMetadata(seo, {
+      title: FALLBACK_METADATA.title as string,
+      description: FALLBACK_METADATA.description as string,
+      path: '/abos',
+    })
+  }
+  
+  return FALLBACK_METADATA
 }
 
 // ISR: Revalidate every 60 seconds

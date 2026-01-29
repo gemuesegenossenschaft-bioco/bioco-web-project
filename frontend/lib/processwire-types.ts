@@ -6,6 +6,29 @@
  */
 
 // ============================================================================
+// SEO Types
+// ============================================================================
+
+export interface SeoImage {
+  url: string;
+  width?: number;
+  height?: number;
+}
+
+export interface SeoRobots {
+  index: boolean;
+  follow: boolean;
+}
+
+export interface SeoData {
+  title: string;
+  description: string;
+  canonical: string;
+  ogImage?: SeoImage | null;
+  robots: SeoRobots;
+}
+
+// ============================================================================
 // Hero Types
 // ============================================================================
 
@@ -42,6 +65,7 @@ export interface ContentSection {
 export interface SectionsResponse {
   page: string;
   sections: ContentSection[];
+  seo?: SeoData;
 }
 
 // ============================================================================
@@ -51,6 +75,7 @@ export interface SectionsResponse {
 export interface HomepageContent {
   hero: HeroContent;
   sections: ContentSection[];
+  seo?: SeoData;
 }
 
 export interface HomepageResponse extends HomepageContent {}
@@ -107,6 +132,7 @@ export interface PageData {
   css_variant?: string;
   sections?: PageSection[];
   children?: PageData[];
+  seo?: SeoData;
 }
 
 // ============================================================================
