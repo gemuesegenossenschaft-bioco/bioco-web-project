@@ -4995,31 +4995,27 @@ footer a:hover {
   z-index: 4;
 }
 
-/* Navbar Overlay - positioned within hero */
-.navbar-overlay {
+/* Homepage Nav Wrapper - positioned at page level, overlays hero then becomes sticky */
+.homepage-nav-wrapper {
   position: absolute;
-  top: clamp(20px, 3vw, 32px); /* Decreased space by 50% between hero border and navbar/logo */
+  top: clamp(52px, 9vw, 96px); /* Below utility nav */
   left: 0;
   right: 0;
   width: 100%;
-  z-index: 50;
+  z-index: 1100;
   pointer-events: none;
-  background: transparent;
-  padding: 0 clamp(16px, 6vw, 96px); /* Match content padding for alignment */
 }
 
-.navbar-overlay .primary-nav,
-.navbar-overlay .secondary-nav,
-.navbar-overlay .mobile-header-actions {
+.homepage-nav-wrapper .primary-nav,
+.homepage-nav-wrapper .secondary-nav,
+.homepage-nav-wrapper .mobile-header-actions {
   pointer-events: auto;
-  background: transparent;
-  border: none;
 }
 
 /* Ensure logo link is always clickable */
-.navbar-overlay .primary-nav-logo,
-.navbar-overlay .secondary-nav-logo,
-.navbar-overlay .logo-link,
+.homepage-nav-wrapper .primary-nav-logo,
+.homepage-nav-wrapper .secondary-nav-logo,
+.homepage-nav-wrapper .logo-link,
 .primary-nav-logo .logo-link,
 .secondary-nav-logo .logo-link,
 .primary-nav .logo-link,
@@ -5028,136 +5024,159 @@ footer a:hover {
   cursor: pointer !important;
 }
 
-.navbar-overlay .primary-nav,
-.navbar-overlay .secondary-nav {
-  position: relative;
-  width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
+/* Homepage navbar - NOT scrolled (transparent, over hero) */
+.homepage-nav-wrapper .primary-nav:not(.nav-scrolled),
+.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) {
+  background: transparent;
+  border: none;
+  margin-top: 0;
 }
 
-
-.navbar-overlay .primary-nav a,
-.navbar-overlay .secondary-nav a {
+.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) a,
+.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) a {
   color: white;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 
-.navbar-overlay .primary-nav a:hover,
-.navbar-overlay .secondary-nav a:hover {
-  color: white !important; /* White text on hover */
-  background: var(--bioco-green) !important; /* Green background on hover */
-  font-weight: 700; /* Bold text on hover */
+.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) a:hover,
+.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) a:hover {
+  color: white !important;
+  background: var(--bioco-green) !important;
+  font-weight: 700;
   text-decoration: none;
-  transform: translateY(-1px); /* Slight lift effect */
-  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.4); /* Subtle shadow for depth */
-  border-radius: 8px; /* Rounded corners */
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.4);
+  border-radius: 8px;
   transition: all 0.2s ease;
-  text-shadow: none !important; /* Remove text shadow on hover for clarity */
+  text-shadow: none !important;
 }
 
-.navbar-overlay .primary-nav .btn-orange,
-.navbar-overlay .secondary-nav .btn-orange {
+.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .btn-orange,
+.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .btn-orange {
   background: white;
   border: 2px solid white;
   color: var(--bioco-green);
   text-shadow: none;
 }
 
-.navbar-overlay .primary-nav .btn-orange:hover,
-.navbar-overlay .secondary-nav .btn-orange:hover {
-  background: var(--bioco-green) !important; /* Green background on hover */
-  border-color: var(--bioco-green) !important; /* Green border on hover */
-  color: white !important; /* White text on hover */
-  font-weight: 700; /* Bold text on hover */
-  transform: translateY(-2px) scale(1.05); /* Lift and slight scale */
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4); /* More prominent shadow */
+.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .btn-orange:hover,
+.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .btn-orange:hover {
+  background: var(--bioco-green) !important;
+  border-color: var(--bioco-green) !important;
+  color: white !important;
+  font-weight: 700;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
   transition: all 0.2s ease;
 }
 
-.navbar-overlay .primary-nav-logo img,
-.navbar-overlay .secondary-nav-logo img {
-  filter: brightness(0) invert(1); /* Make logo white */
+.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .primary-nav-logo img,
+.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .secondary-nav-logo img {
+  filter: brightness(0) invert(1); /* White logo over hero */
 }
 
+/* Homepage navbar - SCROLLED (sticky, colorful like subpages) */
+.homepage-nav-wrapper:has(.nav-scrolled) {
+  position: sticky;
+  top: 0;
+}
+
+.homepage-nav-wrapper .primary-nav.nav-scrolled,
+.homepage-nav-wrapper .secondary-nav.nav-scrolled {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  margin-top: 0;
+}
+
+.homepage-nav-wrapper .primary-nav.nav-scrolled a,
+.homepage-nav-wrapper .secondary-nav.nav-scrolled a {
+  color: var(--text-secondary);
+  text-shadow: none;
+}
+
+.homepage-nav-wrapper .primary-nav.nav-scrolled a:hover,
+.homepage-nav-wrapper .secondary-nav.nav-scrolled a:hover {
+  color: white !important;
+  background: var(--bioco-green) !important;
+  font-weight: 700;
+  text-decoration: none;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.homepage-nav-wrapper .primary-nav.nav-scrolled .btn-orange,
+.homepage-nav-wrapper .secondary-nav.nav-scrolled .btn-orange {
+  background: var(--bioco-orange);
+  border: 2px solid var(--bioco-orange);
+  color: white;
+  text-shadow: none;
+}
+
+.homepage-nav-wrapper .primary-nav.nav-scrolled .primary-nav-logo img,
+.homepage-nav-wrapper .secondary-nav.nav-scrolled .secondary-nav-logo img {
+  filter: none; /* Normal colored logo when scrolled */
+}
+
+/* Mobile adjustments for homepage nav wrapper */
 @media (max-width: 767px) {
-  /* On mobile, logo should be white when over hero */
-  .navbar-overlay .primary-nav-logo img,
-  .navbar-overlay .secondary-nav-logo img {
-    filter: brightness(0) invert(1); /* Make logo white */
+  .homepage-nav-wrapper {
+    top: clamp(39px, calc(4vw + 15px), 63px);
   }
   
-  /* When scrolled, logo should be normal color */
-  .primary-nav.nav-scrolled .primary-nav-logo img,
-  .secondary-nav.nav-scrolled .secondary-nav-logo img {
-    filter: none; /* Logo back to normal colors when scrolled */
+  .homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .primary-nav-logo img,
+  .homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .secondary-nav-logo img {
+    filter: brightness(0) invert(1); /* White logo over hero on mobile */
+  }
+  
+  .homepage-nav-wrapper .primary-nav.nav-scrolled .primary-nav-logo img,
+  .homepage-nav-wrapper .secondary-nav.nav-scrolled .secondary-nav-logo img {
+    filter: none; /* Normal logo when scrolled on mobile */
+  }
+  
+  /* Hamburger menu - white when over hero */
+  .homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .mobile-menu-toggle,
+  .homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle {
+    color: #ffffff !important;
+  }
+  
+  .homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .mobile-menu-toggle svg,
+  .homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle svg {
+    stroke: #ffffff !important;
+  }
+  
+  /* Hamburger menu - black when scrolled */
+  .homepage-nav-wrapper .primary-nav.nav-scrolled .mobile-menu-toggle,
+  .homepage-nav-wrapper .secondary-nav.nav-scrolled .mobile-menu-toggle {
+    color: #000000 !important;
+  }
+  
+  .homepage-nav-wrapper .primary-nav.nav-scrolled .mobile-menu-toggle svg,
+  .homepage-nav-wrapper .secondary-nav.nav-scrolled .mobile-menu-toggle svg {
+    stroke: #000000 !important;
   }
 }
 
-/* When scrolled out of hero: primary nav sticky on desktop home page */
-.primary-nav.nav-scrolled {
-  position: sticky !important; /* Override navbar-overlay positioning */
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  width: 100% !important;
-  margin-top: 0 !important; /* Remove margin when sticky */
-  background: var(--bg-secondary) !important; /* White background */
-  backdrop-filter: none !important; /* Remove blur */
-  border-bottom: 1px solid var(--border-color) !important; /* Regular border */
-  border-radius: 0 !important; /* No rounded corners */
-  box-shadow: none !important; /* No shadow */
-  z-index: 1100 !important;
+/* Legacy navbar-overlay support (kept for backwards compatibility) */
+.navbar-overlay {
+  position: absolute;
+  top: clamp(20px, 3vw, 32px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 50;
+  pointer-events: none;
+  background: transparent;
+  padding: 0 clamp(16px, 6vw, 96px);
 }
 
-/* On desktop home page: ensure sticky behavior when scrolled */
-@media (min-width: 768px) {
-  body[data-pathname="/"] .primary-nav.nav-scrolled,
-  body[data-pathname="/"] .secondary-nav.nav-scrolled {
-    position: sticky !important;
-    top: 0 !important;
-    background: var(--bg-secondary) !important;
-    border-bottom: 1px solid var(--border-color) !important;
-    margin-top: 0 !important;
-    z-index: 1100 !important;
-  }
-  
-  /* Override navbar-overlay positioning when scrolled */
-  body[data-pathname="/"] .navbar-overlay .primary-nav.nav-scrolled,
-  body[data-pathname="/"] .navbar-overlay .secondary-nav.nav-scrolled {
-    position: sticky !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    background: var(--bg-secondary) !important;
-    border-bottom: 1px solid var(--border-color) !important;
-    margin-top: 0 !important;
-    /* Reset overlay styles */
-    pointer-events: auto !important;
-  }
-  
-  /* Ensure navigation text changes color when scrolled */
-  body[data-pathname="/"] .navbar-overlay .primary-nav.nav-scrolled a,
-  body[data-pathname="/"] .navbar-overlay .secondary-nav.nav-scrolled a {
-    color: var(--text-primary) !important; /* Black text when scrolled */
-    text-shadow: none !important; /* Remove text shadow */
-  }
-  
-  /* Logo should be normal color when scrolled */
-  body[data-pathname="/"] .navbar-overlay .primary-nav.nav-scrolled .primary-nav-logo img,
-  body[data-pathname="/"] .navbar-overlay .secondary-nav.nav-scrolled .secondary-nav-logo img {
-    filter: none !important; /* Logo back to normal colors */
-  }
-  
-  /* Button should be orange when scrolled */
-  body[data-pathname="/"] .navbar-overlay .primary-nav.nav-scrolled .btn-orange,
-  body[data-pathname="/"] .navbar-overlay .secondary-nav.nav-scrolled .btn-orange {
-    background: var(--bioco-orange) !important;
-    border: 2px solid var(--bioco-orange) !important;
-    color: white !important;
-    text-shadow: none !important;
-  }
+.navbar-overlay .primary-nav,
+.navbar-overlay .secondary-nav,
+.navbar-overlay .mobile-header-actions {
+  pointer-events: auto;
+  background: transparent;
+  border: none;
 }
 
 .primary-nav.nav-scrolled ~ .utility-nav,

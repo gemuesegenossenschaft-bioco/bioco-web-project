@@ -47,16 +47,19 @@ export default function Home() {
 
   return (
     <div className="page-shell">
-      {/* Secondary Navigation - Above hero */}
+      {/* Utility Navigation - Above hero */}
       <div className="hero-utility-nav">
         <UtilityNavigation />
       </div>
+      
+      {/* Navbar at page level - becomes sticky when scrolled past hero */}
+      <div className="homepage-nav-wrapper">
+        <PrimaryNavigation />
+        <MobileMenu />
+      </div>
+      
       {/* Hero */}
       <section className="hero-bleed">
-        <div className="navbar-overlay">
-          <PrimaryNavigation />
-          <MobileMenu />
-        </div>
         <div className="hero-bg">
           <Image
             src="/images/FrontseiteStartseite.jpg"

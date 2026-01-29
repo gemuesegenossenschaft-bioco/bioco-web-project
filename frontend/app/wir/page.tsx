@@ -121,8 +121,8 @@ export default async function WirPage() {
               die Gemüseaufbereitung und viele gemeinsame Anlässe statt.
             </p>
               
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px', maxWidth: '900px' }}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
                 <Image
                   src="/images/DerHof1.jpg"
                   alt="Der Geisshof Gebenstorf"
@@ -130,7 +130,7 @@ export default async function WirPage() {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
                 <Image
                   src="/images/DerHof2.JPG"
                   alt="Der Geisshof Gebenstorf"
@@ -138,7 +138,7 @@ export default async function WirPage() {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
                 <Image
                   src="/images/hof/bioco_hof_luftaufnahme_grosses-feld.JPG"
                   alt="Bio-Gemüse Anbaufläche auf dem Geisshof Gebenstorf"
@@ -146,7 +146,7 @@ export default async function WirPage() {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
                 <Image
                   src="/images/hof/bioco_hof_luftaufnahme-kleines-feld.JPG"
                   alt="Demeter Gemüsefeld auf dem Geisshof in Gebenstorf"
@@ -265,6 +265,14 @@ export default async function WirPage() {
                 <div className="timeline-content">
                   <h3>Mitgliederwachstum</h3>
                   <p>Weiteres Wachstum der Mitgliederzahl, Optimierung der Anbauplanung und Logistik.</p>
+                  <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    <a href="/wir/Aargauer_Zeitung_2019.pdf" target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-organic" style={{ display: 'inline-block', fontSize: '0.875rem' }}>
+                      Aargauer Zeitung (2019)
+                    </a>
+                    <a href="/wir/Doppelpunkt_2022.pdf" target="_blank" rel="noopener noreferrer" className="btn btn-secondary btn-organic" style={{ display: 'inline-block', fontSize: '0.875rem' }}>
+                      Doppelpunkt (2022)
+                    </a>
+                  </div>
                 </div>
               </div>
               
