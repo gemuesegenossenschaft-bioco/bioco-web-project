@@ -70,7 +70,7 @@ export default function MitmachenPage() {
             <div id="anmelden" style={{ marginTop: '24px' }} />
           </section>
 
-          <section id="D-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+          <section id="D-02" style={{ marginBottom: 'clamp(24px, 4vw, 48px)' }}>
             <div style={{
               background: 'var(--surface-secondary, #f8f8f6)',
               borderRadius: '24px',
@@ -156,12 +156,14 @@ export default function MitmachenPage() {
                     position: 'relative', 
                     width: '100%', 
                     aspectRatio: '4/3',
-                    background: 'linear-gradient(135deg, rgba(var(--bioco-green-rgb), 0.15), rgba(var(--bioco-green-rgb), 0.05))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
+                    overflow: 'hidden'
                   }}>
-                    <span style={{ fontSize: '3rem', opacity: 0.6 }}>📋</span>
+                    <Image
+                      src="/images/team/betriebsgruppe.JPG"
+                      alt="Betriebsgruppe der Gemüsegenossenschaft biocò Gebenstorf"
+                      fill
+                      style={{ objectFit: 'cover', objectPosition: 'center bottom' }}
+                    />
                   </div>
                   <div style={{ padding: '20px' }}>
                     <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>BG (Betriebsgruppe)</h3>
@@ -182,7 +184,8 @@ export default function MitmachenPage() {
         {/* Schnuppertage - Full Width Section with Different Background */}
         <div style={{ 
           background: 'linear-gradient(180deg, rgba(var(--bioco-green-rgb), 0.08) 0%, rgba(var(--bioco-green-rgb), 0.03) 100%)',
-          padding: 'clamp(48px, 8vw, 96px) 0'
+          paddingTop: 'clamp(24px, 4vw, 48px)',
+          paddingBottom: 'clamp(48px, 8vw, 96px)'
         }}>
           <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 6vw, 96px)' }}>
             <SchnuppertageSection />
@@ -190,8 +193,22 @@ export default function MitmachenPage() {
         </div>
 
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 6vw, 96px)' }}>
-          <section id="D-03" className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)', marginTop: 'clamp(48px, 8vw, 96px)' }}>
-            <div className="two-column-image">
+          <section id="D-03" className="familien-two-col" style={{ 
+            marginBottom: 'clamp(48px, 8vw, 96px)', 
+            marginTop: 'clamp(48px, 8vw, 96px)',
+            display: 'grid',
+            gridTemplateColumns: 'minmax(280px, 1fr) minmax(280px, 1fr)',
+            gap: 'clamp(32px, 5vw, 64px)',
+            alignItems: 'start'
+          }}>
+            <div style={{ 
+              position: 'relative', 
+              width: '100%', 
+              aspectRatio: '4/3', 
+              borderRadius: '24px', 
+              overflow: 'hidden',
+              minHeight: '280px'
+            }}>
               <Image
                 src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
                 alt="Frisch geerntetes Demeter-Gemüse vom Geisshof"
@@ -199,7 +216,7 @@ export default function MitmachenPage() {
                 style={{ objectFit: 'cover', borderRadius: '24px' }}
               />
             </div>
-            <div className="two-column-text">
+            <div>
               <h2>Familien & Kinder auf dem Geisshof</h2>
               <h3 style={{ fontSize: '1.25rem', marginTop: '16px', marginBottom: '12px' }}>Kinder sind willkommen</h3>
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>

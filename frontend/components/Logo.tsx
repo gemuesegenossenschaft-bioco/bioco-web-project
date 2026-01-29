@@ -7,8 +7,8 @@ export function Logo() {
       <Image
         src="/images/bioco-logo.png"
         alt="biocò Logo"
-        width={200}
-        height={60}
+        width={1693}
+        height={1010}
         priority
         style={{ height: 'auto', width: 'auto', maxHeight: '60px' }}
       />

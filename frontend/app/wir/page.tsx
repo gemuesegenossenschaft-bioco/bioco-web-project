@@ -91,9 +91,14 @@ export default async function WirPage() {
               padding: '24px'
             }}>
               <h4 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '20px', fontWeight: '500' }}>Hof-Team</h4>
-              <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
-                <div style={{ maxWidth: '200px' }}>
-                  <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden' }}>
+              <div className="hof-team-grid" style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '1fr 1fr', 
+                gap: '24px',
+                width: '100%'
+              }}>
+                <div>
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden' }}>
                     <Image
                       src="/images/team/hofteam_matthias.JPG"
                       alt="Matthias vom Hof-Team - Demeter Landwirtschaft Geisshof"
@@ -103,8 +108,8 @@ export default async function WirPage() {
                   </div>
                   <h3 style={{ fontSize: '1.25rem' }}>Matthias</h3>
                 </div>
-                <div style={{ maxWidth: '200px' }}>
-                  <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden' }}>
+                <div>
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden' }}>
                     <Image
                       src="/images/team/bioco_hofteam_christian.JPG"
                       alt="Michael vom Hof-Team - Demeter Landwirtschaft Geisshof"

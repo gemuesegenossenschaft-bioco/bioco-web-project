@@ -194,6 +194,12 @@ p {
   flex-direction: column;
 }
 
+@media (max-width: 599px) {
+  .hof-team-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
 .bento-card {
   font-family: 'DM Sans', sans-serif;
   font-weight: 400;
@@ -5699,6 +5705,13 @@ footer a:hover {
   .two-column-text ul,
   .two-column-text ol {
     order: 5;
+  }
+}
+
+/* Familien & Kinder two-column on mitmachen */
+@media (max-width: 767px) {
+  .familien-two-col {
+    grid-template-columns: 1fr !important;
   }
 }
 

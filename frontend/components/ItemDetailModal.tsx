@@ -81,8 +81,8 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
             <Image
               src="/images/bioco-logo.png"
               alt="biocò Logo"
-              width={120}
-              height={36}
+              width={1693}
+              height={1010}
               priority
               style={{ height: 'auto', width: 'auto', maxHeight: '36px' }}
             />
