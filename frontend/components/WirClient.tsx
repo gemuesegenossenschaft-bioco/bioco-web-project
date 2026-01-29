@@ -65,6 +65,11 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const hofTeamSection = getSection('hof_team')
   const hofSection = getSection('geisshof')
   const missionSection = getSection('mission')
+  const solidaritaetSection = getSection('solidaritaet')
+  const nachhaltigkeitSection = getSection('nachhaltigkeit')
+  const gemeinschaftSection = getSection('gemeinschaft')
+  const regionalitaetSection = getSection('regionalitaet')
+  const gottiSection = getSection('gotti')
   const geschichteSection = getSection('geschichte')
   
   const timelineItems = timeline || FALLBACK_TIMELINE
@@ -212,13 +217,22 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
           {/* Mission & Leitbild */}
           <section id="F-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
             <h2>{missionSection?.title || 'Mission & Leitbild'}</h2>
+            {missionSection?.text && (
+              <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginTop: '16px' }}
+                   dangerouslySetInnerHTML={{ __html: missionSection.text }} />
+            )}
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '24px' }}>
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Solidarität</h3>
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                  Wir teilen Arbeit und Ertrag. Solidarische Landwirtschaft bedeutet, dass Produzentinnen und Konsumentinnen zusammenarbeiten.
-                </p>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{solidaritaetSection?.title || 'Solidarität'}</h3>
+                {solidaritaetSection?.text ? (
+                  <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}
+                       dangerouslySetInnerHTML={{ __html: solidaritaetSection.text }} />
+                ) : (
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                    Wir teilen Arbeit und Ertrag. Solidarische Landwirtschaft bedeutet, dass Produzentinnen und Konsumentinnen zusammenarbeiten.
+                  </p>
+                )}
                 <p style={{ marginTop: '12px' }}>
                   <Link href="/solawi" className="btn btn-secondary btn-organic" style={{ display: 'inline-block', fontSize: '0.875rem' }}>
                     → Mehr über solidarische Landwirtschaft
@@ -226,31 +240,51 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                 </p>
               </div>
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Nachhaltigkeit</h3>
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                  Wir arbeiten nach biologisch-dynamischen Prinzipien (Demeter) und fördern Biodiversität, Kreislaufwirtschaft und gesunde Böden.
-                </p>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{nachhaltigkeitSection?.title || 'Nachhaltigkeit'}</h3>
+                {nachhaltigkeitSection?.text ? (
+                  <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                       dangerouslySetInnerHTML={{ __html: nachhaltigkeitSection.text }} />
+                ) : (
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                    Wir arbeiten nach biologisch-dynamischen Prinzipien (Demeter) und fördern Biodiversität, Kreislaufwirtschaft und gesunde Böden.
+                  </p>
+                )}
               </div>
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Gemeinschaft</h3>
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                  biocò lebt von der Gemeinschaft. Jede(r) bringt sich ein, lernt voneinander und gestaltet die Genossenschaft aktiv mit.
-                </p>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{gemeinschaftSection?.title || 'Gemeinschaft'}</h3>
+                {gemeinschaftSection?.text ? (
+                  <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                       dangerouslySetInnerHTML={{ __html: gemeinschaftSection.text }} />
+                ) : (
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                    biocò lebt von der Gemeinschaft. Jede(r) bringt sich ein, lernt voneinander und gestaltet die Genossenschaft aktiv mit.
+                  </p>
+                )}
               </div>
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Regionalität</h3>
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                  Unser Gemüse wächst direkt in der Region Baden-Brugg. Kurze Wege, frische Ernte, lokale Verbundenheit.
-                </p>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{regionalitaetSection?.title || 'Regionalität'}</h3>
+                {regionalitaetSection?.text ? (
+                  <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                       dangerouslySetInnerHTML={{ __html: regionalitaetSection.text }} />
+                ) : (
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                    Unser Gemüse wächst direkt in der Region Baden-Brugg. Kurze Wege, frische Ernte, lokale Verbundenheit.
+                  </p>
+                )}
               </div>
             </div>
 
             <div style={{ marginTop: '32px' }}>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>Gotti-System</h3>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                Neumitglieder werden von einem "Gotti" oder "Götti" (Paten) begleitet. Dieses System hilft neuen Mitgliedern, 
-                sich in der Genossenschaft zurechtzufinden.
-              </p>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>{gottiSection?.title || 'Gotti-System'}</h3>
+              {gottiSection?.text ? (
+                <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                     dangerouslySetInnerHTML={{ __html: gottiSection.text }} />
+              ) : (
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                  Neumitglieder werden von einem "Gotti" oder "Götti" (Paten) begleitet. Dieses System hilft neuen Mitgliedern, 
+                  sich in der Genossenschaft zurechtzufinden.
+                </p>
+              )}
             </div>
           </section>
 
