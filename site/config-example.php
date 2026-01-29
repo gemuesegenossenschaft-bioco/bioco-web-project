@@ -51,6 +51,20 @@ $config->matomo_url = 'https://your-matomo-instance.com/'; // Trailing slash req
 $config->matomo_site_id = 1;
 
 // =============================================================================
+// GITHUB INTEGRATION (Content Planning Dashboard)
+// =============================================================================
+
+// Fine-grained PAT with Issues write permission
+// Create at: GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens
+$config->githubToken = 'github_pat_xxxxxxxxxxxx';
+
+// Repo for creating issues (owner/repo format)
+$config->githubRepo = 'wgusta/bioco-web-project';
+
+// Docs repo for commit feed (owner/repo format)
+$config->githubDocsRepo = 'wgusta/bioco-doku';
+
+// =============================================================================
 // REQUIRED MODULES (install via ProcessWire admin)
 // =============================================================================
 //
