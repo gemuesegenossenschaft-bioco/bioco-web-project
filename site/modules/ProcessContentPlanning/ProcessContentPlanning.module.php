@@ -19,8 +19,9 @@ class ProcessContentPlanning extends Process {
             'permission' => 'page-edit',
             'page' => [
                 'name' => 'content-planning',
-                'parent' => 'page',
-                'title' => 'Content Planning'
+                'parent' => '',  // Empty = top-level menu item
+                'title' => 'Content Planning',
+                'icon' => 'calendar-check-o'
             ],
         ];
     }
