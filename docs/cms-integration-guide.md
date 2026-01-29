@@ -1,0 +1,170 @@
+# Bioco CMS Integration Guide
+
+This guide explains how to complete the ProcessWire CMS integration for the Bioco website.
+
+## Architecture Overview
+
+```
+┌─────────────────────┐     HTTPS/JSON      ┌─────────────────────┐
+│                     │ ◄─────────────────► │                     │
+│   ProcessWire CMS   │    X-API-Key Auth   │   Next.js Frontend  │
+│   (cms.bioco.ch)    │                     │   (Vercel)          │
+│                     │                     │                     │
+│   ┌───────────────┐ │                     │ ┌─────────────────┐ │
+│   │ api.php       │ │                     │ │ processwire.ts  │ │
+│   │ (Unified API) │ │                     │ │ (API Client)    │ │
+│   └───────────────┘ │                     │ └─────────────────┘ │
+└─────────────────────┘                     └─────────────────────┘
+```
+
+## Step 1: Configure cms.bioco.ch Subdomain
+
+1. **DNS Setup**: Add DNS record for `cms.bioco.ch` pointing to your hosting
+2. **SSL Certificate**: Install Let's Encrypt certificate for `cms.bioco.ch`
+3. **ProcessWire**: Install or move ProcessWire to the subdomain
+
+## Step 2: Run the Setup Script
+
+1. In ProcessWire admin, go to Setup → Templates → Add New
+2. Create a template named `api-setup` 
+3. Create a page with this template (e.g., `/setup/`)
+4. Visit the page to run the setup script
+5. Delete the page after setup completes
+
+The setup script (`site/templates/api-setup.php`) will create:
+- All required fields (hero_headline, section_title, etc.)
+- All required templates (api, homepage_content, page_content, etc.)
+- Base page structure (/api/, /content/, /content/homepage/, etc.)
+
+## Step 3: Configure the API Template
+
+After running setup, manually configure the `api` template:
+
+1. Go to Setup → Templates → api → Files
+   - Check "Disable automatic prepend of file: `_init.php`"
+   - Check "Disable automatic append of file: `_main.php`"
+
+2. Go to Setup → Templates → api → URLs
+   - Check "Allow URL Segments"
+   - Set maximum segments to 4
+
+## Step 4: Add API Key to Config
+
+Add to `site/config.php`:
+
+```php
+// API Key for authentication
+$config->apiKey = 'bioco_2026_YOUR_SECURE_KEY_HERE';
+
+// Allowed CORS origins
+$config->allowedOrigins = [
+    'https://bioco.ch',
+    'https://www.bioco.ch',
+    'http://localhost:3000',
+];
+```
+
+Generate a secure key: `php -r "echo bin2hex(random_bytes(32));"`
+
+## Step 5: Add Content in ProcessWire
+
+### Homepage Content
+1. Go to Pages → content → homepage
+2. Fill in:
+   - `hero_headline`: Main hero title
+   - `hero_subtitle`: Subtitle text
+   - `hero_image`: Hero background image
+   - `content_sections`: Add sections for Willkommen, Gemeinsam, Kennenlernen
+
+### Page Content (Mitmachen, Gemuese, Solawi)
+1. Create pages under /content/ with `page_content` template
+2. Add sections using the `content_sections` repeater
+
+### Group Cards (for Mitmachen)
+1. Go to Pages → content → gruppen
+2. Add child pages with `group_card` template for each group
+
+## Step 6: Configure Vercel Environment Variables
+
+In Vercel Dashboard → Project → Settings → Environment Variables:
+
+| Variable | Value | Environments |
+|----------|-------|--------------|
+| `PROCESSWIRE_BASE_URL` | `https://cms.bioco.ch` | Production, Preview |
+| `PROCESSWIRE_API_KEY` | Your API key | Production, Preview |
+
+## Step 7: Test the Integration
+
+### Test API endpoints:
+```bash
+# Health check (no auth required)
+curl https://cms.bioco.ch/api/health
+
+# Content endpoints (with auth)
+curl -H "X-API-Key: YOUR_KEY" https://cms.bioco.ch/api/content/hero
+curl -H "X-API-Key: YOUR_KEY" https://cms.bioco.ch/api/content/homepage
+curl -H "X-API-Key: YOUR_KEY" https://cms.bioco.ch/api/content/sections/mitmachen
+curl -H "X-API-Key: YOUR_KEY" https://cms.bioco.ch/api/content/groups
+```
+
+### Verify in browser:
+1. Deploy to Vercel
+2. Visit the site and check that content loads
+3. Edit content in ProcessWire
+4. Wait 60 seconds (ISR revalidation)
+5. Refresh and verify changes appear
+
+## API Endpoint Reference
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/health` | GET | Health check (no auth) |
+| `/api/content/hero` | GET | Homepage hero data |
+| `/api/content/homepage` | GET | Full homepage (hero + sections) |
+| `/api/content/sections/{page}` | GET | Sections for a specific page |
+| `/api/content/groups` | GET | Group cards for Mitmachen |
+| `/api/content/page?path=/path` | GET | Generic page data |
+| `/api/content/navigation` | GET | Site navigation |
+| `/api/content/events` | GET | Events (upcoming + past) |
+| `/api/content/aktuelles` | GET | News items |
+| `/api/forms/{type}` | POST | Form submissions |
+| `/api/doi/confirm` | GET | DOI confirmation |
+
+## Fallback Behavior
+
+If the CMS is unavailable or returns an error:
+- Pages display hardcoded fallback content from `lib/fallback-content.ts`
+- The site remains functional with static content
+- No user-facing errors are shown
+
+## Troubleshooting
+
+### Images not loading
+- Verify `cms.bioco.ch` is in `next.config.js` image domains
+- Check image URLs are absolute (include full domain)
+
+### API returns 401 Unauthorized
+- Verify `PROCESSWIRE_API_KEY` environment variable is set
+- Check the key matches `$config->apiKey` in ProcessWire
+
+### Content not updating
+- ISR revalidation is 60 seconds by default
+- Force refresh: redeploy or use Vercel's "Redeploy" function
+
+### SSL certificate errors
+- Ensure Let's Encrypt certificate is valid for `cms.bioco.ch`
+- Test with: `curl -I https://cms.bioco.ch`
+
+## Files Reference
+
+### ProcessWire
+- `site/templates/api.php` - Unified API router
+- `site/templates/api-setup.php` - Setup script
+- `site/config-example.php` - Configuration reference
+
+### Next.js
+- `frontend/lib/cmsClient.ts` - API client utilities
+- `frontend/lib/processwire.ts` - Content fetch functions
+- `frontend/lib/processwire-types.ts` - TypeScript types
+- `frontend/lib/fallback-content.ts` - Fallback data
+- `frontend/next.config.js` - Image domains, env vars

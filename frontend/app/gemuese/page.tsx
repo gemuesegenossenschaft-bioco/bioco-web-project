@@ -5,6 +5,8 @@ import { Gallery } from '@/components/Gallery'
 import { Saisonkalender } from '@/components/Saisonkalender'
 import Link from 'next/link'
 import { Metadata } from 'next'
+import { getPageSections } from '@/lib/processwire'
+import { FALLBACK_GEMUESE_INTRO } from '@/lib/fallback-content'
 
 export const metadata: Metadata = {
   title: 'Saisonales Demeter Gemüse | Welche Gemüse haben gerade Saison | biocò',
@@ -17,7 +19,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function GemusePage() {
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60
+
+export default async function GemusePage() {
+  // Fetch CMS content
+  const cmsSections = await getPageSections('gemuese')
+  const introSection = cmsSections.find(s => s.id === 'intro')
   return (
     <>
       <Header />
@@ -25,11 +33,20 @@ export default function GemusePage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
           {/* Page Header with H1 */}
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>Welche Gemüse haben gerade Saison</h1>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-              Unser saisonales Demeter-Gemüse wächst in der Region Baden-Brugg. 
-              Hier erfährst du, welche Gemüsesorten gerade Saison haben und in deinem Gemüsekorb landen.
-            </p>
+            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
+              {introSection?.title || FALLBACK_GEMUESE_INTRO.title}
+            </h1>
+            {introSection?.text ? (
+              <div 
+                style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                dangerouslySetInnerHTML={{ __html: introSection.text }}
+              />
+            ) : (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                Unser saisonales Demeter-Gemüse wächst in der Region Baden-Brugg. 
+                Hier erfährst du, welche Gemüsesorten gerade Saison haben und in deinem Gemüsekorb landen.
+              </p>
+            )}
           </section>
 
           <section id="B-04" style={{ marginBottom: 'clamp(48px, 8vw, 96px)', width: '100%', maxWidth: '100%' }}>

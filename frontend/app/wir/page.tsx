@@ -24,6 +24,9 @@ const DEFAULT = {
   intro: 'Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere solidarische Landwirtschaft prägen.',
 }
 
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60
+
 export default async function WirPage() {
   // Fetch CMS data (returns null if unavailable)
   const cmsData = await getPageData('/wir/')

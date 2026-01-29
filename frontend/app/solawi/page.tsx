@@ -3,6 +3,8 @@ import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import Link from 'next/link'
 import { Metadata } from 'next'
+import { getPageSections } from '@/lib/processwire'
+import { FALLBACK_SOLAWI_INTRO } from '@/lib/fallback-content'
 
 export const metadata: Metadata = {
   title: 'Was ist Solidarische Landwirtschaft (SoLaWi)? | biocò',
@@ -15,7 +17,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function SolawiPage() {
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60
+
+export default async function SolawiPage() {
+  // Fetch CMS content
+  const cmsSections = await getPageSections('solawi')
+  const introSection = cmsSections.find(s => s.id === 'intro')
   return (
     <>
       <Header />
@@ -23,16 +31,27 @@ export default function SolawiPage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
           {/* Page Header with H1 */}
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>Was ist eine Solawi?</h1>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              Eine Solawi – Solidarische Landwirtschaft – ist eine gemeinschaftliche Form des Wirtschaftens,
-              bei der Verbraucherinnen und Produzentinnen eine Partnerschaft eingehen. Die Mitglieder tragen
-              gemeinsam die Kosten der landwirtschaftlichen Produktion und erhalten im Gegenzug einen
-              regelmässigen Anteil an frischem Bio-Gemüse aus lokalem Anbau.
-            </p>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-              Statt anonym einzukaufen, entsteht eine direkte, verlässliche Verbindung zu dem Hof, der uns ernährt.
-            </p>
+            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
+              {introSection?.title || FALLBACK_SOLAWI_INTRO.title}
+            </h1>
+            {introSection?.text ? (
+              <div 
+                style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                dangerouslySetInnerHTML={{ __html: introSection.text }}
+              />
+            ) : (
+              <>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                  Eine Solawi – Solidarische Landwirtschaft – ist eine gemeinschaftliche Form des Wirtschaftens,
+                  bei der Verbraucherinnen und Produzentinnen eine Partnerschaft eingehen. Die Mitglieder tragen
+                  gemeinsam die Kosten der landwirtschaftlichen Produktion und erhalten im Gegenzug einen
+                  regelmässigen Anteil an frischem Bio-Gemüse aus lokalem Anbau.
+                </p>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                  Statt anonym einzukaufen, entsteht eine direkte, verlässliche Verbindung zu dem Hof, der uns ernährt.
+                </p>
+              </>
+            )}
           </section>
 
           {/* Was ist Solawi? */}

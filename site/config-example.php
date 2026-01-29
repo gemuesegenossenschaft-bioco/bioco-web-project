@@ -8,6 +8,21 @@
  */
 
 // =============================================================================
+// CMS API CONFIGURATION (for cms.bioco.ch)
+// =============================================================================
+
+// API Key for authentication (X-API-Key header)
+// Generate a secure random key: bin2hex(random_bytes(32))
+$config->apiKey = 'bioco_2026_CHANGE_THIS_TO_SECURE_KEY';
+
+// Allowed origins for CORS
+$config->allowedOrigins = [
+    'https://bioco.ch',
+    'https://www.bioco.ch',
+    'http://localhost:3000',  // Local development
+];
+
+// =============================================================================
 // EMAIL CONFIGURATION
 // =============================================================================
 
@@ -100,3 +115,101 @@ $config->matomo_site_id = 1;
 //
 // - redaktion (Editor role) - Can edit content
 // - admin (Admin role) - Full access
+
+// =============================================================================
+// CMS API TEMPLATES (for headless CMS)
+// =============================================================================
+//
+// Template: api
+// - Purpose: Unified API endpoint router
+// - Files: Disable _init.php and _main.php auto-append
+// - URLs: Enable URL segments (max 4)
+// - Create page: /api/ with template=api
+//
+// Template: homepage_content
+// - Purpose: Homepage content management
+// - Fields: hero_headline, hero_subtitle, hero_image, image_alt, content_sections
+// - Create page: /content/homepage/
+//
+// Template: page_content
+// - Purpose: Generic content pages (mitmachen, gemuese, solawi, etc.)
+// - Fields: section_title, section_text, section_image, image_alt, content_sections, body
+// - Create pages: /content/mitmachen/, /content/gemuese/, /content/solawi/
+//
+// Template: content_parent
+// - Purpose: Parent container for content pages
+// - Fields: title only
+// - Create page: /content/
+//
+// Template: group_card
+// - Purpose: Group cards for Mitmachen page
+// - Fields: title, card_text, card_image, image_alt
+// - Create pages: /content/gruppen/elki/, /content/gruppen/kraeutergruppe/, etc.
+//
+// Template: news_item
+// - Purpose: News/Aktuelles items
+// - Fields: title, summary, body, hero_image, card_image
+// - Parent: /aktuelles/
+
+// =============================================================================
+// CMS API FIELDS (for headless CMS)
+// =============================================================================
+//
+// Text fields (plain text, decoded for JSON):
+// - hero_headline (Text) - Main hero title
+// - hero_subtitle (Text) - Hero subtitle
+// - section_title (Text) - Section headings
+// - section_id (Text) - Section identifier for CSS/JS targeting
+// - button_text (Text) - Primary CTA button label
+// - button_href (Text) - Primary CTA button URL
+// - button_variant (Text) - Button style variant (primary/secondary)
+// - button2_text (Text) - Secondary CTA button label
+// - button2_href (Text) - Secondary CTA button URL
+// - button2_variant (Text) - Secondary button style variant
+// - card_title (Text) - Card titles
+// - image_alt (Text) - Alt text for images
+//
+// HTML/Rich text fields (CKEditor, not decoded):
+// - section_text (Textarea/CKEditor) - Section body content
+// - card_text (Textarea/CKEditor) - Card descriptions
+//
+// Image fields:
+// - hero_image (Image) - Hero background, max 1 file
+// - section_image (Image) - Section images, max 1 file
+// - card_image (Image) - Card images, max 1 file
+//
+// Repeater fields:
+// - content_sections (Repeater) - Repeatable content sections
+//   Contains: section_id, section_title, section_text, section_image, image_alt,
+//             button_text, button_href, button_variant, button2_text, button2_href, button2_variant
+
+// =============================================================================
+// API ENDPOINT REFERENCE
+// =============================================================================
+//
+// Base URL: https://cms.bioco.ch/api/
+// Authentication: X-API-Key header
+//
+// Health:
+// - GET /api/health - Health check (no auth required)
+//
+// Content:
+// - GET /api/content/hero - Homepage hero data
+// - GET /api/content/homepage - Full homepage content (hero + sections)
+// - GET /api/content/sections/{pagename} - Sections for specific page
+// - GET /api/content/groups - Group cards for Mitmachen
+// - GET /api/content/page?path=/path - Generic page data
+// - GET /api/content/navigation - Site navigation
+// - GET /api/content/events - Events (upcoming + past)
+// - GET /api/content/aktuelles?limit=10 - News items
+// - GET /api/content/instagram?limit=10 - Instagram posts
+//
+// Forms (POST):
+// - POST /api/forms/contact - Contact form
+// - POST /api/forms/subscribe - Newsletter subscription
+// - POST /api/forms/visit - Visit day registration
+// - POST /api/forms/waiting-list - Waiting list signup
+// - POST /api/forms/event-signup - Event signup
+//
+// DOI:
+// - GET /api/doi/confirm?token=xxx - Confirm double opt-in

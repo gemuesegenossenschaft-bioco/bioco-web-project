@@ -5,6 +5,8 @@ import { SchnuppertageSection } from '@/components/SchnuppertageSection'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
+import { getPageSections, getGroupCards } from '@/lib/processwire'
+import { FALLBACK_MITMACHEN_INTRO, FALLBACK_MITMACHEN_SECTIONS, FALLBACK_GROUP_CARDS, mergeSections } from '@/lib/fallback-content'
 
 export const metadata: Metadata = {
   title: 'Mitmachen bei solidarischer Landwirtschaft | biocò Baden',
@@ -17,7 +19,21 @@ export const metadata: Metadata = {
   },
 }
 
-export default function MitmachenPage() {
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60
+
+export default async function MitmachenPage() {
+  // Fetch CMS content with fallbacks
+  const [cmsSections, cmsGroups] = await Promise.all([
+    getPageSections('mitmachen'),
+    getGroupCards(),
+  ])
+  
+  const sections = mergeSections(cmsSections, FALLBACK_MITMACHEN_SECTIONS)
+  const groups = cmsGroups.length > 0 ? cmsGroups : FALLBACK_GROUP_CARDS
+  
+  // Get specific sections
+  const familienSection = sections.find(s => s.id === 'familien')
   return (
     <>
       <Header />
@@ -81,97 +97,54 @@ export default function MitmachenPage() {
                 Bei biocò gibt es verschiedene Arbeitsgruppen und Gemeinschaftsaktivitäten, die das Herzstück unserer Genossenschaft bilden:
               </p>
               
-              {/* Card Grid */}
+              {/* Card Grid - CMS-driven */}
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
                 gap: '24px',
                 marginBottom: '32px'
               }}>
-                {/* Elki Card */}
-                <div style={{ 
-                  background: 'var(--bg-primary, #fff)', 
-                  borderRadius: '16px', 
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-                }}>
-                  <div style={{ 
-                    position: 'relative', 
-                    width: '100%', 
-                    aspectRatio: '4/3',
-                    background: 'linear-gradient(135deg, rgba(var(--bioco-green-rgb), 0.15), rgba(var(--bioco-green-rgb), 0.05))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <Image
-                      src="/images/mitmachen/zusammen-arbeiten.JPG"
-                      alt="Elki Familienaktivitäten bei biocò"
-                      fill
-                      style={{ objectFit: 'cover' }}
-                    />
+                {groups.map((group) => (
+                  <div 
+                    key={group.id}
+                    style={{ 
+                      background: 'var(--bg-primary, #fff)', 
+                      borderRadius: '16px', 
+                      overflow: 'hidden',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                    }}
+                  >
+                    <div style={{ 
+                      position: 'relative', 
+                      width: '100%', 
+                      aspectRatio: '4/3',
+                      background: 'linear-gradient(135deg, rgba(var(--bioco-green-rgb), 0.15), rgba(var(--bioco-green-rgb), 0.05))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {group.image ? (
+                        <Image
+                          src={group.image}
+                          alt={group.imageAlt || group.title}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <span style={{ fontSize: '3rem', opacity: 0.6 }}>🌿</span>
+                      )}
+                    </div>
+                    <div style={{ padding: '20px' }}>
+                      <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>{group.title}</h3>
+                      {group.text ? (
+                        <div 
+                          style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}
+                          dangerouslySetInnerHTML={{ __html: group.text }}
+                        />
+                      ) : null}
+                    </div>
                   </div>
-                  <div style={{ padding: '20px' }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>Elki</h3>
-                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                      Familienaktivitäten und gemeinsame Anlässe. Die Elki-Gruppe organisiert speziell für Familien mit Kindern ausgerichtete Aktivitäten auf dem Hof.
-                    </p>
-                  </div>
-                </div>
-
-                {/* Kräutergruppe Card */}
-                <div style={{ 
-                  background: 'var(--bg-primary, #fff)', 
-                  borderRadius: '16px', 
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-                }}>
-                  <div style={{ 
-                    position: 'relative', 
-                    width: '100%', 
-                    aspectRatio: '4/3',
-                    background: 'linear-gradient(135deg, rgba(var(--bioco-green-rgb), 0.15), rgba(var(--bioco-green-rgb), 0.05))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <span style={{ fontSize: '3rem', opacity: 0.6 }}>🌿</span>
-                  </div>
-                  <div style={{ padding: '20px' }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>Kräutergruppe</h3>
-                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                      Spezialisiert auf Kräuter und Gewürze. Diese Gruppe widmet sich dem Anbau, der Pflege und der Verarbeitung von Kräutern.
-                    </p>
-                  </div>
-                </div>
-
-                {/* BG Card */}
-                <div style={{ 
-                  background: 'var(--bg-primary, #fff)', 
-                  borderRadius: '16px', 
-                  overflow: 'hidden',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
-                }}>
-                  <div style={{ 
-                    position: 'relative', 
-                    width: '100%', 
-                    aspectRatio: '4/3',
-                    overflow: 'hidden'
-                  }}>
-                    <Image
-                      src="/images/team/betriebsgruppe.JPG"
-                      alt="Betriebsgruppe der Gemüsegenossenschaft biocò Gebenstorf"
-                      fill
-                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                    />
-                  </div>
-                  <div style={{ padding: '20px' }}>
-                    <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>BG (Betriebsgruppe)</h3>
-                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
-                      Aktive Mitarbeit in der Betriebsorganisation. Die Betriebsgruppe koordiniert strategische Entscheidungen und plant die Anbauzyklen.
-                    </p>
-                  </div>
-                </div>
+                ))}
               </div>
 
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
@@ -210,31 +183,40 @@ export default function MitmachenPage() {
               minHeight: '280px'
             }}>
               <Image
-                src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
-                alt="Frisch geerntetes Demeter-Gemüse vom Geisshof"
+                src={familienSection?.image || '/images/ernte/bioco_ernte-kürbis-hoch.JPG'}
+                alt={familienSection?.imageAlt || 'Frisch geerntetes Demeter-Gemüse vom Geisshof'}
                 fill
                 style={{ objectFit: 'cover', borderRadius: '24px' }}
               />
             </div>
             <div>
-              <h2>Familien & Kinder auf dem Geisshof</h2>
-              <h3 style={{ fontSize: '1.25rem', marginTop: '16px', marginBottom: '12px' }}>Kinder sind willkommen</h3>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                Familien und Kinder sind sehr regelmässige Helfer auf dem Geisshof. Die Einbindung von Kindern 
-                in den Prozess des Gemüseanbaus ist ein zentraler Bestandteil der biocò-Kultur.
-              </p>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                Auf dem Geisshof erleben Kinder hautnah, wie Gemüse wächst, gepflegt wird und geerntet wird. 
-                Sie lernen spielerisch den Kreislauf der Natur kennen und entwickeln ein tiefes Verständnis für 
-                die Herkunft ihrer Nahrung. Diese praktische Erfahrung prägt nicht nur ihr Verhältnis zu Lebensmitteln, 
-                sondern stärkt auch das Gemeinschaftsgefühl zwischen den Generationen.
-              </p>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                Die Elki-Gruppe organisiert spezielle Aktivitäten für Familien, bei denen Kinder aktiv mithelfen 
-                können – sei es beim Säen, Jäten, Ernten oder beim gemeinsamen Verarbeiten des Gemüses. Diese 
-                gemeinsamen Erlebnisse schaffen bleibende Erinnerungen und fördern das Verständnis für nachhaltige 
-                Landwirtschaft von klein auf.
-              </p>
+              <h2>{familienSection?.title || 'Familien & Kinder auf dem Geisshof'}</h2>
+              {familienSection?.text ? (
+                <div 
+                  style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                  dangerouslySetInnerHTML={{ __html: familienSection.text }}
+                />
+              ) : (
+                <>
+                  <h3 style={{ fontSize: '1.25rem', marginTop: '16px', marginBottom: '12px' }}>Kinder sind willkommen</h3>
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                    Familien und Kinder sind sehr regelmässige Helfer auf dem Geisshof. Die Einbindung von Kindern 
+                    in den Prozess des Gemüseanbaus ist ein zentraler Bestandteil der biocò-Kultur.
+                  </p>
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                    Auf dem Geisshof erleben Kinder hautnah, wie Gemüse wächst, gepflegt wird und geerntet wird. 
+                    Sie lernen spielerisch den Kreislauf der Natur kennen und entwickeln ein tiefes Verständnis für 
+                    die Herkunft ihrer Nahrung. Diese praktische Erfahrung prägt nicht nur ihr Verhältnis zu Lebensmitteln, 
+                    sondern stärkt auch das Gemeinschaftsgefühl zwischen den Generationen.
+                  </p>
+                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                    Die Elki-Gruppe organisiert spezielle Aktivitäten für Familien, bei denen Kinder aktiv mithelfen 
+                    können – sei es beim Säen, Jäten, Ernten oder beim gemeinsamen Verarbeiten des Gemüses. Diese 
+                    gemeinsamen Erlebnisse schaffen bleibende Erinnerungen und fördern das Verständnis für nachhaltige 
+                    Landwirtschaft von klein auf.
+                  </p>
+                </>
+              )}
             </div>
           </section>
 
