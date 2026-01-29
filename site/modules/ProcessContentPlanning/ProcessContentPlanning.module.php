@@ -955,7 +955,8 @@ class ProcessContentPlanning extends Process {
         ];
         if ($token) $headers[] = 'Authorization: Bearer ' . $token;
         
-        $ch = curl_init("https://api.github.com/repos/{$repo}/issues?state=open&per_page=15&labels=feature,bug");
+        // Fetch all open issues (no label filter to show all)
+        $ch = curl_init("https://api.github.com/repos/{$repo}/issues?state=open&per_page=20");
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => $headers,
@@ -965,9 +966,15 @@ class ProcessContentPlanning extends Process {
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         
-        if ($httpCode !== 200) return [];
+        if ($httpCode !== 200) {
+            // Log error for debugging
+            $this->wire()->log->save('github-planning', "Failed to fetch issues (HTTP {$httpCode}): {$response}");
+            return [];
+        }
         
         $issues = json_decode($response, true);
+        if (!is_array($issues)) return [];
+        
         $result = [];
         
         foreach ($issues as $issue) {
