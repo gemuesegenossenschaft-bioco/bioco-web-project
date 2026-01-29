@@ -30,7 +30,7 @@ export function SchnuppertageSection() {
 
   return (
     <>
-      <section id="D-02b" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+      <section id="D-02b">
         <h2>Schnuppertage</h2>
         <h3 style={{ fontSize: '1.25rem', marginTop: '16px', marginBottom: '12px', color: 'var(--bioco-green-dark)' }}>
           Komm schnuppern: So geht solidarischer Gemüseanbau.

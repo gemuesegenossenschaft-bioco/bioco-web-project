@@ -37,27 +37,34 @@ export default function MitmachenPage() {
             <h3 style={{ fontSize: '1.5rem', marginTop: '16px', marginBottom: '12px' }}>Mitarbeit bei biocò</h3>
             <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Jedes Mitglied bringt sich ein und unterstützt die Genossenschaft aktiv. Die Mitarbeit ist ein wichtiger Teil unserer <Link href="/solawi">solidarischen Landwirtschaft</Link>.</p>
 
-            <div style={{ marginTop: '24px' }}>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Tätigkeitsbereiche</h3>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Du kannst dich in verschiedenen Bereichen einbringen:</p>
-              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                <li><strong>Feld/Anbau:</strong> Säen, Pflanzen, Jäten, Ernten, Unkraut bekämpfen</li>
-                <li><strong>Logistik:</strong> Gemüse waschen, sortieren, packen, verteilen</li>
-                <li><strong>Administration:</strong> Büroarbeit, Rechnungen, Kommunikation</li>
-                <li><strong>Events/Organisation:</strong> Schnuppertage, Veranstaltungen, Gemeinschaftsanlässe</li>
-                <li><strong>Andere:</strong> Nach Absprache kannst du auch andere Fähigkeiten einbringen</li>
-              </ul>
-            </div>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
+              gap: '32px', 
+              marginTop: '24px' 
+            }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Tätigkeitsbereiche</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Du kannst dich in verschiedenen Bereichen einbringen:</p>
+                <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '0' }}>
+                  <li><strong>Feld/Anbau:</strong> Säen, Pflanzen, Jäten, Ernten, Unkraut bekämpfen</li>
+                  <li><strong>Logistik:</strong> Gemüse waschen, sortieren, packen, verteilen</li>
+                  <li><strong>Administration:</strong> Büroarbeit, Rechnungen, Kommunikation</li>
+                  <li><strong>Events/Organisation:</strong> Schnuppertage, Veranstaltungen, Gemeinschaftsanlässe</li>
+                  <li><strong>Andere:</strong> Nach Absprache kannst du auch andere Fähigkeiten einbringen</li>
+                </ul>
+              </div>
 
-            <div style={{ marginTop: '24px' }}>
-              <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Planung</h3>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Nach der Anmeldung erhältst du Zugang zum Intranet. Dort kannst du:</p>
-              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-                <li>Deine bevorzugten Tage angeben (Mo-Sa)</li>
-                <li>Deine bevorzugten Zeiten wählen (morgens, nachmittags, abends)</li>
-                <li>Tätigkeitsbereiche auswählen</li>
-                <li>Arbeitseinsätze planen und buchen</li>
-              </ul>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Planung</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Nach der Anmeldung erhältst du Zugang zum Intranet. Dort kannst du:</p>
+                <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '0' }}>
+                  <li>Deine bevorzugten Tage angeben (Mo-Sa)</li>
+                  <li>Deine bevorzugten Zeiten wählen (morgens, nachmittags, abends)</li>
+                  <li>Tätigkeitsbereiche auswählen</li>
+                  <li>Arbeitseinsätze planen und buchen</li>
+                </ul>
+              </div>
             </div>
 
             <div id="anmelden" style={{ marginTop: '24px' }} />
