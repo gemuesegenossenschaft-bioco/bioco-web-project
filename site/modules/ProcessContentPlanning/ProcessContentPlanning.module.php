@@ -44,6 +44,7 @@ class ProcessContentPlanning extends Process {
             `priority` varchar(20) DEFAULT 'medium',
             `status` varchar(20) DEFAULT 'backlog',
             `owner` varchar(100) DEFAULT '',
+            `owner_id` int(11) DEFAULT NULL,
             `linked_page_id` int(11) DEFAULT NULL,
             `github_issue_url` varchar(255) DEFAULT '',
             `github_issue_number` int(11) DEFAULT NULL,
@@ -53,7 +54,8 @@ class ProcessContentPlanning extends Process {
             PRIMARY KEY (`id`),
             KEY `status` (`status`),
             KEY `priority` (`priority`),
-            KEY `linked_page_id` (`linked_page_id`)
+            KEY `linked_page_id` (`linked_page_id`),
+            KEY `owner_id` (`owner_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
         
         try {
@@ -78,6 +80,11 @@ class ProcessContentPlanning extends Process {
         // Add resolved_at if not exists
         try {
             $db->exec("ALTER TABLE `{$table}` ADD COLUMN `resolved_at` int(11) DEFAULT NULL");
+        } catch(\Exception $e) {}
+        
+        // Add owner_id if not exists
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `owner_id` int(11) DEFAULT NULL");
         } catch(\Exception $e) {}
     }
 
@@ -230,6 +237,7 @@ class ProcessContentPlanning extends Process {
         $pageLink = $this->renderPageLink($item, true);
         $createdDate = $this->timeAgo($item['created']);
         $resolvedInfo = $item['resolved_at'] ? "<div class='card-resolved'>Resolved " . $this->timeAgo($item['resolved_at']) . "</div>" : '';
+        $ownerName = $this->getOwnerName($item);
         
         return "
         <div class='kanban-card' data-id='{$item['id']}'>
@@ -241,7 +249,7 @@ class ProcessContentPlanning extends Process {
             {$pageLink}
             <div class='card-meta'>
                 <span class='card-date'><i class='fa fa-clock-o'></i> {$createdDate}</span>
-                <span class='card-owner'>{$this->wire('sanitizer')->entities($item['owner'])}</span>
+                <span class='card-owner'>{$ownerName}</span>
             </div>
             {$resolvedInfo}
             <div class='card-footer'>
@@ -397,10 +405,39 @@ class ProcessContentPlanning extends Process {
     }
 
     /**
+     * Get all ProcessWire users for dropdown
+     */
+    private function getUserOptions() {
+        $users = $this->wire('users')->find("roles!=guest, limit=100");
+        $options = ['<option value="">-- Select Owner --</option>'];
+        
+        foreach ($users as $user) {
+            $name = $this->wire('sanitizer')->entities($user->name);
+            $options[] = "<option value='{$user->id}'>{$name}</option>";
+        }
+        
+        return implode("\n", $options);
+    }
+
+    /**
+     * Get owner name from item
+     */
+    private function getOwnerName($item) {
+        if (!empty($item['owner_id'])) {
+            $user = $this->wire('users')->get($item['owner_id']);
+            if ($user->id) {
+                return $this->wire('sanitizer')->entities($user->name);
+            }
+        }
+        return $this->wire('sanitizer')->entities($item['owner'] ?: '-');
+    }
+
+    /**
      * Add/Edit form with page selector
      */
     private function renderAddForm() {
         $pageOptions = $this->getPageOptions();
+        $userOptions = $this->getUserOptions();
         
         return "
         <div id='item-form-overlay' class='form-overlay' style='display:none;'>
@@ -441,7 +478,9 @@ class ProcessContentPlanning extends Process {
                     </div>
                     <div class='form-row'>
                         <label>Owner</label>
-                        <input type='text' name='owner' id='item-owner'>
+                        <select name='owner_id' id='item-owner'>
+                            {$userOptions}
+                        </select>
                     </div>
                     <div class='form-row'>
                         <label>Linked Page</label>
@@ -539,7 +578,7 @@ class ProcessContentPlanning extends Process {
                             document.getElementById('item-type').value = item.item_type;
                             document.getElementById('item-priority').value = item.priority;
                             document.getElementById('item-status').value = item.status;
-                            document.getElementById('item-owner').value = item.owner || '';
+                            document.getElementById('item-owner').value = item.owner_id || '';
                             document.getElementById('item-page').value = item.linked_page_id || '';
                             document.getElementById('item-details').value = item.details || '';
                             
@@ -705,7 +744,7 @@ class ProcessContentPlanning extends Process {
             'details' => $san->textarea($input->post('details')),
             'priority' => $san->name($input->post('priority')) ?: 'medium',
             'status' => $newStatus,
-            'owner' => $san->text($input->post('owner')),
+            'owner_id' => (int)$input->post('owner_id') ?: null,
             'linked_page_id' => (int)$input->post('linked_page_id') ?: null,
             'modified' => time(),
         ];
@@ -730,12 +769,12 @@ class ProcessContentPlanning extends Process {
             }
             
             $sql = "UPDATE `{$table}` SET 
-                    title=?, item_type=?, details=?, priority=?, status=?, owner=?, linked_page_id=?, modified=?, resolved_at=?
+                    title=?, item_type=?, details=?, priority=?, status=?, owner_id=?, linked_page_id=?, modified=?, resolved_at=?
                     WHERE id=?";
             $query = $db->prepare($sql);
             $query->execute([
                 $data['title'], $data['item_type'], $data['details'],
-                $data['priority'], $data['status'], $data['owner'], 
+                $data['priority'], $data['status'], $data['owner_id'], 
                 $data['linked_page_id'], $data['modified'], $resolvedAt, $id
             ]);
         } else {
@@ -743,12 +782,12 @@ class ProcessContentPlanning extends Process {
             $resolvedAt = $newStatus === 'done' ? time() : null;
             
             $sql = "INSERT INTO `{$table}` 
-                    (title, item_type, details, priority, status, owner, linked_page_id, created, modified, resolved_at)
+                    (title, item_type, details, priority, status, owner_id, linked_page_id, created, modified, resolved_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $query = $db->prepare($sql);
             $query->execute([
                 $data['title'], $data['item_type'], $data['details'],
-                $data['priority'], $data['status'], $data['owner'],
+                $data['priority'], $data['status'], $data['owner_id'],
                 $data['linked_page_id'], $data['created'], $data['modified'], $resolvedAt
             ]);
             $id = $db->lastInsertId();
@@ -833,8 +872,11 @@ class ProcessContentPlanning extends Process {
         $token = $this->wire('config')->githubToken ?? '';
         $repo = $this->wire('config')->githubRepo ?? '';
         
-        if (!$token || !$repo) {
-            return ['success' => false, 'error' => 'GitHub not configured'];
+        if (!$token) {
+            return ['success' => false, 'error' => 'GitHub token not configured. Set $config->githubToken in site/config.php'];
+        }
+        if (!$repo) {
+            return ['success' => false, 'error' => 'GitHub repo not configured. Set $config->githubRepo in site/config.php'];
         }
         
         $issueData = [
@@ -864,6 +906,7 @@ class ProcessContentPlanning extends Process {
         
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
         curl_close($ch);
         
         if ($httpCode === 201) {
@@ -877,7 +920,21 @@ class ProcessContentPlanning extends Process {
         }
         
         $error = json_decode($response, true);
-        return ['success' => false, 'error' => $error['message'] ?? 'GitHub API error'];
+        $errorMsg = $error['message'] ?? 'Unknown error';
+        
+        // Log detailed error
+        $this->wire()->log->save('github-planning', "GitHub API Error (HTTP {$httpCode}): {$errorMsg} | Response: {$response} | Curl Error: {$curlError}");
+        
+        // Return user-friendly message
+        if ($httpCode === 401) {
+            return ['success' => false, 'error' => 'Bad credentials: GitHub token is invalid or expired. Check token in config.php'];
+        } elseif ($httpCode === 404) {
+            return ['success' => false, 'error' => "Repo not found: {$repo}. Check githubRepo in config.php"];
+        } elseif ($httpCode === 403) {
+            return ['success' => false, 'error' => 'Permission denied: Token needs "Issues: Read and write" permission'];
+        }
+        
+        return ['success' => false, 'error' => "GitHub API error ({$httpCode}): {$errorMsg}"];
     }
 
     private function fetchGitHubIssues() {
