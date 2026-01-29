@@ -40,9 +40,9 @@ const FALLBACK_IMAGES = {
 }
 
 const FALLBACK_TIMELINE: TimelineItem[] = [
-  { year: '2013', title: 'Gründung', description: 'Die Gründung von biocò fand am 15.11.2013 statt.' },
+  { year: '2013', title: 'Gründung', description: 'Die Gründung von biocò fand am 15.11.2013 statt. Da war die Betriebsgruppe bereits sehr, sehr aktiv.' },
   { year: '2014', title: 'Erste Gartensaison', description: 'War dann die erste Gartensaison und ab da gab es die ersten Depots.' },
-  { year: '2016', title: 'Packraum', description: 'Der Packraum wird erstellt und in Betrieb genommen.' },
+  { year: '2016', title: 'Packraum', description: 'Der Packraum wird erstellt und in Betrieb genommen. Ein wichtiger Schritt für die Genossenschaft.' },
   { 
     year: '2019-2023', 
     title: 'Mitgliederwachstum', 
@@ -71,8 +71,34 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const regionalitaetSection = getSection('regionalitaet')
   const gottiSection = getSection('gotti')
   const geschichteSection = getSection('geschichte')
+  const timelineHeaderSection = getSection('timeline')
   
-  const timelineItems = timeline || FALLBACK_TIMELINE
+  // Parse timeline items from sections with id starting with 'timeline_'
+  // Format: section_id = timeline_2013, section_title = Gründung, section_text = description
+  // For buttons/links: use button_text and button_href fields
+  const cmsTimelineItems: TimelineItem[] = sections
+    .filter(s => s.id.startsWith('timeline_'))
+    .map(s => {
+      const year = s.id.replace('timeline_', '')
+      const item: TimelineItem = {
+        year,
+        title: s.title,
+        description: s.text?.replace(/<[^>]*>/g, '') || '', // Strip HTML for plain text
+      }
+      // Add links from buttons if present
+      if (s.buttons && s.buttons.length > 0) {
+        item.links = s.buttons.map(b => ({ text: b.text, href: b.href }))
+      }
+      return item
+    })
+    .sort((a, b) => {
+      // Sort by year (handle ranges like "2019-2023")
+      const yearA = parseInt(a.year.split('-')[0])
+      const yearB = parseInt(b.year.split('-')[0])
+      return yearA - yearB
+    })
+  
+  const timelineItems = cmsTimelineItems.length > 0 ? cmsTimelineItems : (timeline || FALLBACK_TIMELINE)
 
   // Get images with fallbacks
   const alleMitgliederImg = alleMitgliederSection?.image || FALLBACK_IMAGES.allMembers
@@ -311,7 +337,11 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
 
           {/* Timeline */}
           <section id="F-04" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>Timeline</h2>
+            <h2>{timelineHeaderSection?.title || 'Timeline'}</h2>
+            {timelineHeaderSection?.text && (
+              <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginTop: '16px' }}
+                   dangerouslySetInnerHTML={{ __html: timelineHeaderSection.text }} />
+            )}
             <div className="timeline" style={{ marginTop: '24px' }}>
               {timelineItems.map((item, i) => (
                 <div key={i} className="timeline-item">
