@@ -148,6 +148,40 @@ export const FALLBACK_AKTUELLES_INTRO = {
 }
 
 // ============================================================================
+// Wir Page Fallbacks
+// ============================================================================
+
+export const FALLBACK_WIR_INTRO = {
+  title: 'biocò: Die Gemüsegenossenschaft',
+  text: `<p>Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <a href="/solawi">solidarische Landwirtschaft</a> prägen.</p>`,
+}
+
+export const FALLBACK_WIR_SECTIONS: ContentSection[] = [
+  {
+    id: 'wir',
+    title: 'Wir',
+    text: `<p>biocò ist eine Gemeinschaft von engagierten Menschen, die gemeinsam für frisches, regionales <a href="/gemuese">Demeter-Gemüse</a> sorgen.</p>`,
+  },
+  {
+    id: 'geisshof',
+    title: 'Der Geisshof',
+    text: `<p>Wir bewirtschaften einen Bio Bauernhof in Baden – genauer gesagt den Geisshof in Gebenstorf im Aargau. Seit 2014 ist dieser Ort das Herzstück von biocò, wo wir Bio-Gemüse in Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg versorgen wir die Region mit frischem, saisonalem Gemüse.</p>`,
+  },
+  {
+    id: 'mission',
+    title: 'Mission & Leitbild',
+    text: '',
+  },
+  {
+    id: 'geschichte',
+    title: 'Geschichte',
+    text: `<p>Die Gemüsegenossenschaft biocò wurde 2014 in Gebenstorf im Aargau gegründet. Aus einer kleinen Gruppe engagierter Menschen aus Baden, Brugg und der Region wurde eine lebendige Gemeinschaft, die solidarische Landwirtschaft lebt.</p>
+<p>Gestartet wurde auf dem Geisshof in Gebenstorf, wo wir bis heute unser Gemüse anbauen. Über die Jahre haben wir die Anbaufläche erweitert, neue Standorte (Depots) für die Gemüseabholung geschaffen und die Strukturen der Genossenschaft weiterentwickelt.</p>
+<p>Heute versorgen wir Mitglieder in der Region Baden-Brugg wöchentlich mit frischem, saisonalem Demeter-Gemüse.</p>`,
+  },
+]
+
+// ============================================================================
 // Helper: Merge CMS content with fallbacks
 // ============================================================================
 

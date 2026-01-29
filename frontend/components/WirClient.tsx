@@ -1,0 +1,305 @@
+'use client'
+
+import { Header } from '@/components/Header'
+import { Footer } from '@/components/Footer'
+import { CTA } from '@/components/CTA'
+import Image from 'next/image'
+import Link from 'next/link'
+import type { ContentSection } from '@/lib/processwire-types'
+
+interface TeamMember {
+  name: string
+  image: string
+  alt: string
+}
+
+interface TimelineItem {
+  year: string
+  title: string
+  description: string
+  links?: Array<{ text: string; href: string }>
+}
+
+interface WirClientProps {
+  intro: {
+    title: string
+    text: string
+  }
+  sections: ContentSection[]
+  teamMembers?: {
+    allMembers?: { image: string; alt: string; title: string; text: string }
+    betriebsgruppe?: { image: string; alt: string; title: string; text: string }
+    hofTeam?: TeamMember[]
+  }
+  timeline?: TimelineItem[]
+}
+
+// Fallback data
+const FALLBACK_HOF_TEAM: TeamMember[] = [
+  { name: 'Matthias', image: '/images/team/hofteam_matthias.JPG', alt: 'Matthias vom Hof-Team' },
+  { name: 'Michael', image: '/images/team/bioco_hofteam_christian.JPG', alt: 'Michael vom Hof-Team' },
+]
+
+const FALLBACK_TIMELINE: TimelineItem[] = [
+  { year: '2013', title: 'Gründung', description: 'Die Gründung von biocò fand am 15.11.2013 statt.' },
+  { year: '2014', title: 'Erste Gartensaison', description: 'War dann die erste Gartensaison und ab da gab es die ersten Depots.' },
+  { year: '2016', title: 'Packraum', description: 'Der Packraum wird erstellt und in Betrieb genommen.' },
+  { 
+    year: '2019-2023', 
+    title: 'Mitgliederwachstum', 
+    description: 'Weiteres Wachstum der Mitgliederzahl, Optimierung der Anbauplanung und Logistik.',
+    links: [
+      { text: 'Aargauer Zeitung (2019)', href: '/wir/Aargauer_Zeitung_2019.pdf' },
+      { text: 'Doppelpunkt (2022)', href: '/wir/Doppelpunkt_2022.pdf' },
+    ]
+  },
+  { year: '2023', title: 'Laufenten', description: 'Wir haben zwei Pärchen Laufenten auf dem Hof, die uns bei der Schneckenjagd unterstützen.' },
+  { year: '2025', title: 'Neue Website', description: 'Launch der neuen Website mit modernem Design und verbesserter Benutzerführung.' },
+]
+
+export function WirClient({ intro, sections, teamMembers, timeline }: WirClientProps) {
+  const getSection = (id: string) => sections.find(s => s.id === id)
+  
+  const wirSection = getSection('wir')
+  const hofSection = getSection('geisshof')
+  const missionSection = getSection('mission')
+  const geschichteSection = getSection('geschichte')
+  
+  const hofTeam = teamMembers?.hofTeam || FALLBACK_HOF_TEAM
+  const timelineItems = timeline || FALLBACK_TIMELINE
+
+  return (
+    <>
+      <Header />
+      <main className="main-content">
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
+          
+          {/* Page Header */}
+          <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>biocò:<br />Die Gemüse-<br />genossenschaft</h1>
+            {intro.text ? (
+              <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
+                   dangerouslySetInnerHTML={{ __html: intro.text }} />
+            ) : (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. 
+                Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <Link href="/solawi">solidarische Landwirtschaft</Link> prägen.
+              </p>
+            )}
+          </section>
+
+          {/* Wir Section */}
+          <section id="F-01" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>{wirSection?.title || 'Wir'}</h2>
+            <h3 style={{ fontSize: '1.5rem', marginTop: '16px', marginBottom: '12px' }}>Team & Hof</h3>
+            {wirSection?.text ? (
+              <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}
+                   dangerouslySetInnerHTML={{ __html: wirSection.text }} />
+            ) : (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                biocò ist eine Gemeinschaft von engagierten Menschen, die gemeinsam für frisches, regionales <Link href="/gemuese">Demeter-Gemüse</Link> sorgen.
+              </p>
+            )}
+            
+            {/* Team Grid */}
+            <div className="wir-top-row" style={{ marginTop: '24px', marginBottom: '48px' }}>
+              <div>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
+                  <Image
+                    src={teamMembers?.allMembers?.image || '/images/team/alle-mitglieder-bioco.jpeg'}
+                    alt={teamMembers?.allMembers?.alt || 'Mitglieder der Gemüsegenossenschaft biocò'}
+                    fill
+                    style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                  />
+                </div>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{teamMembers?.allMembers?.title || 'Alle Mitglieder'}</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                  {teamMembers?.allMembers?.text || 'Jede(r) Genossenschafter/in bringt sich ein – ob bei der Feldarbeit, in der Logistik oder bei Events.'}
+                </p>
+              </div>
+              <div>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
+                  <Image
+                    src={teamMembers?.betriebsgruppe?.image || '/images/team/betriebsgruppe.JPG'}
+                    alt={teamMembers?.betriebsgruppe?.alt || 'Betriebsgruppe der Gemüsegenossenschaft biocò'}
+                    fill
+                    style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                  />
+                </div>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{teamMembers?.betriebsgruppe?.title || 'Betriebsgruppe (BG)'}</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                  {teamMembers?.betriebsgruppe?.text || 'Die Betriebsgruppe koordiniert den Anbau, die Logistik und die Organisation der Genossenschaft.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Hof-Team */}
+            <div style={{ background: 'var(--surface-secondary, #f8f8f6)', borderRadius: '24px', padding: '24px' }}>
+              <h4 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '20px', fontWeight: '500' }}>Hof-Team</h4>
+              <div className="hof-team-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', width: '100%', maxWidth: '500px' }}>
+                {hofTeam.map((member, i) => (
+                  <div key={i}>
+                    <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden', background: 'var(--bg-tertiary, #eee)' }}>
+                      <Image src={member.image} alt={member.alt} fill style={{ objectFit: 'contain', objectPosition: 'center' }} />
+                    </div>
+                    <h3 style={{ fontSize: '1.25rem' }}>{member.name}</h3>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Der Geisshof */}
+          <section id="F-01b" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>{hofSection?.title || 'Der Geisshof'}</h2>
+            {hofSection?.text ? (
+              <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}
+                   dangerouslySetInnerHTML={{ __html: hofSection.text }} />
+            ) : (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+                Wir bewirtschaften einen Bio Bauernhof in Baden – genauer gesagt den Geisshof in Gebenstorf im Aargau. 
+                Seit 2014 ist dieser Ort das Herzstück von biocò, wo wir Bio-Gemüse in Demeter-Qualität anbauen.
+              </p>
+            )}
+              
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '24px' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+                <Image src="/images/DerHof1.jpg" alt="Der Geisshof Gebenstorf" fill style={{ objectFit: 'cover' }} />
+              </div>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+                <Image src="/images/DerHof2.JPG" alt="Der Geisshof Gebenstorf" fill style={{ objectFit: 'cover' }} />
+              </div>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+                <Image src="/images/hof/bioco_hof_luftaufnahme_grosses-feld.JPG" alt="Bio-Gemüse Anbaufläche" fill style={{ objectFit: 'cover' }} />
+              </div>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+                <Image src="/images/hof/bioco_hof_luftaufnahme-kleines-feld.JPG" alt="Demeter Gemüsefeld" fill style={{ objectFit: 'cover' }} />
+              </div>
+            </div>
+              
+            <p style={{ marginTop: '16px' }}>
+              <Link href="/standorte-depots" className="btn btn-secondary btn-organic" style={{ display: 'inline-block' }}>
+                Anfahrtsweg zum Geisshof
+              </Link>
+            </p>
+          </section>
+
+          {/* Mission & Leitbild */}
+          <section id="F-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>{missionSection?.title || 'Mission & Leitbild'}</h2>
+            
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '24px' }}>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Solidarität</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                  Wir teilen Arbeit und Ertrag. Solidarische Landwirtschaft bedeutet, dass Produzentinnen und Konsumentinnen zusammenarbeiten.
+                </p>
+                <p style={{ marginTop: '12px' }}>
+                  <Link href="/solawi" className="btn btn-secondary btn-organic" style={{ display: 'inline-block', fontSize: '0.875rem' }}>
+                    → Mehr über solidarische Landwirtschaft
+                  </Link>
+                </p>
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Nachhaltigkeit</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                  Wir arbeiten nach biologisch-dynamischen Prinzipien (Demeter) und fördern Biodiversität, Kreislaufwirtschaft und gesunde Böden.
+                </p>
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Gemeinschaft</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                  biocò lebt von der Gemeinschaft. Jede(r) bringt sich ein, lernt voneinander und gestaltet die Genossenschaft aktiv mit.
+                </p>
+              </div>
+              <div>
+                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Regionalität</h3>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                  Unser Gemüse wächst direkt in der Region Baden-Brugg. Kurze Wege, frische Ernte, lokale Verbundenheit.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '32px' }}>
+              <h3 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>Gotti-System</h3>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                Neumitglieder werden von einem "Gotti" oder "Götti" (Paten) begleitet. Dieses System hilft neuen Mitgliedern, 
+                sich in der Genossenschaft zurechtzufinden.
+              </p>
+            </div>
+          </section>
+
+          {/* Geschichte */}
+          <section id="F-03" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>{geschichteSection?.title || 'Geschichte'}</h2>
+            {geschichteSection?.text ? (
+              <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}
+                   dangerouslySetInnerHTML={{ __html: geschichteSection.text }} />
+            ) : (
+              <>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                  Die Gemüsegenossenschaft biocò wurde 2014 in Gebenstorf im Aargau gegründet.
+                </p>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                  Gestartet wurde auf dem Geisshof in Gebenstorf, wo wir bis heute unser Gemüse anbauen.
+                </p>
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
+                  Heute versorgen wir Mitglieder in der Region Baden-Brugg wöchentlich mit frischem Demeter-Gemüse.
+                </p>
+              </>
+            )}
+          </section>
+
+          {/* Timeline */}
+          <section id="F-04" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Timeline</h2>
+            <div className="timeline" style={{ marginTop: '24px' }}>
+              {timelineItems.map((item, i) => (
+                <div key={i} className="timeline-item">
+                  <div className="timeline-year">{item.year}</div>
+                  <div className="timeline-content">
+                    <h3>{item.title}</h3>
+                    <p>{item.description}</p>
+                    {item.links && (
+                      <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                        {item.links.map((link, j) => (
+                          <a key={j} href={link.href} target="_blank" rel="noopener noreferrer" 
+                             className="btn btn-secondary btn-organic" style={{ display: 'inline-block', fontSize: '0.875rem' }}>
+                            {link.text}
+                          </a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* Mitmachen CTA */}
+          <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Mitmachen?</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              Werde Teil unserer Gemeinschaft und unterstütze die solidarische Landwirtschaft.
+            </p>
+            <CTA text="Jetzt Mitglied werden" href="/mitmachen" variant="primary" />
+          </section>
+
+          {/* Kennenlernen */}
+          <section id="B-06" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <h2>Möchtest du uns kennenlernen?</h2>
+            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
+              Es können viele Fragen auftauchen. Du hast die Möglichkeit, den Hof und uns an den Schnuppertagen kennenzulernen 
+              oder dich via Kontaktformular bei uns zu melden.
+            </p>
+            <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+              <CTA text="Nimm Kontakt auf" href="/kontakt" variant="primary" />
+              <CTA text="Zu uns finden" href="/standorte-depots" variant="secondary" />
+            </div>
+          </section>
+        </div>
+      </main>
+      <Footer />
+    </>
+  )
+}
