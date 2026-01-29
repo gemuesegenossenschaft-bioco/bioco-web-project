@@ -63,40 +63,127 @@ export default function MitmachenPage() {
             <div id="anmelden" style={{ marginTop: '24px' }} />
           </section>
 
-          <section id="D-02" className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <div className="two-column-text">
-              <h2>Gruppen & Gemeinschaft</h2>
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          <section id="D-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <div style={{
+              background: 'var(--surface-secondary, #f8f8f6)',
+              borderRadius: '24px',
+              padding: 'clamp(24px, 4vw, 48px)'
+            }}>
+              <h2 style={{ marginBottom: '12px' }}>Gruppen & Gemeinschaft</h2>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '32px' }}>
                 Bei biocò gibt es verschiedene Arbeitsgruppen und Gemeinschaftsaktivitäten, die das Herzstück unserer Genossenschaft bilden:
               </p>
-              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-                <li style={{ marginBottom: '16px' }}>
-                  <strong>Elki:</strong> Familienaktivitäten und gemeinsame Anlässe. Die Elki-Gruppe organisiert speziell für Familien mit Kindern ausgerichtete Aktivitäten auf dem Hof. Kinder können spielerisch den Anbau kennenlernen, gemeinsam ernten und die Natur entdecken. Diese Aktivitäten stärken das Gemeinschaftsgefühl und ermöglichen es, auch den jüngsten Mitgliedern die Werte der solidarischen Landwirtschaft zu vermitteln.
-                </li>
-                <li style={{ marginBottom: '16px' }}>
-                  <strong>Kräutergruppe:</strong> Spezialisiert auf Kräuter und Gewürze. Diese Gruppe widmet sich dem Anbau, der Pflege und der Verarbeitung von Kräutern und Gewürzen. Mitglieder lernen verschiedene Kräuterarten kennen, erfahren mehr über deren Verwendung in der Küche und können ihre eigenen Kräuterprodukte herstellen. Die Kräutergruppe trägt zur Vielfalt unseres Angebots bei und bietet eine spezielle Nische für interessierte Mitglieder.
-                </li>
-                <li style={{ marginBottom: '16px' }}>
-                  <strong>BG (Betriebsgruppe):</strong> Aktive Mitarbeit in der Betriebsorganisation. Die Betriebsgruppe koordiniert die strategischen Entscheidungen, plant die Anbauzyklen, organisiert die Logistik und sorgt für die reibungslose Abwicklung des täglichen Betriebs. Mitglieder der BG bringen ihre Expertise in verschiedenen Bereichen ein und gestalten die Zukunft der Genossenschaft aktiv mit.
-                </li>
-              </ul>
+              
+              {/* Card Grid */}
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', 
+                gap: '24px',
+                marginBottom: '32px'
+              }}>
+                {/* Elki Card */}
+                <div style={{ 
+                  background: 'var(--bg-primary, #fff)', 
+                  borderRadius: '16px', 
+                  overflow: 'hidden',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                }}>
+                  <div style={{ 
+                    position: 'relative', 
+                    width: '100%', 
+                    aspectRatio: '4/3',
+                    background: 'linear-gradient(135deg, rgba(var(--bioco-green-rgb), 0.15), rgba(var(--bioco-green-rgb), 0.05))',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <Image
+                      src="/images/mitmachen/zusammen-arbeiten.JPG"
+                      alt="Elki Familienaktivitäten bei biocò"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+                  <div style={{ padding: '20px' }}>
+                    <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>Elki</h3>
+                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+                      Familienaktivitäten und gemeinsame Anlässe. Die Elki-Gruppe organisiert speziell für Familien mit Kindern ausgerichtete Aktivitäten auf dem Hof.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Kräutergruppe Card */}
+                <div style={{ 
+                  background: 'var(--bg-primary, #fff)', 
+                  borderRadius: '16px', 
+                  overflow: 'hidden',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                }}>
+                  <div style={{ 
+                    position: 'relative', 
+                    width: '100%', 
+                    aspectRatio: '4/3',
+                    background: 'linear-gradient(135deg, rgba(var(--bioco-green-rgb), 0.15), rgba(var(--bioco-green-rgb), 0.05))',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{ fontSize: '3rem', opacity: 0.6 }}>🌿</span>
+                  </div>
+                  <div style={{ padding: '20px' }}>
+                    <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>Kräutergruppe</h3>
+                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+                      Spezialisiert auf Kräuter und Gewürze. Diese Gruppe widmet sich dem Anbau, der Pflege und der Verarbeitung von Kräutern.
+                    </p>
+                  </div>
+                </div>
+
+                {/* BG Card */}
+                <div style={{ 
+                  background: 'var(--bg-primary, #fff)', 
+                  borderRadius: '16px', 
+                  overflow: 'hidden',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                }}>
+                  <div style={{ 
+                    position: 'relative', 
+                    width: '100%', 
+                    aspectRatio: '4/3',
+                    background: 'linear-gradient(135deg, rgba(var(--bioco-green-rgb), 0.15), rgba(var(--bioco-green-rgb), 0.05))',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <span style={{ fontSize: '3rem', opacity: 0.6 }}>📋</span>
+                  </div>
+                  <div style={{ padding: '20px' }}>
+                    <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>BG (Betriebsgruppe)</h3>
+                    <p style={{ fontSize: '0.95rem', lineHeight: '1.6', color: 'var(--text-secondary)' }}>
+                      Aktive Mitarbeit in der Betriebsorganisation. Die Betriebsgruppe koordiniert strategische Entscheidungen und plant die Anbauzyklen.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                 Diese Gruppen ermöglichen es, sich nach eigenen Interessen und Fähigkeiten einzubringen und die Genossenschaft aktiv mitzugestalten. Jede Gruppe trägt auf ihre Weise zum Erfolg und zur Gemeinschaft bei biocò bei.
               </p>
             </div>
-            <div className="two-column-image">
-              <Image
-                src="/images/mitmachen/zusammen-arbeiten.JPG"
-                alt="Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg"
-                fill
-                style={{ objectFit: 'cover', borderRadius: '24px' }}
-              />
-            </div>
           </section>
+        </div>
 
-          <SchnuppertageSection />
+        {/* Schnuppertage - Full Width Section with Different Background */}
+        <div style={{ 
+          background: 'linear-gradient(180deg, rgba(var(--bioco-green-rgb), 0.08) 0%, rgba(var(--bioco-green-rgb), 0.03) 100%)',
+          padding: 'clamp(48px, 8vw, 96px) 0'
+        }}>
+          <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 6vw, 96px)' }}>
+            <SchnuppertageSection />
+          </div>
+        </div>
 
-          <section id="D-03" className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 clamp(16px, 6vw, 96px)' }}>
+          <section id="D-03" className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)', marginTop: 'clamp(48px, 8vw, 96px)' }}>
             <div className="two-column-image">
               <Image
                 src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
