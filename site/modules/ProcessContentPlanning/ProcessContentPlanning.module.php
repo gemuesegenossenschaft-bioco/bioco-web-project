@@ -19,10 +19,18 @@ class ProcessContentPlanning extends Process {
             'permission' => 'page-edit',
             'page' => [
                 'name' => 'content-planning',
-                'parent' => '',  // Empty = top-level menu item
+                'parent' => 'page',  // Under Pages, shows at top
                 'title' => 'Content Planning',
                 'icon' => 'calendar-check-o'
             ],
+            'nav' => [
+                [
+                    'url' => 'content-planning',
+                    'label' => 'Content Planning',
+                    'icon' => 'calendar-check-o',
+                    'navJSON' => 'navJSON/"{"url":"content-planning","label":"Content Planning","icon":"calendar-check-o"}"'
+                ]
+            ]
         ];
     }
 
