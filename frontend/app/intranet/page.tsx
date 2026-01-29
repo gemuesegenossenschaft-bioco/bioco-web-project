@@ -47,6 +47,8 @@ export default function IntranetPage() {
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Der aktuelle Verteilplan für die Gemüsekorb-Abholung.</p>
                 <a 
                   href="/intranet/Verteilplan_Dienstag_und_Freitag.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn btn-secondary btn-organic"
                   style={{ display: 'inline-block' }}
                 >
@@ -59,6 +61,8 @@ export default function IntranetPage() {
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Formular für die Rückforderung von Fahrspesen.</p>
                 <a 
                   href="/intranet/1408_FahrspesenRueckforderung.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="btn btn-secondary btn-organic"
                   style={{ display: 'inline-block' }}
                 >

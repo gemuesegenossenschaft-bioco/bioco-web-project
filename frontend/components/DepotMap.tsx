@@ -220,22 +220,34 @@ export function DepotMap() {
         <div className="location-addresses">
           <h4>Depot-Standorte</h4>
           <div className="address-list">
-            <div style={{ marginBottom: 'var(--spacing-lg)', paddingBottom: 'var(--spacing-lg)', borderBottom: 'none' }}>
-              <h5 style={{ 
-                color: 'black', 
+            <div
+              style={{
+                marginBottom: 'var(--spacing-lg)',
+                padding: 'var(--spacing-lg)',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '12px',
+                border: '1px solid var(--border-color, #e5e5e5)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+              }}
+            >
+              <h5 style={{
+                color: 'var(--bioco-green-dark, #1b5e20)',
                 marginBottom: 'var(--spacing-md)',
+                marginTop: 0,
+                paddingBottom: 'var(--spacing-sm)',
+                borderBottom: '2px solid var(--bioco-green, #2e7d32)',
                 fontSize: '1.25rem',
                 fontWeight: '700'
               }}>
                 Dienstag
               </h5>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-md)' }}>
                 {depotLocations.filter(d => d.day === 'Dienstag').map((depot) => (
                   <div key={depot.id} className="address-item" style={{ 
                     padding: 'var(--spacing-md)',
-                    backgroundColor: 'var(--bg-secondary)',
+                    backgroundColor: 'var(--bg-primary)',
                     borderRadius: '8px',
-                    border: 'none'
+                    border: '1px solid var(--border-color, #eee)'
                   }}>
                     <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '8px' }}>{depot.name}</strong>
                     {!hideAddressIds.has(depot.id) && <p style={{ marginBottom: '8px' }}>{depot.address}</p>}
@@ -265,22 +277,33 @@ export function DepotMap() {
                 ))}
               </div>
             </div>
-            <div>
-              <h5 style={{ 
-                color: 'black', 
+            <div
+              style={{
+                padding: 'var(--spacing-lg)',
+                backgroundColor: 'var(--bg-secondary)',
+                borderRadius: '12px',
+                border: '1px solid var(--border-color, #e5e5e5)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+              }}
+            >
+              <h5 style={{
+                color: 'var(--bioco-green-dark, #1b5e20)',
                 marginBottom: 'var(--spacing-md)',
+                marginTop: 0,
+                paddingBottom: 'var(--spacing-sm)',
+                borderBottom: '2px solid var(--bioco-green, #2e7d32)',
                 fontSize: '1.25rem',
                 fontWeight: '700'
               }}>
                 Freitag
               </h5>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-md)' }}>
                 {depotLocations.filter(d => d.day === 'Freitag').map((depot) => (
                   <div key={depot.id} className="address-item" style={{ 
                     padding: 'var(--spacing-md)',
-                    backgroundColor: 'var(--bg-secondary)',
+                    backgroundColor: 'var(--bg-primary)',
                     borderRadius: '8px',
-                    border: 'none'
+                    border: '1px solid var(--border-color, #eee)'
                   }}>
                     <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '8px' }}>{depot.name}</strong>
                     {!hideAddressIds.has(depot.id) && <p style={{ marginBottom: '8px' }}>{depot.address}</p>}

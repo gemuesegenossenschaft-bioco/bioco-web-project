@@ -59,7 +59,7 @@ export default function Home() {
         </div>
         <div className="hero-bg">
           <Image
-            src="/images/hero/bioco_hero-junge-mit-kuerbis.JPG"
+            src="/images/FrontseiteStartseite.jpg"
             alt="Solidarische Landwirtschaft auf dem Feld"
             fill
             priority
@@ -107,7 +107,7 @@ export default function Home() {
           <section className="two-column-section">
             <div className="two-column-image">
               <Image
-                src="/images/ernte/bioco_ernte-kürbis-hoch.JPG"
+                src="/images/gemeinsamSolidarischFrisch.JPG"
                 alt="Frisch geerntetes Demeter-Gemüse vom Geisshof"
                 fill
                 priority

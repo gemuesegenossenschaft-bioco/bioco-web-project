@@ -121,8 +121,24 @@ export default async function WirPage() {
               die Gemüseaufbereitung und viele gemeinsame Anlässe statt.
             </p>
               
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '24px' }}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px', maxWidth: '900px' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden' }}>
+                <Image
+                  src="/images/DerHof1.jpg"
+                  alt="Der Geisshof Gebenstorf"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden' }}>
+                <Image
+                  src="/images/DerHof2.JPG"
+                  alt="Der Geisshof Gebenstorf"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </div>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden' }}>
                 <Image
                   src="/images/hof/bioco_hof_luftaufnahme_grosses-feld.JPG"
                   alt="Bio-Gemüse Anbaufläche auf dem Geisshof Gebenstorf"
@@ -130,7 +146,7 @@ export default async function WirPage() {
                   style={{ objectFit: 'cover' }}
                 />
               </div>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '16px', overflow: 'hidden' }}>
                 <Image
                   src="/images/hof/bioco_hof_luftaufnahme-kleines-feld.JPG"
                   alt="Demeter Gemüsefeld auf dem Geisshof in Gebenstorf"

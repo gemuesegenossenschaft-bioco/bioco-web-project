@@ -15,30 +15,26 @@ export default function StatutenPage() {
             
             <div style={{ marginTop: '24px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
               <h3>Dokumente zum Download</h3>
-              <ul style={{ marginTop: '8px' }}>
-                <li>
-                  <a 
-                    href="https://bioco.ch/wp-content/uploads/2018/01/1801_Beitritts-Erklaerung.pdf" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary"
-                    style={{ display: 'inline-block', marginTop: '8px' }}
-                  >
-                    Statuten (PDF)
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="https://bioco.ch/wp-content/uploads/2023/12/2023-Abo-Bestellung.pdf" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="btn btn-secondary"
-                    style={{ display: 'inline-block', marginTop: '8px' }}
-                  >
-                    Reglement (PDF)
-                  </a>
-                </li>
-              </ul>
+              <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                <a
+                  href="/statuten/13-11-15_Statuten_bioco.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-organic"
+                  style={{ display: 'inline-block' }}
+                >
+                  Statuten (PDF)
+                </a>
+                <a
+                  href="/statuten/2212_Betriebsreglement.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-secondary btn-organic"
+                  style={{ display: 'inline-block' }}
+                >
+                  Reglement (PDF)
+                </a>
+              </div>
             </div>
 
             <div style={{ marginTop: '24px' }}>
