@@ -1,8 +1,13 @@
 <?php namespace ProcessWire;
 
 // Template file for "home" template used by the homepage
-// Uses wireframe structure from _main.php
-// The #content div in this file will replace the #content div in _main.php
+// Redirect to content planning if user is logged in
+if ($user->isLoggedin()) {
+    $session->redirect('/processwire/content-planning/');
+}
+
+// If not logged in, redirect to login page
+$session->redirect('/processwire/');
 
 ?>
 
