@@ -53,12 +53,18 @@ export interface ContentButton {
   variant: 'primary' | 'secondary' | string;
 }
 
+export interface ContentImage {
+  url: string;
+  alt: string;
+}
+
 export interface ContentSection {
   id: string;
   title: string;
   text: string;  // May contain HTML from CKEditor
   image?: string | null;
   imageAlt?: string;
+  images?: ContentImage[];  // For sections with multiple images
   buttons?: ContentButton[];
 }
 

@@ -7,12 +7,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { ContentSection } from '@/lib/processwire-types'
 
-interface TeamMember {
-  name: string
-  image: string
-  alt: string
-}
-
 interface TimelineItem {
   year: string
   title: string
@@ -26,19 +20,24 @@ interface WirClientProps {
     text: string
   }
   sections: ContentSection[]
-  teamMembers?: {
-    allMembers?: { image: string; alt: string; title: string; text: string }
-    betriebsgruppe?: { image: string; alt: string; title: string; text: string }
-    hofTeam?: TeamMember[]
-  }
   timeline?: TimelineItem[]
 }
 
-// Fallback data
-const FALLBACK_HOF_TEAM: TeamMember[] = [
-  { name: 'Matthias', image: '/images/team/hofteam_matthias.JPG', alt: 'Matthias vom Hof-Team' },
-  { name: 'Michael', image: '/images/team/bioco_hofteam_christian.JPG', alt: 'Michael vom Hof-Team' },
-]
+// Fallback images
+const FALLBACK_IMAGES = {
+  allMembers: '/images/team/alle-mitglieder-bioco.jpeg',
+  betriebsgruppe: '/images/team/betriebsgruppe.JPG',
+  hofTeam: [
+    { url: '/images/team/hofteam_matthias.JPG', alt: 'Matthias vom Hof-Team', name: 'Matthias' },
+    { url: '/images/team/bioco_hofteam_christian.JPG', alt: 'Michael vom Hof-Team', name: 'Michael' },
+  ],
+  geisshof: [
+    { url: '/images/DerHof1.jpg', alt: 'Der Geisshof Gebenstorf' },
+    { url: '/images/DerHof2.JPG', alt: 'Der Geisshof Gebenstorf' },
+    { url: '/images/hof/bioco_hof_luftaufnahme_grosses-feld.JPG', alt: 'Bio-Gemüse Anbaufläche' },
+    { url: '/images/hof/bioco_hof_luftaufnahme-kleines-feld.JPG', alt: 'Demeter Gemüsefeld' },
+  ],
+}
 
 const FALLBACK_TIMELINE: TimelineItem[] = [
   { year: '2013', title: 'Gründung', description: 'Die Gründung von biocò fand am 15.11.2013 statt.' },
@@ -57,16 +56,39 @@ const FALLBACK_TIMELINE: TimelineItem[] = [
   { year: '2025', title: 'Neue Website', description: 'Launch der neuen Website mit modernem Design und verbesserter Benutzerführung.' },
 ]
 
-export function WirClient({ intro, sections, teamMembers, timeline }: WirClientProps) {
+export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const getSection = (id: string) => sections.find(s => s.id === id)
   
   const wirSection = getSection('wir')
+  const alleMitgliederSection = getSection('alle_mitglieder')
+  const betriebsgruppeSection = getSection('betriebsgruppe')
+  const hofTeamSection = getSection('hof_team')
   const hofSection = getSection('geisshof')
   const missionSection = getSection('mission')
   const geschichteSection = getSection('geschichte')
   
-  const hofTeam = teamMembers?.hofTeam || FALLBACK_HOF_TEAM
   const timelineItems = timeline || FALLBACK_TIMELINE
+
+  // Get images with fallbacks
+  const alleMitgliederImg = alleMitgliederSection?.image || FALLBACK_IMAGES.allMembers
+  const alleMitgliederAlt = alleMitgliederSection?.imageAlt || 'Mitglieder der Gemüsegenossenschaft biocò'
+  
+  const betriebsgruppeImg = betriebsgruppeSection?.image || FALLBACK_IMAGES.betriebsgruppe
+  const betriebsgruppeAlt = betriebsgruppeSection?.imageAlt || 'Betriebsgruppe der Gemüsegenossenschaft biocò'
+  
+  // Hof-Team images from section.images array or fallback
+  const hofTeamImages = hofTeamSection?.images?.length 
+    ? hofTeamSection.images.map((img, i) => ({
+        url: img.url,
+        alt: img.alt,
+        name: img.alt.split(' ')[0] || `Team ${i + 1}`, // Extract name from alt text
+      }))
+    : FALLBACK_IMAGES.hofTeam
+  
+  // Geisshof images from section.images array or fallback
+  const geisshofImages = hofSection?.images?.length 
+    ? hofSection.images 
+    : FALLBACK_IMAGES.geisshof
 
   return (
     <>
@@ -106,41 +128,51 @@ export function WirClient({ intro, sections, teamMembers, timeline }: WirClientP
               <div>
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
                   <Image
-                    src={teamMembers?.allMembers?.image || '/images/team/alle-mitglieder-bioco.jpeg'}
-                    alt={teamMembers?.allMembers?.alt || 'Mitglieder der Gemüsegenossenschaft biocò'}
+                    src={alleMitgliederImg}
+                    alt={alleMitgliederAlt}
                     fill
                     style={{ objectFit: 'cover', objectPosition: 'center top' }}
                   />
                 </div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{teamMembers?.allMembers?.title || 'Alle Mitglieder'}</h3>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{alleMitgliederSection?.title || 'Alle Mitglieder'}</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                  {teamMembers?.allMembers?.text || 'Jede(r) Genossenschafter/in bringt sich ein – ob bei der Feldarbeit, in der Logistik oder bei Events.'}
+                  {alleMitgliederSection?.text ? (
+                    <span dangerouslySetInnerHTML={{ __html: alleMitgliederSection.text }} />
+                  ) : (
+                    'Jede(r) Genossenschafter/in bringt sich ein – ob bei der Feldarbeit, in der Logistik oder bei Events.'
+                  )}
                 </p>
               </div>
               <div>
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
                   <Image
-                    src={teamMembers?.betriebsgruppe?.image || '/images/team/betriebsgruppe.JPG'}
-                    alt={teamMembers?.betriebsgruppe?.alt || 'Betriebsgruppe der Gemüsegenossenschaft biocò'}
+                    src={betriebsgruppeImg}
+                    alt={betriebsgruppeAlt}
                     fill
                     style={{ objectFit: 'cover', objectPosition: 'center top' }}
                   />
                 </div>
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{teamMembers?.betriebsgruppe?.title || 'Betriebsgruppe (BG)'}</h3>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{betriebsgruppeSection?.title || 'Betriebsgruppe (BG)'}</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                  {teamMembers?.betriebsgruppe?.text || 'Die Betriebsgruppe koordiniert den Anbau, die Logistik und die Organisation der Genossenschaft.'}
+                  {betriebsgruppeSection?.text ? (
+                    <span dangerouslySetInnerHTML={{ __html: betriebsgruppeSection.text }} />
+                  ) : (
+                    'Die Betriebsgruppe koordiniert den Anbau, die Logistik und die Organisation der Genossenschaft.'
+                  )}
                 </p>
               </div>
             </div>
 
             {/* Hof-Team */}
             <div style={{ background: 'var(--surface-secondary, #f8f8f6)', borderRadius: '24px', padding: '24px' }}>
-              <h4 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '20px', fontWeight: '500' }}>Hof-Team</h4>
+              <h4 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '20px', fontWeight: '500' }}>
+                {hofTeamSection?.title || 'Hof-Team'}
+              </h4>
               <div className="hof-team-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', width: '100%', maxWidth: '500px' }}>
-                {hofTeam.map((member, i) => (
+                {hofTeamImages.map((member, i) => (
                   <div key={i}>
                     <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden', background: 'var(--bg-tertiary, #eee)' }}>
-                      <Image src={member.image} alt={member.alt} fill style={{ objectFit: 'contain', objectPosition: 'center' }} />
+                      <Image src={member.url} alt={member.alt} fill style={{ objectFit: 'contain', objectPosition: 'center' }} />
                     </div>
                     <h3 style={{ fontSize: '1.25rem' }}>{member.name}</h3>
                   </div>
@@ -163,18 +195,11 @@ export function WirClient({ intro, sections, teamMembers, timeline }: WirClientP
             )}
               
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '24px' }}>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
-                <Image src="/images/DerHof1.jpg" alt="Der Geisshof Gebenstorf" fill style={{ objectFit: 'cover' }} />
-              </div>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
-                <Image src="/images/DerHof2.JPG" alt="Der Geisshof Gebenstorf" fill style={{ objectFit: 'cover' }} />
-              </div>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
-                <Image src="/images/hof/bioco_hof_luftaufnahme_grosses-feld.JPG" alt="Bio-Gemüse Anbaufläche" fill style={{ objectFit: 'cover' }} />
-              </div>
-              <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
-                <Image src="/images/hof/bioco_hof_luftaufnahme-kleines-feld.JPG" alt="Demeter Gemüsefeld" fill style={{ objectFit: 'cover' }} />
-              </div>
+              {geisshofImages.map((img, i) => (
+                <div key={i} style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
+                  <Image src={img.url} alt={img.alt} fill style={{ objectFit: 'cover' }} />
+                </div>
+              ))}
             </div>
               
             <p style={{ marginTop: '16px' }}>

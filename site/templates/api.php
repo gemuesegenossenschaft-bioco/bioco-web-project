@@ -308,9 +308,21 @@ function handleContentRequest($type, $param = null) {
                         'text' => $section->get('section_text') ?: '',
                     ];
                     
+                    // Single image
                     if ($section->hasField('section_image') && $section->section_image) {
                         $sectionData['image'] = getImageUrl($section, 'section_image');
                         $sectionData['imageAlt'] = decodeText($section->get('image_alt') ?: $sectionData['title']);
+                    }
+                    
+                    // Multiple images (section_images field)
+                    if ($section->hasField('section_images') && $section->section_images && $section->section_images->count()) {
+                        $sectionData['images'] = [];
+                        foreach ($section->section_images as $img) {
+                            $sectionData['images'][] = [
+                                'url' => wire('config')->urls->httpRoot . ltrim($img->url, '/'),
+                                'alt' => $img->description ?: decodeText($sectionData['title']),
+                            ];
+                        }
                     }
                     
                     // Check for buttons
