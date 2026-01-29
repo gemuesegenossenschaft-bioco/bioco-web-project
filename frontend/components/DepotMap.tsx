@@ -14,6 +14,9 @@ interface DepotLocation {
   notes?: string
 }
 
+// Depots that do not show address text (only name + Route planen)
+const hideAddressIds = new Set(['casa-flora', 'laegernstrasse', 'ennetbaden', 'kupperhaus'])
+
 // Specific depot locations from Gemüseausliefertour document
 const depotLocations: DepotLocation[] = [
   // Dienstag (Tuesday) depots
@@ -159,9 +162,8 @@ export function DepotMap() {
         const popupContent = `
           <div style="padding: 8px;">
             <strong>${depot.name}</strong><br>
-            ${depot.address}<br>
+            ${hideAddressIds.has(depot.id) ? '' : `${depot.address}<br>`}
             <small><strong>${depot.day}</strong></small><br>
-            ${depot.contact ? `<small>Kontakt: ${depot.contact}</small><br>` : ''}
             ${depot.website ? `<a href="${depot.website}" target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 8px; padding: 12px 24px; background: #2e7d32; color: #ffffff; border: 2px solid #2e7d32; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 1rem; font-family: 'DM Sans', sans-serif; transition: all 0.2s ease; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.08);">Zur Website →</a>` : ''}
           </div>
         `
@@ -236,8 +238,7 @@ export function DepotMap() {
                     border: 'none'
                   }}>
                     <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '8px' }}>{depot.name}</strong>
-                    <p style={{ marginBottom: '8px' }}>{depot.address}</p>
-                    {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Kontakt: {depot.contact}</p>}
+                    {!hideAddressIds.has(depot.id) && <p style={{ marginBottom: '8px' }}>{depot.address}</p>}
                     {depot.website && (
                       <p style={{ fontSize: '0.875rem', marginTop: '8px', marginBottom: '8px' }}>
                         <a 
@@ -282,8 +283,7 @@ export function DepotMap() {
                     border: 'none'
                   }}>
                     <strong style={{ fontSize: '1rem', display: 'block', marginBottom: '8px' }}>{depot.name}</strong>
-                    <p style={{ marginBottom: '8px' }}>{depot.address}</p>
-                    {depot.contact && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>Kontakt: {depot.contact}</p>}
+                    {!hideAddressIds.has(depot.id) && <p style={{ marginBottom: '8px' }}>{depot.address}</p>}
                     {depot.website && (
                       <p style={{ fontSize: '0.875rem', marginTop: '8px', marginBottom: '8px' }}>
                         <a 

@@ -5,9 +5,14 @@ const FORM_RECIPIENTS: Record<string, string[]> = {
   contact: ['info@bioco.ch', 'intranet@bioco.ch'],
   subscribe: ['info@bioco.ch', 'intranet@bioco.ch'],
   visit: ['medien@bioco.ch'],
-  'event-signup': ['medien@bioco.ch'], // Same as visit
+  'event-signup': ['medien@bioco.ch'],
   'waiting-list': ['info@bioco.ch', 'intranet@bioco.ch'],
   membership: ['info@bioco.ch', 'medien@bioco.ch', 'intranet@bioco.ch'],
+}
+
+// CC recipients for specific form types
+const FORM_CC: Record<string, string[]> = {
+  'event-signup': ['info@bioco.ch'],
 }
 
 // Safety BCC recipients - always included to ensure no emails are lost
@@ -88,13 +93,29 @@ export async function sendFormEmail({ formType, data, subject }: FormSubmission)
   const htmlContent = formatFormEmail(formType, data)
 
   try {
-    const mailOptions = {
+    // Get CC recipients if configured for this form type
+    const ccRecipients = FORM_CC[formType] || []
+    
+    const mailOptions: {
+      from: string
+      to: string
+      bcc: string
+      subject: string
+      html: string
+      replyTo: string
+      cc?: string
+    } = {
       from: `${FROM_NAME} <${FROM_EMAIL}>`,
       to: recipients.join(', '),
       bcc: SAFETY_BCC.join(', '), // Always BCC to safety addresses
       subject: emailSubject,
       html: htmlContent,
       replyTo: data.email || FROM_EMAIL,
+    }
+    
+    // Add CC if configured
+    if (ccRecipients.length > 0) {
+      mailOptions.cc = ccRecipients.join(', ')
     }
 
     const info = await transporter.sendMail(mailOptions)
@@ -140,6 +161,13 @@ function formatFormEmail(formType: string, data: Record<string, any>): string {
     })
     .join('')
 
+  // Add copy note for event-signup emails (CC'd to info@bioco.ch)
+  const copyNote = formType === 'event-signup' 
+    ? `<p style="margin-top: 20px; padding: 12px; background: #f5f5f5; border-left: 4px solid #2e7d32; font-size: 13px; color: #555;">
+        <strong>Hinweis:</strong> Kopie an info@bioco.ch, kein Weiterleiten an medien@bioco.ch nötig.
+      </p>`
+    : ''
+
   return `
     <!DOCTYPE html>
     <html>
@@ -155,6 +183,7 @@ function formatFormEmail(formType: string, data: Record<string, any>): string {
         <table>
           ${fields}
         </table>
+        ${copyNote}
         <p style="margin-top: 20px; font-size: 12px; color: #666;">
           Diese E-Mail wurde automatisch über das Kontaktformular auf bioco.ch gesendet.
         </p>

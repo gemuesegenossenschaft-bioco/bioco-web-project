@@ -46,9 +46,7 @@ export default function IntranetPage() {
                 <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>Verteilplan Dienstag und Freitag</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Der aktuelle Verteilplan für die Gemüsekorb-Abholung.</p>
                 <a 
-                  href="https://bioco.ch/intranet-dokumente/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                  href="/intranet/Verteilplan_Dienstag_und_Freitag.pdf"
                   className="btn btn-secondary btn-organic"
                   style={{ display: 'inline-block' }}
                 >
@@ -60,9 +58,7 @@ export default function IntranetPage() {
                 <h3 style={{ fontSize: '1.25rem', marginBottom: '8px' }}>Fahrspesen Rückforderungsformular</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}>Formular für die Rückforderung von Fahrspesen.</p>
                 <a 
-                  href="https://bioco.ch/intranet-dokumente/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
+                  href="/intranet/1408_FahrspesenRueckforderung.pdf"
                   className="btn btn-secondary btn-organic"
                   style={{ display: 'inline-block' }}
                 >

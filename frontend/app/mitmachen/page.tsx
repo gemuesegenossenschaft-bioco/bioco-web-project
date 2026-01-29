@@ -1,7 +1,7 @@
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
-import { getStaticEventItems } from '@/components/AktuellesData'
+import { SchnuppertageSection } from '@/components/SchnuppertageSection'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -18,10 +18,6 @@ export const metadata: Metadata = {
 }
 
 export default function MitmachenPage() {
-  const schnuppertage = getStaticEventItems().filter(
-    (item) => item.status !== 'past'
-  )
-
   return (
     <>
       <Header />
@@ -64,13 +60,7 @@ export default function MitmachenPage() {
               </ul>
             </div>
 
-            <div id="anmelden" style={{ marginTop: '24px' }}>
-              <CTA
-                text="Jetzt anmelden"
-                href="#anmelden"
-                variant="primary"
-              />
-            </div>
+            <div id="anmelden" style={{ marginTop: '24px' }} />
           </section>
 
           <section id="D-02" className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
@@ -104,63 +94,7 @@ export default function MitmachenPage() {
             </div>
           </section>
 
-          <section id="D-02b" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>Schnuppertage</h2>
-            <h3 style={{ fontSize: '1.25rem', marginTop: '16px', marginBottom: '12px', color: 'var(--bioco-green-dark)' }}>
-              Komm schnuppern: So geht solidarischer Gemüseanbau.
-            </h3>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-              Möchtest du dein Gemüse in Gemeinschaft anbauen und erfahren, wie es sich anfühlt, Teil einer Solawi zu sein?
-              Dann komm an einen unserer Schnuppertage vorbei. Geniesse einen Nachmittag auf dem Geisshof in Gebenstorf AG,
-              auf dem Feld umgeben von Natur und Tieren, Wildpflanzen, Bäumen, Beerensträuchern und Kräuterspirale.
-            </p>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
-              Für deine Mithilfe am Schnuppernachmittag bekommst du als Dankeschön eine Tasche voll frisch geerntetem Demeter-Gemüse
-              und ein kleines zVieri von uns spendiert. Nach dem Schnuppernachmittag darfst du gerne noch auf dem Gemeinschaftsplatz bleiben
-              und etwas grillieren – es hat eine Feuerstelle, einen Sandkasten und viel Wiese. Neugierig? Schau vorbei und mach mit.
-            </p>
-            <div className="events-list">
-              {schnuppertage.slice(0, 3).map((item, idx) => (
-                <div key={item.id || idx} className="event-item" style={{ background: 'rgba(var(--bioco-green-rgb), 0.25)', padding: '16px', borderRadius: '12px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '8px' }}>
-                    <strong style={{ color: 'var(--bioco-green-dark)' }}>{item.title}</strong>
-                    <span style={{ color: 'var(--text-secondary)' }}>{item.date}</span>
-                    {item.timeLabel && (
-                      <span style={{ color: 'var(--text-secondary)' }}>{item.timeLabel}</span>
-                    )}
-                  </div>
-                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', margin: '8px 0' }}>
-                    Jeweils 14 - 17 Uhr in Gebenstorf AG
-                  </p>
-                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                    Wir sind eine solidarische Landwirtschaft und bauen auf unserem Hof biologisches Gemüse in Demeter Qualität selber an.
-                    Du möchtest bioco Luft schnuppern und dabei mehr erfahren? Wir bieten Schnuppertage auf dem Hof an. Was dich erwartet:
-                  </p>
-                  <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                    <li>Gemeinschaft auf dem Feld, umgeben von Natur</li>
-                    <li>Unser Hof liegt auf einem Hügel über Gebenstorf AG</li>
-                    <li>Deine Hilfe auf dem Feld</li>
-                    <li>Danke: du bekommst eine Tasche frisch geerntetes Demeter-Gemüse</li>
-                    <li>Kleines zVieri von uns spendiert</li>
-                    <li>Hof und Demeteranbau kennenlernen</li>
-                    <li>Möglichkeit anschliessend auf dem Gemeinschaftsplatz zu bräteln</li>
-                  </ul>
-                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                    Uns ist ein achtsamer Umgang mit der Natur wichtig, wir lassen viel Platz für Wildpflanzen, haben eine Kräuterspirale,
-                    eine Naschecke mit Beeren, Sandkasten und Enten auf dem Hof. Auf dem Gemeinschaftsplatz hat es einen Sandkasten für Kinder
-                    und eine Feuerstelle. Falls du noch bleiben möchtest, kannst du anschliessend gerne etwas über dem Feuer bräteln.
-                    Ein kleines zVieri wird spendiert und du hast auch die Gelegenheit, den Hof kennenzulernen und Fragen zum Demeter-Anbau zu stellen.
-                  </p>
-                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', fontStyle: 'italic', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-                    Hinweis: Formulareingänge gehen an medien@bioco.ch.
-                  </p>
-                  <Link href="#anmelden" className="btn btn-orange btn-organic" style={{ display: 'inline-block', marginTop: '8px' }}>
-                    Jetzt anmelden
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </section>
+          <SchnuppertageSection />
 
           <section id="D-03" className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
             <div className="two-column-image">
