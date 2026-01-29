@@ -1,4 +1,4 @@
-/* Content Planning Dashboard Styles */
+/* Content Planning Dashboard Styles v2 */
 
 .planning-header {
     display: flex;
@@ -46,9 +46,16 @@
 /* Container with sidebar */
 .planning-container {
     display: grid;
-    grid-template-columns: 1fr 280px;
+    grid-template-columns: 1fr 300px;
     gap: 20px;
     margin-bottom: 20px;
+}
+
+/* Sidebar */
+.planning-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 /* Kanban Board */
@@ -71,6 +78,15 @@
     margin-bottom: 10px;
     border-bottom: 2px solid #ddd;
     color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.column-header .count {
+    font-weight: normal;
+    color: #888;
+    font-size: 13px;
 }
 
 .column-items {
@@ -101,6 +117,53 @@
     font-weight: 500;
     margin-bottom: 8px;
     line-height: 1.3;
+}
+
+.card-page {
+    font-size: 12px;
+    margin-bottom: 8px;
+    padding: 4px 6px;
+    background: #f8f9fa;
+    border-radius: 3px;
+}
+.card-page a {
+    color: #2196F3;
+    text-decoration: none;
+}
+.card-page a:hover {
+    text-decoration: underline;
+}
+.card-page i {
+    margin-right: 4px;
+}
+.card-page i.published {
+    color: #4caf50;
+}
+.card-page i.unpublished {
+    color: #ff9800;
+}
+
+.card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.card-date i {
+    margin-right: 3px;
+}
+
+.card-resolved {
+    font-size: 11px;
+    color: #4caf50;
+    margin-bottom: 6px;
+    padding: 2px 6px;
+    background: #e8f5e9;
+    border-radius: 3px;
+    display: inline-block;
 }
 
 .card-footer {
@@ -166,6 +229,14 @@
 .priority-high { background: #ffe0b2; color: #e65100; }
 .priority-urgent { background: #ffcdd2; color: #b71c1c; }
 
+.resolved-badge {
+    display: inline-block;
+    font-size: 11px;
+    color: #4caf50;
+    margin-left: 8px;
+    font-weight: normal;
+}
+
 /* List View */
 .list-view {
     background: #fff;
@@ -197,11 +268,43 @@
     border: 1px solid #ddd;
 }
 
-.no-issue {
+.no-page, .no-issue {
     color: #999;
 }
 
-/* Docs Feed Sidebar */
+.page-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.page-link i.published {
+    color: #4caf50;
+}
+.page-link i.unpublished {
+    color: #ff9800;
+}
+.page-link a {
+    color: #2196F3;
+    text-decoration: none;
+}
+.page-link a:hover {
+    text-decoration: underline;
+}
+
+.date-cell {
+    font-size: 12px;
+    color: #666;
+}
+
+.actions-cell {
+    white-space: nowrap;
+}
+.actions-cell button {
+    margin-right: 4px;
+}
+
+/* Sidebar Panels */
+.github-issues-panel,
 .docs-feed {
     background: #fff;
     border-radius: 6px;
@@ -209,18 +312,57 @@
     overflow: hidden;
 }
 
-.feed-header {
+.panel-header {
     background: #f5f5f5;
     padding: 12px;
     font-weight: 600;
     border-bottom: 1px solid #e0e0e0;
 }
 
-.feed-items {
-    max-height: 500px;
+.panel-items {
+    max-height: 250px;
     overflow-y: auto;
 }
 
+.panel-empty {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+}
+
+/* GitHub Issues */
+.issue-item {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.issue-item:last-child {
+    border-bottom: none;
+}
+.issue-item a {
+    display: block;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1.4;
+}
+.issue-item a:hover {
+    color: #2196F3;
+}
+.issue-meta {
+    font-size: 11px;
+    color: #888;
+    margin-top: 4px;
+}
+.issue-label {
+    display: inline-block;
+    padding: 1px 6px;
+    background: #e0e0e0;
+    border-radius: 3px;
+    font-size: 10px;
+    margin-right: 4px;
+}
+
+/* Docs Feed */
 .feed-item {
     padding: 10px 12px;
     border-bottom: 1px solid #f0f0f0;
@@ -228,7 +370,6 @@
 .feed-item:last-child {
     border-bottom: none;
 }
-
 .feed-item a {
     display: block;
     color: #333;
@@ -239,17 +380,10 @@
 .feed-item a:hover {
     color: #2196F3;
 }
-
 .feed-meta {
     font-size: 11px;
     color: #888;
     margin-top: 4px;
-}
-
-.feed-empty {
-    padding: 20px;
-    text-align: center;
-    color: #999;
 }
 
 /* Form Overlay */
@@ -271,7 +405,7 @@
     padding: 24px;
     border-radius: 8px;
     width: 100%;
-    max-width: 500px;
+    max-width: 550px;
     max-height: 90vh;
     overflow-y: auto;
 }
@@ -301,10 +435,37 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    box-sizing: border-box;
 }
 
 .form-row textarea {
     resize: vertical;
+}
+
+/* Page Selector */
+.page-selector {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.page-selector select {
+    flex: 1;
+}
+.edit-page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    color: #666;
+    text-decoration: none;
+}
+.edit-page-btn:hover {
+    background: #e0e0e0;
+    color: #333;
 }
 
 .form-actions {
@@ -321,15 +482,29 @@
     margin-top: 10px;
 }
 
+/* Publish Button */
+.publish-btn {
+    background: #fff3e0 !important;
+    border-color: #ffb74d !important;
+}
+.publish-btn:hover {
+    background: #ffe0b2 !important;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
     .planning-container {
         grid-template-columns: 1fr;
     }
-    .docs-feed {
-        order: -1;
+    .planning-sidebar {
+        flex-direction: row;
+        flex-wrap: wrap;
     }
-    .feed-items {
+    .planning-sidebar > div {
+        flex: 1;
+        min-width: 280px;
+    }
+    .panel-items {
         max-height: 200px;
     }
 }
@@ -347,5 +522,8 @@
     .planning-header {
         flex-direction: column;
         gap: 10px;
+    }
+    .planning-sidebar {
+        flex-direction: column;
     }
 }

@@ -1,10 +1,10 @@
 <?php namespace ProcessWire;
 
 /**
- * Process Content Planning Module
+ * Process Content Planning Module v2
  * 
- * Minimal dashboard for planning web content with list/kanban views,
- * GitHub issue creation, and docs.bioco.ch change feed.
+ * Dashboard for planning web content with list/kanban views,
+ * GitHub issue creation, page linking, publish control, and docs feed.
  */
 
 class ProcessContentPlanning extends Process {
@@ -14,12 +14,12 @@ class ProcessContentPlanning extends Process {
     public static function getModuleInfo() {
         return [
             'title' => 'Content Planning',
-            'version' => 100,
-            'summary' => 'Plan content with list/kanban views, create GitHub issues',
+            'version' => 200,
+            'summary' => 'Plan content with list/kanban views, page linking, GitHub issues',
             'permission' => 'page-edit',
             'page' => [
                 'name' => 'content-planning',
-                'parent' => 'setup',
+                'parent' => 'page',
                 'title' => 'Content Planning'
             ],
         ];
@@ -28,6 +28,7 @@ class ProcessContentPlanning extends Process {
     public function init() {
         parent::init();
         $this->createDatabaseTable();
+        $this->migrateDatabase();
     }
 
     /**
@@ -43,13 +44,16 @@ class ProcessContentPlanning extends Process {
             `priority` varchar(20) DEFAULT 'medium',
             `status` varchar(20) DEFAULT 'backlog',
             `owner` varchar(100) DEFAULT '',
+            `linked_page_id` int(11) DEFAULT NULL,
             `github_issue_url` varchar(255) DEFAULT '',
             `github_issue_number` int(11) DEFAULT NULL,
             `created` int(11) NOT NULL,
             `modified` int(11) NOT NULL,
+            `resolved_at` int(11) DEFAULT NULL,
             PRIMARY KEY (`id`),
             KEY `status` (`status`),
-            KEY `priority` (`priority`)
+            KEY `priority` (`priority`),
+            KEY `linked_page_id` (`linked_page_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4";
         
         try {
@@ -60,12 +64,29 @@ class ProcessContentPlanning extends Process {
     }
 
     /**
+     * Migrate existing table to add new columns
+     */
+    private function migrateDatabase() {
+        $table = self::TABLE_NAME;
+        $db = $this->wire()->database;
+        
+        // Add linked_page_id if not exists
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `linked_page_id` int(11) DEFAULT NULL");
+        } catch(\Exception $e) {}
+        
+        // Add resolved_at if not exists
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `resolved_at` int(11) DEFAULT NULL");
+        } catch(\Exception $e) {}
+    }
+
+    /**
      * Main execute: render dashboard
      */
     public function ___execute() {
         $this->wire('modules')->get('JqueryUI')->use('vex');
         
-        // Load CSS
         $cssUrl = $this->wire('config')->urls($this) . 'planning.css';
         $this->wire('config')->styles->add($cssUrl);
 
@@ -120,8 +141,9 @@ class ProcessContentPlanning extends Process {
         $out .= "<div class='kanban-board'>";
         
         foreach ($statuses as $key => $label) {
+            $count = count(array_filter($items, fn($i) => $i['status'] === $key));
             $out .= "<div class='kanban-column' data-status='{$key}'>";
-            $out .= "<div class='column-header'>{$label}</div>";
+            $out .= "<div class='column-header'>{$label} <span class='count'>({$count})</span></div>";
             $out .= "<div class='column-items'>";
             
             foreach ($items as $item) {
@@ -134,7 +156,7 @@ class ProcessContentPlanning extends Process {
         }
         
         $out .= "</div>";
-        $out .= $this->renderDocsFeed();
+        $out .= $this->renderSidebar();
         $out .= "</div>";
         
         return $out;
@@ -154,18 +176,21 @@ class ProcessContentPlanning extends Process {
             <th>Type</th>
             <th>Priority</th>
             <th>Status</th>
-            <th>Owner</th>
-            <th>GitHub</th>
+            <th>Page</th>
+            <th>Created</th>
             <th>Actions</th>
         </tr></thead><tbody>";
         
         foreach ($items as $item) {
-            $ghLink = $item['github_issue_url'] 
-                ? "<a href='{$item['github_issue_url']}' target='_blank'>#{$item['github_issue_number']}</a>"
-                : '<span class="no-issue">-</span>';
+            $pageLink = $this->renderPageLink($item);
+            $createdDate = $this->timeAgo($item['created']);
+            $resolvedBadge = $item['resolved_at'] ? "<span class='resolved-badge'>Resolved " . $this->timeAgo($item['resolved_at']) . "</span>" : '';
             
             $out .= "<tr data-id='{$item['id']}'>
-                <td><strong>{$this->wire('sanitizer')->entities($item['title'])}</strong></td>
+                <td>
+                    <strong>{$this->wire('sanitizer')->entities($item['title'])}</strong>
+                    {$resolvedBadge}
+                </td>
                 <td><span class='badge type-{$item['item_type']}'>{$item['item_type']}</span></td>
                 <td><span class='badge priority-{$item['priority']}'>{$item['priority']}</span></td>
                 <td>
@@ -176,18 +201,19 @@ class ProcessContentPlanning extends Process {
                         <option value='done'" . ($item['status'] === 'done' ? ' selected' : '') . ">Done</option>
                     </select>
                 </td>
-                <td>{$this->wire('sanitizer')->entities($item['owner'])}</td>
-                <td>{$ghLink}</td>
-                <td>
+                <td>{$pageLink}</td>
+                <td class='date-cell'>{$createdDate}</td>
+                <td class='actions-cell'>
                     <button class='edit-btn ui-button' data-id='{$item['id']}'><i class='fa fa-pencil'></i></button>
                     <button class='delete-btn ui-button' data-id='{$item['id']}'><i class='fa fa-trash'></i></button>
-                    " . ($item['github_issue_url'] ? '' : "<button class='github-btn ui-button' data-id='{$item['id']}'><i class='fa fa-github'></i></button>") . "
+                    " . $this->renderGitHubButton($item) . "
+                    " . $this->renderPublishButton($item) . "
                 </td>
             </tr>";
         }
         
         $out .= "</tbody></table></div>";
-        $out .= $this->renderDocsFeed();
+        $out .= $this->renderSidebar();
         $out .= "</div>";
         
         return $out;
@@ -201,6 +227,10 @@ class ProcessContentPlanning extends Process {
             ? "<a href='{$item['github_issue_url']}' target='_blank' class='gh-badge'><i class='fa fa-github'></i> #{$item['github_issue_number']}</a>"
             : '';
         
+        $pageLink = $this->renderPageLink($item, true);
+        $createdDate = $this->timeAgo($item['created']);
+        $resolvedInfo = $item['resolved_at'] ? "<div class='card-resolved'>Resolved " . $this->timeAgo($item['resolved_at']) . "</div>" : '';
+        
         return "
         <div class='kanban-card' data-id='{$item['id']}'>
             <div class='card-header'>
@@ -208,33 +238,136 @@ class ProcessContentPlanning extends Process {
                 <span class='badge priority-{$item['priority']}'>{$item['priority']}</span>
             </div>
             <div class='card-title'>{$this->wire('sanitizer')->entities($item['title'])}</div>
+            {$pageLink}
+            <div class='card-meta'>
+                <span class='card-date'><i class='fa fa-clock-o'></i> {$createdDate}</span>
+                <span class='card-owner'>{$this->wire('sanitizer')->entities($item['owner'])}</span>
+            </div>
+            {$resolvedInfo}
             <div class='card-footer'>
                 {$ghBadge}
-                <span class='card-owner'>{$this->wire('sanitizer')->entities($item['owner'])}</span>
             </div>
             <div class='card-actions'>
                 <button class='edit-btn' data-id='{$item['id']}'><i class='fa fa-pencil'></i></button>
                 <button class='delete-btn' data-id='{$item['id']}'><i class='fa fa-trash'></i></button>
-                " . ($item['github_issue_url'] ? '' : "<button class='github-btn' data-id='{$item['id']}'><i class='fa fa-github'></i></button>") . "
+                " . $this->renderGitHubButton($item) . "
+                " . $this->renderPublishButton($item) . "
             </div>
         </div>";
     }
 
     /**
-     * Docs feed sidebar
+     * Render page link with edit button
+     */
+    private function renderPageLink($item, $compact = false) {
+        if (empty($item['linked_page_id'])) {
+            return $compact ? '' : '<span class="no-page">-</span>';
+        }
+        
+        $page = $this->wire('pages')->get($item['linked_page_id']);
+        if (!$page->id) {
+            return $compact ? '' : '<span class="no-page">-</span>';
+        }
+        
+        $editUrl = $this->wire('config')->urls->admin . "page/edit/?id=" . $page->id;
+        $title = $this->wire('sanitizer')->entities($page->title);
+        $isPublished = !$page->isUnpublished();
+        $statusIcon = $isPublished ? 'fa-check-circle published' : 'fa-eye-slash unpublished';
+        
+        if ($compact) {
+            return "<div class='card-page'>
+                <i class='fa {$statusIcon}'></i>
+                <a href='{$editUrl}' target='_blank' title='{$title}'>{$title}</a>
+            </div>";
+        }
+        
+        return "<div class='page-link'>
+            <i class='fa {$statusIcon}'></i>
+            <a href='{$editUrl}' target='_blank'>{$title}</a>
+        </div>";
+    }
+
+    /**
+     * Render GitHub button if no issue exists
+     */
+    private function renderGitHubButton($item) {
+        if ($item['github_issue_url']) return '';
+        return "<button class='github-btn ui-button' data-id='{$item['id']}' title='Create GitHub Issue'><i class='fa fa-github'></i></button>";
+    }
+
+    /**
+     * Render publish/unpublish button if page is linked
+     */
+    private function renderPublishButton($item) {
+        if (empty($item['linked_page_id'])) return '';
+        
+        $page = $this->wire('pages')->get($item['linked_page_id']);
+        if (!$page->id) return '';
+        
+        $isPublished = !$page->isUnpublished();
+        $action = $isPublished ? 'unpublish' : 'publish';
+        $icon = $isPublished ? 'fa-eye-slash' : 'fa-eye';
+        $title = $isPublished ? 'Unpublish Page' : 'Publish Page';
+        
+        return "<button class='publish-btn ui-button' data-id='{$item['id']}' data-action='{$action}' title='{$title}'><i class='fa {$icon}'></i></button>";
+    }
+
+    /**
+     * Sidebar with GitHub issues and docs feed
+     */
+    private function renderSidebar() {
+        $out = "<div class='planning-sidebar'>";
+        $out .= $this->renderGitHubIssuesPanel();
+        $out .= $this->renderDocsFeed();
+        $out .= "</div>";
+        return $out;
+    }
+
+    /**
+     * GitHub issues panel for features/bugs
+     */
+    private function renderGitHubIssuesPanel() {
+        $issues = $this->fetchGitHubIssues();
+        
+        $out = "<div class='github-issues-panel'>";
+        $out .= "<div class='panel-header'><i class='fa fa-github'></i> Open Issues</div>";
+        $out .= "<div class='panel-items'>";
+        
+        if (empty($issues)) {
+            $out .= "<div class='panel-empty'>No open issues</div>";
+        } else {
+            foreach ($issues as $issue) {
+                $labels = '';
+                foreach ($issue['labels'] as $label) {
+                    $labels .= "<span class='issue-label'>{$label}</span>";
+                }
+                $out .= "
+                <div class='issue-item'>
+                    <a href='{$issue['url']}' target='_blank'>#{$issue['number']} {$this->wire('sanitizer')->entities($issue['title'])}</a>
+                    <div class='issue-meta'>{$labels} · {$issue['time']}</div>
+                </div>";
+            }
+        }
+        
+        $out .= "</div></div>";
+        return $out;
+    }
+
+    /**
+     * Docs feed panel
      */
     private function renderDocsFeed() {
         $commits = $this->fetchDocsCommits();
         
         $out = "<div class='docs-feed'>";
-        $out .= "<div class='feed-header'><i class='fa fa-history'></i> Docs Changes</div>";
-        $out .= "<div class='feed-items'>";
+        $out .= "<div class='panel-header'><i class='fa fa-history'></i> Docs Changes</div>";
+        $out .= "<div class='panel-items'>";
         
         if (empty($commits)) {
-            $out .= "<div class='feed-empty'>No recent changes</div>";
+            $out .= "<div class='panel-empty'>No recent changes</div>";
         } else {
             foreach ($commits as $c) {
-                $msg = $this->wire('sanitizer')->entities(substr($c['message'], 0, 60));
+                $msg = $this->wire('sanitizer')->entities(substr($c['message'], 0, 50));
                 $out .= "
                 <div class='feed-item'>
                     <a href='{$c['url']}' target='_blank'>{$msg}</a>
@@ -248,9 +381,27 @@ class ProcessContentPlanning extends Process {
     }
 
     /**
-     * Add/Edit form (hidden, shown via JS)
+     * Get all CMS pages for dropdown
+     */
+    private function getPageOptions() {
+        $pages = $this->wire('pages')->find("template!=admin, include=all, limit=500, sort=path");
+        $options = ['<option value="">-- Select Page --</option>'];
+        
+        foreach ($pages as $p) {
+            $status = $p->isUnpublished() ? ' (unpublished)' : '';
+            $title = $this->wire('sanitizer')->entities($p->title . $status);
+            $options[] = "<option value='{$p->id}'>{$p->path} - {$title}</option>";
+        }
+        
+        return implode("\n", $options);
+    }
+
+    /**
+     * Add/Edit form with page selector
      */
     private function renderAddForm() {
+        $pageOptions = $this->getPageOptions();
+        
         return "
         <div id='item-form-overlay' class='form-overlay' style='display:none;'>
             <div class='form-modal'>
@@ -293,6 +444,17 @@ class ProcessContentPlanning extends Process {
                         <input type='text' name='owner' id='item-owner'>
                     </div>
                     <div class='form-row'>
+                        <label>Linked Page</label>
+                        <div class='page-selector'>
+                            <select name='linked_page_id' id='item-page'>
+                                {$pageOptions}
+                            </select>
+                            <a href='#' id='edit-page-link' class='edit-page-btn' target='_blank' style='display:none;'>
+                                <i class='fa fa-external-link'></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class='form-row'>
                         <label>Details</label>
                         <textarea name='details' id='item-details' rows='4'></textarea>
                     </div>
@@ -313,16 +475,34 @@ class ProcessContentPlanning extends Process {
      */
     private function renderScripts() {
         $ajaxUrl = $this->wire('page')->url . 'ajax/';
+        $adminUrl = $this->wire('config')->urls->admin;
+        
         return "
         <script>
         (function() {
             const ajaxUrl = '{$ajaxUrl}';
+            const adminUrl = '{$adminUrl}';
+            
+            // Page selector edit link
+            const pageSelect = document.getElementById('item-page');
+            const editPageLink = document.getElementById('edit-page-link');
+            
+            pageSelect.onchange = function() {
+                if (this.value) {
+                    editPageLink.href = adminUrl + 'page/edit/?id=' + this.value;
+                    editPageLink.style.display = 'inline-flex';
+                } else {
+                    editPageLink.style.display = 'none';
+                }
+            };
             
             // Add button
             document.getElementById('add-item-btn').onclick = function() {
                 document.getElementById('form-title').textContent = 'Add Item';
                 document.getElementById('item-form').reset();
                 document.getElementById('item-id').value = '';
+                document.getElementById('item-page').value = '';
+                editPageLink.style.display = 'none';
                 document.getElementById('item-form-overlay').style.display = 'flex';
             };
             
@@ -360,7 +540,16 @@ class ProcessContentPlanning extends Process {
                             document.getElementById('item-priority').value = item.priority;
                             document.getElementById('item-status').value = item.status;
                             document.getElementById('item-owner').value = item.owner || '';
+                            document.getElementById('item-page').value = item.linked_page_id || '';
                             document.getElementById('item-details').value = item.details || '';
+                            
+                            if (item.linked_page_id) {
+                                editPageLink.href = adminUrl + 'page/edit/?id=' + item.linked_page_id;
+                                editPageLink.style.display = 'inline-flex';
+                            } else {
+                                editPageLink.style.display = 'none';
+                            }
+                            
                             document.getElementById('item-form-overlay').style.display = 'flex';
                         });
                 };
@@ -399,6 +588,25 @@ class ProcessContentPlanning extends Process {
                 };
             });
             
+            // Publish buttons
+            document.querySelectorAll('.publish-btn').forEach(btn => {
+                btn.onclick = function() {
+                    const action = this.dataset.action;
+                    const msg = action === 'publish' ? 'Publish this page?' : 'Unpublish this page?';
+                    if (!confirm(msg)) return;
+                    
+                    const form = new FormData();
+                    form.append('action', action);
+                    form.append('id', this.dataset.id);
+                    fetch(ajaxUrl, { method: 'POST', body: form })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) location.reload();
+                            else alert(data.error || 'Error');
+                        });
+                };
+            });
+            
             // Status select change
             document.querySelectorAll('.status-select').forEach(sel => {
                 sel.onchange = function() {
@@ -407,7 +615,8 @@ class ProcessContentPlanning extends Process {
                     form.append('id', this.dataset.id);
                     form.append('status', this.value);
                     fetch(ajaxUrl, { method: 'POST', body: form })
-                        .then(r => r.json());
+                        .then(r => r.json())
+                        .then(data => { if (data.success) location.reload(); });
                 };
             });
         })();
@@ -446,23 +655,18 @@ class ProcessContentPlanning extends Process {
                 $result = $this->createGitHubIssueForItem($id);
                 echo json_encode($result);
                 break;
+            case 'publish':
+                $result = $this->publishPage($id);
+                echo json_encode($result);
+                break;
+            case 'unpublish':
+                $result = $this->unpublishPage($id);
+                echo json_encode($result);
+                break;
             default:
                 echo json_encode(['error' => 'Invalid action']);
         }
         exit;
-    }
-
-    /**
-     * Process POST requests on main page (non-AJAX compatible)
-     */
-    public function ___executePost() {
-        $action = $this->wire('input')->post('action');
-        
-        if ($action === 'get' || $this->wire('input')->get('action')) {
-            return $this->executeAjax();
-        }
-        
-        return $this->executeAjax();
     }
 
     // =========================================================================
@@ -493,13 +697,16 @@ class ProcessContentPlanning extends Process {
         $san = $this->wire('sanitizer');
         
         $id = (int)$input->post('id');
+        $newStatus = $san->name($input->post('status')) ?: 'backlog';
+        
         $data = [
             'title' => $san->text($input->post('title')),
             'item_type' => $san->name($input->post('item_type')) ?: 'content',
             'details' => $san->textarea($input->post('details')),
             'priority' => $san->name($input->post('priority')) ?: 'medium',
-            'status' => $san->name($input->post('status')) ?: 'backlog',
+            'status' => $newStatus,
             'owner' => $san->text($input->post('owner')),
+            'linked_page_id' => (int)$input->post('linked_page_id') ?: null,
             'modified' => time(),
         ];
         
@@ -511,24 +718,38 @@ class ProcessContentPlanning extends Process {
         $db = $this->wire()->database;
         
         if ($id) {
+            // Check if status changed to done
+            $oldItem = $this->getItem($id);
+            $resolvedAt = null;
+            if ($newStatus === 'done' && $oldItem['status'] !== 'done') {
+                $resolvedAt = time();
+            } elseif ($newStatus !== 'done') {
+                $resolvedAt = null;
+            } else {
+                $resolvedAt = $oldItem['resolved_at'];
+            }
+            
             $sql = "UPDATE `{$table}` SET 
-                    title=?, item_type=?, details=?, priority=?, status=?, owner=?, modified=?
+                    title=?, item_type=?, details=?, priority=?, status=?, owner=?, linked_page_id=?, modified=?, resolved_at=?
                     WHERE id=?";
             $query = $db->prepare($sql);
             $query->execute([
                 $data['title'], $data['item_type'], $data['details'],
-                $data['priority'], $data['status'], $data['owner'], $data['modified'], $id
+                $data['priority'], $data['status'], $data['owner'], 
+                $data['linked_page_id'], $data['modified'], $resolvedAt, $id
             ]);
         } else {
             $data['created'] = time();
+            $resolvedAt = $newStatus === 'done' ? time() : null;
+            
             $sql = "INSERT INTO `{$table}` 
-                    (title, item_type, details, priority, status, owner, created, modified)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                    (title, item_type, details, priority, status, owner, linked_page_id, created, modified, resolved_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $query = $db->prepare($sql);
             $query->execute([
                 $data['title'], $data['item_type'], $data['details'],
                 $data['priority'], $data['status'], $data['owner'],
-                $data['created'], $data['modified']
+                $data['linked_page_id'], $data['created'], $data['modified'], $resolvedAt
             ]);
             $id = $db->lastInsertId();
         }
@@ -546,9 +767,57 @@ class ProcessContentPlanning extends Process {
 
     private function updateStatus($id, $status) {
         $table = self::TABLE_NAME;
-        $sql = "UPDATE `{$table}` SET status=?, modified=? WHERE id=?";
+        $resolvedAt = $status === 'done' ? time() : null;
+        
+        // Check current status
+        $item = $this->getItem($id);
+        if ($item['status'] === 'done' && $status === 'done') {
+            $resolvedAt = $item['resolved_at'];
+        }
+        
+        $sql = "UPDATE `{$table}` SET status=?, modified=?, resolved_at=? WHERE id=?";
         $query = $this->wire()->database->prepare($sql);
-        $query->execute([$status, time(), $id]);
+        $query->execute([$status, time(), $resolvedAt, $id]);
+        return ['success' => true];
+    }
+
+    // =========================================================================
+    // PAGE PUBLISH METHODS
+    // =========================================================================
+
+    private function publishPage($itemId) {
+        $item = $this->getItem($itemId);
+        if (!$item || empty($item['linked_page_id'])) {
+            return ['success' => false, 'error' => 'No linked page'];
+        }
+        
+        $page = $this->wire('pages')->get($item['linked_page_id']);
+        if (!$page->id) {
+            return ['success' => false, 'error' => 'Page not found'];
+        }
+        
+        $page->of(false);
+        $page->removeStatus(Page::statusUnpublished);
+        $page->save();
+        
+        return ['success' => true];
+    }
+
+    private function unpublishPage($itemId) {
+        $item = $this->getItem($itemId);
+        if (!$item || empty($item['linked_page_id'])) {
+            return ['success' => false, 'error' => 'No linked page'];
+        }
+        
+        $page = $this->wire('pages')->get($item['linked_page_id']);
+        if (!$page->id) {
+            return ['success' => false, 'error' => 'Page not found'];
+        }
+        
+        $page->of(false);
+        $page->addStatus(Page::statusUnpublished);
+        $page->save();
+        
         return ['success' => true];
     }
 
@@ -565,7 +834,7 @@ class ProcessContentPlanning extends Process {
         $repo = $this->wire('config')->githubRepo ?? '';
         
         if (!$token || !$repo) {
-            return ['success' => false, 'error' => 'GitHub not configured (set githubToken and githubRepo in config.php)'];
+            return ['success' => false, 'error' => 'GitHub not configured'];
         }
         
         $issueData = [
@@ -611,11 +880,63 @@ class ProcessContentPlanning extends Process {
         return ['success' => false, 'error' => $error['message'] ?? 'GitHub API error'];
     }
 
+    private function fetchGitHubIssues() {
+        $repo = $this->wire('config')->githubRepo ?? '';
+        if (!$repo) return [];
+        
+        $cache = $this->wire('cache');
+        $cacheKey = 'planning_github_issues';
+        $cached = $cache->get($cacheKey);
+        if ($cached !== null) return $cached;
+        
+        $token = $this->wire('config')->githubToken ?? '';
+        $headers = [
+            'Accept: application/vnd.github+json',
+            'X-GitHub-Api-Version: 2022-11-28',
+            'User-Agent: ProcessWire-Planning',
+        ];
+        if ($token) $headers[] = 'Authorization: Bearer ' . $token;
+        
+        $ch = curl_init("https://api.github.com/repos/{$repo}/issues?state=open&per_page=15&labels=feature,bug");
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER => $headers,
+        ]);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        if ($httpCode !== 200) return [];
+        
+        $issues = json_decode($response, true);
+        $result = [];
+        
+        foreach ($issues as $issue) {
+            if (isset($issue['pull_request'])) continue;
+            
+            $labels = [];
+            foreach ($issue['labels'] as $label) {
+                $labels[] = $label['name'];
+            }
+            
+            $result[] = [
+                'number' => $issue['number'],
+                'title' => $issue['title'],
+                'url' => $issue['html_url'],
+                'labels' => $labels,
+                'time' => $this->timeAgo(strtotime($issue['created_at'])),
+            ];
+        }
+        
+        $cache->save($cacheKey, $result, 300);
+        return $result;
+    }
+
     private function fetchDocsCommits() {
         $repo = $this->wire('config')->githubDocsRepo ?? '';
         if (!$repo) return [];
         
-        // Cache for 5 minutes
         $cache = $this->wire('cache');
         $cacheKey = 'planning_docs_commits';
         $cached = $cache->get($cacheKey);
@@ -667,19 +988,12 @@ class ProcessContentPlanning extends Process {
         return date('M j', $timestamp);
     }
 
-    /**
-     * Module install
-     */
     public function ___install() {
         parent::___install();
         $this->createDatabaseTable();
     }
 
-    /**
-     * Module uninstall
-     */
     public function ___uninstall() {
-        // Keep table for data preservation
         parent::___uninstall();
     }
 }
