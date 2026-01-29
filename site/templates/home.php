@@ -1,13 +1,7 @@
 <?php namespace ProcessWire;
 
 // Template file for "home" template used by the homepage
-// Redirect to content planning if user is logged in
-if ($user->isLoggedin()) {
-    $session->redirect('/processwire/content-planning/');
-}
-
-// If not logged in, redirect to login page
-$session->redirect('/processwire/');
+// Note: Root URL is redirected to /processwire/ via .htaccess
 
 ?>
 

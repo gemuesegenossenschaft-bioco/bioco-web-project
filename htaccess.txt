@@ -162,6 +162,11 @@ DirectoryIndex index.php index.html index.htm
 <IfModule mod_rewrite.c>
 
   RewriteEngine On
+
+  # -----------------------------------------------------------------------------------------------
+  # BIOCO: Redirect CMS homepage to ProcessWire admin
+  # -----------------------------------------------------------------------------------------------
+  RewriteRule ^$ /processwire/ [L,R=302]
  
   
   # 8A. Optionally (O) set a rewrite base if rewrites are not working properly on your server.
