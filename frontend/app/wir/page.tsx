@@ -56,48 +56,63 @@ export default async function WirPage() {
             <h3 style={{ fontSize: '1.5rem', marginTop: '16px', marginBottom: '12px' }}>Team & Hof</h3>
             <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>biocò ist eine Gemeinschaft von engagierten Menschen, die gemeinsam für frisches, regionales <Link href="/gemuese">Demeter-Gemüse</Link> sorgen.</p>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginTop: '24px' }}>
-              <div>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
-                  <Image
-                    src="/images/team/hofteam_matthias.JPG"
-                    alt="Matthias vom Hof-Team - Demeter Landwirtschaft Geisshof"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
+            {/* Hof-Team Container */}
+            <div style={{ 
+              background: 'var(--surface-secondary, #f8f8f6)', 
+              borderRadius: '24px', 
+              padding: '24px', 
+              marginTop: '24px',
+              marginBottom: '32px'
+            }}>
+              <h4 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '20px', fontWeight: '500' }}>Hof-Team</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px' }}>
+                <div>
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '16px', borderRadius: '16px', overflow: 'hidden' }}>
+                    <Image
+                      src="/images/team/hofteam_matthias.JPG"
+                      alt="Matthias vom Hof-Team - Demeter Landwirtschaft Geisshof"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+                  <h3 style={{ fontSize: '1.25rem' }}>Matthias</h3>
                 </div>
-                <h3>Matthias</h3>
-                <p>Hof-Team</p>
-              </div>
-              
-              <div>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
-                  <Image
-                    src="/images/team/bioco_hofteam_christian.JPG"
-                    alt="Michael vom Hof-Team - Demeter Landwirtschaft Geisshof"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
+                
+                <div>
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '1', marginBottom: '16px', borderRadius: '16px', overflow: 'hidden' }}>
+                    <Image
+                      src="/images/team/bioco_hofteam_christian.JPG"
+                      alt="Michael vom Hof-Team - Demeter Landwirtschaft Geisshof"
+                      fill
+                      style={{ objectFit: 'cover' }}
+                    />
+                  </div>
+                  <h3 style={{ fontSize: '1.25rem' }}>Michael</h3>
                 </div>
-                <h3>Michael</h3>
-                <p>Hof-Team</p>
               </div>
-              
-              <div>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
-                  <Image
-                    src="/images/team/alle-mitglieder-bioco.jpeg"
-                    alt="Mitglieder der Gemüsegenossenschaft biocò - Solidarische Landwirtschaft Baden"
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                </div>
-                <h3>Alle Mitglieder</h3>
-                <p>Jede(r) Genossenschafter/in bringt sich ein – ob bei der Feldarbeit, in der Logistik oder bei Events.</p>
+            </div>
+
+            {/* Alle Mitglieder - Full Width, Larger */}
+            <div style={{ marginBottom: '48px' }}>
+              <div style={{ position: 'relative', width: '100%', aspectRatio: '21/9', marginBottom: '20px', borderRadius: '24px', overflow: 'hidden' }}>
+                <Image
+                  src="/images/team/alle-mitglieder-bioco.jpeg"
+                  alt="Mitglieder der Gemüsegenossenschaft biocò - Solidarische Landwirtschaft Baden"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
               </div>
-              
-              <div>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
+              <h3 style={{ fontSize: '1.75rem', marginBottom: '8px' }}>Alle Mitglieder</h3>
+              <p style={{ fontSize: '1.1rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Jede(r) Genossenschafter/in bringt sich ein – ob bei der Feldarbeit, in der Logistik oder bei Events.</p>
+            </div>
+
+            {/* Betriebsgruppe - Separate Entity */}
+            <div style={{ 
+              borderTop: '1px solid var(--border-color, #e0e0e0)', 
+              paddingTop: '48px'
+            }}>
+              <div style={{ maxWidth: '800px' }}>
+                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', marginBottom: '20px', borderRadius: '24px', overflow: 'hidden' }}>
                   <Image
                     src="/images/team/betriebsgruppe.JPG"
                     alt="Betriebsgruppe der Gemüsegenossenschaft biocò Gebenstorf"
@@ -105,8 +120,8 @@ export default async function WirPage() {
                     style={{ objectFit: 'cover', objectPosition: 'bottom' }}
                   />
                 </div>
-                <h3>Betriebsgruppe (BG)</h3>
-                <p>Die Betriebsgruppe koordiniert den Anbau, die Logistik und die Organisation der Genossenschaft.</p>
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>Betriebsgruppe (BG)</h3>
+                <p style={{ fontSize: '1.1rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Die Betriebsgruppe koordiniert den Anbau, die Logistik und die Organisation der Genossenschaft.</p>
               </div>
             </div>
           </section>
