@@ -52,14 +52,13 @@ export default function Home() {
         <UtilityNavigation />
       </div>
       
-      {/* Navbar at page level - becomes sticky when scrolled past hero */}
-      <div className="homepage-nav-wrapper">
-        <PrimaryNavigation />
-        <MobileMenu />
-      </div>
-      
       {/* Hero */}
       <section className="hero-bleed">
+        {/* Navbar inside hero - becomes fixed when scrolled past */}
+        <div className="navbar-overlay">
+          <PrimaryNavigation />
+          <MobileMenu />
+        </div>
         <div className="hero-bg">
           <Image
             src="/images/FrontseiteStartseite.jpg"

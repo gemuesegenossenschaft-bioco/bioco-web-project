@@ -4995,27 +4995,7 @@ footer a:hover {
   z-index: 4;
 }
 
-/* Homepage Nav Wrapper - positioned at page level, overlays hero then becomes sticky */
-.homepage-nav-wrapper {
-  position: absolute;
-  top: clamp(52px, 9vw, 96px); /* Below utility nav */
-  left: 0;
-  right: 0;
-  width: 100%;
-  z-index: 1100;
-  pointer-events: none;
-}
-
-.homepage-nav-wrapper .primary-nav,
-.homepage-nav-wrapper .secondary-nav,
-.homepage-nav-wrapper .mobile-header-actions {
-  pointer-events: auto;
-}
-
 /* Ensure logo link is always clickable */
-.homepage-nav-wrapper .primary-nav-logo,
-.homepage-nav-wrapper .secondary-nav-logo,
-.homepage-nav-wrapper .logo-link,
 .primary-nav-logo .logo-link,
 .secondary-nav-logo .logo-link,
 .primary-nav .logo-link,
@@ -5024,141 +5004,7 @@ footer a:hover {
   cursor: pointer !important;
 }
 
-/* Homepage navbar - NOT scrolled (transparent, over hero) */
-.homepage-nav-wrapper .primary-nav:not(.nav-scrolled),
-.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) {
-  background: transparent;
-  border: none;
-  margin-top: 0;
-}
-
-.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) a,
-.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) a {
-  color: white;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
-}
-
-.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) a:hover,
-.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) a:hover {
-  color: white !important;
-  background: var(--bioco-green) !important;
-  font-weight: 700;
-  text-decoration: none;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.4);
-  border-radius: 8px;
-  transition: all 0.2s ease;
-  text-shadow: none !important;
-}
-
-.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .btn-orange,
-.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .btn-orange {
-  background: white;
-  border: 2px solid white;
-  color: var(--bioco-green);
-  text-shadow: none;
-}
-
-.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .btn-orange:hover,
-.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .btn-orange:hover {
-  background: var(--bioco-green) !important;
-  border-color: var(--bioco-green) !important;
-  color: white !important;
-  font-weight: 700;
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 4px 12px rgba(46, 125, 50, 0.4);
-  transition: all 0.2s ease;
-}
-
-.homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .primary-nav-logo img,
-.homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .secondary-nav-logo img {
-  filter: brightness(0) invert(1); /* White logo over hero */
-}
-
-/* Homepage navbar - SCROLLED (sticky, colorful like subpages) */
-.homepage-nav-wrapper:has(.nav-scrolled) {
-  position: sticky;
-  top: 0;
-}
-
-.homepage-nav-wrapper .primary-nav.nav-scrolled,
-.homepage-nav-wrapper .secondary-nav.nav-scrolled {
-  background: var(--bg-secondary);
-  border-bottom: 1px solid var(--border-color);
-  margin-top: 0;
-}
-
-.homepage-nav-wrapper .primary-nav.nav-scrolled a,
-.homepage-nav-wrapper .secondary-nav.nav-scrolled a {
-  color: var(--text-secondary);
-  text-shadow: none;
-}
-
-.homepage-nav-wrapper .primary-nav.nav-scrolled a:hover,
-.homepage-nav-wrapper .secondary-nav.nav-scrolled a:hover {
-  color: white !important;
-  background: var(--bioco-green) !important;
-  font-weight: 700;
-  text-decoration: none;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
-  border-radius: 8px;
-  transition: all 0.2s ease;
-}
-
-.homepage-nav-wrapper .primary-nav.nav-scrolled .btn-orange,
-.homepage-nav-wrapper .secondary-nav.nav-scrolled .btn-orange {
-  background: var(--bioco-orange);
-  border: 2px solid var(--bioco-orange);
-  color: white;
-  text-shadow: none;
-}
-
-.homepage-nav-wrapper .primary-nav.nav-scrolled .primary-nav-logo img,
-.homepage-nav-wrapper .secondary-nav.nav-scrolled .secondary-nav-logo img {
-  filter: none; /* Normal colored logo when scrolled */
-}
-
-/* Mobile adjustments for homepage nav wrapper */
-@media (max-width: 767px) {
-  .homepage-nav-wrapper {
-    top: clamp(39px, calc(4vw + 15px), 63px);
-  }
-  
-  .homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .primary-nav-logo img,
-  .homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .secondary-nav-logo img {
-    filter: brightness(0) invert(1); /* White logo over hero on mobile */
-  }
-  
-  .homepage-nav-wrapper .primary-nav.nav-scrolled .primary-nav-logo img,
-  .homepage-nav-wrapper .secondary-nav.nav-scrolled .secondary-nav-logo img {
-    filter: none; /* Normal logo when scrolled on mobile */
-  }
-  
-  /* Hamburger menu - white when over hero */
-  .homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .mobile-menu-toggle,
-  .homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle {
-    color: #ffffff !important;
-  }
-  
-  .homepage-nav-wrapper .primary-nav:not(.nav-scrolled) .mobile-menu-toggle svg,
-  .homepage-nav-wrapper .secondary-nav:not(.nav-scrolled) .mobile-menu-toggle svg {
-    stroke: #ffffff !important;
-  }
-  
-  /* Hamburger menu - black when scrolled */
-  .homepage-nav-wrapper .primary-nav.nav-scrolled .mobile-menu-toggle,
-  .homepage-nav-wrapper .secondary-nav.nav-scrolled .mobile-menu-toggle {
-    color: #000000 !important;
-  }
-  
-  .homepage-nav-wrapper .primary-nav.nav-scrolled .mobile-menu-toggle svg,
-  .homepage-nav-wrapper .secondary-nav.nav-scrolled .mobile-menu-toggle svg {
-    stroke: #000000 !important;
-  }
-}
-
-/* Legacy navbar-overlay support (kept for backwards compatibility) */
+/* Navbar Overlay - positioned inside hero, transparent styling */
 .navbar-overlay {
   position: absolute;
   top: clamp(20px, 3vw, 32px);
@@ -5177,34 +5023,135 @@ footer a:hover {
   pointer-events: auto;
   background: transparent;
   border: none;
+  margin-top: 0;
 }
 
-.primary-nav.nav-scrolled ~ .utility-nav,
-.primary-nav.nav-scrolled ~ * .utility-nav {
-  display: none; /* Hide secondary nav when scrolled */
+.navbar-overlay .primary-nav-logo,
+.navbar-overlay .secondary-nav-logo {
+  pointer-events: auto !important;
 }
 
-.primary-nav.nav-scrolled a,
-.primary-nav.nav-scrolled .btn-orange {
-  color: var(--text-primary);
+/* Transparent navbar styling (over hero) */
+.navbar-overlay .primary-nav:not(.nav-scrolled) a,
+.navbar-overlay .secondary-nav:not(.nav-scrolled) a {
+  color: white;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.navbar-overlay .primary-nav:not(.nav-scrolled) a:hover,
+.navbar-overlay .secondary-nav:not(.nav-scrolled) a:hover {
+  color: white !important;
+  background: var(--bioco-green) !important;
+  font-weight: 700;
+  text-shadow: none !important;
+  border-radius: 8px;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.4);
+}
+
+.navbar-overlay .primary-nav:not(.nav-scrolled) .btn-orange,
+.navbar-overlay .secondary-nav:not(.nav-scrolled) .btn-orange {
+  background: white;
+  border: 2px solid white;
+  color: var(--bioco-green);
   text-shadow: none;
 }
 
-.primary-nav.nav-scrolled .btn-orange {
-  background: var(--bioco-orange);
-  border: 2px solid var(--bioco-orange);
-  color: white;
+.navbar-overlay .primary-nav:not(.nav-scrolled) .btn-orange:hover,
+.navbar-overlay .secondary-nav:not(.nav-scrolled) .btn-orange:hover {
+  background: var(--bioco-green) !important;
+  border-color: var(--bioco-green) !important;
+  color: white !important;
 }
 
-.primary-nav.nav-scrolled .btn-orange:hover {
-  background: var(--bioco-green); /* Green background on hover */
-  border-color: var(--bioco-green); /* Green border on hover */
-  color: white; /* White text on hover */
-  font-weight: 700; /* Bold text on hover */
+.navbar-overlay .primary-nav:not(.nav-scrolled) .primary-nav-logo img,
+.navbar-overlay .secondary-nav:not(.nav-scrolled) .secondary-nav-logo img {
+  filter: brightness(0) invert(1); /* White logo over hero */
 }
 
-.primary-nav.nav-scrolled .primary-nav-logo img {
-  filter: none; /* Logo back to normal colors when scrolled */
+/* SCROLLED STATE - navbar becomes fixed at top with colorful styling */
+.navbar-overlay .primary-nav.nav-scrolled,
+.navbar-overlay .secondary-nav.nav-scrolled {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  z-index: 1100 !important;
+  background: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  margin: 0 !important;
+  padding: calc(var(--spacing-xs) * 0.5) 0 !important;
+}
+
+.navbar-overlay .primary-nav.nav-scrolled a,
+.navbar-overlay .secondary-nav.nav-scrolled a {
+  color: var(--text-secondary) !important;
+  text-shadow: none !important;
+}
+
+.navbar-overlay .primary-nav.nav-scrolled a:hover,
+.navbar-overlay .secondary-nav.nav-scrolled a:hover {
+  color: white !important;
+  background: var(--bioco-green) !important;
+  font-weight: 700;
+  border-radius: 8px;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.navbar-overlay .primary-nav.nav-scrolled .btn-orange,
+.navbar-overlay .secondary-nav.nav-scrolled .btn-orange {
+  background: var(--bioco-orange) !important;
+  border: 2px solid var(--bioco-orange) !important;
+  color: white !important;
+  text-shadow: none !important;
+}
+
+.navbar-overlay .primary-nav.nav-scrolled .btn-orange:hover,
+.navbar-overlay .secondary-nav.nav-scrolled .btn-orange:hover {
+  background: var(--bioco-green) !important;
+  border-color: var(--bioco-green) !important;
+  color: white !important;
+}
+
+.navbar-overlay .primary-nav.nav-scrolled .primary-nav-logo img,
+.navbar-overlay .secondary-nav.nav-scrolled .secondary-nav-logo img {
+  filter: none !important; /* Normal colored logo when scrolled */
+}
+
+/* Mobile adjustments for scrolled navbar */
+@media (max-width: 767px) {
+  .navbar-overlay .primary-nav.nav-scrolled,
+  .navbar-overlay .secondary-nav.nav-scrolled {
+    padding: var(--spacing-xs) 0 !important;
+  }
+  
+  .navbar-overlay .primary-nav.nav-scrolled .primary-nav-logo img,
+  .navbar-overlay .secondary-nav.nav-scrolled .secondary-nav-logo img {
+    filter: none !important;
+  }
+  
+  /* Hamburger white over hero */
+  .navbar-overlay .mobile-menu-toggle {
+    color: #ffffff !important;
+  }
+  
+  .navbar-overlay .mobile-menu-toggle svg {
+    stroke: #ffffff !important;
+  }
+  
+  /* Hamburger black when scrolled */
+  .navbar-overlay .primary-nav.nav-scrolled ~ .mobile-header-actions .mobile-menu-toggle,
+  .primary-nav.nav-scrolled .mobile-menu-toggle {
+    color: #000000 !important;
+  }
+  
+  .navbar-overlay .primary-nav.nav-scrolled ~ .mobile-header-actions .mobile-menu-toggle svg,
+  .primary-nav.nav-scrolled .mobile-menu-toggle svg {
+    stroke: #000000 !important;
+  }
 }
 
 /* Main Content - 2 Column Grid */
