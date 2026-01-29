@@ -49,9 +49,10 @@ $apiKey = $config->apiKey ?? '';
 if ($apiKey) {
     $requestKey = $_SERVER['HTTP_X_API_KEY'] ?? '';
     
-    // Allow unauthenticated access to health endpoint
+    // Allow unauthenticated access to health and content (read-only) endpoints
+    // Only forms and doi require authentication
     $endpoint = $input->urlSegment1;
-    if ($endpoint !== 'health' && $requestKey !== $apiKey) {
+    if (!in_array($endpoint, ['health', 'content']) && $requestKey !== $apiKey) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid API key', 'hint' => 'Set X-API-Key header']);
         exit;
