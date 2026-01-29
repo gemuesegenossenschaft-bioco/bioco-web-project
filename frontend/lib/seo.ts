@@ -96,6 +96,13 @@ export function mergeSeoMetadata(
     return staticMetadata
   }
   
+  const staticOg = staticMetadata.openGraph && typeof staticMetadata.openGraph === 'object' 
+    ? staticMetadata.openGraph 
+    : {}
+  const staticTwitter = staticMetadata.twitter && typeof staticMetadata.twitter === 'object'
+    ? staticMetadata.twitter
+    : {}
+  
   return {
     ...staticMetadata,
     title: cmsSeo.title || staticMetadata.title,
@@ -105,15 +112,15 @@ export function mergeSeoMetadata(
       canonical: cmsSeo.canonical || staticMetadata.alternates?.canonical,
     },
     openGraph: {
-      ...(typeof staticMetadata.openGraph === 'object' ? staticMetadata.openGraph : {}),
-      title: cmsSeo.title || (typeof staticMetadata.openGraph === 'object' ? staticMetadata.openGraph.title : undefined),
-      description: cmsSeo.description || (typeof staticMetadata.openGraph === 'object' ? staticMetadata.openGraph.description : undefined),
+      ...staticOg,
+      title: cmsSeo.title || ('title' in staticOg ? staticOg.title : undefined),
+      description: cmsSeo.description || ('description' in staticOg ? staticOg.description : undefined),
       ...(cmsSeo.ogImage?.url ? { images: [{ url: cmsSeo.ogImage.url, width: cmsSeo.ogImage.width, height: cmsSeo.ogImage.height }] } : {}),
     },
     twitter: {
-      ...(typeof staticMetadata.twitter === 'object' ? staticMetadata.twitter : {}),
-      title: cmsSeo.title || (typeof staticMetadata.twitter === 'object' ? staticMetadata.twitter.title : undefined),
-      description: cmsSeo.description || (typeof staticMetadata.twitter === 'object' ? staticMetadata.twitter.description : undefined),
+      ...staticTwitter,
+      title: cmsSeo.title || ('title' in staticTwitter ? staticTwitter.title : undefined),
+      description: cmsSeo.description || ('description' in staticTwitter ? staticTwitter.description : undefined),
       ...(cmsSeo.ogImage?.url ? { images: [cmsSeo.ogImage.url] } : {}),
     },
     robots: cmsSeo.robots && (!cmsSeo.robots.index || !cmsSeo.robots.follow)
