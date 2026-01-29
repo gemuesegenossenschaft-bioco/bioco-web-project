@@ -95,26 +95,43 @@ export default async function WirPage() {
                 display: 'grid', 
                 gridTemplateColumns: '1fr 1fr', 
                 gap: '24px',
-                width: '100%'
+                width: '100%',
+                maxWidth: '500px'
               }}>
                 <div>
-                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    position: 'relative', 
+                    width: '100%', 
+                    aspectRatio: '3/4', 
+                    marginBottom: '12px', 
+                    borderRadius: '16px', 
+                    overflow: 'hidden',
+                    background: 'var(--bg-tertiary, #eee)'
+                  }}>
                     <Image
                       src="/images/team/hofteam_matthias.JPG"
                       alt="Matthias vom Hof-Team - Demeter Landwirtschaft Geisshof"
                       fill
-                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                      style={{ objectFit: 'contain', objectPosition: 'center' }}
                     />
                   </div>
                   <h3 style={{ fontSize: '1.25rem' }}>Matthias</h3>
                 </div>
                 <div>
-                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden' }}>
+                  <div style={{ 
+                    position: 'relative', 
+                    width: '100%', 
+                    aspectRatio: '3/4', 
+                    marginBottom: '12px', 
+                    borderRadius: '16px', 
+                    overflow: 'hidden',
+                    background: 'var(--bg-tertiary, #eee)'
+                  }}>
                     <Image
                       src="/images/team/bioco_hofteam_christian.JPG"
                       alt="Michael vom Hof-Team - Demeter Landwirtschaft Geisshof"
                       fill
-                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                      style={{ objectFit: 'contain', objectPosition: 'center' }}
                     />
                   </div>
                   <h3 style={{ fontSize: '1.25rem' }}>Michael</h3>
