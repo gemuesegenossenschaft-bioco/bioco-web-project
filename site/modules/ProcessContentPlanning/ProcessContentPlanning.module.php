@@ -152,6 +152,11 @@ class ProcessContentPlanning extends Process {
         try {
             $db->exec("ALTER TABLE `{$table}` ADD KEY `assignee_id` (`assignee_id`)");
         } catch(\Exception $e) {}
+        
+        // Add topic field for issues without page reference
+        try {
+            $db->exec("ALTER TABLE `{$table}` ADD COLUMN `topic` varchar(255) DEFAULT NULL");
+        } catch(\Exception $e) {}
     }
 
     /**
@@ -278,6 +283,7 @@ class ProcessContentPlanning extends Process {
         $out .= "<table class='AdminDataTable'>";
         $out .= "<thead><tr>
             <th>Title</th>
+            <th>Topic</th>
             <th>Type</th>
             <th>Priority</th>
             <th>Status</th>
@@ -294,12 +300,14 @@ class ProcessContentPlanning extends Process {
             $resolvedBadge = $item['resolved_at'] ? "<span class='resolved-badge'>Resolved " . $this->timeAgo($item['resolved_at']) . "</span>" : '';
             $assigneeName = $this->getOwnerName($item);
             $assignerName = $this->getAssignerName($item);
+            $topicDisplay = !empty($item['topic']) ? $this->wire('sanitizer')->entities($item['topic']) : '-';
             
             $out .= "<tr data-id='{$item['id']}'>
                 <td>
                     <strong>{$this->wire('sanitizer')->entities($item['title'])}</strong>
                     {$resolvedBadge}
                 </td>
+                <td class='topic-cell'>{$topicDisplay}</td>
                 <td><span class='badge type-{$item['item_type']}'>{$item['item_type']}</span></td>
                 <td><span class='badge priority-{$item['priority']}'>{$item['priority']}</span></td>
                 <td>
@@ -343,6 +351,7 @@ class ProcessContentPlanning extends Process {
         $createdDate = $this->timeAgo($item['created']);
         $resolvedInfo = $item['resolved_at'] ? "<div class='card-resolved'>Resolved " . $this->timeAgo($item['resolved_at']) . "</div>" : '';
         $ownerName = $this->getOwnerName($item);
+        $topicBadge = !empty($item['topic']) ? "<div class='card-topic'><i class='fa fa-tag'></i> {$this->wire('sanitizer')->entities($item['topic'])}</div>" : '';
         
         return "
         <div class='kanban-card' data-id='{$item['id']}'>
@@ -351,6 +360,7 @@ class ProcessContentPlanning extends Process {
                 <span class='badge priority-{$item['priority']}'>{$item['priority']}</span>
             </div>
             <div class='card-title'>{$this->wire('sanitizer')->entities($item['title'])}</div>
+            {$topicBadge}
             {$pageLink}
             <div class='card-meta'>
                 <span class='card-date'><i class='fa fa-clock-o'></i> {$createdDate}</span>
@@ -507,11 +517,12 @@ class ProcessContentPlanning extends Process {
     }
 
     /**
-     * Get all CMS pages for dropdown
+     * Get all CMS pages for dropdown (only /content/ branch, exclude 404)
      */
     private function getPageOptions() {
-        $pages = $this->wire('pages')->find("template!=admin, include=all, limit=500, sort=path");
-        $options = ['<option value="">-- Select Page --</option>'];
+        // Find pages under /content/ and exclude 404 page
+        $pages = $this->wire('pages')->find("template!=admin, has_parent=/content/, template!=404, include=all, limit=500, sort=path");
+        $options = ['<option value="">-- No Page (Optional) --</option>'];
         
         foreach ($pages as $p) {
             $status = $p->isUnpublished() ? ' (unpublished)' : '';
@@ -583,22 +594,27 @@ class ProcessContentPlanning extends Process {
                 <h3 id='form-title'>Add Item</h3>
                 <form id='item-form'>
                     <input type='hidden' name='id' id='item-id' value=''>
+                    <div class='form-row'>
+                        <label>Title *</label>
+                        <input type='text' name='title' id='item-title' required>
+                        <small>Auto-filled from page if selected, or enter manually</small>
+                    </div>
+                    <div class='form-row'>
+                        <label>Topic</label>
+                        <input type='text' name='topic' id='item-topic' placeholder='e.g., New feature idea, Bug in checkout'>
+                        <small>Optional: Describe the topic/issue if not related to specific page</small>
+                    </div>
                     <div class='form-row form-row-highlight'>
-                        <label>Linked Page (Select First) *</label>
+                        <label>Linked Page (Optional)</label>
                         <div class='page-selector'>
-                            <select name='linked_page_id' id='item-page' required>
+                            <select name='linked_page_id' id='item-page'>
                                 {$pageOptions}
                             </select>
                             <a href='#' id='edit-page-link' class='edit-page-btn' target='_blank' style='display:none;'>
                                 <i class='fa fa-external-link'></i>
                             </a>
                         </div>
-                        <small>Select a page to edit its content fields below</small>
-                    </div>
-                    <div class='form-row'>
-                        <label>Title *</label>
-                        <input type='text' name='title' id='item-title' required>
-                        <small>Auto-filled from page title, but you can customize</small>
+                        <small>Select a page to edit its content fields below (only /content/ pages)</small>
                     </div>
                     <div class='form-row'>
                         <label>Type</label>
@@ -634,10 +650,15 @@ class ProcessContentPlanning extends Process {
                         </select>
                     </div>
                     <div class='form-row'>
-                        <label>Assigned To (Assignee) *</label>
-                        <select name='assignee_id' id='item-assignee' required>
-                            {$userOptions}
-                        </select>
+                        <label>Assigned To (Assignee)</label>
+                        <div class='assignee-selector'>
+                            <select name='assignee_id' id='item-assignee'>
+                                {$userOptions}
+                            </select>
+                            <button type='button' id='assign-to-me-btn' class='ui-button'>
+                                <i class='fa fa-user'></i> Assign to Me
+                            </button>
+                        </div>
                     </div>
                     <div class='form-row'>
                         <label>Details</label>
@@ -669,6 +690,11 @@ class ProcessContentPlanning extends Process {
             const ajaxUrl = '{$ajaxUrl}';
             const adminUrl = '{$adminUrl}';
             const currentUserId = " . $this->wire('user')->id . ";
+            
+            // Assign to Me button
+            document.getElementById('assign-to-me-btn').onclick = function() {
+                document.getElementById('item-assignee').value = currentUserId;
+            };
             
             // Page selector edit link
             const pageSelect = document.getElementById('item-page');
@@ -794,6 +820,7 @@ class ProcessContentPlanning extends Process {
                             document.getElementById('form-title').textContent = 'Edit Item';
                             document.getElementById('item-id').value = item.id;
                             document.getElementById('item-title').value = item.title;
+                            document.getElementById('item-topic').value = item.topic || '';
                             document.getElementById('item-type').value = item.item_type;
                             document.getElementById('item-priority').value = item.priority;
                             document.getElementById('item-status').value = item.status;
@@ -999,6 +1026,7 @@ class ProcessContentPlanning extends Process {
         
         $data = [
             'title' => $san->text($input->post('title')),
+            'topic' => $san->text($input->post('topic')) ?: null,
             'item_type' => $san->name($input->post('item_type')) ?: 'content',
             'details' => $san->textarea($input->post('details')),
             'priority' => $san->name($input->post('priority')) ?: 'medium',
@@ -1030,11 +1058,11 @@ class ProcessContentPlanning extends Process {
             }
             
             $sql = "UPDATE `{$table}` SET 
-                    title=?, item_type=?, details=?, priority=?, status=?, owner_id=?, assigner_id=?, assignee_id=?, linked_page_id=?, modified=?, resolved_at=?
+                    title=?, topic=?, item_type=?, details=?, priority=?, status=?, owner_id=?, assigner_id=?, assignee_id=?, linked_page_id=?, modified=?, resolved_at=?
                     WHERE id=?";
             $query = $db->prepare($sql);
             $query->execute([
-                $data['title'], $data['item_type'], $data['details'],
+                $data['title'], $data['topic'], $data['item_type'], $data['details'],
                 $data['priority'], $data['status'], $data['owner_id'], 
                 $data['assigner_id'], $data['assignee_id'],
                 $data['linked_page_id'], $data['modified'], $resolvedAt, $id
@@ -1067,11 +1095,11 @@ class ProcessContentPlanning extends Process {
             $resolvedAt = $newStatus === 'done' ? time() : null;
             
             $sql = "INSERT INTO `{$table}` 
-                    (title, item_type, details, priority, status, owner_id, assigner_id, assignee_id, linked_page_id, created, modified, resolved_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    (title, topic, item_type, details, priority, status, owner_id, assigner_id, assignee_id, linked_page_id, created, modified, resolved_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $query = $db->prepare($sql);
             $query->execute([
-                $data['title'], $data['item_type'], $data['details'],
+                $data['title'], $data['topic'], $data['item_type'], $data['details'],
                 $data['priority'], $data['status'], $data['owner_id'],
                 $data['assigner_id'], $data['assignee_id'],
                 $data['linked_page_id'], $data['created'], $data['modified'], $resolvedAt

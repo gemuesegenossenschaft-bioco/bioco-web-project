@@ -143,6 +143,18 @@
     color: #ff9800;
 }
 
+.card-topic {
+    font-size: 11px;
+    margin-bottom: 8px;
+    padding: 3px 6px;
+    background: #fff3e0;
+    border-radius: 3px;
+    color: #ef6c00;
+}
+.card-topic i {
+    margin-right: 4px;
+}
+
 .card-meta {
     display: flex;
     justify-content: space-between;
@@ -294,6 +306,12 @@
 .date-cell {
     font-size: 12px;
     color: #666;
+}
+
+.topic-cell {
+    font-size: 12px;
+    color: #666;
+    font-style: italic;
 }
 
 .actions-cell {
@@ -466,6 +484,25 @@
 .edit-page-btn:hover {
     background: #e0e0e0;
     color: #333;
+}
+
+/* Assignee Selector */
+.assignee-selector {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.assignee-selector select {
+    flex: 1;
+}
+#assign-to-me-btn {
+    white-space: nowrap;
+    background: #2196F3 !important;
+    color: #fff !important;
+    border-color: #2196F3 !important;
+}
+#assign-to-me-btn:hover {
+    background: #1976D2 !important;
 }
 
 .form-actions {
