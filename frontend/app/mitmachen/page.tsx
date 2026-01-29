@@ -162,7 +162,7 @@ export default function MitmachenPage() {
                       src="/images/team/betriebsgruppe.JPG"
                       alt="Betriebsgruppe der Gemüsegenossenschaft biocò Gebenstorf"
                       fill
-                      style={{ objectFit: 'cover', objectPosition: 'center bottom' }}
+                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
                     />
                   </div>
                   <div style={{ padding: '20px' }}>
