@@ -66,7 +66,70 @@ $config->allowedOrigins = [
 
 Generate a secure key: `php -r "echo bin2hex(random_bytes(32));"`
 
-## Step 5: Add Content in ProcessWire
+## Step 5: Run Content Migration Script
+
+The migration script automatically creates all content pages with pre-populated sections.
+
+### Setup Migration Template
+
+1. Rename file on server:
+   ```bash
+   mv site/templates/migrate-pages.php site/templates/migrate.php
+   ```
+
+2. In ProcessWire Admin:
+   - Go to **Setup** → **Templates** → **Add New Template**
+   - Select `migrate` from dropdown
+   - Save
+
+3. Create migration page:
+   - Go to **Pages** → **Add New** (under root)
+   - Title: `migrate`
+   - Template: `migrate`
+   - Save + Publish
+
+### Run Migration
+
+**First run (create pages):**
+```
+https://cms.bioco.ch/migrate/
+```
+
+**Refresh existing pages:**
+```
+https://cms.bioco.ch/migrate/?overwrite=1
+```
+
+### Pages Created (15 total)
+
+| Page | Sections | Components |
+|------|----------|------------|
+| mitmachen | 6 | schnuppertage |
+| gemuese | 5 | saisonkalender, gallery |
+| solawi | 6 | - |
+| abos | 6 | - |
+| aktuelles | 4 | schnuppertage, events_feed |
+| kontakt | 4 | contact_form |
+| standorte-depots | 4 | geisshof_map, depot_map |
+| wir | 20 | - |
+| bioco-werden | 2 | pricing_calculator |
+| datenschutz | 6 | - |
+| impressum | 4 | - |
+| statuten | 4 | - |
+| newsletter | 2 | subscribe_form |
+| warteliste | 2 | waiting_list_form |
+| anmeldung | 2 | membership_form |
+| tag-der-offenen-tuer | 2 | visit_day_form |
+
+**Note:** Homepage is managed separately via `homepage_content` template.
+
+### After Migration
+
+1. Delete the `migrate` page in ProcessWire admin
+2. Edit pages to add images and fine-tune content
+3. Test pages on frontend: `https://bioco.ch/{pagename}`
+
+## Step 6: Manual Content Editing
 
 ### Homepage Content
 1. Go to Pages → content → homepage
@@ -76,9 +139,10 @@ Generate a secure key: `php -r "echo bin2hex(random_bytes(32));"`
    - `hero_image`: Hero background image
    - `content_sections`: Add sections for Willkommen, Gemeinsam, Kennenlernen
 
-### Page Content (Mitmachen, Gemuese, Solawi)
-1. Create pages under /content/ with `page_content` template
-2. Add sections using the `content_sections` repeater
+### Page Content (Post-Migration)
+1. Go to Pages → content → {pagename}
+2. Edit sections using the `content_sections` repeater
+3. Add images to sections
 
 ### Flexible Section Layouts
 Each `content_sections` item supports flexible layouts and media:
@@ -95,7 +159,7 @@ Each `content_sections` item supports flexible layouts and media:
 1. Go to Pages → content → gruppen
 2. Add child pages with `group_card` template for each group
 
-## Step 6: Configure Vercel Environment Variables
+## Step 7: Configure Vercel Environment Variables
 
 In Vercel Dashboard → Project → Settings → Environment Variables:
 
@@ -104,7 +168,7 @@ In Vercel Dashboard → Project → Settings → Environment Variables:
 | `PROCESSWIRE_BASE_URL` | `https://cms.bioco.ch` | Production, Preview |
 | `PROCESSWIRE_API_KEY` | Your API key | Production, Preview |
 
-## Step 7: Test the Integration
+## Step 8: Test the Integration
 
 ### Test API endpoints:
 ```bash
@@ -181,7 +245,8 @@ If the CMS is unavailable or returns an error:
 
 ### ProcessWire
 - `site/templates/api.php` - Unified API router
-- `site/templates/api-setup.php` - Setup script
+- `site/templates/api-setup.php` - Field/template setup script
+- `site/templates/migrate.php` - Content migration script (15 pages)
 - `site/config-example.php` - Configuration reference
 
 ### Next.js

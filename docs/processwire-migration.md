@@ -530,6 +530,68 @@ Already completed per [existing setup docs](https://wgusta.github.io/bioco-doku/
 - `admin` - Admin access without module management
 - `redaktion` - Editor role (content only, no settings)
 
+### Content Migration Script
+
+The migration script (`site/templates/migrate.php`) automates content page creation.
+
+#### Setup
+
+1. Rename file on server:
+   ```bash
+   mv site/templates/migrate-pages.php site/templates/migrate.php
+   ```
+
+2. Create template in ProcessWire:
+   - Setup → Templates → Add New → select `migrate`
+
+3. Create page:
+   - Pages → Add New → Title: `migrate` → Template: `migrate`
+
+#### Run Migration
+
+```bash
+# Create new pages (skip existing)
+https://cms.bioco.ch/migrate/
+
+# Overwrite existing pages
+https://cms.bioco.ch/migrate/?overwrite=1
+```
+
+#### Pages Created
+
+| Page | Sections | Components |
+|------|----------|------------|
+| mitmachen | 6 | schnuppertage |
+| gemuese | 5 | saisonkalender, gallery |
+| solawi | 6 | - |
+| abos | 6 | - |
+| aktuelles | 4 | schnuppertage, events_feed |
+| kontakt | 4 | contact_form |
+| standorte-depots | 4 | geisshof_map, depot_map |
+| wir | 20 | - |
+| bioco-werden | 2 | pricing_calculator |
+| datenschutz | 6 | - |
+| impressum | 4 | - |
+| statuten | 4 | - |
+| newsletter | 2 | subscribe_form |
+| warteliste | 2 | waiting_list_form |
+| anmeldung | 2 | membership_form |
+| tag-der-offenen-tuer | 2 | visit_day_form |
+
+**Note:** Homepage managed separately via `homepage_content` template.
+
+#### Events Sync
+
+Events are fetched dynamically from `/api/events`:
+- `schnuppertage` component: mitmachen, aktuelles pages
+- `events_feed` component: aktuelles page
+
+#### After Migration
+
+1. Delete `migrate` page
+2. Add images to sections via ProcessWire admin
+3. Test pages on frontend
+
 ### Data Seeding
 
 #### Static Event Data
