@@ -8,6 +8,8 @@ import { WaitingListForm } from '@/components/forms/WaitingListForm'
 import { EventsSection } from '@/components/EventsSection'
 import { SchnuppertageSection } from '@/components/SchnuppertageSection'
 import { DepotMap } from '@/components/DepotMap'
+import { GeisshofMap } from '@/components/GeisshofMap'
+import { Saisonkalender } from '@/components/Saisonkalender'
 import { Gallery } from '@/components/Gallery'
 import type { ContentSection, ContentMedia } from '@/lib/processwire-types'
 
@@ -24,6 +26,8 @@ const componentMap: Record<string, React.ReactNode> = {
   events_feed: <EventsSection />,
   schnuppertage: <SchnuppertageSection />,
   depot_map: <DepotMap />,
+  geisshof_map: <GeisshofMap />,
+  saisonkalender: <Saisonkalender />,
   gallery: <Gallery />,
 }
 
