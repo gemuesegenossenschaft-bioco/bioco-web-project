@@ -31,6 +31,8 @@ $output = [];
 $output[] = "=== Page Migration ===";
 $output[] = "Overwrite mode: " . ($overwrite ? "ON (existing pages will be refreshed)" : "OFF (existing pages will be skipped)");
 $output[] = "";
+$output[] = "Note: Homepage is managed separately via homepage_content template.";
+$output[] = "";
 
 // Get content parent
 $contentParent = $pages->get('/content/');
@@ -436,9 +438,25 @@ if (shouldPopulate($result)) {
 <p>Neuigkeiten, Schnuppertage und Events der biocò Gemüsegenossenschaft. Erlebe solidarische Landwirtschaft auf dem Geisshof.</p>
 HTML;
 
-    addSection($aktuelles, 'intro', 'Aktuelles', $aktuellesIntro, 'rich_text');
+    $schnuppertageIntro = <<<HTML
+<p>Neugierig? Schau vorbei und mach mit. Erlebe an unseren Schnuppertagen, wie solidarische Landwirtschaft funktioniert, direkt auf dem Geisshof in Gebenstorf, umgeben von Natur, Wildpflanzen, auf unserem sonnigen Feld. Als Dank für deine Mithilfe erhältst du eine Tasche frisch geerntetes Demeter-Gemüse und ein kleines zVieri spendiert.</p>
+HTML;
 
-    $output[] = "  Added 1 section to aktuelles";
+    $eventsIntro = <<<HTML
+<p>Weitere Veranstaltungen und Anlässe der Gemüsegenossenschaft.</p>
+HTML;
+
+    $kennenlernenText = <<<HTML
+<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
+<p><a href="/kontakt">Nimm Kontakt auf</a> · <a href="/standorte-depots">Zu uns finden</a></p>
+HTML;
+
+    addSection($aktuelles, 'intro', 'Aktuelles', $aktuellesIntro, 'rich_text');
+    addSection($aktuelles, 'schnuppertage', 'Schnuppertage', $schnuppertageIntro, 'component', 'default', 'schnuppertage');
+    addSection($aktuelles, 'events', 'Nächste Events', $eventsIntro, 'component', 'default', 'events_feed');
+    addSection($aktuelles, 'kennenlernen', 'Möchtest du uns kennenlernen?', $kennenlernenText, 'rich_text');
+
+    $output[] = "  Added 4 sections to aktuelles (with schnuppertage + events_feed components)";
 } else {
     $output[] = getStatusText($result, 'aktuelles');
 }
@@ -859,7 +877,12 @@ HTML;
 $output[] = "";
 $output[] = "=== Migration Complete ===";
 $output[] = "";
-$output[] = "Summary: 16 pages processed";
+$output[] = "Summary: 15 content pages processed (homepage managed separately)";
+$output[] = "";
+$output[] = "Events sync:";
+$output[] = "- Schnuppertage component on: mitmachen, aktuelles";
+$output[] = "- Events feed component on: aktuelles";
+$output[] = "- Events are fetched dynamically from /api/events";
 $output[] = "";
 $output[] = "Next steps:";
 $output[] = "1. Edit each page in ProcessWire to add images and fine-tune content";
