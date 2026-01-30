@@ -121,6 +121,21 @@ $output[] = createField('section_id', 'FieldtypeText', 'Section ID', [
     'description' => 'Unique identifier for CSS/JS targeting (e.g., willkommen, gemeinsam)',
 ]);
 
+$output[] = createField('section_layout', 'FieldtypeOptions', 'Section Layout', [
+    'description' => 'Layout for this section',
+    'options' => "split_media_text|Split media left, text right\nsplit_text_media|Split text left, media right\nfull_width_banner|Full width banner\nmedia_grid|Media grid\nvideo_embed|Video embed\nrich_text|Rich text\ncomponent|Component block",
+]);
+
+$output[] = createField('section_theme', 'FieldtypeOptions', 'Section Theme', [
+    'description' => 'Background or tone for the section',
+    'options' => "default|Default\nmuted|Muted\naccent|Accent\ndark|Dark",
+]);
+
+$output[] = createField('section_eyebrow', 'FieldtypeText', 'Section Eyebrow', [
+    'maxlength' => 120,
+    'description' => 'Small label above the title',
+]);
+
 $output[] = createField('section_title', 'FieldtypeText', 'Section Title', [
     'maxlength' => 255,
     'description' => 'Section heading',
@@ -136,6 +151,27 @@ $output[] = createField('section_image', 'FieldtypeImage', 'Section Image', [
     'maxFiles' => 1,
     'extensions' => 'jpg jpeg png webp',
     'description' => 'Image for this section',
+]);
+
+$output[] = createField('section_images', 'FieldtypeImage', 'Section Images', [
+    'maxFiles' => 12,
+    'extensions' => 'jpg jpeg png webp',
+    'description' => 'Multiple images for grids or galleries',
+]);
+
+$output[] = createField('section_video_url', 'FieldtypeText', 'Section Video URL', [
+    'maxlength' => 500,
+    'description' => 'Video URL for embeds (YouTube, Vimeo, or MP4)',
+]);
+
+$output[] = createField('section_video_title', 'FieldtypeText', 'Section Video Title', [
+    'maxlength' => 255,
+    'description' => 'Optional title or caption for the video',
+]);
+
+$output[] = createField('section_component', 'FieldtypeText', 'Section Component Key', [
+    'maxlength' => 120,
+    'description' => 'Component key for special blocks, e.g. contact_form, membership_form',
 ]);
 
 // Button fields
@@ -212,8 +248,26 @@ if (!$fields->get($repeaterName)) {
         $fg->save();
         
         // Add fields to repeater
-        $repeaterFields = ['section_id', 'section_title', 'section_text', 'section_image', 'image_alt', 
-                          'button_text', 'button_href', 'button_variant', 'button2_text', 'button2_href', 'button2_variant'];
+        $repeaterFields = [
+            'section_id',
+            'section_layout',
+            'section_theme',
+            'section_eyebrow',
+            'section_title',
+            'section_text',
+            'section_image',
+            'section_images',
+            'section_video_url',
+            'section_video_title',
+            'section_component',
+            'image_alt',
+            'button_text',
+            'button_href',
+            'button_variant',
+            'button2_text',
+            'button2_href',
+            'button2_variant',
+        ];
         foreach ($repeaterFields as $fieldName) {
             $field = $fields->get($fieldName);
             if ($field) {

@@ -307,7 +307,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                      dangerouslySetInnerHTML={{ __html: gottiSection.text }} />
               ) : (
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                  Neumitglieder werden von einem "Gotti" oder "Götti" (Paten) begleitet. Dieses System hilft neuen Mitgliedern, 
+                  Neumitglieder werden von einem &quot;Gotti&quot; oder &quot;Götti&quot; (Paten) begleitet. Dieses System hilft neuen Mitgliedern, 
                   sich in der Genossenschaft zurechtzufinden.
                 </p>
               )}

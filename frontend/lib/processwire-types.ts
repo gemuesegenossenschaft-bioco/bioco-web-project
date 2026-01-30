@@ -53,6 +53,19 @@ export interface ContentButton {
   variant: 'primary' | 'secondary' | string;
 }
 
+export interface ContentMedia {
+  url: string;
+  alt: string;
+  width?: number;
+  height?: number;
+  type: 'image' | 'video';
+}
+
+export interface ContentVideo {
+  url: string;
+  title?: string;
+}
+
 export interface ContentImage {
   url: string;
   alt: string;
@@ -62,9 +75,16 @@ export interface ContentSection {
   id: string;
   title: string;
   text: string;  // May contain HTML from CKEditor
+  layout?: string;
+  theme?: string;
+  eyebrow?: string;
+  component?: string;
   image?: string | null;
   imageAlt?: string;
+  imageData?: ImageData | null;
   images?: ContentImage[];  // For sections with multiple images
+  media?: ContentMedia[];
+  video?: ContentVideo | null;
   buttons?: ContentButton[];
 }
 
@@ -136,9 +156,24 @@ export interface PageData {
   gallery_images?: ImageData[];
   footer_content?: string;
   css_variant?: string;
-  sections?: PageSection[];
+  sections?: ContentSection[] | PageSection[];
   children?: PageData[];
   seo?: SeoData;
+}
+
+export interface PageIndexItem {
+  id: number;
+  title: string;
+  path: string;
+  url: string;
+  template?: string;
+  seo?: SeoData;
+}
+
+export interface PageIndexResponse {
+  success: boolean;
+  items: PageIndexItem[];
+  count: number;
 }
 
 // ============================================================================

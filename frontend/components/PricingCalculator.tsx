@@ -54,7 +54,7 @@ export function PricingCalculator({ onStartForm }: PricingCalculatorProps) {
             Standard (2-3 Personen)
             <span className="recommended-badge" style={{ position: 'absolute', top: '-8px', right: '-8px' }}>Empfohlen</span>
             <br />
-            <span className="price">CHF 1'280.-</span>
+            <span className="price">CHF 1&apos;280.-</span>
           </button>
           <button
             type="button"
@@ -65,7 +65,7 @@ export function PricingCalculator({ onStartForm }: PricingCalculatorProps) {
             }}
           >
             Doppel (4-6 Personen)<br />
-            <span className="price">CHF 2'350.-</span>
+            <span className="price">CHF 2&apos;350.-</span>
           </button>
           <button
             type="button"

@@ -91,6 +91,22 @@ function getImageData($page, $field) {
 }
 
 /**
+ * Get image data with alt fallback
+ */
+function getImageDataWithAlt($page, $field, $fallbackAlt = '') {
+    $image = $page->get($field);
+    if ($image && $image->url) {
+        return [
+            'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
+            'alt' => $image->description ?: $fallbackAlt,
+            'width' => $image->width,
+            'height' => $image->height,
+        ];
+    }
+    return null;
+}
+
+/**
  * Get SEO data for a page
  */
 function getSeoData($page) {
@@ -152,6 +168,122 @@ function decodeText($text) {
         return $text;
     }
     return html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+}
+
+/**
+ * Build buttons array for a section
+ */
+function buildSectionButtons($section) {
+    $buttons = [];
+    if ($section->hasField('button_text') && $section->button_text) {
+        $buttons[] = [
+            'text' => decodeText($section->button_text),
+            'href' => $section->get('button_href') ?: '/',
+            'variant' => $section->get('button_variant') ?: 'primary',
+        ];
+    }
+    if ($section->hasField('button2_text') && $section->button2_text) {
+        $buttons[] = [
+            'text' => decodeText($section->button2_text),
+            'href' => $section->get('button2_href') ?: '/',
+            'variant' => $section->get('button2_variant') ?: 'secondary',
+        ];
+    }
+    return $buttons;
+}
+
+/**
+ * Build media array for a section
+ */
+function buildSectionMedia($section, $fallbackAlt = '') {
+    $media = [];
+    if ($section->hasField('section_image') && $section->section_image) {
+        $image = $section->section_image;
+        $media[] = [
+            'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
+            'alt' => $image->description ?: $fallbackAlt,
+            'width' => $image->width,
+            'height' => $image->height,
+            'type' => 'image',
+        ];
+    }
+    if ($section->hasField('section_images') && $section->section_images && $section->section_images->count()) {
+        foreach ($section->section_images as $img) {
+            $media[] = [
+                'url' => wire('config')->urls->httpRoot . ltrim($img->url, '/'),
+                'alt' => $img->description ?: $fallbackAlt,
+                'width' => $img->width,
+                'height' => $img->height,
+                'type' => 'image',
+            ];
+        }
+    }
+    return $media;
+}
+
+/**
+ * Build video data for a section
+ */
+function buildSectionVideo($section) {
+    if ($section->hasField('section_video_url') && $section->section_video_url) {
+        return [
+            'url' => $section->section_video_url,
+            'title' => decodeText($section->get('section_video_title') ?: ''),
+        ];
+    }
+    return null;
+}
+
+/**
+ * Build section data for API response
+ */
+function buildSectionData($section) {
+    $title = decodeText($section->get('section_title') ?: '');
+    $text = $section->get('section_text') ?: '';
+    $layout = $section->get('section_layout') ?: 'split_media_text';
+    $theme = $section->get('section_theme') ?: 'default';
+    $eyebrow = decodeText($section->get('section_eyebrow') ?: '');
+    $componentKey = decodeText($section->get('section_component') ?: '');
+    $imageAlt = decodeText($section->get('image_alt') ?: $title);
+
+    $sectionData = [
+        'id' => $section->get('section_id') ?: 'section-' . $section->id,
+        'title' => $title,
+        'text' => $text,
+        'layout' => $layout,
+        'theme' => $theme,
+    ];
+
+    if (!empty($eyebrow)) {
+        $sectionData['eyebrow'] = $eyebrow;
+    }
+
+    if (!empty($componentKey)) {
+        $sectionData['component'] = $componentKey;
+    }
+
+    if ($section->hasField('section_image') && $section->section_image) {
+        $sectionData['image'] = getImageUrl($section, 'section_image');
+        $sectionData['imageAlt'] = $imageAlt;
+        $sectionData['imageData'] = getImageDataWithAlt($section, 'section_image', $imageAlt);
+    }
+
+    $media = buildSectionMedia($section, $imageAlt);
+    if (!empty($media)) {
+        $sectionData['media'] = $media;
+    }
+
+    $video = buildSectionVideo($section);
+    if (!empty($video)) {
+        $sectionData['video'] = $video;
+    }
+
+    $buttons = buildSectionButtons($section);
+    if (!empty($buttons)) {
+        $sectionData['buttons'] = $buttons;
+    }
+
+    return $sectionData;
 }
 
 /**
@@ -303,48 +435,7 @@ function handleContentRequest($type, $param = null) {
             // Check for content_sections repeater
             if ($contentPage->hasField('content_sections') && $contentPage->content_sections) {
                 foreach ($contentPage->content_sections as $section) {
-                    $sectionData = [
-                        'id' => $section->get('section_id') ?: 'section-' . $section->id,
-                        'title' => decodeText($section->get('section_title') ?: ''),
-                        'text' => $section->get('section_text') ?: '',
-                    ];
-                    
-                    // Single image
-                    if ($section->hasField('section_image') && $section->section_image) {
-                        $sectionData['image'] = getImageUrl($section, 'section_image');
-                        $sectionData['imageAlt'] = decodeText($section->get('image_alt') ?: $sectionData['title']);
-                    }
-                    
-                    // Multiple images (section_images field)
-                    if ($section->hasField('section_images') && $section->section_images && $section->section_images->count()) {
-                        $sectionData['images'] = [];
-                        foreach ($section->section_images as $img) {
-                            $sectionData['images'][] = [
-                                'url' => wire('config')->urls->httpRoot . ltrim($img->url, '/'),
-                                'alt' => $img->description ?: decodeText($sectionData['title']),
-                            ];
-                        }
-                    }
-                    
-                    // Check for buttons
-                    if ($section->hasField('button_text') && $section->button_text) {
-                        $sectionData['buttons'] = [[
-                            'text' => decodeText($section->button_text),
-                            'href' => $section->get('button_href') ?: '/',
-                            'variant' => $section->get('button_variant') ?: 'primary',
-                        ]];
-                        
-                        // Check for secondary button
-                        if ($section->hasField('button2_text') && $section->button2_text) {
-                            $sectionData['buttons'][] = [
-                                'text' => decodeText($section->button2_text),
-                                'href' => $section->get('button2_href') ?: '/',
-                                'variant' => $section->get('button2_variant') ?: 'secondary',
-                            ];
-                        }
-                    }
-                    
-                    $sections[] = $sectionData;
+                    $sections[] = buildSectionData($section);
                 }
             }
             
@@ -354,13 +445,16 @@ function handleContentRequest($type, $param = null) {
                     'id' => 'main',
                     'title' => decodeText($contentPage->get('section_title') ?: $contentPage->title),
                     'text' => $contentPage->get('section_text') ?: $contentPage->get('body') ?: '',
+                    'layout' => 'rich_text',
+                    'theme' => 'default',
                 ];
-                
+
                 if ($contentPage->hasField('section_image') && $contentPage->section_image) {
                     $pageSection['image'] = getImageUrl($contentPage, 'section_image');
                     $pageSection['imageAlt'] = decodeText($contentPage->get('image_alt') ?: '');
+                    $pageSection['imageData'] = getImageDataWithAlt($contentPage, 'section_image', $pageSection['title']);
                 }
-                
+
                 $sections[] = $pageSection;
             }
             
@@ -416,34 +510,7 @@ function handleContentRequest($type, $param = null) {
             // Get sections
             if ($homepage->hasField('content_sections') && $homepage->content_sections) {
                 foreach ($homepage->content_sections as $section) {
-                    $sectionData = [
-                        'id' => $section->get('section_id') ?: 'section-' . $section->id,
-                        'title' => decodeText($section->get('section_title') ?: ''),
-                        'text' => $section->get('section_text') ?: '',
-                    ];
-                    
-                    if ($section->hasField('section_image') && $section->section_image) {
-                        $sectionData['image'] = getImageUrl($section, 'section_image');
-                        $sectionData['imageAlt'] = decodeText($section->get('image_alt') ?: '');
-                    }
-                    
-                    if ($section->hasField('button_text') && $section->button_text) {
-                        $sectionData['buttons'] = [[
-                            'text' => decodeText($section->button_text),
-                            'href' => $section->get('button_href') ?: '/',
-                            'variant' => $section->get('button_variant') ?: 'primary',
-                        ]];
-                        
-                        if ($section->hasField('button2_text') && $section->button2_text) {
-                            $sectionData['buttons'][] = [
-                                'text' => decodeText($section->button2_text),
-                                'href' => $section->get('button2_href') ?: '/',
-                                'variant' => $section->get('button2_variant') ?: 'secondary',
-                            ];
-                        }
-                    }
-                    
-                    $response['sections'][] = $sectionData;
+                    $response['sections'][] = buildSectionData($section);
                 }
             }
             
@@ -506,11 +573,14 @@ function handleContentRequest($type, $param = null) {
             if ($page->hasField('page_sections') && $page->page_sections && $page->page_sections->count()) {
                 $pageData['sections'] = [];
                 foreach ($page->page_sections as $section) {
-                    $sectionData = [];
-                    if ($section->hasField('section_id')) $sectionData['id'] = $section->section_id;
-                    if ($section->hasField('section_title')) $sectionData['title'] = decodeText($section->section_title);
-                    if ($section->hasField('section_content')) $sectionData['content'] = $section->section_content;
-                    $pageData['sections'][] = $sectionData;
+                    $pageData['sections'][] = buildSectionData($section);
+                }
+            }
+
+            if (empty($pageData['sections']) && $page->hasField('content_sections') && $page->content_sections && $page->content_sections->count()) {
+                $pageData['sections'] = [];
+                foreach ($page->content_sections as $section) {
+                    $pageData['sections'][] = buildSectionData($section);
                 }
             }
             
@@ -531,6 +601,35 @@ function handleContentRequest($type, $param = null) {
             }
             
             echo json_encode($pageData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            break;
+
+        // --------------------------------------------------------------------
+        // Page index for static params
+        // --------------------------------------------------------------------
+        case 'pages':
+            $items = [];
+            $query = "template!=admin, template!=api, path^!='/content/', path^!='/admin/', path^!='/api/', status<" . Page::statusUnpublished;
+            $pagesList = $pages->find($query);
+
+            foreach ($pagesList as $page) {
+                if (!$page->id || !$page->url) {
+                    continue;
+                }
+                $items[] = [
+                    'id' => $page->id,
+                    'title' => decodeText($page->title),
+                    'path' => $page->path,
+                    'url' => $page->url,
+                    'template' => $page->template->name,
+                    'seo' => getSeoData($page),
+                ];
+            }
+
+            echo json_encode([
+                'success' => true,
+                'items' => $items,
+                'count' => count($items),
+            ]);
             break;
             
         // --------------------------------------------------------------------
@@ -710,7 +809,7 @@ function handleContentRequest($type, $param = null) {
             echo json_encode([
                 'error' => 'Content endpoint not found',
                 'type' => $type,
-                'available' => ['hero', 'homepage', 'sections', 'groups', 'page', 'navigation', 'events', 'aktuelles', 'instagram'],
+                'available' => ['hero', 'homepage', 'sections', 'groups', 'page', 'pages', 'navigation', 'events', 'aktuelles', 'instagram'],
             ]);
     }
 }

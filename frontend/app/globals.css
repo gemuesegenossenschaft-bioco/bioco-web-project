@@ -60,6 +60,134 @@ body {
   min-height: 100vh;
 }
 
+/* CMS Section Renderer */
+.cms-sections {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: clamp(32px, 6vw, 96px) clamp(16px, 6vw, 96px);
+}
+
+.cms-section {
+  margin-bottom: clamp(32px, 6vw, 80px);
+}
+
+.cms-section-eyebrow {
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin-bottom: 8px;
+}
+
+.cms-section-text {
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.cms-section-caption {
+  color: var(--text-tertiary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.cms-section-actions {
+  margin-top: var(--spacing-sm);
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.cms-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(24px, 4vw, 64px);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .cms-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cms-split-media.is-last {
+    order: 2;
+  }
+  .cms-split-content {
+    order: 1;
+  }
+}
+
+.cms-media-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.cms-banner {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: clamp(24px, 4vw, 48px);
+  box-shadow: var(--shadow-sm);
+}
+
+.cms-banner-inner {
+  max-width: 900px;
+}
+
+.cms-media-grid {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.cms-media-grid-items {
+  display: grid;
+  gap: var(--spacing-md);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.cms-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #000;
+  margin-bottom: var(--spacing-sm);
+}
+
+.cms-video-frame iframe,
+.cms-video-frame video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.cms-theme-default {
+  background: transparent;
+}
+
+.cms-theme-muted {
+  background: var(--bg-tertiary);
+}
+
+.cms-theme-accent {
+  background: rgba(46, 125, 50, 0.08);
+}
+
+.cms-theme-dark {
+  background: #1f2a24;
+  color: #f4f4f0;
+}
+
+.cms-theme-dark .cms-section-text,
+.cms-theme-dark h1,
+.cms-theme-dark h2,
+.cms-theme-dark h3,
+.cms-theme-dark p {
+  color: #f4f4f0;
+}
+
 /* Typography */
 h1, h2 {
   font-family: 'DM Sans', sans-serif;

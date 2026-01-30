@@ -80,6 +80,17 @@ Generate a secure key: `php -r "echo bin2hex(random_bytes(32));"`
 1. Create pages under /content/ with `page_content` template
 2. Add sections using the `content_sections` repeater
 
+### Flexible Section Layouts
+Each `content_sections` item supports flexible layouts and media:
+
+- `section_layout`: split_media_text, split_text_media, full_width_banner, media_grid, video_embed, rich_text, component
+- `section_theme`: default, muted, accent, dark
+- `section_eyebrow`: small label above the title
+- `section_images`: multi image grid
+- `section_video_url`: YouTube, Vimeo, or MP4 URL
+- `section_video_title`: optional caption
+- `section_component`: special component key, e.g. contact_form, membership_form, events_feed
+
 ### Group Cards (for Mitmachen)
 1. Go to Pages → content → gruppen
 2. Add child pages with `group_card` template for each group
@@ -122,6 +133,7 @@ curl -H "X-API-Key: YOUR_KEY" https://cms.bioco.ch/api/content/groups
 | `/api/content/hero` | GET | Homepage hero data |
 | `/api/content/homepage` | GET | Full homepage (hero + sections) |
 | `/api/content/sections/{page}` | GET | Sections for a specific page |
+| `/api/content/pages` | GET | All public pages for static params |
 | `/api/content/groups` | GET | Group cards for Mitmachen |
 | `/api/content/page?path=/path` | GET | Generic page data |
 | `/api/content/navigation` | GET | Site navigation |
@@ -129,6 +141,16 @@ curl -H "X-API-Key: YOUR_KEY" https://cms.bioco.ch/api/content/groups
 | `/api/content/aktuelles` | GET | News items |
 | `/api/forms/{type}` | POST | Form submissions |
 | `/api/doi/confirm` | GET | DOI confirmation |
+
+## Dynamic Page Discovery
+
+New pages added in ProcessWire automatically appear on the website:
+
+1. **On-demand rendering**: Pages not pre-built are rendered on first request
+2. **ISR caching**: After first render, pages are cached for 60 seconds
+3. **Sitemap updates**: The sitemap fetches pages from CMS dynamically
+
+No code changes or rebuilds required when adding new pages in ProcessWire.
 
 ## Fallback Behavior
 

@@ -104,7 +104,7 @@ export default function AbosPage() {
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>+</span>
                       </div>
                     </td>
-                    <td>CHF 1'280.-</td>
+                    <td>CHF 1&apos;280.-</td>
                     <td>CHF 500.-</td>
                     <td>
                       20 Arbeitseinsätze<br />
@@ -124,8 +124,8 @@ export default function AbosPage() {
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>+</span>
                       </div>
                     </td>
-                    <td>CHF 2'350.-</td>
-                    <td>CHF 1'000.-</td>
+                    <td>CHF 2&apos;350.-</td>
+                    <td>CHF 1&apos;000.-</td>
                     <td>
                       40 Arbeitseinsätze<br />
                       <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>à 2 Stunden</span>

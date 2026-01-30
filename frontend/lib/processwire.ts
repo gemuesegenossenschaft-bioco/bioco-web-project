@@ -8,6 +8,8 @@
 import { fetchCmsJsonSafe, buildCmsHeaders, cmsApiUrl, cmsFetchOptions } from './cmsClient'
 import type {
   PageData,
+  PageIndexItem,
+  PageIndexResponse,
   NavigationItem,
   HeroResponse,
   HomepageContent,
@@ -113,6 +115,14 @@ export async function getPageData(path: string): Promise<PageData | null> {
   )
 }
 
+/**
+ * Get all CMS pages for static params
+ */
+export async function getAllPages(): Promise<PageIndexItem[]> {
+  const response = await fetchCmsJsonSafe<PageIndexResponse>('/content/pages', { revalidate: 600 })
+  return response?.items || []
+}
+
 // ============================================================================
 // Navigation
 // ============================================================================
@@ -204,6 +214,9 @@ export async function getPageContent(slug: string): Promise<{
   
   // Prefer SEO from sections endpoint, fallback to pageData
   const seo = sectionsData.seo || pageData?.seo || null
+
+  const pageSections = Array.isArray(pageData?.sections) ? pageData?.sections : []
+  const sections = sectionsData.sections.length > 0 ? sectionsData.sections : (pageSections as ContentSection[])
   
-  return { sections: sectionsData.sections, pageData, seo }
+  return { sections, pageData, seo }
 }

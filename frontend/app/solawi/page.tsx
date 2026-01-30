@@ -174,7 +174,7 @@ export default async function SolawiPage() {
             <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>
               <li>
                 <strong>Jahresbeitrag:</strong> Mitglieder bezahlen zu Jahresbeginn ihren Anteil 
-                (je nach Korbgrösse CHF 750 – CHF 2'350)
+                (je nach Korbgrösse CHF 750 – CHF 2&apos;350)
               </li>
               <li>
                 <strong>Wöchentlicher Gemüsekorb:</strong> Fast jede Woche könnt ihr euren 
@@ -219,9 +219,9 @@ export default async function SolawiPage() {
               <div style={{ marginBottom: '24px' }}>
                 <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>Was bedeutet Solawi?</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
-                  Solawi ist die Abkürzung für "Solidarische Landwirtschaft". Auch die Schreibweise 
-                  "SoLaWi" ist verbreitet. International spricht man von "Community Supported 
-                  Agriculture" (CSA).
+                  Solawi ist die Abkürzung für &quot;Solidarische Landwirtschaft&quot;. Auch die Schreibweise 
+                  &quot;SoLaWi&quot; ist verbreitet. International spricht man von &quot;Community Supported 
+                  Agriculture&quot; (CSA).
                 </p>
               </div>
 
