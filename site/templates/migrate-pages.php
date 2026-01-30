@@ -56,6 +56,8 @@ function getOrCreatePage($parent, $name, $title, $template, $overwrite = false) 
     
     $page = $pages->get("parent={$parent}, name={$name}");
     if ($page->id) {
+        // Disable output formatting before modifying
+        $page->of(false);
         if ($overwrite && $page->hasField('content_sections')) {
             // Clear existing sections for overwrite
             $page->content_sections->removeAll();
@@ -70,6 +72,7 @@ function getOrCreatePage($parent, $name, $title, $template, $overwrite = false) 
     $page->parent = $parent;
     $page->name = $name;
     $page->title = $title;
+    $page->of(false); // Disable output formatting
     $page->save();
     
     return ['page' => $page, 'created' => true, 'overwritten' => false];
@@ -81,7 +84,11 @@ function addSection($page, $sectionId, $title, $text, $layout = 'rich_text', $th
         return false;
     }
     
+    // Ensure output formatting is disabled
+    $page->of(false);
+    
     $section = $page->content_sections->getNew();
+    $section->of(false);
     $section->section_id = $sectionId;
     $section->section_title = $title;
     $section->section_text = $text;
