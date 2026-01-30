@@ -608,17 +608,22 @@ function handleContentRequest($type, $param = null) {
         // --------------------------------------------------------------------
         case 'pages':
             $items = [];
-            $query = "template!=admin, template!=api, path^!='/content/', path^!='/admin/', path^!='/api/', status<" . Page::statusUnpublished;
+            $query = "template!=admin, template!=api, status<" . Page::statusUnpublished;
             $pagesList = $pages->find($query);
 
             foreach ($pagesList as $page) {
                 if (!$page->id || !$page->url) {
                     continue;
                 }
+                // Skip internal paths
+                $path = $page->path;
+                if (strpos($path, '/content/') === 0 || strpos($path, '/admin/') === 0 || strpos($path, '/api/') === 0) {
+                    continue;
+                }
                 $items[] = [
                     'id' => $page->id,
                     'title' => decodeText($page->title),
-                    'path' => $page->path,
+                    'path' => $path,
                     'url' => $page->url,
                     'template' => $page->template->name,
                     'seo' => getSeoData($page),
