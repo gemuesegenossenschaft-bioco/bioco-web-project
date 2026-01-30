@@ -5,6 +5,7 @@ import { MembershipForm } from '@/components/forms/MembershipForm'
 import { SubscribeForm } from '@/components/forms/SubscribeForm'
 import { VisitDayForm } from '@/components/forms/VisitDayForm'
 import { WaitingListForm } from '@/components/forms/WaitingListForm'
+import { PricingCalculator } from '@/components/PricingCalculator'
 import { EventsSection } from '@/components/EventsSection'
 import { SchnuppertageSection } from '@/components/SchnuppertageSection'
 import { DepotMap } from '@/components/DepotMap'
@@ -23,6 +24,7 @@ const componentMap: Record<string, React.ReactNode> = {
   subscribe_form: <SubscribeForm />,
   visit_day_form: <VisitDayForm />,
   waiting_list_form: <WaitingListForm />,
+  pricing_calculator: <PricingCalculator />,
   events_feed: <EventsSection />,
   schnuppertage: <SchnuppertageSection />,
   depot_map: <DepotMap />,

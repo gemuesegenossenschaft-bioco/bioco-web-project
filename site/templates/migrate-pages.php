@@ -3,11 +3,14 @@
  * Page Migration Script
  * 
  * Migrates existing hardcoded pages to CMS-editable pages.
+ * Supports overwriting existing pages (clears and re-populates sections).
  * 
  * Usage:
  * 1. Create a page with template 'api-setup' (or basic-page) in ProcessWire admin
  * 2. Visit the page to run migration
  * 3. Delete the page after migration completes
+ * 
+ * Add ?overwrite=1 to URL to refresh existing pages
  */
 
 namespace ProcessWire;
@@ -19,9 +22,15 @@ if (!defined('PROCESSWIRE')) {
 $pages = wire('pages');
 $templates = wire('templates');
 $fields = wire('fields');
+$input = wire('input');
+
+// Check for overwrite flag
+$overwrite = $input->get('overwrite') == '1';
 
 $output = [];
-$output[] = "=== Page Migration ===\n";
+$output[] = "=== Page Migration ===";
+$output[] = "Overwrite mode: " . ($overwrite ? "ON (existing pages will be refreshed)" : "OFF (existing pages will be skipped)");
+$output[] = "";
 
 // Get content parent
 $contentParent = $pages->get('/content/');
@@ -38,14 +47,20 @@ if (!$pageContentTemplate) {
     exit;
 }
 
-// Helper to create or get page
-function getOrCreatePage($parent, $name, $title, $template) {
+// Helper to create or get page (with optional overwrite)
+function getOrCreatePage($parent, $name, $title, $template, $overwrite = false) {
     $pages = wire('pages');
     $templates = wire('templates');
     
     $page = $pages->get("parent={$parent}, name={$name}");
     if ($page->id) {
-        return ['page' => $page, 'created' => false];
+        if ($overwrite && $page->hasField('content_sections')) {
+            // Clear existing sections for overwrite
+            $page->content_sections->removeAll();
+            $page->save();
+            return ['page' => $page, 'created' => false, 'overwritten' => true];
+        }
+        return ['page' => $page, 'created' => false, 'overwritten' => false];
     }
     
     $page = wire(new Page());
@@ -55,7 +70,7 @@ function getOrCreatePage($parent, $name, $title, $template) {
     $page->title = $title;
     $page->save();
     
-    return ['page' => $page, 'created' => true];
+    return ['page' => $page, 'created' => true, 'overwritten' => false];
 }
 
 // Helper to add section
@@ -84,13 +99,28 @@ function addSection($page, $sectionId, $title, $text, $layout = 'rich_text', $th
     return true;
 }
 
-$output[] = "\n--- Creating Pages ---";
+$output[] = "--- Creating Pages ---";
+
+// Helper function to check if we should populate
+function shouldPopulate($result) {
+    return $result['created'] || $result['overwritten'];
+}
+
+function getStatusText($result, $name) {
+    if ($result['created']) {
+        return "Created /content/{$name}/";
+    } elseif ($result['overwritten']) {
+        return "Overwritten /content/{$name}/";
+    } else {
+        return "Skipped /content/{$name}/ (already exists)";
+    }
+}
 
 // 1. Mitmachen
-$result = getOrCreatePage($contentParent, 'mitmachen', 'Mitmachen', 'page_content');
+$result = getOrCreatePage($contentParent, 'mitmachen', 'Mitmachen', 'page_content', $overwrite);
 $mitmachen = $result['page'];
-if ($result['created']) {
-    $output[] = "Created /content/mitmachen/";
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'mitmachen');
 
     $mitmachenIntro = <<<HTML
 <p>Werde Teil unserer Gemüsegenossenschaft und erlebe <a href="/solawi">solidarische Landwirtschaft</a> hautnah. Hier erfährst du, wie du dich einbringen kannst und was Mitarbeit bei biocò bedeutet.</p>
@@ -148,14 +178,14 @@ HTML;
 
     $output[] = "  Added 6 sections to mitmachen";
 } else {
-    $output[] = "Page /content/mitmachen/ already exists";
+    $output[] = getStatusText($result, 'mitmachen');
 }
 
 // 2. Gemüse
-$result = getOrCreatePage($contentParent, 'gemuese', 'Gemüse', 'page_content');
+$result = getOrCreatePage($contentParent, 'gemuese', 'Gemüse', 'page_content', $overwrite);
 $gemuese = $result['page'];
-if ($result['created']) {
-    $output[] = "Created /content/gemuese/";
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'gemuese');
 
     $gemueseIntro = <<<HTML
 <p>Unser saisonales Demeter-Gemüse wächst in der Region Baden-Brugg. Hier erfährst du, welche Gemüsesorten gerade Saison haben und in deinem Gemüsekorb landen.</p>
@@ -195,14 +225,14 @@ HTML;
 
     $output[] = "  Added 5 sections to gemuese";
 } else {
-    $output[] = "Page /content/gemuese/ already exists";
+    $output[] = getStatusText($result, 'gemuese');
 }
 
 // 3. Solawi
-$result = getOrCreatePage($contentParent, 'solawi', 'Solawi', 'page_content');
+$result = getOrCreatePage($contentParent, 'solawi', 'Solawi', 'page_content', $overwrite);
 $solawi = $result['page'];
-if ($result['created']) {
-    $output[] = "Created /content/solawi/";
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'solawi');
 
     $solawiIntro = <<<HTML
 <p>Eine Solawi – Solidarische Landwirtschaft – ist eine gemeinschaftliche Form des Wirtschaftens, bei der Verbraucherinnen und Produzentinnen eine Partnerschaft eingehen. Die Mitglieder tragen gemeinsam die Kosten der landwirtschaftlichen Produktion und erhalten im Gegenzug einen regelmässigen Anteil an frischem Bio-Gemüse aus lokalem Anbau.</p>
@@ -285,14 +315,14 @@ HTML;
 
     $output[] = "  Added 6 sections to solawi";
 } else {
-    $output[] = "Page /content/solawi/ already exists";
+    $output[] = getStatusText($result, 'solawi');
 }
 
 // 4. Abos
-$result = getOrCreatePage($contentParent, 'abos', 'Abos', 'page_content');
+$result = getOrCreatePage($contentParent, 'abos', 'Abos', 'page_content', $overwrite);
 $abos = $result['page'];
-if ($result['created']) {
-    $output[] = "Created /content/abos/";
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'abos');
 
     $abosIntro = <<<HTML
 <p>Wöchentlich frisches Demeter-Gemüse direkt vom Geisshof in deinen Gemüsekorb. Mit deinem Gemüseabo unterstützt du unsere <a href="/solawi">solidarische Landwirtschaft (Solawi)</a> und wirst Teil unserer Gemüsegenossenschaft. Hier erfährst du alles über unsere Abo-Modelle, Preise und wie du Mitglied werden kannst.</p>
@@ -393,14 +423,14 @@ HTML;
 
     $output[] = "  Added 6 sections to abos";
 } else {
-    $output[] = "Page /content/abos/ already exists";
+    $output[] = getStatusText($result, 'abos');
 }
 
 // 5. Aktuelles
-$result = getOrCreatePage($contentParent, 'aktuelles', 'Aktuelles', 'page_content');
+$result = getOrCreatePage($contentParent, 'aktuelles', 'Aktuelles', 'page_content', $overwrite);
 $aktuelles = $result['page'];
-if ($result['created']) {
-    $output[] = "Created /content/aktuelles/";
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'aktuelles');
 
     $aktuellesIntro = <<<HTML
 <p>Neuigkeiten, Schnuppertage und Events der biocò Gemüsegenossenschaft. Erlebe solidarische Landwirtschaft auf dem Geisshof.</p>
@@ -410,14 +440,14 @@ HTML;
 
     $output[] = "  Added 1 section to aktuelles";
 } else {
-    $output[] = "Page /content/aktuelles/ already exists";
+    $output[] = getStatusText($result, 'aktuelles');
 }
 
 // 6. Kontakt
-$result = getOrCreatePage($contentParent, 'kontakt', 'Kontakt', 'page_content');
+$result = getOrCreatePage($contentParent, 'kontakt', 'Kontakt', 'page_content', $overwrite);
 $kontakt = $result['page'];
-if ($result['created']) {
-    $output[] = "Created /content/kontakt/";
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'kontakt');
 
     $kontaktIntro = <<<HTML
 <p>Hast du Fragen zu biocò? Wir freuen uns auf deine Nachricht. Wir melden uns in der Regel innerhalb von 2-3 Werktagen bei dir zurück.</p>
@@ -447,14 +477,14 @@ HTML;
 
     $output[] = "  Added 4 sections to kontakt (with contact form component)";
 } else {
-    $output[] = "Page /content/kontakt/ already exists";
+    $output[] = getStatusText($result, 'kontakt');
 }
 
 // 7. Standorte & Depots
-$result = getOrCreatePage($contentParent, 'standorte-depots', 'Standorte & Depots', 'page_content');
+$result = getOrCreatePage($contentParent, 'standorte-depots', 'Standorte & Depots', 'page_content', $overwrite);
 $standorte = $result['page'];
-if ($result['created']) {
-    $output[] = "Created /content/standorte-depots/";
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'standorte-depots');
 
     $standorteIntro = <<<HTML
 <p>Wir unterscheiden zwei Arten von Standorten:</p>
@@ -502,14 +532,341 @@ HTML;
 
     $output[] = "  Added 4 sections to standorte-depots (with map components)";
 } else {
-    $output[] = "Page /content/standorte-depots/ already exists";
+    $output[] = getStatusText($result, 'standorte-depots');
 }
 
-$output[] = "\n=== Migration Complete ===";
-$output[] = "\nNext steps:";
-$output[] = "1. Edit each page in ProcessWire to add more content and images";
+// 8. Wir (About Us)
+$result = getOrCreatePage($contentParent, 'wir', 'Über uns', 'page_content', $overwrite);
+$wir = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'wir');
+
+    $wirIntro = <<<HTML
+<p>Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <a href="/solawi">solidarische Landwirtschaft</a> prägen.</p>
+HTML;
+
+    $wirTeam = <<<HTML
+<p>biocò ist eine Gemeinschaft von engagierten Menschen, die gemeinsam für frisches, regionales <a href="/gemuese">Demeter-Gemüse</a> sorgen.</p>
+HTML;
+
+    $alleMitglieder = <<<HTML
+<p>Jede(r) Genossenschafter/in bringt sich ein, ob bei der Feldarbeit, in der Logistik oder bei Events.</p>
+HTML;
+
+    $betriebsgruppe = <<<HTML
+<p>Die Betriebsgruppe koordiniert den Anbau, die Logistik und die Organisation der Genossenschaft.</p>
+HTML;
+
+    $hofTeam = <<<HTML
+<p>Das Hof-Team kümmert sich um den täglichen Betrieb auf dem Geisshof.</p>
+HTML;
+
+    $geisshof = <<<HTML
+<p>Wir bewirtschaften einen Bio Bauernhof in Baden, genauer gesagt den Geisshof in Gebenstorf im Aargau. Seit 2014 ist dieser Ort das Herzstück von biocò, wo wir Bio-Gemüse in Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg versorgen wir die Region mit frischem, saisonalem Gemüse.</p>
+HTML;
+
+    $mission = <<<HTML
+<p>Unsere Mission ist es, hochwertige, regionale Lebensmittel auf nachhaltige und gemeinschaftliche Weise zu produzieren.</p>
+HTML;
+
+    $solidaritaet = <<<HTML
+<p>Wir teilen Arbeit und Ertrag. Solidarische Landwirtschaft bedeutet, dass Produzentinnen und Konsumentinnen zusammenarbeiten.</p>
+HTML;
+
+    $nachhaltigkeit = <<<HTML
+<p>Wir arbeiten nach biologisch-dynamischen Prinzipien (Demeter) und fördern Biodiversität, Kreislaufwirtschaft und gesunde Böden.</p>
+HTML;
+
+    $gemeinschaft = <<<HTML
+<p>biocò lebt von der Gemeinschaft. Jede(r) bringt sich ein, lernt voneinander und gestaltet die Genossenschaft aktiv mit.</p>
+HTML;
+
+    $regionalitaet = <<<HTML
+<p>Unser Gemüse wächst direkt in der Region Baden-Brugg. Kurze Wege, frische Ernte, lokale Verbundenheit.</p>
+HTML;
+
+    $gotti = <<<HTML
+<p>Neumitglieder werden von einem &quot;Gotti&quot; oder &quot;Götti&quot; (Paten) begleitet. Dieses System hilft neuen Mitgliedern, sich in der Genossenschaft zurechtzufinden.</p>
+HTML;
+
+    $geschichte = <<<HTML
+<p>Die Gemüsegenossenschaft biocò wurde 2014 in Gebenstorf im Aargau gegründet. Aus einer kleinen Gruppe engagierter Menschen aus Baden, Brugg und der Region wurde eine lebendige Gemeinschaft, die solidarische Landwirtschaft lebt.</p>
+<p>Gestartet wurde auf dem Geisshof in Gebenstorf, wo wir bis heute unser Gemüse anbauen. Über die Jahre haben wir die Anbaufläche erweitert, neue Standorte (Depots) für die Gemüseabholung geschaffen und die Strukturen der Genossenschaft weiterentwickelt.</p>
+<p>Heute versorgen wir Mitglieder in der Region Baden-Brugg wöchentlich mit frischem, saisonalem Demeter-Gemüse.</p>
+HTML;
+
+    $timeline = <<<HTML
+<p>Wichtige Meilensteine in der Geschichte von biocò.</p>
+HTML;
+
+    addSection($wir, 'intro', 'biocò: Die Gemüsegenossenschaft', $wirIntro, 'rich_text');
+    addSection($wir, 'wir', 'Wir', $wirTeam, 'rich_text');
+    addSection($wir, 'alle_mitglieder', 'Alle Mitglieder', $alleMitglieder, 'split_media_text');
+    addSection($wir, 'betriebsgruppe', 'Betriebsgruppe (BG)', $betriebsgruppe, 'split_media_text');
+    addSection($wir, 'hof_team', 'Hof-Team', $hofTeam, 'rich_text');
+    addSection($wir, 'geisshof', 'Der Geisshof', $geisshof, 'rich_text');
+    addSection($wir, 'mission', 'Mission & Leitbild', $mission, 'rich_text');
+    addSection($wir, 'solidaritaet', 'Solidarität', $solidaritaet, 'rich_text');
+    addSection($wir, 'nachhaltigkeit', 'Nachhaltigkeit', $nachhaltigkeit, 'rich_text');
+    addSection($wir, 'gemeinschaft', 'Gemeinschaft', $gemeinschaft, 'rich_text');
+    addSection($wir, 'regionalitaet', 'Regionalität', $regionalitaet, 'rich_text');
+    addSection($wir, 'gotti', 'Gotti-System', $gotti, 'rich_text');
+    addSection($wir, 'geschichte', 'Geschichte', $geschichte, 'rich_text');
+    addSection($wir, 'timeline', 'Timeline', $timeline, 'rich_text');
+    addSection($wir, 'timeline_2013', 'Gründung', 'Die Gründung von biocò fand am 15.11.2013 statt. Da war die Betriebsgruppe bereits sehr, sehr aktiv.', 'rich_text');
+    addSection($wir, 'timeline_2014', 'Erste Gartensaison', 'War dann die erste Gartensaison und ab da gab es die ersten Depots.', 'rich_text');
+    addSection($wir, 'timeline_2016', 'Packraum', 'Der Packraum wird erstellt und in Betrieb genommen. Ein wichtiger Schritt für die Genossenschaft.', 'rich_text');
+    addSection($wir, 'timeline_2019-2023', 'Mitgliederwachstum', 'Weiteres Wachstum der Mitgliederzahl, Optimierung der Anbauplanung und Logistik.', 'rich_text');
+    addSection($wir, 'timeline_2023', 'Laufenten', 'Wir haben zwei Pärchen Laufenten auf dem Hof, die uns bei der Schneckenjagd unterstützen.', 'rich_text');
+    addSection($wir, 'timeline_2025', 'Neue Website', 'Launch der neuen Website mit modernem Design und verbesserter Benutzerführung.', 'rich_text');
+
+    $output[] = "  Added 20 sections to wir";
+} else {
+    $output[] = getStatusText($result, 'wir');
+}
+
+// 9. biocò werden (Membership signup)
+$result = getOrCreatePage($contentParent, 'bioco-werden', 'biocò werden', 'page_content', $overwrite);
+$biocoWerden = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'bioco-werden');
+
+    $biocoWerdenIntro = <<<HTML
+<p>Wähle dein Gemüseabo und werde Teil unserer Gemüsegenossenschaft. Deine Auswahl wird automatisch ins Anmeldeformular übernommen.</p>
+HTML;
+
+    addSection($biocoWerden, 'intro', 'biocò werden', $biocoWerdenIntro, 'rich_text');
+    addSection($biocoWerden, 'calculator', 'Abo-Rechner', '', 'component', 'default', 'pricing_calculator');
+
+    $output[] = "  Added 2 sections to bioco-werden (with pricing calculator)";
+} else {
+    $output[] = getStatusText($result, 'bioco-werden');
+}
+
+// 10. Datenschutz (Privacy Policy)
+$result = getOrCreatePage($contentParent, 'datenschutz', 'Datenschutzerklärung', 'page_content', $overwrite);
+$datenschutz = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'datenschutz');
+
+    $datenschutzIntro = <<<HTML
+<h2>1. Datenschutz auf einen Blick</h2>
+<h3>Allgemeine Hinweise</h3>
+<p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</p>
+HTML;
+
+    $datenschutzVerantwortlich = <<<HTML
+<h2>2. Verantwortliche Stelle</h2>
+<p>Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:</p>
+<p><strong>Gemüsegenossenschaft biocò</strong><br />
+Geisshof<br />
+5412 Gebenstorf<br />
+Schweiz<br />
+E-Mail: <a href="mailto:info@bioco.ch">info@bioco.ch</a></p>
+HTML;
+
+    $datenschutzErfassung = <<<HTML
+<h2>3. Datenerfassung auf dieser Website</h2>
+<h3>Kontaktformular</h3>
+<p>Wenn Sie uns per Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben aus dem Anfrageformular inklusive der von Ihnen dort angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert. Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.</p>
+<h3>Double Opt-In (DOI)</h3>
+<p>Bei allen Formularen verwenden wir ein Double Opt-In Verfahren. Das bedeutet, dass Sie nach der Anmeldung eine E-Mail erhalten, in der Sie um Bestätigung Ihrer Anmeldung gebeten werden. Erst nach Bestätigung werden Ihre Daten gespeichert.</p>
+HTML;
+
+    $datenschutzCookies = <<<HTML
+<h2>4. Cookies</h2>
+<p>Diese Website verwendet keine Cookies. Wir verwenden Matomo Analytics im cookieless Modus, um die Nutzung der Website zu analysieren, ohne personenbezogene Daten zu speichern.</p>
+HTML;
+
+    $datenschutzRechte = <<<HTML
+<h2>5. Ihre Rechte</h2>
+<p>Sie haben jederzeit das Recht, Auskunft über Ihre bei uns gespeicherten personenbezogenen Daten zu erhalten. Sie haben ausserdem ein Recht auf Berichtigung, Sperrung oder Löschung dieser Daten. Hierzu sowie zu weiteren Fragen zum Thema Datenschutz können Sie sich jederzeit unter der im Impressum angegebenen Adresse an uns wenden.</p>
+HTML;
+
+    $datenschutzSsl = <<<HTML
+<h2>6. SSL-Verschlüsselung</h2>
+<p>Diese Seite nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher Inhalte eine SSL-Verschlüsselung.</p>
+HTML;
+
+    addSection($datenschutz, 'intro', 'Datenschutzerklärung', $datenschutzIntro, 'rich_text');
+    addSection($datenschutz, 'verantwortlich', 'Verantwortliche Stelle', $datenschutzVerantwortlich, 'rich_text');
+    addSection($datenschutz, 'erfassung', 'Datenerfassung', $datenschutzErfassung, 'rich_text');
+    addSection($datenschutz, 'cookies', 'Cookies', $datenschutzCookies, 'rich_text');
+    addSection($datenschutz, 'rechte', 'Ihre Rechte', $datenschutzRechte, 'rich_text');
+    addSection($datenschutz, 'ssl', 'SSL-Verschlüsselung', $datenschutzSsl, 'rich_text');
+
+    $output[] = "  Added 6 sections to datenschutz";
+} else {
+    $output[] = getStatusText($result, 'datenschutz');
+}
+
+// 11. Impressum (Legal Notice)
+$result = getOrCreatePage($contentParent, 'impressum', 'Impressum', 'page_content', $overwrite);
+$impressum = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'impressum');
+
+    $impressumKontakt = <<<HTML
+<h2>Kontakt</h2>
+<p><strong>Gemüsegenossenschaft biocò</strong><br />
+Geisshof<br />
+5412 Gebenstorf<br />
+Schweiz</p>
+<p><strong>E-Mail:</strong> <a href="mailto:info@bioco.ch">info@bioco.ch</a></p>
+HTML;
+
+    $impressumVertretung = <<<HTML
+<h2>Vertretungsberechtigte Personen</h2>
+<p>Betriebsgruppe der Gemüsegenossenschaft biocò</p>
+HTML;
+
+    $impressumHaftung = <<<HTML
+<h2>Haftungsausschluss</h2>
+<p>Der Inhalt dieser Website wurde mit grösster Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.</p>
+HTML;
+
+    $impressumUrheberrecht = <<<HTML
+<h2>Urheberrecht</h2>
+<p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem schweizerischen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung ausserhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>
+HTML;
+
+    addSection($impressum, 'kontakt', 'Impressum', $impressumKontakt, 'rich_text');
+    addSection($impressum, 'vertretung', 'Vertretung', $impressumVertretung, 'rich_text');
+    addSection($impressum, 'haftung', 'Haftung', $impressumHaftung, 'rich_text');
+    addSection($impressum, 'urheberrecht', 'Urheberrecht', $impressumUrheberrecht, 'rich_text');
+
+    $output[] = "  Added 4 sections to impressum";
+} else {
+    $output[] = getStatusText($result, 'impressum');
+}
+
+// 12. Statuten (Statutes)
+$result = getOrCreatePage($contentParent, 'statuten', 'Statuten', 'page_content', $overwrite);
+$statuten = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'statuten');
+
+    $statutenIntro = <<<HTML
+<p>Die Statuten der Gemüsegenossenschaft biocò regeln die Struktur und Organisation der Genossenschaft.</p>
+<h3>Dokumente zum Download</h3>
+<p><a href="/statuten/13-11-15_Statuten_bioco.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Statuten (PDF)</a> <a href="/statuten/2212_Betriebsreglement.pdf" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">Reglement (PDF)</a></p>
+HTML;
+
+    $statutenUeber = <<<HTML
+<h2>Über die Genossenschaft</h2>
+<p>Die Gemüsegenossenschaft biocò ist eine Genossenschaft nach schweizerischem Recht. Sie wurde 2014 gegründet und betreibt solidarische Landwirtschaft (Community Supported Agriculture) auf dem Geisshof in Gebenstorf.</p>
+<p>Die Genossenschaft basiert auf dem Prinzip der Solidarität: Mitglieder teilen sich Arbeit und Ertrag gemeinsam. Jede(r) Genossenschafter/in bringt sich aktiv ein und trägt zur Gemeinschaft bei.</p>
+HTML;
+
+    $statutenMitgliedschaft = <<<HTML
+<h2>Mitgliedschaft</h2>
+<p>Um Mitglied zu werden, benötigst du Anteilsscheine der Genossenschaft (CHF 250 pro Anteil). Die Anzahl der erforderlichen Anteile hängt vom gewählten Gemüsekorb ab:</p>
+<ul>
+<li>Halb Gemüsekorb: 1 Anteil</li>
+<li>Standard Gemüsekorb: 2 Anteile</li>
+<li>Doppel Gemüsekorb: 4 Anteile</li>
+</ul>
+<p><a href="/mitmachen" class="btn btn-primary">Jetzt Mitglied werden</a></p>
+HTML;
+
+    $statutenInfo = <<<HTML
+<h2>Weitere Informationen</h2>
+<p>Für weitere Fragen zu den Statuten oder der Genossenschaft, kontaktiere uns unter <a href="mailto:info@bioco.ch">info@bioco.ch</a> oder nutze das <a href="/kontakt">Kontaktformular</a>.</p>
+HTML;
+
+    addSection($statuten, 'intro', 'Statuten', $statutenIntro, 'rich_text');
+    addSection($statuten, 'ueber', 'Über die Genossenschaft', $statutenUeber, 'rich_text');
+    addSection($statuten, 'mitgliedschaft', 'Mitgliedschaft', $statutenMitgliedschaft, 'rich_text');
+    addSection($statuten, 'info', 'Weitere Informationen', $statutenInfo, 'rich_text');
+
+    $output[] = "  Added 4 sections to statuten";
+} else {
+    $output[] = getStatusText($result, 'statuten');
+}
+
+// 13. Newsletter
+$result = getOrCreatePage($contentParent, 'newsletter', 'Newsletter', 'page_content', $overwrite);
+$newsletter = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'newsletter');
+
+    $newsletterIntro = <<<HTML
+<p>Abonniere unseren Newsletter und bleibe über Neuigkeiten, Events und Aktuelles aus der Gemüsegenossenschaft informiert.</p>
+HTML;
+
+    addSection($newsletter, 'intro', 'Newsletter abonnieren', $newsletterIntro, 'rich_text');
+    addSection($newsletter, 'form', 'Anmeldung', '', 'component', 'default', 'subscribe_form');
+
+    $output[] = "  Added 2 sections to newsletter (with subscribe form)";
+} else {
+    $output[] = getStatusText($result, 'newsletter');
+}
+
+// 14. Warteliste (Waiting List)
+$result = getOrCreatePage($contentParent, 'warteliste', 'Warteliste', 'page_content', $overwrite);
+$warteliste = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'warteliste');
+
+    $wartelisteIntro = <<<HTML
+<p>Unsere Gemüsekörbe sind derzeit vollständig vergeben. Trage dich auf die Warteliste ein und wir melden uns, sobald ein Platz frei wird.</p>
+HTML;
+
+    addSection($warteliste, 'intro', 'Warteliste', $wartelisteIntro, 'rich_text');
+    addSection($warteliste, 'form', 'Anmeldung', '', 'component', 'default', 'waiting_list_form');
+
+    $output[] = "  Added 2 sections to warteliste (with waiting list form)";
+} else {
+    $output[] = getStatusText($result, 'warteliste');
+}
+
+// 15. Anmeldung (Membership Registration)
+$result = getOrCreatePage($contentParent, 'anmeldung', 'Anmeldung', 'page_content', $overwrite);
+$anmeldung = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'anmeldung');
+
+    $anmeldungIntro = <<<HTML
+<p>Fülle das Anmeldeformular aus, um Mitglied der Gemüsegenossenschaft biocò zu werden.</p>
+HTML;
+
+    addSection($anmeldung, 'intro', 'Anmeldung', $anmeldungIntro, 'rich_text');
+    addSection($anmeldung, 'form', 'Mitgliedschaftsformular', '', 'component', 'default', 'membership_form');
+
+    $output[] = "  Added 2 sections to anmeldung (with membership form)";
+} else {
+    $output[] = getStatusText($result, 'anmeldung');
+}
+
+// 16. Tag der offenen Tür (Open Day)
+$result = getOrCreatePage($contentParent, 'tag-der-offenen-tuer', 'Tag der offenen Tür', 'page_content', $overwrite);
+$openDay = $result['page'];
+if (shouldPopulate($result)) {
+    $output[] = getStatusText($result, 'tag-der-offenen-tuer');
+
+    $openDayIntro = <<<HTML
+<p>Besuche uns am Tag der offenen Tür auf dem Geisshof und erlebe solidarische Landwirtschaft hautnah.</p>
+HTML;
+
+    addSection($openDay, 'intro', 'Tag der offenen Tür', $openDayIntro, 'rich_text');
+    addSection($openDay, 'form', 'Anmeldung', '', 'component', 'default', 'visit_day_form');
+
+    $output[] = "  Added 2 sections to tag-der-offenen-tuer (with visit day form)";
+} else {
+    $output[] = getStatusText($result, 'tag-der-offenen-tuer');
+}
+
+$output[] = "";
+$output[] = "=== Migration Complete ===";
+$output[] = "";
+$output[] = "Summary: 16 pages processed";
+$output[] = "";
+$output[] = "Next steps:";
+$output[] = "1. Edit each page in ProcessWire to add images and fine-tune content";
 $output[] = "2. Visit bioco.ch/{pagename} to verify pages render correctly";
-$output[] = "3. Update hardcoded pages to use CMS content via getPageSections()";
+$output[] = "3. Add images to sections via ProcessWire admin";
 $output[] = "4. Delete this migration page when done";
+$output[] = "";
+$output[] = "To re-run with overwrite: add ?overwrite=1 to URL";
 
 echo "<pre>" . implode("\n", $output) . "</pre>";
