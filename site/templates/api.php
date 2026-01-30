@@ -617,7 +617,12 @@ function handleContentRequest($type, $param = null) {
                 }
                 // Skip internal paths
                 $path = $page->path;
-                if (strpos($path, '/content/') === 0 || strpos($path, '/admin/') === 0 || strpos($path, '/api/') === 0) {
+                if (strpos($path, '/content/') === 0 
+                    || strpos($path, '/admin/') === 0 
+                    || strpos($path, '/api/') === 0
+                    || strpos($path, '/processwire/') === 0
+                    || strpos($path, '/http404') === 0
+                    || strpos($path, '/setup') === 0) {
                     continue;
                 }
                 $items[] = [
