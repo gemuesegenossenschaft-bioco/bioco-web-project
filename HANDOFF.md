@@ -1363,7 +1363,33 @@ These files document the design process and can be useful for:
 
 ## 13. Existing Documentation
 
-This project has extensive documentation in the `docs/` directory. This hand-off document provides an overview; refer to these documents for detailed procedures.
+This project has extensive documentation in the root directory. This hand-off document provides an overview; refer to these documents for detailed procedures.
+
+### `MATOMO_SETUP_DE.md` (Deutsch)
+
+**Matomo Analytics Einrichtung** (vollständige Anleitung auf Deutsch):
+
+- Matomo-Instanz Installation auf cPanel
+- Datenschutz-Konfiguration (DSG-konform)
+- ProcessWire MatomoTracker Modul Setup
+- Next.js Frontend-Integration
+- Testing & Verifizierung
+- Fehlerbehebung & Wartung
+
+**Verwenden für:** Matomo-Installation, Datenschutz-Setup, Tracking-Konfiguration
+
+### `MATOMO_SETUP.md` (English)
+
+**Matomo Analytics Setup Guide** (complete English documentation):
+
+- Matomo instance installation
+- Privacy settings (Swiss DSG compliant)
+- ProcessWire backend configuration
+- Next.js frontend integration
+- Testing & troubleshooting
+- Maintenance procedures
+
+**Use this for:** Matomo setup, privacy configuration, tracking implementation
 
 ### `docs/processwire-migration.md`
 
