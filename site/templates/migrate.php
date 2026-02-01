@@ -463,6 +463,28 @@ HTML;
     addSection($aktuelles, 'events', 'Nächste Events', $eventsIntro, 'component', 'default', 'events_feed');
     addSection($aktuelles, 'kennenlernen', 'Möchtest du uns kennenlernen?', $kennenlernenText, 'rich_text');
 
+    // Create sample news item (Neuigkeiten) if news_item template exists
+    $newsItemTemplate = $templates->get('news_item');
+    if ($newsItemTemplate && $aktuelles->id) {
+        $existingNews = $pages->get("parent={$aktuelles}, template=news_item");
+        if (!$existingNews->id) {
+            $newsPage = wire(new Page());
+            $newsPage->of(false);
+            $newsPage->template = $newsItemTemplate;
+            $newsPage->parent = $aktuelles;
+            $newsPage->name = 'bald-kommt-mehr';
+            $newsPage->title = 'Bald kommt mehr!';
+            if ($newsPage->hasField('summary')) {
+                $newsPage->summary = 'Wir haben viel zu erzählen aber hatten noch nicht Zeit es aufzuschreiben.';
+            }
+            if ($newsPage->hasField('body')) {
+                $newsPage->body = 'Wir haben viel zu erzählen aber hatten noch nicht Zeit es aufzuschreiben.';
+            }
+            $newsPage->save();
+            $output[] = "  Created sample news item (Neuigkeiten) under aktuelles";
+        }
+    }
+
     $output[] = "  Added 4 sections to aktuelles (with schnuppertage + events_feed components)";
 } else {
     $output[] = getStatusText($result, 'aktuelles');

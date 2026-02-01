@@ -734,7 +734,10 @@ function handleContentRequest($type, $param = null) {
             $limit = (int) ($input->get('limit') ?: 10);
             $limit = min($limit, 50);
             
-            $aktuellesParent = $pages->get('/aktuelles/');
+            $aktuellesParent = $pages->get('/content/aktuelles/');
+            if (!$aktuellesParent->id) {
+                $aktuellesParent = $pages->get('/aktuelles/');
+            }
             $items = [];
             
             if ($aktuellesParent->id) {

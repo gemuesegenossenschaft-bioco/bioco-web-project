@@ -4,19 +4,20 @@ import { useState } from 'react'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
-import { getAktuellesItems, getAllAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import Link from 'next/link'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import type { ContentSection } from '@/lib/processwire-types'
+import type { AktuellesItem } from '@/components/AktuellesData'
 
 interface AktuellesClientProps {
   sections?: ContentSection[]
+  aktuellesItems: AktuellesItem[]
 }
 
-export function AktuellesClient({ sections }: AktuellesClientProps) {
-  const allAktuellesItems = getAllAktuellesItems()
+export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientProps) {
+  const allAktuellesItems = aktuellesItems
   const { upcoming: eventItems, past, isLoading: eventsLoading, error: eventsError } = useEventsFeed()
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)

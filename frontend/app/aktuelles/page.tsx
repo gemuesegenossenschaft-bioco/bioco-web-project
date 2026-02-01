@@ -1,5 +1,7 @@
-import { getPageSections } from '@/lib/processwire'
-import { FALLBACK_AKTUELLES_INTRO } from '@/lib/fallback-content'
+import { getPageSections, getAktuelles } from '@/lib/processwire'
+import { getAktuellesItems } from '@/components/AktuellesData'
+import type { AktuellesItem } from '@/components/AktuellesData'
+import type { AktuellesNewsItem } from '@/lib/processwire-types'
 import { AktuellesClient } from '@/components/AktuellesClient'
 import { Metadata } from 'next'
 
@@ -17,9 +19,31 @@ export const metadata: Metadata = {
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60
 
-export default async function AktuellesPage() {
-  // Fetch CMS content
-  const cmsSections = await getPageSections('aktuelles')
+function mapNewsToAktuellesItem(item: AktuellesNewsItem): AktuellesItem {
+  return {
+    id: item.id,
+    date: item.date,
+    title: item.title,
+    description: item.summary,
+    type: 'aktuelles',
+    fullDescription: item.body,
+    imageUrl: item.image ?? undefined,
+    url: item.url,
+  }
+}
 
-  return <AktuellesClient sections={cmsSections} />
+export default async function AktuellesPage() {
+  const [cmsSections, cmsNews] = await Promise.all([
+    getPageSections('aktuelles'),
+    getAktuelles(10),
+  ])
+
+  const aktuellesItems: AktuellesItem[] =
+    cmsNews.length > 0
+      ? cmsNews.map(mapNewsToAktuellesItem)
+      : getAktuellesItems()
+
+  return (
+    <AktuellesClient sections={cmsSections} aktuellesItems={aktuellesItems} />
+  )
 }

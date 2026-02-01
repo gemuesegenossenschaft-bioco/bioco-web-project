@@ -1,5 +1,8 @@
 import { Metadata } from 'next'
-import { getHomepageContent } from '@/lib/processwire'
+import { getHomepageContent, getAktuelles } from '@/lib/processwire'
+import { getAktuellesItems } from '@/components/AktuellesData'
+import type { AktuellesItem } from '@/components/AktuellesData'
+import type { AktuellesNewsItem } from '@/lib/processwire-types'
 import { FALLBACK_HERO, FALLBACK_HOMEPAGE_SECTIONS, mergeSections } from '@/lib/fallback-content'
 import { HomeClient } from '@/components/HomeClient'
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo'
@@ -33,16 +36,35 @@ export async function generateMetadata(): Promise<Metadata> {
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60
 
+function mapNewsToAktuellesItem(item: AktuellesNewsItem): AktuellesItem {
+  return {
+    id: item.id,
+    date: item.date,
+    title: item.title,
+    description: item.summary,
+    type: 'aktuelles',
+    fullDescription: item.body,
+    imageUrl: item.image ?? undefined,
+    url: item.url,
+  }
+}
+
 export default async function Home() {
-  // Fetch CMS content with fallback
-  const cmsContent = await getHomepageContent()
+  const [cmsContent, cmsNews] = await Promise.all([
+    getHomepageContent(),
+    getAktuelles(10),
+  ])
   
-  // Use CMS content if available, otherwise use fallbacks
   const hero = cmsContent?.hero?.headline 
     ? cmsContent.hero 
     : FALLBACK_HERO
   
   const sections = mergeSections(cmsContent?.sections, FALLBACK_HOMEPAGE_SECTIONS)
 
-  return <HomeClient hero={hero} sections={sections} />
+  const aktuellesItems: AktuellesItem[] =
+    cmsNews.length > 0 ? cmsNews.map(mapNewsToAktuellesItem) : getAktuellesItems()
+
+  return (
+    <HomeClient hero={hero} sections={sections} aktuellesItems={aktuellesItems} />
+  )
 }

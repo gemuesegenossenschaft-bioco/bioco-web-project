@@ -128,13 +128,14 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
         {/* Content */}
         <div style={{ padding: '24px' }}>
           {item.fullDescription && (
-            <p style={{ 
-              marginBottom: '16px',
-              lineHeight: 1.7,
-              color: 'var(--text-secondary)'
-            }}>
-              {item.fullDescription}
-            </p>
+            <div
+              style={{
+                marginBottom: '16px',
+                lineHeight: 1.7,
+                color: 'var(--text-secondary)',
+              }}
+              dangerouslySetInnerHTML={{ __html: item.fullDescription }}
+            />
           )}
 
           {(item.location || item.timeLabel || item.time) && (

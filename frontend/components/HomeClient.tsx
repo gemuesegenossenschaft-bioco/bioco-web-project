@@ -8,19 +8,20 @@ import { PrimaryNavigation } from '@/components/SecondaryNavigation'
 import { MobileMenu } from '@/components/MobileMenu'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
-import { getAktuellesItems, AktuellesItem } from '@/components/AktuellesData'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import { ScrollToTopLink } from '@/components/ScrollToTopLink'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import type { ContentSection, HeroContent } from '@/lib/processwire-types'
+import type { AktuellesItem } from '@/components/AktuellesData'
 
 interface HomeClientProps {
   hero: HeroContent
   sections: ContentSection[]
+  aktuellesItems: AktuellesItem[]
 }
 
-export function HomeClient({ hero, sections }: HomeClientProps) {
+export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) {
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -161,7 +162,7 @@ export function HomeClient({ hero, sections }: HomeClientProps) {
           <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
             <h2>Aktuelles</h2>
             <div className="aktuelles-list">
-              {getAktuellesItems().slice(0, 3).map((item, index) => (
+              {aktuellesItems.slice(0, 3).map((item, index) => (
                 <AktuellesItemComponent
                   key={item.id || index}
                   item={item}

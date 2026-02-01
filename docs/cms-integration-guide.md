@@ -108,7 +108,7 @@ https://cms.bioco.ch/migrate/?overwrite=1
 | gemuese | 5 | saisonkalender, gallery |
 | solawi | 6 | - |
 | abos | 6 | - |
-| aktuelles | 4 | schnuppertage, events_feed |
+| aktuelles | 4 | schnuppertage, events_feed (Neuigkeiten: child pages with template news_item) |
 | kontakt | 4 | contact_form |
 | standorte-depots | 4 | geisshof_map, depot_map |
 | wir | 20 | - |
@@ -138,6 +138,14 @@ https://cms.bioco.ch/migrate/?overwrite=1
    - `hero_subtitle`: Subtitle text
    - `hero_image`: Hero background image
    - `content_sections`: Add sections for Willkommen, Gemeinsam, Kennenlernen
+
+### Neuigkeiten (News Items) on Aktuelles Page
+1. Go to Pages → content → aktuelles
+2. Click **Add New** (child page)
+3. Select template `news_item`
+4. Fill in: `title`, `summary` (teaser), `body` (full content, HTML allowed)
+5. Optional: `hero_image` or `card_image` for preview
+6. Save. News items appear in Neuigkeiten section on /aktuelles and homepage
 
 ### Page Content (Post-Migration)
 1. Go to Pages → content → {pagename}
