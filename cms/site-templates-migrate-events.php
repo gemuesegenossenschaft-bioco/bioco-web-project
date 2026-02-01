@@ -173,6 +173,13 @@ try {
         $eventTemplate = new Template();
         $eventTemplate->name = 'event';
         $eventTemplate->label = 'Event';
+
+        // Create fieldgroup for new template
+        $fieldgroup = new Fieldgroup();
+        $fieldgroup->name = 'event';
+        $fieldgroups->save($fieldgroup);
+        $eventTemplate->fieldgroup = $fieldgroup;
+
         $result['log'][] = "→ Erstelle Template: event";
     } else {
         $result['log'][] = "→ Template existiert: event (aktualisiere Felder)";
@@ -219,21 +226,31 @@ try {
                 $result['log'][] = "  + $label (hinzugefügt)";
             } catch (\Exception $e) {
                 $result['errors'][] = "Fehler beim Hinzufügen von $fieldName: " . $e->getMessage();
+                $result['success'] = false;
+                continue;
             }
         }
 
         // Update sort order
-        $fieldContext = $eventTemplate->fieldgroup->getFieldContext($field);
-        if ($fieldContext) {
-            $fieldContext->sort = $sort;
-            try {
+        try {
+            $fieldContext = $eventTemplate->fieldgroup->getFieldContext($field);
+            if ($fieldContext) {
+                $fieldContext->sort = $sort;
                 $eventTemplate->fieldgroup->saveContext($field, $fieldContext);
-            } catch (\Exception $e) {
-                $result['warnings'][] = "Konnte Feldposition nicht speichern für $fieldName";
             }
+        } catch (\Exception $e) {
+            $result['warnings'][] = "Konnte Feldposition nicht speichern für $fieldName: " . $e->getMessage();
         }
 
         $sort++;
+    }
+
+    // Save fieldgroup after adding all fields
+    try {
+        $fieldgroups->save($eventTemplate->fieldgroup);
+    } catch (\Exception $e) {
+        $result['errors'][] = "Fehler beim Speichern der Feldgruppe: " . $e->getMessage();
+        $result['success'] = false;
     }
 
     // Save template
