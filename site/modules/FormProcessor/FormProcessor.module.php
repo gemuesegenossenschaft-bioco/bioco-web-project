@@ -269,8 +269,14 @@ class FormProcessor extends WireData implements Module {
 	 * Process confirmed subscription
 	 */
 	private function processConfirmedSubscribe($data) {
-		// Add to newsletter list (implement as needed)
-		// For now, just send confirmation
+		// Persist subscriber in Newsletter module (double opt-in already done)
+		if($this->modules->isInstalled('ProcessNewsletter')) {
+			$newsletter = $this->modules->get('ProcessNewsletter');
+			if($newsletter) {
+				$newsletter->recordSubscriber($data['email'], $data['name'] ?? '', 'subscribe_form');
+			}
+		}
+
 		$mail = wireMail();
 		$mail->to($data['email']);
 		$mail->from($this->config->email_from);

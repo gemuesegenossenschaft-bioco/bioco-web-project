@@ -7,7 +7,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 	
-	<h1 style="color: #0066cc;">Newsletter-Anmeldung bestätigt</h1>
+	<h1 style="color: #0b5c2e;">Newsletter-Anmeldung bestätigt</h1>
 	
 	<p>Hallo<?php echo !empty($data['name']) ? ' ' . htmlspecialchars($data['name']) : ''; ?>,</p>
 	

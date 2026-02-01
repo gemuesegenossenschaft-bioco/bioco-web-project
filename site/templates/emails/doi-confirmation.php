@@ -7,7 +7,7 @@
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
 	
-	<h1 style="color: #0066cc;">Bestätigung deiner Anmeldung</h1>
+	<h1 style="color: #0b5c2e;">Bestätigung deiner Anmeldung</h1>
 	
 	<p>Hallo,</p>
 	
@@ -15,7 +15,7 @@
 	
 	<p style="text-align: center; margin: 30px 0;">
 		<a href="<?php echo $confirmationUrl; ?>" 
-		   style="display: inline-block; background-color: #0066cc; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+		   style="display: inline-block; background-color: #0b5c2e; color: #ffffff; padding: 15px 30px; text-decoration: none; border-radius: 4px; font-weight: bold;">
 			Anmeldung bestätigen
 		</a>
 	</p>

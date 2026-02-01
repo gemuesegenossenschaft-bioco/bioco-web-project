@@ -242,7 +242,8 @@ bioco-web-project/
 │   │   ├── DOIManager/
 │   │   ├── FormProcessor/
 │   │   ├── InstagramSync/
-│   │   └── MatomoTracker/
+│   │   ├── MatomoTracker/
+│   │   └── ProcessNewsletter/
 │   ├── templates/           # Template files
 │   ├── config-example.php  # Config template
 │   ├── ready.php           # Bootstrap
@@ -266,6 +267,9 @@ ProcessWire manages its own database schema. Key tables:
 - `templates` - Template definitions
 - `fieldgroups` - Field-to-template mappings
 - `doi_tokens` - Double opt-in tokens (custom table)
+- `newsletter_subscribers` - Newsletter subscriber list
+- `newsletter_campaigns` - Campaign metadata and content
+- `newsletter_send_queue` - Per-recipient send status
 
 **Note:** Don't modify ProcessWire tables directly. Use the API or admin interface.
 
@@ -335,8 +339,8 @@ Set in `site/config.php`:
 
 ```php
 $config->admin_email = 'admin@bioco.ch';
-$config->email_from = 'noreply@bioco.ch';
-$config->email_from_name = 'biocò';
+$config->email_from = 'hallo@bioco.ch';
+$config->email_from_name = 'Bioco';
 ```
 
 ### InstagramSync
@@ -396,6 +400,41 @@ $config->matomo_site_id = 1; // 1 for staging, 2 for production
     </script>
 <?php endif; ?>
 ```
+
+### ProcessNewsletter
+
+**Location:** `site/modules/ProcessNewsletter/ProcessNewsletter.module.php`
+
+**Purpose:** In-house newsletter manager with campaign creation, batch sending, and subscriber management.
+
+**Key Features:**
+
+- DOI-backed subscriber list (uses DOIManager/FormProcessor flow)
+- Draft and scheduled campaigns
+- Page picker for Aktuelles (news_item) and upcoming events
+- Content snapshotting (page edits don't change sent emails)
+- LazyCron-based send queue with SMTP throttling
+- Tokenized unsubscribe links
+- List-Unsubscribe header for one-click unsubscribe
+- Admin UI for campaigns and subscriber list
+
+**Database Tables:**
+
+```sql
+newsletter_subscribers (id, email, name, status, source, unsubscribe_token, ...)
+newsletter_campaigns (id, title, subject, preheader, status, scheduled_at, body_intro, content_blocks, ...)
+newsletter_send_queue (id, campaign_id, subscriber_id, status, attempts, ...)
+```
+
+**Configuration (site/config.php):**
+
+```php
+$config->email_from = 'hallo@bioco.ch';
+$config->email_from_name = 'Bioco';
+$config->newsletter_batch_size = 50; // emails per 5-minute window
+```
+
+**Setup:** Run `php scripts/setup-newsletter.php` to install module, create unsubscribe template/page. See `docs/newsletter-setup.md` for full guide.
 
 ### EventSetup
 
@@ -664,7 +703,7 @@ NEXT_PUBLIC_MATOMO_SITE_ID=2
 SMTP_HOST=mail.bioco.ch
 SMTP_PORT=465
 SMTP_SECURE=true
-SMTP_USER=noreply@bioco.ch
+SMTP_USER=hallo@bioco.ch
 SMTP_PASS=...
 ```
 
@@ -709,8 +748,8 @@ $config->httpHost = 'www.bioco.ch'; // or staging.bioco.ch
 $config->urls->root = '/';
 
 // Email
-$config->email_from = 'noreply@bioco.ch';
-$config->email_from_name = 'biocò';
+$config->email_from = 'hallo@bioco.ch';
+$config->email_from_name = 'Bioco';
 $config->admin_email = 'admin@bioco.ch';
 $config->info_email = 'info@bioco.ch';
 $config->intranet_email = 'intranet@bioco.ch';
@@ -1030,8 +1069,10 @@ site/modules/
 │   └── FormProcessor.module.php
 ├── InstagramSync/
 │   └── InstagramSync.module.php
-└── MatomoTracker/
-    └── MatomoTracker.module.php
+├── MatomoTracker/
+│   └── MatomoTracker.module.php
+└── ProcessNewsletter/
+    └── ProcessNewsletter.module.php
 ```
 
 ### Module Structure
@@ -1121,6 +1162,9 @@ ProcessWire manages its own schema. Don't modify tables directly.
 **Custom Tables:**
 
 - `doi_tokens` - Created by DOIManager module
+- `newsletter_subscribers` - Created by ProcessNewsletter module
+- `newsletter_campaigns` - Created by ProcessNewsletter module
+- `newsletter_send_queue` - Created by ProcessNewsletter module
 
 **Querying Data:**
 
@@ -1455,6 +1499,7 @@ This project has extensive documentation in the root directory. This hand-off do
 - `docs/aws-ses-emails-recovery.md` - Email recovery procedures
 - `docs/mx-records-migration.md` - DNS migration guide
 - `docs/recover-emails-last-14-days.md` - Email recovery
+- `docs/newsletter-setup.md` - In-house newsletter (ProcessNewsletter) setup, SMTP, cron, sending workflow
 - `seo-implementation-spec.md` - SEO requirements and implementation
 
 ---
@@ -1740,8 +1785,8 @@ git push origin develop
 - Document new workflows
 - Update troubleshooting section with common issues
 
-**Last Updated:** January 2026  
-**Version:** 1.0
+**Last Updated:** February 2026
+**Version:** 1.1
 
 ---
 

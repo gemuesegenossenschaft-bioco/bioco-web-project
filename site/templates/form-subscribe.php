@@ -39,12 +39,12 @@ if($input->post->submit_subscribe_form) {
 	<form method="post" action="" class="subscribe-form">
 		<div class="form-group">
 			<label for="subscribe_email">E-Mail-Adresse *</label>
-			<input type="email" id="subscribe_email" name="email" required value="<?php echo $input->post->email; ?>" />
+			<input type="email" id="subscribe_email" name="email" required value="<?php echo htmlspecialchars($input->post->email, ENT_QUOTES, 'UTF-8'); ?>" />
 		</div>
 		
 		<div class="form-group">
 			<label for="subscribe_name">Name (optional)</label>
-			<input type="text" id="subscribe_name" name="name" value="<?php echo $input->post->name; ?>" />
+			<input type="text" id="subscribe_name" name="name" value="<?php echo htmlspecialchars($input->post->name, ENT_QUOTES, 'UTF-8'); ?>" />
 		</div>
 		
 		<div class="form-group">

@@ -19,8 +19,15 @@ class DOIManager extends WireData implements Module {
 	}
 
 	public function init() {
-		// Create database table if it doesn't exist
+		$this->addHookAfter('LazyCron::everyHour', $this, 'hookCleanupExpired');
+	}
+
+	public function ___install() {
 		$this->createDatabaseTable();
+	}
+
+	public function hookCleanupExpired(\ProcessWire\HookEvent $event) {
+		$this->cleanupExpiredTokens();
 	}
 
 	/**
@@ -146,7 +153,9 @@ class DOIManager extends WireData implements Module {
 	 */
 	private function sendConfirmationEmail($email, $token, $formType) {
 		$config = $this->config;
-		$confirmationUrl = $config->urls->root . "doi-confirm/?token=" . $token;
+		$host = $config->httpHosts[0] ?? $_SERVER['HTTP_HOST'] ?? 'cms.bioco.ch';
+		$scheme = $config->https ? 'https' : 'http';
+		$confirmationUrl = $scheme . '://' . $host . $config->urls->root . "doi-confirm/?token=" . $token;
 		
 		$mail = wireMail();
 		$mail->to($email);
