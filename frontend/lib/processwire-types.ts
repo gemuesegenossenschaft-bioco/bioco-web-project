@@ -86,6 +86,8 @@ export interface ContentSection {
   media?: ContentMedia[];
   video?: ContentVideo | null;
   buttons?: ContentButton[];
+  imageOverlay?: 'none' | 'dark' | 'green' | 'orange';  // Image tint/overlay
+  bgColor?: 'none' | 'green' | 'darkgreen' | 'orange' | 'gray' | 'white';  // Section background
 }
 
 export interface SectionsResponse {
@@ -184,6 +186,7 @@ export interface NavigationItem {
   id: number;
   title: string;
   url: string;
+  sort?: number;  // Sort order from page tree
 }
 
 // ============================================================================

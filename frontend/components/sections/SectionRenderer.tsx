@@ -96,9 +96,10 @@ function SectionButtons({ section }: { section: ContentSection }) {
 
 function SplitSection({ section, mediaFirst }: { section: ContentSection; mediaFirst: boolean }) {
   const media = getSectionMedia(section)
+  const overlayClass = section.imageOverlay && section.imageOverlay !== 'none' ? `image-overlay-${section.imageOverlay}` : ''
   return (
     <section className="cms-section cms-split">
-      <div className={`cms-split-media ${mediaFirst ? 'is-first' : 'is-last'}`}>
+      <div className={`cms-split-media ${mediaFirst ? 'is-first' : 'is-last'} ${overlayClass}`}>
         {media ? (
           <div className="cms-media-frame">
             <Image src={media.url} alt={media.alt || section.title} fill style={{ objectFit: 'cover' }} />
@@ -198,47 +199,49 @@ export function SectionRenderer({ sections }: SectionRendererProps) {
       {sections.map((section) => {
         const layout = section.layout || (section.image || section.media ? 'split_media_text' : 'rich_text')
         const theme = section.theme ? `cms-theme-${section.theme}` : 'cms-theme-default'
+        const bgColor = section.bgColor && section.bgColor !== 'none' ? `bg-${section.bgColor}` : ''
+        const wrapperClasses = [theme, bgColor].filter(Boolean).join(' ')
         switch (layout) {
           case 'split_text_media':
             return (
-              <div key={section.id} className={theme}>
+              <div key={section.id} className={wrapperClasses}>
                 <SplitSection section={section} mediaFirst={false} />
               </div>
             )
           case 'full_width_banner':
             return (
-              <div key={section.id} className={theme}>
+              <div key={section.id} className={wrapperClasses}>
                 <BannerSection section={section} />
               </div>
             )
           case 'media_grid':
             return (
-              <div key={section.id} className={theme}>
+              <div key={section.id} className={wrapperClasses}>
                 <MediaGridSection section={section} />
               </div>
             )
           case 'video_embed':
             return (
-              <div key={section.id} className={theme}>
+              <div key={section.id} className={wrapperClasses}>
                 <VideoSection section={section} />
               </div>
             )
           case 'component':
             return (
-              <div key={section.id} className={theme}>
+              <div key={section.id} className={wrapperClasses}>
                 <ComponentSection section={section} />
               </div>
             )
           case 'split_media_text':
             return (
-              <div key={section.id} className={theme}>
+              <div key={section.id} className={wrapperClasses}>
                 <SplitSection section={section} mediaFirst={true} />
               </div>
             )
           case 'rich_text':
           default:
             return (
-              <div key={section.id} className={theme}>
+              <div key={section.id} className={wrapperClasses}>
                 <RichTextSection section={section} />
               </div>
             )

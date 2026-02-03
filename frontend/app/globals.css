@@ -6013,3 +6013,86 @@ footer a:hover {
   background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);
   border-radius: 24px;
 }
+
+/* ============================================================================ */
+/* Image Overlay & Background Color Styling (Phase 4) */
+/* ============================================================================ */
+
+/* Image Overlays - Semi-transparent tints over images */
+.image-overlay-dark::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+
+.image-overlay-green::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(76, 111, 68, 0.3);
+  pointer-events: none;
+}
+
+.image-overlay-orange::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(232, 119, 34, 0.3);
+  pointer-events: none;
+}
+
+/* Ensure overlays work with relative positioning */
+.image-overlay-dark,
+.image-overlay-green,
+.image-overlay-orange {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Color Utilities */
+.bg-green {
+  background-color: #4C6F44;
+  color: white;
+}
+
+.bg-darkgreen {
+  background-color: #2D4A27;
+  color: white;
+}
+
+.bg-orange {
+  background-color: #E87722;
+  color: white;
+}
+
+.bg-gray {
+  background-color: #999999;
+  color: white;
+}
+
+.bg-white {
+  background-color: #FFFFFF;
+  color: var(--text-primary);
+}
+
+/* Adjust section padding for colored backgrounds */
+.bg-green .cms-section,
+.bg-darkgreen .cms-section,
+.bg-orange .cms-section,
+.bg-gray .cms-section,
+.bg-white .cms-section {
+  padding: var(--spacing-lg) 0;
+}
+
+/* Eyebrow styling enhancement */
+.cms-section-eyebrow {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #4C6F44;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
