@@ -24,7 +24,7 @@ $allowedOrigins = $config->allowedOrigins ?? [
 ];
 
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-if (in_array($origin, $allowedOrigins) || strpos($origin, '.vercel.app') !== false || strpos($origin, 'http://localhost:') === 0) {
+if (in_array($origin, $allowedOrigins) || strpos($origin, '.vercel.app') !== false) {
     header("Access-Control-Allow-Origin: $origin");
 } elseif (empty($origin)) {
     // Allow requests without origin (direct API calls, curl, etc.)
@@ -641,32 +641,7 @@ function handleContentRequest($type, $param = null) {
             
             echo json_encode(['groups' => $groups]);
             break;
-
-        // --------------------------------------------------------------------
-        // Gallery images (public, from MediaLibrary pages)
-        // --------------------------------------------------------------------
-        case 'gallery':
-            $assets = $pages->find('template=MediaLibrary');
-            $images = [];
-            $config = wire('config');
-            foreach ($assets as $asset) {
-                foreach (['MediaImages', 'MediaFiles'] as $fieldName) {
-                    if (!$asset->hasField($fieldName)) continue;
-                    foreach ($asset->get($fieldName) as $file) {
-                        $ext = strtolower(pathinfo($file->name, PATHINFO_EXTENSION));
-                        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'])) continue;
-                        $images[] = [
-                            'id' => $asset->name . '-' . pathinfo($file->name, PATHINFO_FILENAME),
-                            'src' => $config->urls->httpRoot . ltrim($file->url, '/'),
-                            'alt' => $file->description ?: decodeText($asset->title),
-                            'category' => 'feld',
-                        ];
-                    }
-                }
-            }
-            echo json_encode(['success' => true, 'images' => $images]);
-            break;
-
+            
         // --------------------------------------------------------------------
         // Homepage content (combined hero + sections)
         // --------------------------------------------------------------------
