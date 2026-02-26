@@ -150,6 +150,10 @@ function biocoRenderUsageMarkup($assetId) {
 // Load custom admin JavaScript
 $wire->addHookAfter('Page::render', function($event) {
     if($this->wire('page')->template == 'admin') {
+        $user = $this->wire('user');
+        $process = $this->wire('process');
+        if (!$user || $user->isGuest()) return;
+        if ($process && $process instanceof ProcessLogin) return;
         $event->return = str_replace(
             '</body>',
             '<script src="' . $this->wire('config')->urls->templates . 'admin.js"></script></body>',

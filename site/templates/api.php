@@ -986,9 +986,19 @@ function handleMediaImportRequest() {
     $fileField = (string)($input['fileField'] ?? '');
     $fileName = (string)($input['fileName'] ?? '');
 
-    if (!$targetPageId || !$assetId || !$fieldHint || !$fileField || !$fileName) {
+    $missing = [];
+    if (!$targetPageId && !$repeaterItemId) $missing[] = 'targetPageId|repeaterItemId';
+    if (!$assetId) $missing[] = 'assetId';
+    if (!$fieldHint) $missing[] = 'targetField';
+    if (!$fileField) $missing[] = 'fileField';
+    if (!$fileName) $missing[] = 'fileName';
+    if (count($missing)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Missing required fields']);
+        echo json_encode([
+            'success' => false,
+            'error' => 'Missing required fields',
+            'missing' => $missing,
+        ]);
         return;
     }
 
@@ -1125,6 +1135,7 @@ function handleMediaUsageRequest() {
 
     $database = wire('database');
     $pages = wire('pages');
+    ensureMediaUsageTableExists();
     $assetId = (int)(wire('input')->get('assetId') ?: 0);
     if (!$assetId) {
         http_response_code(400);
@@ -1132,9 +1143,20 @@ function handleMediaUsageRequest() {
         return;
     }
 
-    $stmt = $database->prepare("SELECT asset_id, page_id, field, repeater_item_id, file_name, updated_at FROM media_asset_usage WHERE asset_id = :asset ORDER BY page_id, field");
-    $stmt->execute([':asset' => $assetId]);
-    $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    try {
+        $stmt = $database->prepare("SELECT asset_id, page_id, field, repeater_item_id, file_name, updated_at FROM media_asset_usage WHERE asset_id = :asset ORDER BY page_id, field");
+        $stmt->execute([':asset' => $assetId]);
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    } catch (\Throwable $e) {
+        echo json_encode([
+            'success' => true,
+            'assetId' => $assetId,
+            'count' => 0,
+            'items' => [],
+            'warning' => 'usage_table_unavailable',
+        ]);
+        return;
+    }
 
     $items = [];
     foreach ($rows as $row) {

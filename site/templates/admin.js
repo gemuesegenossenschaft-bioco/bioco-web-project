@@ -28,9 +28,24 @@ $(document).ready(function() {
         var id = $field.attr('id') || '';
         var m = id.match(/wrap_Inputfield_([^ ]+)/);
         if (m && m[1]) return m[1];
+        var fieldClass = ($field.attr('class') || '').match(/Inputfield_([A-Za-z0-9_]+)/);
+        if (fieldClass && fieldClass[1]) return fieldClass[1];
+        var dataName = $field.attr('data-name') || '';
+        if (dataName) return dataName;
         var inputName = $field.find('input[name]').first().attr('name') || '';
         if (inputName) return inputName.replace(/\[\]$/, '');
         return '';
+    }
+
+    function getPageEditId() {
+        if (ProcessWire && ProcessWire.config && ProcessWire.config.ProcessPageEdit && ProcessWire.config.ProcessPageEdit.id) {
+            return parseInt(ProcessWire.config.ProcessPageEdit.id, 10) || null;
+        }
+        var q = parseQuery();
+        if (q.id) return parseInt(q.id, 10) || null;
+        var m = (window.location.search || '').match(/[?&]id=(\d+)/);
+        if (m) return parseInt(m[1], 10) || null;
+        return null;
     }
 
     function getRepeaterItemId($field) {
@@ -92,7 +107,7 @@ $(document).ready(function() {
                 var url = ProcessWire.config.urls.admin + 'media/?biocoPicker=1';
                 var targetField = getTargetFieldName($field);
                 var repeaterItemId = getRepeaterItemId($field);
-                var pageId = ProcessWire.config.ProcessPageEdit ? ProcessWire.config.ProcessPageEdit.id : null;
+                var pageId = getPageEditId();
                 currentImportContext = {
                     targetField: targetField,
                     targetPageId: pageId,
