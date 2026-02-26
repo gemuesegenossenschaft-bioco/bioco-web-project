@@ -58,6 +58,13 @@ function normalizeSectionMedia(section: ContentSection): ContentSection {
   function push(url?: string | null, alt?: string | null) {
     const safeUrl = normalizeMediaUrl(url)
     if (!safeUrl || seen.has(safeUrl)) return
+    try {
+      const path = new URL(safeUrl).pathname
+      // Ignore directory URLs like ".../site/assets/files/1708/".
+      if (path.endsWith('/')) return
+    } catch {
+      if (safeUrl.endsWith('/')) return
+    }
     seen.add(safeUrl)
     images.push({ url: safeUrl, alt: String(alt || section.imageAlt || section.title || '').trim() || 'Bild' })
   }
