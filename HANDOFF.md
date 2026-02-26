@@ -44,9 +44,9 @@ The bioco.ch website serves as the digital presence for **Gemüsegenossenschaft 
 - **Backend CMS:** ProcessWire 3.x (PHP 8.2)
 - **Frontend:** Next.js 14 (React) with App Router
 - **Database:** MySQL (3 databases: live, staging, matomo)
-- **Hosting:**
-  - Backend: Novatrend cPanel (Swiss hosting)
-  - Frontend: Vercel (CDN, automatic deployments)
+- **Hosting:** Novatrend cPanel (Swiss hosting, single server)
+  - Frontend: Next.js standalone via Phusion Passenger
+  - Backend: ProcessWire via PHP-FPM
 - **Analytics:** Matomo (cookieless, Swiss DSG compliant)
 - **Email:** Novatrend SMTP server
 
@@ -185,26 +185,24 @@ Access ProcessWire admin at: `https://www.bioco.ch/processwire/`
 
 ```mermaid
 graph TB
-    subgraph "Frontend Layer"
-        NextJS[Next.js 14<br/>Vercel]
+    subgraph "Novatrend cPanel (193.33.128.160)"
+        Passenger[Phusion Passenger] --> NextJS[Next.js 14 Standalone]
+        Apache[Apache + AutoSSL] --> Passenger
+        Apache --> PHP[PHP-FPM]
+        PHP --> ProcessWire[ProcessWire CMS]
+        ProcessWire --> MySQL[(MySQL Database)]
+        NextJS -->|localhost/cms/api| ProcessWire
     end
-    
-    subgraph "Backend Layer"
-        ProcessWire[ProcessWire CMS<br/>Novatrend cPanel]
-        MySQL[(MySQL Database)]
-    end
-    
+
     subgraph "External Services"
         Matomo[Matomo Analytics]
-        Instagram[Instagram API]
         SMTP[Novatrend SMTP]
     end
-    
-    NextJS -->|REST API<br/>JSON| ProcessWire
-    ProcessWire --> MySQL
+
     ProcessWire -->|Tracking| Matomo
-    ProcessWire -->|Sync| Instagram
     ProcessWire -->|Send Emails| SMTP
+
+    GitHub[GitHub] -->|git pull| Passenger
 ```
 
 ### Data Flow
@@ -242,8 +240,7 @@ bioco-web-project/
 │   │   ├── DOIManager/
 │   │   ├── FormProcessor/
 │   │   ├── InstagramSync/
-│   │   ├── MatomoTracker/
-│   │   └── ProcessNewsletter/
+│   │   └── MatomoTracker/
 │   ├── templates/           # Template files
 │   ├── config-example.php  # Config template
 │   ├── ready.php           # Bootstrap
@@ -267,9 +264,6 @@ ProcessWire manages its own database schema. Key tables:
 - `templates` - Template definitions
 - `fieldgroups` - Field-to-template mappings
 - `doi_tokens` - Double opt-in tokens (custom table)
-- `newsletter_subscribers` - Newsletter subscriber list
-- `newsletter_campaigns` - Campaign metadata and content
-- `newsletter_send_queue` - Per-recipient send status
 
 **Note:** Don't modify ProcessWire tables directly. Use the API or admin interface.
 
@@ -339,8 +333,8 @@ Set in `site/config.php`:
 
 ```php
 $config->admin_email = 'admin@bioco.ch';
-$config->email_from = 'hallo@bioco.ch';
-$config->email_from_name = 'Bioco';
+$config->email_from = 'noreply@bioco.ch';
+$config->email_from_name = 'biocò';
 ```
 
 ### InstagramSync
@@ -400,41 +394,6 @@ $config->matomo_site_id = 1; // 1 for staging, 2 for production
     </script>
 <?php endif; ?>
 ```
-
-### ProcessNewsletter
-
-**Location:** `site/modules/ProcessNewsletter/ProcessNewsletter.module.php`
-
-**Purpose:** In-house newsletter manager with campaign creation, batch sending, and subscriber management.
-
-**Key Features:**
-
-- DOI-backed subscriber list (uses DOIManager/FormProcessor flow)
-- Draft and scheduled campaigns
-- Page picker for Aktuelles (news_item) and upcoming events
-- Content snapshotting (page edits don't change sent emails)
-- LazyCron-based send queue with SMTP throttling
-- Tokenized unsubscribe links
-- List-Unsubscribe header for one-click unsubscribe
-- Admin UI for campaigns and subscriber list
-
-**Database Tables:**
-
-```sql
-newsletter_subscribers (id, email, name, status, source, unsubscribe_token, ...)
-newsletter_campaigns (id, title, subject, preheader, status, scheduled_at, body_intro, content_blocks, ...)
-newsletter_send_queue (id, campaign_id, subscriber_id, status, attempts, ...)
-```
-
-**Configuration (site/config.php):**
-
-```php
-$config->email_from = 'hallo@bioco.ch';
-$config->email_from_name = 'Bioco';
-$config->newsletter_batch_size = 50; // emails per 5-minute window
-```
-
-**Setup:** Run `php scripts/setup-newsletter.php` to install module, create unsubscribe template/page. See `docs/newsletter-setup.md` for full guide.
 
 ### EventSetup
 
@@ -685,43 +644,29 @@ const data = await response.json();
 
 ### Environment Variables
 
-**Required (Vercel Dashboard):**
+**Required (cPanel Node.js App UI or .env.production):**
 
 ```bash
-# ProcessWire API
-NEXT_PUBLIC_PROCESSWIRE_API_URL=https://www.bioco.ch/api
-PROCESSWIRE_API_URL=https://www.bioco.ch/api
-
-# Site
-NEXT_PUBLIC_SITE_URL=https://www.bioco.ch
-
-# Matomo
+PROCESSWIRE_BASE_URL=http://localhost/cms
+NEXT_PUBLIC_PROCESSWIRE_BASE_URL=https://cms.bioco.ch
+NEXT_PUBLIC_SITE_URL=https://bioco.ch
 NEXT_PUBLIC_MATOMO_URL=https://matomo.bioco.ch/
-NEXT_PUBLIC_MATOMO_SITE_ID=2
-
-# Email (SMTP)
-SMTP_HOST=mail.bioco.ch
-SMTP_PORT=465
-SMTP_SECURE=true
-SMTP_USER=hallo@bioco.ch
-SMTP_PASS=...
+NEXT_PUBLIC_MATOMO_SITE_ID=1
 ```
+
+See `.env.example` for all variables including SMTP secrets.
 
 **Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser.
 
-### Build Process
+### Build & Deploy
 
-```bash
-cd frontend
-npm install
-npm run build
-```
+Deploy is automated via `.cpanel.yml` on `git pull`:
+1. `npm ci --omit=dev`
+2. `npm run build` (produces standalone output)
+3. Copy standalone to app dir
+4. Touch `tmp/restart.txt` to restart Passenger
 
-Vercel automatically:
-1. Detects Next.js project
-2. Runs `npm install`
-3. Runs `npm run build`
-4. Deploys to CDN
+Manual: `ssh bioco@193.33.128.160` then `bash scripts/deploy.sh develop`
 
 ---
 
@@ -748,8 +693,8 @@ $config->httpHost = 'www.bioco.ch'; // or staging.bioco.ch
 $config->urls->root = '/';
 
 // Email
-$config->email_from = 'hallo@bioco.ch';
-$config->email_from_name = 'Bioco';
+$config->email_from = 'noreply@bioco.ch';
+$config->email_from_name = 'biocò';
 $config->admin_email = 'admin@bioco.ch';
 $config->info_email = 'info@bioco.ch';
 $config->intranet_email = 'intranet@bioco.ch';
@@ -1069,10 +1014,8 @@ site/modules/
 │   └── FormProcessor.module.php
 ├── InstagramSync/
 │   └── InstagramSync.module.php
-├── MatomoTracker/
-│   └── MatomoTracker.module.php
-└── ProcessNewsletter/
-    └── ProcessNewsletter.module.php
+└── MatomoTracker/
+    └── MatomoTracker.module.php
 ```
 
 ### Module Structure
@@ -1162,9 +1105,6 @@ ProcessWire manages its own schema. Don't modify tables directly.
 **Custom Tables:**
 
 - `doi_tokens` - Created by DOIManager module
-- `newsletter_subscribers` - Created by ProcessNewsletter module
-- `newsletter_campaigns` - Created by ProcessNewsletter module
-- `newsletter_send_queue` - Created by ProcessNewsletter module
 
 **Querying Data:**
 
@@ -1238,10 +1178,10 @@ $events = $pages->find('template=event, event_status=upcoming');
 
 ### Git-Based Deployment
 
-The project uses Git for all deployments:
+Everything deploys via Git to cPanel:
 
-- **Backend:** cPanel Git Version Control
-- **Frontend:** Vercel (automatic from Git)
+- **Backend (ProcessWire):** cPanel Git Version Control
+- **Frontend (Next.js):** cPanel Git pull triggers `.cpanel.yml` (build + Passenger restart)
 
 ### Staging Workflow
 
@@ -1261,8 +1201,8 @@ The project uses Git for all deployments:
    ```
 
 3. **Deploy to staging:**
-   - Backend: cPanel → Git → Update from Remote (develop branch)
-   - Frontend: Vercel auto-deploys develop branch
+   - SSH: `cd /home/bioco/bioco-web-project && git pull origin develop`
+   - `.cpanel.yml` auto-runs: npm ci, build, copy standalone, restart Passenger
 
 4. **Test on staging.bioco.ch**
 
@@ -1276,8 +1216,8 @@ The project uses Git for all deployments:
    ```
 
 2. **Deploy to production:**
-   - Backend: cPanel → Git → Update from Remote (main branch)
-   - Frontend: Vercel auto-deploys main branch
+   - SSH: `cd /home/bioco/bioco-web-project && git pull origin main`
+   - Or: `bash scripts/deploy.sh main`
 
 3. **Verify on www.bioco.ch**
 
@@ -1292,20 +1232,18 @@ Set in `site/config.php` on server (not in Git):
 - Matomo configuration
 - Instagram API tokens
 
-**Frontend (Vercel):**
+**Frontend (cPanel Node.js App):**
 
-Set in Vercel Dashboard → Settings → Environment Variables:
+Set in cPanel → Software → Setup Node.js App → Environment Variables:
 
-- `NEXT_PUBLIC_PROCESSWIRE_API_URL`
-- `PROCESSWIRE_API_URL`
-- `NEXT_PUBLIC_MATOMO_URL`
-- `NEXT_PUBLIC_MATOMO_SITE_ID`
+- `PROCESSWIRE_BASE_URL=http://localhost/cms`
+- `NEXT_PUBLIC_PROCESSWIRE_BASE_URL=https://cms.bioco.ch`
+- `NEXT_PUBLIC_SITE_URL=https://bioco.ch`
+- `NEXT_PUBLIC_MATOMO_URL=https://matomo.bioco.ch/`
+- `NEXT_PUBLIC_MATOMO_SITE_ID=1`
 - SMTP credentials
 
-**Scopes:**
-
-- **Production:** Only `main` branch
-- **Preview:** All other branches (staging, feature branches)
+See `.env.example` for full list.
 
 ### Database Migration
 
@@ -1407,33 +1345,7 @@ These files document the design process and can be useful for:
 
 ## 13. Existing Documentation
 
-This project has extensive documentation in the root directory. This hand-off document provides an overview; refer to these documents for detailed procedures.
-
-### `MATOMO_SETUP_DE.md` (Deutsch)
-
-**Matomo Analytics Einrichtung** (vollständige Anleitung auf Deutsch):
-
-- Matomo-Instanz Installation auf cPanel
-- Datenschutz-Konfiguration (DSG-konform)
-- ProcessWire MatomoTracker Modul Setup
-- Next.js Frontend-Integration
-- Testing & Verifizierung
-- Fehlerbehebung & Wartung
-
-**Verwenden für:** Matomo-Installation, Datenschutz-Setup, Tracking-Konfiguration
-
-### `MATOMO_SETUP.md` (English)
-
-**Matomo Analytics Setup Guide** (complete English documentation):
-
-- Matomo instance installation
-- Privacy settings (Swiss DSG compliant)
-- ProcessWire backend configuration
-- Next.js frontend integration
-- Testing & troubleshooting
-- Maintenance procedures
-
-**Use this for:** Matomo setup, privacy configuration, tracking implementation
+This project has extensive documentation in the `docs/` directory. This hand-off document provides an overview; refer to these documents for detailed procedures.
 
 ### `docs/processwire-migration.md`
 
@@ -1499,7 +1411,6 @@ This project has extensive documentation in the root directory. This hand-off do
 - `docs/aws-ses-emails-recovery.md` - Email recovery procedures
 - `docs/mx-records-migration.md` - DNS migration guide
 - `docs/recover-emails-last-14-days.md` - Email recovery
-- `docs/newsletter-setup.md` - In-house newsletter (ProcessNewsletter) setup, SMTP, cron, sending workflow
 - `seo-implementation-spec.md` - SEO requirements and implementation
 
 ---
@@ -1785,8 +1696,8 @@ git push origin develop
 - Document new workflows
 - Update troubleshooting section with common issues
 
-**Last Updated:** February 2026
-**Version:** 1.1
+**Last Updated:** January 2026  
+**Version:** 1.0
 
 ---
 

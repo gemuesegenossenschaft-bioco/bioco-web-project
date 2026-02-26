@@ -1,68 +1,55 @@
-# biocò (bioco.ch)
+# bioco.ch
 
-Swiss organic vegetable cooperative. Headless CMS: ProcessWire (PHP) on Novatrend cPanel. Frontend: Next.js 14 on Vercel.
+Swiss organic vegetable cooperative. Headless CMS: ProcessWire (PHP). Frontend: Next.js 14 (standalone). Both on Novatrend cPanel.
 
-## FTP Access (Novatrend cPanel)
+## Architecture
 
-- Host: `193.33.128.160` (or `ftp.bioco.ch`), Port: `21`
-- User: `gueney@bioco.ch` / Pass: `UEqPP00NAR2ynxU`
-- Protocol: Explicit FTPS (FTP_TLS), passive mode required
-- Python ftplib connection pattern:
-  ```python
-  import ftplib, ssl, socket
-  socket.setdefaulttimeout(15)
-  ctx = ssl.create_default_context()
-  ctx.check_hostname = False
-  ctx.verify_mode = ssl.CERT_NONE
-  ftp = ftplib.FTP_TLS(context=ctx)
-  ftp.connect('193.33.128.160', 21, timeout=15)
-  ftp.login('gueney@bioco.ch', 'UEqPP00NAR2ynxU')
-  ftp.prot_p()
-  ftp.set_pasv(True)
-  ```
-- CMS webroot: `/public_html/cms/`
-- Templates: `/public_html/cms/site/templates/`
-- Migrations: upload `.php` to `site/templates/`, run via standalone bootstrap script
+Everything runs on one Novatrend cPanel server (193.33.128.160):
+- **Next.js** standalone on port 49152, Apache `.htaccess` proxy via `RewriteRule [P]`
+- **ProcessWire** via PHP-FPM (cms.bioco.ch)
+- **MySQL** localhost:3306 (bioco_cms)
+- **SMTP** mail.bioco.ch:465
+- Cron job every 5min keeps Node.js alive (`/home/bioco/bioco-frontend/start.sh`)
 
-## Running Migrations
+Note: CloudLinux mod_passenger is NOT loaded in Apache. Passenger directives in .htaccess are ignored. We use mod_proxy via RewriteRule instead. Build on server also fails (CloudLinux thread limits for SWC/Rayon). Build locally, deploy via rsync.
 
-PW `.htaccess` routes all requests through `index.php`, so accessing template files directly returns 404. To run migration scripts:
+Next.js calls ProcessWire via `http://localhost/cms/api/*` (same server, no CORS).
 
-1. Upload migration script to `site/templates/` (e.g. `install-foo.php`)
-2. Create a temporary bootstrap script in **webroot** (`/public_html/cms/`), not in templates:
-   ```php
-   <?php
-   namespace ProcessWire;
-   include('./index.php');
-   $wire = ProcessWire::getCurrentInstance();
-   $pages = $wire->wire('pages');
-   $templates = $wire->wire('templates');
-   $fields = $wire->wire('fields');
-   $modules = $wire->wire('modules');
-   $config = $wire->wire('config');
-   // ... other API vars as needed
-   $config->debug = true;
-   include $config->paths->templates . 'install-foo.php';
-   ```
-3. Upload bootstrap to `/public_html/cms/bootstrap-foo.php`
-4. Run via `curl https://cms.bioco.ch/bootstrap-foo.php`
-5. **Delete bootstrap script from server after use** (security)
+## Deploy
 
-Migration scripts in `site/templates/` use PW API vars (`$pages`, `$fields`, `$modules`, etc.) directly. They output JSON with `success`, `log`, `errors` keys.
+Build locally, upload via rsync:
+```
+scripts/deploy.sh main
+```
 
-## Installed Modules
-
-- `MediaLibrary` (BitPoet): media library tab in CKEditor link/image dialogs. Template: `MediaLibrary`, fields: `MediaImages`, `MediaFiles`. Admin page at `/processwire/media/`.
-- `ProcessMediaLibraries`: admin overview of media libraries (auto-installed with MediaLibrary)
-- `InputfieldCKEditor`: rich text editor on textarea fields
-
-## CKEditor Fields
-
-All 5 textarea fields use `InputfieldCKEditor` with toolbar, PWImage/PWLink plugins:
-`section_text`, `body`, `card_text`, `event_summary`, `event_signup_notes`
+Or manually: `cd frontend && npm ci && npm run build`, then rsync `.next/standalone/`, `.next/static/`, `public/` to server, restart Node.js.
 
 ## URLs
 
 - Production: https://www.bioco.ch
 - CMS Admin: https://cms.bioco.ch/processwire/
-- Docs: `/HANDOFF.md`
+
+## Key Files
+
+- `frontend/server.js`: Next.js standalone startup (used by build output, not custom)
+- `frontend/middleware.ts`: security headers
+- `frontend/.env.production`: production env defaults
+- `.cpanel.yml`: auto-deploy config
+- `scripts/deploy.sh`: manual deploy
+- `site/config.php`: PW config (env var overrides for secrets)
+
+## Running PW Migrations
+
+1. Upload migration `.php` to `site/templates/`
+2. Create bootstrap in CMS webroot (`/public_html/cms/`)
+3. Run via `curl https://cms.bioco.ch/bootstrap-foo.php`
+4. Delete bootstrap after use
+
+## Installed PW Modules
+
+- `MediaLibrary` (BitPoet): media library in CKEditor
+- `InputfieldCKEditor`: rich text editor
+
+## CKEditor Fields
+
+`section_text`, `body`, `card_text`, `event_summary`, `event_signup_notes`

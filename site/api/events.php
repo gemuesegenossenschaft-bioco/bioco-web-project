@@ -15,7 +15,7 @@ $response = [
 
 // Safely find events with error handling
 try {
-    $events = $pages->find('template=event, sort=event_start');
+    $events = $pages->find('template=event, sort=-created');
 } catch (Exception $e) {
     error_log('Failed to query events: ' . $e->getMessage());
     echo json_encode($response);
@@ -24,40 +24,37 @@ try {
 
 foreach($events as $event) {
     // Ensure status is always set, default to 'upcoming'
-    $status = $event->event_status && in_array($event->event_status, ['upcoming', 'past']) 
-        ? $event->event_status 
+    $status = $event->event_status && in_array($event->event_status, ['upcoming', 'past'])
+        ? $event->event_status
         : 'upcoming';
     $media = [];
 
-    foreach($event->event_media as $file) {
-        /** @var Pagefile $file */
-        $media[] = [
-            'url' => $file->httpUrl(),
-            'description' => $file->description,
-            'type' => mediaTypeFromExtension($file->ext),
-        ];
+    if($event->event_media) {
+        foreach($event->event_media as $file) {
+            /** @var Pagefile $file */
+            $media[] = [
+                'url' => $file->httpUrl(),
+                'description' => $file->description,
+                'type' => mediaTypeFromExtension($file->ext),
+            ];
+        }
     }
 
     // Only add events that have required fields
-    if (!$event->title || !$event->event_start) {
+    if (!$event->title) {
         continue;
     }
-    
+
     // Ensure past events don't have signup enabled
     $signupEnabled = ($status === 'upcoming') ? (bool) $event->event_signup_enabled : false;
-    
+
     $response[$status][] = [
         'id' => $event->id,
         'title' => $event->title,
         'description' => $event->event_summary ?: ($event->body ? $sanitizer->truncate($event->body, 200) : ''),
         'fullDescription' => $event->body ?: '',
         'location' => $event->event_location ?: '',
-        'startDate' => $event->event_start ? $event->event_start->format(DATE_ATOM) : null,
-        'endDate' => $event->event_end ? $event->event_end->format(DATE_ATOM) : null,
-        'dateLabel' => $event->event_start ? $event->event_start->format('d.m.Y') : '',
-        'timeLabel' => $event->event_start && $event->event_end
-            ? $event->event_start->format('H:i') . ' - ' . $event->event_end->format('H:i') . ' Uhr'
-            : '',
+        'time' => $event->event_time ?: '',
         'signupEnabled' => $signupEnabled,
         'signupNotes' => $event->event_signup_notes ?: '',
         'status' => $status,

@@ -27,6 +27,17 @@
 /node_modules/
 npm-debug.log
 
+# Environment (secrets)
+.env
+.env.local
+
+# Internal planning docs (keep local only)
+/docs/
+/migration-novatrend.md
+/seo-implementation-spec.md
+/NEXTJS_SETUP.md
+/SETUP.md
+
 # OS-spezifische Dateien
 .DS_Store
 Thumbs.db

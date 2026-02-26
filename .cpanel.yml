@@ -1,0 +1,7 @@
+---
+# cPanel Git auto-deploy is NOT used for builds (CloudLinux thread limits).
+# Build locally, deploy with: scripts/deploy.sh [branch]
+# This file is kept for documentation and potential future use.
+deployment:
+  tasks:
+    - echo "Build locally and deploy with scripts/deploy.sh"
