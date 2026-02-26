@@ -15,7 +15,7 @@ npm ci
 npm run build
 
 echo "Uploading standalone output..."
-rsync -avz --delete .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
+rsync -avz --delete --exclude='start.sh' .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
 rsync -avz --delete .next/static/ "$DEPLOY_HOST:$DEPLOY_DIR/.next/static/"
 rsync -avz --delete public/ "$DEPLOY_HOST:$DEPLOY_DIR/public/"
 

@@ -58,7 +58,7 @@ foreach ($filterFields as $name => $config) {
 }
 
 // Add to repeater_sections template (the sections repeater)
-$repeaterTemplate = $templates->get('repeater_sections');
+$repeaterTemplate = $templates->get('repeater_content_sections');
 if ($repeaterTemplate) {
     $fg = $repeaterTemplate->fieldgroup;
     foreach ($filterFields as $name => $config) {
