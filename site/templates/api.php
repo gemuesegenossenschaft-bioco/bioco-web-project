@@ -1275,36 +1275,41 @@ function handleMediaFilesRequest() {
     $pages = wire('pages');
     $config = wire('config');
     $assetId = (int)(wire('input')->get('assetId') ?: 0);
-    if (!$assetId) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'assetId required']);
-        return;
-    }
 
-    $asset = $pages->get($assetId);
-    if (!$asset->id || $asset->template->name !== 'MediaLibrary') {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'error' => 'Media asset not found']);
-        return;
+    if ($assetId) {
+        $asset = $pages->get($assetId);
+        if (!$asset->id || $asset->template->name !== 'MediaLibrary') {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'Media asset not found']);
+            return;
+        }
+        $assets = [$asset];
+    } else {
+        $assets = $pages->find('template=MediaLibrary');
+        if (!$assets->count()) {
+            echo json_encode(['success' => true, 'files' => []]);
+            return;
+        }
     }
 
     $files = [];
-    foreach (['MediaImages', 'MediaFiles'] as $field) {
-        if (!$asset->hasField($field)) continue;
-        foreach ($asset->get($field) as $file) {
-            $files[] = [
-                'assetId' => $asset->id,
-                'assetTitle' => decodeText($asset->title),
-                'fileField' => $field,
-                'fileName' => $file->name,
-                'url' => $config->urls->httpRoot . ltrim($file->url, '/'),
-            ];
+    foreach ($assets as $asset) {
+        foreach (['MediaImages', 'MediaFiles'] as $field) {
+            if (!$asset->hasField($field)) continue;
+            foreach ($asset->get($field) as $file) {
+                $files[] = [
+                    'assetId' => $asset->id,
+                    'assetTitle' => decodeText($asset->title),
+                    'fileField' => $field,
+                    'fileName' => $file->name,
+                    'url' => $config->urls->httpRoot . ltrim($file->url, '/'),
+                ];
+            }
         }
     }
 
     echo json_encode([
         'success' => true,
-        'assetId' => $asset->id,
         'files' => $files,
     ]);
 }

@@ -137,6 +137,165 @@ $(document).ready(function() {
         return $node.closest('tr');
     }
 
+    function isLikelyImage(fileName) {
+        var n = String(fileName || '').toLowerCase();
+        return /\.(jpg|jpeg|png|webp|gif|avif|svg)$/.test(n);
+    }
+
+    function openVisualFileChooser(files, onSelect) {
+        if (!files || !files.length) {
+            alert('No files available.');
+            return;
+        }
+
+        $('.bioco-file-picker-overlay').remove();
+
+        var $overlay = $('<div class="bioco-file-picker-overlay"></div>').css({
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.55)',
+            zIndex: 999999
+        });
+
+        var $modal = $('<div class="bioco-file-picker-modal"></div>').css({
+            width: 'min(980px, 92vw)',
+            maxHeight: '86vh',
+            overflow: 'hidden',
+            background: '#fff',
+            borderRadius: '10px',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
+            margin: '6vh auto 0 auto',
+            display: 'flex',
+            flexDirection: 'column'
+        });
+
+        var $head = $('<div><strong>Select media file(s)</strong><div style="font-size:12px;color:#666">Select one or more thumbnails, then import.</div></div>').css({
+            padding: '14px 16px',
+            borderBottom: '1px solid #e6e6e6'
+        });
+
+        var $grid = $('<div class="bioco-file-picker-grid"></div>').css({
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+            gap: '12px',
+            padding: '14px',
+            overflow: 'auto'
+        });
+
+        var selected = {};
+        function selectedCount() {
+            return Object.keys(selected).length;
+        }
+
+        files.forEach(function(file) {
+            var image = isLikelyImage(file.fileName);
+            var key = [file.assetId, file.fileField, file.fileName].join('|');
+            var $card = $('<button type="button" class="bioco-file-card"></button>').css({
+                border: '1px solid #ddd',
+                background: '#fff',
+                borderRadius: '8px',
+                textAlign: 'left',
+                padding: '8px',
+                cursor: 'pointer',
+                position: 'relative'
+            });
+
+            var $preview;
+            if (image) {
+                $preview = $('<img alt="">').attr('src', file.url).css({
+                    width: '100%',
+                    height: '110px',
+                    objectFit: 'cover',
+                    borderRadius: '6px',
+                    display: 'block',
+                    background: '#f3f3f3'
+                });
+            } else {
+                $preview = $('<div>FILE</div>').css({
+                    width: '100%',
+                    height: '110px',
+                    borderRadius: '6px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    letterSpacing: '0.08em',
+                    color: '#666',
+                    background: '#f3f3f3'
+                });
+            }
+
+            var $name = $('<div></div>').text(file.fileName).css({
+                marginTop: '8px',
+                fontSize: '12px',
+                lineHeight: '1.25',
+                wordBreak: 'break-all'
+            });
+
+            var $check = $('<span>Selected</span>').css({
+                position: 'absolute',
+                top: '8px',
+                right: '8px',
+                fontSize: '11px',
+                background: '#0a7d2b',
+                color: '#fff',
+                borderRadius: '999px',
+                padding: '2px 8px',
+                display: 'none'
+            });
+
+            $card.append($preview, $name, $check);
+            $card.on('click', function() {
+                if (selected[key]) {
+                    delete selected[key];
+                    $card.css({ borderColor: '#ddd', boxShadow: 'none' });
+                    $check.hide();
+                } else {
+                    selected[key] = file;
+                    $card.css({ borderColor: '#0a7d2b', boxShadow: '0 0 0 2px rgba(10,125,43,0.18)' });
+                    $check.show();
+                }
+                $import.prop('disabled', selectedCount() < 1).text('Import selected (' + selectedCount() + ')');
+            });
+
+            $grid.append($card);
+        });
+
+        var $foot = $('<div></div>').css({
+            borderTop: '1px solid #e6e6e6',
+            padding: '10px 14px',
+            textAlign: 'right'
+        });
+        var $import = $('<button type="button" class="ui-button ui-priority-primary" disabled>Import selected (0)</button>').css({ marginRight: '8px' });
+        var $cancel = $('<button type="button" class="ui-button">Cancel</button>');
+        function closePicker() {
+            $overlay.remove();
+            $(document).off('keydown.biocoFilePicker');
+        }
+        $import.on('click', function() {
+            var picks = Object.keys(selected).map(function(k) { return selected[k]; });
+            if (!picks.length) return;
+            closePicker();
+            onSelect(picks);
+        });
+        $cancel.on('click', function() { closePicker(); });
+        $foot.append($import, $cancel);
+
+        $modal.append($head, $grid, $foot);
+        $overlay.append($modal);
+        $('body').append($overlay);
+
+        $overlay.on('click', function(e) {
+            if (e.target === this) closePicker();
+        });
+        $(document).on('keydown.biocoFilePicker', function(e) {
+            if (e.key === 'Escape') {
+                closePicker();
+            }
+        });
+    }
+
     // ================================================================
     // Media Library browse button
     // ================================================================
@@ -169,7 +328,6 @@ $(document).ready(function() {
                 e.preventDefault();
                 e.stopPropagation();
                 var $field = $(this).closest('.InputfieldImage, .InputfieldFile');
-                var url = ProcessWire.config.urls.admin + 'media/?biocoPicker=1';
                 var targetField = getTargetFieldName($field);
                 var repeaterItemId = getRepeaterItemId($field);
                 var pageId = getPageEditId();
@@ -180,15 +338,20 @@ $(document).ready(function() {
                     $field: $field
                 };
 
-                // Use PW modal if available, else fallback to window.open
-                if (typeof pwModalWindow === 'function') {
-                    var $iframe = pwModalWindow(url, {}, 'large');
-                    $iframe.on('pw-modal-closed', function() {
-                        $field.find('.InputfieldFileUpload').trigger('reload');
+                // Fetch all media files directly, show inline picker
+                $.getJSON(ProcessWire.config.urls.root + 'api/media-files')
+                    .done(function(res) {
+                        if (!res || !res.success || !res.files || !res.files.length) {
+                            alert('No files in media library.');
+                            return;
+                        }
+                        openVisualFileChooser(res.files, function(chosen) {
+                            importSelectedMediaBatch(chosen);
+                        });
+                    })
+                    .fail(function() {
+                        alert('Failed loading media library.');
                     });
-                } else {
-                    window.open(url, 'MediaLibrary', 'width=1200,height=800,scrollbars=yes,resizable=yes');
-                }
             });
 
             var $wrap = $('<span class="bioco-media-library-btn-wrap" style="display:inline-block;vertical-align:middle;position:relative;z-index:20"></span>');
@@ -276,248 +439,6 @@ $(document).ready(function() {
             var msg = (xhr && xhr.responseJSON && xhr.responseJSON.error) || 'Batch import request failed';
             alert(msg);
         });
-    }
-
-    function bindParentMessageListener() {
-        window.addEventListener('message', function(evt) {
-            var data = evt.data || {};
-            if (data.type === 'bioco-media-selected') {
-                importSelectedMedia(data);
-                return;
-            }
-            if (data.type === 'bioco-media-selected-multi' && Array.isArray(data.items)) {
-                importSelectedMediaBatch(data.items);
-            }
-        });
-    }
-
-    function initPickerWindowMode() {
-        var query = parseQuery();
-        if (!query.biocoPicker) return false;
-        if (!isMediaPage()) return false;
-
-        function isLikelyImage(fileName) {
-            var n = String(fileName || '').toLowerCase();
-            return /\.(jpg|jpeg|png|webp|gif|avif|svg)$/.test(n);
-        }
-
-        function openVisualFileChooser(files, onSelect) {
-            if (!files || !files.length) {
-                alert('No files available.');
-                return;
-            }
-
-            $('.bioco-file-picker-overlay').remove();
-
-            var $overlay = $('<div class="bioco-file-picker-overlay"></div>').css({
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0,0,0,0.55)',
-                zIndex: 999999
-            });
-
-            var $modal = $('<div class="bioco-file-picker-modal"></div>').css({
-                width: 'min(980px, 92vw)',
-                maxHeight: '86vh',
-                overflow: 'hidden',
-                background: '#fff',
-                borderRadius: '10px',
-                boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
-                margin: '6vh auto 0 auto',
-                display: 'flex',
-                flexDirection: 'column'
-            });
-
-            var $head = $('<div><strong>Select media file(s)</strong><div style="font-size:12px;color:#666">Select one or more thumbnails, then import.</div></div>').css({
-                padding: '14px 16px',
-                borderBottom: '1px solid #e6e6e6'
-            });
-
-            var $grid = $('<div class="bioco-file-picker-grid"></div>').css({
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-                gap: '12px',
-                padding: '14px',
-                overflow: 'auto'
-            });
-
-            var selected = {};
-            function selectedCount() {
-                return Object.keys(selected).length;
-            }
-
-            files.forEach(function(file) {
-                var image = isLikelyImage(file.fileName);
-                var key = [file.assetId, file.fileField, file.fileName].join('|');
-                var $card = $('<button type="button" class="bioco-file-card"></button>').css({
-                    border: '1px solid #ddd',
-                    background: '#fff',
-                    borderRadius: '8px',
-                    textAlign: 'left',
-                    padding: '8px',
-                    cursor: 'pointer',
-                    position: 'relative'
-                });
-
-                var $preview;
-                if (image) {
-                    $preview = $('<img alt="">').attr('src', file.url).css({
-                        width: '100%',
-                        height: '110px',
-                        objectFit: 'cover',
-                        borderRadius: '6px',
-                        display: 'block',
-                        background: '#f3f3f3'
-                    });
-                } else {
-                    $preview = $('<div>FILE</div>').css({
-                        width: '100%',
-                        height: '110px',
-                        borderRadius: '6px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '12px',
-                        fontWeight: 700,
-                        letterSpacing: '0.08em',
-                        color: '#666',
-                        background: '#f3f3f3'
-                    });
-                }
-
-                var $name = $('<div></div>').text(file.fileName).css({
-                    marginTop: '8px',
-                    fontSize: '12px',
-                    lineHeight: '1.25',
-                    wordBreak: 'break-all'
-                });
-
-                var $check = $('<span>Selected</span>').css({
-                    position: 'absolute',
-                    top: '8px',
-                    right: '8px',
-                    fontSize: '11px',
-                    background: '#0a7d2b',
-                    color: '#fff',
-                    borderRadius: '999px',
-                    padding: '2px 8px',
-                    display: 'none'
-                });
-
-                $card.append($preview, $name, $check);
-                $card.on('click', function() {
-                    if (selected[key]) {
-                        delete selected[key];
-                        $card.css({ borderColor: '#ddd', boxShadow: 'none' });
-                        $check.hide();
-                    } else {
-                        selected[key] = file;
-                        $card.css({ borderColor: '#0a7d2b', boxShadow: '0 0 0 2px rgba(10,125,43,0.18)' });
-                        $check.show();
-                    }
-                    $import.prop('disabled', selectedCount() < 1).text('Import selected (' + selectedCount() + ')');
-                });
-
-                $grid.append($card);
-            });
-
-            var $foot = $('<div></div>').css({
-                borderTop: '1px solid #e6e6e6',
-                padding: '10px 14px',
-                textAlign: 'right'
-            });
-            var $import = $('<button type="button" class="ui-button ui-priority-primary" disabled>Import selected (0)</button>').css({ marginRight: '8px' });
-            var $cancel = $('<button type="button" class="ui-button">Cancel</button>');
-            function closePicker() {
-                $overlay.remove();
-                $(document).off('keydown.biocoFilePicker');
-            }
-            $import.on('click', function() {
-                var picks = Object.keys(selected).map(function(k) { return selected[k]; });
-                if (!picks.length) return;
-                closePicker();
-                onSelect(picks);
-            });
-            $cancel.on('click', function() { closePicker(); });
-            $foot.append($import, $cancel);
-
-            $modal.append($head, $grid, $foot);
-            $overlay.append($modal);
-            $('body').append($overlay);
-
-            $overlay.on('click', function(e) {
-                if (e.target === this) closePicker();
-            });
-            $(document).on('keydown.biocoFilePicker', function(e) {
-                if (e.key === 'Escape') {
-                    closePicker();
-                }
-            });
-        }
-
-        function sendSelection(chosen) {
-            var payload;
-            if (Array.isArray(chosen)) {
-                payload = {
-                    type: 'bioco-media-selected-multi',
-                    items: chosen.map(function(item) {
-                        return {
-                            assetId: item.assetId,
-                            fileField: item.fileField,
-                            fileName: item.fileName
-                        };
-                    })
-                };
-            } else {
-                payload = {
-                    type: 'bioco-media-selected',
-                    assetId: chosen.assetId,
-                    fileField: chosen.fileField,
-                    fileName: chosen.fileName
-                };
-            }
-            if (window.opener) {
-                window.opener.postMessage(payload, window.location.origin);
-                window.close();
-                return;
-            }
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage(payload, window.location.origin);
-                try {
-                    var $parent = window.parent.jQuery;
-                    if ($parent) {
-                        $parent('.pw-modal-window .pw-modal-close, .ui-dialog-titlebar-close').first().trigger('click');
-                    }
-                } catch (e) {
-                    // no-op
-                }
-                return;
-            }
-            alert('Picker parent window not found.');
-        }
-
-        $('body').addClass('bioco-media-picker-mode');
-        $(document).on('click', 'a[href*="page/edit/?id="]', function(e) {
-            var href = $(this).attr('href') || '';
-            var match = href.match(/[?&]id=(\d+)/);
-            if (!match) return;
-            e.preventDefault();
-            var assetId = parseInt(match[1], 10);
-            $.getJSON(ProcessWire.config.urls.root + 'api/media-files', { assetId: assetId })
-                .done(function(res) {
-                    if (!res || !res.success || !res.files || !res.files.length) {
-                        alert('No files found in selected media item.');
-                        return;
-                    }
-                    openVisualFileChooser(res.files, function(chosen) {
-                        sendSelection(chosen);
-                    });
-                })
-                .fail(function() {
-                    alert('Failed loading media files.');
-                });
-        });
-        return true;
     }
 
     function renderUsageBlocksInMediaLibrary() {
@@ -683,12 +604,6 @@ $(document).ready(function() {
     // ================================================================
     // Initialize
     // ================================================================
-    if (initPickerWindowMode()) {
-        renderUsageBlocksInMediaLibrary();
-        return;
-    }
-
-    bindParentMessageListener();
     addMediaLibraryButtons();
     enforceLibraryOnlyOnPageFields();
     addImageEditorButtons();
