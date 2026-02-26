@@ -34,9 +34,20 @@ function normalizeMediaUrl(url?: string | null): string {
   const raw = String(url || '').trim()
   if (!raw) return ''
   try {
-    return encodeURI(raw)
+    const parsed = new URL(raw)
+    let path = parsed.pathname
+    // Fix duplicated CMS prefixes returned by ProcessWire on this setup.
+    while (path.includes('/cms/cms/')) {
+      path = path.replace('/cms/cms/', '/cms/')
+    }
+    // On cms.bioco.ch, media files are served from /site/assets, not /cms/site/assets.
+    if (parsed.hostname === 'cms.bioco.ch' && path.startsWith('/cms/site/')) {
+      path = path.replace(/^\/cms/, '')
+    }
+    parsed.pathname = path
+    return encodeURI(parsed.toString())
   } catch {
-    return raw
+    return encodeURI(raw)
   }
 }
 

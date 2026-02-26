@@ -1,8 +1,8 @@
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
-import { Gallery } from '@/components/Gallery'
 import { Saisonkalender } from '@/components/Saisonkalender'
+import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { getPageSectionsWithSeo } from '@/lib/processwire'
@@ -44,6 +44,11 @@ export default async function GemusePage() {
   // Fetch CMS content
   const { sections: cmsSections } = await getPageSectionsWithSeo('gemuese')
   const introSection = cmsSections.find(s => s.id === 'intro')
+  const anbauenSection =
+    cmsSections.find((s) => s.id === 'B-02') ||
+    cmsSections.find((s) => (s.title || '').toLowerCase().includes('anbauen'))
+  const galleryImages = anbauenSection?.images || []
+
   return (
     <>
       <Header />
@@ -141,9 +146,34 @@ export default async function GemusePage() {
 
           {/* Was wir anbauen - Single Column */}
           <section id="B-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>Was wir anbauen</h2>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Einblicke in unsere Ernte, den Anbau und die Gemeinschaft</p>
-            <Gallery />
+            <h2>{anbauenSection?.title || 'Was wir anbauen'}</h2>
+            {anbauenSection?.text ? (
+              <div
+                style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}
+                dangerouslySetInnerHTML={{ __html: anbauenSection.text }}
+              />
+            ) : (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Einblicke in unsere Ernte, den Anbau und die Gemeinschaft</p>
+            )}
+            {galleryImages.length > 0 ? (
+              <div className="gallery-grid">
+                {galleryImages.map((image, index) => (
+                  <div key={`${image.url}-${index}`} className="gallery-item">
+                    <Image
+                      src={image.url}
+                      alt={image.alt || anbauenSection?.title || 'Gemüse'}
+                      width={400}
+                      height={300}
+                      style={{ objectFit: 'cover', width: '100%', height: '100%', borderRadius: '8px' }}
+                    />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="gallery-placeholder">
+                <p>Keine Bilder im CMS gefunden.</p>
+              </div>
+            )}
           </section>
 
           {/* Möchtest du uns kennenlernen - Am Ende */}
