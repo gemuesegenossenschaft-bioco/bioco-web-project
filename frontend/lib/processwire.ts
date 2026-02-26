@@ -30,6 +30,49 @@ import type {
 // Re-export types for convenience
 export type { PageData, NavigationItem, ContentSection, GroupCard, EventItem, AktuellesNewsItem, SeoData }
 
+function normalizeMediaUrl(url?: string | null): string {
+  const raw = String(url || '').trim()
+  if (!raw) return ''
+  try {
+    return encodeURI(raw)
+  } catch {
+    return raw
+  }
+}
+
+function normalizeSectionMedia(section: ContentSection): ContentSection {
+  const seen = new Set<string>()
+  const images: Array<{ url: string; alt: string }> = []
+
+  function push(url?: string | null, alt?: string | null) {
+    const safeUrl = normalizeMediaUrl(url)
+    if (!safeUrl || seen.has(safeUrl)) return
+    seen.add(safeUrl)
+    images.push({ url: safeUrl, alt: String(alt || section.imageAlt || section.title || '').trim() || 'Bild' })
+  }
+
+  if (Array.isArray(section.images)) {
+    section.images.forEach((img) => push(img?.url, img?.alt))
+  }
+  if (Array.isArray(section.media)) {
+    section.media
+      .filter((m) => m && m.type === 'image')
+      .forEach((m) => push(m.url, m.alt))
+  }
+  push(section.image, section.imageAlt)
+
+  const image = normalizeMediaUrl(section.image)
+  if (images.length === 0) {
+    return image ? { ...section, image } : section
+  }
+  return { ...section, image: image || section.image, images }
+}
+
+function normalizeSections(sections: ContentSection[]): ContentSection[] {
+  if (!Array.isArray(sections) || sections.length === 0) return []
+  return sections.map(normalizeSectionMedia)
+}
+
 // ============================================================================
 // Health Check
 // ============================================================================
@@ -72,7 +115,7 @@ export async function getPageSections(pageName: string): Promise<ContentSection[
     `/content/sections/${encodeURIComponent(pageName)}`,
     { revalidate: 60 }
   )
-  return response?.sections || []
+  return normalizeSections(response?.sections || [])
 }
 
 /**
@@ -84,7 +127,7 @@ export async function getPageSectionsWithSeo(pageName: string): Promise<{ sectio
     { revalidate: 60 }
   )
   return {
-    sections: response?.sections || [],
+    sections: normalizeSections(response?.sections || []),
     seo: response?.seo || null,
   }
 }
@@ -216,7 +259,7 @@ export async function getPageContent(slug: string): Promise<{
   const seo = sectionsData.seo || pageData?.seo || null
 
   const pageSections = Array.isArray(pageData?.sections) ? pageData?.sections : []
-  const sections = sectionsData.sections.length > 0 ? sectionsData.sections : (pageSections as ContentSection[])
+  const sections = sectionsData.sections.length > 0 ? sectionsData.sections : normalizeSections(pageSections as ContentSection[])
   
   return { sections, pageData, seo }
 }

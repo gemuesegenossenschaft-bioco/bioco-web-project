@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 function mapNewsToAktuellesItem(item: AktuellesNewsItem): AktuellesItem {
   return {

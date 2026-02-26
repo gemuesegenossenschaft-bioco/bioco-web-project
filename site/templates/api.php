@@ -198,14 +198,19 @@ function buildSectionButtons($section) {
 function buildSectionMedia($section, $fallbackAlt = '') {
     $media = [];
     if ($section->hasField('section_image') && $section->section_image) {
-        $image = $section->section_image;
-        $media[] = [
-            'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
-            'alt' => $image->description ?: $fallbackAlt,
-            'width' => $image->width,
-            'height' => $image->height,
-            'type' => 'image',
-        ];
+        $images = $section->section_image;
+        if ($images instanceof Pageimage) {
+            $images = [$images];
+        }
+        foreach ($images as $img) {
+            $media[] = [
+                'url' => wire('config')->urls->httpRoot . ltrim($img->url, '/'),
+                'alt' => $img->description ?: $fallbackAlt,
+                'width' => $img->width,
+                'height' => $img->height,
+                'type' => 'image',
+            ];
+        }
     }
     if ($section->hasField('section_images') && $section->section_images && $section->section_images->count()) {
         foreach ($section->section_images as $img) {
@@ -271,6 +276,17 @@ function buildSectionData($section) {
     $media = buildSectionMedia($section, $imageAlt);
     if (!empty($media)) {
         $sectionData['media'] = $media;
+        $images = [];
+        foreach ($media as $item) {
+            if (($item['type'] ?? '') !== 'image') continue;
+            $images[] = [
+                'url' => $item['url'],
+                'alt' => $item['alt'] ?? $imageAlt,
+            ];
+        }
+        if (!empty($images)) {
+            $sectionData['images'] = $images;
+        }
     }
 
     $video = buildSectionVideo($section);

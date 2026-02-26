@@ -26,6 +26,32 @@ interface WirClientProps {
 
 export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const getSection = (id: string) => sections.find(s => s.id === id)
+
+  function getSectionImages(section?: ContentSection | null, fallbackAlt?: string) {
+    if (!section) return []
+    var images: Array<{ url: string; alt: string }> = []
+    var seen = new Set<string>()
+    var baseTitle = section.title || ''
+
+    function push(url?: string | null, alt?: string | null) {
+      const safeUrl = String(url || '').trim()
+      if (!safeUrl || seen.has(safeUrl)) return
+      seen.add(safeUrl)
+      images.push({ url: safeUrl, alt: String(alt || fallbackAlt || baseTitle || '').trim() || 'Bild' })
+    }
+
+    if (Array.isArray(section.images)) {
+      section.images.forEach((img) => push(img?.url, img?.alt))
+    }
+    if (Array.isArray(section.media)) {
+      section.media
+        .filter((m) => m && m.type === 'image')
+        .forEach((m) => push(m.url, m.alt))
+    }
+    push(section.image, section.imageAlt)
+
+    return images
+  }
   
   const wirSection = getSection('wir')
   const alleMitgliederSection = getSection('alle_mitglieder')
@@ -76,8 +102,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const betriebsgruppeAlt = betriebsgruppeSection?.imageAlt || 'Betriebsgruppe der Gemüsegenossenschaft biocò'
   
   // Hof-Team images from section.images array or fallback
-  const hofTeamImages = hofTeamSection?.images?.length 
-    ? hofTeamSection.images.map((img, i) => ({
+  const hofTeamImageList = getSectionImages(hofTeamSection, 'Hof-Team')
+  const hofTeamImages = hofTeamImageList.length
+    ? hofTeamImageList.map((img, i) => ({
         url: img.url,
         alt: img.alt,
         name: img.alt.split(' ')[0] || `Team ${i + 1}`, // Extract name from alt text
@@ -85,9 +112,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
     : []
   
   // Geisshof images from section.images array or fallback
-  const geisshofImages = hofSection?.images?.length 
-    ? hofSection.images 
-    : []
+  const geisshofImages = getSectionImages(hofSection, 'Geisshof')
 
   return (
     <>

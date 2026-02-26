@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 
 // ISR: revalidate every 60 seconds
 export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 // Allow paths not in generateStaticParams to be rendered on-demand
 // This ensures new CMS pages appear without a rebuild

@@ -1,16 +1,30 @@
-const FALLBACK_BASE_URL = 'http://localhost/cms'
+const FALLBACK_BASE_URL = 'https://cms.bioco.ch'
 
 function normalizeBaseUrl(value?: string | null): string {
   if (!value) return FALLBACK_BASE_URL
   return value.replace(/\/+$/, '')
 }
 
-const RESOLVED_BASE_URL = normalizeBaseUrl(
-  process.env.PROCESSWIRE_BASE_URL ||
-    process.env.PROCESSWIRE_API_URL ||
-    process.env.NEXT_PUBLIC_PROCESSWIRE_BASE_URL ||
-    process.env.NEXT_PUBLIC_PROCESSWIRE_API_URL
-)
+function isLocalCmsUrl(value: string): boolean {
+  const v = (value || '').toLowerCase()
+  return v.includes('localhost') || v.includes('127.0.0.1')
+}
+
+const baseCandidates = [
+  process.env.NEXT_PUBLIC_PROCESSWIRE_BASE_URL,
+  process.env.NEXT_PUBLIC_PROCESSWIRE_API_URL,
+  process.env.PROCESSWIRE_BASE_URL,
+  process.env.PROCESSWIRE_API_URL,
+]
+
+const firstUsableBaseUrl =
+  baseCandidates.find((v) => {
+    if (!v) return false
+    if (process.env.NODE_ENV === 'production' && isLocalCmsUrl(v)) return false
+    return true
+  }) || FALLBACK_BASE_URL
+
+const RESOLVED_BASE_URL = normalizeBaseUrl(firstUsableBaseUrl)
 
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || 'https://bioco.ch'
