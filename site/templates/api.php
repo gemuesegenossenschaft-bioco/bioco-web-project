@@ -52,7 +52,7 @@ if ($apiKey) {
     // Allow unauthenticated access to health and content (read-only) endpoints
     // media-* endpoints use ProcessWire session auth inside handlers
     $endpoint = $input->urlSegment1;
-    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-usage', 'media-files']) && $requestKey !== $apiKey) {
+    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files']) && $requestKey !== $apiKey) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid API key', 'hint' => 'Set X-API-Key header']);
         exit;
@@ -490,6 +490,10 @@ switch ($endpoint) {
         handleMediaImportRequest();
         break;
 
+    case 'media-import-batch':
+        handleMediaImportBatchRequest();
+        break;
+
     case 'media-usage':
         handleMediaUsageRequest();
         break;
@@ -502,7 +506,7 @@ switch ($endpoint) {
         http_response_code(404);
         echo json_encode([
             'error' => 'Endpoint not found',
-            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-usage', 'media-files'],
+            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files'],
         ]);
 }
 
@@ -967,18 +971,9 @@ function handleContentRequest($type, $param = null) {
 // Media Admin Handlers
 // ============================================================================
 
-function handleMediaImportRequest() {
-    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        http_response_code(405);
-        echo json_encode(['success' => false, 'error' => 'POST method required']);
-        return;
-    }
-    if (!requireAdminSession()) return;
-
+function runMediaImport(array $input, &$httpCode = 200) {
     $pages = wire('pages');
     $config = wire('config');
-
-    $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $targetPageId = (int)($input['targetPageId'] ?? 0);
     $repeaterItemId = (int)($input['repeaterItemId'] ?? 0);
     $assetId = (int)($input['assetId'] ?? 0);
@@ -993,44 +988,38 @@ function handleMediaImportRequest() {
     if (!$fileField) $missing[] = 'fileField';
     if (!$fileName) $missing[] = 'fileName';
     if (count($missing)) {
-        http_response_code(400);
-        echo json_encode([
+        $httpCode = 400;
+        return [
             'success' => false,
             'error' => 'Missing required fields',
             'missing' => $missing,
-        ]);
-        return;
+        ];
     }
 
     $targetPage = $repeaterItemId ? $pages->get($repeaterItemId) : $pages->get($targetPageId);
     if (!$targetPage->id) {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'error' => 'Target page not found']);
-        return;
+        $httpCode = 404;
+        return ['success' => false, 'error' => 'Target page not found'];
     }
 
     $fieldName = resolveMediaFieldName($targetPage, $fieldHint);
     if (!$fieldName || !$targetPage->hasField($fieldName)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Target media field not found']);
-        return;
+        $httpCode = 400;
+        return ['success' => false, 'error' => 'Target media field not found'];
     }
 
     $assetPage = $pages->get($assetId);
     if (!$assetPage->id) {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'error' => 'Media asset page not found']);
-        return;
+        $httpCode = 404;
+        return ['success' => false, 'error' => 'Media asset page not found'];
     }
     if ($assetPage->template->name !== 'MediaLibrary') {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Asset is not a media library item']);
-        return;
+        $httpCode = 400;
+        return ['success' => false, 'error' => 'Asset is not a media library item'];
     }
     if (!$assetPage->hasField($fileField)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Invalid media file field']);
-        return;
+        $httpCode = 400;
+        return ['success' => false, 'error' => 'Invalid media file field'];
     }
 
     $assetFile = null;
@@ -1041,9 +1030,8 @@ function handleMediaImportRequest() {
         }
     }
     if (!$assetFile || !$assetFile->filename || !is_file($assetFile->filename)) {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'error' => 'Selected media file not found']);
-        return;
+        $httpCode = 404;
+        return ['success' => false, 'error' => 'Selected media file not found'];
     }
 
     $targetField = $targetPage->getField($fieldName);
@@ -1051,9 +1039,8 @@ function handleMediaImportRequest() {
         !$targetField
         || !($targetField->type instanceof FieldtypeImage || $targetField->type instanceof FieldtypeFile)
     ) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Target field is not a media field']);
-        return;
+        $httpCode = 400;
+        return ['success' => false, 'error' => 'Target field is not a media field'];
     }
 
     $targetPage->of(false);
@@ -1061,9 +1048,8 @@ function handleMediaImportRequest() {
     $config->biocoMediaImportInProgress = true;
     $targetFiles = $targetPage->get($fieldName);
     if (!$targetFiles) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Target media collection unavailable']);
-        return;
+        $httpCode = 500;
+        return ['success' => false, 'error' => 'Target media collection unavailable'];
     }
 
     // Avoid duplicate imports of the same source file into the same field.
@@ -1088,9 +1074,8 @@ function handleMediaImportRequest() {
             $targetPage->save($fieldName);
             $imported = $targetFiles->last();
         } catch (\Exception $e) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'error' => 'Import failed: ' . $e->getMessage()]);
-            return;
+            $httpCode = 500;
+            return ['success' => false, 'error' => 'Import failed: ' . $e->getMessage()];
         }
     }
 
@@ -1112,7 +1097,7 @@ function handleMediaImportRequest() {
         upsertMediaUsageRow($assetId, $targetPage, $fieldName, (string)$imported->name);
     }
 
-    echo json_encode([
+    return [
         'success' => true,
         'targetPageId' => $targetPageId,
         'resolvedPageId' => $targetPage->id,
@@ -1124,6 +1109,85 @@ function handleMediaImportRequest() {
             'url' => $url,
             'tags' => $imported ? ((string)($imported->tags ?? '')) : '',
         ],
+    ];
+}
+
+function handleMediaImportRequest() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'POST method required']);
+        return;
+    }
+    if (!requireAdminSession()) return;
+
+    $input = json_decode(file_get_contents('php://input'), true) ?: [];
+    $httpCode = 200;
+    $result = runMediaImport($input, $httpCode);
+    http_response_code($httpCode);
+    echo json_encode($result);
+}
+
+function handleMediaImportBatchRequest() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'POST method required']);
+        return;
+    }
+    if (!requireAdminSession()) return;
+
+    $input = json_decode(file_get_contents('php://input'), true) ?: [];
+    $targetPageId = (int)($input['targetPageId'] ?? 0);
+    $repeaterItemId = (int)($input['repeaterItemId'] ?? 0);
+    $targetField = (string)($input['targetField'] ?? '');
+    $items = is_array($input['items'] ?? null) ? $input['items'] : [];
+    if (!$targetPageId && !$repeaterItemId) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'targetPageId|repeaterItemId required']);
+        return;
+    }
+    if (!$targetField) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'targetField required']);
+        return;
+    }
+    if (!count($items)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'items required']);
+        return;
+    }
+
+    $imported = [];
+    $failed = [];
+    foreach ($items as $item) {
+        $payload = [
+            'targetPageId' => $targetPageId,
+            'repeaterItemId' => $repeaterItemId,
+            'targetField' => $targetField,
+            'assetId' => (int)($item['assetId'] ?? 0),
+            'fileField' => (string)($item['fileField'] ?? ''),
+            'fileName' => (string)($item['fileName'] ?? ''),
+        ];
+        $itemCode = 200;
+        $res = runMediaImport($payload, $itemCode);
+        if (!empty($res['success'])) {
+            $imported[] = $res['imported'] ?? $payload;
+        } else {
+            $failed[] = [
+                'item' => $payload,
+                'error' => $res['error'] ?? 'Import failed',
+                'status' => $itemCode,
+            ];
+        }
+    }
+
+    $ok = count($imported) > 0;
+    http_response_code($ok ? 200 : 400);
+    echo json_encode([
+        'success' => $ok,
+        'importedCount' => count($imported),
+        'failedCount' => count($failed),
+        'imported' => $imported,
+        'failed' => $failed,
     ]);
 }
 

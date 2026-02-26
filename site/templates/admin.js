@@ -240,23 +240,41 @@ $(document).ready(function() {
 
     function importSelectedMediaBatch(items) {
         if (!Array.isArray(items) || !items.length) return;
-        var chain = $.Deferred().resolve().promise();
-        var failures = [];
+        if (
+            !currentImportContext
+            || (!currentImportContext.targetPageId && !currentImportContext.repeaterItemId)
+            || !currentImportContext.targetField
+        ) {
+            alert('Import context missing. Please reopen media library from the image field.');
+            return;
+        }
 
-        items.forEach(function(item) {
-            chain = chain.then(function() {
-                return importSelectedMedia(item, { reloadOnSuccess: false }).then(null, function(err) {
-                    failures.push(err || (item && item.fileName) || 'unknown');
-                    return $.Deferred().resolve().promise();
-                });
-            });
-        });
-
-        chain.then(function() {
-            if (failures.length) {
-                alert('Some files failed to import: ' + failures.join(' | '));
+        $.ajax({
+            url: ProcessWire.config.urls.root + 'api/media-import-batch',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                targetPageId: currentImportContext.targetPageId,
+                repeaterItemId: currentImportContext.repeaterItemId,
+                targetField: currentImportContext.targetField,
+                items: items
+            })
+        }).done(function(response) {
+            if (!response || !response.success) {
+                var msg = (response && response.error) || 'Batch import failed';
+                alert(msg);
+                return;
+            }
+            if (response.failedCount) {
+                var details = (response.failed || []).map(function(f) {
+                    return (f.item && f.item.fileName ? f.item.fileName : 'unknown') + ': ' + (f.error || 'failed');
+                }).join(' | ');
+                alert('Imported ' + response.importedCount + ', failed ' + response.failedCount + '. ' + details);
             }
             window.location.reload();
+        }).fail(function(xhr) {
+            var msg = (xhr && xhr.responseJSON && xhr.responseJSON.error) || 'Batch import request failed';
+            alert(msg);
         });
     }
 
