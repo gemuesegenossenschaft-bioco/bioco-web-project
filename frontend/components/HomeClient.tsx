@@ -66,7 +66,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
       {/* Hero */}
       <section className="hero-bleed">
         {/* Navbar inside hero - becomes fixed when scrolled past */}
-        <div className="navbar-overlay">
+        <div className="navbar-overlay mobile-nav-shell">
           <PrimaryNavigation />
           <MobileMenu />
         </div>

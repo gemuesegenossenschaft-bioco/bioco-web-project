@@ -7,10 +7,12 @@ export function Header() {
     <>
       {/* Utility Nav - Top bar, NOT sticky, scrolls away */}
       <UtilityNavigation />
-      {/* Primary Nav - Main navigation with Logo, sticky on scroll */}
-      <PrimaryNavigation />
-      {/* Mobile Menu (hamburger) - only visible on mobile */}
-      <MobileMenu />
+      <div className="mobile-nav-shell">
+        {/* Primary Nav - Main navigation with Logo, sticky on scroll */}
+        <PrimaryNavigation />
+        {/* Mobile Menu (hamburger) - only visible on mobile */}
+        <MobileMenu />
+      </div>
     </>
   )
 }

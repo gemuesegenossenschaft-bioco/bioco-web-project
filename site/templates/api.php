@@ -1108,7 +1108,11 @@ function runMediaImport(array $input, &$httpCode = 200) {
 
     $url = $imported ? ($config->urls->httpRoot . ltrim($imported->url, '/')) : null;
     if ($imported) {
-        upsertMediaUsageRow($assetId, $targetPage, $fieldName, (string)$imported->name);
+        try {
+            upsertMediaUsageRow($assetId, $targetPage, $fieldName, (string)$imported->name);
+        } catch (\Throwable $e) {
+            // Usage tracking is best-effort and must not block media import.
+        }
     }
 
     return [
@@ -1136,9 +1140,14 @@ function handleMediaImportRequest() {
 
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $httpCode = 200;
-    $result = runMediaImport($input, $httpCode);
-    http_response_code($httpCode);
-    echo json_encode($result);
+    try {
+        $result = runMediaImport($input, $httpCode);
+        http_response_code($httpCode);
+        echo json_encode($result);
+    } catch (\Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Import failed: ' . $e->getMessage()]);
+    }
 }
 
 function handleMediaImportBatchRequest() {
@@ -1182,22 +1191,38 @@ function handleMediaImportBatchRequest() {
             'fileName' => (string)($item['fileName'] ?? ''),
         ];
         $itemCode = 200;
-        $res = runMediaImport($payload, $itemCode);
-        if (!empty($res['success'])) {
-            $imported[] = $res['imported'] ?? $payload;
-        } else {
+        try {
+            $res = runMediaImport($payload, $itemCode);
+            if (!empty($res['success'])) {
+                $imported[] = $res['imported'] ?? $payload;
+            } else {
+                $failed[] = [
+                    'item' => $payload,
+                    'error' => $res['error'] ?? 'Import failed',
+                    'status' => $itemCode,
+                ];
+            }
+        } catch (\Throwable $e) {
             $failed[] = [
                 'item' => $payload,
-                'error' => $res['error'] ?? 'Import failed',
-                'status' => $itemCode,
+                'error' => $e->getMessage(),
+                'status' => 500,
             ];
         }
     }
 
     $ok = count($imported) > 0;
+    $error = null;
+    if (!$ok) {
+        $first = $failed[0] ?? null;
+        $firstMsg = $first['error'] ?? 'Import failed';
+        $error = 'Batch import failed: ' . $firstMsg;
+    }
+
     http_response_code($ok ? 200 : 400);
     echo json_encode([
         'success' => $ok,
+        'error' => $error,
         'importedCount' => count($imported),
         'failedCount' => count($failed),
         'imported' => $imported,

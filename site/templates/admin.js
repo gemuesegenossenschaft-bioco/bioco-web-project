@@ -412,6 +412,18 @@ $(document).ready(function() {
             return;
         }
 
+        function formatBatchFailures(response, fallback) {
+            var failed = response && Array.isArray(response.failed) ? response.failed : [];
+            if (!failed.length) return fallback;
+            var parts = failed.slice(0, 3).map(function(f) {
+                var name = (f.item && f.item.fileName) ? f.item.fileName : 'unknown';
+                var err = f.error || 'failed';
+                return name + ': ' + err;
+            });
+            var extra = failed.length > 3 ? ' (+' + (failed.length - 3) + ' more)' : '';
+            return parts.join(' | ') + extra;
+        }
+
         $.ajax({
             url: ProcessWire.config.urls.root + 'api/media-import-batch',
             method: 'POST',
@@ -424,7 +436,7 @@ $(document).ready(function() {
             })
         }).done(function(response) {
             if (!response || !response.success) {
-                var msg = (response && response.error) || 'Batch import failed';
+                var msg = formatBatchFailures(response, (response && response.error) || 'Batch import failed');
                 alert(msg);
                 return;
             }
@@ -436,7 +448,8 @@ $(document).ready(function() {
             }
             window.location.reload();
         }).fail(function(xhr) {
-            var msg = (xhr && xhr.responseJSON && xhr.responseJSON.error) || 'Batch import request failed';
+            var res = xhr && xhr.responseJSON;
+            var msg = formatBatchFailures(res, (res && res.error) || 'Batch import request failed');
             alert(msg);
         });
     }
