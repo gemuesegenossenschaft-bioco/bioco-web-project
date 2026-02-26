@@ -166,6 +166,136 @@ $(document).ready(function() {
         if (!query.biocoPicker) return false;
         if (!isMediaPage()) return false;
 
+        function isLikelyImage(fileName) {
+            var n = String(fileName || '').toLowerCase();
+            return /\.(jpg|jpeg|png|webp|gif|avif|svg)$/.test(n);
+        }
+
+        function openVisualFileChooser(files, onSelect) {
+            if (!files || !files.length) {
+                alert('No files available.');
+                return;
+            }
+            if (files.length === 1) {
+                onSelect(files[0]);
+                return;
+            }
+
+            $('.bioco-file-picker-overlay').remove();
+
+            var $overlay = $('<div class="bioco-file-picker-overlay"></div>').css({
+                position: 'fixed',
+                inset: 0,
+                background: 'rgba(0,0,0,0.55)',
+                zIndex: 999999
+            });
+
+            var $modal = $('<div class="bioco-file-picker-modal"></div>').css({
+                width: 'min(980px, 92vw)',
+                maxHeight: '86vh',
+                overflow: 'hidden',
+                background: '#fff',
+                borderRadius: '10px',
+                boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
+                margin: '6vh auto 0 auto',
+                display: 'flex',
+                flexDirection: 'column'
+            });
+
+            var $head = $('<div><strong>Select media file</strong><div style="font-size:12px;color:#666">Click a thumbnail to import</div></div>').css({
+                padding: '14px 16px',
+                borderBottom: '1px solid #e6e6e6'
+            });
+
+            var $grid = $('<div class="bioco-file-picker-grid"></div>').css({
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
+                gap: '12px',
+                padding: '14px',
+                overflow: 'auto'
+            });
+
+            files.forEach(function(file) {
+                var image = isLikelyImage(file.fileName);
+                var $card = $('<button type="button" class="bioco-file-card"></button>').css({
+                    border: '1px solid #ddd',
+                    background: '#fff',
+                    borderRadius: '8px',
+                    textAlign: 'left',
+                    padding: '8px',
+                    cursor: 'pointer'
+                });
+
+                var $preview;
+                if (image) {
+                    $preview = $('<img alt="">').attr('src', file.url).css({
+                        width: '100%',
+                        height: '110px',
+                        objectFit: 'cover',
+                        borderRadius: '6px',
+                        display: 'block',
+                        background: '#f3f3f3'
+                    });
+                } else {
+                    $preview = $('<div>FILE</div>').css({
+                        width: '100%',
+                        height: '110px',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        letterSpacing: '0.08em',
+                        color: '#666',
+                        background: '#f3f3f3'
+                    });
+                }
+
+                var $name = $('<div></div>').text(file.fileName).css({
+                    marginTop: '8px',
+                    fontSize: '12px',
+                    lineHeight: '1.25',
+                    wordBreak: 'break-all'
+                });
+
+                $card.append($preview, $name);
+                $card.on('click', function() {
+                    $(document).off('keydown.biocoFilePicker');
+                    $overlay.remove();
+                    onSelect(file);
+                });
+
+                $grid.append($card);
+            });
+
+            var $foot = $('<div></div>').css({
+                borderTop: '1px solid #e6e6e6',
+                padding: '10px 14px',
+                textAlign: 'right'
+            });
+            var $cancel = $('<button type="button" class="ui-button">Cancel</button>');
+            function closePicker() {
+                $overlay.remove();
+                $(document).off('keydown.biocoFilePicker');
+            }
+            $cancel.on('click', function() { closePicker(); });
+            $foot.append($cancel);
+
+            $modal.append($head, $grid, $foot);
+            $overlay.append($modal);
+            $('body').append($overlay);
+
+            $overlay.on('click', function(e) {
+                if (e.target === this) closePicker();
+            });
+            $(document).on('keydown.biocoFilePicker', function(e) {
+                if (e.key === 'Escape') {
+                    closePicker();
+                }
+            });
+        }
+
         function sendSelection(chosen) {
             var payload = {
                 type: 'bioco-media-selected',
@@ -206,14 +336,9 @@ $(document).ready(function() {
                         alert('No files found in selected media item.');
                         return;
                     }
-                    var chosen = res.files[0];
-                    if (res.files.length > 1) {
-                        var names = res.files.map(function(f, i) { return (i + 1) + ': ' + f.fileName; }).join('\n');
-                        var selected = prompt('Select file number:\n' + names, '1');
-                        var idx = Math.max(1, parseInt(selected || '1', 10)) - 1;
-                        chosen = res.files[idx] || res.files[0];
-                    }
-                    sendSelection(chosen);
+                    openVisualFileChooser(res.files, function(chosen) {
+                        sendSelection(chosen);
+                    });
                 })
                 .fail(function() {
                     alert('Failed loading media files.');
