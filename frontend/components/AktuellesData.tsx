@@ -257,9 +257,7 @@ function parseDate(dateStr: string): Date {
   return new Date(dateStr)
 }
 
-const DEFAULT_SITE_URL =
-  SITE_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+const DEFAULT_SITE_URL = SITE_URL || 'https://bioco.ch'
 
 export async function fetchEventsFromCms(): Promise<EventsFeed> {
   const endpoint =

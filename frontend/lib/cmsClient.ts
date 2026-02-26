@@ -1,4 +1,4 @@
-const FALLBACK_BASE_URL = 'https://bioco.ch'
+const FALLBACK_BASE_URL = 'http://localhost/cms'
 
 function normalizeBaseUrl(value?: string | null): string {
   if (!value) return FALLBACK_BASE_URL
@@ -13,10 +13,9 @@ const RESOLVED_BASE_URL = normalizeBaseUrl(
 )
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  process.env.NEXT_PUBLIC_SITE_URL || 'https://bioco.ch'
 
-const API_TOKEN = process.env.PROCESSWIRE_API_TOKEN
+const API_KEY = process.env.PROCESSWIRE_API_KEY || process.env.PROCESSWIRE_API_TOKEN
 
 export function cmsApiUrl(path: string): string {
   const safePath = path.startsWith('/') ? path : `/${path}`
@@ -25,8 +24,8 @@ export function cmsApiUrl(path: string): string {
 }
 
 export function buildCmsHeaders(): HeadersInit | undefined {
-  if (!API_TOKEN) return undefined
-  return { Authorization: `Bearer ${API_TOKEN}` }
+  if (!API_KEY) return undefined
+  return { 'X-API-Key': API_KEY }
 }
 
 export function cmsFetchOptions(revalidateSeconds: number) {
@@ -58,4 +57,4 @@ export async function fetchCmsJson<T>(
 }
 
 export const processwireBaseUrl = RESOLVED_BASE_URL
-export const processwireApiToken = API_TOKEN
+export const processwireApiKey = API_KEY

@@ -44,9 +44,9 @@ The bioco.ch website serves as the digital presence for **Gemüsegenossenschaft 
 - **Backend CMS:** ProcessWire 3.x (PHP 8.2)
 - **Frontend:** Next.js 14 (React) with App Router
 - **Database:** MySQL (3 databases: live, staging, matomo)
-- **Hosting:**
-  - Backend: Novatrend cPanel (Swiss hosting)
-  - Frontend: Vercel (CDN, automatic deployments)
+- **Hosting:** Novatrend cPanel (Swiss hosting, single server)
+  - Frontend: Next.js standalone via Phusion Passenger
+  - Backend: ProcessWire via PHP-FPM
 - **Analytics:** Matomo (cookieless, Swiss DSG compliant)
 - **Email:** Novatrend SMTP server
 
@@ -185,26 +185,24 @@ Access ProcessWire admin at: `https://www.bioco.ch/processwire/`
 
 ```mermaid
 graph TB
-    subgraph "Frontend Layer"
-        NextJS[Next.js 14<br/>Vercel]
+    subgraph "Novatrend cPanel (193.33.128.160)"
+        Passenger[Phusion Passenger] --> NextJS[Next.js 14 Standalone]
+        Apache[Apache + AutoSSL] --> Passenger
+        Apache --> PHP[PHP-FPM]
+        PHP --> ProcessWire[ProcessWire CMS]
+        ProcessWire --> MySQL[(MySQL Database)]
+        NextJS -->|localhost/cms/api| ProcessWire
     end
-    
-    subgraph "Backend Layer"
-        ProcessWire[ProcessWire CMS<br/>Novatrend cPanel]
-        MySQL[(MySQL Database)]
-    end
-    
+
     subgraph "External Services"
         Matomo[Matomo Analytics]
-        Instagram[Instagram API]
         SMTP[Novatrend SMTP]
     end
-    
-    NextJS -->|REST API<br/>JSON| ProcessWire
-    ProcessWire --> MySQL
+
     ProcessWire -->|Tracking| Matomo
-    ProcessWire -->|Sync| Instagram
     ProcessWire -->|Send Emails| SMTP
+
+    GitHub[GitHub] -->|git pull| Passenger
 ```
 
 ### Data Flow
@@ -646,43 +644,29 @@ const data = await response.json();
 
 ### Environment Variables
 
-**Required (Vercel Dashboard):**
+**Required (cPanel Node.js App UI or .env.production):**
 
 ```bash
-# ProcessWire API
-NEXT_PUBLIC_PROCESSWIRE_API_URL=https://www.bioco.ch/api
-PROCESSWIRE_API_URL=https://www.bioco.ch/api
-
-# Site
-NEXT_PUBLIC_SITE_URL=https://www.bioco.ch
-
-# Matomo
+PROCESSWIRE_BASE_URL=http://localhost/cms
+NEXT_PUBLIC_PROCESSWIRE_BASE_URL=https://cms.bioco.ch
+NEXT_PUBLIC_SITE_URL=https://bioco.ch
 NEXT_PUBLIC_MATOMO_URL=https://matomo.bioco.ch/
-NEXT_PUBLIC_MATOMO_SITE_ID=2
-
-# Email (SMTP)
-SMTP_HOST=mail.bioco.ch
-SMTP_PORT=465
-SMTP_SECURE=true
-SMTP_USER=noreply@bioco.ch
-SMTP_PASS=...
+NEXT_PUBLIC_MATOMO_SITE_ID=1
 ```
+
+See `.env.example` for all variables including SMTP secrets.
 
 **Note:** Variables prefixed with `NEXT_PUBLIC_` are exposed to the browser.
 
-### Build Process
+### Build & Deploy
 
-```bash
-cd frontend
-npm install
-npm run build
-```
+Deploy is automated via `.cpanel.yml` on `git pull`:
+1. `npm ci --omit=dev`
+2. `npm run build` (produces standalone output)
+3. Copy standalone to app dir
+4. Touch `tmp/restart.txt` to restart Passenger
 
-Vercel automatically:
-1. Detects Next.js project
-2. Runs `npm install`
-3. Runs `npm run build`
-4. Deploys to CDN
+Manual: `ssh bioco@193.33.128.160` then `bash scripts/deploy.sh develop`
 
 ---
 
@@ -1194,10 +1178,10 @@ $events = $pages->find('template=event, event_status=upcoming');
 
 ### Git-Based Deployment
 
-The project uses Git for all deployments:
+Everything deploys via Git to cPanel:
 
-- **Backend:** cPanel Git Version Control
-- **Frontend:** Vercel (automatic from Git)
+- **Backend (ProcessWire):** cPanel Git Version Control
+- **Frontend (Next.js):** cPanel Git pull triggers `.cpanel.yml` (build + Passenger restart)
 
 ### Staging Workflow
 
@@ -1217,8 +1201,8 @@ The project uses Git for all deployments:
    ```
 
 3. **Deploy to staging:**
-   - Backend: cPanel → Git → Update from Remote (develop branch)
-   - Frontend: Vercel auto-deploys develop branch
+   - SSH: `cd /home/bioco/bioco-web-project && git pull origin develop`
+   - `.cpanel.yml` auto-runs: npm ci, build, copy standalone, restart Passenger
 
 4. **Test on staging.bioco.ch**
 
@@ -1232,8 +1216,8 @@ The project uses Git for all deployments:
    ```
 
 2. **Deploy to production:**
-   - Backend: cPanel → Git → Update from Remote (main branch)
-   - Frontend: Vercel auto-deploys main branch
+   - SSH: `cd /home/bioco/bioco-web-project && git pull origin main`
+   - Or: `bash scripts/deploy.sh main`
 
 3. **Verify on www.bioco.ch**
 
@@ -1248,20 +1232,18 @@ Set in `site/config.php` on server (not in Git):
 - Matomo configuration
 - Instagram API tokens
 
-**Frontend (Vercel):**
+**Frontend (cPanel Node.js App):**
 
-Set in Vercel Dashboard → Settings → Environment Variables:
+Set in cPanel → Software → Setup Node.js App → Environment Variables:
 
-- `NEXT_PUBLIC_PROCESSWIRE_API_URL`
-- `PROCESSWIRE_API_URL`
-- `NEXT_PUBLIC_MATOMO_URL`
-- `NEXT_PUBLIC_MATOMO_SITE_ID`
+- `PROCESSWIRE_BASE_URL=http://localhost/cms`
+- `NEXT_PUBLIC_PROCESSWIRE_BASE_URL=https://cms.bioco.ch`
+- `NEXT_PUBLIC_SITE_URL=https://bioco.ch`
+- `NEXT_PUBLIC_MATOMO_URL=https://matomo.bioco.ch/`
+- `NEXT_PUBLIC_MATOMO_SITE_ID=1`
 - SMTP credentials
 
-**Scopes:**
-
-- **Production:** Only `main` branch
-- **Preview:** All other branches (staging, feature branches)
+See `.env.example` for full list.
 
 ### Database Migration
 

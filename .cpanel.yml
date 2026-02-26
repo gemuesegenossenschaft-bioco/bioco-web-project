@@ -1,0 +1,14 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/bioco/bioco-frontend
+    # Install deps and build Next.js standalone
+    - cd /home/bioco/bioco-web-project/frontend && /home/bioco/nodevenv/bioco-frontend/20/bin/npm ci --omit=dev
+    - cd /home/bioco/bioco-web-project/frontend && /home/bioco/nodevenv/bioco-frontend/20/bin/npm run build
+    # Deploy standalone output
+    - rm -rf $DEPLOYPATH/.next
+    - cp -r /home/bioco/bioco-web-project/frontend/.next/standalone/* $DEPLOYPATH/
+    - cp -r /home/bioco/bioco-web-project/frontend/.next/static $DEPLOYPATH/.next/static
+    - cp -r /home/bioco/bioco-web-project/frontend/public $DEPLOYPATH/public
+    # Restart Passenger
+    - mkdir -p $DEPLOYPATH/tmp && touch $DEPLOYPATH/tmp/restart.txt

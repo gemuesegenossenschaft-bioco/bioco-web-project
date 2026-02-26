@@ -1,22 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   reactStrictMode: true,
   env: {
     PROCESSWIRE_BASE_URL:
       process.env.PROCESSWIRE_BASE_URL ||
       process.env.PROCESSWIRE_API_URL ||
-      process.env.NEXT_PUBLIC_PROCESSWIRE_BASE_URL ||
-      'https://bioco.ch',
+      'http://localhost/cms',
     NEXT_PUBLIC_PROCESSWIRE_BASE_URL:
       process.env.NEXT_PUBLIC_PROCESSWIRE_BASE_URL ||
-      process.env.PROCESSWIRE_BASE_URL ||
-      process.env.PROCESSWIRE_API_URL ||
-      'https://bioco.ch',
+      'https://cms.bioco.ch',
+    PROCESSWIRE_API_KEY: process.env.PROCESSWIRE_API_KEY || '',
     NEXT_PUBLIC_SITE_URL:
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://bioco.ch'),
-    MATOMO_URL: process.env.MATOMO_URL || '',
-    MATOMO_SITE_ID: process.env.MATOMO_SITE_ID || '',
+      process.env.NEXT_PUBLIC_SITE_URL || 'https://bioco.ch',
+    NEXT_PUBLIC_MATOMO_URL: process.env.NEXT_PUBLIC_MATOMO_URL || '',
+    NEXT_PUBLIC_MATOMO_SITE_ID: process.env.NEXT_PUBLIC_MATOMO_SITE_ID || '',
   },
   images: {
     domains: ['localhost', 'staging.bioco.ch', 'bioco.ch', 'api.bioco.ch'],
@@ -45,6 +43,16 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: '/ernte',
+        destination: '/gemuese',
+        permanent: true,
+      },
+      {
+        source: '/depots',
+        destination: '/standorte-depots',
+        permanent: true,
+      },
       {
         source: '/der-geisshof',
         destination: '/wir',
