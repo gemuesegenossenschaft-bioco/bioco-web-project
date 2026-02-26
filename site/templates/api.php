@@ -50,9 +50,9 @@ if ($apiKey) {
     $requestKey = $_SERVER['HTTP_X_API_KEY'] ?? '';
     
     // Allow unauthenticated access to health and content (read-only) endpoints
-    // Only forms and doi require authentication
+    // media-* endpoints use ProcessWire session auth inside handlers
     $endpoint = $input->urlSegment1;
-    if (!in_array($endpoint, ['health', 'content']) && $requestKey !== $apiKey) {
+    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-usage', 'media-files']) && $requestKey !== $apiKey) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid API key', 'hint' => 'Set X-API-Key header']);
         exit;
@@ -356,6 +356,52 @@ function mediaTypeFromExtension($ext) {
     return in_array(strtolower($ext), $videoExtensions, true) ? 'video' : 'image';
 }
 
+/**
+ * Require logged-in ProcessWire admin/editor for admin-only endpoints.
+ */
+function requireAdminSession() {
+    $user = wire('user');
+    if (!$user || $user->isGuest()) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Authentication required']);
+        return false;
+    }
+    return true;
+}
+
+/**
+ * Parse "asset-123" marker from image tags.
+ */
+function parseAssetIdFromTags($tags) {
+    if (!$tags) return 0;
+    if (preg_match('/(?:^|\\s)asset-(\\d+)(?:\\s|$)/', (string)$tags, $m)) {
+        return (int)$m[1];
+    }
+    return 0;
+}
+
+/**
+ * Resolve target image field from a possibly suffixed Inputfield hint.
+ */
+function resolveImageFieldName(Page $page, $fieldHint) {
+    $hint = (string)$fieldHint;
+    $candidates = [];
+    foreach ($page->template->fieldgroup as $field) {
+        if ($field->type instanceof FieldtypeImage) {
+            $candidates[] = $field->name;
+        }
+    }
+    if (in_array($hint, $candidates, true)) {
+        return $hint;
+    }
+    foreach ($candidates as $name) {
+        if (strpos($hint, $name) === 0 || strpos($hint, '_' . $name) !== false || strpos($hint, $name . '_') !== false) {
+            return $name;
+        }
+    }
+    return '';
+}
+
 // ============================================================================
 // Routing
 // ============================================================================
@@ -385,11 +431,23 @@ switch ($endpoint) {
         handleDoiRequest($subEndpoint);
         break;
         
+    case 'media-import':
+        handleMediaImportRequest();
+        break;
+
+    case 'media-usage':
+        handleMediaUsageRequest();
+        break;
+
+    case 'media-files':
+        handleMediaFilesRequest();
+        break;
+        
     default:
         http_response_code(404);
         echo json_encode([
             'error' => 'Endpoint not found',
-            'available' => ['health', 'content', 'forms', 'doi'],
+            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-usage', 'media-files'],
         ]);
 }
 
@@ -848,6 +906,230 @@ function handleContentRequest($type, $param = null) {
                 'available' => ['hero', 'homepage', 'sections', 'groups', 'page', 'pages', 'navigation', 'events', 'aktuelles', 'instagram'],
             ]);
     }
+}
+
+// ============================================================================
+// Media Admin Handlers
+// ============================================================================
+
+function handleMediaImportRequest() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'POST method required']);
+        return;
+    }
+    if (!requireAdminSession()) return;
+
+    $pages = wire('pages');
+    $config = wire('config');
+
+    $input = json_decode(file_get_contents('php://input'), true) ?: [];
+    $targetPageId = (int)($input['targetPageId'] ?? 0);
+    $assetId = (int)($input['assetId'] ?? 0);
+    $fieldHint = (string)($input['targetField'] ?? '');
+    $fileField = (string)($input['fileField'] ?? '');
+    $fileName = (string)($input['fileName'] ?? '');
+
+    if (!$targetPageId || !$assetId || !$fieldHint || !$fileField || !$fileName) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Missing required fields']);
+        return;
+    }
+
+    $targetPage = $pages->get($targetPageId);
+    if (!$targetPage->id) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Target page not found']);
+        return;
+    }
+
+    $fieldName = resolveImageFieldName($targetPage, $fieldHint);
+    if (!$fieldName || !$targetPage->hasField($fieldName)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Target image field not found']);
+        return;
+    }
+
+    $assetPage = $pages->get($assetId);
+    if (!$assetPage->id) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Media asset page not found']);
+        return;
+    }
+    if ($assetPage->template->name !== 'MediaLibrary') {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Asset is not a media library item']);
+        return;
+    }
+    if (!$assetPage->hasField($fileField)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Invalid media file field']);
+        return;
+    }
+
+    $assetFile = null;
+    foreach ($assetPage->get($fileField) as $candidate) {
+        if ((string)$candidate->name === $fileName) {
+            $assetFile = $candidate;
+            break;
+        }
+    }
+    if (!$assetFile || !$assetFile->filename || !is_file($assetFile->filename)) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Selected media file not found']);
+        return;
+    }
+
+    $targetField = $targetPage->getField($fieldName);
+    if (!$targetField || !($targetField->type instanceof FieldtypeImage)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Target field is not an image field']);
+        return;
+    }
+
+    $targetPage->of(false);
+    $targetImages = $targetPage->get($fieldName);
+    if (!$targetImages) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Target image collection unavailable']);
+        return;
+    }
+
+    // Avoid duplicate imports of the same source file into the same field.
+    $existingByName = null;
+    foreach ($targetImages as $candidate) {
+        if ((string)$candidate->name === $fileName) {
+            $existingByName = $candidate;
+            break;
+        }
+    }
+    if ($existingByName && $existingByName->id) {
+        $img = $existingByName;
+    } else {
+        try {
+            $targetImages->add($assetFile->filename);
+            $targetPage->save($fieldName);
+            $img = $targetImages->last();
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Import failed: ' . $e->getMessage()]);
+            return;
+        }
+    }
+
+    if ($img) {
+        $tags = trim((string)$img->tags);
+        $assetTag = 'asset-' . $assetId;
+        if (strpos(" $tags ", " $assetTag ") === false) {
+            $img->tags = trim($tags . ' ' . $assetTag);
+            $targetPage->save($fieldName);
+        }
+    }
+
+    $imported = $targetImages->last();
+    $url = $imported ? ($config->urls->httpRoot . ltrim($imported->url, '/')) : null;
+
+    echo json_encode([
+        'success' => true,
+        'targetPageId' => $targetPage->id,
+        'targetField' => $fieldName,
+        'assetId' => $assetId,
+        'imported' => [
+            'name' => $imported ? $imported->name : $fileName,
+            'url' => $url,
+            'tags' => $imported ? (string)$imported->tags : '',
+        ],
+    ]);
+}
+
+function handleMediaUsageRequest() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'GET method required']);
+        return;
+    }
+    if (!requireAdminSession()) return;
+
+    $database = wire('database');
+    $pages = wire('pages');
+    $assetId = (int)(wire('input')->get('assetId') ?: 0);
+    if (!$assetId) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'assetId required']);
+        return;
+    }
+
+    $stmt = $database->prepare("SELECT asset_id, page_id, field, repeater_item_id, file_name, updated_at FROM media_asset_usage WHERE asset_id = :asset ORDER BY page_id, field");
+    $stmt->execute([':asset' => $assetId]);
+    $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+
+    $items = [];
+    foreach ($rows as $row) {
+        $page = $pages->get((int)$row['page_id']);
+        $items[] = [
+            'assetId' => (int)$row['asset_id'],
+            'pageId' => (int)$row['page_id'],
+            'pageTitle' => $page->id ? decodeText($page->title) : '(deleted page)',
+            'pagePath' => $page->id ? $page->path : '',
+            'pageEditUrl' => $page->id ? wire('config')->urls->admin . "page/edit/?id={$page->id}" : '',
+            'field' => $row['field'],
+            'repeaterItemId' => $row['repeater_item_id'] !== null ? (int)$row['repeater_item_id'] : null,
+            'fileName' => $row['file_name'],
+            'updatedAt' => $row['updated_at'],
+        ];
+    }
+
+    echo json_encode([
+        'success' => true,
+        'assetId' => $assetId,
+        'count' => count($items),
+        'items' => $items,
+    ]);
+}
+
+function handleMediaFilesRequest() {
+    if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'GET method required']);
+        return;
+    }
+    if (!requireAdminSession()) return;
+
+    $pages = wire('pages');
+    $config = wire('config');
+    $assetId = (int)(wire('input')->get('assetId') ?: 0);
+    if (!$assetId) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'assetId required']);
+        return;
+    }
+
+    $asset = $pages->get($assetId);
+    if (!$asset->id || $asset->template->name !== 'MediaLibrary') {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'Media asset not found']);
+        return;
+    }
+
+    $files = [];
+    foreach (['MediaImages', 'MediaFiles'] as $field) {
+        if (!$asset->hasField($field)) continue;
+        foreach ($asset->get($field) as $file) {
+            $files[] = [
+                'assetId' => $asset->id,
+                'assetTitle' => decodeText($asset->title),
+                'fileField' => $field,
+                'fileName' => $file->name,
+                'url' => $config->urls->httpRoot . ltrim($file->url, '/'),
+            ];
+        }
+    }
+
+    echo json_encode([
+        'success' => true,
+        'assetId' => $asset->id,
+        'files' => $files,
+    ]);
 }
 
 // ============================================================================
