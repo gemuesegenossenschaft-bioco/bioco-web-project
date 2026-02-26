@@ -24,12 +24,10 @@ $allowedOrigins = $config->allowedOrigins ?? [
 ];
 
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
-if (in_array($origin, $allowedOrigins) || strpos($origin, '.vercel.app') !== false) {
+if (in_array($origin, $allowedOrigins)) {
     header("Access-Control-Allow-Origin: $origin");
-} elseif (empty($origin)) {
-    // Allow requests without origin (direct API calls, curl, etc.)
-    header('Access-Control-Allow-Origin: *');
 }
+// No CORS header for unknown origins or server-to-server (empty origin)
 
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, X-API-Key, Authorization');

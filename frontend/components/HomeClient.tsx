@@ -22,6 +22,14 @@ interface HomeClientProps {
   aktuellesItems: AktuellesItem[]
 }
 
+function sectionImage(s?: ContentSection): string | null {
+  return s?.images?.[0]?.url || s?.imageData?.url || s?.image || null
+}
+
+function sectionImageAlt(s?: ContentSection, fallback?: string): string {
+  return s?.images?.[0]?.alt || s?.imageAlt || fallback || ''
+}
+
 export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) {
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -116,9 +124,9 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
             </div>
           </div>
           <div className="two-column-image">
-            {willkommenSection?.image && <Image
-              src={willkommenSection.image}
-              alt={willkommenSection?.imageAlt || 'Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg'}
+            {sectionImage(willkommenSection) && <Image
+              src={sectionImage(willkommenSection)!}
+              alt={sectionImageAlt(willkommenSection, 'Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg')}
               fill
               priority
               style={{ objectFit: 'cover', borderRadius: '24px' }}
@@ -129,9 +137,9 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
         {/* Gemeinsam, solidarisch, frisch - Row 2, Two Columns */}
         <section className="two-column-section">
           <div className="two-column-image">
-            {gemeinsamSection?.image && <Image
-              src={gemeinsamSection.image}
-              alt={gemeinsamSection?.imageAlt || 'Frisch geerntetes Demeter-Gemüse vom Geisshof'}
+            {sectionImage(gemeinsamSection) && <Image
+              src={sectionImage(gemeinsamSection)!}
+              alt={sectionImageAlt(gemeinsamSection, 'Frisch geerntetes Demeter-Gemüse vom Geisshof')}
               fill
               priority
               style={{ objectFit: 'cover', borderRadius: '24px' }}

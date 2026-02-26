@@ -37,6 +37,9 @@ const RESERVED_PATHS = new Set([
   'wir',
 ])
 
+// Files that should never be handled by the CMS catch-all
+const STATIC_FILES = /\.(ico|png|jpg|svg|xml|txt|webmanifest)$/
+
 function normalizeSlug(segments?: string[]) {
   if (!segments || segments.length === 0) return ''
   return segments.join('/')
@@ -53,7 +56,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: { slug?: string[] } }): Promise<Metadata> {
   const slug = normalizeSlug(params.slug)
-  if (!slug || RESERVED_PATHS.has(slug)) {
+  if (!slug || RESERVED_PATHS.has(slug) || STATIC_FILES.test(slug)) {
     return {}
   }
   const { seo, pageData } = await getPageContent(slug)
@@ -65,7 +68,7 @@ export async function generateMetadata({ params }: { params: { slug?: string[] }
 
 export default async function CmsPage({ params }: { params: { slug?: string[] } }) {
   const slug = normalizeSlug(params.slug)
-  if (!slug || RESERVED_PATHS.has(slug)) {
+  if (!slug || RESERVED_PATHS.has(slug) || STATIC_FILES.test(slug)) {
     notFound()
   }
 

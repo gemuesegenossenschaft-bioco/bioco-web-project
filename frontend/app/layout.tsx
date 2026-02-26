@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: 'biocò | Bio-Gemüse aus der Region Baden-Brugg',
   description: 'Gemüsegenossenschaft biocò: Frisches Demeter-Gemüse aus solidarischer Landwirtschaft. Wöchentliche Gemüsekörbe vom Geisshof in Gebenstorf für die Region Baden-Brugg.',
   keywords: 'solidarische landwirtschaft, bio gemüse, demeter, gemüsegenossenschaft, baden, brugg, gebenstorf, aargau',
+  icons: { icon: '/icon.png' },
   openGraph: {
     title: 'biocò | Bio-Gemüse aus der Region Baden-Brugg',
     description: 'Gemüsegenossenschaft biocò: Frisches Demeter-Gemüse aus solidarischer Landwirtschaft.',

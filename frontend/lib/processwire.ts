@@ -93,7 +93,11 @@ export async function checkCmsHealth(): Promise<boolean> {
  * Get full homepage content (hero + sections)
  */
 export async function getHomepageContent(): Promise<HomepageContent | null> {
-  return fetchCmsJsonSafe<HomepageContent>('/content/homepage', { revalidate: 60 })
+  const data = await fetchCmsJsonSafe<HomepageContent>('/content/homepage', { revalidate: 60 })
+  if (data && Array.isArray(data.sections)) {
+    data.sections = normalizeSections(data.sections)
+  }
+  return data
 }
 
 /**

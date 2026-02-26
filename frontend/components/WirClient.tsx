@@ -95,11 +95,11 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const timelineItems = cmsTimelineItems.length > 0 ? cmsTimelineItems : (timeline || [])
 
   // Get images with fallbacks
-  const alleMitgliederImg = alleMitgliederSection?.image || ''
-  const alleMitgliederAlt = alleMitgliederSection?.imageAlt || 'Mitglieder der Gemüsegenossenschaft biocò'
-  
-  const betriebsgruppeImg = betriebsgruppeSection?.image || ''
-  const betriebsgruppeAlt = betriebsgruppeSection?.imageAlt || 'Betriebsgruppe der Gemüsegenossenschaft biocò'
+  const alleMitgliederImg = alleMitgliederSection?.images?.[0]?.url || alleMitgliederSection?.imageData?.url || alleMitgliederSection?.image || ''
+  const alleMitgliederAlt = alleMitgliederSection?.images?.[0]?.alt || alleMitgliederSection?.imageAlt || 'Mitglieder der Gemüsegenossenschaft biocò'
+
+  const betriebsgruppeImg = betriebsgruppeSection?.images?.[0]?.url || betriebsgruppeSection?.imageData?.url || betriebsgruppeSection?.image || ''
+  const betriebsgruppeAlt = betriebsgruppeSection?.images?.[0]?.alt || betriebsgruppeSection?.imageAlt || 'Betriebsgruppe der Gemüsegenossenschaft biocò'
   
   // Hof-Team images from section.images array or fallback
   const hofTeamImageList = getSectionImages(hofTeamSection, 'Hof-Team')
