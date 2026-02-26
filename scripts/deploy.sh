@@ -1,23 +1,24 @@
 #!/bin/bash
+# Deploy bioco.ch Next.js frontend to cPanel
+# Build locally, rsync standalone output, restart Node.js
 set -e
 BRANCH=${1:-develop}
-REPO="/home/bioco/bioco-web-project"
-DEPLOY="/home/bioco/bioco-frontend"
+DEPLOY_HOST="bioco@193.33.128.160"
+DEPLOY_DIR="/home/bioco/bioco-frontend"
+LOCAL_DIR="$(cd "$(dirname "$0")/../frontend" && pwd)"
 
-cd "$REPO"
-git fetch origin
+echo "Building $BRANCH locally..."
+cd "$LOCAL_DIR"
 git checkout "$BRANCH"
 git pull origin "$BRANCH"
-
-cd frontend
-npm ci --omit=dev
+npm ci
 npm run build
 
-rm -rf "$DEPLOY/.next"
-cp -r .next/standalone/* "$DEPLOY/"
-cp -r .next/static "$DEPLOY/.next/static"
-cp -r public "$DEPLOY/public"
+echo "Uploading standalone output..."
+rsync -avz --delete .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
+rsync -avz --delete .next/static/ "$DEPLOY_HOST:$DEPLOY_DIR/.next/static/"
+rsync -avz --delete public/ "$DEPLOY_HOST:$DEPLOY_DIR/public/"
 
-mkdir -p "$DEPLOY/tmp"
-touch "$DEPLOY/tmp/restart.txt"
-echo "Deployed $BRANCH. Passenger restarting."
+echo "Restarting Node.js..."
+ssh "$DEPLOY_HOST" 'pkill -f "node.*server.js.*49152" 2>/dev/null; sleep 1; /home/bioco/bioco-frontend/start.sh'
+echo "Deployed $BRANCH."
