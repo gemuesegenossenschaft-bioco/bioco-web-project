@@ -65,24 +65,29 @@ $(document).ready(function() {
             var $mediaField = $(this);
             if ($mediaField.find('.browse-media-library-btn').length > 0) return;
 
-            var $uploadBtn = $mediaField.find('.InputfieldFileUpload').first();
-            var $insertAfter = $uploadBtn;
+            var $insertAfter = $mediaField.find('.InputfieldFileUpload').first();
             if ($insertAfter.length === 0) {
-                // UIkit/modern admin themes often render custom wrappers instead.
-                $insertAfter = $mediaField.find('.uk-form-custom, input[type="file"]').first();
+                // UIkit/modern admin themes: upload button is wrapped by .uk-form-custom.
+                $insertAfter = $mediaField.find('.uk-form-custom').first();
             }
             if ($insertAfter.length === 0) {
-                // Final fallback: still render the button in the image field.
-                $insertAfter = $mediaField.find('.InputfieldContent').first();
+                var $fileInput = $mediaField.find('input[type="file"]').first();
+                if ($fileInput.length) {
+                    $insertAfter = $fileInput.closest('.uk-form-custom');
+                    if ($insertAfter.length === 0) {
+                        $insertAfter = $fileInput;
+                    }
+                }
             }
             if ($insertAfter.length === 0) return;
 
             var $browseBtn = $('<button type="button" class="ui-button ui-widget ui-corner-all browse-media-library-btn">')
-                .css({ 'margin-left': '10px' })
+                .css({ 'margin-left': '10px', 'position': 'relative', 'z-index': '20' })
                 .html('<i class="fa fa-folder-open"></i> Media Library');
 
             $browseBtn.on('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 var $field = $(this).closest('.InputfieldImage, .InputfieldFile');
                 var url = ProcessWire.config.urls.admin + 'media/?biocoPicker=1';
                 var targetField = getTargetFieldName($field);
@@ -106,11 +111,9 @@ $(document).ready(function() {
                 }
             });
 
-            if ($insertAfter.hasClass('InputfieldContent')) {
-                $insertAfter.prepend($browseBtn);
-            } else {
-                $insertAfter.after($browseBtn);
-            }
+            var $wrap = $('<span class="bioco-media-library-btn-wrap" style="display:inline-block;vertical-align:middle;position:relative;z-index:20"></span>');
+            $wrap.append($browseBtn);
+            $insertAfter.after($wrap);
         });
     }
 
