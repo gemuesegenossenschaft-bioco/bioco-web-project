@@ -42,7 +42,7 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
           right: 0,
           bottom: 0,
           background: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000,
+          zIndex: 3000,
           backdropFilter: 'blur(4px)'
         }}
       />
@@ -60,7 +60,7 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
           width: '90%',
           maxHeight: '90vh',
           overflow: 'auto',
-          zIndex: 1001,
+          zIndex: 3001,
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
         }}
         onClick={(e) => e.stopPropagation()}
@@ -211,7 +211,6 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
     </>
   )
 }
-
 
 
 

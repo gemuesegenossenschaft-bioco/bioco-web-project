@@ -26,6 +26,12 @@ interface WirClientProps {
 
 export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const getSection = (id: string) => sections.find(s => s.id === id)
+  const getTeamDisplayName = (alt: string, index: number) => {
+    const raw = String(alt || '').trim()
+    if (!raw) return `Team ${index + 1}`
+    const firstChunk = raw.split(/[|,–-]/)[0]?.trim() || raw
+    return firstChunk || `Team ${index + 1}`
+  }
 
   function getSectionImages(section?: ContentSection | null, fallbackAlt?: string) {
     if (!section) return []
@@ -56,7 +62,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const wirSection = getSection('wir')
   const alleMitgliederSection = getSection('alle_mitglieder')
   const betriebsgruppeSection = getSection('betriebsgruppe')
-  const hofTeamSection = getSection('hof_team')
+  const hofTeamSection = getSection('hof_team') || getSection('team')
   const hofSection = getSection('geisshof')
   const missionSection = getSection('mission')
   const solidaritaetSection = getSection('solidaritaet')
@@ -102,12 +108,15 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const betriebsgruppeAlt = betriebsgruppeSection?.images?.[0]?.alt || betriebsgruppeSection?.imageAlt || 'Betriebsgruppe der Gemüsegenossenschaft biocò'
   
   // Hof-Team images from section.images array or fallback
-  const hofTeamImageList = getSectionImages(hofTeamSection, 'Hof-Team')
+  const hofTeamImageList =
+    getSectionImages(hofTeamSection, 'Hof-Team').length > 0
+      ? getSectionImages(hofTeamSection, 'Hof-Team')
+      : getSectionImages(wirSection, 'Hof-Team')
   const hofTeamImages = hofTeamImageList.length
     ? hofTeamImageList.map((img, i) => ({
         url: img.url,
         alt: img.alt,
-        name: img.alt.split(' ')[0] || `Team ${i + 1}`, // Extract name from alt text
+        name: getTeamDisplayName(img.alt, i),
       }))
     : []
   
@@ -150,14 +159,16 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
             {/* Team Grid */}
             <div className="wir-top-row" style={{ marginTop: '24px', marginBottom: '48px' }}>
               <div>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
-                  {alleMitgliederImg && <Image
-                    src={alleMitgliederImg}
-                    alt={alleMitgliederAlt}
-                    fill
-                    style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                  />}
-                </div>
+                {alleMitgliederImg && (
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
+                    <Image
+                      src={alleMitgliederImg}
+                      alt={alleMitgliederAlt}
+                      fill
+                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                    />
+                  </div>
+                )}
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{alleMitgliederSection?.title || 'Alle Mitglieder'}</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                   {alleMitgliederSection?.text ? (
@@ -168,14 +179,16 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                 </p>
               </div>
               <div>
-                <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
-                  {betriebsgruppeImg && <Image
-                    src={betriebsgruppeImg}
-                    alt={betriebsgruppeAlt}
-                    fill
-                    style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                  />}
-                </div>
+                {betriebsgruppeImg && (
+                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
+                    <Image
+                      src={betriebsgruppeImg}
+                      alt={betriebsgruppeAlt}
+                      fill
+                      style={{ objectFit: 'cover', objectPosition: 'center top' }}
+                    />
+                  </div>
+                )}
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{betriebsgruppeSection?.title || 'Betriebsgruppe (BG)'}</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                   {betriebsgruppeSection?.text ? (
@@ -192,16 +205,20 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
               <h4 style={{ fontSize: '1.1rem', color: 'var(--text-secondary)', marginBottom: '20px', fontWeight: '500' }}>
                 {hofTeamSection?.title || 'Hof-Team'}
               </h4>
-              <div className="hof-team-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', width: '100%', maxWidth: '500px' }}>
-                {hofTeamImages.map((member, i) => (
-                  <div key={i}>
-                    <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden', background: 'var(--bg-tertiary, #eee)' }}>
-                      <Image src={member.url} alt={member.alt} fill style={{ objectFit: 'contain', objectPosition: 'center' }} />
+              {hofTeamImages.length > 0 ? (
+                <div className="hof-team-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', width: '100%', maxWidth: '500px' }}>
+                  {hofTeamImages.map((member, i) => (
+                    <div key={i}>
+                      <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden', background: 'var(--bg-tertiary, #eee)' }}>
+                        <Image src={member.url} alt={member.alt} fill style={{ objectFit: 'contain', objectPosition: 'center' }} />
+                      </div>
+                      <h3 style={{ fontSize: '1.25rem' }}>{member.name}</h3>
                     </div>
-                    <h3 style={{ fontSize: '1.25rem' }}>{member.name}</h3>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p style={{ color: 'var(--text-secondary)', margin: 0 }}>Noch keine Teamfotos hinterlegt.</p>
+              )}
             </div>
           </section>
 

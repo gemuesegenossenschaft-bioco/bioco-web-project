@@ -64,9 +64,49 @@ if ($apiKey) {
 /**
  * Get full image URL (required for Next.js Image component)
  */
+function getFirstImageFromField($page, $field) {
+    $value = $page->get($field);
+    if (!$value) return null;
+
+    if ($value instanceof Pageimage || $value instanceof Pagefile) {
+        return $value;
+    }
+
+    if (($value instanceof Pageimages || $value instanceof Pagefiles) && $value->count()) {
+        return $value->first();
+    }
+
+    return null;
+}
+
+/**
+ * Get all images from a field (supports single and multi image fields)
+ */
+function getAllImagesFromField($page, $field) {
+    $value = $page->get($field);
+    if (!$value) return [];
+
+    if ($value instanceof Pageimage || $value instanceof Pagefile) {
+        return [$value];
+    }
+
+    if (($value instanceof Pageimages || $value instanceof Pagefiles) && $value->count()) {
+        $items = [];
+        foreach ($value as $img) {
+            $items[] = $img;
+        }
+        return $items;
+    }
+
+    return [];
+}
+
+/**
+ * Get full image URL (required for Next.js Image component)
+ */
 function getImageUrl($page, $field) {
-    $image = $page->get($field);
-    if ($image && $image->url) {
+    $image = getFirstImageFromField($page, $field);
+    if ($image && !empty($image->url)) {
         return wire('config')->urls->httpRoot . ltrim($image->url, '/');
     }
     return null;
@@ -76,13 +116,13 @@ function getImageUrl($page, $field) {
  * Get image data with metadata
  */
 function getImageData($page, $field) {
-    $image = $page->get($field);
-    if ($image && $image->url) {
+    $image = getFirstImageFromField($page, $field);
+    if ($image && !empty($image->url)) {
         return [
             'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
             'description' => $image->description ?: '',
-            'width' => $image->width,
-            'height' => $image->height,
+            'width' => property_exists($image, 'width') ? $image->width : null,
+            'height' => property_exists($image, 'height') ? $image->height : null,
         ];
     }
     return null;
@@ -92,13 +132,13 @@ function getImageData($page, $field) {
  * Get image data with alt fallback
  */
 function getImageDataWithAlt($page, $field, $fallbackAlt = '') {
-    $image = $page->get($field);
-    if ($image && $image->url) {
+    $image = getFirstImageFromField($page, $field);
+    if ($image && !empty($image->url)) {
         return [
             'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
             'alt' => $image->description ?: $fallbackAlt,
-            'width' => $image->width,
-            'height' => $image->height,
+            'width' => property_exists($image, 'width') ? $image->width : null,
+            'height' => property_exists($image, 'height') ? $image->height : null,
         ];
     }
     return null;
@@ -195,28 +235,19 @@ function buildSectionButtons($section) {
  */
 function buildSectionMedia($section, $fallbackAlt = '') {
     $media = [];
-    if ($section->hasField('section_image') && $section->section_image) {
-        $images = $section->section_image;
-        if ($images instanceof Pageimage) {
-            $images = [$images];
-        }
-        foreach ($images as $img) {
+    $seen = [];
+    foreach (['section_image', 'image', 'section_images'] as $fieldName) {
+        if (!$section->hasField($fieldName)) continue;
+        foreach (getAllImagesFromField($section, $fieldName) as $img) {
+            if (empty($img->url)) continue;
+            $url = wire('config')->urls->httpRoot . ltrim($img->url, '/');
+            if (isset($seen[$url])) continue;
+            $seen[$url] = true;
             $media[] = [
-                'url' => wire('config')->urls->httpRoot . ltrim($img->url, '/'),
+                'url' => $url,
                 'alt' => $img->description ?: $fallbackAlt,
-                'width' => $img->width,
-                'height' => $img->height,
-                'type' => 'image',
-            ];
-        }
-    }
-    if ($section->hasField('section_images') && $section->section_images && $section->section_images->count()) {
-        foreach ($section->section_images as $img) {
-            $media[] = [
-                'url' => wire('config')->urls->httpRoot . ltrim($img->url, '/'),
-                'alt' => $img->description ?: $fallbackAlt,
-                'width' => $img->width,
-                'height' => $img->height,
+                'width' => property_exists($img, 'width') ? $img->width : null,
+                'height' => property_exists($img, 'height') ? $img->height : null,
                 'type' => 'image',
             ];
         }
@@ -265,10 +296,17 @@ function buildSectionData($section) {
         $sectionData['component'] = $componentKey;
     }
 
-    if ($section->hasField('section_image') && $section->section_image) {
-        $sectionData['image'] = getImageUrl($section, 'section_image');
+    $primaryImageField = null;
+    foreach (['section_image', 'image'] as $candidate) {
+        if ($section->hasField($candidate) && getFirstImageFromField($section, $candidate)) {
+            $primaryImageField = $candidate;
+            break;
+        }
+    }
+    if ($primaryImageField) {
+        $sectionData['image'] = getImageUrl($section, $primaryImageField);
         $sectionData['imageAlt'] = $imageAlt;
-        $sectionData['imageData'] = getImageDataWithAlt($section, 'section_image', $imageAlt);
+        $sectionData['imageData'] = getImageDataWithAlt($section, $primaryImageField, $imageAlt);
     }
 
     $media = buildSectionMedia($section, $imageAlt);
