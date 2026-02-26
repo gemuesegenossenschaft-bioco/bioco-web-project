@@ -51,12 +51,21 @@ $(document).ready(function() {
             var $imageField = $(this);
             if ($imageField.find('.browse-media-library-btn').length > 0) return;
 
-            var $uploadBtn = $imageField.find('.InputfieldFileUpload');
-            if ($uploadBtn.length === 0) return;
+            var $uploadBtn = $imageField.find('.InputfieldFileUpload').first();
+            var $insertAfter = $uploadBtn;
+            if ($insertAfter.length === 0) {
+                // UIkit/modern admin themes often render custom wrappers instead.
+                $insertAfter = $imageField.find('.uk-form-custom, input[type="file"]').first();
+            }
+            if ($insertAfter.length === 0) {
+                // Final fallback: still render the button in the image field.
+                $insertAfter = $imageField.find('.InputfieldContent').first();
+            }
+            if ($insertAfter.length === 0) return;
 
             var $browseBtn = $('<button type="button" class="ui-button ui-widget ui-corner-all browse-media-library-btn">')
                 .css({ 'margin-left': '10px' })
-                .html('<i class="fa fa-folder-open"></i> Medienbibliothek durchsuchen');
+                .html('<i class="fa fa-folder-open"></i> Media Library');
 
             $browseBtn.on('click', function(e) {
                 e.preventDefault();
@@ -81,7 +90,11 @@ $(document).ready(function() {
                 }
             });
 
-            $uploadBtn.after($browseBtn);
+            if ($insertAfter.hasClass('InputfieldContent')) {
+                $insertAfter.prepend($browseBtn);
+            } else {
+                $insertAfter.after($browseBtn);
+            }
         });
     }
 
@@ -129,6 +142,33 @@ $(document).ready(function() {
         if (!query.biocoPicker) return false;
         if (!isMediaPage()) return false;
 
+        function sendSelection(chosen) {
+            var payload = {
+                type: 'bioco-media-selected',
+                assetId: chosen.assetId,
+                fileField: chosen.fileField,
+                fileName: chosen.fileName
+            };
+            if (window.opener) {
+                window.opener.postMessage(payload, window.location.origin);
+                window.close();
+                return;
+            }
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage(payload, window.location.origin);
+                try {
+                    var $parent = window.parent.jQuery;
+                    if ($parent) {
+                        $parent('.pw-modal-window .pw-modal-close, .ui-dialog-titlebar-close').first().trigger('click');
+                    }
+                } catch (e) {
+                    // no-op
+                }
+                return;
+            }
+            alert('Picker parent window not found.');
+        }
+
         $('body').addClass('bioco-media-picker-mode');
         $(document).on('click', 'a[href*="page/edit/?id="]', function(e) {
             var href = $(this).attr('href') || '';
@@ -149,17 +189,7 @@ $(document).ready(function() {
                         var idx = Math.max(1, parseInt(selected || '1', 10)) - 1;
                         chosen = res.files[idx] || res.files[0];
                     }
-                    if (window.opener) {
-                        window.opener.postMessage({
-                            type: 'bioco-media-selected',
-                            assetId: chosen.assetId,
-                            fileField: chosen.fileField,
-                            fileName: chosen.fileName
-                        }, window.location.origin);
-                        window.close();
-                    } else {
-                        alert('Picker opener not found.');
-                    }
+                    sendSelection(chosen);
                 })
                 .fail(function() {
                     alert('Failed loading media files.');
