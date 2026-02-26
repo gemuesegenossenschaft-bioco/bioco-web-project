@@ -2981,6 +2981,40 @@ footer a:hover {
   border-bottom-color: var(--bioco-green);
 }
 
+.kalender-tab-short {
+  display: inline;
+}
+
+.kalender-tab-full {
+  display: none;
+}
+
+.kalender-mobile-stepper {
+  display: none;
+}
+
+.kalender-mobile-stepper-btn {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border-radius: 999px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.kalender-mobile-stepper-current {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
 .kalender-select {
   display: none;
   width: 100%;
@@ -4805,6 +4839,67 @@ footer a:hover {
 
   .kalender-select {
     display: block;
+  }
+
+  /* Saisonkalender: touch-friendly month navigation on mobile */
+  .saisonkalender .kalender-mobile-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .saisonkalender .kalender-tabs {
+    display: flex !important;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    gap: 8px;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    border-bottom: none;
+  }
+
+  .saisonkalender .kalender-tabs::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .saisonkalender .kalender-tabs::-webkit-scrollbar-thumb {
+    background: #c8c8c8;
+    border-radius: 999px;
+  }
+
+  .saisonkalender .kalender-tab {
+    min-height: 44px;
+    padding: 10px 14px;
+    margin-bottom: 0;
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    color: var(--text-primary);
+    background: var(--bg-secondary);
+  }
+
+  .saisonkalender .kalender-tab-short {
+    display: none;
+  }
+
+  .saisonkalender .kalender-tab-full {
+    display: inline;
+  }
+
+  .saisonkalender .kalender-tab.active {
+    color: #ffffff;
+    background: var(--bioco-green);
+    border-color: var(--bioco-green);
+  }
+
+  .saisonkalender .kalender-select {
+    display: none !important;
   }
 
   .gallery-filters {

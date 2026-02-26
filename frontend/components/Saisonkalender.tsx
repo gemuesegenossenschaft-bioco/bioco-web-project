@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 const MONTHS = [
   'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
@@ -71,21 +71,64 @@ const SEASONAL_DATA: Record<string, string[]> = {
 
 export function Saisonkalender() {
   const [activeMonth, setActiveMonth] = useState(new Date().getMonth())
+  const monthButtonRefs = useRef<Array<HTMLButtonElement | null>>([])
 
   const monthKey = MONTHS[activeMonth].toLowerCase()
   const vegetables = SEASONAL_DATA[monthKey] || []
 
+  useEffect(() => {
+    monthButtonRefs.current[activeMonth]?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    })
+  }, [activeMonth])
+
+  const goToPreviousMonth = () => {
+    setActiveMonth((prev) => (prev === 0 ? MONTHS.length - 1 : prev - 1))
+  }
+
+  const goToNextMonth = () => {
+    setActiveMonth((prev) => (prev === MONTHS.length - 1 ? 0 : prev + 1))
+  }
+
   return (
     <div className="saisonkalender">
-      {/* Desktop: Tabs, Mobile: Dropdown */}
+      <div className="kalender-mobile-stepper" aria-label="Monat wechseln">
+        <button
+          type="button"
+          className="kalender-mobile-stepper-btn"
+          onClick={goToPreviousMonth}
+          aria-label="Vorheriger Monat"
+        >
+          &lt;
+        </button>
+        <span className="kalender-mobile-stepper-current">{MONTHS[activeMonth]}</span>
+        <button
+          type="button"
+          className="kalender-mobile-stepper-btn"
+          onClick={goToNextMonth}
+          aria-label="Nächster Monat"
+        >
+          &gt;
+        </button>
+      </div>
+
+      {/* Desktop: short tabs, Mobile: full tabs with swipe */}
       <div className="kalender-tabs">
         {MONTHS.map((month, index) => (
           <button
             key={month}
+            ref={(el) => {
+              monthButtonRefs.current[index] = el
+            }}
+            type="button"
             className={`kalender-tab ${activeMonth === index ? 'active' : ''}`}
             onClick={() => setActiveMonth(index)}
+            aria-label={`Monat ${month} anzeigen`}
           >
-            {month.substring(0, 3)}
+            <span className="kalender-tab-short">{month.substring(0, 3)}</span>
+            <span className="kalender-tab-full">{month}</span>
           </button>
         ))}
       </div>
