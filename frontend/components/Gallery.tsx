@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 type FilterType = 'all' | 'körbe' | 'feld' | 'portraits'
@@ -9,58 +9,38 @@ interface GalleryImage {
   id: string
   src: string
   alt: string
-  category: FilterType
+  category: string
 }
 
-// Gallery images from public/images/ernte/
-const GALLERY_IMAGES: GalleryImage[] = [
-  {
-    id: 'ernte-bohnen',
-    src: '/images/ernte/bioco_ernte_bohnen.JPG',
-    alt: 'Bohnen-Ernte auf dem Geisshof',
-    category: 'feld'
-  },
-  {
-    id: 'ernte-mais',
-    src: '/images/ernte/bioco_ernte_mais.JPG',
-    alt: 'Mais-Ernte auf dem Geisshof',
-    category: 'feld'
-  },
-  {
-    id: 'ernte-paprika',
-    src: '/images/ernte/bioco_ernte_paprika.JPG',
-    alt: 'Paprika-Ernte auf dem Geisshof',
-    category: 'feld'
-  },
-  {
-    id: 'ernte-zwiebel',
-    src: '/images/ernte/bioco_ernte_zwiebel.JPG',
-    alt: 'Zwiebel-Ernte auf dem Geisshof',
-    category: 'feld'
-  },
-  {
-    id: 'ernte-kürbis',
-    src: '/images/ernte/bioco_ernte-kürbis-hoch.JPG',
-    alt: 'Kürbis-Ernte auf dem Geisshof',
-    category: 'feld'
-  },
-  {
-    id: 'ernte-salat',
-    src: '/images/ernte/bioco_ertne_Salat.JPG',
-    alt: 'Salat-Ernte auf dem Geisshof',
-    category: 'feld'
-  },
-  {
-    id: 'feld-himmel',
-    src: '/images/ernte/bioco_feld-mit-himmel.JPG',
-    alt: 'Feld mit Himmel auf dem Geisshof',
-    category: 'feld'
-  }
+// Fallback gallery images (used when CMS unavailable)
+const FALLBACK_IMAGES: GalleryImage[] = [
+  { id: 'ernte-bohnen', src: '/images/ernte/bioco_ernte_bohnen.JPG', alt: 'Bohnen-Ernte auf dem Geisshof', category: 'feld' },
+  { id: 'ernte-mais', src: '/images/ernte/bioco_ernte_mais.JPG', alt: 'Mais-Ernte auf dem Geisshof', category: 'feld' },
+  { id: 'ernte-paprika', src: '/images/ernte/bioco_ernte_paprika.JPG', alt: 'Paprika-Ernte auf dem Geisshof', category: 'feld' },
+  { id: 'ernte-zwiebel', src: '/images/ernte/bioco_ernte_zwiebel.JPG', alt: 'Zwiebel-Ernte auf dem Geisshof', category: 'feld' },
+  { id: 'ernte-kürbis', src: '/images/ernte/bioco_ernte-kürbis-hoch.JPG', alt: 'Kürbis-Ernte auf dem Geisshof', category: 'feld' },
+  { id: 'ernte-salat', src: '/images/ernte/bioco_ertne_Salat.JPG', alt: 'Salat-Ernte auf dem Geisshof', category: 'feld' },
+  { id: 'feld-himmel', src: '/images/ernte/bioco_feld-mit-himmel.JPG', alt: 'Feld mit Himmel auf dem Geisshof', category: 'feld' },
 ]
 
 export function Gallery() {
+  const [images, setImages] = useState<GalleryImage[]>(FALLBACK_IMAGES)
   const [activeFilter, setActiveFilter] = useState<FilterType>('all')
   const [showAll, setShowAll] = useState(false)
+
+  useEffect(() => {
+    const cmsBase = process.env.NEXT_PUBLIC_PROCESSWIRE_BASE_URL || 'https://cms.bioco.ch'
+    fetch(`${cmsBase}/api/content/gallery`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.images) && data.images.length > 0) {
+          setImages(data.images)
+        }
+      })
+      .catch(() => {
+        // Keep fallback images
+      })
+  }, [])
 
   const filters: { id: FilterType; label: string }[] = [
     { id: 'all', label: 'Alles' },
@@ -69,16 +49,15 @@ export function Gallery() {
     { id: 'portraits', label: 'Portraits' },
   ]
 
-  const filteredImages = activeFilter === 'all' 
-    ? GALLERY_IMAGES 
-    : GALLERY_IMAGES.filter(img => img.category === activeFilter)
+  const filteredImages = activeFilter === 'all'
+    ? images
+    : images.filter(img => img.category === activeFilter)
 
   const displayedImages = showAll ? filteredImages : filteredImages.slice(0, 4)
   const hasMoreImages = filteredImages.length > 4
 
   return (
     <div className="gallery-container">
-      {/* Desktop: Buttons, Mobile: Dropdown */}
       <div className="gallery-filters">
         {filters.map(filter => (
           <button
@@ -86,7 +65,7 @@ export function Gallery() {
             className={`gallery-filter ${activeFilter === filter.id ? 'active' : ''}`}
             onClick={() => {
               setActiveFilter(filter.id)
-              setShowAll(false) // Reset showAll when filter changes
+              setShowAll(false)
             }}
           >
             {filter.label}
@@ -108,7 +87,7 @@ export function Gallery() {
         ))}
       </select>
 
-      {GALLERY_IMAGES.length > 0 ? (
+      {images.length > 0 ? (
         <>
           <div className="gallery-grid">
             {displayedImages.map(image => (

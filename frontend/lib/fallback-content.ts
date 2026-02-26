@@ -17,7 +17,7 @@ import type { ContentSection, GroupCard, HeroContent, HomepageContent } from './
 export const FALLBACK_HERO: HeroContent = {
   headline: 'Gemeinsam Gemüse anbauen und geniessen',
   subtitle: 'Solidarische Landwirtschaft in der Region Baden-Brugg',
-  image: '/images/FrontseiteStartseite.jpg',
+  image: 'https://cms.bioco.ch/site/assets/files/1/frontseitestartseite.jpg',
   imageAlt: 'Solidarische Landwirtschaft auf dem Feld',
 }
 
@@ -26,7 +26,7 @@ export const FALLBACK_HOMEPAGE_SECTIONS: ContentSection[] = [
     id: 'willkommen',
     title: 'Willkommen bei biocò',
     text: `<p>Bei der biocò Gemüsegenossenschaft teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <a href="/solawi">solidarische Landwirtschaft</a> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den Anbau und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich in den <a href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</a> abgeholt werden kann.</p>`,
-    image: '/images/mitmachen/zusammen-arbeiten.JPG',
+    image: 'https://cms.bioco.ch/site/assets/files/1778/zusammen-arbeiten.jpg',
     imageAlt: 'Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg',
     buttons: [
       { text: 'Lerne uns kennen', href: '/wir', variant: 'primary' },
@@ -36,7 +36,7 @@ export const FALLBACK_HOMEPAGE_SECTIONS: ContentSection[] = [
     id: 'gemeinsam',
     title: 'Gemeinsam, solidarisch, frisch',
     text: `<p>Seit 2014 bewirtschaften wir den <a href="/wir">Geisshof in Gebenstorf</a> nach biologisch-dynamischen Prinzipien und liefern <a href="/gemuese">Demeter-Gemüse</a> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <a href="/solawi">solidarischer Landwirtschaft</a>, das wir gemeinsam anbauen, pflegen und ernten. Jedes Mitglied bringt sich ein, ob auf dem Feld, in der Logistik oder bei der Organisation.</p>`,
-    image: '/images/gemeinsamSolidarischFrisch.JPG',
+    image: 'https://cms.bioco.ch/site/assets/files/1779/gemeinsamsolidarischfrisch.jpg',
     imageAlt: 'Frisch geerntetes Demeter-Gemüse vom Geisshof',
     buttons: [
       { text: 'Was gerade wächst', href: '/gemuese', variant: 'secondary' },
@@ -78,7 +78,7 @@ export const FALLBACK_MITMACHEN_SECTIONS: ContentSection[] = [
     title: 'Familien & Kinder auf dem Geisshof',
     text: `<p>Familien und Kinder sind sehr regelmässige Helfer auf dem Geisshof. Die Einbindung von Kindern in den Prozess des Gemüseanbaus ist ein zentraler Bestandteil der biocò-Kultur.</p>
 <p>Auf dem Geisshof erleben Kinder hautnah, wie Gemüse wächst, gepflegt wird und geerntet wird. Sie lernen spielerisch den Kreislauf der Natur kennen und entwickeln ein tiefes Verständnis für die Herkunft ihrer Nahrung.</p>`,
-    image: '/images/ernte/bioco_ernte-kürbis-hoch.JPG',
+    image: 'https://cms.bioco.ch/site/assets/files/1781/bioco_ernte-kurbis-hoch.jpg',
     imageAlt: 'Frisch geerntetes Demeter-Gemüse vom Geisshof',
   },
 ]
@@ -88,7 +88,7 @@ export const FALLBACK_GROUP_CARDS: GroupCard[] = [
     id: 'elki',
     title: 'Elki',
     text: '<p>Familienaktivitäten und gemeinsame Anlässe. Die Elki-Gruppe organisiert speziell für Familien mit Kindern ausgerichtete Aktivitäten auf dem Hof.</p>',
-    image: '/images/mitmachen/zusammen-arbeiten.JPG',
+    image: 'https://cms.bioco.ch/site/assets/files/1778/zusammen-arbeiten.jpg',
     imageAlt: 'Elki Familienaktivitäten bei biocò',
   },
   {
@@ -102,7 +102,7 @@ export const FALLBACK_GROUP_CARDS: GroupCard[] = [
     id: 'betriebsgruppe',
     title: 'BG (Betriebsgruppe)',
     text: '<p>Aktive Mitarbeit in der Betriebsorganisation. Die Betriebsgruppe koordiniert strategische Entscheidungen und plant die Anbauzyklen.</p>',
-    image: '/images/team/betriebsgruppe.JPG',
+    image: 'https://cms.bioco.ch/site/assets/files/1713/zusammen-arbeiten.jpg',
     imageAlt: 'Betriebsgruppe der Gemüsegenossenschaft biocò Gebenstorf',
   },
 ]

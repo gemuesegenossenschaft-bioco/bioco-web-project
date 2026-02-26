@@ -238,6 +238,27 @@ export async function getInstagramPosts(limit: number = 10): Promise<InstagramPo
 }
 
 // ============================================================================
+// Gallery
+// ============================================================================
+
+export interface GalleryImage {
+  id: string
+  src: string
+  alt: string
+  category: string
+}
+
+interface GalleryResponse {
+  success: boolean
+  images: GalleryImage[]
+}
+
+export async function getGalleryImages(): Promise<GalleryImage[]> {
+  const response = await fetchCmsJsonSafe<GalleryResponse>('/content/gallery', { revalidate: 60 })
+  return response?.images || []
+}
+
+// ============================================================================
 // Content Helpers
 // ============================================================================
 
