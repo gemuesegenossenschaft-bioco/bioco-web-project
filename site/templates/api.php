@@ -1057,6 +1057,8 @@ function handleMediaImportRequest() {
     }
 
     $targetPage->of(false);
+    // Allow this request path to add files to page media fields.
+    $config->biocoMediaImportInProgress = true;
     $targetFiles = $targetPage->get($fieldName);
     if (!$targetFiles) {
         http_response_code(500);

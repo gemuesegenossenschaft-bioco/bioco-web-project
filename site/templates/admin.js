@@ -48,6 +48,71 @@ $(document).ready(function() {
         return null;
     }
 
+    function isPageEditProcess() {
+        if (window.ProcessWire && ProcessWire.config && ProcessWire.config.ProcessPageEdit) return true;
+        var path = String(window.location.pathname || '');
+        if (/\/processwire\/page\/edit\/?$/.test(path) || path.indexOf('/processwire/page/edit/') >= 0) return true;
+        if (path.indexOf('/processwire/page/') >= 0 && /[?&]id=\d+/.test(window.location.search || '')) return true;
+        return false;
+    }
+
+    function getEditedTemplateName() {
+        if (!isPageEditProcess()) return '';
+        var ppe = ProcessWire.config.ProcessPageEdit || {};
+        var tpl = ppe.templateName || ppe.template || '';
+        if (tpl && typeof tpl === 'object') {
+            tpl = tpl.name || tpl.label || tpl.value || '';
+        }
+        tpl = String(tpl || '').trim();
+        if (tpl) return tpl;
+
+        // Fallback for MediaLibrary edit screens where template config is not exposed.
+        if ($('#wrap_Inputfield_MediaImages, #wrap_Inputfield_MediaFiles').length) return 'MediaLibrary';
+        return '';
+    }
+
+    function shouldEnforceLibraryOnly() {
+        if (!isPageEditProcess()) return false;
+        if (isMediaPage()) return false;
+        var tpl = String(getEditedTemplateName() || '').toLowerCase();
+        if (tpl === 'medialibrary') return false;
+        return true;
+    }
+
+    function enforceLibraryOnlyOnPageFields() {
+        if (!shouldEnforceLibraryOnly()) return;
+
+        $('.InputfieldImage, .InputfieldFile').each(function() {
+            var $field = $(this);
+
+            $field.find('.InputfieldFileUpload, .uk-form-custom, input[type="file"], .InputfieldFileDropZone, .InputfieldFileDrop, .InputfieldFileDropArea, .gridImage__drop').each(function() {
+                var $el = $(this);
+                if ($el.hasClass('bioco-library-only-hidden')) return;
+                $el.addClass('bioco-library-only-hidden').hide();
+            });
+
+            // Extra safety for themes that keep "Choose File" visible in custom wrappers.
+            $field.find('button, a, label, span, div').filter(function() {
+                var t = String($(this).text() || '').trim().toLowerCase();
+                return t === 'choose file' || t === 'datei wählen';
+            }).each(function() {
+                var $container = $(this).closest('.uk-form-custom, .InputfieldFileUpload, label, button');
+                if (!$container.length) $container = $(this);
+                if ($container.hasClass('browse-media-library-btn')) return;
+                $container.addClass('bioco-library-only-hidden').hide();
+            });
+
+            if ($field.find('.bioco-library-only-note').length) return;
+            var $note = $('<div class="bioco-library-only-note uk-text-small" style="margin-top:6px;color:#666">Upload in Media Library, then select here.</div>');
+            var $anchor = $field.find('.bioco-media-library-btn-wrap').first();
+            if ($anchor.length) {
+                $anchor.after($note);
+            } else {
+                $field.find('.InputfieldContent').first().append($note);
+            }
+        });
+    }
+
     function getRepeaterItemId($field) {
         var $item = $field.closest('.InputfieldRepeaterItem');
         if (!$item.length) return null;
@@ -132,16 +197,19 @@ $(document).ready(function() {
         });
     }
 
-    function importSelectedMedia(payload) {
+    function importSelectedMedia(payload, options) {
+        options = options || {};
+        var reloadOnSuccess = options.reloadOnSuccess !== false;
+
         if (
             !currentImportContext
             || (!currentImportContext.targetPageId && !currentImportContext.repeaterItemId)
             || !currentImportContext.targetField
         ) {
             alert('Import context missing. Please reopen media library from the image field.');
-            return;
+            return $.Deferred().reject('missing_context').promise();
         }
-        $.ajax({
+        return $.ajax({
             url: ProcessWire.config.urls.root + 'api/media-import',
             method: 'POST',
             contentType: 'application/json',
@@ -153,26 +221,55 @@ $(document).ready(function() {
                 fileField: payload.fileField,
                 fileName: payload.fileName
             }),
-            success: function(response) {
-                if (!response || !response.success) {
-                    alert('Import failed: ' + ((response && response.error) || 'unknown error'));
-                    return;
-                }
-                // Full reload is the most reliable way to make ProcessWire re-render file items.
-                window.location.reload();
-            },
-            error: function(xhr) {
-                var msg = (xhr.responseJSON && xhr.responseJSON.error) || 'Import request failed';
-                alert(msg);
+        }).then(function(response) {
+            if (!response || !response.success) {
+                var reason = (response && response.error) || 'unknown error';
+                alert('Import failed: ' + reason);
+                return $.Deferred().reject(reason).promise();
             }
+            if (reloadOnSuccess) {
+                window.location.reload();
+            }
+            return response;
+        }, function(xhr) {
+            var msg = (xhr && xhr.responseJSON && xhr.responseJSON.error) || 'Import request failed';
+            alert(msg);
+            return $.Deferred().reject(msg).promise();
+        });
+    }
+
+    function importSelectedMediaBatch(items) {
+        if (!Array.isArray(items) || !items.length) return;
+        var chain = $.Deferred().resolve().promise();
+        var failures = [];
+
+        items.forEach(function(item) {
+            chain = chain.then(function() {
+                return importSelectedMedia(item, { reloadOnSuccess: false }).then(null, function(err) {
+                    failures.push(err || (item && item.fileName) || 'unknown');
+                    return $.Deferred().resolve().promise();
+                });
+            });
+        });
+
+        chain.then(function() {
+            if (failures.length) {
+                alert('Some files failed to import: ' + failures.join(' | '));
+            }
+            window.location.reload();
         });
     }
 
     function bindParentMessageListener() {
         window.addEventListener('message', function(evt) {
             var data = evt.data || {};
-            if (data.type !== 'bioco-media-selected') return;
-            importSelectedMedia(data);
+            if (data.type === 'bioco-media-selected') {
+                importSelectedMedia(data);
+                return;
+            }
+            if (data.type === 'bioco-media-selected-multi' && Array.isArray(data.items)) {
+                importSelectedMediaBatch(data.items);
+            }
         });
     }
 
@@ -189,10 +286,6 @@ $(document).ready(function() {
         function openVisualFileChooser(files, onSelect) {
             if (!files || !files.length) {
                 alert('No files available.');
-                return;
-            }
-            if (files.length === 1) {
-                onSelect(files[0]);
                 return;
             }
 
@@ -217,7 +310,7 @@ $(document).ready(function() {
                 flexDirection: 'column'
             });
 
-            var $head = $('<div><strong>Select media file</strong><div style="font-size:12px;color:#666">Click a thumbnail to import</div></div>').css({
+            var $head = $('<div><strong>Select media file(s)</strong><div style="font-size:12px;color:#666">Select one or more thumbnails, then import.</div></div>').css({
                 padding: '14px 16px',
                 borderBottom: '1px solid #e6e6e6'
             });
@@ -230,15 +323,22 @@ $(document).ready(function() {
                 overflow: 'auto'
             });
 
+            var selected = {};
+            function selectedCount() {
+                return Object.keys(selected).length;
+            }
+
             files.forEach(function(file) {
                 var image = isLikelyImage(file.fileName);
+                var key = [file.assetId, file.fileField, file.fileName].join('|');
                 var $card = $('<button type="button" class="bioco-file-card"></button>').css({
                     border: '1px solid #ddd',
                     background: '#fff',
                     borderRadius: '8px',
                     textAlign: 'left',
                     padding: '8px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    position: 'relative'
                 });
 
                 var $preview;
@@ -274,11 +374,30 @@ $(document).ready(function() {
                     wordBreak: 'break-all'
                 });
 
-                $card.append($preview, $name);
+                var $check = $('<span>Selected</span>').css({
+                    position: 'absolute',
+                    top: '8px',
+                    right: '8px',
+                    fontSize: '11px',
+                    background: '#0a7d2b',
+                    color: '#fff',
+                    borderRadius: '999px',
+                    padding: '2px 8px',
+                    display: 'none'
+                });
+
+                $card.append($preview, $name, $check);
                 $card.on('click', function() {
-                    $(document).off('keydown.biocoFilePicker');
-                    $overlay.remove();
-                    onSelect(file);
+                    if (selected[key]) {
+                        delete selected[key];
+                        $card.css({ borderColor: '#ddd', boxShadow: 'none' });
+                        $check.hide();
+                    } else {
+                        selected[key] = file;
+                        $card.css({ borderColor: '#0a7d2b', boxShadow: '0 0 0 2px rgba(10,125,43,0.18)' });
+                        $check.show();
+                    }
+                    $import.prop('disabled', selectedCount() < 1).text('Import selected (' + selectedCount() + ')');
                 });
 
                 $grid.append($card);
@@ -289,13 +408,20 @@ $(document).ready(function() {
                 padding: '10px 14px',
                 textAlign: 'right'
             });
+            var $import = $('<button type="button" class="ui-button ui-priority-primary" disabled>Import selected (0)</button>').css({ marginRight: '8px' });
             var $cancel = $('<button type="button" class="ui-button">Cancel</button>');
             function closePicker() {
                 $overlay.remove();
                 $(document).off('keydown.biocoFilePicker');
             }
+            $import.on('click', function() {
+                var picks = Object.keys(selected).map(function(k) { return selected[k]; });
+                if (!picks.length) return;
+                closePicker();
+                onSelect(picks);
+            });
             $cancel.on('click', function() { closePicker(); });
-            $foot.append($cancel);
+            $foot.append($import, $cancel);
 
             $modal.append($head, $grid, $foot);
             $overlay.append($modal);
@@ -312,12 +438,26 @@ $(document).ready(function() {
         }
 
         function sendSelection(chosen) {
-            var payload = {
-                type: 'bioco-media-selected',
-                assetId: chosen.assetId,
-                fileField: chosen.fileField,
-                fileName: chosen.fileName
-            };
+            var payload;
+            if (Array.isArray(chosen)) {
+                payload = {
+                    type: 'bioco-media-selected-multi',
+                    items: chosen.map(function(item) {
+                        return {
+                            assetId: item.assetId,
+                            fileField: item.fileField,
+                            fileName: item.fileName
+                        };
+                    })
+                };
+            } else {
+                payload = {
+                    type: 'bioco-media-selected',
+                    assetId: chosen.assetId,
+                    fileField: chosen.fileField,
+                    fileName: chosen.fileName
+                };
+            }
             if (window.opener) {
                 window.opener.postMessage(payload, window.location.origin);
                 window.close();
@@ -532,12 +672,14 @@ $(document).ready(function() {
 
     bindParentMessageListener();
     addMediaLibraryButtons();
+    enforceLibraryOnlyOnPageFields();
     addImageEditorButtons();
     renderUsageBlocksInMediaLibrary();
 
     $(document).on('reloaded wiretabclick', '.InputfieldRepeater, .Inputfield', function() {
         setTimeout(function() {
             addMediaLibraryButtons();
+            enforceLibraryOnlyOnPageFields();
             addImageEditorButtons();
             renderUsageBlocksInMediaLibrary();
         }, 100);

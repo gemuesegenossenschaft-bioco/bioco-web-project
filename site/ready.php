@@ -127,6 +127,35 @@ function biocoMediaUsageRows($assetId) {
     return $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
 }
 
+function biocoUsageRowExistsForFile(Page $page, $fieldName, $fileName) {
+    biocoEnsureMediaUsageTable();
+    $db = wire('database');
+    $ctx = biocoUsageContext($page);
+    if ($ctx['repeaterItemId']) {
+        $stmt = $db->prepare("SELECT 1 FROM media_asset_usage WHERE page_id = :pid AND repeater_item_id = :rid AND field = :field AND file_name = :file LIMIT 1");
+        $stmt->execute([
+            ':pid' => $ctx['pageId'],
+            ':rid' => $ctx['repeaterItemId'],
+            ':field' => $fieldName,
+            ':file' => $fileName,
+        ]);
+    } else {
+        $stmt = $db->prepare("SELECT 1 FROM media_asset_usage WHERE page_id = :pid AND repeater_item_id IS NULL AND field = :field AND file_name = :file LIMIT 1");
+        $stmt->execute([
+            ':pid' => $ctx['pageId'],
+            ':field' => $fieldName,
+            ':file' => $fileName,
+        ]);
+    }
+    return (bool)$stmt->fetchColumn();
+}
+
+function biocoIsImportedMediaFile($file, Page $page, $fieldName) {
+    $assetId = biocoParseAssetIdFromTags($file->tags ?? '');
+    if ($assetId > 0) return true;
+    return biocoUsageRowExistsForFile($page, $fieldName, (string)$file->name);
+}
+
 function biocoRenderUsageMarkup($assetId) {
     $rows = biocoMediaUsageRows($assetId);
     if (!count($rows)) {
@@ -163,6 +192,39 @@ $wire->addHookAfter('Page::render', function($event) {
 });
 
 // Keep usage index updated on content edits.
+$wire->addHookBefore('Pages::saveReady', function($event) {
+    if (!empty(wire('config')->biocoMediaImportInProgress)) return;
+
+    $page = $event->arguments(0);
+    if (!$page instanceof Page || !$page->id) return;
+    if ($page->template->name === 'admin' || $page->template->name === 'MediaLibrary') return;
+
+    $original = wire('pages')->get((int)$page->id);
+    if (!$original->id) return;
+
+    foreach ($page->template->fieldgroup as $field) {
+        if (!($field->type instanceof FieldtypeImage || $field->type instanceof FieldtypeFile)) continue;
+
+        $currentFiles = $page->get($field->name);
+        if (!$currentFiles) continue;
+        $oldFiles = $original->get($field->name);
+
+        $oldByName = [];
+        if ($oldFiles) {
+            foreach ($oldFiles as $oldFile) {
+                $oldByName[(string)$oldFile->name] = true;
+            }
+        }
+
+        foreach ($currentFiles as $file) {
+            $name = (string)$file->name;
+            if (!$name || isset($oldByName[$name])) continue;
+            if (biocoIsImportedMediaFile($file, $page, $field->name)) continue;
+            throw new WireException("Direct upload is disabled for page media fields. Upload in Media Library and select it via 'Media Library'. Field '{$field->name}', file '{$name}'.");
+        }
+    }
+});
+
 $wire->addHookAfter('Pages::saved', function($event) {
     $page = $event->arguments(0);
     if (!$page instanceof Page || !$page->id) return;
