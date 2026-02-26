@@ -56,5 +56,16 @@ export async function fetchCmsJson<T>(
   return (await response.json()) as T
 }
 
+export async function fetchCmsJsonSafe<T>(
+  path: string,
+  init?: RequestInit & { revalidate?: number }
+): Promise<T | null> {
+  try {
+    return await fetchCmsJson<T>(path, init)
+  } catch {
+    return null
+  }
+}
+
 export const processwireBaseUrl = RESOLVED_BASE_URL
 export const processwireApiKey = API_KEY

@@ -283,6 +283,28 @@ function buildSectionData($section) {
         $sectionData['buttons'] = $buttons;
     }
 
+    $overlay = $section->get('section_image_overlay');
+    if ($overlay && $overlay !== 'none') {
+        $sectionData['imageOverlay'] = $overlay;
+    }
+    $bgColor = $section->get('section_bg_color');
+    if ($bgColor && $bgColor !== 'none') {
+        $sectionData['bgColor'] = $bgColor;
+    }
+
+    $brightness = $section->get('section_image_brightness');
+    if ($brightness !== null && $brightness !== '' && (float) $brightness != 1.0) {
+        $sectionData['imageBrightness'] = (float) $brightness;
+    }
+    $contrast = $section->get('section_image_contrast');
+    if ($contrast !== null && $contrast !== '' && (float) $contrast != 1.0) {
+        $sectionData['imageContrast'] = (float) $contrast;
+    }
+    $saturate = $section->get('section_image_saturate');
+    if ($saturate !== null && $saturate !== '' && (float) $saturate != 1.0) {
+        $sectionData['imageSaturate'] = (float) $saturate;
+    }
+
     return $sectionData;
 }
 
@@ -721,6 +743,7 @@ function handleContentRequest($type, $param = null) {
                     'media' => $media,
                     'url' => $event->httpUrl(),
                     'parentTitle' => $event->parent?->title ?: '',
+                    'eventType' => $event->event_type ?: 'general',
                 ];
             }
             

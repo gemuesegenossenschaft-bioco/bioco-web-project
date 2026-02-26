@@ -3,7 +3,7 @@ import { getHomepageContent, getAktuelles } from '@/lib/processwire'
 import { getAktuellesItems } from '@/components/AktuellesData'
 import type { AktuellesItem } from '@/components/AktuellesData'
 import type { AktuellesNewsItem } from '@/lib/processwire-types'
-import { FALLBACK_HERO, FALLBACK_HOMEPAGE_SECTIONS, mergeSections } from '@/lib/fallback-content'
+import type { HeroContent } from '@/lib/processwire-types'
 import { HomeClient } from '@/components/HomeClient'
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo'
 
@@ -55,11 +55,11 @@ export default async function Home() {
     getAktuelles(10),
   ])
   
-  const hero = cmsContent?.hero?.headline 
-    ? cmsContent.hero 
-    : FALLBACK_HERO
-  
-  const sections = mergeSections(cmsContent?.sections, FALLBACK_HOMEPAGE_SECTIONS)
+  const hero: HeroContent = cmsContent?.hero?.headline
+    ? cmsContent.hero
+    : { headline: '', subtitle: '', image: null, imageAlt: '' }
+
+  const sections = cmsContent?.sections || []
 
   const aktuellesItems: AktuellesItem[] =
     cmsNews.length > 0 ? cmsNews.map(mapNewsToAktuellesItem) : getAktuellesItems()

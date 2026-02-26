@@ -11,6 +11,14 @@ import { useEventsFeed } from '@/hooks/useEventsFeed'
 import type { ContentSection } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
 
+export function filterSchnuppertage(events: AktuellesItem[]): AktuellesItem[] {
+  return events.filter((item) => item.eventType === 'schnuppertag')
+}
+
+export function filterOtherEvents(events: AktuellesItem[]): AktuellesItem[] {
+  return events.filter((item) => item.eventType !== 'schnuppertag')
+}
+
 interface AktuellesClientProps {
   sections?: ContentSection[]
   aktuellesItems: AktuellesItem[]
@@ -32,12 +40,8 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
     setSelectedItem(null)
   }
 
-  const schnuppertageEvents = eventItems.filter((item) =>
-    (item.title || '').toLowerCase().includes('schnuppertag')
-  )
-  const otherEvents = eventItems.filter(
-    (item) => !(item.title || '').toLowerCase().includes('schnuppertag')
-  )
+  const schnuppertageEvents = filterSchnuppertage(eventItems)
+  const otherEvents = filterOtherEvents(eventItems)
   
   // Get CMS content if available
   const introSection = sections?.find(s => s.id === 'intro')

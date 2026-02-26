@@ -34,6 +34,7 @@ export interface AktuellesItem {
   body?: string // Full content from ProcessWire
   url?: string // ProcessWire page URL
   parentTitle?: string
+  eventType?: string // 'general' | 'schnuppertag'
 }
 
 interface EventsApiEvent {
@@ -52,6 +53,7 @@ interface EventsApiEvent {
   media?: EventMediaItem[]
   url?: string
   parentTitle?: string
+  eventType?: string
 }
 
 interface EventsApiResponse {
@@ -67,163 +69,12 @@ export interface EventsFeed {
   generatedAt?: string
 }
 
-export const aktuellesData: AktuellesItem[] = [
-  {
-    id: 3,
-    date: '1. Januar 2026',
-    title: 'Bald kommt mehr!',
-    description: 'Wir haben viel zu erzählen aber hatten noch nicht Zeit es aufzuschreiben.',
-    type: 'aktuelles',
-    fullDescription: 'Wir haben viel zu erzählen aber hatten noch nicht Zeit es aufzuschreiben.',
-  },
-  // Schnuppertage 2026
-  {
-    id: 4,
-    date: '28. April 2026',
-    title: 'Schnuppertag April',
-    description: 'Lerne biocò und den Geisshof kennen',
-    type: 'event',
-    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
-    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
-    time: '14:00 - 17:00 Uhr',
-    timeLabel: '14:00 - 17:00 Uhr',
-    startDate: '2026-04-28T14:00:00+02:00',
-    endDate: '2026-04-28T17:00:00+02:00',
-    status: 'upcoming',
-    signupRequired: true,
-    signupEnabled: true
-  },
-  {
-    id: 5,
-    date: '29. Mai 2026',
-    title: 'Schnuppertag Mai',
-    description: 'Lerne biocò und den Geisshof kennen',
-    type: 'event',
-    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
-    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
-    time: '14:00 - 17:00 Uhr',
-    timeLabel: '14:00 - 17:00 Uhr',
-    startDate: '2026-05-29T14:00:00+02:00',
-    endDate: '2026-05-29T17:00:00+02:00',
-    status: 'upcoming',
-    signupRequired: true,
-    signupEnabled: true
-  },
-  {
-    id: 6,
-    date: '26. Juni 2026',
-    title: 'Schnuppertag Juni',
-    description: 'Lerne biocò und den Geisshof kennen',
-    type: 'event',
-    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
-    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
-    time: '14:00 - 17:00 Uhr',
-    timeLabel: '14:00 - 17:00 Uhr',
-    startDate: '2026-06-26T14:00:00+02:00',
-    endDate: '2026-06-26T17:00:00+02:00',
-    status: 'upcoming',
-    signupRequired: true,
-    signupEnabled: true
-  },
-  {
-    id: 7,
-    date: '31. Juli 2026',
-    title: 'Schnuppertag Juli',
-    description: 'Lerne biocò und den Geisshof kennen',
-    type: 'event',
-    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
-    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
-    time: '14:00 - 17:00 Uhr',
-    timeLabel: '14:00 - 17:00 Uhr',
-    startDate: '2026-07-31T14:00:00+02:00',
-    endDate: '2026-07-31T17:00:00+02:00',
-    status: 'upcoming',
-    signupRequired: true,
-    signupEnabled: true
-  },
-  {
-    id: 8,
-    date: '28. August 2026',
-    title: 'Schnuppertag August',
-    description: 'Lerne biocò und den Geisshof kennen',
-    type: 'event',
-    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
-    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
-    time: '14:00 - 17:00 Uhr',
-    timeLabel: '14:00 - 17:00 Uhr',
-    startDate: '2026-08-28T14:00:00+02:00',
-    endDate: '2026-08-28T17:00:00+02:00',
-    status: 'upcoming',
-    signupRequired: true,
-    signupEnabled: true
-  },
-  {
-    id: 9,
-    date: '25. September 2026',
-    title: 'Schnuppertag September',
-    description: 'Lerne biocò und den Geisshof kennen',
-    type: 'event',
-    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
-    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
-    time: '14:00 - 17:00 Uhr',
-    timeLabel: '14:00 - 17:00 Uhr',
-    startDate: '2026-09-25T14:00:00+02:00',
-    endDate: '2026-09-25T17:00:00+02:00',
-    status: 'upcoming',
-    signupRequired: true,
-    signupEnabled: true
-  },
-  {
-    id: 10,
-    date: '30. Oktober 2026',
-    title: 'Schnuppertag Oktober',
-    description: 'Lerne biocò und den Geisshof kennen',
-    type: 'event',
-    fullDescription: 'Komm vorbei und lerne biocò kennen! An diesem Schnuppertag kannst du den Geisshof besichtigen, unser Gärtnerteam treffen und mehr über die solidarische Landwirtschaft erfahren. Für alle Interessierten, die biocò kennenlernen möchten.',
-    location: 'Geisshof, Geisslistrasse, 5412 Gebenstorf',
-    time: '14:00 - 17:00 Uhr',
-    timeLabel: '14:00 - 17:00 Uhr',
-    startDate: '2026-10-30T14:00:00+02:00',
-    endDate: '2026-10-30T17:00:00+02:00',
-    status: 'upcoming',
-    signupRequired: true,
-    signupEnabled: true
-  }
-]
-
 export function getAktuellesItems(): AktuellesItem[] {
-  return aktuellesData.filter(item => item.type === 'aktuelles')
+  return []
 }
 
-export function getEventItems(): AktuellesItem[] {
-  return getStaticEventItems()
-}
-
-export function getStaticEventItems(): AktuellesItem[] {
-  const now = new Date()
-  
-  return aktuellesData
-    .filter(item => item.type === 'event')
-    .map(item => {
-      // Parse the event date to determine if it's past
-      const itemDate = item.startDate ? new Date(item.startDate) : null
-      const isPast = itemDate && itemDate < now
-      
-      return {
-        ...item,
-        // Explicitly set signup to false if event is past
-        signupEnabled: isPast ? false : (item.signupEnabled ?? item.signupRequired ?? false),
-        media: item.media ?? [],
-        status: isPast ? 'past' : (item.status ?? 'upcoming'),
-      }
-    })
-}
-
-/**
- * Get all Aktuelles items
- */
 export function getAllAktuellesItems(): AktuellesItem[] {
-  return getAktuellesItems()
+  return []
 }
 
 /**
@@ -245,17 +96,6 @@ function formatDateFull(date: Date | string): string {
   return `${day}. ${month} ${year}`
 }
 
-/**
- * Parse German date string to Date object
- */
-function parseDate(dateStr: string): Date {
-  // Format: "DD.MM.YYYY" or "DD. Month YYYY"
-  const parts = dateStr.split('.')
-  if (parts.length === 3) {
-    return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]))
-  }
-  return new Date(dateStr)
-}
 
 const DEFAULT_SITE_URL = SITE_URL || 'https://bioco.ch'
 
@@ -312,12 +152,13 @@ function mapEventFromApi(event: EventsApiEvent): AktuellesItem {
     media: event.media,
     url: event.url,
     parentTitle: event.parentTitle,
+    eventType: event.eventType || 'general',
   }
 }
 
 export function getFallbackEventsFeed(): EventsFeed {
   return {
-    upcoming: getStaticEventItems(),
+    upcoming: [],
     past: [],
   }
 }

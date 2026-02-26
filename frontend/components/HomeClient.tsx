@@ -14,6 +14,7 @@ import { ScrollToTopLink } from '@/components/ScrollToTopLink'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import type { ContentSection, HeroContent } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
+import { filterSchnuppertage } from '@/components/AktuellesClient'
 
 interface HomeClientProps {
   hero: HeroContent
@@ -26,9 +27,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(6)
-  const schnuppertageEvents = eventItems.filter((item) =>
-    (item.title || '').toLowerCase().includes('schnuppertag')
-  )
+  const schnuppertageEvents = filterSchnuppertage(eventItems)
 
   const handleItemClick = (item: AktuellesItem) => {
     setSelectedItem(item)
@@ -64,13 +63,13 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
           <MobileMenu />
         </div>
         <div className="hero-bg">
-          <Image
-            src={hero.image || '/images/FrontseiteStartseite.jpg'}
+          {hero.image && <Image
+            src={hero.image}
             alt={hero.imageAlt || 'Solidarische Landwirtschaft auf dem Feld'}
             fill
             priority
             style={{ objectFit: 'cover' }}
-          />
+          />}
           <div className="hero-overlay" />
           <div className="hero-content">
             <h1 className="hero-headline">
@@ -117,26 +116,26 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
             </div>
           </div>
           <div className="two-column-image">
-            <Image
-              src={willkommenSection?.image || '/images/mitmachen/zusammen-arbeiten.JPG'}
+            {willkommenSection?.image && <Image
+              src={willkommenSection.image}
               alt={willkommenSection?.imageAlt || 'Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg'}
               fill
               priority
               style={{ objectFit: 'cover', borderRadius: '24px' }}
-            />
+            />}
           </div>
         </section>
 
         {/* Gemeinsam, solidarisch, frisch - Row 2, Two Columns */}
         <section className="two-column-section">
           <div className="two-column-image">
-            <Image
-              src={gemeinsamSection?.image || '/images/gemeinsamSolidarischFrisch.JPG'}
+            {gemeinsamSection?.image && <Image
+              src={gemeinsamSection.image}
               alt={gemeinsamSection?.imageAlt || 'Frisch geerntetes Demeter-Gemüse vom Geisshof'}
               fill
               priority
               style={{ objectFit: 'cover', borderRadius: '24px' }}
-            />
+            />}
           </div>
           <div className="two-column-text">
             <h2>{gemeinsamSection?.title || 'Gemeinsam, solidarisch, frisch'}</h2>

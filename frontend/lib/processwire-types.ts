@@ -88,6 +88,9 @@ export interface ContentSection {
   buttons?: ContentButton[];
   imageOverlay?: 'none' | 'dark' | 'green' | 'orange';  // Image tint/overlay
   bgColor?: 'none' | 'green' | 'darkgreen' | 'orange' | 'gray' | 'white';  // Section background
+  imageBrightness?: number;  // CSS filter brightness (0.5-1.5, default 1.0)
+  imageContrast?: number;    // CSS filter contrast (0.5-1.5, default 1.0)
+  imageSaturate?: number;    // CSS filter saturate (0-2.0, default 1.0)
 }
 
 export interface SectionsResponse {
@@ -215,6 +218,7 @@ export interface EventItem {
   media: EventMedia[];
   url: string;
   parentTitle: string;
+  eventType?: string;
 }
 
 export interface EventsResponse {

@@ -1738,12 +1738,21 @@ header .header-nav-container .beet-leaves {
     display: flex !important; /* Always visible on mobile */
   }
   
-  /* On home page: align with logo in navbar */
-  body[data-pathname="/"] .mobile-header-actions {
+  /* On home page over hero: align with logo in navbar */
+  body[data-pathname="/"]:not(.nav-scrolled) .mobile-header-actions {
     position: absolute;
     top: 50%;
     right: clamp(16px, 5vw, 72px);
     transform: translateY(-50%);
+  }
+
+  /* On home page scrolled past hero: fixed position like the navbar */
+  body[data-pathname="/"].nav-scrolled .mobile-header-actions {
+    position: fixed;
+    top: clamp(12px, 4vw, 28px);
+    right: clamp(16px, 5vw, 32px);
+    transform: none;
+    z-index: 1200 !important;
   }
   
   /* Ensure hamburger is positioned correctly relative to nav container on home */

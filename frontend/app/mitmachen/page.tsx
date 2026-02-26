@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { getPageSections, getGroupCards } from '@/lib/processwire'
-import { FALLBACK_MITMACHEN_INTRO, FALLBACK_MITMACHEN_SECTIONS, FALLBACK_GROUP_CARDS, mergeSections } from '@/lib/fallback-content'
+import type { GroupCard } from '@/lib/processwire-types'
 
 export const metadata: Metadata = {
   title: 'Mitmachen bei solidarischer Landwirtschaft | biocò Baden',
@@ -29,8 +29,8 @@ export default async function MitmachenPage() {
     getGroupCards(),
   ])
   
-  const sections = mergeSections(cmsSections, FALLBACK_MITMACHEN_SECTIONS)
-  const groups = cmsGroups.length > 0 ? cmsGroups : FALLBACK_GROUP_CARDS
+  const sections = cmsSections || []
+  const groups: GroupCard[] = cmsGroups.length > 0 ? cmsGroups : []
   
   // Get specific sections
   const familienSection = sections.find(s => s.id === 'familien')
@@ -182,12 +182,12 @@ export default async function MitmachenPage() {
               overflow: 'hidden',
               minHeight: '280px'
             }}>
-              <Image
-                src={familienSection?.image || '/images/ernte/bioco_ernte-kürbis-hoch.JPG'}
+              {familienSection?.image && <Image
+                src={familienSection.image}
                 alt={familienSection?.imageAlt || 'Frisch geerntetes Demeter-Gemüse vom Geisshof'}
                 fill
                 style={{ objectFit: 'cover', borderRadius: '24px' }}
-              />
+              />}
             </div>
             <div>
               <h2>{familienSection?.title || 'Familien & Kinder auf dem Geisshof'}</h2>

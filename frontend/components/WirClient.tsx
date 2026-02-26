@@ -23,38 +23,6 @@ interface WirClientProps {
   timeline?: TimelineItem[]
 }
 
-// Fallback images
-const FALLBACK_IMAGES = {
-  allMembers: '/images/team/alle-mitglieder-bioco.jpeg',
-  betriebsgruppe: '/images/team/betriebsgruppe.JPG',
-  hofTeam: [
-    { url: '/images/team/hofteam_matthias.JPG', alt: 'Matthias vom Hof-Team', name: 'Matthias' },
-    { url: '/images/team/bioco_hofteam_christian.JPG', alt: 'Michael vom Hof-Team', name: 'Michael' },
-  ],
-  geisshof: [
-    { url: '/images/DerHof1.jpg', alt: 'Der Geisshof Gebenstorf' },
-    { url: '/images/DerHof2.JPG', alt: 'Der Geisshof Gebenstorf' },
-    { url: '/images/hof/bioco_hof_luftaufnahme_grosses-feld.JPG', alt: 'Bio-Gemüse Anbaufläche' },
-    { url: '/images/hof/bioco_hof_luftaufnahme-kleines-feld.JPG', alt: 'Demeter Gemüsefeld' },
-  ],
-}
-
-const FALLBACK_TIMELINE: TimelineItem[] = [
-  { year: '2013', title: 'Gründung', description: 'Die Gründung von biocò fand am 15.11.2013 statt. Da war die Betriebsgruppe bereits sehr, sehr aktiv.' },
-  { year: '2014', title: 'Erste Gartensaison', description: 'War dann die erste Gartensaison und ab da gab es die ersten Depots.' },
-  { year: '2016', title: 'Packraum', description: 'Der Packraum wird erstellt und in Betrieb genommen. Ein wichtiger Schritt für die Genossenschaft.' },
-  { 
-    year: '2019-2023', 
-    title: 'Mitgliederwachstum', 
-    description: 'Weiteres Wachstum der Mitgliederzahl, Optimierung der Anbauplanung und Logistik.',
-    links: [
-      { text: 'Aargauer Zeitung (2019)', href: '/wir/Aargauer_Zeitung_2019.pdf' },
-      { text: 'Doppelpunkt (2022)', href: '/wir/Doppelpunkt_2022.pdf' },
-    ]
-  },
-  { year: '2023', title: 'Laufenten', description: 'Wir haben zwei Pärchen Laufenten auf dem Hof, die uns bei der Schneckenjagd unterstützen.' },
-  { year: '2025', title: 'Neue Website', description: 'Launch der neuen Website mit modernem Design und verbesserter Benutzerführung.' },
-]
 
 export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const getSection = (id: string) => sections.find(s => s.id === id)
@@ -98,13 +66,13 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
       return yearA - yearB
     })
   
-  const timelineItems = cmsTimelineItems.length > 0 ? cmsTimelineItems : (timeline || FALLBACK_TIMELINE)
+  const timelineItems = cmsTimelineItems.length > 0 ? cmsTimelineItems : (timeline || [])
 
   // Get images with fallbacks
-  const alleMitgliederImg = alleMitgliederSection?.image || FALLBACK_IMAGES.allMembers
+  const alleMitgliederImg = alleMitgliederSection?.image || ''
   const alleMitgliederAlt = alleMitgliederSection?.imageAlt || 'Mitglieder der Gemüsegenossenschaft biocò'
   
-  const betriebsgruppeImg = betriebsgruppeSection?.image || FALLBACK_IMAGES.betriebsgruppe
+  const betriebsgruppeImg = betriebsgruppeSection?.image || ''
   const betriebsgruppeAlt = betriebsgruppeSection?.imageAlt || 'Betriebsgruppe der Gemüsegenossenschaft biocò'
   
   // Hof-Team images from section.images array or fallback
@@ -114,12 +82,12 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
         alt: img.alt,
         name: img.alt.split(' ')[0] || `Team ${i + 1}`, // Extract name from alt text
       }))
-    : FALLBACK_IMAGES.hofTeam
+    : []
   
   // Geisshof images from section.images array or fallback
   const geisshofImages = hofSection?.images?.length 
     ? hofSection.images 
-    : FALLBACK_IMAGES.geisshof
+    : []
 
   return (
     <>
@@ -158,12 +126,12 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
             <div className="wir-top-row" style={{ marginTop: '24px', marginBottom: '48px' }}>
               <div>
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
-                  <Image
+                  {alleMitgliederImg && <Image
                     src={alleMitgliederImg}
                     alt={alleMitgliederAlt}
                     fill
                     style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                  />
+                  />}
                 </div>
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{alleMitgliederSection?.title || 'Alle Mitglieder'}</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
@@ -176,12 +144,12 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
               </div>
               <div>
                 <div style={{ position: 'relative', width: '100%', aspectRatio: '4/3', marginBottom: '16px', borderRadius: '24px', overflow: 'hidden' }}>
-                  <Image
+                  {betriebsgruppeImg && <Image
                     src={betriebsgruppeImg}
                     alt={betriebsgruppeAlt}
                     fill
                     style={{ objectFit: 'cover', objectPosition: 'center top' }}
-                  />
+                  />}
                 </div>
                 <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{betriebsgruppeSection?.title || 'Betriebsgruppe (BG)'}</h3>
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>

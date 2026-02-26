@@ -16,22 +16,13 @@ export const metadata: Metadata = {
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60
 
-// Fallback content
-const FALLBACK_INTRO = {
-  title: 'biocò: Die Gemüsegenossenschaft',
-  text: 'Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere <a href="/solawi">solidarische Landwirtschaft</a> prägen.',
-}
-
 export default async function WirPage() {
-  // Fetch CMS sections
   const cmsSections = await getPageSections('wir')
-  
-  // Get intro section
   const introSection = cmsSections.find(s => s.id === 'intro')
-  
+
   const intro = {
-    title: introSection?.title || FALLBACK_INTRO.title,
-    text: introSection?.text || FALLBACK_INTRO.text,
+    title: introSection?.title || 'biocò: Die Gemüsegenossenschaft',
+    text: introSection?.text || '',
   }
 
   return <WirClient intro={intro} sections={cmsSections} />

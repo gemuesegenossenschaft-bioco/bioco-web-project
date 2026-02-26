@@ -1,16 +1,17 @@
 'use client'
 
 import { useState } from 'react'
-import { getStaticEventItems, AktuellesItem } from './AktuellesData'
+import type { AktuellesItem } from './AktuellesData'
+import { filterSchnuppertage } from './AktuellesClient'
+import { useEventsFeed } from '@/hooks/useEventsFeed'
 import { EventSignupForm } from './EventSignupForm'
 
 export function SchnuppertageSection() {
   const [selectedEvent, setSelectedEvent] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { upcoming } = useEventsFeed()
 
-  const schnuppertage = getStaticEventItems().filter(
-    (item) => item.status !== 'past' && item.title.toLowerCase().includes('schnuppertag')
-  ).slice(0, 3)
+  const schnuppertage = filterSchnuppertage(upcoming).slice(0, 3)
 
   const openModal = (event: AktuellesItem) => {
     setSelectedEvent(event)

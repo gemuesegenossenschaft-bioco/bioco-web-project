@@ -6,7 +6,6 @@ import { Saisonkalender } from '@/components/Saisonkalender'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { getPageSectionsWithSeo } from '@/lib/processwire'
-import { FALLBACK_GEMUESE_INTRO } from '@/lib/fallback-content'
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo'
 
 // Static fallback metadata (used when CMS data unavailable)
@@ -52,7 +51,7 @@ export default async function GemusePage() {
           {/* Page Header with H1 */}
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
             <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
-              {introSection?.title || FALLBACK_GEMUESE_INTRO.title}
+              {introSection?.title || 'Unser Gemüse'}
             </h1>
             {introSection?.text ? (
               <div 

@@ -4,7 +4,6 @@ import { CTA } from '@/components/CTA'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { getPageSections } from '@/lib/processwire'
-import { FALLBACK_SOLAWI_INTRO } from '@/lib/fallback-content'
 
 export const metadata: Metadata = {
   title: 'Was ist Solidarische Landwirtschaft (SoLaWi)? | biocò',
@@ -32,7 +31,7 @@ export default async function SolawiPage() {
           {/* Page Header with H1 */}
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
             <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
-              {introSection?.title || FALLBACK_SOLAWI_INTRO.title}
+              {introSection?.title || 'Solidarische Landwirtschaft'}
             </h1>
             {introSection?.text ? (
               <div 

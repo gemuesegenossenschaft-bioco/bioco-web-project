@@ -33,6 +33,19 @@ const componentMap: Record<string, React.ReactNode> = {
   gallery: <Gallery />,
 }
 
+function getImageFilterStyle(section: ContentSection): React.CSSProperties | undefined {
+  const b = section.imageBrightness
+  const c = section.imageContrast
+  const s = section.imageSaturate
+  if (b == null && c == null && s == null) return undefined
+  const parts: string[] = []
+  if (b != null && b !== 1) parts.push(`brightness(${b})`)
+  if (c != null && c !== 1) parts.push(`contrast(${c})`)
+  if (s != null && s !== 1) parts.push(`saturate(${s})`)
+  if (parts.length === 0) return undefined
+  return { filter: parts.join(' ') }
+}
+
 function getSectionMedia(section: ContentSection): ContentMedia | null {
   if (section.media && section.media.length > 0) {
     return section.media[0]
@@ -101,7 +114,7 @@ function SplitSection({ section, mediaFirst }: { section: ContentSection; mediaF
     <section className="cms-section cms-split">
       <div className={`cms-split-media ${mediaFirst ? 'is-first' : 'is-last'} ${overlayClass}`}>
         {media ? (
-          <div className="cms-media-frame">
+          <div className="cms-media-frame" style={getImageFilterStyle(section)}>
             <Image src={media.url} alt={media.alt || section.title} fill style={{ objectFit: 'cover' }} />
           </div>
         ) : null}
