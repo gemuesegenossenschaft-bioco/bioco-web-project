@@ -11,6 +11,11 @@ interface AktuellesItemProps {
 }
 
 export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }: AktuellesItemProps) {
+  const previewText = (item.description || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
   const className = variant === 'event' ? 'event-item' : 'aktuelles-item'
   const canRegister = item.type === 'event' && (item.signupEnabled ?? item.signupRequired ?? false)
   const hasDetails =
@@ -51,7 +56,7 @@ export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }:
     >
       <h3>{item.date}</h3>
       <p><strong>{item.title}</strong></p>
-      <p>{item.description}</p>
+      <p>{previewText}</p>
       {hasDetails && (
         <p style={{ 
           marginTop: '8px', 
@@ -65,4 +70,3 @@ export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }:
     </div>
   )
 }
-
