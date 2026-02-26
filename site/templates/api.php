@@ -381,13 +381,13 @@ function parseAssetIdFromTags($tags) {
 }
 
 /**
- * Resolve target image field from a possibly suffixed Inputfield hint.
+ * Resolve target media field (image/file) from a possibly suffixed Inputfield hint.
  */
-function resolveImageFieldName(Page $page, $fieldHint) {
+function resolveMediaFieldName(Page $page, $fieldHint) {
     $hint = (string)$fieldHint;
     $candidates = [];
     foreach ($page->template->fieldgroup as $field) {
-        if ($field->type instanceof FieldtypeImage) {
+        if ($field->type instanceof FieldtypeImage || $field->type instanceof FieldtypeFile) {
             $candidates[] = $field->name;
         }
     }
@@ -400,6 +400,61 @@ function resolveImageFieldName(Page $page, $fieldHint) {
         }
     }
     return '';
+}
+
+function mediaUsageContextFromPage(Page $page) {
+    $ctx = [
+        'pageId' => (int)$page->id,
+        'repeaterItemId' => null,
+    ];
+    if (strpos($page->template->name, 'repeater_') === 0 && method_exists($page, 'getForPage')) {
+        $forPage = $page->getForPage();
+        if ($forPage && $forPage->id) {
+            $ctx['pageId'] = (int)$forPage->id;
+            $ctx['repeaterItemId'] = (int)$page->id;
+        }
+    }
+    return $ctx;
+}
+
+function ensureMediaUsageTableExists() {
+    static $ready = false;
+    if ($ready) return;
+    $ready = true;
+    $db = wire('database');
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS media_asset_usage (
+            asset_id INT UNSIGNED NOT NULL,
+            page_id INT UNSIGNED NOT NULL,
+            field VARCHAR(128) NOT NULL,
+            repeater_item_id INT UNSIGNED NULL,
+            file_name VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            PRIMARY KEY (asset_id, page_id, field, file_name),
+            KEY idx_asset (asset_id),
+            KEY idx_page (page_id),
+            KEY idx_repeater (repeater_item_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+}
+
+function upsertMediaUsageRow($assetId, Page $page, $field, $fileName) {
+    ensureMediaUsageTableExists();
+    $ctx = mediaUsageContextFromPage($page);
+    $db = wire('database');
+    $stmt = $db->prepare("
+        INSERT INTO media_asset_usage (asset_id, page_id, field, repeater_item_id, file_name)
+        VALUES (:asset_id, :page_id, :field, :repeater_item_id, :file_name)
+        ON DUPLICATE KEY UPDATE updated_at = CURRENT_TIMESTAMP
+    ");
+    $stmt->execute([
+        ':asset_id' => (int)$assetId,
+        ':page_id' => (int)$ctx['pageId'],
+        ':field' => (string)$field,
+        ':repeater_item_id' => $ctx['repeaterItemId'],
+        ':file_name' => (string)$fileName,
+    ]);
 }
 
 // ============================================================================
@@ -925,6 +980,7 @@ function handleMediaImportRequest() {
 
     $input = json_decode(file_get_contents('php://input'), true) ?: [];
     $targetPageId = (int)($input['targetPageId'] ?? 0);
+    $repeaterItemId = (int)($input['repeaterItemId'] ?? 0);
     $assetId = (int)($input['assetId'] ?? 0);
     $fieldHint = (string)($input['targetField'] ?? '');
     $fileField = (string)($input['fileField'] ?? '');
@@ -936,17 +992,17 @@ function handleMediaImportRequest() {
         return;
     }
 
-    $targetPage = $pages->get($targetPageId);
+    $targetPage = $repeaterItemId ? $pages->get($repeaterItemId) : $pages->get($targetPageId);
     if (!$targetPage->id) {
         http_response_code(404);
         echo json_encode(['success' => false, 'error' => 'Target page not found']);
         return;
     }
 
-    $fieldName = resolveImageFieldName($targetPage, $fieldHint);
+    $fieldName = resolveMediaFieldName($targetPage, $fieldHint);
     if (!$fieldName || !$targetPage->hasField($fieldName)) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Target image field not found']);
+        echo json_encode(['success' => false, 'error' => 'Target media field not found']);
         return;
     }
 
@@ -981,35 +1037,44 @@ function handleMediaImportRequest() {
     }
 
     $targetField = $targetPage->getField($fieldName);
-    if (!$targetField || !($targetField->type instanceof FieldtypeImage)) {
+    if (
+        !$targetField
+        || !($targetField->type instanceof FieldtypeImage || $targetField->type instanceof FieldtypeFile)
+    ) {
         http_response_code(400);
-        echo json_encode(['success' => false, 'error' => 'Target field is not an image field']);
+        echo json_encode(['success' => false, 'error' => 'Target field is not a media field']);
         return;
     }
 
     $targetPage->of(false);
-    $targetImages = $targetPage->get($fieldName);
-    if (!$targetImages) {
+    $targetFiles = $targetPage->get($fieldName);
+    if (!$targetFiles) {
         http_response_code(500);
-        echo json_encode(['success' => false, 'error' => 'Target image collection unavailable']);
+        echo json_encode(['success' => false, 'error' => 'Target media collection unavailable']);
         return;
     }
 
     // Avoid duplicate imports of the same source file into the same field.
     $existingByName = null;
-    foreach ($targetImages as $candidate) {
+    foreach ($targetFiles as $candidate) {
         if ((string)$candidate->name === $fileName) {
             $existingByName = $candidate;
             break;
         }
     }
     if ($existingByName && $existingByName->id) {
-        $img = $existingByName;
+        $imported = $existingByName;
     } else {
         try {
-            $targetImages->add($assetFile->filename);
+            if ((int)$targetField->maxFiles === 1 && $targetFiles->count() >= 1) {
+                foreach ($targetFiles as $existing) {
+                    $targetFiles->remove($existing);
+                }
+                $targetPage->save($fieldName);
+            }
+            $targetFiles->add($assetFile->filename);
             $targetPage->save($fieldName);
-            $img = $targetImages->last();
+            $imported = $targetFiles->last();
         } catch (\Exception $e) {
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => 'Import failed: ' . $e->getMessage()]);
@@ -1017,27 +1082,35 @@ function handleMediaImportRequest() {
         }
     }
 
-    if ($img) {
-        $tags = trim((string)$img->tags);
-        $assetTag = 'asset-' . $assetId;
-        if (strpos(" $tags ", " $assetTag ") === false) {
-            $img->tags = trim($tags . ' ' . $assetTag);
-            $targetPage->save($fieldName);
+    if ($imported) {
+        try {
+            $tags = trim((string)$imported->tags);
+            $assetTag = 'asset-' . $assetId;
+            if (strpos(" $tags ", " $assetTag ") === false) {
+                $imported->tags = trim($tags . ' ' . $assetTag);
+                $targetPage->save($fieldName);
+            }
+        } catch (\Throwable $e) {
+            // Some file fields may not support tags; usage is still tracked via DB row.
         }
     }
 
-    $imported = $targetImages->last();
     $url = $imported ? ($config->urls->httpRoot . ltrim($imported->url, '/')) : null;
+    if ($imported) {
+        upsertMediaUsageRow($assetId, $targetPage, $fieldName, (string)$imported->name);
+    }
 
     echo json_encode([
         'success' => true,
-        'targetPageId' => $targetPage->id,
+        'targetPageId' => $targetPageId,
+        'resolvedPageId' => $targetPage->id,
+        'repeaterItemId' => $repeaterItemId ?: null,
         'targetField' => $fieldName,
         'assetId' => $assetId,
         'imported' => [
             'name' => $imported ? $imported->name : $fileName,
             'url' => $url,
-            'tags' => $imported ? (string)$imported->tags : '',
+            'tags' => $imported ? ((string)($imported->tags ?? '')) : '',
         ],
     ]);
 }

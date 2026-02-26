@@ -33,6 +33,20 @@ $(document).ready(function() {
         return '';
     }
 
+    function getRepeaterItemId($field) {
+        var $item = $field.closest('.InputfieldRepeaterItem');
+        if (!$item.length) return null;
+        var direct = parseInt($item.attr('data-page') || $item.attr('data-id') || $item.attr('data-pageid') || '', 10);
+        if (direct) return direct;
+        var idAttr = $item.attr('id') || '';
+        var m = idAttr.match(/(\d{2,})/);
+        if (m) {
+            var num = parseInt(m[1], 10);
+            if (num) return num;
+        }
+        return null;
+    }
+
     function findClosestCard($node) {
         var $card = $node.closest('.PageListItem');
         if ($card.length) return $card;
@@ -47,19 +61,19 @@ $(document).ready(function() {
     // Media Library browse button
     // ================================================================
     function addMediaLibraryButtons() {
-        $('.InputfieldImage').each(function() {
-            var $imageField = $(this);
-            if ($imageField.find('.browse-media-library-btn').length > 0) return;
+        $('.InputfieldImage, .InputfieldFile').each(function() {
+            var $mediaField = $(this);
+            if ($mediaField.find('.browse-media-library-btn').length > 0) return;
 
-            var $uploadBtn = $imageField.find('.InputfieldFileUpload').first();
+            var $uploadBtn = $mediaField.find('.InputfieldFileUpload').first();
             var $insertAfter = $uploadBtn;
             if ($insertAfter.length === 0) {
                 // UIkit/modern admin themes often render custom wrappers instead.
-                $insertAfter = $imageField.find('.uk-form-custom, input[type="file"]').first();
+                $insertAfter = $mediaField.find('.uk-form-custom, input[type="file"]').first();
             }
             if ($insertAfter.length === 0) {
                 // Final fallback: still render the button in the image field.
-                $insertAfter = $imageField.find('.InputfieldContent').first();
+                $insertAfter = $mediaField.find('.InputfieldContent').first();
             }
             if ($insertAfter.length === 0) return;
 
@@ -69,13 +83,15 @@ $(document).ready(function() {
 
             $browseBtn.on('click', function(e) {
                 e.preventDefault();
-                var $field = $(this).closest('.InputfieldImage');
+                var $field = $(this).closest('.InputfieldImage, .InputfieldFile');
                 var url = ProcessWire.config.urls.admin + 'media/?biocoPicker=1';
                 var targetField = getTargetFieldName($field);
+                var repeaterItemId = getRepeaterItemId($field);
                 var pageId = ProcessWire.config.ProcessPageEdit ? ProcessWire.config.ProcessPageEdit.id : null;
                 currentImportContext = {
                     targetField: targetField,
                     targetPageId: pageId,
+                    repeaterItemId: repeaterItemId,
                     $field: $field
                 };
 
@@ -99,7 +115,11 @@ $(document).ready(function() {
     }
 
     function importSelectedMedia(payload) {
-        if (!currentImportContext || !currentImportContext.targetPageId || !currentImportContext.targetField) {
+        if (
+            !currentImportContext
+            || (!currentImportContext.targetPageId && !currentImportContext.repeaterItemId)
+            || !currentImportContext.targetField
+        ) {
             alert('Import context missing. Please reopen media library from the image field.');
             return;
         }
@@ -109,6 +129,7 @@ $(document).ready(function() {
             contentType: 'application/json',
             data: JSON.stringify({
                 targetPageId: currentImportContext.targetPageId,
+                repeaterItemId: currentImportContext.repeaterItemId,
                 targetField: currentImportContext.targetField,
                 assetId: payload.assetId,
                 fileField: payload.fileField,

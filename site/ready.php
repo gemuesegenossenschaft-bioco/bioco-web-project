@@ -65,13 +65,32 @@ function biocoClearUsageRowsForPage(Page $page) {
     $stmt->execute([':pid' => $ctx['pageId']]);
 }
 
+function biocoExistingUsageMap($ctx) {
+    biocoEnsureMediaUsageTable();
+    $db = wire('database');
+    if ($ctx['repeaterItemId']) {
+        $stmt = $db->prepare("SELECT asset_id, field, file_name FROM media_asset_usage WHERE repeater_item_id = :rid");
+        $stmt->execute([':rid' => $ctx['repeaterItemId']]);
+    } else {
+        $stmt = $db->prepare("SELECT asset_id, field, file_name FROM media_asset_usage WHERE page_id = :pid AND repeater_item_id IS NULL");
+        $stmt->execute([':pid' => $ctx['pageId']]);
+    }
+    $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC) ?: [];
+    $map = [];
+    foreach ($rows as $row) {
+        $map[$row['field'] . '|' . $row['file_name']] = (int)$row['asset_id'];
+    }
+    return $map;
+}
+
 function biocoReindexUsageForPage(Page $page) {
     biocoEnsureMediaUsageTable();
-    biocoClearUsageRowsForPage($page);
     if (!$page->id) return;
 
     $db = wire('database');
     $ctx = biocoUsageContext($page);
+    $existingMap = biocoExistingUsageMap($ctx);
+    biocoClearUsageRowsForPage($page);
     $insert = $db->prepare("
         INSERT INTO media_asset_usage (asset_id, page_id, field, repeater_item_id, file_name)
         VALUES (:asset_id, :page_id, :field, :repeater_item_id, :file_name)
@@ -79,18 +98,22 @@ function biocoReindexUsageForPage(Page $page) {
     ");
 
     foreach ($page->template->fieldgroup as $field) {
-        if (!($field->type instanceof FieldtypeImage)) continue;
-        $images = $page->get($field->name);
-        if (!$images) continue;
-        foreach ($images as $image) {
-            $assetId = biocoParseAssetIdFromTags($image->tags ?? '');
+        if (!($field->type instanceof FieldtypeImage || $field->type instanceof FieldtypeFile)) continue;
+        $files = $page->get($field->name);
+        if (!$files) continue;
+        foreach ($files as $file) {
+            $assetId = biocoParseAssetIdFromTags($file->tags ?? '');
+            if (!$assetId) {
+                $key = $field->name . '|' . (string)$file->name;
+                $assetId = $existingMap[$key] ?? 0;
+            }
             if (!$assetId) continue;
             $insert->execute([
                 ':asset_id' => $assetId,
                 ':page_id' => $ctx['pageId'],
                 ':field' => $field->name,
                 ':repeater_item_id' => $ctx['repeaterItemId'],
-                ':file_name' => (string)$image->name,
+                ':file_name' => (string)$file->name,
             ]);
         }
     }
