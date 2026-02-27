@@ -204,7 +204,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
               </div>
             )}
             <ScrollToTopLink
-              href="/mitmachen"
+              href="/aktuelles"
               className="btn btn-primary btn-organic"
               style={{ marginTop: '16px', marginBottom: '16px', display: 'inline-block' }}
             >
