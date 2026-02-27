@@ -6287,6 +6287,24 @@ footer a:hover {
     stroke: currentColor !important;
   }
 
+  /* Final mobile override: keep hamburger icon black in all states (no color shift on scroll) */
+  body .mobile-nav-shell .mobile-menu-toggle,
+  body[data-pathname="/"] .mobile-nav-shell .mobile-menu-toggle,
+  body[data-pathname="/"]:not(.nav-scrolled) .mobile-nav-shell .mobile-menu-toggle,
+  body[data-pathname="/"].nav-scrolled .mobile-nav-shell .mobile-menu-toggle,
+  body:not([data-pathname="/"]) .mobile-nav-shell .mobile-menu-toggle {
+    color: #000 !important;
+    animation: none !important;
+  }
+
+  body .mobile-nav-shell .mobile-menu-toggle svg,
+  body[data-pathname="/"] .mobile-nav-shell .mobile-menu-toggle svg,
+  body[data-pathname="/"]:not(.nav-scrolled) .mobile-nav-shell .mobile-menu-toggle svg,
+  body[data-pathname="/"].nav-scrolled .mobile-nav-shell .mobile-menu-toggle svg,
+  body:not([data-pathname="/"]) .mobile-nav-shell .mobile-menu-toggle svg {
+    stroke: #000 !important;
+  }
+
   body[data-pathname="/"] .mobile-nav-shell .primary-nav,
   body[data-pathname="/"] .mobile-nav-shell .secondary-nav {
     background: var(--bg-secondary) !important;

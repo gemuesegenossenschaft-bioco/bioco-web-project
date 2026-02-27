@@ -170,22 +170,28 @@ function sortEventsDesc(a: AktuellesItem, b: AktuellesItem): number {
 const DEFAULT_SITE_URL = SITE_URL || 'https://bioco.ch'
 
 export async function fetchEventsFromCms(): Promise<EventsFeed> {
-  const endpoint =
+  const endpoints =
     typeof window === 'undefined'
-      ? `${DEFAULT_SITE_URL}/api/events`
-      : '/api/events'
+      ? [`${DEFAULT_SITE_URL}/api/events`, `${DEFAULT_SITE_URL}/cms/api/events/`, 'https://cms.bioco.ch/api/events/']
+      : ['/api/events', '/cms/api/events/', 'https://cms.bioco.ch/api/events/']
 
-  const response = await fetch(endpoint, {
-    cache: 'force-cache',
-  })
+  let data: EventsApiResponse | null = null
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch events: ${response.status}`)
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, { cache: 'force-cache' })
+      if (!response.ok) continue
+      const candidate = (await response.json()) as EventsApiResponse
+      if (!isValidEventsApiResponse(candidate) || !candidate.success) continue
+      data = candidate
+      break
+    } catch {
+      // Try the next endpoint.
+    }
   }
 
-  const data = (await response.json()) as EventsApiResponse
-  if (!data.success) {
-    throw new Error('Events API returned an error')
+  if (!data) {
+    throw new Error('Failed to fetch events from all endpoints')
   }
 
   return {
@@ -193,6 +199,12 @@ export async function fetchEventsFromCms(): Promise<EventsFeed> {
     past: data.past.map(mapEventFromApi).sort(sortEventsDesc),
     generatedAt: data.generatedAt,
   }
+}
+
+function isValidEventsApiResponse(data: unknown): data is EventsApiResponse {
+  if (!data || typeof data !== 'object') return false
+  const candidate = data as Partial<EventsApiResponse>
+  return Array.isArray(candidate.upcoming) && Array.isArray(candidate.past)
 }
 
 function mapEventFromApi(event: EventsApiEvent): AktuellesItem {

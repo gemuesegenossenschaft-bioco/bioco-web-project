@@ -26,6 +26,12 @@ interface WirClientProps {
 
 export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const getSection = (id: string) => sections.find(s => s.id === id)
+  const stripHtml = (value?: string | null) => String(value || '').replace(/<[^>]*>/g, '').trim()
+  const extractYear = (value?: string | null): string => {
+    const text = String(value || '')
+    const match = text.match(/\b(19|20)\d{2}(?:\s*[-–]\s*(19|20)?\d{2})?\b/)
+    return match ? match[0].replace(/\s+/g, '') : ''
+  }
   const getTeamDisplayName = (alt: string, index: number) => {
     const raw = String(alt || '').trim()
     if (!raw) return `Team ${index + 1}`
@@ -71,19 +77,44 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const regionalitaetSection = getSection('regionalitaet')
   const gottiSection = getSection('gotti')
   const geschichteSection = getSection('geschichte')
-  const timelineHeaderSection = getSection('timeline')
+  const timelineHeaderSection =
+    getSection('timeline') ||
+    sections.find((s) => ['timeline', 'timeline_header'].includes(String(s.component || '').toLowerCase())) ||
+    sections.find((s) => ['timeline', 'timeline_header'].includes(String(s.layout || '').toLowerCase())) ||
+    sections.find((s) => String(s.title || '').toLowerCase() === 'timeline')
   
-  // Parse timeline items from sections with id starting with 'timeline_'
-  // Format: section_id = timeline_2013, section_title = Gründung, section_text = description
-  // For buttons/links: use button_text and button_href fields
+  // Parse timeline items from CMS in a flexible way:
+  // - id starts with timeline_...
+  // - component/layout marked as timeline item
+  // - year is present in eyebrow/title/id (editor-friendly)
   const cmsTimelineItems: TimelineItem[] = sections
-    .filter(s => s.id.startsWith('timeline_'))
+    .filter((s) => {
+      const id = String(s.id || '').toLowerCase()
+      const component = String(s.component || '').toLowerCase()
+      const layout = String(s.layout || '').toLowerCase()
+      const title = stripHtml(s.title).toLowerCase()
+      const hasTimelineMarker =
+        id.startsWith('timeline_') ||
+        id.startsWith('timeline-') ||
+        component === 'timeline_item' ||
+        component === 'timeline-item' ||
+        layout === 'timeline_item' ||
+        layout === 'timeline-item'
+      const hasYearSignal = !!extractYear(s.eyebrow || s.title || s.id)
+      const looksLikeHeaderOnly = title === 'timeline'
+      return (hasTimelineMarker || hasYearSignal) && !looksLikeHeaderOnly
+    })
     .map(s => {
-      const year = s.id.replace('timeline_', '')
+      const year =
+        extractYear(s.eyebrow) ||
+        extractYear(s.id?.replace(/^timeline[_-]?/i, '')) ||
+        extractYear(s.title) ||
+        ''
+      const title = stripHtml(s.title) || (year ? `Eintrag ${year}` : 'Timeline-Eintrag')
       const item: TimelineItem = {
         year,
-        title: s.title,
-        description: s.text?.replace(/<[^>]*>/g, '') || '', // Strip HTML for plain text
+        title,
+        description: stripHtml(s.text),
       }
       // Add links from buttons if present
       if (s.buttons && s.buttons.length > 0) {
@@ -95,6 +126,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
       // Sort by year (handle ranges like "2019-2023")
       const yearA = parseInt(a.year.split('-')[0])
       const yearB = parseInt(b.year.split('-')[0])
+      if (Number.isNaN(yearA) && Number.isNaN(yearB)) return a.title.localeCompare(b.title, 'de')
+      if (Number.isNaN(yearA)) return 1
+      if (Number.isNaN(yearB)) return -1
       return yearA - yearB
     })
   
@@ -355,7 +389,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
             <div className="timeline" style={{ marginTop: '24px' }}>
               {timelineItems.map((item, i) => (
                 <div key={i} className="timeline-item">
-                  <div className="timeline-year">{item.year}</div>
+                  <div className="timeline-year">{item.year || '•'}</div>
                   <div className="timeline-content">
                     <h3>{item.title}</h3>
                     <p>{item.description}</p>

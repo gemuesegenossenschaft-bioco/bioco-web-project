@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { buildCmsHeaders, cmsApiUrl, cmsFetchOptions } from '@/lib/cmsClient'
 
 export const revalidate = 60
-export const dynamic = 'force-static'
+export const dynamic = 'force-dynamic'
 
 // Fallback response when API is unavailable
 const FALLBACK_RESPONSE = {
@@ -28,7 +28,7 @@ async function fetchEventsFromCms() {
       const response = await fetch(cmsApiUrl(endpoint), {
         ...cmsFetchOptions(revalidate),
         headers: buildCmsHeaders(),
-        signal: AbortSignal.timeout(5000),
+        signal: createTimeoutSignal(5000),
       })
 
       if (!response.ok) {
@@ -49,6 +49,20 @@ async function fetchEventsFromCms() {
   }
 
   return null
+}
+
+function createTimeoutSignal(timeoutMs: number): AbortSignal {
+  const abortSignalWithTimeout = AbortSignal as typeof AbortSignal & {
+    timeout?: (ms: number) => AbortSignal
+  }
+
+  if (typeof abortSignalWithTimeout.timeout === 'function') {
+    return abortSignalWithTimeout.timeout(timeoutMs)
+  }
+
+  const controller = new AbortController()
+  setTimeout(() => controller.abort(), timeoutMs)
+  return controller.signal
 }
 
 export async function GET() {
