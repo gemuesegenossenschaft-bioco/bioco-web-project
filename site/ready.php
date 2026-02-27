@@ -176,6 +176,26 @@ function biocoRenderUsageMarkup($assetId) {
     return "<div><strong>Used in:</strong><ul>" . implode('', $items) . "</ul></div>";
 }
 
+function biocoExtractSectionTitleFromHtml($html) {
+    $source = (string) $html;
+    if ($source === '') return '';
+
+    // Prefer first heading to keep repeater labels aligned with authored structure.
+    if (preg_match('/<h[1-3]\\b[^>]*>(.*?)<\\/h[1-3]>/is', $source, $m)) {
+        $heading = trim(preg_replace('/\\s+/u', ' ', strip_tags($m[1])));
+        if ($heading !== '') return mb_substr($heading, 0, 120);
+    }
+
+    $plain = trim(preg_replace('/\\s+/u', ' ', strip_tags(html_entity_decode($source, ENT_QUOTES | ENT_HTML5, 'UTF-8'))));
+    if ($plain === '') return '';
+
+    $sentences = preg_split('/(?<=[\\.!\\?])\\s+/u', $plain) ?: [];
+    $first = trim((string) ($sentences[0] ?? ''));
+    if ($first !== '') return mb_substr($first, 0, 120);
+
+    return mb_substr($plain, 0, 120);
+}
+
 // Load custom admin JavaScript
 $wire->addHookAfter('Page::render', function($event) {
     if($this->wire('page')->template == 'admin') {
@@ -192,6 +212,22 @@ $wire->addHookAfter('Page::render', function($event) {
 });
 
 // Keep usage index updated on content edits.
+$wire->addHookBefore('Pages::saveReady', function($event) {
+    $page = $event->arguments(0);
+    if (!$page instanceof Page) return;
+    if (strpos($page->template->name, 'repeater_content_sections') !== 0) return;
+    if (!$page->hasField('section_text') || !$page->hasField('section_title')) return;
+
+    $nextTitle = biocoExtractSectionTitleFromHtml((string) $page->get('section_text'));
+    if ($nextTitle === '') return;
+
+    $currentTitle = trim((string) $page->get('section_title'));
+    if ($currentTitle === $nextTitle) return;
+
+    $page->of(false);
+    $page->set('section_title', $nextTitle);
+});
+
 $wire->addHookBefore('Pages::saveReady', function($event) {
     if (!empty(wire('config')->biocoMediaImportInProgress)) return;
 

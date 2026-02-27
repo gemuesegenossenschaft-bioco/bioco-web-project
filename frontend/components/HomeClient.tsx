@@ -30,6 +30,10 @@ function sectionImageAlt(s?: ContentSection, fallback?: string): string {
   return s?.images?.[0]?.alt || s?.imageAlt || fallback || ''
 }
 
+function hasHeadingHtml(html?: string | null): boolean {
+  return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
+}
+
 export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) {
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -107,7 +111,9 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
         {/* Willkommen - Row 1, Two Columns */}
         <section className="two-column-section">
           <div className="two-column-text">
-            <h2>{willkommenSection?.title || 'Willkommen bei biocò'}</h2>
+            {!hasHeadingHtml(willkommenSection?.text) && (
+              <h2>{willkommenSection?.title || 'Willkommen bei biocò'}</h2>
+            )}
             {willkommenSection?.text ? (
               <div dangerouslySetInnerHTML={{ __html: willkommenSection.text }} />
             ) : (
@@ -146,7 +152,9 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
             />}
           </div>
           <div className="two-column-text">
-            <h2>{gemeinsamSection?.title || 'Gemeinsam, solidarisch, frisch'}</h2>
+            {!hasHeadingHtml(gemeinsamSection?.text) && (
+              <h2>{gemeinsamSection?.title || 'Gemeinsam, solidarisch, frisch'}</h2>
+            )}
             {gemeinsamSection?.text ? (
               <div dangerouslySetInnerHTML={{ __html: gemeinsamSection.text }} />
             ) : (
@@ -214,7 +222,9 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
 
           {/* Kennenlernen */}
           <section className="home-block col-span-12" style={{ marginTop: 'clamp(24px, 4vw, 48px)' }}>
-            <h2>{kennenlernenSection?.title || 'Möchtest du uns kennenlernen?'}</h2>
+            {!hasHeadingHtml(kennenlernenSection?.text) && (
+              <h2>{kennenlernenSection?.title || 'Möchtest du uns kennenlernen?'}</h2>
+            )}
             {kennenlernenSection?.text ? (
               <div dangerouslySetInnerHTML={{ __html: kennenlernenSection.text }} />
             ) : (

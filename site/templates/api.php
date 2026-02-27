@@ -209,6 +209,85 @@ function decodeText($text) {
 }
 
 /**
+ * Default typography tokens for global H1/H2 styling.
+ */
+function defaultTypographySettings() {
+    return [
+        'h1' => [
+            'color' => '#1a1a1a',
+            'fontSize' => [
+                'mobile' => 'calc(1.375rem + 1.5vw)',
+                'desktop' => '2.5rem',
+            ],
+            'lineHeight' => '1.2',
+            'fontWeight' => '700',
+            'letterSpacing' => '0em',
+        ],
+        'h2' => [
+            'color' => '#1a1a1a',
+            'fontSize' => [
+                'mobile' => 'calc(1.125rem + 0.7vw)',
+                'desktop' => '1.75rem',
+            ],
+            'lineHeight' => '1.2',
+            'fontWeight' => '700',
+            'letterSpacing' => '0em',
+        ],
+    ];
+}
+
+function sanitizeTypographyColor($value, $default) {
+    $raw = trim((string) $value);
+    if (preg_match('/^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/', $raw)) {
+        return strtolower($raw);
+    }
+    return $default;
+}
+
+function sanitizeTypographySize($value, $default, $allowCalc = false) {
+    $raw = trim((string) $value);
+    if ($allowCalc && preg_match('/^calc\\([^;{}]+\\)$/', $raw)) {
+        return $raw;
+    }
+    if (preg_match('/^\\d+(?:\\.\\d+)?(?:px|rem)$/', $raw)) {
+        return $raw;
+    }
+    return $default;
+}
+
+function sanitizeTypographyLineHeight($value, $default) {
+    $raw = trim((string) $value);
+    if (!is_numeric($raw)) {
+        return $default;
+    }
+    $num = (float) $raw;
+    if ($num < 1.0 || $num > 2.0) {
+        return $default;
+    }
+    return rtrim(rtrim(number_format($num, 2, '.', ''), '0'), '.');
+}
+
+function sanitizeTypographyWeight($value, $default) {
+    $raw = trim((string) $value);
+    if (!preg_match('/^\\d{3}$/', $raw)) {
+        return $default;
+    }
+    $num = (int) $raw;
+    if ($num < 100 || $num > 900) {
+        return $default;
+    }
+    return (string) $num;
+}
+
+function sanitizeTypographyLetterSpacing($value, $default) {
+    $raw = trim((string) $value);
+    if (preg_match('/^-?\\d+(?:\\.\\d+)?(?:em|px)$/', $raw)) {
+        return $raw;
+    }
+    return $default;
+}
+
+/**
  * Build buttons array for a section
  */
 function buildSectionButtons($section) {
@@ -577,6 +656,75 @@ function handleContentRequest($type, $param = null) {
         // --------------------------------------------------------------------
         case 'status':
             echo json_encode(['status' => 'ok', 'subsystem' => 'content']);
+            break;
+
+        // --------------------------------------------------------------------
+        // Global site settings (typography tokens)
+        // --------------------------------------------------------------------
+        case 'settings':
+            $defaults = defaultTypographySettings();
+            $settingsPage = $pages->get('/content/design-settings/');
+            if (!$settingsPage->id) {
+                $settingsPage = $pages->get('template=site_settings, name=design-settings');
+            }
+
+            $h1Color = $defaults['h1']['color'];
+            $h1Mobile = $defaults['h1']['fontSize']['mobile'];
+            $h1Desktop = $defaults['h1']['fontSize']['desktop'];
+            $h1LineHeight = $defaults['h1']['lineHeight'];
+            $h1Weight = $defaults['h1']['fontWeight'];
+            $h1LetterSpacing = $defaults['h1']['letterSpacing'];
+
+            $h2Color = $defaults['h2']['color'];
+            $h2Mobile = $defaults['h2']['fontSize']['mobile'];
+            $h2Desktop = $defaults['h2']['fontSize']['desktop'];
+            $h2LineHeight = $defaults['h2']['lineHeight'];
+            $h2Weight = $defaults['h2']['fontWeight'];
+            $h2LetterSpacing = $defaults['h2']['letterSpacing'];
+
+            if ($settingsPage->id) {
+                $h1Color = sanitizeTypographyColor($settingsPage->get('typography_h1_color'), $h1Color);
+                $h1Mobile = sanitizeTypographySize($settingsPage->get('typography_h1_size_mobile'), $h1Mobile, true);
+                $h1Desktop = sanitizeTypographySize($settingsPage->get('typography_h1_size_desktop'), $h1Desktop, true);
+                $h1LineHeight = sanitizeTypographyLineHeight($settingsPage->get('typography_h1_line_height'), $h1LineHeight);
+                $h1Weight = sanitizeTypographyWeight($settingsPage->get('typography_h1_font_weight'), $h1Weight);
+                $h1LetterSpacing = sanitizeTypographyLetterSpacing($settingsPage->get('typography_h1_letter_spacing'), $h1LetterSpacing);
+
+                $h2Color = sanitizeTypographyColor($settingsPage->get('typography_h2_color'), $h2Color);
+                $h2Mobile = sanitizeTypographySize($settingsPage->get('typography_h2_size_mobile'), $h2Mobile, true);
+                $h2Desktop = sanitizeTypographySize($settingsPage->get('typography_h2_size_desktop'), $h2Desktop, true);
+                $h2LineHeight = sanitizeTypographyLineHeight($settingsPage->get('typography_h2_line_height'), $h2LineHeight);
+                $h2Weight = sanitizeTypographyWeight($settingsPage->get('typography_h2_font_weight'), $h2Weight);
+                $h2LetterSpacing = sanitizeTypographyLetterSpacing($settingsPage->get('typography_h2_letter_spacing'), $h2LetterSpacing);
+            }
+
+            echo json_encode([
+                'success' => true,
+                'settings' => [
+                    'typography' => [
+                        'h1' => [
+                            'color' => $h1Color,
+                            'fontSize' => [
+                                'mobile' => $h1Mobile,
+                                'desktop' => $h1Desktop,
+                            ],
+                            'lineHeight' => $h1LineHeight,
+                            'fontWeight' => $h1Weight,
+                            'letterSpacing' => $h1LetterSpacing,
+                        ],
+                        'h2' => [
+                            'color' => $h2Color,
+                            'fontSize' => [
+                                'mobile' => $h2Mobile,
+                                'desktop' => $h2Desktop,
+                            ],
+                            'lineHeight' => $h2LineHeight,
+                            'fontWeight' => $h2Weight,
+                            'letterSpacing' => $h2LetterSpacing,
+                        ],
+                    ],
+                ],
+            ]);
             break;
             
         // --------------------------------------------------------------------

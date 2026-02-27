@@ -40,6 +40,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
 
+function hasHeadingHtml(html?: string | null): boolean {
+  return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
+}
+
 export default async function GemusePage() {
   // Fetch CMS content
   const { sections: cmsSections } = await getPageSectionsWithSeo('gemuese')
@@ -56,9 +60,11 @@ export default async function GemusePage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
           {/* Page Header with H1 */}
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
-              {introSection?.title || 'Unser Gemüse'}
-            </h1>
+            {!hasHeadingHtml(introSection?.text) && (
+              <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
+                {introSection?.title || 'Unser Gemüse'}
+              </h1>
+            )}
             {introSection?.text ? (
               <div 
                 style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
@@ -146,7 +152,9 @@ export default async function GemusePage() {
 
           {/* Was wir anbauen - Single Column */}
           <section id="B-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>{anbauenSection?.title || 'Was wir anbauen'}</h2>
+            {!hasHeadingHtml(anbauenSection?.text) && (
+              <h2>{anbauenSection?.title || 'Was wir anbauen'}</h2>
+            )}
             {anbauenSection?.text ? (
               <div
                 style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}

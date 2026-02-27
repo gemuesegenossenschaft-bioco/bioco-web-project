@@ -19,6 +19,10 @@ export function filterOtherEvents(events: AktuellesItem[]): AktuellesItem[] {
   return events.filter((item) => item.eventType !== 'schnuppertag')
 }
 
+function hasHeadingHtml(html?: string | null): boolean {
+  return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
+}
+
 interface AktuellesClientProps {
   sections?: ContentSection[]
   aktuellesItems: AktuellesItem[]
@@ -52,9 +56,11 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
       <main className="main-content">
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
           <section id="G-01" style={{ marginBottom: 'clamp(24px, 4vw, 48px)' }}>
-            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
-              {introSection?.title || 'Aktuelles'}
-            </h1>
+            {!hasHeadingHtml(introSection?.text) && (
+              <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
+                {introSection?.title || 'Aktuelles'}
+              </h1>
+            )}
             {introSection?.text && (
               <div 
                 style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}

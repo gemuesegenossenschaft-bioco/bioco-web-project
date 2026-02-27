@@ -27,6 +27,7 @@ interface WirClientProps {
 export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const getSection = (id: string) => sections.find(s => s.id === id)
   const stripHtml = (value?: string | null) => String(value || '').replace(/<[^>]*>/g, '').trim()
+  const hasHeadingHtml = (value?: string | null) => /<h[1-6]\b[^>]*>/i.test(String(value || ''))
   const extractYear = (value?: string | null): string => {
     const text = String(value || '')
     const match = text.match(/\b(19|20)\d{2}(?:\s*[-–]\s*(19|20)?\d{2})?\b/)
@@ -165,7 +166,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
           
           {/* Page Header */}
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>biocò:<br />Die Gemüse-<br />genossenschaft</h1>
+            {!hasHeadingHtml(intro.text) && (
+              <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>biocò:<br />Die Gemüse-<br />genossenschaft</h1>
+            )}
             {intro.text ? (
               <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
                    dangerouslySetInnerHTML={{ __html: intro.text }} />
@@ -179,7 +182,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
 
           {/* Wir Section */}
           <section id="F-01" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>{wirSection?.title || 'Wir'}</h2>
+            {!hasHeadingHtml(wirSection?.text) && <h2>{wirSection?.title || 'Wir'}</h2>}
             <h3 style={{ fontSize: '1.5rem', marginTop: '16px', marginBottom: '12px' }}>Team & Hof</h3>
             {wirSection?.text ? (
               <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}
@@ -203,7 +206,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                     />
                   </div>
                 )}
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{alleMitgliederSection?.title || 'Alle Mitglieder'}</h3>
+                {!hasHeadingHtml(alleMitgliederSection?.text) && (
+                  <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{alleMitgliederSection?.title || 'Alle Mitglieder'}</h3>
+                )}
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                   {alleMitgliederSection?.text ? (
                     <span dangerouslySetInnerHTML={{ __html: alleMitgliederSection.text }} />
@@ -223,7 +228,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                     />
                   </div>
                 )}
-                <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{betriebsgruppeSection?.title || 'Betriebsgruppe (BG)'}</h3>
+                {!hasHeadingHtml(betriebsgruppeSection?.text) && (
+                  <h3 style={{ fontSize: '1.5rem', marginBottom: '8px' }}>{betriebsgruppeSection?.title || 'Betriebsgruppe (BG)'}</h3>
+                )}
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>
                   {betriebsgruppeSection?.text ? (
                     <span dangerouslySetInnerHTML={{ __html: betriebsgruppeSection.text }} />
@@ -258,7 +265,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
 
           {/* Der Geisshof */}
           <section id="F-01b" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>{hofSection?.title || 'Der Geisshof'}</h2>
+            {!hasHeadingHtml(hofSection?.text) && <h2>{hofSection?.title || 'Der Geisshof'}</h2>}
             {hofSection?.text ? (
               <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}
                    dangerouslySetInnerHTML={{ __html: hofSection.text }} />
@@ -286,7 +293,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
 
           {/* Mission & Leitbild */}
           <section id="F-02" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>{missionSection?.title || 'Mission & Leitbild'}</h2>
+            {!hasHeadingHtml(missionSection?.text) && <h2>{missionSection?.title || 'Mission & Leitbild'}</h2>}
             {missionSection?.text && (
               <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginTop: '16px' }}
                    dangerouslySetInnerHTML={{ __html: missionSection.text }} />
@@ -294,7 +301,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '24px' }}>
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{solidaritaetSection?.title || 'Solidarität'}</h3>
+                {!hasHeadingHtml(solidaritaetSection?.text) && (
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{solidaritaetSection?.title || 'Solidarität'}</h3>
+                )}
                 {solidaritaetSection?.text ? (
                   <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}
                        dangerouslySetInnerHTML={{ __html: solidaritaetSection.text }} />
@@ -310,7 +319,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                 </p>
               </div>
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{nachhaltigkeitSection?.title || 'Nachhaltigkeit'}</h3>
+                {!hasHeadingHtml(nachhaltigkeitSection?.text) && (
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{nachhaltigkeitSection?.title || 'Nachhaltigkeit'}</h3>
+                )}
                 {nachhaltigkeitSection?.text ? (
                   <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
                        dangerouslySetInnerHTML={{ __html: nachhaltigkeitSection.text }} />
@@ -321,7 +332,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                 )}
               </div>
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{gemeinschaftSection?.title || 'Gemeinschaft'}</h3>
+                {!hasHeadingHtml(gemeinschaftSection?.text) && (
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{gemeinschaftSection?.title || 'Gemeinschaft'}</h3>
+                )}
                 {gemeinschaftSection?.text ? (
                   <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
                        dangerouslySetInnerHTML={{ __html: gemeinschaftSection.text }} />
@@ -332,7 +345,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                 )}
               </div>
               <div>
-                <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{regionalitaetSection?.title || 'Regionalität'}</h3>
+                {!hasHeadingHtml(regionalitaetSection?.text) && (
+                  <h3 style={{ fontSize: '1.25rem', marginBottom: '12px' }}>{regionalitaetSection?.title || 'Regionalität'}</h3>
+                )}
                 {regionalitaetSection?.text ? (
                   <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
                        dangerouslySetInnerHTML={{ __html: regionalitaetSection.text }} />
@@ -345,7 +360,9 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
             </div>
 
             <div style={{ marginTop: '32px' }}>
-              <h3 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>{gottiSection?.title || 'Gotti-System'}</h3>
+              {!hasHeadingHtml(gottiSection?.text) && (
+                <h3 style={{ fontSize: '1.5rem', marginBottom: '12px' }}>{gottiSection?.title || 'Gotti-System'}</h3>
+              )}
               {gottiSection?.text ? (
                 <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}
                      dangerouslySetInnerHTML={{ __html: gottiSection.text }} />
@@ -360,7 +377,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
 
           {/* Geschichte */}
           <section id="F-03" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>{geschichteSection?.title || 'Geschichte'}</h2>
+            {!hasHeadingHtml(geschichteSection?.text) && <h2>{geschichteSection?.title || 'Geschichte'}</h2>}
             {geschichteSection?.text ? (
               <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}
                    dangerouslySetInnerHTML={{ __html: geschichteSection.text }} />
@@ -381,7 +398,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
 
           {/* Timeline */}
           <section id="F-04" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>{timelineHeaderSection?.title || 'Timeline'}</h2>
+            {!hasHeadingHtml(timelineHeaderSection?.text) && <h2>{timelineHeaderSection?.title || 'Timeline'}</h2>}
             {timelineHeaderSection?.text && (
               <div style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginTop: '16px' }}
                    dangerouslySetInnerHTML={{ __html: timelineHeaderSection.text }} />

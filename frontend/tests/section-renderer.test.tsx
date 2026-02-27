@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { render } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { SectionRenderer } from '@/components/sections/SectionRenderer'
 import type { ContentSection } from '@/lib/processwire-types'
 
@@ -65,5 +65,21 @@ describe('SectionRenderer image filters', () => {
     expect(mediaFrame).toBeTruthy()
     const style = (mediaFrame as HTMLElement).style.filter
     expect(style).toBeFalsy()
+  })
+
+  it('does not render duplicate heading when section text already contains heading tags', () => {
+    const sections: ContentSection[] = [
+      {
+        id: 'rich-text-heading',
+        title: 'Duplicate Heading',
+        text: '<h2>Duplicate Heading</h2><p>Body</p>',
+        layout: 'rich_text',
+      },
+    ]
+
+    const { container } = render(<SectionRenderer sections={sections} />)
+    const headings = container.querySelectorAll('h2')
+    expect(headings).toHaveLength(1)
+    expect(screen.getByText('Duplicate Heading')).toBeTruthy()
   })
 })

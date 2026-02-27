@@ -20,6 +20,10 @@ export const metadata: Metadata = {
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
 
+function hasHeadingHtml(html?: string | null): boolean {
+  return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
+}
+
 export default async function SolawiPage() {
   // Fetch CMS content
   const cmsSections = await getPageSections('solawi')
@@ -31,9 +35,11 @@ export default async function SolawiPage() {
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
           {/* Page Header with H1 */}
           <section style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
-              {introSection?.title || 'Solidarische Landwirtschaft'}
-            </h1>
+            {!hasHeadingHtml(introSection?.text) && (
+              <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
+                {introSection?.title || 'Solidarische Landwirtschaft'}
+              </h1>
+            )}
             {introSection?.text ? (
               <div 
                 style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}

@@ -23,6 +23,10 @@ export const metadata: Metadata = {
 export const revalidate = 60
 export const dynamic = 'force-dynamic'
 
+function hasHeadingHtml(html?: string | null): boolean {
+  return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
+}
+
 export default async function MitmachenPage() {
   // Fetch CMS content with fallbacks
   const [cmsSections, cmsGroups] = await Promise.all([
@@ -191,7 +195,9 @@ export default async function MitmachenPage() {
               />}
             </div>
             <div>
-              <h2>{familienSection?.title || 'Familien & Kinder auf dem Geisshof'}</h2>
+              {!hasHeadingHtml(familienSection?.text) && (
+                <h2>{familienSection?.title || 'Familien & Kinder auf dem Geisshof'}</h2>
+              )}
               {familienSection?.text ? (
                 <div 
                   style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}

@@ -33,6 +33,10 @@ const componentMap: Record<string, React.ReactNode> = {
   gallery: <Gallery />,
 }
 
+function hasHeadingHtml(html?: string | null): boolean {
+  return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
+}
+
 function getImageFilterStyle(section: ContentSection): React.CSSProperties | undefined {
   const b = section.imageBrightness
   const c = section.imageContrast
@@ -83,10 +87,11 @@ function getVideoEmbedUrl(url: string): string {
 }
 
 function SectionHeader({ section }: { section: ContentSection }) {
+  const headingAlreadyInText = hasHeadingHtml(section.text)
   return (
     <>
       {section.eyebrow ? <p className="cms-section-eyebrow">{section.eyebrow}</p> : null}
-      {section.title ? <h2>{section.title}</h2> : null}
+      {section.title && !headingAlreadyInText ? <h2>{section.title}</h2> : null}
     </>
   )
 }

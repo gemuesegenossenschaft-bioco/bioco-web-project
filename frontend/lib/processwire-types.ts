@@ -29,6 +29,33 @@ export interface SeoData {
 }
 
 // ============================================================================
+// Global Settings Types
+// ============================================================================
+
+export interface GlobalHeadingTypography {
+  color: string;
+  fontSize: {
+    mobile: string;
+    desktop: string;
+  };
+  lineHeight: string;
+  fontWeight: string;
+  letterSpacing: string;
+}
+
+export interface GlobalTypographySettings {
+  h1: GlobalHeadingTypography;
+  h2: GlobalHeadingTypography;
+}
+
+export interface GlobalSettingsResponse {
+  success: boolean;
+  settings: {
+    typography: GlobalTypographySettings;
+  };
+}
+
+// ============================================================================
 // Hero Types
 // ============================================================================
 

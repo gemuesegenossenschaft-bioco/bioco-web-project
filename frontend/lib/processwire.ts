@@ -25,10 +25,13 @@ import type {
   InstagramPost,
   HealthResponse,
   SeoData,
+  GlobalSettingsResponse,
+  GlobalTypographySettings,
 } from './processwire-types'
 
 // Re-export types for convenience
 export type { PageData, NavigationItem, ContentSection, GroupCard, EventItem, AktuellesNewsItem, SeoData }
+export type { GlobalTypographySettings }
 
 function normalizeMediaUrl(url?: string | null): string {
   const raw = String(url || '').trim()
@@ -198,6 +201,18 @@ export async function getAllPages(): Promise<PageIndexItem[]> {
 export async function getNavigation(): Promise<NavigationItem[]> {
   const response = await fetchCmsJsonSafe<NavigationItem[]>('/content/navigation', { revalidate: 1800 })
   return response || []
+}
+
+// ============================================================================
+// Global Settings
+// ============================================================================
+
+/**
+ * Get global site settings (typography tokens)
+ */
+export async function getGlobalSettings(): Promise<GlobalTypographySettings | null> {
+  const response = await fetchCmsJsonSafe<GlobalSettingsResponse>('/content/settings', { revalidate: 60 })
+  return response?.settings?.typography || null
 }
 
 // ============================================================================
