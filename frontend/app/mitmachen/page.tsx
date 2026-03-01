@@ -21,7 +21,6 @@ export const metadata: Metadata = {
 
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60
-export const dynamic = 'force-dynamic'
 
 function hasHeadingHtml(html?: string | null): boolean {
   return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
@@ -133,6 +132,7 @@ export default async function MitmachenPage() {
                           src={group.image}
                           alt={group.imageAlt || group.title}
                           fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
                           style={{ objectFit: 'cover' }}
                         />
                       ) : (
@@ -191,6 +191,7 @@ export default async function MitmachenPage() {
                 src={familienSection.image}
                 alt={familienSection?.imageAlt || 'Frisch geerntetes Demeter-Gemüse vom Geisshof'}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ objectFit: 'cover', borderRadius: '24px' }}
               />}
             </div>

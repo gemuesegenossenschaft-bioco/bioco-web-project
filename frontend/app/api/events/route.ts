@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server'
 import { buildCmsHeaders, cmsApiUrl, cmsFetchOptions } from '@/lib/cmsClient'
 
 export const revalidate = 60
-export const dynamic = 'force-dynamic'
 
 // Fallback response when API is unavailable
 const FALLBACK_RESPONSE = {

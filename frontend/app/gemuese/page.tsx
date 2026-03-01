@@ -38,7 +38,6 @@ export async function generateMetadata(): Promise<Metadata> {
 
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60
-export const dynamic = 'force-dynamic'
 
 function hasHeadingHtml(html?: string | null): boolean {
   return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
