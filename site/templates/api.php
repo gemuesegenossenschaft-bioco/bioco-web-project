@@ -26,6 +26,7 @@ $allowedOrigins = $config->allowedOrigins ?? [
 $origin = isset($_SERVER['HTTP_ORIGIN']) ? $_SERVER['HTTP_ORIGIN'] : '';
 if (in_array($origin, $allowedOrigins)) {
     header("Access-Control-Allow-Origin: $origin");
+    header('Access-Control-Allow-Credentials: true');
 }
 // No CORS header for unknown origins or server-to-server (empty origin)
 
@@ -58,8 +59,25 @@ if ($apiKey) {
 }
 
 // ============================================================================
+// Preview / Draft Mode
+// ============================================================================
+
+$previewToken = $input->get('preview_token') ?: '';
+$isPreview = $previewToken && $previewToken === getenv('PW_PREVIEW_TOKEN');
+
+// ============================================================================
 // Helper Functions
 // ============================================================================
+
+/**
+ * Resize a Pageimage to max width for API delivery.
+ * Returns the resized variation (or original if already small enough).
+ */
+function resizeForApi($image, $maxWidth = 1600) {
+    if (!$image instanceof \ProcessWire\Pageimage) return $image;
+    if ($image->width <= $maxWidth) return $image;
+    return $image->size($maxWidth, 0, ['upscaling' => false, 'quality' => 85]);
+}
 
 /**
  * Get full image URL (required for Next.js Image component)
@@ -87,13 +105,13 @@ function getAllImagesFromField($page, $field) {
     if (!$value) return [];
 
     if ($value instanceof Pageimage || $value instanceof Pagefile) {
-        return [$value];
+        return [resizeForApi($value)];
     }
 
     if (($value instanceof Pageimages || $value instanceof Pagefiles) && $value->count()) {
         $items = [];
         foreach ($value as $img) {
-            $items[] = $img;
+            $items[] = resizeForApi($img);
         }
         return $items;
     }
@@ -107,6 +125,7 @@ function getAllImagesFromField($page, $field) {
 function getImageUrl($page, $field) {
     $image = getFirstImageFromField($page, $field);
     if ($image && !empty($image->url)) {
+        $image = resizeForApi($image);
         return wire('config')->urls->httpRoot . ltrim($image->url, '/');
     }
     return null;
@@ -118,6 +137,7 @@ function getImageUrl($page, $field) {
 function getImageData($page, $field) {
     $image = getFirstImageFromField($page, $field);
     if ($image && !empty($image->url)) {
+        $image = resizeForApi($image);
         return [
             'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
             'description' => $image->description ?: '',
@@ -134,6 +154,7 @@ function getImageData($page, $field) {
 function getImageDataWithAlt($page, $field, $fallbackAlt = '') {
     $image = getFirstImageFromField($page, $field);
     if ($image && !empty($image->url)) {
+        $image = resizeForApi($image);
         return [
             'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
             'alt' => $image->description ?: $fallbackAlt,
@@ -632,12 +653,53 @@ switch ($endpoint) {
     case 'media-files':
         handleMediaFilesRequest();
         break;
-        
+
+    case 'auth-check':
+        $user = wire('user');
+        if ($user && !$user->isGuest() && $user->hasRole('superuser')) {
+            echo json_encode(['loggedIn' => true, 'username' => $user->name]);
+        } else {
+            http_response_code(401);
+            echo json_encode(['loggedIn' => false]);
+        }
+        break;
+
+    case 'content-save':
+        requireAdminSession();
+        $data = json_decode(file_get_contents('php://input'), true);
+        $sectionId = (int)($data['sectionId'] ?? 0);
+        $fields = $data['fields'] ?? [];
+        if (!$sectionId || !$fields) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing sectionId or fields']);
+            break;
+        }
+        $section = wire('pages')->get($sectionId);
+        if (!$section->id || strpos($section->template->name, 'repeater_') !== 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid section']);
+            break;
+        }
+        $allowedFields = [
+            'section_title', 'section_text', 'section_eyebrow',
+            'button_text', 'button_href', 'button_variant',
+            'button2_text', 'button2_href', 'button2_variant',
+        ];
+        $sanitizer = wire('sanitizer');
+        foreach ($fields as $key => $value) {
+            if (in_array($key, $allowedFields) && $section->hasField($key)) {
+                $section->set($key, $sanitizer->purify($value));
+            }
+        }
+        $section->save();
+        echo json_encode(['success' => true, 'saved' => true, 'sectionId' => $sectionId]);
+        break;
+
     default:
         http_response_code(404);
         echo json_encode([
             'error' => 'Endpoint not found',
-            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files'],
+            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save'],
         ]);
 }
 
@@ -1157,12 +1219,36 @@ function handleContentRequest($type, $param = null) {
             ]);
             break;
             
+        // ----------------------------------------------------------------
+        // Page path lookup (for preview button)
+        // ----------------------------------------------------------------
+        case 'page-path':
+            $id = (int)($input->get('id') ?: 0);
+            if (!$id) {
+                echo json_encode(['error' => 'Missing id parameter']);
+                break;
+            }
+            $target = $pages->get($id);
+            if (!$target->id) {
+                echo json_encode(['error' => 'Page not found']);
+                break;
+            }
+            $path = rtrim(str_replace('/content/', '/', $target->path), '/') ?: '/';
+            $siteUrl = getenv('NEXT_PUBLIC_SITE_URL') ?: 'https://bioco.ch';
+            $draftSecret = getenv('PW_PREVIEW_TOKEN') ?: '';
+            echo json_encode([
+                'path' => $path,
+                'siteUrl' => $siteUrl,
+                'draftSecret' => $draftSecret,
+            ]);
+            break;
+
         default:
             http_response_code(404);
             echo json_encode([
                 'error' => 'Content endpoint not found',
                 'type' => $type,
-                'available' => ['hero', 'homepage', 'sections', 'groups', 'page', 'pages', 'navigation', 'events', 'aktuelles', 'instagram'],
+                'available' => ['hero', 'homepage', 'sections', 'groups', 'page', 'pages', 'navigation', 'events', 'aktuelles', 'instagram', 'page-path'],
             ]);
     }
 }

@@ -630,4 +630,38 @@ $(document).ready(function() {
             renderUsageBlocksInMediaLibrary();
         }, 100);
     });
+
+    // ================================================================
+    // Preview button on page edit screens
+    // ================================================================
+    function addPreviewButton() {
+        if (!isPageEditProcess()) return;
+        if ($('.bioco-preview-btn').length) return;
+        var pageId = getPageEditId();
+        if (!pageId) return;
+
+        // Fetch page path from API
+        $.getJSON(ProcessWire.config.urls.root + 'api/content/page-path?id=' + pageId)
+            .done(function(data) {
+                if (!data || !data.path) return;
+                var draftSecret = data.draftSecret || '';
+                if (!draftSecret) return;
+                var $btn = $('<button type="button" class="ui-button ui-priority-secondary bioco-preview-btn" style="margin-left:10px">')
+                    .html('<i class="fa fa-eye"></i> Vorschau');
+                $btn.on('click', function(e) {
+                    e.preventDefault();
+                    window.open(
+                        data.siteUrl + '/api/draft?secret=' + encodeURIComponent(draftSecret) + '&path=' + encodeURIComponent(data.path),
+                        '_blank'
+                    );
+                });
+                var $header = $('#ProcessPageEditHeader, #pw-content-head, .PageEditHeader');
+                if ($header.length) {
+                    $header.first().find('h1, .pw-content-head-title').first().after($btn);
+                } else {
+                    $('#ProcessPageEdit .Inputfields').first().before($btn);
+                }
+            });
+    }
+    addPreviewButton();
 });
