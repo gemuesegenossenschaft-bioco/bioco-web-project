@@ -134,6 +134,13 @@ export function MobileMenu() {
               <div className="mobile-menu-logo">
                 <Logo />
               </div>
+              <button
+                className="mobile-menu-close-btn"
+                onClick={() => setIsOpen(false)}
+                aria-label="Menü schliessen"
+              >
+                <X size={22} />
+              </button>
             </div>
             <div className="mobile-menu-primary-section">
               <ul className="mobile-nav-list">
