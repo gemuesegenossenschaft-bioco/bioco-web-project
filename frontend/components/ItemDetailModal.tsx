@@ -83,7 +83,6 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
               alt="biocò Logo"
               width={1693}
               height={1010}
-              priority
               style={{ height: 'auto', width: 'auto', maxHeight: '36px' }}
             />
           </Link>
