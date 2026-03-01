@@ -202,6 +202,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                       src={alleMitgliederImg}
                       alt={alleMitgliederAlt}
                       fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       style={{ objectFit: 'cover', objectPosition: 'center top' }}
                     />
                   </div>
@@ -224,6 +225,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                       src={betriebsgruppeImg}
                       alt={betriebsgruppeAlt}
                       fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       style={{ objectFit: 'cover', objectPosition: 'center top' }}
                     />
                   </div>
@@ -251,7 +253,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
                   {hofTeamImages.map((member, i) => (
                     <div key={i}>
                       <div style={{ position: 'relative', width: '100%', aspectRatio: '3/4', marginBottom: '12px', borderRadius: '16px', overflow: 'hidden', background: 'var(--bg-tertiary, #eee)' }}>
-                        <Image src={member.url} alt={member.alt} fill style={{ objectFit: 'contain', objectPosition: 'center' }} />
+                        <Image src={member.url} alt={member.alt} fill sizes="(max-width: 768px) 50vw, 25vw" style={{ objectFit: 'contain', objectPosition: 'center' }} />
                       </div>
                       <h3 style={{ fontSize: '1.25rem' }}>{member.name}</h3>
                     </div>
@@ -279,7 +281,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '24px' }}>
               {geisshofImages.map((img, i) => (
                 <div key={i} style={{ position: 'relative', width: '100%', aspectRatio: '4/3', borderRadius: '24px', overflow: 'hidden' }}>
-                  <Image src={img.url} alt={img.alt} fill style={{ objectFit: 'cover' }} />
+                  <Image src={img.url} alt={img.alt} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover' }} />
                 </div>
               ))}
             </div>

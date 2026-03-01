@@ -80,6 +80,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
             alt={hero.imageAlt || 'Solidarische Landwirtschaft auf dem Feld'}
             fill
             priority
+            sizes="100vw"
             style={{ objectFit: 'cover' }}
           />}
           <div className="hero-overlay" />
@@ -134,7 +135,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
               src={sectionImage(willkommenSection)!}
               alt={sectionImageAlt(willkommenSection, 'Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg')}
               fill
-              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
               style={{ objectFit: 'cover', borderRadius: '24px' }}
             />}
           </div>
@@ -147,7 +148,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
               src={sectionImage(gemeinsamSection)!}
               alt={sectionImageAlt(gemeinsamSection, 'Frisch geerntetes Demeter-Gemüse vom Geisshof')}
               fill
-              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
               style={{ objectFit: 'cover', borderRadius: '24px' }}
             />}
           </div>

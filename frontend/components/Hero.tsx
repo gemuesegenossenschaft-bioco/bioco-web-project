@@ -41,6 +41,7 @@ export function Hero({ title, subtitle, image }: HeroProps) {
                 src={image.url}
                 alt={image.description}
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ objectFit: 'cover' }}
                 priority
               />

@@ -12,10 +12,12 @@ import { DepotMap } from '@/components/DepotMap'
 import { GeisshofMap } from '@/components/GeisshofMap'
 import { Saisonkalender } from '@/components/Saisonkalender'
 import { Gallery } from '@/components/Gallery'
+import { EditableSection } from '@/components/sections/EditableSection'
 import type { ContentSection, ContentMedia } from '@/lib/processwire-types'
 
 interface SectionRendererProps {
   sections: ContentSection[]
+  isEditing?: boolean
 }
 
 const componentMap: Record<string, React.ReactNode> = {
@@ -120,7 +122,7 @@ function SplitSection({ section, mediaFirst }: { section: ContentSection; mediaF
       <div className={`cms-split-media ${mediaFirst ? 'is-first' : 'is-last'} ${overlayClass}`}>
         {media ? (
           <div className="cms-media-frame" style={getImageFilterStyle(section)}>
-            <Image src={media.url} alt={media.alt || section.title} fill style={{ objectFit: 'cover' }} />
+            <Image src={media.url} alt={media.alt || section.title} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} />
           </div>
         ) : null}
       </div>
@@ -156,7 +158,7 @@ function MediaGridSection({ section }: { section: ContentSection }) {
       <div className="cms-media-grid-items">
         {mediaItems.map((item, index) => (
           <div key={`${section.id}-media-${index}`} className="cms-media-frame">
-            <Image src={item.url} alt={item.alt || section.title} fill style={{ objectFit: 'cover' }} />
+            <Image src={item.url} alt={item.alt || section.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover' }} />
           </div>
         ))}
       </div>
@@ -211,7 +213,16 @@ function ComponentSection({ section }: { section: ContentSection }) {
   )
 }
 
-export function SectionRenderer({ sections }: SectionRendererProps) {
+export function SectionRenderer({ sections, isEditing = false }: SectionRendererProps) {
+  function wrapEditable(section: ContentSection, content: React.ReactNode) {
+    if (!isEditing) return content
+    return (
+      <EditableSection section={section} isEditing={isEditing}>
+        {content}
+      </EditableSection>
+    )
+  }
+
   return (
     <div className="cms-sections">
       {sections.map((section) => {
@@ -219,51 +230,36 @@ export function SectionRenderer({ sections }: SectionRendererProps) {
         const theme = section.theme ? `cms-theme-${section.theme}` : 'cms-theme-default'
         const bgColor = section.bgColor && section.bgColor !== 'none' ? `bg-${section.bgColor}` : ''
         const wrapperClasses = [theme, bgColor].filter(Boolean).join(' ')
+        let inner: React.ReactNode
         switch (layout) {
           case 'split_text_media':
-            return (
-              <div key={section.id} className={wrapperClasses}>
-                <SplitSection section={section} mediaFirst={false} />
-              </div>
-            )
+            inner = <SplitSection section={section} mediaFirst={false} />
+            break
           case 'full_width_banner':
-            return (
-              <div key={section.id} className={wrapperClasses}>
-                <BannerSection section={section} />
-              </div>
-            )
+            inner = <BannerSection section={section} />
+            break
           case 'media_grid':
-            return (
-              <div key={section.id} className={wrapperClasses}>
-                <MediaGridSection section={section} />
-              </div>
-            )
+            inner = <MediaGridSection section={section} />
+            break
           case 'video_embed':
-            return (
-              <div key={section.id} className={wrapperClasses}>
-                <VideoSection section={section} />
-              </div>
-            )
+            inner = <VideoSection section={section} />
+            break
           case 'component':
-            return (
-              <div key={section.id} className={wrapperClasses}>
-                <ComponentSection section={section} />
-              </div>
-            )
+            inner = <ComponentSection section={section} />
+            break
           case 'split_media_text':
-            return (
-              <div key={section.id} className={wrapperClasses}>
-                <SplitSection section={section} mediaFirst={true} />
-              </div>
-            )
+            inner = <SplitSection section={section} mediaFirst={true} />
+            break
           case 'rich_text':
           default:
-            return (
-              <div key={section.id} className={wrapperClasses}>
-                <RichTextSection section={section} />
-              </div>
-            )
+            inner = <RichTextSection section={section} />
+            break
         }
+        return (
+          <div key={section.id} className={wrapperClasses}>
+            {wrapEditable(section, inner)}
+          </div>
+        )
       })}
     </div>
   )
