@@ -94,7 +94,9 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
               cursor: 'pointer',
               padding: '4px 8px',
               color: 'var(--text-secondary)',
-              lineHeight: 1
+              lineHeight: 1,
+              width: '36px',
+              flexShrink: 0
             }}
             aria-label="Schließen"
           >

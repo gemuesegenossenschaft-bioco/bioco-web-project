@@ -1243,12 +1243,39 @@ function handleContentRequest($type, $param = null) {
             ]);
             break;
 
+        // ----------------------------------------------------------------
+        // Convert upcoming event to past recap
+        // ----------------------------------------------------------------
+        case 'event-to-recap':
+            if (!requireAdminSession()) break;
+            $data = json_decode(file_get_contents('php://input'), true);
+            $pageId = (int)($data['pageId'] ?? 0);
+            if (!$pageId) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Missing pageId']);
+                break;
+            }
+            $eventPage = $pages->get($pageId);
+            if (!$eventPage->id || $eventPage->template->name !== 'event') {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => 'Event not found']);
+                break;
+            }
+            $eventPage->of(false);
+            $eventPage->set('event_status', 'past');
+            if ($eventPage->hasField('event_signup_enabled')) {
+                $eventPage->set('event_signup_enabled', 0);
+            }
+            $eventPage->save();
+            echo json_encode(['success' => true, 'pageId' => $pageId]);
+            break;
+
         default:
             http_response_code(404);
             echo json_encode([
                 'error' => 'Content endpoint not found',
                 'type' => $type,
-                'available' => ['hero', 'homepage', 'sections', 'groups', 'page', 'pages', 'navigation', 'events', 'aktuelles', 'instagram', 'page-path'],
+                'available' => ['hero', 'homepage', 'sections', 'groups', 'page', 'pages', 'navigation', 'events', 'aktuelles', 'instagram', 'page-path', 'event-to-recap'],
             ]);
     }
 }

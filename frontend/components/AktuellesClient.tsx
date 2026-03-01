@@ -185,12 +185,18 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                     className="past-event-tile"
                     onClick={() => handleItemClick(item)}
                   >
-                    {item.media?.[0] && (
+                    {(item.media?.[0] || item.imageUrl) && (
                       <div className="past-event-media">
-                        {item.media[0].type === 'image' ? (
-                          <Image src={item.media[0].url} alt={item.media[0].description || item.title} fill sizes="(max-width: 768px) 100vw, 25vw" style={{ objectFit: 'cover' }} />
-                        ) : (
+                        {item.media?.[0]?.type === 'video' ? (
                           <video src={item.media[0].url} muted playsInline />
+                        ) : (
+                          <Image
+                            src={item.media?.[0]?.url || item.imageUrl!}
+                            alt={item.media?.[0]?.description || item.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 25vw"
+                            style={{ objectFit: 'cover' }}
+                          />
                         )}
                       </div>
                     )}

@@ -52,6 +52,8 @@ interface EventsApiEvent {
   signupNotes?: string
   status?: EventStatus
   media?: EventMediaItem[]
+  cardImage?: string
+  cardImageAlt?: string
   url?: string
   parentTitle?: string
   eventType?: unknown
@@ -231,7 +233,7 @@ function mapEventFromApi(event: EventsApiEvent): AktuellesItem {
     signupEnabled: event.signupEnabled,
     signupRequired: event.signupEnabled,
     signupNotes: event.signupNotes,
-    imageUrl: previewImage?.url,
+    imageUrl: event.cardImage || previewImage?.url,
     media: event.media,
     url: event.url,
     parentTitle: event.parentTitle,

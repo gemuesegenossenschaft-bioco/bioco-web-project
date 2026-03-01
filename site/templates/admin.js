@@ -664,4 +664,55 @@ $(document).ready(function() {
             });
     }
     addPreviewButton();
+    addRecapButton();
+
+    // ================================================================
+    // "Rückblick erstellen" button for upcoming events
+    // ================================================================
+    function addRecapButton() {
+        if (!isPageEditProcess()) return;
+        if ($('.bioco-recap-btn').length) return;
+        var tpl = getEditedTemplateName();
+        if (tpl !== 'event') return;
+
+        // Check if event_status is 'upcoming'
+        var $statusField = $('[name="event_status"]');
+        if (!$statusField.length) return;
+        var currentStatus = $statusField.val();
+        if (currentStatus !== 'upcoming') return;
+
+        var pageId = getPageEditId();
+        if (!pageId) return;
+
+        var $btn = $('<button type="button" class="ui-button ui-priority-secondary bioco-recap-btn" style="margin-left:10px">')
+            .html('<i class="fa fa-history"></i> Rückblick erstellen');
+        $btn.on('click', function(e) {
+            e.preventDefault();
+            if (!confirm('Event als vergangen markieren und Rückblick vorbereiten?')) return;
+            $btn.prop('disabled', true).text('Wird umgestellt…');
+            $.ajax({
+                url: ProcessWire.config.urls.root + 'api/content/event-to-recap',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ pageId: pageId })
+            }).done(function(res) {
+                if (res && res.success) {
+                    window.location.reload();
+                } else {
+                    alert('Fehler: ' + ((res && res.error) || 'Unbekannt'));
+                    $btn.prop('disabled', false).html('<i class="fa fa-history"></i> Rückblick erstellen');
+                }
+            }).fail(function() {
+                alert('Anfrage fehlgeschlagen.');
+                $btn.prop('disabled', false).html('<i class="fa fa-history"></i> Rückblick erstellen');
+            });
+        });
+
+        var $header = $('#ProcessPageEditHeader, #pw-content-head, .PageEditHeader');
+        if ($header.length) {
+            $header.first().find('h1, .pw-content-head-title').first().after($btn);
+        } else {
+            $('#ProcessPageEdit .Inputfields').first().before($btn);
+        }
+    }
 });

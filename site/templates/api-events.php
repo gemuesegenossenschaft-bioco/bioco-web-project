@@ -55,6 +55,21 @@ foreach($events as $event) {
         $eventType = $opt->value ?: strtolower($opt->title) ?: 'general';
     }
 
+    // Card image for grid thumbnails
+    $cardImage = '';
+    $cardImageAlt = '';
+    $cardImg = $event->event_card_image;
+    if ($cardImg && !($cardImg instanceof \Countable && $cardImg->count() === 0)) {
+        if (is_object($cardImg) && method_exists($cardImg, 'httpUrl')) {
+            $cardImage = $cardImg->httpUrl();
+            $cardImageAlt = $cardImg->description ?: '';
+        } elseif ($cardImg instanceof \Countable && $cardImg->count()) {
+            $first = $cardImg->first();
+            $cardImage = $first->httpUrl();
+            $cardImageAlt = $first->description ?: '';
+        }
+    }
+
     $response[$status][] = [
         'id' => $event->id,
         'title' => $event->title,
@@ -68,6 +83,8 @@ foreach($events as $event) {
         'signupNotes' => $event->event_signup_notes ?: '',
         'status' => $status,
         'media' => $media,
+        'cardImage' => $cardImage,
+        'cardImageAlt' => $cardImageAlt,
         'url' => $event->httpUrl(),
         'parentTitle' => $event->parent?->title ?: '',
         'eventType' => $eventType,
