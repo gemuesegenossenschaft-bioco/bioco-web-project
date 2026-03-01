@@ -301,3 +301,69 @@ $wire->addHookAfter('ProcessPageEdit::buildForm', function($event) {
     $f->value = biocoRenderUsageMarkup((int)$edited->id);
     $form->add($f);
 });
+
+// Collapse advanced fields in repeater items for cleaner editor UX.
+$wire->addHookAfter('ProcessPageEdit::buildForm', function($event) {
+    $form = $event->return;
+    if (!$form) return;
+    $process = $event->object;
+    $page = $process->getPage();
+    if (!$page instanceof Page || !$page->id) return;
+    if (strpos($page->template->name, 'repeater_content_sections') !== 0) return;
+
+    $advancedFields = [
+        'section_id', 'section_component', 'section_bg_color', 'section_image_overlay',
+        'section_image_brightness', 'section_image_contrast', 'section_image_saturate',
+        'section_video_url', 'section_video_title',
+        'button2_text', 'button2_href', 'button2_variant',
+    ];
+
+    $modules = wire('modules');
+    $fieldset = $modules->get('InputfieldFieldset');
+    $fieldset->label = 'Erweitert';
+    $fieldset->collapsed = \ProcessWire\Inputfield::collapsedYes;
+    $fieldset->attr('name', '_bioco_advanced');
+
+    $moved = false;
+    foreach ($advancedFields as $name) {
+        $f = $form->getChildByName($name);
+        if ($f) {
+            $form->remove($f);
+            $fieldset->add($f);
+            $moved = true;
+        }
+    }
+    if ($moved) {
+        $form->add($fieldset);
+    }
+});
+
+// On-demand ISR revalidation: notify Next.js when content pages are saved.
+$wire->addHookAfter('Pages::saved', function($event) {
+    $page = $event->arguments(0);
+    if (!$page instanceof Page || !$page->id) return;
+    $skip = ['admin', 'api', 'MediaLibrary'];
+    if (in_array($page->template->name, $skip)) return;
+    // For repeater items, revalidate the parent page
+    if (strpos($page->template->name, 'repeater_') === 0) {
+        if (method_exists($page, 'getForPage')) {
+            $parent = $page->getForPage();
+            if ($parent && $parent->id) $page = $parent;
+            else return;
+        } else return;
+    }
+    $secret = getenv('NEXT_REVALIDATE_SECRET');
+    $url = getenv('NEXT_REVALIDATE_URL') ?: 'http://127.0.0.1:49152/api/revalidate';
+    if (!$secret) return;
+    $path = rtrim(str_replace('/content/', '/', $page->path), '/') ?: '/';
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode(['secret' => $secret, 'path' => $path]),
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_TIMEOUT => 3,
+        CURLOPT_RETURNTRANSFER => true,
+    ]);
+    curl_exec($ch);
+    curl_close($ch);
+}, ['priority' => 100]);
