@@ -15,10 +15,13 @@ npm ci
 npm run build
 
 echo "Uploading standalone output..."
-rsync -avz --delete --exclude='start.sh' .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
-rsync -avz --delete .next/static/ "$DEPLOY_HOST:$DEPLOY_DIR/.next/static/"
-rsync -avz --delete public/ "$DEPLOY_HOST:$DEPLOY_DIR/public/"
+rsync -avzc --delete --exclude='start.sh' .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
+rsync -avzc --delete .next/static/ "$DEPLOY_HOST:$DEPLOY_DIR/.next/static/"
+rsync -avzc --delete public/ "$DEPLOY_HOST:$DEPLOY_DIR/public/"
+
+echo "Restoring sharp Linux bindings..."
+ssh "$DEPLOY_HOST" 'cp -r /tmp/sharp-pkg/node_modules/@img/sharp-linux-x64 /home/bioco/bioco-frontend/node_modules/@img/ 2>/dev/null || echo "WARN: sharp bindings not found in /tmp"'
 
 echo "Restarting Node.js..."
-ssh "$DEPLOY_HOST" 'pkill -f "node.*server.js.*49152" 2>/dev/null; sleep 1; /home/bioco/bioco-frontend/start.sh'
+ssh "$DEPLOY_HOST" 'for p in $(pgrep -f next-server 2>/dev/null); do kill $p; done; sleep 2; rm -f /tmp/bioco-next-start.lock /tmp/bioco-next.pid; rm -rf /home/bioco/bioco-frontend/.next/cache; /home/bioco/bioco-frontend/start.sh'
 echo "Deployed $BRANCH."
