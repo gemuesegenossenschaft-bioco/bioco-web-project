@@ -78,11 +78,10 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
           zIndex: 10
         }}>
           <Link href="/" onClick={onClose}>
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src="/images/bioco-logo.png"
               alt="biocò Logo"
-              width={1693}
-              height={1010}
               style={{ height: 'auto', width: 'auto', maxHeight: '36px' }}
             />
           </Link>

@@ -2163,19 +2163,18 @@ header .header-nav-container .beet-leaves {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid var(--text-primary);
+  width: 44px;
+  height: 44px;
+  border: none;
   background: transparent;
   color: var(--text-primary);
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.15s ease;
+  padding: 0;
 }
 
 .mobile-menu-close-btn:hover {
-  background: var(--bg-secondary);
+  opacity: 0.7;
 }
 
 .mobile-menu-logo {

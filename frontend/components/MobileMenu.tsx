@@ -139,7 +139,7 @@ export function MobileMenu() {
                 onClick={() => setIsOpen(false)}
                 aria-label="Menü schliessen"
               >
-                <X size={22} />
+                <X size={28} />
               </button>
             </div>
             <div className="mobile-menu-primary-section">
