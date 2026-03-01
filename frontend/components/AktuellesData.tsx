@@ -46,6 +46,7 @@ interface EventsApiEvent {
   startDate?: string
   endDate?: string
   dateLabel?: string
+  time?: string
   timeLabel?: string
   signupEnabled?: boolean
   signupNotes?: string
@@ -220,10 +221,10 @@ function mapEventFromApi(event: EventsApiEvent): AktuellesItem {
     title: event.title,
     description: event.description,
     type: 'event',
-    fullDescription: event.fullDescription,
+    fullDescription: event.fullDescription || event.description,
     location: event.location,
-    time: event.timeLabel,
-    timeLabel: event.timeLabel,
+    time: event.timeLabel || event.time,
+    timeLabel: event.timeLabel || event.time,
     startDate: resolvedStartDate,
     endDate: event.endDate,
     status: event.status ?? 'upcoming',

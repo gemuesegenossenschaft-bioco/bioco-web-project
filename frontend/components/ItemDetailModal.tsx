@@ -125,14 +125,14 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
 
         {/* Content */}
         <div style={{ padding: '24px' }}>
-          {item.fullDescription && (
+          {(item.fullDescription || item.description) && (
             <div
               style={{
                 marginBottom: '16px',
                 lineHeight: 1.7,
                 color: 'var(--text-secondary)',
               }}
-              dangerouslySetInnerHTML={{ __html: item.fullDescription }}
+              dangerouslySetInnerHTML={{ __html: item.fullDescription || item.description }}
             />
           )}
 
