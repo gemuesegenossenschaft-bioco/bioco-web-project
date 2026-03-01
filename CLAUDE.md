@@ -4,8 +4,8 @@ Swiss organic vegetable cooperative. Headless CMS: ProcessWire (PHP). Frontend: 
 
 ## Architecture
 
-Everything runs on one Novatrend cPanel server (193.33.128.160):
-- **Next.js** standalone on port 49152, Apache `.htaccess` proxy via `RewriteRule [P]`
+Single Novatrend cPanel server (193.33.128.160):
+- **Next.js** standalone on port 49154, Apache `.htaccess` proxy via `RewriteRule [P]`
 - **ProcessWire** via PHP-FPM (cms.bioco.ch)
 - **MySQL** localhost:3306 (bioco_cms)
 - **SMTP** mail.bioco.ch:465
@@ -16,87 +16,159 @@ Next.js calls ProcessWire via `http://localhost/cms/api/*` (same server, no CORS
 ## Server Setup (Novatrend cPanel / CloudLinux)
 
 ### Critical constraints
-- **mod_passenger NOT loaded in Apache.** Passenger directives in `.htaccess` are silently ignored. Use `RewriteRule [P]` (mod_proxy) instead.
-- **`npm run build` fails on server.** CloudLinux thread limits cause SWC/Rayon panics. Workaround: `RAYON_NUM_THREADS=1` or build locally.
-- **Node 18.20.8** is the latest available (no Node 20+). Fine for Next.js 14.
-- **Port 49152** is open externally (not firewalled). Used for direct testing: `http://193.33.128.160:49152`
+- **CloudLinux Passenger IS active** but unreliable for restarts. Use `pgrep -x next-server` + kill for process management.
+- **`npm run build` fails on server.** CloudLinux thread limits cause SWC/Rayon panics. Always build locally.
+- **Node 18.20.8** (no Node 20+). Fine for Next.js 14.
+- **Port 49154** used by Node.js. Apache proxies to it.
+- **sharp needs two packages**: after `--delete` rsync, restore both `sharp-linux-x64` AND `sharp-libvips-linux-x64` from `/tmp/sharp-pkg/`. Remove darwin bindings.
+- **`pgrep -f next-server`** in SSH will match the SSH command itself, killing the session. Always use `pgrep -x next-server`.
 
 ### SSH access
 ```bash
 ssh bioco@193.33.128.160
 ```
-SSH key must be imported via cPanel > Sicherheit > SSH-Zugang. Username: `bioco`.
 
 ### Server paths
 ```
 /home/bioco/
-├── bioco-web-project/         # Git repo (reference, not for deploy)
 ├── bioco-frontend/            # Deployed Next.js standalone
-│   ├── server.js              # Next.js standalone entry (from build output)
-│   ├── start.sh               # Startup script with env vars
+│   ├── server.js              # Next.js standalone entry
+│   ├── start.sh               # Startup script with env vars (DO NOT rsync --delete)
 │   ├── .next/                 # Compiled app + static assets
 │   ├── public/                # Images, PDFs, fonts
-│   └── node_modules/          # Minimal standalone deps
+│   └── node_modules/@img/     # sharp bindings (restore after deploy)
 ├── public_html/
-│   ├── .htaccess              # Apache proxy rules + Passenger config (ignored)
+│   ├── .htaccess              # Apache proxy: RewriteRule to 127.0.0.1:49154
 │   ├── cms/                   # ProcessWire installation
+│   │   └── site/templates/    # API + admin templates (deploy target for CMS files)
 │   └── matomo/                # Matomo analytics
 ├── nodevenv/bioco-frontend/18/ # CloudLinux Node.js virtual env
-└── logs/
-    ├── nextjs.log             # Node.js stdout/stderr
-    └── passenger.log          # Empty (Passenger not active)
+└── logs/nextjs.log            # Node.js stdout/stderr
 ```
 
 ### Apache .htaccess proxy
-Requests to `bioco.ch` are proxied to Node.js via:
 ```apache
-RewriteEngine On
-RewriteCond %{REQUEST_URI} !^/cms(/|$) [NC]
-RewriteCond %{REQUEST_URI} !^/matomo(/|$) [NC]
-RewriteRule ^(.*)$ http://127.0.0.1:49152/$1 [P,L]
+RewriteRule ^(.*)$ http://127.0.0.1:49154/$1 [P,L]
 ```
-`/cms` and `/matomo` are excluded (served by Apache/PHP directly).
+`/cms` and `/matomo` excluded (served by Apache/PHP).
 
 ### Process management
-- `start.sh` exports all env vars and runs `node server.js` with `nohup`
+- `start.sh` exports env vars, runs `node server.js` with `nohup`, uses flock to prevent duplicates
 - Cron runs `start.sh` every 5 minutes (no-op if already running)
-- To restart: `pkill -f "node.*server.js"; sleep 2; /home/bioco/bioco-frontend/start.sh`
+- Safe restart: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`
 
 ### Environment variables (set in start.sh)
-`PROCESSWIRE_BASE_URL`, `PROCESSWIRE_API_KEY`, `NEXT_PUBLIC_PROCESSWIRE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`, `NODE_ENV`, `PORT`
+`PORT`, `NODE_ENV`, `HOSTNAME`, `PROCESSWIRE_BASE_URL`, `PROCESSWIRE_API_KEY`, `PW_API_KEY`, `NEXT_PUBLIC_PROCESSWIRE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`
 
 ## Deploy
 
-Build locally, upload via rsync. **Always rsync all three directories:**
+Build locally, rsync frontend + CMS templates, restore sharp, restart.
+
+**Full deploy (recommended):**
 ```bash
 scripts/deploy.sh main
 ```
 
-Manual deploy:
+This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, rsyncs CMS templates (admin.js, api.php, api-events.php), restarts Node.js, verifies.
+
+**Manual deploy:**
 ```bash
 cd frontend && npm ci && npm run build
-rsync -avz --delete .next/standalone/ bioco@193.33.128.160:/home/bioco/bioco-frontend/
-rsync -avz --delete .next/static/ bioco@193.33.128.160:/home/bioco/bioco-frontend/.next/static/
-rsync -avz --delete public/ bioco@193.33.128.160:/home/bioco/bioco-frontend/public/
-ssh bioco@193.33.128.160 'pkill -f "node.*server.js"; sleep 2; /home/bioco/bioco-frontend/start.sh'
+rsync -avzc --delete --exclude='start.sh' .next/standalone/ bioco@193.33.128.160:/home/bioco/bioco-frontend/
+rsync -avzc --delete .next/static/ bioco@193.33.128.160:/home/bioco/bioco-frontend/.next/static/
+rsync -avzc --delete public/ bioco@193.33.128.160:/home/bioco/bioco-frontend/public/
+# Restore sharp (REQUIRED after standalone rsync)
+ssh bioco@193.33.128.160 'cp -r /tmp/sharp-pkg/node_modules/@img/sharp-{linux-x64,libvips-linux-x64} /home/bioco/bioco-frontend/node_modules/@img/'
+# CMS templates
+rsync -avzc site/templates/{admin.js,api.php,api-events.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+# Restart
+ssh bioco@193.33.128.160 'for p in $(pgrep -x next-server); do kill $p; done; sleep 3; rm -f /tmp/bioco-next-start.lock /tmp/bioco-next.pid; /home/bioco/bioco-frontend/start.sh'
 ```
 
-**Warning:** The standalone rsync with `--delete` removes `public/` and `.next/static/` from the target. Always run all three rsyncs together.
+**CMS-only deploy** (no frontend build needed):
+```bash
+rsync -avzc site/templates/{admin.js,api.php,api-events.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+```
 
 ## URLs
 
-- Production: https://www.bioco.ch (DNS currently on Vercel, pending cutover)
-- Direct test: http://193.33.128.160:49152
+- Production: https://www.bioco.ch
 - CMS Admin: https://cms.bioco.ch/processwire/
+- External test: `curl --resolve bioco.ch:443:193.33.128.160 https://bioco.ch/`
 
 ## Key Files
 
-- `frontend/middleware.ts`: security headers (X-Frame-Options, CSP, etc.)
-- `frontend/.env.production`: production env defaults (no secrets)
-- `.env.example`: all env vars documented
-- `scripts/deploy.sh`: full deploy script (build + rsync + restart)
-- `site/config.php`: PW config with `getenv()` overrides for secrets (gitignored)
-- `public_html/.htaccess`: Apache proxy rules (managed by cPanel, do not delete Passenger/env sections)
+### Frontend
+| File | Purpose |
+|------|---------|
+| `frontend/app/*/page.tsx` | Next.js pages (SSG) |
+| `frontend/components/AktuellesClient.tsx` | Aktuelles page: events grid, past events, modals |
+| `frontend/components/AktuellesData.tsx` | Event data types, CMS API fetching, field mapping |
+| `frontend/components/ItemDetailModal.tsx` | Event/aktuelles detail modal |
+| `frontend/components/EventSignupForm.tsx` | Event signup form |
+| `frontend/hooks/useEventsFeed.ts` | Client-side events hook |
+| `frontend/lib/cmsClient.ts` | ProcessWire API client |
+| `frontend/lib/processwire.ts` | PW page fetching, section rendering |
+| `frontend/middleware.ts` | Security headers (CSP, X-Frame-Options) |
+
+### CMS (ProcessWire)
+| File | Purpose |
+|------|---------|
+| `site/templates/api.php` | Unified API router, all endpoints |
+| `site/templates/api-events.php` | Events API (upcoming/past split, cardImage) |
+| `site/templates/admin.js` | Admin UI: media library, image editor, preview, recap button |
+| `site/templates/admin.php` | Loads admin.js in PW admin |
+| `site/config.php` | PW config (gitignored, secrets via getenv) |
+
+### Scripts
+| File | Purpose |
+|------|---------|
+| `scripts/deploy.sh` | Full deploy: build, rsync, sharp restore, restart |
+
+## API Endpoints
+
+### Public (GET)
+| Endpoint | Description |
+|----------|-------------|
+| `/api/health` | Health check |
+| `/api/content/hero` | Homepage hero data |
+| `/api/content/homepage` | Homepage sections |
+| `/api/content/sections?path=` | Page sections by path |
+| `/api/content/page?path=` | Single page content |
+| `/api/content/pages` | All pages list |
+| `/api/content/navigation` | Site navigation tree |
+| `/api/content/events` | Events (upcoming + past) |
+| `/api/content/aktuelles` | News/aktuelles posts |
+| `/api/content/instagram` | Instagram feed |
+| `/api/content/settings` | Typography/design tokens |
+| `/api/content/page-path?id=` | Page path lookup (preview) |
+| `/api/media-files` | Media library file list |
+
+### Admin-only (POST, requires PW session)
+| Endpoint | Description |
+|----------|-------------|
+| `/api/content/event-to-recap` | Convert upcoming event to past recap |
+| `/api/content-save` | Save section content |
+| `/api/media-import` | Import single media file |
+| `/api/media-import-batch` | Batch media import |
+| `/api/media-usage` | Check media usage |
+
+### Form submissions (POST)
+| Endpoint | Description |
+|----------|-------------|
+| `/api/forms/contact` | Contact form |
+| `/api/forms/subscribe` | Newsletter signup |
+| `/api/forms/visit` | Open visit day signup |
+| `/api/forms/waiting-list` | Waiting list signup |
+| `/api/forms/event-signup` | Event signup |
+
+## CMS Admin Enhancements (admin.js)
+
+- **Media Library button**: on image/file fields, opens inline picker to import from MediaLibrary
+- **Library-only mode**: hides native upload on page edit (forces MediaLibrary usage)
+- **Image editor**: Filerobot-based editor on image thumbnails
+- **Preview button**: opens Next.js draft preview for the current page
+- **Rückblick button**: on upcoming events, converts to past status for recap editing
 
 ## Running PW Migrations
 
@@ -113,3 +185,7 @@ ssh bioco@193.33.128.160 'pkill -f "node.*server.js"; sleep 2; /home/bioco/bioco
 ## CKEditor Fields
 
 `section_text`, `body`, `card_text`, `event_summary`, `event_signup_notes`
+
+## Skills
+
+See `SKILLS.md` for available slash commands: `/deploy`, `/deploy-cms`, `/server-status`.
