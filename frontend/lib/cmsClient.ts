@@ -1,5 +1,3 @@
-import { draftMode } from 'next/headers'
-
 const FALLBACK_BASE_URL = 'https://cms.bioco.ch'
 
 function normalizeBaseUrl(value?: string | null): string {
@@ -51,15 +49,16 @@ export function cmsFetchOptions(revalidateSeconds: number) {
   }
 }
 
-function getDraftUrl(url: string): string {
+async function getDraftUrl(url: string): Promise<string> {
   try {
+    const { draftMode } = await import('next/headers')
     const { isEnabled } = draftMode()
     if (isEnabled && process.env.DRAFT_SECRET) {
       const sep = url.includes('?') ? '&' : '?'
       return `${url}${sep}preview_token=${process.env.DRAFT_SECRET}`
     }
   } catch {
-    // draftMode() throws outside of request context (e.g. build time)
+    // draftMode() throws outside of request context or in client components
   }
   return url
 }
@@ -69,7 +68,7 @@ export async function fetchCmsJson<T>(
   init?: RequestInit & { revalidate?: number }
 ): Promise<T> {
   const { revalidate, ...requestInit } = init || {}
-  const url = getDraftUrl(cmsApiUrl(path))
+  const url = await getDraftUrl(cmsApiUrl(path))
   const response = await fetch(url, {
     ...requestInit,
     headers: {
