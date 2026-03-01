@@ -7,6 +7,7 @@ import { CTA } from '@/components/CTA'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import type { ContentSection } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
@@ -187,8 +188,7 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                     {item.media?.[0] && (
                       <div className="past-event-media">
                         {item.media[0].type === 'image' ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={item.media[0].url} alt={item.media[0].description || item.title} />
+                          <Image src={item.media[0].url} alt={item.media[0].description || item.title} fill sizes="(max-width: 768px) 100vw, 25vw" style={{ objectFit: 'cover' }} />
                         ) : (
                           <video src={item.media[0].url} muted playsInline />
                         )}

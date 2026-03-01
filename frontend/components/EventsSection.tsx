@@ -5,6 +5,7 @@ import { AktuellesItem } from './AktuellesData'
 import { AktuellesItemComponent } from './AktuellesItem'
 import { ItemDetailModal } from './ItemDetailModal'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 
 interface EventsSectionProps {
@@ -84,8 +85,7 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
                   {heroMedia && (
                     <div className="past-event-media">
                       {heroMedia.type === 'image' ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={heroMedia.url} alt={heroMedia.description || item.title} />
+                        <Image src={heroMedia.url} alt={heroMedia.description || item.title} fill sizes="(max-width: 768px) 100vw, 25vw" style={{ objectFit: 'cover' }} />
                       ) : (
                         <video src={heroMedia.url} muted playsInline />
                       )}
