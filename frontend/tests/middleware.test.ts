@@ -3,12 +3,10 @@ import { NextRequest } from 'next/server'
 import { middleware, config } from '@/middleware'
 
 describe('middleware', () => {
-  it('sets Cache-Control with s-maxage=60 on page requests', () => {
+  it('does not force Cache-Control on page requests', () => {
     const req = new NextRequest('https://bioco.ch/mitmachen')
     const res = middleware(req)
-    const cc = res.headers.get('Cache-Control')
-    expect(cc).toContain('s-maxage=60')
-    expect(cc).toContain('stale-while-revalidate')
+    expect(res.headers.get('Cache-Control')).toBeNull()
   })
 
   it('exports matcher that excludes _next/static and api routes', () => {

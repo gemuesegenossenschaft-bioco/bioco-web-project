@@ -42,10 +42,10 @@ export function buildCmsHeaders(): HeadersInit | undefined {
   return { 'X-API-Key': API_KEY }
 }
 
-export function cmsFetchOptions(revalidateSeconds: number) {
+export function cmsFetchOptions(revalidateSeconds: number, tags: string[] = ['cms']) {
+  const safeTags = [...new Set(tags.map((tag) => tag.trim()).filter(Boolean))]
   return {
-    next: { revalidate: revalidateSeconds },
-    // Removed cache: 'force-cache' to avoid conflict with revalidate
+    next: { revalidate: revalidateSeconds, tags: safeTags },
   }
 }
 
@@ -65,9 +65,9 @@ async function getDraftUrl(url: string): Promise<string> {
 
 export async function fetchCmsJson<T>(
   path: string,
-  init?: RequestInit & { revalidate?: number }
+  init?: RequestInit & { revalidate?: number; tags?: string[] }
 ): Promise<T> {
-  const { revalidate, ...requestInit } = init || {}
+  const { revalidate, tags, ...requestInit } = init || {}
   const url = await getDraftUrl(cmsApiUrl(path))
   const response = await fetch(url, {
     ...requestInit,
@@ -75,7 +75,7 @@ export async function fetchCmsJson<T>(
       ...(requestInit?.headers || {}),
       ...(buildCmsHeaders() || {}),
     },
-    ...(revalidate ? cmsFetchOptions(revalidate) : {}),
+    ...(revalidate ? cmsFetchOptions(revalidate, ['cms', ...(tags || [])]) : {}),
   })
 
   if (!response.ok) {
@@ -87,7 +87,7 @@ export async function fetchCmsJson<T>(
 
 export async function fetchCmsJsonSafe<T>(
   path: string,
-  init?: RequestInit & { revalidate?: number }
+  init?: RequestInit & { revalidate?: number; tags?: string[] }
 ): Promise<T | null> {
   try {
     return await fetchCmsJson<T>(path, init)

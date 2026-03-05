@@ -58,7 +58,10 @@ RewriteRule ^(.*)$ http://127.0.0.1:49154/$1 [P,L]
 - Safe restart: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`
 
 ### Environment variables (set in start.sh)
-`PORT`, `NODE_ENV`, `HOSTNAME`, `PROCESSWIRE_BASE_URL`, `PROCESSWIRE_API_KEY`, `PW_API_KEY`, `NEXT_PUBLIC_PROCESSWIRE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`
+`PORT`, `NODE_ENV`, `HOSTNAME`, `PROCESSWIRE_BASE_URL`, `PROCESSWIRE_API_KEY`, `PW_API_KEY`, `REVALIDATE_SECRET`, `NEXT_PUBLIC_PROCESSWIRE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`
+
+### CMS ISR settings (set in `site/config.php`)
+`nextRevalidateSecret`, `nextRevalidateUrl`, `nextRevalidateDebounceSeconds`, `nextRevalidateMaxWaitSeconds`, `nextRevalidateQueueFile`
 
 ## Deploy
 
@@ -69,7 +72,7 @@ Build locally, rsync frontend + CMS templates, restore sharp, restart.
 scripts/deploy.sh main
 ```
 
-This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, rsyncs CMS templates (admin.js, api.php, api-events.php), restarts Node.js, verifies.
+This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, rsyncs CMS templates (admin.js, api.php, api-events.php) + `site/ready.php`, restarts Node.js, verifies.
 
 **Manual deploy:**
 ```bash
@@ -81,6 +84,8 @@ rsync -avzc --delete public/ bioco@193.33.128.160:/home/bioco/bioco-frontend/pub
 ssh bioco@193.33.128.160 'cp -r /tmp/sharp-pkg/node_modules/@img/sharp-{linux-x64,libvips-linux-x64} /home/bioco/bioco-frontend/node_modules/@img/'
 # CMS templates
 rsync -avzc site/templates/{admin.js,api.php,api-events.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+# CMS hooks
+rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 # Restart
 ssh bioco@193.33.128.160 'for p in $(pgrep -x next-server); do kill $p; done; sleep 3; rm -f /tmp/bioco-next-start.lock /tmp/bioco-next.pid; /home/bioco/bioco-frontend/start.sh'
 ```
@@ -88,6 +93,7 @@ ssh bioco@193.33.128.160 'for p in $(pgrep -x next-server); do kill $p; done; sl
 **CMS-only deploy** (no frontend build needed):
 ```bash
 rsync -avzc site/templates/{admin.js,api.php,api-events.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 ```
 
 ## URLs

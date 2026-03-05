@@ -338,13 +338,286 @@ $wire->addHookAfter('ProcessPageEdit::buildForm', function($event) {
     }
 });
 
-// On-demand ISR revalidation: notify Next.js when content pages are saved.
+function biocoNextPathFromPage(Page $page): string {
+    $path = '/' . trim((string)$page->path, '/');
+    if ($path === '/') return '/';
+
+    if (strpos($path, '/content/') === 0) {
+        $path = '/' . ltrim(substr($path, strlen('/content/')), '/');
+    }
+
+    $slug = trim($path, '/');
+    if ($slug === '' || $slug === 'home' || $slug === 'homepage') return '/';
+    return '/' . $slug;
+}
+
+function biocoNextRevalidateConfig(): array {
+    static $cfg = null;
+    if (is_array($cfg)) return $cfg;
+
+    $config = wire('config');
+    $secret = trim((string)($config->nextRevalidateSecret ?? ''));
+    if ($secret === '') {
+        $secret = trim((string)(getenv('NEXT_REVALIDATE_SECRET') ?: getenv('REVALIDATE_SECRET') ?: ''));
+    }
+
+    $url = trim((string)($config->nextRevalidateUrl ?? ''));
+    if ($url === '') {
+        $url = trim((string)(getenv('NEXT_REVALIDATE_URL') ?: 'http://127.0.0.1:49154/api/revalidate'));
+    }
+
+    $debounceSeconds = (int)($config->nextRevalidateDebounceSeconds ?? 10);
+    if ($debounceSeconds < 0) $debounceSeconds = 0;
+
+    $maxWaitSeconds = (int)($config->nextRevalidateMaxWaitSeconds ?? 45);
+    if ($maxWaitSeconds < 1) $maxWaitSeconds = 1;
+    if ($maxWaitSeconds < $debounceSeconds) $maxWaitSeconds = $debounceSeconds;
+
+    $queueFile = trim((string)($config->nextRevalidateQueueFile ?? '/tmp/bioco-next-revalidate-state.json'));
+    if ($queueFile === '') {
+        $queueFile = '/tmp/bioco-next-revalidate-state.json';
+    }
+
+    $cfg = [
+        'secret' => $secret,
+        'url' => $url,
+        'debounceSeconds' => $debounceSeconds,
+        'maxWaitSeconds' => $maxWaitSeconds,
+        'queueFile' => $queueFile,
+    ];
+    return $cfg;
+}
+
+function biocoNextRevalidateDefaultState(): array {
+    return [
+        'lastDispatchAt' => 0,
+        'firstPendingAt' => 0,
+        'pendingPaths' => [],
+        'pendingTags' => [],
+        'pendingLayout' => false,
+    ];
+}
+
+function biocoNextRevalidateSanitizePaths($paths): array {
+    if (!is_array($paths)) return [];
+    $seen = [];
+    $clean = [];
+    foreach ($paths as $rawPath) {
+        if (!is_string($rawPath)) continue;
+        $path = trim($rawPath);
+        if ($path === '') continue;
+        if ($path[0] !== '/') {
+            $path = '/' . $path;
+        }
+        if ($path !== '/') {
+            $path = rtrim($path, '/');
+            if ($path === '') $path = '/';
+        }
+        if (isset($seen[$path])) continue;
+        $seen[$path] = true;
+        $clean[] = $path;
+    }
+    return $clean;
+}
+
+function biocoNextRevalidateSanitizeTags($tags): array {
+    if (!is_array($tags)) return [];
+    $seen = [];
+    $clean = [];
+    foreach ($tags as $rawTag) {
+        if (!is_string($rawTag)) continue;
+        $tag = trim($rawTag);
+        if ($tag === '' || isset($seen[$tag])) continue;
+        $seen[$tag] = true;
+        $clean[] = $tag;
+    }
+    return $clean;
+}
+
+function biocoNextRevalidateNormalizeState($state): array {
+    $defaults = biocoNextRevalidateDefaultState();
+    if (!is_array($state)) return $defaults;
+    return [
+        'lastDispatchAt' => max(0, (int)($state['lastDispatchAt'] ?? 0)),
+        'firstPendingAt' => max(0, (int)($state['firstPendingAt'] ?? 0)),
+        'pendingPaths' => biocoNextRevalidateSanitizePaths($state['pendingPaths'] ?? []),
+        'pendingTags' => biocoNextRevalidateSanitizeTags($state['pendingTags'] ?? []),
+        'pendingLayout' => (bool)($state['pendingLayout'] ?? false),
+    ];
+}
+
+function biocoNextRevalidateReadState($fh): array {
+    rewind($fh);
+    $raw = stream_get_contents($fh);
+    if (!is_string($raw) || trim($raw) === '') {
+        return biocoNextRevalidateDefaultState();
+    }
+    $decoded = json_decode($raw, true);
+    return biocoNextRevalidateNormalizeState($decoded);
+}
+
+function biocoNextRevalidateWriteState($fh, array $state): void {
+    $normalized = biocoNextRevalidateNormalizeState($state);
+    $json = json_encode($normalized, JSON_UNESCAPED_SLASHES);
+    if (!is_string($json)) {
+        $json = json_encode(biocoNextRevalidateDefaultState(), JSON_UNESCAPED_SLASHES);
+    }
+    rewind($fh);
+    ftruncate($fh, 0);
+    fwrite($fh, $json ?: '{}');
+    fflush($fh);
+}
+
+function biocoDispatchRevalidatePayload(array $payload): bool {
+    $cfg = biocoNextRevalidateConfig();
+    if ($cfg['secret'] === '' || $cfg['url'] === '') return false;
+
+    $payload['secret'] = $cfg['secret'];
+    $ch = curl_init($cfg['url']);
+    curl_setopt_array($ch, [
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($payload),
+        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+        CURLOPT_CONNECTTIMEOUT => 1,
+        CURLOPT_TIMEOUT => 3,
+        CURLOPT_RETURNTRANSFER => true,
+    ]);
+
+    $response = curl_exec($ch);
+    if ($response === false) {
+        wire('log')->save('next-revalidate', 'cURL failed: ' . curl_error($ch));
+        curl_close($ch);
+        return false;
+    }
+
+    $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($status >= 400) {
+        wire('log')->save('next-revalidate', "HTTP {$status} from {$cfg['url']}: {$response}");
+        return false;
+    }
+
+    return true;
+}
+
+function biocoNextRevalidateFlushQueue(bool $force = false): bool {
+    $cfg = biocoNextRevalidateConfig();
+    if ($cfg['secret'] === '') return false;
+
+    $dir = dirname($cfg['queueFile']);
+    if ($dir && !is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+    }
+
+    $fh = @fopen($cfg['queueFile'], 'c+');
+    if (!$fh) {
+        wire('log')->save('next-revalidate', "Cannot open queue file: {$cfg['queueFile']}");
+        return false;
+    }
+    if (!flock($fh, LOCK_EX)) {
+        fclose($fh);
+        return false;
+    }
+
+    $state = biocoNextRevalidateReadState($fh);
+    $now = time();
+    $hasPending = count($state['pendingPaths']) > 0 || count($state['pendingTags']) > 0 || $state['pendingLayout'];
+    if (!$hasPending) {
+        flock($fh, LOCK_UN);
+        fclose($fh);
+        return false;
+    }
+
+    $sinceLastDispatch = $now - (int)$state['lastDispatchAt'];
+    $sinceFirstPending = $state['firstPendingAt'] > 0 ? $now - (int)$state['firstPendingAt'] : 0;
+    $isDue = $force
+        || $cfg['debounceSeconds'] === 0
+        || $sinceLastDispatch >= $cfg['debounceSeconds']
+        || ($state['firstPendingAt'] > 0 && $sinceFirstPending >= $cfg['maxWaitSeconds']);
+
+    if (!$isDue) {
+        flock($fh, LOCK_UN);
+        fclose($fh);
+        return false;
+    }
+
+    $payload = [
+        'paths' => $state['pendingPaths'],
+        'tags' => $state['pendingTags'],
+        'layout' => (bool)$state['pendingLayout'],
+    ];
+    $ok = biocoDispatchRevalidatePayload($payload);
+    $state['lastDispatchAt'] = $now;
+    if ($ok) {
+        $state['firstPendingAt'] = 0;
+        $state['pendingPaths'] = [];
+        $state['pendingTags'] = [];
+        $state['pendingLayout'] = false;
+    }
+
+    biocoNextRevalidateWriteState($fh, $state);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+    return $ok;
+}
+
+function biocoQueueRevalidateRequest(array $paths, array $tags = ['cms'], bool $layout = true): void {
+    $cfg = biocoNextRevalidateConfig();
+    if ($cfg['secret'] === '') {
+        static $secretWarningLogged = false;
+        if (!$secretWarningLogged) {
+            wire('log')->save('next-revalidate', 'Missing next revalidate secret, skipping queue.');
+            $secretWarningLogged = true;
+        }
+        return;
+    }
+
+    $dir = dirname($cfg['queueFile']);
+    if ($dir && !is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+    }
+
+    $fh = @fopen($cfg['queueFile'], 'c+');
+    if (!$fh) {
+        wire('log')->save('next-revalidate', "Cannot open queue file: {$cfg['queueFile']}");
+        return;
+    }
+    if (!flock($fh, LOCK_EX)) {
+        fclose($fh);
+        return;
+    }
+
+    $state = biocoNextRevalidateReadState($fh);
+    $now = time();
+    $hadPending = count($state['pendingPaths']) > 0 || count($state['pendingTags']) > 0 || $state['pendingLayout'];
+
+    $state['pendingPaths'] = biocoNextRevalidateSanitizePaths(array_merge($state['pendingPaths'], $paths));
+    $state['pendingTags'] = biocoNextRevalidateSanitizeTags(array_merge($state['pendingTags'], $tags));
+    $state['pendingLayout'] = (bool)$state['pendingLayout'] || $layout;
+
+    $hasPending = count($state['pendingPaths']) > 0 || count($state['pendingTags']) > 0 || $state['pendingLayout'];
+    if ($hasPending && (!$hadPending || $state['firstPendingAt'] <= 0)) {
+        $state['firstPendingAt'] = $now;
+    }
+    if (!$hasPending) {
+        $state['firstPendingAt'] = 0;
+    }
+
+    biocoNextRevalidateWriteState($fh, $state);
+    flock($fh, LOCK_UN);
+    fclose($fh);
+
+    biocoNextRevalidateFlushQueue(false);
+}
+
+// On-demand ISR revalidation: enqueue CMS changes, coalesce bursts, flush trailing.
 $wire->addHookAfter('Pages::saved', function($event) {
     $page = $event->arguments(0);
     if (!$page instanceof Page || !$page->id) return;
     $skip = ['admin', 'api', 'MediaLibrary'];
     if (in_array($page->template->name, $skip)) return;
-    // For repeater items, revalidate the parent page
+
+    // For repeater items, revalidate the parent page.
     if (strpos($page->template->name, 'repeater_') === 0) {
         if (method_exists($page, 'getForPage')) {
             $parent = $page->getForPage();
@@ -352,18 +625,15 @@ $wire->addHookAfter('Pages::saved', function($event) {
             else return;
         } else return;
     }
-    $secret = getenv('NEXT_REVALIDATE_SECRET');
-    $url = getenv('NEXT_REVALIDATE_URL') ?: 'http://127.0.0.1:49152/api/revalidate';
-    if (!$secret) return;
-    $path = rtrim(str_replace('/content/', '/', $page->path), '/') ?: '/';
-    $ch = curl_init($url);
-    curl_setopt_array($ch, [
-        CURLOPT_POST => true,
-        CURLOPT_POSTFIELDS => json_encode(['secret' => $secret, 'path' => $path]),
-        CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-        CURLOPT_TIMEOUT => 3,
-        CURLOPT_RETURNTRANSFER => true,
-    ]);
-    curl_exec($ch);
-    curl_close($ch);
+
+    $paths = array_values(array_unique(array_filter([
+        biocoNextPathFromPage($page),
+        '/',
+    ])));
+
+    biocoQueueRevalidateRequest($paths, ['cms'], true);
 }, ['priority' => 100]);
+
+$wire->addHookAfter('LazyCron::everyMinute', function() {
+    biocoNextRevalidateFlushQueue(false);
+});

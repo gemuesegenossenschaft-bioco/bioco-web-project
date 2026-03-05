@@ -182,7 +182,7 @@ export async function fetchEventsFromCms(): Promise<EventsFeed> {
 
   for (const endpoint of endpoints) {
     try {
-      const response = await fetch(endpoint, { cache: 'force-cache' })
+      const response = await fetch(endpoint, { cache: 'no-store' })
       if (!response.ok) continue
       const candidate = (await response.json()) as EventsApiResponse
       if (!isValidEventsApiResponse(candidate) || !candidate.success) continue

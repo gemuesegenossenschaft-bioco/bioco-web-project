@@ -8,7 +8,7 @@ Deploys frontend and/or CMS to Novatrend cPanel.
 1. Always build locally. Server builds fail (CloudLinux thread limits).
 2. Rsync three dirs in order: `.next/standalone/` (exclude start.sh), `.next/static/`, `public/`.
 3. Restore sharp: copy `sharp-linux-x64` AND `sharp-libvips-linux-x64` from `/tmp/sharp-pkg/`. Remove darwin bindings.
-4. Rsync CMS templates: `admin.js`, `api.php`, `api-events.php` to `/home/bioco/public_html/cms/site/templates/`.
+4. Rsync CMS files: `admin.js`, `api.php`, `api-events.php` to `/home/bioco/public_html/cms/site/templates/` **and** `site/ready.php` to `/home/bioco/public_html/cms/site/ready.php`.
 5. Restart: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`. Never use `pgrep -f` (kills SSH session).
 6. Verify: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:49154/` from server.
 7. External test: `curl --resolve bioco.ch:443:193.33.128.160 https://bioco.ch/`
@@ -28,6 +28,7 @@ Configures Node.js on Novatrend/CloudLinux cPanel.
 - Node venv: `source /home/bioco/nodevenv/bioco-frontend/18/bin/activate` before any node/npm commands.
 - `127.0.0.1` does NOT resolve to bioco.ch vhost. Test externally with `--resolve`.
 - `SetEnv` in .htaccess causes 500 (mod_env not available with lsapi handler).
+- Keep ISR hook config in `site/config.php`: `nextRevalidateSecret`, `nextRevalidateUrl`, debounce/max-wait/queue-file keys.
 
 ## CMS API Agent
 
