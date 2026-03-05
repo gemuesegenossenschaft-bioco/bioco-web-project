@@ -56,12 +56,27 @@ RewriteRule ^(.*)$ http://127.0.0.1:49154/$1 [P,L]
 - `start.sh` exports env vars, runs `node server.js` with `nohup`, uses flock to prevent duplicates
 - Cron runs `start.sh` every 5 minutes (no-op if already running)
 - Safe restart: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`
+- Fallback restart if old workers remain: `for p in $(ps -eo pid,comm | awk '$2=="next-server"{print $1}'); do kill $p; done`
 
 ### Environment variables (set in start.sh)
 `PORT`, `NODE_ENV`, `HOSTNAME`, `PROCESSWIRE_BASE_URL`, `PROCESSWIRE_API_KEY`, `PW_API_KEY`, `REVALIDATE_SECRET`, `NEXT_PUBLIC_PROCESSWIRE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`
 
 ### CMS ISR settings (set in `site/config.php`)
 `nextRevalidateSecret`, `nextRevalidateUrl`, `nextRevalidateDebounceSeconds`, `nextRevalidateMaxWaitSeconds`, `nextRevalidateQueueFile`
+
+### Config contract (must stay in sync)
+- `start.sh: REVALIDATE_SECRET` must equal `site/config.php: nextRevalidateSecret`.
+- `site/config.php: nextRevalidateUrl` must be `http://127.0.0.1:49154/api/revalidate`.
+- Debounce defaults: `nextRevalidateDebounceSeconds=10`, `nextRevalidateMaxWaitSeconds=45`.
+- Queue file: `nextRevalidateQueueFile=/tmp/bioco-next-revalidate-state.json`.
+- Do not use `.htaccess SetEnv` for these values on cPanel/lsapi.
+
+### Caching + revalidate contract
+- `frontend/middleware.ts`: security headers only; do not set global `Cache-Control`.
+- `frontend/lib/cmsClient.ts`: use `next.revalidate` + cache tags including `cms`.
+- `frontend/components/AktuellesData.tsx`: client fetch uses `cache: 'no-store'`.
+- `frontend/app/api/revalidate/route.ts`: accepts `path|paths|tag|tags|layout`, validates `REVALIDATE_SECRET`.
+- `site/ready.php`: queue + debounce + trailing flush (`LazyCron::everyMinute`) for CMS save events.
 
 ## Deploy
 
@@ -88,12 +103,24 @@ rsync -avzc site/templates/{admin.js,api.php,api-events.php} bioco@193.33.128.16
 rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 # Restart
 ssh bioco@193.33.128.160 'for p in $(pgrep -x next-server); do kill $p; done; sleep 3; rm -f /tmp/bioco-next-start.lock /tmp/bioco-next.pid; /home/bioco/bioco-frontend/start.sh'
+# Fallback if old workers remain
+ssh bioco@193.33.128.160 'for p in $(ps -eo pid,comm | awk '\''$2=="next-server"{print $1}'\''); do kill $p; done'
 ```
 
 **CMS-only deploy** (no frontend build needed):
 ```bash
 rsync -avzc site/templates/{admin.js,api.php,api-events.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
 rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
+```
+
+**Post-deploy checks (required):**
+```bash
+# Local app health
+ssh bioco@193.33.128.160 'curl -s -o /dev/null -w "Local: HTTP %{http_code}\n" http://127.0.0.1:49154/'
+# External app health
+curl --resolve bioco.ch:443:193.33.128.160 -s -o /dev/null -w "External: HTTP %{http_code}\n" https://bioco.ch/
+# Revalidate auth + route
+ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRET=$(perl -nE '\''if (/nextRevalidateSecret\\s*=\\s*"([^"]+)"/) { say $1; exit }'\'' "$CFG"); PAYLOAD=$(printf "{\"secret\":\"%s\",\"path\":\"/\"}" "$SECRET"); curl -s -o /dev/null -w "Revalidate: HTTP %{http_code}\n" -X POST http://127.0.0.1:49154/api/revalidate -H "Content-Type: application/json" --data "$PAYLOAD"'
 ```
 
 ## URLs

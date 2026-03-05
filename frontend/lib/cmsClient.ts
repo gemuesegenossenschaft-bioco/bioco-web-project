@@ -43,7 +43,8 @@ export function buildCmsHeaders(): HeadersInit | undefined {
 }
 
 export function cmsFetchOptions(revalidateSeconds: number, tags: string[] = ['cms']) {
-  const safeTags = [...new Set(tags.map((tag) => tag.trim()).filter(Boolean))]
+  const normalized = tags.map((tag) => tag.trim()).filter(Boolean)
+  const safeTags = normalized.filter((tag, index) => normalized.indexOf(tag) === index)
   return {
     next: { revalidate: revalidateSeconds, tags: safeTags },
   }

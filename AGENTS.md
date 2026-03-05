@@ -9,9 +9,11 @@ Deploys frontend and/or CMS to Novatrend cPanel.
 2. Rsync three dirs in order: `.next/standalone/` (exclude start.sh), `.next/static/`, `public/`.
 3. Restore sharp: copy `sharp-linux-x64` AND `sharp-libvips-linux-x64` from `/tmp/sharp-pkg/`. Remove darwin bindings.
 4. Rsync CMS files: `admin.js`, `api.php`, `api-events.php` to `/home/bioco/public_html/cms/site/templates/` **and** `site/ready.php` to `/home/bioco/public_html/cms/site/ready.php`.
-5. Restart: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`. Never use `pgrep -f` (kills SSH session).
-6. Verify: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:49154/` from server.
-7. External test: `curl --resolve bioco.ch:443:193.33.128.160 https://bioco.ch/`
+5. Restart primary: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`. Never use `pgrep -f` (kills SSH session).
+6. Restart fallback if primary misses old workers: `for p in $(ps -eo pid,comm | awk '$2=="next-server"{print $1}'); do kill $p; done`.
+7. Verify: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:49154/` from server.
+8. External test: `curl --resolve bioco.ch:443:193.33.128.160 https://bioco.ch/`
+9. Verify revalidate auth from server: `POST http://127.0.0.1:49154/api/revalidate` must return `200` with secret from `site/config.php`.
 
 **Common issues:**
 - 503 after deploy: sharp bindings missing or process not started. Check `tail /home/bioco/logs/nextjs.log`.
@@ -29,6 +31,8 @@ Configures Node.js on Novatrend/CloudLinux cPanel.
 - `127.0.0.1` does NOT resolve to bioco.ch vhost. Test externally with `--resolve`.
 - `SetEnv` in .htaccess causes 500 (mod_env not available with lsapi handler).
 - Keep ISR hook config in `site/config.php`: `nextRevalidateSecret`, `nextRevalidateUrl`, debounce/max-wait/queue-file keys.
+- Keep secrets synced: `start.sh: REVALIDATE_SECRET` == `site/config.php: nextRevalidateSecret`.
+- Required values: `nextRevalidateUrl=http://127.0.0.1:49154/api/revalidate`, debounce `10`, max-wait `45`, queue file `/tmp/bioco-next-revalidate-state.json`.
 
 ## CMS API Agent
 
@@ -40,6 +44,7 @@ Manages ProcessWire API endpoints in `site/templates/api.php`.
 - Form sub-endpoints: contact, subscribe, visit, waiting-list, event-signup.
 - Admin endpoints require `requireAdminSession()` (checks PW login).
 - Events also served by standalone `api-events.php` template.
+- Cache invalidation hook lives in `site/ready.php` (not `api.php`): queued + debounced + trailing flush via `LazyCron::everyMinute`.
 
 ## CMS Admin Agent
 
@@ -84,3 +89,9 @@ Next.js 14 app router frontend.
 - `mapEventFromApi()` normalizes API response to `AktuellesItem`
 - `cardImage` field used as fallback thumbnail when no media attached
 - Modal system: `ItemDetailModal` for event/aktuelles detail views
+- Caching contract:
+  - `frontend/middleware.ts` sets security headers only (no global `Cache-Control` override).
+  - CMS server fetches use `next.revalidate` + tag `cms`.
+  - Client-side events fetch uses `cache: 'no-store'`.
+  - `/api/revalidate` supports `path|paths|tag|tags|layout`, secret required.
+- If touching cache/revalidate behavior, update tests: `frontend/tests/revalidate-route.test.ts`, `frontend/tests/middleware.test.ts`.

@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     ...(Array.isArray(body.paths) ? body.paths.map(normalizePath) : []),
   ].filter((v): v is string => Boolean(v))
 
-  const uniquePaths = [...new Set(paths)]
+  const uniquePaths = paths.filter((path, index) => paths.indexOf(path) === index)
   for (const path of uniquePaths) {
     revalidatePath(path)
   }
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
     .map((tag) => (typeof tag === 'string' ? tag.trim() : ''))
     .filter((tag) => tag.length > 0)
 
-  const uniqueTags = [...new Set(tags)]
+  const uniqueTags = tags.filter((tag, index) => tags.indexOf(tag) === index)
   for (const tag of uniqueTags) {
     revalidateTag(tag)
   }
