@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
-import { SectionRenderer } from '@/components/sections/SectionRenderer'
+import { Suspense } from 'react'
+import { VisualEditorWrapper } from '@/components/sections/VisualEditorWrapper'
 import { getAllPages, getPageContent } from '@/lib/processwire'
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
@@ -80,7 +81,9 @@ export default async function CmsPage({ params }: { params: { slug?: string[] } 
     <>
       <Header />
       <main className="main-content">
-        <SectionRenderer sections={sections} />
+        <Suspense fallback={null}>
+          <VisualEditorWrapper sections={sections} />
+        </Suspense>
       </main>
       <Footer />
     </>
