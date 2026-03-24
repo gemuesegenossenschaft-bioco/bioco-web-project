@@ -2,15 +2,11 @@
 
 /**
  * Visual Editor: iframe-based WYSIWYG section editor.
- *
- * Loads the Next.js frontend in an iframe, communicates via postMessage.
- * Requires admin session. Installed as a PW Process page at /processwire/visual-editor/.
- *
- * Setup in PW admin:
- * 1. Create template "visual-editor" with this file, noPrependTemplateFile=1, noAppendTemplateFile=1
- * 2. Create page at /processwire/visual-editor/ under Admin, template=visual-editor
- * 3. Or use the auto-install hook in ready.php
+ * Outputs a full HTML page and exits, bypassing PW admin chrome.
  */
+
+// Bypass PW output buffering: clean all buffers, output directly, then exit.
+while (ob_get_level()) ob_end_clean();
 
 if (!$user->isLoggedin() || $user->isGuest()) {
     header('Location: ' . $config->urls->admin . 'login/');
@@ -20,12 +16,22 @@ if (!$user->isLoggedin() || $user->isGuest()) {
 $siteUrl = rtrim(getenv('NEXT_PUBLIC_SITE_URL') ?: 'https://bioco.ch', '/');
 $draftSecret = getenv('PW_PREVIEW_TOKEN') ?: '';
 
-// Build page list for selector
+// Build page list: all pages with content_sections + homepage
 $contentPages = [];
-$pageTree = $pages->find("has_parent=/content/, template!=admin, include=hidden, sort=sort");
-foreach ($pageTree as $p) {
-    $path = '/' . trim(str_replace('/content/', '/', $p->path), '/');
-    if ($path === '/') $path = '/';
+$home = $pages->get('/');
+if ($home->id) {
+    $contentPages[] = [
+        'id' => $home->id,
+        'title' => $home->title ?: 'Startseite',
+        'path' => '/',
+        'template' => $home->template->name,
+    ];
+}
+
+// Find all pages that have content_sections field
+$sectionPages = $pages->find("has_field=content_sections, template!=admin, id!={$home->id}, sort=sort");
+foreach ($sectionPages as $p) {
+    $path = '/' . trim($p->path, '/');
     $contentPages[] = [
         'id' => $p->id,
         'title' => $p->title,
@@ -33,19 +39,11 @@ foreach ($pageTree as $p) {
         'template' => $p->template->name,
     ];
 }
-// Add homepage
-$home = $pages->get('/');
-if ($home->id) {
-    array_unshift($contentPages, [
-        'id' => $home->id,
-        'title' => $home->title ?: 'Startseite',
-        'path' => '/',
-        'template' => $home->template->name,
-    ]);
-}
 
 $pagesJson = json_encode($contentPages, JSON_UNESCAPED_UNICODE);
 $apiRoot = $config->urls->root . 'api/';
+
+header('Content-Type: text/html; charset=UTF-8');
 
 ?><!DOCTYPE html>
 <html lang="de">
@@ -620,3 +618,4 @@ body {
 </script>
 </body>
 </html>
+<?php exit; // Prevent PW from wrapping output in admin chrome

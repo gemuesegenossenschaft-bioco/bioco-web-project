@@ -722,18 +722,55 @@ $(document).ready(function() {
     // ================================================================
     function addVisualEditorLink() {
         if ($('.bioco-visual-editor-link').length) return;
-        // Add to admin top nav or page edit header
-        var adminUrl = ProcessWire.config.urls.admin || '/processwire/';
-        var $link = $('<a class="bioco-visual-editor-link ui-button ui-priority-secondary" style="margin-left:10px;font-size:12px">')
-            .attr('href', adminUrl + 'visual-editor/')
+        var siteRoot = ProcessWire.config.urls.root || '/';
+        var veUrl = siteRoot + 'visual-editor/';
+        var $link = $('<a class="bioco-visual-editor-link">')
+            .attr('href', veUrl)
             .attr('target', '_blank')
-            .html('<i class="fa fa-eye"></i> Visual Editor');
+            .css({
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '6px 14px',
+                background: '#4a7c59',
+                color: '#fff',
+                borderRadius: '6px',
+                fontSize: '13px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                marginLeft: '10px',
+                cursor: 'pointer',
+                transition: 'background 0.15s',
+            })
+            .html('<i class="fa fa-eye"></i> Visual Editor')
+            .on('mouseenter', function() { $(this).css('background', '#3a6c49'); })
+            .on('mouseleave', function() { $(this).css('background', '#4a7c59'); });
 
-        // Try to add to main nav
-        var $topNav = $('#pw-masthead .pw-masthead-nav, #topnav, .uk-navbar-nav').first();
-        if ($topNav.length) {
-            var $li = $('<li style="display:inline-block;margin-left:8px"></li>').append($link);
-            $topNav.append($li);
+        // Try multiple PW admin nav selectors
+        var placed = false;
+        var navSelectors = [
+            '#pw-masthead-links',
+            '#pw-masthead .pw-masthead-nav',
+            '#topnav',
+            '.uk-navbar-right',
+            '.uk-navbar-nav',
+            '#masthead .container',
+        ];
+        for (var i = 0; i < navSelectors.length; i++) {
+            var $nav = $(navSelectors[i]).first();
+            if ($nav.length) {
+                $nav.append($link);
+                placed = true;
+                break;
+            }
+        }
+        // Fallback: prepend to page content area
+        if (!placed) {
+            var $content = $('#pw-content-body, #content, .pw-container').first();
+            if ($content.length) {
+                $link.css({ marginBottom: '12px', display: 'inline-flex' });
+                $content.prepend($link);
+            }
         }
     }
 });
