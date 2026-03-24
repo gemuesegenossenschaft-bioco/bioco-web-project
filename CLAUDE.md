@@ -72,7 +72,8 @@ RewriteRule ^(.*)$ http://127.0.0.1:49154/$1 [P,L]
 - Do not use `.htaccess SetEnv` for these values on cPanel/lsapi.
 
 ### Caching + revalidate contract
-- `frontend/middleware.ts`: security headers only; do not set global `Cache-Control`.
+- `frontend/middleware.ts`: security headers only; no `Cache-Control`, no framing headers (framing via `next.config.js` `headers()`).
+- `frontend/next.config.js` `headers()`: CSP `frame-ancestors` for iframe protection. Do NOT use middleware for framing headers (ISR cache overwrites them).
 - `frontend/lib/cmsClient.ts`: use `next.revalidate` + cache tags including `cms`.
 - `frontend/components/AktuellesData.tsx`: client fetch uses `cache: 'no-store'`.
 - `frontend/app/api/revalidate/route.ts`: accepts `path|paths|tag|tags|layout`, validates `REVALIDATE_SECRET`.
@@ -87,7 +88,7 @@ Build locally, rsync frontend + CMS templates, restore sharp, restart.
 scripts/deploy.sh main
 ```
 
-This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, rsyncs CMS templates (admin.js, api.php, api-events.php) + `site/ready.php`, restarts Node.js, verifies.
+This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, rsyncs CMS templates (admin.js, api.php, api-events.php, visual-editor.php) + `site/ready.php`, restarts Node.js, verifies.
 
 **Manual deploy:**
 ```bash
@@ -98,7 +99,7 @@ rsync -avzc --delete public/ bioco@193.33.128.160:/home/bioco/bioco-frontend/pub
 # Restore sharp (REQUIRED after standalone rsync)
 ssh bioco@193.33.128.160 'cp -r /tmp/sharp-pkg/node_modules/@img/sharp-{linux-x64,libvips-linux-x64} /home/bioco/bioco-frontend/node_modules/@img/'
 # CMS templates
-rsync -avzc site/templates/{admin.js,api.php,api-events.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
 # CMS hooks
 rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 # Restart
@@ -109,7 +110,7 @@ ssh bioco@193.33.128.160 'for p in $(ps -eo pid,comm | awk '\''$2=="next-server"
 
 **CMS-only deploy** (no frontend build needed):
 ```bash
-rsync -avzc site/templates/{admin.js,api.php,api-events.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
 rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 ```
 
@@ -142,14 +143,17 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 | `frontend/hooks/useEventsFeed.ts` | Client-side events hook |
 | `frontend/lib/cmsClient.ts` | ProcessWire API client |
 | `frontend/lib/processwire.ts` | PW page fetching, section rendering |
-| `frontend/middleware.ts` | Security headers (CSP, X-Frame-Options) |
+| `frontend/middleware.ts` | Security headers (no framing headers, see next.config.js) |
+| `frontend/hooks/useVisualEditor.ts` | Visual editor: postMessage protocol, section click/highlight/update |
+| `frontend/components/sections/VisualEditorWrapper.tsx` | Detects `?_visual=1`, wraps SectionRenderer with editor mode |
 
 ### CMS (ProcessWire)
 | File | Purpose |
 |------|---------|
 | `site/templates/api.php` | Unified API router, all endpoints |
 | `site/templates/api-events.php` | Events API (upcoming/past split, cardImage) |
-| `site/templates/admin.js` | Admin UI: media library, image editor, preview, recap button |
+| `site/templates/admin.js` | Admin UI: media library, image editor, preview, recap button, visual editor link |
+| `site/templates/visual-editor.php` | Standalone visual editor: iframe + sidebar, postMessage CRUD |
 | `site/templates/admin.php` | Loads admin.js in PW admin |
 | `site/config.php` | PW config (gitignored, secrets via getenv) |
 
@@ -182,6 +186,9 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 |----------|-------------|
 | `/api/content/event-to-recap` | Convert upcoming event to past recap |
 | `/api/content-save` | Save section content |
+| `/api/sections-reorder` | Reorder content_sections repeater items |
+| `/api/sections-add` | Add new content_sections repeater item |
+| `/api/sections-delete` | Delete content_sections repeater item |
 | `/api/media-import` | Import single media file |
 | `/api/media-import-batch` | Batch media import |
 | `/api/media-usage` | Check media usage |
@@ -202,6 +209,20 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 - **Image editor**: Filerobot-based editor on image thumbnails
 - **Preview button**: opens Next.js draft preview for the current page
 - **Rückblick button**: on upcoming events, converts to past status for recap editing
+- **Visual Editor link**: green button in admin navbar, opens `/visual-editor/` in new tab
+
+## Visual Editor
+
+iframe + postMessage WYSIWYG editor for content sections. Pattern from Storyblok/Payload CMS.
+
+**Architecture:** PW admin page (`/visual-editor/`, template `visual-editor.php`) embeds Next.js site in iframe with `?_visual=1`. Bidirectional postMessage with `bioco:visual-editor:` prefix.
+
+**Key constraints:**
+- `visual-editor.php` must call `while (ob_get_level()) ob_end_clean()` at top and `exit` at bottom to bypass PW admin chrome
+- PW `has_field` is NOT a valid selector. Use `wire('templates')` iteration + `$t->hasField('content_sections')` to find pages
+- Framing protection: `next.config.js` `headers()` sets CSP `frame-ancestors 'self' https://cms.bioco.ch`. Do NOT use middleware for framing headers (don't survive ISR cache hits in Next.js 14)
+- `VisualEditorWrapper` requires `<Suspense>` boundary (uses `useSearchParams()`)
+- After deploy, kill ALL `next-server` PIDs. Zombie processes from prior deploys serve stale middleware/headers
 
 ## Running PW Migrations
 

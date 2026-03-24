@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
+import { Suspense } from 'react'
 import './globals.css'
 import { MatomoScript } from '@/components/MatomoScript'
 import { MarkerScript } from '@/components/MarkerScript'
 import { OrganizationSchema, LocalBusinessSchema } from '@/components/StructuredData'
 import { PathnameBodyClass } from '@/components/PathnameBodyClass'
+import { VisualEditorBridge } from '@/components/VisualEditorBridge'
 import { getGlobalSettings } from '@/lib/processwire'
 
 export const metadata: Metadata = {
@@ -61,6 +63,7 @@ export default async function RootLayout({
         <OrganizationSchema />
         <LocalBusinessSchema />
         {children}
+        <Suspense fallback={null}><VisualEditorBridge /></Suspense>
         <MatomoScript />
         <MarkerScript />
       </body>
