@@ -51,7 +51,7 @@ if ($apiKey) {
     // Allow unauthenticated access to health and content (read-only) endpoints
     // media-* endpoints use ProcessWire session auth inside handlers
     $endpoint = $input->urlSegment1;
-    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files']) && $requestKey !== $apiKey) {
+    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'sections-reorder', 'sections-add', 'sections-delete']) && $requestKey !== $apiKey) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid API key', 'hint' => 'Set X-API-Key header']);
         exit;
@@ -371,7 +371,7 @@ function buildSectionVideo($section) {
 /**
  * Build section data for API response
  */
-function buildSectionData($section) {
+function buildSectionData($section, $sortIndex = null) {
     $title = decodeText($section->get('section_title') ?: '');
     $text = $section->get('section_text') ?: '';
     $layout = $section->get('section_layout') ?: 'split_media_text';
@@ -382,11 +382,15 @@ function buildSectionData($section) {
 
     $sectionData = [
         'id' => $section->get('section_id') ?: 'section-' . $section->id,
+        'pwId' => (int) $section->id,
         'title' => $title,
         'text' => $text,
         'layout' => $layout,
         'theme' => $theme,
     ];
+    if ($sortIndex !== null) {
+        $sectionData['sort'] = (int) $sortIndex;
+    }
 
     if (!empty($eyebrow)) {
         $sectionData['eyebrow'] = $eyebrow;
@@ -682,6 +686,8 @@ switch ($endpoint) {
         }
         $allowedFields = [
             'section_title', 'section_text', 'section_eyebrow',
+            'section_layout', 'section_theme', 'section_bg_color',
+            'section_component', 'section_image_overlay',
             'button_text', 'button_href', 'button_variant',
             'button2_text', 'button2_href', 'button2_variant',
         ];
@@ -695,11 +701,107 @@ switch ($endpoint) {
         echo json_encode(['success' => true, 'saved' => true, 'sectionId' => $sectionId]);
         break;
 
+    // ====================================================================
+    // Section CRUD (Visual Editor)
+    // ====================================================================
+
+    case 'sections-reorder':
+        requireAdminSession();
+        $data = json_decode(file_get_contents('php://input'), true);
+        $pageId = (int)($data['pageId'] ?? 0);
+        $order = $data['order'] ?? [];
+        if (!$pageId || !is_array($order) || empty($order)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing pageId or order']);
+            break;
+        }
+        $parentPage = wire('pages')->get($pageId);
+        if (!$parentPage->id || !$parentPage->hasField('content_sections')) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid page or no content_sections field']);
+            break;
+        }
+        $repeater = $parentPage->content_sections;
+        $sortMap = [];
+        foreach ($order as $idx => $pwId) {
+            $sortMap[(int) $pwId] = $idx;
+        }
+        foreach ($repeater as $item) {
+            if (isset($sortMap[$item->id])) {
+                $item->sort = $sortMap[$item->id];
+                $item->save();
+            }
+        }
+        $parentPage->save('content_sections');
+        echo json_encode(['success' => true, 'reordered' => count($order)]);
+        break;
+
+    case 'sections-add':
+        requireAdminSession();
+        $data = json_decode(file_get_contents('php://input'), true);
+        $pageId = (int)($data['pageId'] ?? 0);
+        $layout = $sanitizer->name($data['layout'] ?? 'rich_text');
+        if (!$pageId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing pageId']);
+            break;
+        }
+        $parentPage = wire('pages')->get($pageId);
+        if (!$parentPage->id || !$parentPage->hasField('content_sections')) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid page or no content_sections field']);
+            break;
+        }
+        $newItem = $parentPage->content_sections->getNew();
+        $newItem->set('section_title', 'Neuer Abschnitt');
+        $newItem->set('section_text', '<p></p>');
+        $newItem->set('section_layout', $layout);
+        $newItem->save();
+        $parentPage->save('content_sections');
+        echo json_encode([
+            'success' => true,
+            'section' => buildSectionData($newItem, $parentPage->content_sections->count() - 1),
+        ]);
+        break;
+
+    case 'sections-delete':
+        requireAdminSession();
+        $data = json_decode(file_get_contents('php://input'), true);
+        $pageId = (int)($data['pageId'] ?? 0);
+        $sectionPwId = (int)($data['sectionPwId'] ?? 0);
+        if (!$pageId || !$sectionPwId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing pageId or sectionPwId']);
+            break;
+        }
+        $parentPage = wire('pages')->get($pageId);
+        if (!$parentPage->id || !$parentPage->hasField('content_sections')) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid page or no content_sections field']);
+            break;
+        }
+        $found = false;
+        foreach ($parentPage->content_sections as $item) {
+            if ((int) $item->id === $sectionPwId) {
+                $parentPage->content_sections->remove($item);
+                $found = true;
+                break;
+            }
+        }
+        if (!$found) {
+            http_response_code(404);
+            echo json_encode(['error' => 'Section not found']);
+            break;
+        }
+        $parentPage->save('content_sections');
+        echo json_encode(['success' => true, 'deleted' => $sectionPwId]);
+        break;
+
     default:
         http_response_code(404);
         echo json_encode([
             'error' => 'Endpoint not found',
-            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save'],
+            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'sections-reorder', 'sections-add', 'sections-delete'],
         ]);
 }
 
@@ -833,10 +935,12 @@ function handleContentRequest($type, $param = null) {
             
             $sections = [];
             
-            // Check for content_sections repeater
+            // Check for content_sections repeater (explicit sort order)
             if ($contentPage->hasField('content_sections') && $contentPage->content_sections) {
-                foreach ($contentPage->content_sections as $section) {
-                    $sections[] = buildSectionData($section);
+                $sortedSections = $contentPage->content_sections->sort('sort');
+                $idx = 0;
+                foreach ($sortedSections as $section) {
+                    $sections[] = buildSectionData($section, $idx++);
                 }
             }
             
@@ -913,10 +1017,12 @@ function handleContentRequest($type, $param = null) {
                 'sections' => [],
             ];
             
-            // Get sections
+            // Get sections (explicit sort order)
             if ($homepage->hasField('content_sections') && $homepage->content_sections) {
-                foreach ($homepage->content_sections as $section) {
-                    $response['sections'][] = buildSectionData($section);
+                $sortedSections = $homepage->content_sections->sort('sort');
+                $idx = 0;
+                foreach ($sortedSections as $section) {
+                    $response['sections'][] = buildSectionData($section, $idx++);
                 }
             }
             
@@ -975,18 +1081,22 @@ function handleContentRequest($type, $param = null) {
                 }
             }
             
-            // Page sections (Repeater)
+            // Page sections (Repeater, explicit sort order)
             if ($page->hasField('page_sections') && $page->page_sections && $page->page_sections->count()) {
                 $pageData['sections'] = [];
-                foreach ($page->page_sections as $section) {
-                    $pageData['sections'][] = buildSectionData($section);
+                $sortedSections = $page->page_sections->sort('sort');
+                $idx = 0;
+                foreach ($sortedSections as $section) {
+                    $pageData['sections'][] = buildSectionData($section, $idx++);
                 }
             }
 
             if (empty($pageData['sections']) && $page->hasField('content_sections') && $page->content_sections && $page->content_sections->count()) {
                 $pageData['sections'] = [];
-                foreach ($page->content_sections as $section) {
-                    $pageData['sections'][] = buildSectionData($section);
+                $sortedSections = $page->content_sections->sort('sort');
+                $idx = 0;
+                foreach ($sortedSections as $section) {
+                    $pageData['sections'][] = buildSectionData($section, $idx++);
                 }
             }
             

@@ -100,6 +100,8 @@ export interface ContentImage {
 
 export interface ContentSection {
   id: string;
+  pwId?: number;  // ProcessWire page ID (for visual editor CRUD)
+  sort?: number;  // Sort index (for visual editor reorder)
   title: string;
   text: string;  // May contain HTML from CKEditor
   layout?: string;

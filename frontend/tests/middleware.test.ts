@@ -22,4 +22,19 @@ describe('middleware', () => {
     expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff')
     expect(res.headers.get('X-Frame-Options')).toBe('DENY')
   })
+
+  it('sets X-Frame-Options DENY by default (no visual editor)', () => {
+    const req = new NextRequest('https://bioco.ch/mitmachen')
+    const res = middleware(req)
+    expect(res.headers.get('X-Frame-Options')).toBe('DENY')
+    expect(res.headers.get('Content-Security-Policy')).toBeNull()
+  })
+
+  it('allows iframe embedding from CMS when _visual=1', () => {
+    const req = new NextRequest('https://bioco.ch/mitmachen?_visual=1')
+    const res = middleware(req)
+    expect(res.headers.get('X-Frame-Options')).toContain('ALLOW-FROM')
+    expect(res.headers.get('Content-Security-Policy')).toContain('frame-ancestors')
+    expect(res.headers.get('Content-Security-Policy')).toContain('cms.bioco.ch')
+  })
 })

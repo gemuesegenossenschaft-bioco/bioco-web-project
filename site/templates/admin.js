@@ -665,6 +665,7 @@ $(document).ready(function() {
     }
     addPreviewButton();
     addRecapButton();
+    addVisualEditorLink();
 
     // ================================================================
     // "Rückblick erstellen" button for upcoming events
@@ -713,6 +714,26 @@ $(document).ready(function() {
             $header.first().find('h1, .pw-content-head-title').first().after($btn);
         } else {
             $('#ProcessPageEdit .Inputfields').first().before($btn);
+        }
+    }
+
+    // ================================================================
+    // Visual Editor link in admin navigation
+    // ================================================================
+    function addVisualEditorLink() {
+        if ($('.bioco-visual-editor-link').length) return;
+        // Add to admin top nav or page edit header
+        var adminUrl = ProcessWire.config.urls.admin || '/processwire/';
+        var $link = $('<a class="bioco-visual-editor-link ui-button ui-priority-secondary" style="margin-left:10px;font-size:12px">')
+            .attr('href', adminUrl + 'visual-editor/')
+            .attr('target', '_blank')
+            .html('<i class="fa fa-eye"></i> Visual Editor');
+
+        // Try to add to main nav
+        var $topNav = $('#pw-masthead .pw-masthead-nav, #topnav, .uk-navbar-nav').first();
+        if ($topNav.length) {
+            var $li = $('<li style="display:inline-block;margin-left:8px"></li>').append($link);
+            $topNav.append($li);
         }
     }
 });

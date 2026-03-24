@@ -18,6 +18,7 @@ import type { ContentSection, ContentMedia } from '@/lib/processwire-types'
 interface SectionRendererProps {
   sections: ContentSection[]
   isEditing?: boolean
+  visualEditor?: boolean
 }
 
 const componentMap: Record<string, React.ReactNode> = {
@@ -213,7 +214,7 @@ function ComponentSection({ section }: { section: ContentSection }) {
   )
 }
 
-export function SectionRenderer({ sections, isEditing = false }: SectionRendererProps) {
+export function SectionRenderer({ sections, isEditing = false, visualEditor = false }: SectionRendererProps) {
   function wrapEditable(section: ContentSection, content: React.ReactNode) {
     if (!isEditing) return content
     return (
@@ -223,10 +224,14 @@ export function SectionRenderer({ sections, isEditing = false }: SectionRenderer
     )
   }
 
+  function resolveLayout(section: ContentSection): string {
+    return section.layout || (section.image || section.media ? 'split_media_text' : 'rich_text')
+  }
+
   return (
     <div className="cms-sections">
       {sections.map((section) => {
-        const layout = section.layout || (section.image || section.media ? 'split_media_text' : 'rich_text')
+        const layout = resolveLayout(section)
         const theme = section.theme ? `cms-theme-${section.theme}` : 'cms-theme-default'
         const bgColor = section.bgColor && section.bgColor !== 'none' ? `bg-${section.bgColor}` : ''
         const wrapperClasses = [theme, bgColor].filter(Boolean).join(' ')
@@ -255,8 +260,14 @@ export function SectionRenderer({ sections, isEditing = false }: SectionRenderer
             inner = <RichTextSection section={section} />
             break
         }
+
+        const veAttrs = visualEditor ? {
+          'data-section-id': section.id,
+          'data-section-layout': layout,
+        } : {}
+
         return (
-          <div key={section.id} className={wrapperClasses}>
+          <div key={section.id} className={wrapperClasses} {...veAttrs}>
             {wrapEditable(section, inner)}
           </div>
         )
