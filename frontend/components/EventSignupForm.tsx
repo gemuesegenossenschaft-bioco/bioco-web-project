@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CTA } from './CTA'
+import { CaptchaField } from './forms/CaptchaField'
 
 interface EventSignupFormProps {
   eventTitle: string
@@ -15,13 +15,21 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
     name: '',
     email: '',
     phone: '',
-    notes: ''
+    notes: '',
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [captchaResetKey, setCaptchaResetKey] = useState(0)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (!captchaToken) {
+      setSubmitStatus('error')
+      return
+    }
+
     setIsSubmitting(true)
     setSubmitStatus('idle')
 
@@ -29,7 +37,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
       const response = await fetch('/api/forms/event-signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, eventId, eventTitle }),
+        body: JSON.stringify({ ...formData, eventId, eventTitle, captchaToken }),
       })
 
       let data
@@ -42,6 +50,8 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
       if (!response.ok || !data.success) {
         setSubmitStatus('error')
         console.error('Event signup error:', data.error || `HTTP error! status: ${response.status}`)
+        setCaptchaToken('')
+        setCaptchaResetKey((prev) => prev + 1)
       } else {
         setSubmitStatus('success')
         if (onSuccess) {
@@ -51,6 +61,8 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
     } catch (error) {
       console.error('Event signup error:', error)
       setSubmitStatus('error')
+      setCaptchaToken('')
+      setCaptchaResetKey((prev) => prev + 1)
     } finally {
       setIsSubmitting(false)
     }
@@ -68,7 +80,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
   return (
     <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
       <h3 style={{ marginBottom: '16px' }}>Anmeldung für: {eventTitle}</h3>
-      
+
       <div style={{ marginBottom: '16px' }}>
         <label htmlFor="name" style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
           Name *
@@ -84,7 +96,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
             padding: '12px',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
-            fontSize: '1rem'
+            fontSize: '1rem',
           }}
         />
       </div>
@@ -104,7 +116,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
             padding: '12px',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
-            fontSize: '1rem'
+            fontSize: '1rem',
           }}
         />
       </div>
@@ -123,7 +135,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
             padding: '12px',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
-            fontSize: '1rem'
+            fontSize: '1rem',
           }}
         />
       </div>
@@ -144,61 +156,37 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
             borderRadius: '8px',
             fontSize: '1rem',
             fontFamily: 'inherit',
-            resize: 'vertical'
+            resize: 'vertical',
           }}
         />
       </div>
 
+      <CaptchaField token={captchaToken} onTokenChange={setCaptchaToken} resetKey={captchaResetKey} />
+
       {submitStatus === 'error' && (
-        <div style={{ 
-          padding: '12px', 
-          marginBottom: '16px', 
-          background: 'var(--bioco-beet-50)', 
-          color: 'var(--bioco-beet)',
-          borderRadius: '8px'
-        }}>
+        <div
+          style={{
+            padding: '12px',
+            marginBottom: '16px',
+            background: 'var(--bioco-beet-50)',
+            color: 'var(--bioco-beet)',
+            borderRadius: '8px',
+          }}
+        >
           Die Anmeldung konnte nicht gesendet werden. Bitte versuche es erneut oder kontaktiere uns direkt.
         </div>
       )}
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
         {onCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="btn btn-secondary"
-            disabled={isSubmitting}
-          >
+          <button type="button" onClick={onCancel} className="btn btn-secondary" disabled={isSubmitting}>
             Abbrechen
           </button>
         )}
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isSubmitting}
-        >
+        <button type="submit" className="btn btn-primary" disabled={isSubmitting || !captchaToken}>
           {isSubmitting ? 'Wird gesendet...' : 'Anmelden'}
         </button>
       </div>
     </form>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

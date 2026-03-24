@@ -88,10 +88,12 @@ The frontend expects ProcessWire API endpoints at:
 - `GET /site/api/navigation.php` - Get navigation items
 - `GET /site/api/events.php` - Read event listings
 - `GET /site/api/instagram.php` - Read Instagram feed
-- `POST /site/api/forms.php/contact` - Submit contact form
-- `POST /site/api/forms.php/subscribe` - Submit newsletter subscription
-- `POST /site/api/forms.php/visit` - Submit visit day registration
-- `POST /site/api/forms.php/waiting-list` - Submit waiting list form
+- `POST /api/forms/contact` - Submit contact form
+- `POST /api/forms/subscribe` - Submit newsletter subscription
+- `POST /api/forms/visit` - Submit visit day registration
+- `POST /api/forms/waiting-list` - Submit waiting list form
+- `POST /api/forms/membership` - Submit membership form
+- `POST /api/forms/event-signup` - Submit event signup form
 - `GET /site/api/doi.php/confirm?token=...` - Confirm DOI token
 
 **Note**: For now, deeper database functionalities are not implemented. The ProcessWire API endpoints should be configured but may not have full database integration. This will be implemented in a later phase.

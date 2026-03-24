@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { trackEvent } from '../MatomoScript'
 import { InfoTooltip } from '../InfoTooltip'
 import Link from 'next/link'
+import { CaptchaField } from './CaptchaField'
 
 type AboType = 'halb' | 'standard' | 'doppel' | 'none'
 type PaymentType = 'quarterly' | 'yearly'
@@ -89,6 +90,8 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
   const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [captchaToken, setCaptchaToken] = useState('')
+  const [captchaResetKey, setCaptchaResetKey] = useState(0)
   
   // Read URL parameters
   const getInitialDataFromURL = () => {
@@ -279,6 +282,13 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!validateStep(5)) return
+    if (!captchaToken) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        captcha: 'Bitte bestätigen Sie, dass Sie kein Roboter sind.',
+      }))
+      return
+    }
 
     setIsSubmitting(true)
     setFieldErrors({}) // Clear previous errors
@@ -291,7 +301,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, captchaToken }),
       })
 
       let data
@@ -306,6 +316,8 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
         // Extract error message from response
         const errorMessage = data.error || `HTTP error! status: ${response.status}`
         setFieldErrors({ submit: errorMessage })
+        setCaptchaToken('')
+        setCaptchaResetKey((prev) => prev + 1)
         setIsSubmitting(false)
         return
       }
@@ -320,6 +332,8 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
       console.error('Form submission error:', err)
       const errorMessage = err?.message || 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.'
       setFieldErrors({ submit: errorMessage })
+      setCaptchaToken('')
+      setCaptchaResetKey((prev) => prev + 1)
       setIsSubmitting(false)
     }
   }
@@ -932,6 +946,20 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                     <div className="invalid-feedback">{fieldErrors.privacyAccept}</div>
                   )}
                 </div>
+
+                <CaptchaField
+                  token={captchaToken}
+                  onTokenChange={(token) => {
+                    setCaptchaToken(token)
+                    if (fieldErrors.captcha && token) {
+                      const newErrors = { ...fieldErrors }
+                      delete newErrors.captcha
+                      setFieldErrors(newErrors)
+                    }
+                  }}
+                  resetKey={captchaResetKey}
+                  error={fieldErrors.captcha}
+                />
               </div>
             )}
 
@@ -958,7 +986,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                 <button
                   type="submit"
                   className="btn btn-primary"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !captchaToken}
                 >
                   {isSubmitting ? 'Wird gesendet...' : 'Anmeldung einreichen'}
                 </button>

@@ -1,11 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendFormEmail } from '@/lib/email'
+import { verifyTurnstileToken } from '@/lib/turnstile'
+
+const CAPTCHA_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.'
+
+function getClientIp(request: NextRequest): string | null {
+  const forwardedFor = request.headers.get('x-forwarded-for')
+  if (!forwardedFor) return null
+  return forwardedFor.split(',')[0]?.trim() || null
+}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
+    const captcha = await verifyTurnstileToken(body.captchaToken, getClientIp(request))
 
-    // Validate required fields
+    if (!captcha.ok) {
+      return NextResponse.json({ success: false, error: CAPTCHA_ERROR }, { status: 400 })
+    }
+
     if (!body.firstName || !body.lastName || !body.email || !body.address || !body.zip || !body.city || !body.privacyAccept) {
       return NextResponse.json(
         { success: false, error: 'Bitte füllen Sie alle Pflichtfelder aus.' },
@@ -13,7 +26,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Send email via SMTP
     await sendFormEmail({
       formType: 'membership',
       data: body,
@@ -22,8 +34,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('Membership form error:', error)
-    
-    // Provide more detailed error message
+
     let errorMessage = 'Es ist ein Fehler aufgetreten.'
     if (error?.message) {
       if (error.message.includes('SMTP_PASS') || error.message.includes('SMTP')) {
@@ -34,7 +45,7 @@ export async function POST(request: NextRequest) {
         errorMessage = error.message
       }
     }
-    
+
     return NextResponse.json(
       { success: false, error: errorMessage },
       { status: 500 }
