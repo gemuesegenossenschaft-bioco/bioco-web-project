@@ -13,6 +13,8 @@ import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import { ScrollToTopLink } from '@/components/ScrollToTopLink'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
+import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
+import { InlineVisualEditorRuntime } from '@/components/visual-editor/InlineVisualEditorRuntime'
 import { useVisualEditor } from '@/hooks/useVisualEditor'
 import type { ContentSection, HeroContent } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
@@ -68,6 +70,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
     if (!isVisualEditor || !section) return {}
     return {
       'data-section-id': section.id,
+      'data-ve-section-id': section.id,
       'data-section-layout': section.layout || 'rich_text',
     }
   }
@@ -78,6 +81,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
 
   return (
     <div className="page-shell">
+      <InlineVisualEditorRuntime enabled={isVisualEditor} sections={liveSections} />
       {isVisualEditor ? (
         <style dangerouslySetInnerHTML={{ __html: `
           [data-section-id] {
@@ -162,24 +166,33 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
         <section className="two-column-section" {...getVisualAttrs(willkommenSection)}>
           <div className="two-column-text">
             {!hasHeadingHtml(willkommenSection?.text) && (
-              <h2>{willkommenSection?.title || 'Willkommen bei biocò'}</h2>
+              <h2 {...getVeFieldAttrs(isVisualEditor, 'willkommen', 'title', 'text', true)}>
+                {willkommenSection?.title || 'Willkommen bei biocò'}
+              </h2>
             )}
             {willkommenSection?.text ? (
-              <div dangerouslySetInnerHTML={{ __html: willkommenSection.text }} />
+              <div
+                {...getVeFieldAttrs(isVisualEditor, 'willkommen', 'text', 'richtext', true)}
+                dangerouslySetInnerHTML={{ __html: willkommenSection.text }}
+              />
             ) : (
-              <p>
+              <p {...getVeFieldAttrs(isVisualEditor, 'willkommen', 'text', 'richtext', true)}>
                 Bei der biocò Gemüsegenossenschaft teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <Link href="/solawi">solidarische Landwirtschaft</Link> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den Anbau und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich in den <Link href="/standorte-depots">Depots in Baden, Brugg und Gebenstorf</Link> abgeholt werden kann.
               </p>
             )}
             <div style={{ marginTop: '16px' }}>
               {willkommenSection?.buttons?.map((btn, i) => (
-                <CTA key={i} text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+                <span key={i} {...getVeFieldAttrs(isVisualEditor, 'willkommen', 'button', 'button', true, { buttonIndex: i })}>
+                  <CTA text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+                </span>
               )) || (
-                <CTA text="Lerne uns kennen" href="/wir" variant="primary" />
+                <span {...getVeFieldAttrs(isVisualEditor, 'willkommen', 'button', 'button', true, { buttonIndex: 0 })}>
+                  <CTA text="Lerne uns kennen" href="/wir" variant="primary" />
+                </span>
               )}
             </div>
           </div>
-          <div className="two-column-image">
+          <div className="two-column-image" {...getVeFieldAttrs(isVisualEditor, 'willkommen', 'media', 'media', false, { targetField: 'section_image' })}>
             {sectionImage(willkommenSection) && <Image
               src={sectionImage(willkommenSection)!}
               alt={sectionImageAlt(willkommenSection, 'Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg')}
@@ -192,7 +205,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
 
         {/* Gemeinsam, solidarisch, frisch - Row 2, Two Columns */}
         <section className="two-column-section" {...getVisualAttrs(gemeinsamSection)}>
-          <div className="two-column-image">
+          <div className="two-column-image" {...getVeFieldAttrs(isVisualEditor, 'gemeinsam', 'media', 'media', false, { targetField: 'section_image' })}>
             {sectionImage(gemeinsamSection) && <Image
               src={sectionImage(gemeinsamSection)!}
               alt={sectionImageAlt(gemeinsamSection, 'Frisch geerntetes Demeter-Gemüse vom Geisshof')}
@@ -203,20 +216,29 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
           </div>
           <div className="two-column-text">
             {!hasHeadingHtml(gemeinsamSection?.text) && (
-              <h2>{gemeinsamSection?.title || 'Gemeinsam, solidarisch, frisch'}</h2>
+              <h2 {...getVeFieldAttrs(isVisualEditor, 'gemeinsam', 'title', 'text', true)}>
+                {gemeinsamSection?.title || 'Gemeinsam, solidarisch, frisch'}
+              </h2>
             )}
             {gemeinsamSection?.text ? (
-              <div dangerouslySetInnerHTML={{ __html: gemeinsamSection.text }} />
+              <div
+                {...getVeFieldAttrs(isVisualEditor, 'gemeinsam', 'text', 'richtext', true)}
+                dangerouslySetInnerHTML={{ __html: gemeinsamSection.text }}
+              />
             ) : (
-              <p>
+              <p {...getVeFieldAttrs(isVisualEditor, 'gemeinsam', 'text', 'richtext', true)}>
                 Seit 2014 bewirtschaften wir den <Link href="/wir">Geisshof in Gebenstorf</Link> nach biologisch-dynamischen Prinzipien und liefern <Link href="/gemuese">Demeter-Gemüse</Link> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <Link href="/solawi">solidarischer Landwirtschaft</Link>, das wir gemeinsam anbauen, pflegen und ernten. Jedes Mitglied bringt sich ein, ob auf dem Feld, in der Logistik oder bei der Organisation.
               </p>
             )}
             <div style={{ marginTop: '16px' }}>
               {gemeinsamSection?.buttons?.map((btn, i) => (
-                <CTA key={i} text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+                <span key={i} {...getVeFieldAttrs(isVisualEditor, 'gemeinsam', 'button', 'button', true, { buttonIndex: i })}>
+                  <CTA text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+                </span>
               )) || (
-                <CTA text="Was gerade wächst" href="/gemuese" variant="secondary" />
+                <span {...getVeFieldAttrs(isVisualEditor, 'gemeinsam', 'button', 'button', true, { buttonIndex: 0 })}>
+                  <CTA text="Was gerade wächst" href="/gemuese" variant="secondary" />
+                </span>
               )}
             </div>
           </div>
@@ -277,22 +299,33 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
             {...getVisualAttrs(kennenlernenSection)}
           >
             {!hasHeadingHtml(kennenlernenSection?.text) && (
-              <h2>{kennenlernenSection?.title || 'Möchtest du uns kennenlernen?'}</h2>
+              <h2 {...getVeFieldAttrs(isVisualEditor, 'kennenlernen', 'title', 'text', true)}>
+                {kennenlernenSection?.title || 'Möchtest du uns kennenlernen?'}
+              </h2>
             )}
             {kennenlernenSection?.text ? (
-              <div dangerouslySetInnerHTML={{ __html: kennenlernenSection.text }} />
+              <div
+                {...getVeFieldAttrs(isVisualEditor, 'kennenlernen', 'text', 'richtext', true)}
+                dangerouslySetInnerHTML={{ __html: kennenlernenSection.text }}
+              />
             ) : (
-              <p>
+              <p {...getVeFieldAttrs(isVisualEditor, 'kennenlernen', 'text', 'richtext', true)}>
                 Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.
               </p>
             )}
             <div className="cta-row">
               {kennenlernenSection?.buttons?.map((btn, i) => (
-                <CTA key={i} text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+                <span key={i} {...getVeFieldAttrs(isVisualEditor, 'kennenlernen', 'button', 'button', true, { buttonIndex: i })}>
+                  <CTA text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+                </span>
               )) || (
                 <>
-                  <CTA text="Nimm Kontakt auf" href="/kontakt" variant="primary" />
-                  <CTA text="Zu uns finden" href="/standorte-depots" variant="secondary" />
+                  <span {...getVeFieldAttrs(isVisualEditor, 'kennenlernen', 'button', 'button', true, { buttonIndex: 0 })}>
+                    <CTA text="Nimm Kontakt auf" href="/kontakt" variant="primary" />
+                  </span>
+                  <span {...getVeFieldAttrs(isVisualEditor, 'kennenlernen', 'button', 'button', true, { buttonIndex: 1 })}>
+                    <CTA text="Zu uns finden" href="/standorte-depots" variant="secondary" />
+                  </span>
                 </>
               )}
             </div>

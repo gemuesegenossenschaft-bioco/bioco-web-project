@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
 import type { ContentSection } from '@/lib/processwire-types'
 
 let mockSearch = ''
@@ -93,6 +93,30 @@ describe('SectionRenderer data-section-id attributes', () => {
     expect(annotated[0].getAttribute('data-section-layout')).toBe('rich_text')
     expect(annotated[1].getAttribute('data-section-layout')).toBe('split_media_text')
     expect(annotated[2].getAttribute('data-section-layout')).toBe('full_width_banner')
+  })
+
+  it('adds field-level data-ve markers in visual editor mode', async () => {
+    const { SectionRenderer } = await import('@/components/sections/SectionRenderer')
+    const { container } = render(
+      <SectionRenderer
+        sections={[{
+          id: 'section-markers',
+          title: 'Marker Title',
+          eyebrow: 'Marker Eyebrow',
+          text: '<p>Marker Text</p>',
+          layout: 'split_media_text',
+          image: '/img.jpg',
+          buttons: [{ text: 'CTA', href: '/foo', variant: 'primary' }],
+        }]}
+        visualEditor={true}
+      />
+    )
+
+    expect(container.querySelector('[data-ve-field="eyebrow"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-field="title"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-field="text"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-field="button"][data-ve-button-index="0"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-field="media"][data-ve-target-field="section_image"]')).toBeTruthy()
   })
 })
 
@@ -193,6 +217,34 @@ describe('useVisualEditor hook', () => {
     render(<TestComponent />)
 
     expect(postMessageSpy).not.toHaveBeenCalled()
+  })
+
+  it('does not intercept section clicks in browse mode', async () => {
+    const { useVisualEditor } = await import('@/hooks/useVisualEditor')
+
+    function TestComponent() {
+      useVisualEditor({ enabled: true, sections: testSections })
+      return <div data-section-id="section-1">click target</div>
+    }
+
+    render(<TestComponent />)
+    postMessageSpy.mockClear()
+
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        data: {
+          type: 'bioco:visual-editor:save-state',
+          mode: 'browse',
+        },
+      }))
+    })
+
+    fireEvent.click(screen.getByText('click target'))
+
+    expect(postMessageSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'bioco:visual-editor:section-click' }),
+      '*'
+    )
   })
 })
 

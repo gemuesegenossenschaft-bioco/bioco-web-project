@@ -136,6 +136,15 @@ body {
 .ve-status.is-ready { background: #17321f; color: #9ae6b4; }
 .ve-status.is-loading { background: #3b2f17; color: #f6e05e; }
 .ve-status.is-error { background: #3b1717; color: #feb2b2; }
+.ve-mode-switch {
+    display: flex;
+    gap: 6px;
+}
+.ve-mode-btn.is-active {
+    background: #4a7c59;
+    border-color: #4a7c59;
+    color: #fff;
+}
 .ve-main {
     display: flex;
     flex: 1;
@@ -313,6 +322,88 @@ body {
     height: 100%;
     width: 100%;
 }
+.ve-info-card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 12px;
+    padding: 12px;
+}
+.ve-info-card + .ve-info-card {
+    margin-top: 12px;
+}
+.ve-info-card strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+.ve-info-card p {
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.ve-media-modal {
+    align-items: stretch;
+    background: rgba(15, 23, 42, 0.72);
+    display: none;
+    inset: 0;
+    justify-content: flex-end;
+    position: fixed;
+    z-index: 30;
+}
+.ve-media-modal.is-open {
+    display: flex;
+}
+.ve-media-panel {
+    background: #0f172a;
+    border-left: 1px solid #1f2937;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 460px;
+    width: 100%;
+}
+.ve-media-header {
+    align-items: center;
+    border-bottom: 1px solid #1f2937;
+    display: flex;
+    justify-content: space-between;
+    padding: 14px;
+}
+.ve-media-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    overflow-y: auto;
+    padding: 14px;
+}
+.ve-media-card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 12px;
+    cursor: pointer;
+    overflow: hidden;
+    padding: 0;
+    text-align: left;
+}
+.ve-media-card img {
+    display: block;
+    height: 120px;
+    object-fit: cover;
+    width: 100%;
+}
+.ve-media-card-body {
+    padding: 10px;
+}
+.ve-media-card-body strong {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+.ve-media-card-body span {
+    color: #94a3b8;
+    display: block;
+    font-size: 11px;
+}
 </style>
 </head>
 <body>
@@ -323,6 +414,10 @@ body {
         <option value="">Seite wählen...</option>
     </select>
     <span id="ve-status" class="ve-status">Nicht verbunden</span>
+    <div class="ve-mode-switch">
+        <button class="ve-btn ve-mode-btn is-active" id="ve-mode-edit" type="button">Edit</button>
+        <button class="ve-btn ve-mode-btn" id="ve-mode-browse" type="button">Browse</button>
+    </div>
     <div class="ve-toolbar-actions">
         <button class="ve-btn" id="ve-btn-refresh" type="button">Neu laden</button>
         <button class="ve-btn" id="ve-btn-pw" type="button">PW Admin</button>
@@ -344,7 +439,7 @@ body {
 
         <div class="ve-field-editor">
             <div class="ve-editor-scroll" id="ve-field-editor">
-                <div class="ve-empty-state">Wähle einen Abschnitt aus der Liste oder direkt in der Vorschau.</div>
+                <div class="ve-empty-state">Wähle einen Abschnitt oder ein Feld direkt in der Vorschau.</div>
             </div>
             <div class="ve-actions-bar">
                 <button class="ve-btn" id="ve-btn-reset" type="button" disabled>Zurücksetzen</button>
@@ -355,6 +450,17 @@ body {
 
     <div class="ve-iframe-wrap">
         <iframe id="ve-iframe" src="about:blank"></iframe>
+    </div>
+</div>
+
+<div class="ve-media-modal" id="ve-media-modal">
+    <div class="ve-media-panel">
+        <div class="ve-media-header">
+            <strong>Mediathek</strong>
+            <button class="ve-btn" id="ve-media-close" type="button">Schliessen</button>
+        </div>
+        <div class="ve-empty-state" id="ve-media-empty">Medien werden geladen…</div>
+        <div class="ve-media-grid" id="ve-media-grid"></div>
     </div>
 </div>
 
@@ -390,15 +496,25 @@ body {
     var btnPw = document.getElementById('ve-btn-pw');
     var btnSave = document.getElementById('ve-btn-save');
     var btnReset = document.getElementById('ve-btn-reset');
+    var btnModeEdit = document.getElementById('ve-mode-edit');
+    var btnModeBrowse = document.getElementById('ve-mode-browse');
+    var mediaModal = document.getElementById('ve-media-modal');
+    var mediaClose = document.getElementById('ve-media-close');
+    var mediaEmpty = document.getElementById('ve-media-empty');
+    var mediaGrid = document.getElementById('ve-media-grid');
 
     var currentPageId = null;
     var currentPath = null;
     var sections = [];
     var activeSectionId = null;
+    var activeField = null;
     var pendingSelectId = null;
     var iframeReady = false;
-    var isDirty = false;
+    var dirtySectionIds = {};
     var isSaving = false;
+    var editorMode = 'edit';
+    var mediaFiles = [];
+    var mediaRequest = null;
 
     ALL_PAGES.forEach(function (page) {
         var option = document.createElement('option');
@@ -435,6 +551,35 @@ body {
         return null;
     }
 
+    function getActiveSection() {
+        return getSectionById(activeSectionId);
+    }
+
+    function getDirtySectionIds() {
+        return Object.keys(dirtySectionIds);
+    }
+
+    function hasDirtySections() {
+        return getDirtySectionIds().length > 0;
+    }
+
+    function isSectionDirty(sectionId) {
+        return !!dirtySectionIds[sectionId];
+    }
+
+    function markSectionDirty(sectionId, nextDirty) {
+        if (!sectionId) return;
+        if (nextDirty) {
+            dirtySectionIds[sectionId] = true;
+        } else {
+            delete dirtySectionIds[sectionId];
+        }
+    }
+
+    function clearDirtySections() {
+        dirtySectionIds = {};
+    }
+
     function getButton(section, index) {
         if (!section || !Array.isArray(section.buttons)) {
             return { text: '', href: '', variant: index === 0 ? 'primary' : 'secondary' };
@@ -459,26 +604,135 @@ body {
         iframe.contentWindow.postMessage(Object.assign({ type: PREFIX + action }, data || {}), '*');
     }
 
+    function updateModeButtons() {
+        btnModeEdit.classList.toggle('is-active', editorMode === 'edit');
+        btnModeBrowse.classList.toggle('is-active', editorMode === 'browse');
+    }
+
+    function syncIframeState(message) {
+        sendToIframe('save-state', {
+            mode: editorMode,
+            dirty: hasDirtySections(),
+            saving: isSaving,
+            message: message || '',
+            selectedSectionId: activeSectionId
+        });
+    }
+
     function updateActions() {
         var hasActive = !!getSectionById(activeSectionId);
         btnAdd.disabled = !currentPageId || isSaving;
         btnPw.disabled = !currentPageId;
-        btnSave.disabled = !hasActive || !isDirty || isSaving;
-        btnReset.disabled = !hasActive || !isDirty || isSaving;
+        btnSave.disabled = !hasDirtySections() || isSaving;
+        btnReset.disabled = !hasDirtySections() || isSaving;
         if (isSaving) {
             btnSave.textContent = 'Speichert...';
         } else {
             btnSave.textContent = 'Speichern';
         }
+        if (!hasActive) {
+            btnReset.disabled = !hasDirtySections() || isSaving;
+        }
+        updateModeButtons();
     }
 
     function confirmDiscardChanges() {
-        if (!isDirty) return true;
+        if (!hasDirtySections()) return true;
         return window.confirm('Ungespeicherte Änderungen verwerfen?');
     }
 
-    function markDirty(nextDirty) {
-        isDirty = !!nextDirty;
+    function blockWhileDirty(actionLabel) {
+        if (!hasDirtySections()) return false;
+        window.alert('Vor "' + actionLabel + '" zuerst speichern oder zurücksetzen.');
+        return true;
+    }
+
+    function normalizeChoice(value, fallback) {
+        if (!value || value === 'none') return fallback;
+        return value;
+    }
+
+    function fieldLabel(field) {
+        if (!field) return 'Feld';
+        if (field.kind === 'button') {
+            return 'Button ' + ((field.buttonIndex || 0) + 1);
+        }
+        switch (field.field) {
+            case 'title': return 'Titel';
+            case 'eyebrow': return 'Eyebrow';
+            case 'text': return 'Text';
+            case 'media': return 'Bild / Medien';
+            case 'component': return 'Komponente';
+            default: return field.field;
+        }
+    }
+
+    function fieldHint(field) {
+        if (!field) return 'Klicke ein Feld in der Vorschau an, um inline zu bearbeiten.';
+        switch (field.field) {
+            case 'text':
+                return 'Rich Text wird direkt im iframe bearbeitet. Änderungen bleiben lokal bis zum Speichern.';
+            case 'media':
+                return 'Alt-Text und Medienauswahl laufen über das Overlay direkt im iframe.';
+            case 'component':
+                return 'Komponentenname wird inline geändert. Komponentenspezifische Optionen sind in V1 noch begrenzt.';
+            case 'button':
+                return 'Text, Link und Variante werden inline im Button-Overlay geändert.';
+            default:
+                return 'Dieses Feld wird direkt in der Vorschau bearbeitet.';
+        }
+    }
+
+    function renderFieldEditor() {
+        var section = getActiveSection();
+        var page = getPageDescriptor(currentPageId, currentPath);
+        var dirtyCount = getDirtySectionIds().length;
+
+        if (!currentPageId || !page) {
+            fieldEditor.innerHTML =
+                '<div class="ve-empty-state">Seite wählen, dann direkt in der Vorschau bearbeiten.</div>';
+            updateActions();
+            return;
+        }
+
+        if (!section) {
+            fieldEditor.innerHTML =
+                '<div class="ve-info-card">' +
+                    '<strong>Seite</strong>' +
+                    '<p>' + escapeHtml(page.title) + ' (' + escapeHtml(page.path) + ')</p>' +
+                '</div>' +
+                '<div class="ve-info-card">' +
+                    '<strong>Modus</strong>' +
+                    '<p>' + (editorMode === 'edit' ? 'Edit: Felder klicken, inline ändern, explizit speichern.' : 'Browse: Seite verhält sich wie normale Vorschau.') + '</p>' +
+                '</div>' +
+                '<div class="ve-info-card">' +
+                    '<strong>Status</strong>' +
+                    '<p>' + (dirtyCount ? dirtyCount + ' Abschnitt(e) mit ungespeicherten Änderungen.' : 'Keine offenen Änderungen.') + '</p>' +
+                '</div>';
+            updateActions();
+            return;
+        }
+
+        fieldEditor.innerHTML =
+            '<div class="ve-info-card">' +
+                '<strong>Aktiver Abschnitt</strong>' +
+                '<p>' + escapeHtml(section.title || '(kein Titel)') + '</p>' +
+                '<p>Layout: ' + escapeHtml(LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt') + (section.component ? ' · Komponente: ' + escapeHtml(section.component) : '') + '</p>' +
+            '</div>' +
+            '<div class="ve-info-card">' +
+                '<strong>Aktives Feld</strong>' +
+                '<p>' + escapeHtml(fieldLabel(activeField)) + '</p>' +
+                '<p>' + escapeHtml(fieldHint(activeField)) + '</p>' +
+            '</div>' +
+            '<div class="ve-info-card">' +
+                '<strong>Offene Änderungen</strong>' +
+                '<p>' + (dirtyCount ? dirtyCount + ' Abschnitt(e) warten auf Speichern.' : 'Keine offenen Änderungen.') + '</p>' +
+            '</div>' +
+            '<div class="ve-info-card">' +
+                '<strong>Hinweis</strong>' +
+                '<p>Abschnitt-CRUD bleibt in der linken Spalte. Inline-Änderungen werden erst mit "Speichern" dauerhaft.</p>' +
+            '</div>';
+
         updateActions();
     }
 
@@ -512,6 +766,7 @@ body {
                     activeSectionId = pendingSelectId;
                 } else if (activeSectionId && !getSectionById(activeSectionId)) {
                     activeSectionId = null;
+                    activeField = null;
                 }
                 pendingSelectId = null;
                 renderSectionList();
@@ -519,9 +774,14 @@ body {
                 updateActions();
                 if (iframeReady) {
                     sendToIframe('sections-replace', { sections: sections });
-                    if (activeSectionId) {
-                        sendToIframe('section-highlight', { sectionId: activeSectionId });
+                    sendToIframe('section-highlight', { sectionId: activeSectionId });
+                    if (activeField && activeSectionId === activeField.sectionId) {
+                        sendToIframe('field-highlight', activeField);
+                    } else {
+                        activeField = null;
+                        sendToIframe('field-reset', {});
                     }
+                    syncIframeState();
                 }
                 if (!options.keepStatus) {
                     setStatus('Verbunden', 'is-ready');
@@ -540,7 +800,8 @@ body {
         sections = [];
         pendingSelectId = null;
         activeSectionId = null;
-        isDirty = false;
+        activeField = null;
+        clearDirtySections();
         isSaving = false;
 
         pageSelect.value = pageId + '|' + path;
@@ -557,78 +818,117 @@ body {
         iframe.src = url;
     }
 
-    function applySectionField(section, name, value) {
-        switch (name) {
+    function notifySectionUpdate(sectionId, field, value) {
+        sendToIframe('section-update', { sectionId: sectionId, field: field, value: value });
+    }
+
+    function applyFieldChange(payload) {
+        var section = getSectionById(payload.sectionId);
+        if (!section) return;
+
+        switch (payload.field) {
             case 'title':
-                section.title = value;
-                sendToIframe('section-update', { sectionId: section.id, field: 'title', value: value });
+                section.title = payload.value || '';
+                notifySectionUpdate(section.id, 'title', section.title);
                 break;
             case 'text':
-                section.text = value;
-                sendToIframe('section-update', { sectionId: section.id, field: 'text', value: value });
+                section.text = payload.value || '';
+                notifySectionUpdate(section.id, 'text', section.text);
                 break;
             case 'eyebrow':
-                section.eyebrow = value;
-                sendToIframe('section-update', { sectionId: section.id, field: 'eyebrow', value: value });
+                section.eyebrow = payload.value || '';
+                notifySectionUpdate(section.id, 'eyebrow', section.eyebrow);
                 break;
             case 'layout':
-                section.layout = value || 'rich_text';
-                sendToIframe('section-update', { sectionId: section.id, field: 'layout', value: section.layout });
+                section.layout = payload.value || 'rich_text';
+                notifySectionUpdate(section.id, 'layout', section.layout);
                 break;
             case 'theme':
-                section.theme = value || 'default';
-                sendToIframe('section-update', { sectionId: section.id, field: 'theme', value: section.theme });
+                section.theme = payload.value || 'default';
+                notifySectionUpdate(section.id, 'theme', section.theme);
                 break;
             case 'bgColor':
-                section.bgColor = value === 'none' ? undefined : value;
-                sendToIframe('section-update', { sectionId: section.id, field: 'bgColor', value: section.bgColor });
+                section.bgColor = normalizeChoice(payload.value, undefined);
+                notifySectionUpdate(section.id, 'bgColor', section.bgColor);
                 break;
             case 'imageOverlay':
-                section.imageOverlay = value === 'none' ? undefined : value;
-                sendToIframe('section-update', { sectionId: section.id, field: 'imageOverlay', value: section.imageOverlay });
+                section.imageOverlay = normalizeChoice(payload.value, undefined);
+                notifySectionUpdate(section.id, 'imageOverlay', section.imageOverlay);
                 break;
             case 'component':
-                section.component = value;
-                sendToIframe('section-update', { sectionId: section.id, field: 'component', value: value });
+                section.component = payload.value || '';
+                notifySectionUpdate(section.id, 'component', section.component);
                 break;
-            case 'button0_text':
-                setButtons(section, 0, { text: value });
-                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+            case 'imageAlt':
+                section.imageAlt = payload.value || '';
                 break;
-            case 'button0_href':
-                setButtons(section, 0, { href: value });
-                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+            case 'button_text':
+                setButtons(section, payload.buttonIndex || 0, { text: payload.value || '' });
+                notifySectionUpdate(section.id, 'buttons', section.buttons);
                 break;
-            case 'button0_variant':
-                setButtons(section, 0, { variant: value || 'primary' });
-                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+            case 'button_href':
+                setButtons(section, payload.buttonIndex || 0, { href: payload.value || '' });
+                notifySectionUpdate(section.id, 'buttons', section.buttons);
                 break;
-            case 'button1_text':
-                setButtons(section, 1, { text: value });
-                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+            case 'button_variant':
+                setButtons(section, payload.buttonIndex || 0, {
+                    variant: payload.value || ((payload.buttonIndex || 0) === 0 ? 'primary' : 'secondary')
+                });
+                notifySectionUpdate(section.id, 'buttons', section.buttons);
                 break;
-            case 'button1_href':
-                setButtons(section, 1, { href: value });
-                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
-                break;
-            case 'button1_variant':
-                setButtons(section, 1, { variant: value || 'secondary' });
-                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
-                break;
+            default:
+                return;
         }
+        markSectionDirty(section.id, true);
+        renderSectionList();
+        renderFieldEditor();
+        syncIframeState();
+        updateActions();
     }
 
     function selectSection(sectionId, options) {
         options = options || {};
         if (!getSectionById(sectionId)) return;
         activeSectionId = sectionId;
+        if (options.clearField !== false) {
+            activeField = null;
+        }
         renderSectionList();
         renderFieldEditor();
         updateActions();
         sendToIframe('section-highlight', { sectionId: sectionId });
+        if (options.clearField !== false) {
+            sendToIframe('field-reset', {});
+        } else if (activeField) {
+            sendToIframe('field-highlight', activeField);
+        }
         if (options.scroll !== false) {
             sendToIframe('section-scroll', { sectionId: sectionId });
         }
+        syncIframeState();
+    }
+
+    function selectField(field, options) {
+        options = options || {};
+        if (!field || !field.sectionId || !getSectionById(field.sectionId)) return;
+        activeSectionId = field.sectionId;
+        activeField = {
+            sectionId: field.sectionId,
+            field: field.field,
+            kind: field.kind,
+            inline: field.inline !== false,
+            buttonIndex: typeof field.buttonIndex === 'number' ? field.buttonIndex : undefined,
+            targetField: typeof field.targetField === 'string' ? field.targetField : undefined
+        };
+        renderSectionList();
+        renderFieldEditor();
+        updateActions();
+        sendToIframe('section-highlight', { sectionId: field.sectionId });
+        sendToIframe('field-highlight', activeField);
+        if (options.scroll !== false) {
+            sendToIframe('section-scroll', { sectionId: field.sectionId });
+        }
+        syncIframeState();
     }
 
     function renderSectionList() {
@@ -667,7 +967,7 @@ body {
                 meta.appendChild(component);
             }
 
-            if (section.id === activeSectionId && isDirty) {
+            if (isSectionDirty(section.id)) {
                 var dirty = document.createElement('span');
                 dirty.className = 've-dirty-pill';
                 dirty.textContent = 'UNGESPEICHERT';
@@ -679,18 +979,6 @@ body {
             var actions = document.createElement('div');
             actions.className = 've-section-actions';
 
-            var editBtn = document.createElement('button');
-            editBtn.className = 've-icon-btn';
-            editBtn.type = 'button';
-            editBtn.title = 'In ProcessWire bearbeiten';
-            editBtn.textContent = '↗';
-            editBtn.addEventListener('click', function (event) {
-                event.stopPropagation();
-                if (section.pwId) {
-                    window.open('<?= $config->urls->admin ?>page/edit/?id=' + section.pwId, '_blank');
-                }
-            });
-
             var deleteBtn = document.createElement('button');
             deleteBtn.className = 've-icon-btn';
             deleteBtn.type = 'button';
@@ -698,12 +986,11 @@ body {
             deleteBtn.textContent = '✕';
             deleteBtn.addEventListener('click', function (event) {
                 event.stopPropagation();
-                if (!confirmDiscardChanges()) return;
+                if (blockWhileDirty('Löschen')) return;
                 if (!window.confirm('Abschnitt "' + (section.title || '') + '" wirklich löschen?')) return;
                 deleteSection(section);
             });
 
-            actions.appendChild(editBtn);
             actions.appendChild(deleteBtn);
 
             item.appendChild(drag);
@@ -711,13 +998,11 @@ body {
             item.appendChild(actions);
 
             item.addEventListener('click', function () {
-                if (activeSectionId !== section.id && isDirty && !confirmDiscardChanges()) return;
-                markDirty(false);
                 selectSection(section.id);
             });
 
             item.addEventListener('dragstart', function (event) {
-                if (isDirty && !confirmDiscardChanges()) {
+                if (blockWhileDirty('Sortieren')) {
                     event.preventDefault();
                     return;
                 }
@@ -747,90 +1032,6 @@ body {
         });
     }
 
-    function optionMarkup(options, current) {
-        return options.map(function (option) {
-            return '<option value="' + escapeHtml(option) + '"' + (option === current ? ' selected' : '') + '>' + escapeHtml(option) + '</option>';
-        }).join('');
-    }
-
-    function renderFieldEditor() {
-        var section = getSectionById(activeSectionId);
-        if (!section) {
-            fieldEditor.innerHTML = '<div class="ve-empty-state">Wähle einen Abschnitt aus der Liste oder direkt in der Vorschau.</div>';
-            updateActions();
-            return;
-        }
-
-        var button1 = getButton(section, 0);
-        var button2 = getButton(section, 1);
-        var dirtyBadge = isDirty ? '<span class="ve-dirty-pill">Ungespeichert</span>' : '';
-
-        fieldEditor.innerHTML =
-            '<div class="ve-field-group">' +
-                '<div class="ve-sidebar-title">Abschnitt bearbeiten' + dirtyBadge + '</div>' +
-                '<div class="ve-help">Live-Vorschau aktualisiert sofort. Dauerhaft gespeichert wird erst mit "Speichern".</div>' +
-            '</div>' +
-            '<div class="ve-form-grid">' +
-                '<div class="ve-field-group ve-field-group-full">' +
-                    '<label for="ve-field-title">Titel</label>' +
-                    '<input id="ve-field-title" name="title" type="text" value="' + escapeHtml(section.title || '') + '">' +
-                '</div>' +
-                '<div class="ve-field-group ve-field-group-full">' +
-                    '<label for="ve-field-eyebrow">Eyebrow</label>' +
-                    '<input id="ve-field-eyebrow" name="eyebrow" type="text" value="' + escapeHtml(section.eyebrow || '') + '">' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-layout">Layout</label>' +
-                    '<select id="ve-field-layout" name="layout">' + optionMarkup(Object.keys(LAYOUT_LABELS), section.layout || 'rich_text') + '</select>' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-theme">Theme</label>' +
-                    '<select id="ve-field-theme" name="theme">' + optionMarkup(THEME_OPTIONS, section.theme || 'default') + '</select>' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-bg">Hintergrund</label>' +
-                    '<select id="ve-field-bg" name="bgColor">' + optionMarkup(BG_OPTIONS, section.bgColor || 'none') + '</select>' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-overlay">Bild-Overlay</label>' +
-                    '<select id="ve-field-overlay" name="imageOverlay">' + optionMarkup(OVERLAY_OPTIONS, section.imageOverlay || 'none') + '</select>' +
-                '</div>' +
-                '<div class="ve-field-group ve-field-group-full">' +
-                    '<label for="ve-field-component">Komponente</label>' +
-                    '<input id="ve-field-component" name="component" type="text" value="' + escapeHtml(section.component || '') + '">' +
-                '</div>' +
-                '<div class="ve-field-group ve-field-group-full">' +
-                    '<label for="ve-field-text">Text</label>' +
-                    '<textarea id="ve-field-text" name="text">' + escapeHtml(section.text || '') + '</textarea>' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-button0-text">Button 1 Text</label>' +
-                    '<input id="ve-field-button0-text" name="button0_text" type="text" value="' + escapeHtml(button1.text || '') + '">' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-button0-href">Button 1 Link</label>' +
-                    '<input id="ve-field-button0-href" name="button0_href" type="text" value="' + escapeHtml(button1.href || '') + '">' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-button0-variant">Button 1 Stil</label>' +
-                    '<select id="ve-field-button0-variant" name="button0_variant">' + optionMarkup(BUTTON_VARIANTS, button1.variant || 'primary') + '</select>' +
-                '</div>' +
-                '<div class="ve-field-group"></div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-button1-text">Button 2 Text</label>' +
-                    '<input id="ve-field-button1-text" name="button1_text" type="text" value="' + escapeHtml(button2.text || '') + '">' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-button1-href">Button 2 Link</label>' +
-                    '<input id="ve-field-button1-href" name="button1_href" type="text" value="' + escapeHtml(button2.href || '') + '">' +
-                '</div>' +
-                '<div class="ve-field-group">' +
-                    '<label for="ve-field-button1-variant">Button 2 Stil</label>' +
-                    '<select id="ve-field-button1-variant" name="button1_variant">' + optionMarkup(BUTTON_VARIANTS, button2.variant || 'secondary') + '</select>' +
-                '</div>' +
-            '</div>';
-    }
-
     function buildSavePayload(section) {
         var button1 = getButton(section, 0);
         var button2 = getButton(section, 1);
@@ -843,6 +1044,7 @@ body {
             section_bg_color: section.bgColor || 'none',
             section_image_overlay: section.imageOverlay || 'none',
             section_component: section.component || '',
+            image_alt: section.imageAlt || '',
             button_text: button1.text || '',
             button_href: button1.href || '',
             button_variant: button1.variant || 'primary',
@@ -852,81 +1054,95 @@ body {
         };
     }
 
-    function saveActiveSection() {
-        var section = getSectionById(activeSectionId);
-        if (!section || !section.pwId || isSaving) return;
+    function parseJson(response) {
+        return response.json().catch(function () { return {}; });
+    }
+
+    function postJson(url, body, fallbackError) {
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(body)
+        })
+            .then(function (response) {
+                return parseJson(response).then(function (data) {
+                    if (!response.ok || !data.success) {
+                        throw new Error((data && data.error) || fallbackError);
+                    }
+                    return data;
+                });
+            });
+    }
+
+    function saveSection(section) {
+        if (!section || !section.pwId) return Promise.resolve();
+        return postJson(API_ROOT + 'content-save', {
+            sectionPwId: section.pwId,
+            fields: buildSavePayload(section)
+        }, 'Speichern fehlgeschlagen').then(function () {
+            markSectionDirty(section.id, false);
+        });
+    }
+
+    function saveDirtySections() {
+        if (isSaving || !hasDirtySections()) return;
+        var ordered = sections.filter(function (section) {
+            return isSectionDirty(section.id);
+        });
 
         isSaving = true;
         updateActions();
         setStatus('Speichert...', 'is-loading');
+        syncIframeState();
 
-        fetch(API_ROOT + 'content-save', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                sectionPwId: section.pwId,
-                fields: buildSavePayload(section)
-            })
-        })
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    if (!response.ok || !data.success) {
-                        throw new Error((data && data.error) || 'Speichern fehlgeschlagen');
-                    }
-                    return data;
-                });
-            })
+        ordered.reduce(function (promise, section) {
+            return promise.then(function () {
+                return saveSection(section);
+            });
+        }, Promise.resolve())
             .then(function () {
-                isDirty = false;
+                clearDirtySections();
                 return fetchSections({ keepStatus: true });
             })
             .then(function () {
                 setStatus('Gespeichert', 'is-ready');
-                renderSectionList();
-                renderFieldEditor();
+                sendToIframe('save-result', { success: true });
             })
             .catch(function (error) {
                 setStatus(error.message || 'Speichern fehlgeschlagen', 'is-error');
+                sendToIframe('save-result', {
+                    success: false,
+                    error: error.message || 'Speichern fehlgeschlagen'
+                });
             })
             .finally(function () {
                 isSaving = false;
                 updateActions();
+                syncIframeState();
             });
     }
 
-    function resetActiveSection() {
+    function resetChanges() {
         if (!confirmDiscardChanges()) return;
-        isDirty = false;
+        clearDirtySections();
         fetchSections({ keepStatus: true }).then(function () {
             setStatus('Zurückgesetzt', 'is-ready');
+            syncIframeState();
         });
     }
 
     function reorderSections(fromIndex, toIndex) {
-        if (!currentPageId || isSaving) return;
+        if (!currentPageId || isSaving || blockWhileDirty('Sortieren')) return;
         var order = sections.slice();
         var moved = order.splice(fromIndex, 1)[0];
         order.splice(toIndex, 0, moved);
 
         setStatus('Sortierung speichern...', 'is-loading');
-        fetch(API_ROOT + 'sections-reorder', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                pageId: currentPageId,
-                order: order.map(function (section) { return section.pwId; })
-            })
-        })
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    if (!response.ok || !data.success) {
-                        throw new Error((data && data.error) || 'Sortieren fehlgeschlagen');
-                    }
-                    return data;
-                });
-            })
+        postJson(API_ROOT + 'sections-reorder', {
+            pageId: currentPageId,
+            order: order.map(function (section) { return section.pwId; })
+        }, 'Sortieren fehlgeschlagen')
             .then(function () {
                 return fetchSections({ keepStatus: true });
             })
@@ -939,22 +1155,9 @@ body {
     }
 
     function addSection(layout) {
-        if (!currentPageId || isSaving) return;
+        if (!currentPageId || isSaving || blockWhileDirty('Hinzufügen')) return;
         setStatus('Abschnitt anlegen...', 'is-loading');
-        fetch(API_ROOT + 'sections-add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ pageId: currentPageId, layout: layout })
-        })
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    if (!response.ok || !data.success) {
-                        throw new Error((data && data.error) || 'Abschnitt konnte nicht angelegt werden');
-                    }
-                    return data;
-                });
-            })
+        postJson(API_ROOT + 'sections-add', { pageId: currentPageId, layout: layout }, 'Abschnitt konnte nicht angelegt werden')
             .then(function (data) {
                 pendingSelectId = data.section && data.section.id ? data.section.id : null;
                 return fetchSections({ keepStatus: true });
@@ -974,25 +1177,13 @@ body {
     function deleteSection(section) {
         if (!currentPageId || !section || !section.pwId || isSaving) return;
         setStatus('Abschnitt löschen...', 'is-loading');
-        fetch(API_ROOT + 'sections-delete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ pageId: currentPageId, sectionPwId: section.pwId })
-        })
-            .then(function (response) {
-                return response.json().then(function (data) {
-                    if (!response.ok || !data.success) {
-                        throw new Error((data && data.error) || 'Löschen fehlgeschlagen');
-                    }
-                    return data;
-                });
-            })
+        postJson(API_ROOT + 'sections-delete', { pageId: currentPageId, sectionPwId: section.pwId }, 'Löschen fehlgeschlagen')
             .then(function () {
                 if (activeSectionId === section.id) {
                     activeSectionId = null;
-                    isDirty = false;
+                    activeField = null;
                 }
+                markSectionDirty(section.id, false);
                 return fetchSections({ keepStatus: true });
             })
             .then(function () {
@@ -1001,6 +1192,181 @@ body {
             .catch(function (error) {
                 setStatus(error.message || 'Löschen fehlgeschlagen', 'is-error');
             });
+    }
+
+    function moveSection(sectionId, direction) {
+        if (!currentPageId || isSaving || blockWhileDirty('Verschieben')) return;
+        var index = sections.findIndex(function (section) { return section.id === sectionId; });
+        if (index === -1) return;
+        var targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= sections.length) return;
+        reorderSections(index, targetIndex);
+    }
+
+    function duplicateSection(section) {
+        if (!section || !currentPageId || isSaving || blockWhileDirty('Duplizieren')) return;
+        var copyPayload = buildSavePayload(section);
+        copyPayload.section_title = (section.title || 'Neuer Abschnitt') + ' (Kopie)';
+
+        setStatus('Abschnitt duplizieren...', 'is-loading');
+        postJson(API_ROOT + 'sections-add', {
+            pageId: currentPageId,
+            layout: section.layout || 'rich_text'
+        }, 'Duplizieren fehlgeschlagen')
+            .then(function (data) {
+                var newSection = data.section || null;
+                if (!newSection || !newSection.pwId) {
+                    throw new Error('Neuer Abschnitt konnte nicht erstellt werden');
+                }
+                pendingSelectId = newSection.id || null;
+                return postJson(API_ROOT + 'content-save', {
+                    sectionPwId: newSection.pwId,
+                    fields: copyPayload
+                }, 'Kopie speichern fehlgeschlagen').then(function () {
+                    return newSection;
+                });
+            })
+            .then(function (newSection) {
+                var order = sections.map(function (item) { return item.pwId; }).filter(Boolean);
+                var sourceIndex = order.indexOf(section.pwId);
+                if (sourceIndex === -1) {
+                    order.push(newSection.pwId);
+                } else {
+                    order.splice(sourceIndex + 1, 0, newSection.pwId);
+                }
+                return postJson(API_ROOT + 'sections-reorder', {
+                    pageId: currentPageId,
+                    order: order
+                }, 'Kopie einsortieren fehlgeschlagen');
+            })
+            .then(function () {
+                return fetchSections({ keepStatus: true });
+            })
+            .then(function () {
+                if (pendingSelectId && getSectionById(pendingSelectId)) {
+                    selectSection(pendingSelectId);
+                    pendingSelectId = null;
+                }
+                setStatus('Abschnitt dupliziert. Medien prüfen.', 'is-ready');
+            })
+            .catch(function (error) {
+                setStatus(error.message || 'Duplizieren fehlgeschlagen', 'is-error');
+            });
+    }
+
+    function openMediaModal(request) {
+        if (!request || !request.sectionId) return;
+        mediaRequest = {
+            sectionId: request.sectionId,
+            targetField: request.targetField || 'section_image'
+        };
+        mediaFiles = [];
+        mediaGrid.innerHTML = '';
+        mediaEmpty.textContent = 'Medien werden geladen…';
+        mediaEmpty.style.display = 'block';
+        mediaModal.classList.add('is-open');
+
+        fetch(API_ROOT + 'media-files', { credentials: 'include' })
+            .then(function (response) {
+                return parseJson(response).then(function (data) {
+                    if (!response.ok || !data.success) {
+                        throw new Error((data && data.error) || 'Medien konnten nicht geladen werden');
+                    }
+                    return data;
+                });
+            })
+            .then(function (data) {
+                mediaFiles = Array.isArray(data.files) ? data.files : [];
+                renderMediaGrid();
+            })
+            .catch(function (error) {
+                mediaGrid.innerHTML = '';
+                mediaEmpty.textContent = error.message || 'Medien konnten nicht geladen werden';
+                mediaEmpty.style.display = 'block';
+            });
+    }
+
+    function closeMediaModal() {
+        mediaRequest = null;
+        mediaModal.classList.remove('is-open');
+    }
+
+    function renderMediaGrid() {
+        mediaGrid.innerHTML = '';
+        if (!mediaFiles.length) {
+            mediaEmpty.textContent = 'Keine Medien gefunden.';
+            mediaEmpty.style.display = 'block';
+            return;
+        }
+
+        mediaEmpty.style.display = 'none';
+        mediaFiles.forEach(function (file) {
+            var card = document.createElement('button');
+            card.type = 'button';
+            card.className = 've-media-card';
+            card.innerHTML =
+                '<img src="' + escapeHtml(file.url || '') + '" alt="' + escapeHtml(file.assetTitle || file.fileName || 'Medium') + '">' +
+                '<div class="ve-media-card-body">' +
+                    '<strong>' + escapeHtml(file.assetTitle || file.fileName || 'Medium') + '</strong>' +
+                    '<span>' + escapeHtml(file.fileName || '') + '</span>' +
+                '</div>';
+            card.addEventListener('click', function () {
+                importMediaFile(file);
+            });
+            mediaGrid.appendChild(card);
+        });
+    }
+
+    function importMediaFile(file) {
+        var section = mediaRequest ? getSectionById(mediaRequest.sectionId) : null;
+        if (!section || !section.pwId || !mediaRequest) return;
+
+        mediaEmpty.textContent = 'Medium wird importiert…';
+        mediaEmpty.style.display = 'block';
+
+        postJson(API_ROOT + 'media-import', {
+            repeaterItemId: section.pwId,
+            targetField: mediaRequest.targetField || 'section_image',
+            assetId: file.assetId,
+            fileField: file.fileField,
+            fileName: file.fileName
+        }, 'Import fehlgeschlagen')
+            .then(function () {
+                closeMediaModal();
+                return fetchSections({ keepStatus: true });
+            })
+            .then(function () {
+                if (activeField) {
+                    selectField(activeField, { scroll: false });
+                } else if (section.id) {
+                    selectSection(section.id, { scroll: false });
+                }
+                setStatus('Medium importiert', 'is-ready');
+            })
+            .catch(function (error) {
+                mediaEmpty.textContent = error.message || 'Import fehlgeschlagen';
+                mediaEmpty.style.display = 'block';
+            });
+    }
+
+    function handleSectionAction(sectionId, action) {
+        var section = getSectionById(sectionId);
+        if (!section) return;
+        switch (action) {
+            case 'delete':
+                if (!window.confirm('Abschnitt "' + (section.title || '') + '" wirklich löschen?')) return;
+                deleteSection(section);
+                break;
+            case 'move-up':
+                moveSection(sectionId, -1);
+                break;
+            case 'move-down':
+                moveSection(sectionId, 1);
+                break;
+            case 'duplicate':
+                duplicateSection(section);
+                break;
+        }
     }
 
     pageSelect.addEventListener('change', function () {
@@ -1034,7 +1400,7 @@ body {
 
     btnAdd.addEventListener('click', function () {
         if (!currentPageId) return;
-        if (!confirmDiscardChanges()) return;
+        if (blockWhileDirty('Hinzufügen')) return;
         var choice = window.prompt(
             'Layout wählen:\n\n1. Bild + Text\n2. Text + Bild\n3. Banner\n4. Bildergalerie\n5. Video\n6. Nur Text\n7. Komponente\n\nNummer eingeben:',
             '6'
@@ -1053,31 +1419,30 @@ body {
     });
 
     btnSave.addEventListener('click', function () {
-        saveActiveSection();
+        saveDirtySections();
     });
 
     btnReset.addEventListener('click', function () {
-        resetActiveSection();
+        resetChanges();
     });
 
-    fieldEditor.addEventListener('input', function (event) {
-        var target = event.target;
-        if (!target || !target.name) return;
-        var section = getSectionById(activeSectionId);
-        if (!section) return;
-        applySectionField(section, target.name, target.value);
-        markDirty(true);
-        renderSectionList();
+    btnModeEdit.addEventListener('click', function () {
+        editorMode = 'edit';
+        updateActions();
+        syncIframeState();
     });
 
-    fieldEditor.addEventListener('change', function (event) {
-        var target = event.target;
-        if (!target || !target.name) return;
-        var section = getSectionById(activeSectionId);
-        if (!section) return;
-        applySectionField(section, target.name, target.value);
-        markDirty(true);
-        renderSectionList();
+    btnModeBrowse.addEventListener('click', function () {
+        editorMode = 'browse';
+        updateActions();
+        syncIframeState();
+    });
+
+    mediaClose.addEventListener('click', closeMediaModal);
+    mediaModal.addEventListener('click', function (event) {
+        if (event.target === mediaModal) {
+            closeMediaModal();
+        }
     });
 
     window.addEventListener('message', function (event) {
@@ -1089,19 +1454,40 @@ body {
         if (action === 'ready') {
             iframeReady = true;
             setStatus('Verbunden', 'is-ready');
-            fetchSections();
+            syncIframeState();
+            if (currentPath) {
+                fetchSections();
+            }
             return;
         }
 
         if (action === 'section-click') {
-            if (activeSectionId !== data.sectionId && isDirty && !confirmDiscardChanges()) return;
-            isDirty = false;
             selectSection(data.sectionId, { scroll: false });
+            return;
+        }
+
+        if (action === 'field-select') {
+            selectField(data, { scroll: false });
+            return;
+        }
+
+        if (action === 'field-change' || action === 'field-commit') {
+            applyFieldChange(data);
+            return;
+        }
+
+        if (action === 'media-request') {
+            openMediaModal(data);
+            return;
+        }
+
+        if (action === 'section-action') {
+            handleSectionAction(data.sectionId, data.action);
         }
     });
 
     window.addEventListener('beforeunload', function (event) {
-        if (!isDirty) return;
+        if (!hasDirtySections()) return;
         event.preventDefault();
         event.returnValue = '';
     });

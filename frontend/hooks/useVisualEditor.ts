@@ -16,6 +16,8 @@ interface UseVisualEditorReturn {
   handleSectionClick: (sectionId: string) => void
 }
 
+type VisualEditorMode = 'edit' | 'browse'
+
 function isInIframe(): boolean {
   try {
     return typeof window !== 'undefined' && window.parent !== window
@@ -36,6 +38,7 @@ function sendToParent(type: string, data: Record<string, unknown> = {}) {
 export function useVisualEditor({ enabled, sections: initialSections }: UseVisualEditorOptions): UseVisualEditorReturn {
   const [sections, setSections] = useState<ContentSection[]>(initialSections)
   const [highlightedSectionId, setHighlightedSectionId] = useState<string | null>(null)
+  const [mode, setMode] = useState<VisualEditorMode>('edit')
   const sectionsRef = useRef(initialSections)
 
   // Keep state in sync with server-rendered section data.
@@ -81,6 +84,10 @@ export function useVisualEditor({ enabled, sections: initialSections }: UseVisua
           setHighlightedSectionId(data.sectionId || null)
           break
         }
+        case 'save-state': {
+          setMode(data.mode === 'browse' ? 'browse' : 'edit')
+          break
+        }
         case 'sections-replace': {
           if (Array.isArray(data.sections)) {
             setSections(data.sections)
@@ -95,33 +102,11 @@ export function useVisualEditor({ enabled, sections: initialSections }: UseVisua
   }, [enabled])
 
   const handleSectionClick = useCallback((sectionId: string) => {
-    if (!enabled) return
+    if (!enabled || mode !== 'edit') return
     const section = sectionsRef.current.find(s => s.id === sectionId)
     if (!section) return
     sendToParent('section-click', { sectionId, section })
-  }, [enabled])
-
-  // Event-delegated click handler for [data-section-id] elements
-  useEffect(() => {
-    if (!enabled) return
-
-    function onClick(e: MouseEvent) {
-      const target = (e.target as HTMLElement).closest('[data-section-id]')
-      if (!target) return
-      const sectionId = target.getAttribute('data-section-id')
-      if (sectionId) {
-        e.preventDefault()
-        e.stopPropagation()
-        const section = sectionsRef.current.find(s => s.id === sectionId)
-        if (section) {
-          sendToParent('section-click', { sectionId, section })
-        }
-      }
-    }
-
-    document.addEventListener('click', onClick, true)
-    return () => document.removeEventListener('click', onClick, true)
-  }, [enabled])
+  }, [enabled, mode])
 
   // Handle scroll-to-section messages
   useEffect(() => {

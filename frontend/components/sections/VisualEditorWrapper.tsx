@@ -2,6 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import { useVisualEditor } from '@/hooks/useVisualEditor'
+import { InlineVisualEditorRuntime } from '@/components/visual-editor/InlineVisualEditorRuntime'
 import { SectionRenderer } from './SectionRenderer'
 import type { ContentSection } from '@/lib/processwire-types'
 
@@ -24,6 +25,7 @@ export function VisualEditorWrapper({ sections: initialSections, isEditing = fal
 
   return (
     <>
+      <InlineVisualEditorRuntime enabled={isVisualEditor} sections={sections} />
       <style dangerouslySetInnerHTML={{ __html: `
         [data-section-id] {
           position: relative;

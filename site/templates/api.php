@@ -688,6 +688,7 @@ switch ($endpoint) {
             'section_title', 'section_text', 'section_eyebrow',
             'section_layout', 'section_theme', 'section_bg_color',
             'section_component', 'section_image_overlay',
+            'image_alt',
             'section_image_brightness', 'section_image_contrast', 'section_image_saturate',
             'button_text', 'button_href', 'button_variant',
             'button2_text', 'button2_href', 'button2_variant',

@@ -12,6 +12,7 @@ import { DepotMap } from '@/components/DepotMap'
 import { GeisshofMap } from '@/components/GeisshofMap'
 import { Saisonkalender } from '@/components/Saisonkalender'
 import { Gallery } from '@/components/Gallery'
+import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
 import type { ContentSection, ContentMedia } from '@/lib/processwire-types'
 
 interface SectionRendererProps {
@@ -88,38 +89,55 @@ function getVideoEmbedUrl(url: string): string {
   return url
 }
 
-function SectionHeader({ section }: { section: ContentSection }) {
+function SectionHeader({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   const headingAlreadyInText = hasHeadingHtml(section.text)
   return (
     <>
-      {section.eyebrow ? <p className="cms-section-eyebrow">{section.eyebrow}</p> : null}
-      {section.title && !headingAlreadyInText ? <h2>{section.title}</h2> : null}
+      {section.eyebrow ? (
+        <p className="cms-section-eyebrow" {...getVeFieldAttrs(visualEditor, section.id, 'eyebrow', 'text', true)}>
+          {section.eyebrow}
+        </p>
+      ) : null}
+      {section.title && !headingAlreadyInText ? (
+        <h2 {...getVeFieldAttrs(visualEditor, section.id, 'title', 'text', true)}>{section.title}</h2>
+      ) : null}
     </>
   )
 }
 
-function SectionText({ section }: { section: ContentSection }) {
+function SectionText({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   if (!section.text) return null
-  return <div className="cms-section-text" dangerouslySetInnerHTML={{ __html: section.text }} />
+  return (
+    <div
+      className="cms-section-text"
+      {...getVeFieldAttrs(visualEditor, section.id, 'text', 'richtext', true)}
+      dangerouslySetInnerHTML={{ __html: section.text }}
+    />
+  )
 }
 
-function SectionButtons({ section }: { section: ContentSection }) {
+function SectionButtons({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   if (!section.buttons || section.buttons.length === 0) return null
   return (
     <div className="cms-section-actions">
       {section.buttons.map((btn, i) => (
-        <CTA key={`${section.id}-btn-${i}`} text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+        <span key={`${section.id}-btn-${i}`} {...getVeFieldAttrs(visualEditor, section.id, 'button', 'button', true, { buttonIndex: i })}>
+          <CTA text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+        </span>
       ))}
     </div>
   )
 }
 
-function SplitSection({ section, mediaFirst }: { section: ContentSection; mediaFirst: boolean }) {
+function SplitSection({ section, mediaFirst, visualEditor }: { section: ContentSection; mediaFirst: boolean; visualEditor: boolean }) {
   const media = getSectionMedia(section)
   const overlayClass = section.imageOverlay && section.imageOverlay !== 'none' ? `image-overlay-${section.imageOverlay}` : ''
   return (
     <section className="cms-section cms-split">
-      <div className={`cms-split-media ${mediaFirst ? 'is-first' : 'is-last'} ${overlayClass}`}>
+      <div
+        className={`cms-split-media ${mediaFirst ? 'is-first' : 'is-last'} ${overlayClass}`}
+        {...getVeFieldAttrs(visualEditor, section.id, 'media', 'media', false, { targetField: 'section_image' })}
+      >
         {media ? (
           <div className="cms-media-frame" style={getImageFilterStyle(section)}>
             <Image src={media.url} alt={media.alt || section.title} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} />
@@ -127,53 +145,57 @@ function SplitSection({ section, mediaFirst }: { section: ContentSection; mediaF
         ) : null}
       </div>
       <div className="cms-split-content">
-        <SectionHeader section={section} />
-        <SectionText section={section} />
-        <SectionButtons section={section} />
+        <SectionHeader section={section} visualEditor={visualEditor} />
+        <SectionText section={section} visualEditor={visualEditor} />
+        <SectionButtons section={section} visualEditor={visualEditor} />
       </div>
     </section>
   )
 }
 
-function BannerSection({ section }: { section: ContentSection }) {
+function BannerSection({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   return (
     <section className="cms-section cms-banner">
       <div className="cms-banner-inner">
-        <SectionHeader section={section} />
-        <SectionText section={section} />
-        <SectionButtons section={section} />
+        <SectionHeader section={section} visualEditor={visualEditor} />
+        <SectionText section={section} visualEditor={visualEditor} />
+        <SectionButtons section={section} visualEditor={visualEditor} />
       </div>
     </section>
   )
 }
 
-function MediaGridSection({ section }: { section: ContentSection }) {
+function MediaGridSection({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   const mediaItems = section.media || []
   return (
     <section className="cms-section cms-media-grid">
       <div className="cms-media-grid-text">
-        <SectionHeader section={section} />
-        <SectionText section={section} />
+        <SectionHeader section={section} visualEditor={visualEditor} />
+        <SectionText section={section} visualEditor={visualEditor} />
       </div>
       <div className="cms-media-grid-items">
         {mediaItems.map((item, index) => (
-          <div key={`${section.id}-media-${index}`} className="cms-media-frame">
+          <div
+            key={`${section.id}-media-${index}`}
+            className="cms-media-frame"
+            {...getVeFieldAttrs(visualEditor, section.id, 'media', 'media', false, { targetField: 'section_images' })}
+          >
             <Image src={item.url} alt={item.alt || section.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: 'cover' }} />
           </div>
         ))}
       </div>
-      <SectionButtons section={section} />
+      <SectionButtons section={section} visualEditor={visualEditor} />
     </section>
   )
 }
 
-function VideoSection({ section }: { section: ContentSection }) {
+function VideoSection({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   if (!section.video?.url) return null
   const embedUrl = getVideoEmbedUrl(section.video.url)
   const isFile = embedUrl.endsWith('.mp4') || embedUrl.endsWith('.webm')
   return (
     <section className="cms-section cms-video">
-      <SectionHeader section={section} />
+      <SectionHeader section={section} visualEditor={visualEditor} />
       {section.video.title ? <p className="cms-section-caption">{section.video.title}</p> : null}
       <div className="cms-video-frame">
         {isFile ? (
@@ -184,31 +206,33 @@ function VideoSection({ section }: { section: ContentSection }) {
           <iframe src={embedUrl} title={section.video.title || section.title} allow="autoplay; encrypted-media" allowFullScreen />
         )}
       </div>
-      <SectionText section={section} />
-      <SectionButtons section={section} />
+      <SectionText section={section} visualEditor={visualEditor} />
+      <SectionButtons section={section} visualEditor={visualEditor} />
     </section>
   )
 }
 
-function RichTextSection({ section }: { section: ContentSection }) {
+function RichTextSection({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   return (
     <section className="cms-section cms-rich-text">
-      <SectionHeader section={section} />
-      <SectionText section={section} />
-      <SectionButtons section={section} />
+      <SectionHeader section={section} visualEditor={visualEditor} />
+      <SectionText section={section} visualEditor={visualEditor} />
+      <SectionButtons section={section} visualEditor={visualEditor} />
     </section>
   )
 }
 
-function ComponentSection({ section }: { section: ContentSection }) {
+function ComponentSection({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   const componentKey = section.component || ''
   const component = componentMap[componentKey] || null
   return (
     <section className="cms-section cms-component">
-      <SectionHeader section={section} />
-      <SectionText section={section} />
-      {component}
-      <SectionButtons section={section} />
+      <SectionHeader section={section} visualEditor={visualEditor} />
+      <SectionText section={section} visualEditor={visualEditor} />
+      <div {...getVeFieldAttrs(visualEditor, section.id, 'component', 'structured', false)}>
+        {component}
+      </div>
+      <SectionButtons section={section} visualEditor={visualEditor} />
     </section>
   )
 }
@@ -228,31 +252,32 @@ export function SectionRenderer({ sections, isEditing = false, visualEditor = fa
         let inner: React.ReactNode
         switch (layout) {
           case 'split_text_media':
-            inner = <SplitSection section={section} mediaFirst={false} />
+            inner = <SplitSection section={section} mediaFirst={false} visualEditor={visualEditor} />
             break
           case 'full_width_banner':
-            inner = <BannerSection section={section} />
+            inner = <BannerSection section={section} visualEditor={visualEditor} />
             break
           case 'media_grid':
-            inner = <MediaGridSection section={section} />
+            inner = <MediaGridSection section={section} visualEditor={visualEditor} />
             break
           case 'video_embed':
-            inner = <VideoSection section={section} />
+            inner = <VideoSection section={section} visualEditor={visualEditor} />
             break
           case 'component':
-            inner = <ComponentSection section={section} />
+            inner = <ComponentSection section={section} visualEditor={visualEditor} />
             break
           case 'split_media_text':
-            inner = <SplitSection section={section} mediaFirst={true} />
+            inner = <SplitSection section={section} mediaFirst={true} visualEditor={visualEditor} />
             break
           case 'rich_text':
           default:
-            inner = <RichTextSection section={section} />
+            inner = <RichTextSection section={section} visualEditor={visualEditor} />
             break
         }
 
         const veAttrs = visualEditor ? {
           'data-section-id': section.id,
+          'data-ve-section-id': section.id,
           'data-section-layout': layout,
         } : {}
 
