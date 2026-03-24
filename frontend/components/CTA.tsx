@@ -9,66 +9,52 @@ interface CTAProps {
   onClick?: () => void
 }
 
+function scrollToElement(id: string) {
+  const element = document.getElementById(id)
+  if (element) {
+    const offsetPosition = element.getBoundingClientRect().top + window.pageYOffset - 100
+    window.scrollTo({ top: offsetPosition, behavior: 'smooth' })
+  }
+}
+
 export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
   const router = useRouter()
   const className = `${variant === 'primary' ? 'btn btn-primary' : 'btn btn-secondary'} btn-organic`
-  
+
+  const isExternal = href.startsWith('http://') || href.startsWith('https://')
+  const isFile = /\.(pdf|doc|docx|xls|xlsx|zip)$/i.test(href)
+
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     if (onClick) {
       onClick()
     }
-    
-    // Check if it's an anchor link (starts with #)
-    if (href.startsWith('#')) {
-      // For anchor links, scroll to the element on the same page
-      const element = document.getElementById(href.substring(1))
-      if (element) {
-        const headerOffset = 100
-        const elementPosition = element.getBoundingClientRect().top
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: 'smooth'
-        })
-      }
+
+    if (isExternal || isFile) {
+      window.open(href, '_blank', 'noopener,noreferrer')
       return
     }
-    
-    // Determine scroll target based on href for specific pages
+
+    if (href.startsWith('#')) {
+      scrollToElement(href.substring(1))
+      return
+    }
+
     let scrollTarget: string | null = null
     if (href === '/kontakt') {
       scrollTarget = 'kontakt-formular'
     } else if (href === '/standorte-depots') {
       scrollTarget = 'E-02'
     }
-    
-    if (scrollTarget) {
-      router.push(href)
-      // Wait for navigation to complete, then scroll
-      setTimeout(() => {
-        const element = document.getElementById(scrollTarget!)
-        if (element) {
-          const headerOffset = 100
-          const elementPosition = element.getBoundingClientRect().top
-          const offsetPosition = elementPosition + window.pageYOffset - headerOffset
-          window.scrollTo({
-            top: offsetPosition,
-            behavior: 'smooth'
-          })
-        }
-      }, 100)
-    } else {
-      // For other pages, scroll to top after navigation
-      router.push(href)
-      // Wait for navigation to complete, then scroll to top
-      setTimeout(() => {
-        window.scrollTo({
-          top: 0,
-          behavior: 'smooth'
-        })
-      }, 100)
-    }
+
+    router.push(href)
+    setTimeout(() => {
+      if (scrollTarget) {
+        scrollToElement(scrollTarget)
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    }, 100)
   }
   
   return (

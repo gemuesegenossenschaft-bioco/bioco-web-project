@@ -23,7 +23,6 @@ const RESERVED_PATHS = new Set([
   'doi-confirm',
   'gemuese',
   'impressum',
-  'intranet',
   'kontakt',
   'kundenportal',
   'mitmachen',
@@ -37,7 +36,7 @@ const RESERVED_PATHS = new Set([
 ])
 
 // Files that should never be handled by the CMS catch-all
-const STATIC_FILES = /\.(ico|png|jpg|svg|xml|txt|webmanifest)$/
+const STATIC_FILES = /\.(ico|png|jpg|svg|xml|txt|webmanifest|pdf)$/
 
 function normalizeSlug(segments?: string[]) {
   if (!segments || segments.length === 0) return ''

@@ -26,7 +26,8 @@ class MatomoTracker extends WireData implements Module {
 		// This ensures events are tracked even if JavaScript fails
 		$session = $this->wire()->session;
 		if($session) {
-			$events = $session->get('matomo_events', []);
+			$events = $session->get('matomo_events');
+			if(!is_array($events)) $events = [];
 			$events[] = [
 				'category' => $category,
 				'action' => $action,
@@ -86,7 +87,8 @@ class MatomoTracker extends WireData implements Module {
 	private function getPendingEvents() {
 		$session = $this->wire()->session;
 		if($session) {
-			$events = $session->get('matomo_events', []);
+			$events = $session->get('matomo_events');
+			if(!is_array($events)) $events = [];
 			// Clear events after retrieving
 			$session->remove('matomo_events');
 			return $events;

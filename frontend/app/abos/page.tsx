@@ -186,8 +186,8 @@ export default function AbosPage() {
           </section>
 
           {/* Probe-Abo und Anteilsscheine - Two Columns */}
-          <div className="two-column-section" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <section id="C-02" className="two-column-text">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 'clamp(32px, 5vw, 64px)', alignItems: 'start', marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <section id="C-02">
               <h2>Probe-Abo</h2>
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px', marginTop: '16px' }}>Möchtest du biocò erst einmal kennenlernen? Teste unser Gemüseabo für 3 Monate.</p>
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}><strong>Details:</strong></p>
@@ -203,7 +203,7 @@ export default function AbosPage() {
               />
             </section>
 
-            <section id="C-03" className="two-column-text">
+            <section id="C-03">
               <h2>Anteilsscheine ohne Gemüsekorb</h2>
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px', marginTop: '16px' }}>Du möchtest biocò unterstützen, ohne ein Gemüseabo zu beziehen? Das ist möglich!</p>
               <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '12px' }}><strong>Vorteile:</strong></p>

@@ -317,14 +317,14 @@ function buildSectionButtons($section) {
         $buttons[] = [
             'text' => decodeText($section->button_text),
             'href' => $section->get('button_href') ?: '/',
-            'variant' => $section->get('button_variant') ?: 'primary',
+            'variant' => ((string) $section->get('button_variant')) ?: 'primary',
         ];
     }
     if ($section->hasField('button2_text') && $section->button2_text) {
         $buttons[] = [
             'text' => decodeText($section->button2_text),
             'href' => $section->get('button2_href') ?: '/',
-            'variant' => $section->get('button2_variant') ?: 'secondary',
+            'variant' => ((string) $section->get('button2_variant')) ?: 'secondary',
         ];
     }
     return $buttons;
@@ -854,6 +854,11 @@ function handleContentRequest($type, $param = null) {
                     $pageSection['image'] = getImageUrl($contentPage, 'section_image');
                     $pageSection['imageAlt'] = decodeText($contentPage->get('image_alt') ?: '');
                     $pageSection['imageData'] = getImageDataWithAlt($contentPage, 'section_image', $pageSection['title']);
+                }
+
+                $buttons = buildSectionButtons($contentPage);
+                if (!empty($buttons)) {
+                    $pageSection['buttons'] = $buttons;
                 }
 
                 $sections[] = $pageSection;
