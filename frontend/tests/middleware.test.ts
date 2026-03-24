@@ -20,21 +20,13 @@ describe('middleware', () => {
     const req = new NextRequest('https://bioco.ch/')
     const res = middleware(req)
     expect(res.headers.get('X-Content-Type-Options')).toBe('nosniff')
-    expect(res.headers.get('X-Frame-Options')).toBe('DENY')
+    expect(res.headers.get('Referrer-Policy')).toBe('strict-origin-when-cross-origin')
   })
 
-  it('sets X-Frame-Options DENY by default (no visual editor)', () => {
+  it('does not set X-Frame-Options (handled by next.config.js headers)', () => {
     const req = new NextRequest('https://bioco.ch/mitmachen')
     const res = middleware(req)
-    expect(res.headers.get('X-Frame-Options')).toBe('DENY')
-    expect(res.headers.get('Content-Security-Policy')).toBeNull()
-  })
-
-  it('allows iframe embedding from CMS when _visual=1', () => {
-    const req = new NextRequest('https://bioco.ch/mitmachen?_visual=1')
-    const res = middleware(req)
-    expect(res.headers.get('X-Frame-Options')).toContain('ALLOW-FROM')
-    expect(res.headers.get('Content-Security-Policy')).toContain('frame-ancestors')
-    expect(res.headers.get('Content-Security-Policy')).toContain('cms.bioco.ch')
+    // Framing headers managed by next.config.js headers() to survive ISR cache
+    expect(res.headers.get('X-Frame-Options')).toBeNull()
   })
 })

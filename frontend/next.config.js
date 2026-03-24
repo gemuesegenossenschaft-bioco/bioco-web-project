@@ -41,6 +41,21 @@ const nextConfig = {
       },
     ],
   },
+  async headers() {
+    return [
+      {
+        // Framing protection: CSP frame-ancestors allows cms.bioco.ch (visual editor)
+        // No X-Frame-Options (CSP frame-ancestors supersedes it in all modern browsers)
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://cms.bioco.ch",
+          },
+        ],
+      },
+    ]
+  },
   async redirects() {
     return [
       {
