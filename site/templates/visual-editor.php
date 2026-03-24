@@ -28,8 +28,14 @@ if ($home->id) {
     ];
 }
 
-// Find all pages that have content_sections field
-$sectionPages = $pages->find("has_field=content_sections, template!=admin, id!={$home->id}, sort=sort");
+// Find all pages with content_sections by checking which templates use that field
+$sectionPages = new PageArray();
+foreach (wire('templates') as $t) {
+    if ($t->hasField('content_sections')) {
+        $found = $pages->find("template={$t->name}, id!={$home->id}, sort=sort");
+        $sectionPages->import($found);
+    }
+}
 foreach ($sectionPages as $p) {
     $path = '/' . trim($p->path, '/');
     $contentPages[] = [
