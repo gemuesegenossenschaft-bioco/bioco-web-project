@@ -669,25 +669,26 @@ switch ($endpoint) {
         break;
 
     case 'content-save':
-        requireAdminSession();
+        if (!requireAdminSession()) break;
         $data = json_decode(file_get_contents('php://input'), true);
-        $sectionId = (int)($data['sectionId'] ?? 0);
+        $sectionId = (int)($data['sectionPwId'] ?? ($data['sectionId'] ?? 0));
         $fields = $data['fields'] ?? [];
         if (!$sectionId || !$fields) {
             http_response_code(400);
-            echo json_encode(['error' => 'Missing sectionId or fields']);
+            echo json_encode(['success' => false, 'error' => 'Missing sectionPwId or fields']);
             break;
         }
         $section = wire('pages')->get($sectionId);
         if (!$section->id || strpos($section->template->name, 'repeater_') !== 0) {
             http_response_code(400);
-            echo json_encode(['error' => 'Invalid section']);
+            echo json_encode(['success' => false, 'error' => 'Invalid section']);
             break;
         }
         $allowedFields = [
             'section_title', 'section_text', 'section_eyebrow',
             'section_layout', 'section_theme', 'section_bg_color',
             'section_component', 'section_image_overlay',
+            'section_image_brightness', 'section_image_contrast', 'section_image_saturate',
             'button_text', 'button_href', 'button_variant',
             'button2_text', 'button2_href', 'button2_variant',
         ];
@@ -706,7 +707,7 @@ switch ($endpoint) {
     // ====================================================================
 
     case 'sections-reorder':
-        requireAdminSession();
+        if (!requireAdminSession()) break;
         $data = json_decode(file_get_contents('php://input'), true);
         $pageId = (int)($data['pageId'] ?? 0);
         $order = $data['order'] ?? [];
@@ -737,7 +738,7 @@ switch ($endpoint) {
         break;
 
     case 'sections-add':
-        requireAdminSession();
+        if (!requireAdminSession()) break;
         $data = json_decode(file_get_contents('php://input'), true);
         $pageId = (int)($data['pageId'] ?? 0);
         $layout = $sanitizer->name($data['layout'] ?? 'rich_text');
@@ -765,7 +766,7 @@ switch ($endpoint) {
         break;
 
     case 'sections-delete':
-        requireAdminSession();
+        if (!requireAdminSession()) break;
         $data = json_decode(file_get_contents('php://input'), true);
         $pageId = (int)($data['pageId'] ?? 0);
         $sectionPwId = (int)($data['sectionPwId'] ?? 0);

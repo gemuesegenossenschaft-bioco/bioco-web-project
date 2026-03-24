@@ -1,10 +1,20 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import type { ContentSection } from '@/lib/processwire-types'
+
+let mockSearch = ''
 
 vi.mock('next/image', () => ({
   default: (props: Record<string, unknown>) => <img data-testid="next-image" {...props} />,
+}))
+vi.mock('next/link', () => ({
+  default: ({ href, children, ...props }: Record<string, unknown>) => <a href={String(href)} {...props}>{children}</a>,
+}))
+vi.mock('next/navigation', () => ({
+  useSearchParams: () => ({
+    get: (key: string) => new URLSearchParams(mockSearch).get(key),
+  }),
 }))
 vi.mock('@/components/forms/ContactForm', () => ({ ContactForm: () => null }))
 vi.mock('@/components/forms/MembershipForm', () => ({ MembershipForm: () => null }))
@@ -19,12 +29,37 @@ vi.mock('@/components/GeisshofMap', () => ({ GeisshofMap: () => null }))
 vi.mock('@/components/Saisonkalender', () => ({ Saisonkalender: () => null }))
 vi.mock('@/components/Gallery', () => ({ Gallery: () => null }))
 vi.mock('@/components/CTA', () => ({ CTA: () => null }))
+vi.mock('@/components/UtilityNavigation', () => ({ UtilityNavigation: () => null }))
+vi.mock('@/components/SecondaryNavigation', () => ({ PrimaryNavigation: () => null }))
+vi.mock('@/components/MobileMenu', () => ({ MobileMenu: () => null }))
+vi.mock('@/components/Footer', () => ({ Footer: () => null }))
+vi.mock('@/components/AktuellesItem', () => ({ AktuellesItemComponent: () => null }))
+vi.mock('@/components/ItemDetailModal', () => ({ ItemDetailModal: () => null }))
+vi.mock('@/components/ScrollToTopLink', () => ({
+  ScrollToTopLink: ({ children, ...props }: Record<string, unknown>) => <a {...props}>{children}</a>,
+}))
+vi.mock('@/hooks/useEventsFeed', () => ({
+  useEventsFeed: () => ({ upcoming: [], isLoading: false }),
+}))
+vi.mock('@/components/AktuellesClient', () => ({
+  filterSchnuppertage: () => [],
+}))
 
 const testSections: ContentSection[] = [
   { id: 'section-1', title: 'First', text: '<p>One</p>', layout: 'rich_text' },
   { id: 'section-2', title: 'Second', text: '<p>Two</p>', layout: 'split_media_text', image: '/img.jpg' },
   { id: 'section-3', title: 'Third', text: '<p>Three</p>', layout: 'full_width_banner' },
 ]
+
+const homepageSections: ContentSection[] = [
+  { id: 'willkommen', title: 'Willkommen', text: '<p>Hallo</p>', layout: 'rich_text' },
+  { id: 'gemeinsam', title: 'Gemeinsam', text: '<p>Zusammen</p>', layout: 'split_media_text', image: '/img.jpg' },
+  { id: 'kennenlernen', title: 'Kennenlernen', text: '<p>Besuch uns</p>', layout: 'full_width_banner' },
+]
+
+beforeEach(() => {
+  mockSearch = ''
+})
 
 describe('SectionRenderer data-section-id attributes', () => {
   it('adds data-section-id to each section wrapper in visual editor mode', async () => {
@@ -198,5 +233,49 @@ describe('Visual editor postMessage protocol', () => {
     })
 
     expect(screen.getByTestId('highlighted').textContent).toBe('section-2')
+  })
+})
+
+describe('HomeClient visual editor integration', () => {
+  it('adds data-section attributes to CMS-backed homepage sections in visual mode', async () => {
+    mockSearch = '_visual=1'
+    const { HomeClient } = await import('@/components/HomeClient')
+    const { container } = render(
+      <HomeClient
+        hero={{ headline: 'Hero', subtitle: '', image: null, imageAlt: '' }}
+        sections={homepageSections}
+        aktuellesItems={[]}
+      />
+    )
+
+    expect(container.querySelector('[data-section-id="willkommen"]')).toBeTruthy()
+    expect(container.querySelector('[data-section-id="gemeinsam"]')).toBeTruthy()
+    expect(container.querySelector('[data-section-id="kennenlernen"]')).toBeTruthy()
+  })
+
+  it('updates homepage content on section-update messages', async () => {
+    mockSearch = '_visual=1'
+    const { HomeClient } = await import('@/components/HomeClient')
+
+    render(
+      <HomeClient
+        hero={{ headline: 'Hero', subtitle: '', image: null, imageAlt: '' }}
+        sections={homepageSections}
+        aktuellesItems={[]}
+      />
+    )
+
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        data: {
+          type: 'bioco:visual-editor:section-update',
+          sectionId: 'willkommen',
+          field: 'title',
+          value: 'Aktualisiert',
+        },
+      }))
+    })
+
+    expect(screen.getByRole('heading', { name: 'Aktualisiert' })).toBeInTheDocument()
   })
 })

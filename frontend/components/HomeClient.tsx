@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { UtilityNavigation } from '@/components/UtilityNavigation'
 import { PrimaryNavigation } from '@/components/SecondaryNavigation'
 import { MobileMenu } from '@/components/MobileMenu'
@@ -12,6 +13,7 @@ import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
 import { ScrollToTopLink } from '@/components/ScrollToTopLink'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
+import { useVisualEditor } from '@/hooks/useVisualEditor'
 import type { ContentSection, HeroContent } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
 import { filterSchnuppertage } from '@/components/AktuellesClient'
@@ -35,8 +37,14 @@ function hasHeadingHtml(html?: string | null): boolean {
 }
 
 export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) {
+  const searchParams = useSearchParams()
+  const isVisualEditor = searchParams.get('_visual') === '1'
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const { sections: liveSections, highlightedSectionId } = useVisualEditor({
+    enabled: isVisualEditor,
+    sections,
+  })
 
   const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(6)
   const schnuppertageEvents = filterSchnuppertage(eventItems)
@@ -53,7 +61,15 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
 
   // Get sections by ID with fallback
   const getSection = (id: string): ContentSection | undefined => {
-    return sections.find(s => s.id === id)
+    return liveSections.find(s => s.id === id)
+  }
+
+  const getVisualAttrs = (section?: ContentSection): Record<string, string> => {
+    if (!isVisualEditor || !section) return {}
+    return {
+      'data-section-id': section.id,
+      'data-section-layout': section.layout || 'rich_text',
+    }
   }
 
   const willkommenSection = getSection('willkommen')
@@ -62,6 +78,39 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
 
   return (
     <div className="page-shell">
+      {isVisualEditor ? (
+        <style dangerouslySetInnerHTML={{ __html: `
+          [data-section-id] {
+            position: relative;
+            cursor: pointer;
+            transition: outline 0.15s;
+          }
+          [data-section-id]:hover {
+            outline: 2px dashed rgba(74, 124, 89, 0.6);
+            outline-offset: -2px;
+          }
+          [data-section-id]:hover::after {
+            content: attr(data-section-layout);
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(74, 124, 89, 0.9);
+            color: #fff;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            z-index: 10;
+            pointer-events: none;
+          }
+          ${highlightedSectionId ? `
+          [data-section-id="${highlightedSectionId}"] {
+            outline: 3px solid #4a7c59 !important;
+            outline-offset: -3px !important;
+          }
+          ` : ''}
+        ` }} />
+      ) : null}
+
       {/* Utility Navigation - Above hero */}
       <div className="hero-utility-nav">
         <UtilityNavigation />
@@ -110,7 +159,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
       {/* Main content */}
       <main className="home-container">
         {/* Willkommen - Row 1, Two Columns */}
-        <section className="two-column-section">
+        <section className="two-column-section" {...getVisualAttrs(willkommenSection)}>
           <div className="two-column-text">
             {!hasHeadingHtml(willkommenSection?.text) && (
               <h2>{willkommenSection?.title || 'Willkommen bei biocò'}</h2>
@@ -142,7 +191,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
         </section>
 
         {/* Gemeinsam, solidarisch, frisch - Row 2, Two Columns */}
-        <section className="two-column-section">
+        <section className="two-column-section" {...getVisualAttrs(gemeinsamSection)}>
           <div className="two-column-image">
             {sectionImage(gemeinsamSection) && <Image
               src={sectionImage(gemeinsamSection)!}
@@ -222,7 +271,11 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
           </section>
 
           {/* Kennenlernen */}
-          <section className="home-block col-span-12" style={{ marginTop: 'clamp(24px, 4vw, 48px)' }}>
+          <section
+            className="home-block col-span-12"
+            style={{ marginTop: 'clamp(24px, 4vw, 48px)' }}
+            {...getVisualAttrs(kennenlernenSection)}
+          >
             {!hasHeadingHtml(kennenlernenSection?.text) && (
               <h2>{kennenlernenSection?.title || 'Möchtest du uns kennenlernen?'}</h2>
             )}

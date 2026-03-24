@@ -1,11 +1,10 @@
 <?php namespace ProcessWire;
 
 /**
- * Visual Editor: iframe-based WYSIWYG section editor.
- * Outputs a full HTML page and exits, bypassing PW admin chrome.
+ * Visual Editor: iframe-based live preview editor for content sections.
+ * Outputs a standalone HTML page and exits before ProcessWire admin chrome renders.
  */
 
-// Bypass PW output buffering: clean all buffers, output directly, then exit.
 while (ob_get_level()) ob_end_clean();
 
 if (!$user->isLoggedin() || $user->isGuest()) {
@@ -15,42 +14,41 @@ if (!$user->isLoggedin() || $user->isGuest()) {
 
 $siteUrl = rtrim(getenv('NEXT_PUBLIC_SITE_URL') ?: 'https://bioco.ch', '/');
 $draftSecret = getenv('PW_PREVIEW_TOKEN') ?: '';
+$apiRoot = $config->urls->root . 'api/';
 
-// Build page list: all pages with content_sections + homepage
-$contentPages = [];
+$pagesById = [];
 $home = $pages->get('/');
 if ($home->id) {
-    $contentPages[] = [
-        'id' => $home->id,
+    $pagesById[$home->id] = [
+        'id' => (int) $home->id,
         'title' => $home->title ?: 'Startseite',
         'path' => '/',
         'template' => $home->template->name,
     ];
 }
 
-// Find all pages with content_sections by checking which templates use that field
-$sectionPages = new PageArray();
-foreach (wire('templates') as $t) {
-    if ($t->hasField('content_sections')) {
-        $found = $pages->find("template={$t->name}, id!={$home->id}, sort=sort");
-        $sectionPages->import($found);
+foreach (wire('templates') as $template) {
+    if (!$template->hasField('content_sections')) continue;
+    foreach ($pages->find("template={$template->name}, sort=sort") as $page) {
+        if (!$page->id) continue;
+        if (isset($pagesById[$page->id])) continue;
+        $pagesById[$page->id] = [
+            'id' => (int) $page->id,
+            'title' => $page->title ?: $page->name,
+            'path' => '/' . trim($page->path, '/'),
+            'template' => $page->template->name,
+        ];
     }
 }
-foreach ($sectionPages as $p) {
-    $path = '/' . trim($p->path, '/');
-    $contentPages[] = [
-        'id' => $p->id,
-        'title' => $p->title,
-        'path' => $path,
-        'template' => $p->template->name,
-    ];
-}
 
-$pagesJson = json_encode($contentPages, JSON_UNESCAPED_UNICODE);
-$apiRoot = $config->urls->root . 'api/';
+$contentPages = array_values($pagesById);
+usort($contentPages, function ($a, $b) {
+    if ($a['path'] === '/') return -1;
+    if ($b['path'] === '/') return 1;
+    return strcmp($a['path'], $b['path']);
+});
 
 header('Content-Type: text/html; charset=UTF-8');
-
 ?><!DOCTYPE html>
 <html lang="de">
 <head>
@@ -58,234 +56,262 @@ header('Content-Type: text/html; charset=UTF-8');
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Visual Editor</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-    background: #1a1a2e;
-    color: #e0e0e0;
-    height: 100vh;
-    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: #111827;
+    color: #e5e7eb;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
-
 .ve-toolbar {
-    display: flex;
     align-items: center;
+    background: #0f172a;
+    border-bottom: 1px solid #1f2937;
+    display: flex;
     gap: 12px;
-    padding: 8px 16px;
-    background: #16213e;
-    border-bottom: 1px solid #0f3460;
-    flex-shrink: 0;
-    z-index: 100;
+    padding: 10px 14px;
+    z-index: 10;
 }
-
 .ve-toolbar-logo {
-    font-weight: 700;
+    color: #8ab272;
     font-size: 14px;
-    color: #4a7c59;
+    font-weight: 700;
     white-space: nowrap;
 }
-
-.ve-toolbar select {
-    background: #0f3460;
-    color: #e0e0e0;
-    border: 1px solid #1a1a4e;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 13px;
-    min-width: 220px;
+.ve-toolbar select,
+.ve-toolbar button,
+.ve-toolbar a,
+.ve-field-editor input,
+.ve-field-editor select,
+.ve-field-editor textarea {
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    color: #e5e7eb;
+    font: inherit;
 }
-
+.ve-toolbar select {
+    min-width: 260px;
+    padding: 7px 10px;
+}
 .ve-toolbar-actions {
     display: flex;
     gap: 8px;
     margin-left: auto;
 }
-
 .ve-btn {
-    background: #0f3460;
-    color: #e0e0e0;
-    border: 1px solid #1a1a4e;
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 13px;
     cursor: pointer;
-    transition: background 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 7px 12px;
+    text-decoration: none;
+    transition: background 0.15s, border-color 0.15s, opacity 0.15s;
 }
-.ve-btn:hover { background: #1a1a4e; }
-.ve-btn-primary { background: #4a7c59; border-color: #3a6c49; color: #fff; }
-.ve-btn-primary:hover { background: #3a6c49; }
-.ve-btn-danger { background: #8b2252; border-color: #6b1242; }
-.ve-btn-danger:hover { background: #6b1242; }
-.ve-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
+.ve-btn:hover { background: #1f2937; }
+.ve-btn-primary {
+    background: #4a7c59;
+    border-color: #4a7c59;
+    color: #fff;
+}
+.ve-btn-primary:hover { background: #3f6c4e; }
+.ve-btn-danger {
+    background: #7f1d1d;
+    border-color: #7f1d1d;
+    color: #fff;
+}
+.ve-btn-danger:hover { background: #991b1b; }
+.ve-btn:disabled { cursor: not-allowed; opacity: 0.55; }
+.ve-status {
+    background: #1f2937;
+    border-radius: 999px;
+    font-size: 11px;
+    padding: 4px 10px;
+    white-space: nowrap;
+}
+.ve-status.is-ready { background: #17321f; color: #9ae6b4; }
+.ve-status.is-loading { background: #3b2f17; color: #f6e05e; }
+.ve-status.is-error { background: #3b1717; color: #feb2b2; }
 .ve-main {
     display: flex;
     flex: 1;
-    overflow: hidden;
+    min-height: 0;
 }
-
 .ve-sidebar {
-    width: 380px;
-    background: #16213e;
-    border-right: 1px solid #0f3460;
+    background: #0f172a;
+    border-right: 1px solid #1f2937;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     flex-shrink: 0;
+    width: 430px;
 }
-
 .ve-sidebar-header {
-    padding: 12px 16px;
-    border-bottom: 1px solid #0f3460;
-    font-weight: 600;
-    font-size: 14px;
-    display: flex;
     align-items: center;
+    border-bottom: 1px solid #1f2937;
+    display: flex;
+    gap: 8px;
     justify-content: space-between;
+    padding: 12px 14px;
 }
-
-.ve-sidebar-content {
-    flex: 1;
+.ve-sidebar-title {
+    font-size: 13px;
+    font-weight: 600;
+}
+.ve-section-list-wrap {
+    border-bottom: 1px solid #1f2937;
+    max-height: 42%;
+    min-height: 180px;
     overflow-y: auto;
-    padding: 0;
 }
-
 .ve-section-list {
     list-style: none;
 }
-
 .ve-section-item {
-    padding: 10px 16px;
-    border-bottom: 1px solid #0f3460;
-    cursor: pointer;
-    transition: background 0.1s;
-    display: flex;
     align-items: center;
+    border-left: 3px solid transparent;
+    border-bottom: 1px solid #1f2937;
+    cursor: pointer;
+    display: flex;
     gap: 10px;
+    padding: 10px 14px;
 }
-.ve-section-item:hover { background: #1a1a4e; }
-.ve-section-item.is-active { background: #0f3460; border-left: 3px solid #4a7c59; }
-
+.ve-section-item:hover { background: #111827; }
+.ve-section-item.is-active {
+    background: #111827;
+    border-left-color: #4a7c59;
+}
 .ve-section-drag {
+    color: #64748b;
     cursor: grab;
-    color: #666;
-    font-size: 16px;
+    font-size: 15px;
     user-select: none;
 }
-.ve-section-drag:active { cursor: grabbing; }
-
 .ve-section-info {
     flex: 1;
     min-width: 0;
 }
-
 .ve-section-title {
     font-size: 13px;
     font-weight: 500;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
-
 .ve-section-meta {
-    font-size: 11px;
-    color: #888;
-    margin-top: 2px;
+    color: #94a3b8;
+    display: flex;
+    gap: 4px;
+    margin-top: 3px;
 }
-
+.ve-layout-badge {
+    background: #1e293b;
+    border-radius: 999px;
+    font-size: 10px;
+    padding: 2px 7px;
+}
 .ve-section-actions {
     display: flex;
     gap: 4px;
 }
-
-.ve-section-actions button {
-    background: none;
+.ve-icon-btn {
+    align-items: center;
+    background: transparent;
     border: none;
-    color: #888;
+    border-radius: 6px;
+    color: #94a3b8;
     cursor: pointer;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 12px;
+    display: inline-flex;
+    height: 28px;
+    justify-content: center;
+    width: 28px;
 }
-.ve-section-actions button:hover { background: #1a1a4e; color: #e0e0e0; }
-
-/* Field editor panel (shown when section selected) */
+.ve-icon-btn:hover {
+    background: #1f2937;
+    color: #e5e7eb;
+}
 .ve-field-editor {
-    padding: 16px;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
 }
-
+.ve-editor-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 14px;
+}
+.ve-empty-state {
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 18px 14px;
+}
 .ve-field-group {
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
-
 .ve-field-group label {
+    color: #94a3b8;
     display: block;
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: #888;
-    margin-bottom: 4px;
 }
-
 .ve-field-group input,
 .ve-field-group select,
 .ve-field-group textarea {
-    width: 100%;
-    background: #0f3460;
-    color: #e0e0e0;
-    border: 1px solid #1a1a4e;
-    border-radius: 6px;
     padding: 8px 10px;
-    font-size: 13px;
-    font-family: inherit;
+    width: 100%;
 }
-
 .ve-field-group textarea {
-    min-height: 120px;
+    min-height: 110px;
     resize: vertical;
 }
-
-.ve-iframe-wrap {
-    flex: 1;
-    position: relative;
-    background: #fff;
+.ve-form-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-
-.ve-iframe-wrap iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
+.ve-form-grid .ve-field-group-full {
+    grid-column: 1 / -1;
 }
-
-.ve-status {
-    font-size: 11px;
-    padding: 2px 8px;
-    border-radius: 10px;
-    background: #333;
+.ve-actions-bar {
+    border-top: 1px solid #1f2937;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding: 12px 14px;
 }
-.ve-status.is-ready { background: #2d5a3d; color: #8fdf8f; }
-.ve-status.is-loading { background: #5a4a2d; color: #dfcf8f; }
-.ve-status.is-error { background: #5a2d2d; color: #df8f8f; }
-
-.ve-empty-state {
-    padding: 40px 20px;
-    text-align: center;
-    color: #666;
-    font-size: 13px;
+.ve-help {
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1.5;
+    margin-top: 4px;
 }
-
-/* Layout labels in German */
-.ve-layout-badge {
+.ve-dirty-pill {
+    background: #3b2f17;
+    border-radius: 999px;
+    color: #f6e05e;
     font-size: 10px;
-    padding: 1px 6px;
-    border-radius: 4px;
-    background: #1a1a4e;
-    color: #aaa;
-    white-space: nowrap;
+    margin-left: 6px;
+    padding: 2px 6px;
+}
+.ve-iframe-wrap {
+    background: #fff;
+    flex: 1;
+    min-width: 0;
+    position: relative;
+}
+.ve-iframe-wrap iframe {
+    border: none;
+    height: 100%;
+    width: 100%;
 }
 </style>
 </head>
@@ -298,35 +324,47 @@ body {
     </select>
     <span id="ve-status" class="ve-status">Nicht verbunden</span>
     <div class="ve-toolbar-actions">
-        <button class="ve-btn" id="ve-btn-refresh" title="Vorschau neu laden">↻ Aktualisieren</button>
-        <button class="ve-btn" id="ve-btn-pw" title="In ProcessWire öffnen">PW Admin</button>
-        <a href="<?= $config->urls->admin ?>" class="ve-btn">← Zurück</a>
+        <button class="ve-btn" id="ve-btn-refresh" type="button">Neu laden</button>
+        <button class="ve-btn" id="ve-btn-pw" type="button">PW Admin</button>
+        <a href="<?= $config->urls->admin ?>" class="ve-btn">Zurück</a>
     </div>
 </div>
 
 <div class="ve-main">
-    <div class="ve-sidebar">
+    <aside class="ve-sidebar">
         <div class="ve-sidebar-header">
-            <span>Inhaltsbereiche</span>
-            <button class="ve-btn ve-btn-primary" id="ve-btn-add" disabled>+ Neu</button>
+            <span class="ve-sidebar-title">Inhaltsbereiche</span>
+            <button class="ve-btn ve-btn-primary" id="ve-btn-add" type="button" disabled>Abschnitt hinzufügen</button>
         </div>
-        <div class="ve-sidebar-content">
-            <div class="ve-empty-state" id="ve-empty">Seite wählen, um Abschnitte zu sehen.</div>
+
+        <div class="ve-section-list-wrap">
+            <div class="ve-empty-state" id="ve-empty-list">Seite wählen, um Abschnitte zu laden.</div>
             <ul class="ve-section-list" id="ve-section-list"></ul>
         </div>
-    </div>
+
+        <div class="ve-field-editor">
+            <div class="ve-editor-scroll" id="ve-field-editor">
+                <div class="ve-empty-state">Wähle einen Abschnitt aus der Liste oder direkt in der Vorschau.</div>
+            </div>
+            <div class="ve-actions-bar">
+                <button class="ve-btn" id="ve-btn-reset" type="button" disabled>Zurücksetzen</button>
+                <button class="ve-btn ve-btn-primary" id="ve-btn-save" type="button" disabled>Speichern</button>
+            </div>
+        </div>
+    </aside>
+
     <div class="ve-iframe-wrap">
         <iframe id="ve-iframe" src="about:blank"></iframe>
     </div>
 </div>
 
 <script>
-(function() {
+(function () {
     var PREFIX = 'bioco:visual-editor:';
     var SITE_URL = <?= json_encode($siteUrl) ?>;
     var DRAFT_SECRET = <?= json_encode($draftSecret) ?>;
     var API_ROOT = <?= json_encode($apiRoot) ?>;
-    var ALL_PAGES = <?= $pagesJson ?>;
+    var ALL_PAGES = <?= json_encode($contentPages, JSON_UNESCAPED_UNICODE) ?>;
     var LAYOUT_LABELS = {
         split_media_text: 'Bild + Text',
         split_text_media: 'Text + Bild',
@@ -334,132 +372,273 @@ body {
         media_grid: 'Bildergalerie',
         video_embed: 'Video',
         rich_text: 'Nur Text',
-        component: 'Komponente',
+        component: 'Komponente'
     };
+    var THEME_OPTIONS = ['default', 'light', 'dark', 'green'];
+    var BG_OPTIONS = ['none', 'green', 'darkgreen', 'orange', 'gray', 'white'];
+    var OVERLAY_OPTIONS = ['none', 'dark', 'green', 'orange'];
+    var BUTTON_VARIANTS = ['primary', 'secondary'];
 
     var iframe = document.getElementById('ve-iframe');
     var pageSelect = document.getElementById('ve-page-select');
-    var sectionList = document.getElementById('ve-section-list');
     var statusEl = document.getElementById('ve-status');
-    var emptyEl = document.getElementById('ve-empty');
+    var sectionList = document.getElementById('ve-section-list');
+    var emptyList = document.getElementById('ve-empty-list');
+    var fieldEditor = document.getElementById('ve-field-editor');
     var btnAdd = document.getElementById('ve-btn-add');
     var btnRefresh = document.getElementById('ve-btn-refresh');
     var btnPw = document.getElementById('ve-btn-pw');
+    var btnSave = document.getElementById('ve-btn-save');
+    var btnReset = document.getElementById('ve-btn-reset');
 
     var currentPageId = null;
     var currentPath = null;
     var sections = [];
     var activeSectionId = null;
+    var pendingSelectId = null;
     var iframeReady = false;
+    var isDirty = false;
+    var isSaving = false;
 
-    // Populate page selector
-    ALL_PAGES.forEach(function(p) {
-        var opt = document.createElement('option');
-        opt.value = p.id + '|' + p.path;
-        opt.textContent = p.title + ' (' + p.path + ')';
-        pageSelect.appendChild(opt);
+    ALL_PAGES.forEach(function (page) {
+        var option = document.createElement('option');
+        option.value = page.id + '|' + page.path;
+        option.textContent = page.title + ' (' + page.path + ')';
+        pageSelect.appendChild(option);
     });
 
     function setStatus(text, cls) {
         statusEl.textContent = text;
-        statusEl.className = 've-status ' + (cls || '');
+        statusEl.className = 've-status' + (cls ? ' ' + cls : '');
     }
 
-    function loadPage(pageId, path) {
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function getPageDescriptor(pageId, path) {
+        for (var i = 0; i < ALL_PAGES.length; i++) {
+            if (ALL_PAGES[i].id === pageId && ALL_PAGES[i].path === path) return ALL_PAGES[i];
+        }
+        return null;
+    }
+
+    function getSectionById(sectionId) {
+        for (var i = 0; i < sections.length; i++) {
+            if (sections[i].id === sectionId) return sections[i];
+        }
+        return null;
+    }
+
+    function getButton(section, index) {
+        if (!section || !Array.isArray(section.buttons)) {
+            return { text: '', href: '', variant: index === 0 ? 'primary' : 'secondary' };
+        }
+        return section.buttons[index] || { text: '', href: '', variant: index === 0 ? 'primary' : 'secondary' };
+    }
+
+    function setButtons(section, buttonIndex, patch) {
+        var buttons = Array.isArray(section.buttons) ? section.buttons.slice() : [];
+        var current = buttons[buttonIndex] || { text: '', href: '', variant: buttonIndex === 0 ? 'primary' : 'secondary' };
+        buttons[buttonIndex] = Object.assign({}, current, patch);
+        while (buttons.length > 0) {
+            var last = buttons[buttons.length - 1];
+            if ((last.text || '').trim() || (last.href || '').trim()) break;
+            buttons.pop();
+        }
+        section.buttons = buttons;
+    }
+
+    function sendToIframe(action, data) {
+        if (!iframeReady || !iframe.contentWindow) return;
+        iframe.contentWindow.postMessage(Object.assign({ type: PREFIX + action }, data || {}), '*');
+    }
+
+    function updateActions() {
+        var hasActive = !!getSectionById(activeSectionId);
+        btnAdd.disabled = !currentPageId || isSaving;
+        btnPw.disabled = !currentPageId;
+        btnSave.disabled = !hasActive || !isDirty || isSaving;
+        btnReset.disabled = !hasActive || !isDirty || isSaving;
+        if (isSaving) {
+            btnSave.textContent = 'Speichert...';
+        } else {
+            btnSave.textContent = 'Speichern';
+        }
+    }
+
+    function confirmDiscardChanges() {
+        if (!isDirty) return true;
+        return window.confirm('Ungespeicherte Änderungen verwerfen?');
+    }
+
+    function markDirty(nextDirty) {
+        isDirty = !!nextDirty;
+        updateActions();
+    }
+
+    function sectionEndpointForCurrentPath() {
+        if (!currentPath) return '';
+        if (currentPath === '/') return API_ROOT + 'content/homepage';
+        return API_ROOT + 'content/sections/' + encodeURIComponent(currentPath.replace(/^\/|\/$/g, ''));
+    }
+
+    function fetchSections(options) {
+        options = options || {};
+        var endpoint = sectionEndpointForCurrentPath();
+        if (!endpoint) return Promise.resolve();
+
+        if (!options.keepStatus) {
+            setStatus('Abschnitte laden...', 'is-loading');
+        }
+
+        return fetch(endpoint, { credentials: 'include' })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    if (!response.ok) {
+                        throw new Error((data && data.error) || 'Fehler beim Laden');
+                    }
+                    return data;
+                });
+            })
+            .then(function (data) {
+                sections = Array.isArray(data.sections) ? data.sections : [];
+                if (pendingSelectId && getSectionById(pendingSelectId)) {
+                    activeSectionId = pendingSelectId;
+                } else if (activeSectionId && !getSectionById(activeSectionId)) {
+                    activeSectionId = null;
+                }
+                pendingSelectId = null;
+                renderSectionList();
+                renderFieldEditor();
+                updateActions();
+                if (iframeReady) {
+                    sendToIframe('sections-replace', { sections: sections });
+                    if (activeSectionId) {
+                        sendToIframe('section-highlight', { sectionId: activeSectionId });
+                    }
+                }
+                if (!options.keepStatus) {
+                    setStatus('Verbunden', 'is-ready');
+                }
+            })
+            .catch(function (error) {
+                setStatus(error.message || 'Fehler beim Laden', 'is-error');
+            });
+    }
+
+    function loadPage(pageId, path, options) {
+        options = options || {};
         currentPageId = pageId;
         currentPath = path;
         iframeReady = false;
         sections = [];
+        pendingSelectId = null;
         activeSectionId = null;
-        setStatus('Laden...', 'is-loading');
-        btnAdd.disabled = true;
+        isDirty = false;
+        isSaving = false;
+
+        pageSelect.value = pageId + '|' + path;
+        renderSectionList();
+        renderFieldEditor();
+        updateActions();
+        setStatus('Vorschau laden...', 'is-loading');
 
         var url = SITE_URL + path;
-        var sep = url.indexOf('?') >= 0 ? '&' : '?';
-        url += sep + '_visual=1';
+        url += (url.indexOf('?') === -1 ? '?' : '&') + '_visual=1';
         if (DRAFT_SECRET) {
             url += '&draft_secret=' + encodeURIComponent(DRAFT_SECRET);
         }
         iframe.src = url;
+    }
+
+    function applySectionField(section, name, value) {
+        switch (name) {
+            case 'title':
+                section.title = value;
+                sendToIframe('section-update', { sectionId: section.id, field: 'title', value: value });
+                break;
+            case 'text':
+                section.text = value;
+                sendToIframe('section-update', { sectionId: section.id, field: 'text', value: value });
+                break;
+            case 'eyebrow':
+                section.eyebrow = value;
+                sendToIframe('section-update', { sectionId: section.id, field: 'eyebrow', value: value });
+                break;
+            case 'layout':
+                section.layout = value || 'rich_text';
+                sendToIframe('section-update', { sectionId: section.id, field: 'layout', value: section.layout });
+                break;
+            case 'theme':
+                section.theme = value || 'default';
+                sendToIframe('section-update', { sectionId: section.id, field: 'theme', value: section.theme });
+                break;
+            case 'bgColor':
+                section.bgColor = value === 'none' ? undefined : value;
+                sendToIframe('section-update', { sectionId: section.id, field: 'bgColor', value: section.bgColor });
+                break;
+            case 'imageOverlay':
+                section.imageOverlay = value === 'none' ? undefined : value;
+                sendToIframe('section-update', { sectionId: section.id, field: 'imageOverlay', value: section.imageOverlay });
+                break;
+            case 'component':
+                section.component = value;
+                sendToIframe('section-update', { sectionId: section.id, field: 'component', value: value });
+                break;
+            case 'button0_text':
+                setButtons(section, 0, { text: value });
+                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+                break;
+            case 'button0_href':
+                setButtons(section, 0, { href: value });
+                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+                break;
+            case 'button0_variant':
+                setButtons(section, 0, { variant: value || 'primary' });
+                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+                break;
+            case 'button1_text':
+                setButtons(section, 1, { text: value });
+                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+                break;
+            case 'button1_href':
+                setButtons(section, 1, { href: value });
+                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+                break;
+            case 'button1_variant':
+                setButtons(section, 1, { variant: value || 'secondary' });
+                sendToIframe('section-update', { sectionId: section.id, field: 'buttons', value: section.buttons });
+                break;
+        }
+    }
+
+    function selectSection(sectionId, options) {
+        options = options || {};
+        if (!getSectionById(sectionId)) return;
+        activeSectionId = sectionId;
         renderSectionList();
-    }
-
-    pageSelect.addEventListener('change', function() {
-        var val = this.value;
-        if (!val) return;
-        var parts = val.split('|');
-        loadPage(parseInt(parts[0], 10), parts[1]);
-    });
-
-    btnRefresh.addEventListener('click', function() {
-        if (currentPageId) loadPage(currentPageId, currentPath);
-    });
-
-    btnPw.addEventListener('click', function() {
-        if (currentPageId) {
-            window.open('<?= $config->urls->admin ?>page/edit/?id=' + currentPageId, '_blank');
+        renderFieldEditor();
+        updateActions();
+        sendToIframe('section-highlight', { sectionId: sectionId });
+        if (options.scroll !== false) {
+            sendToIframe('section-scroll', { sectionId: sectionId });
         }
-    });
-
-    // Listen for postMessage from iframe
-    window.addEventListener('message', function(event) {
-        var data = event.data;
-        if (!data || typeof data.type !== 'string' || data.type.indexOf(PREFIX) !== 0) return;
-        var action = data.type.slice(PREFIX.length);
-
-        switch (action) {
-            case 'ready':
-                iframeReady = true;
-                setStatus('Verbunden', 'is-ready');
-                btnAdd.disabled = false;
-                // Fetch sections from API
-                fetchSections();
-                break;
-
-            case 'section-click':
-                activeSectionId = data.sectionId || null;
-                renderSectionList();
-                // Highlight in iframe
-                sendToIframe('section-highlight', { sectionId: data.sectionId });
-                break;
-        }
-    });
-
-    function sendToIframe(action, data) {
-        if (!iframeReady || !iframe.contentWindow) return;
-        iframe.contentWindow.postMessage(
-            Object.assign({ type: PREFIX + action }, data),
-            '*'
-        );
-    }
-
-    function fetchSections() {
-        if (!currentPath) return;
-        var pageName = currentPath === '/' ? 'homepage' : currentPath.replace(/^\//, '').replace(/\/$/, '');
-        var endpoint = currentPath === '/'
-            ? API_ROOT + 'content/homepage'
-            : API_ROOT + 'content/sections/' + encodeURIComponent(pageName);
-
-        fetch(endpoint)
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
-                sections = data.sections || [];
-                renderSectionList();
-            })
-            .catch(function() {
-                setStatus('Fehler beim Laden', 'is-error');
-            });
     }
 
     function renderSectionList() {
         sectionList.innerHTML = '';
-        emptyEl.style.display = sections.length ? 'none' : 'block';
+        emptyList.style.display = sections.length ? 'none' : 'block';
 
-        sections.forEach(function(sec, idx) {
-            var li = document.createElement('li');
-            li.className = 've-section-item' + (sec.id === activeSectionId ? ' is-active' : '');
-            li.setAttribute('data-pw-id', sec.pwId || '');
-            li.setAttribute('draggable', 'true');
+        sections.forEach(function (section, index) {
+            var item = document.createElement('li');
+            item.className = 've-section-item' + (section.id === activeSectionId ? ' is-active' : '');
+            item.draggable = true;
 
             var drag = document.createElement('span');
             drag.className = 've-section-drag';
@@ -470,158 +649,466 @@ body {
 
             var title = document.createElement('div');
             title.className = 've-section-title';
-            title.textContent = sec.title || '(kein Titel)';
+            title.textContent = section.title || '(kein Titel)';
+            info.appendChild(title);
 
             var meta = document.createElement('div');
             meta.className = 've-section-meta';
 
-            var badge = document.createElement('span');
-            badge.className = 've-layout-badge';
-            badge.textContent = LAYOUT_LABELS[sec.layout] || sec.layout;
-            meta.appendChild(badge);
+            var layout = document.createElement('span');
+            layout.className = 've-layout-badge';
+            layout.textContent = LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt';
+            meta.appendChild(layout);
 
-            if (sec.component) {
-                var compBadge = document.createElement('span');
-                compBadge.className = 've-layout-badge';
-                compBadge.style.marginLeft = '4px';
-                compBadge.textContent = sec.component;
-                meta.appendChild(compBadge);
+            if (section.component) {
+                var component = document.createElement('span');
+                component.className = 've-layout-badge';
+                component.textContent = section.component;
+                meta.appendChild(component);
             }
 
-            info.appendChild(title);
+            if (section.id === activeSectionId && isDirty) {
+                var dirty = document.createElement('span');
+                dirty.className = 've-dirty-pill';
+                dirty.textContent = 'UNGESPEICHERT';
+                meta.appendChild(dirty);
+            }
+
             info.appendChild(meta);
 
             var actions = document.createElement('div');
             actions.className = 've-section-actions';
 
             var editBtn = document.createElement('button');
-            editBtn.textContent = '✎';
-            editBtn.title = 'In PW bearbeiten';
-            editBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (sec.pwId) {
-                    window.open('<?= $config->urls->admin ?>page/edit/?id=' + sec.pwId, '_blank');
+            editBtn.className = 've-icon-btn';
+            editBtn.type = 'button';
+            editBtn.title = 'In ProcessWire bearbeiten';
+            editBtn.textContent = '↗';
+            editBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+                if (section.pwId) {
+                    window.open('<?= $config->urls->admin ?>page/edit/?id=' + section.pwId, '_blank');
                 }
             });
 
-            var delBtn = document.createElement('button');
-            delBtn.textContent = '✕';
-            delBtn.title = 'Löschen';
-            delBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (!confirm('Abschnitt "' + (sec.title || '') + '" wirklich löschen?')) return;
-                deleteSection(sec.pwId);
+            var deleteBtn = document.createElement('button');
+            deleteBtn.className = 've-icon-btn';
+            deleteBtn.type = 'button';
+            deleteBtn.title = 'Abschnitt löschen';
+            deleteBtn.textContent = '✕';
+            deleteBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+                if (!confirmDiscardChanges()) return;
+                if (!window.confirm('Abschnitt "' + (section.title || '') + '" wirklich löschen?')) return;
+                deleteSection(section);
             });
 
             actions.appendChild(editBtn);
-            actions.appendChild(delBtn);
+            actions.appendChild(deleteBtn);
 
-            li.appendChild(drag);
-            li.appendChild(info);
-            li.appendChild(actions);
+            item.appendChild(drag);
+            item.appendChild(info);
+            item.appendChild(actions);
 
-            li.addEventListener('click', function() {
-                activeSectionId = sec.id;
-                renderSectionList();
-                sendToIframe('section-highlight', { sectionId: sec.id });
-                // Scroll to section in iframe
-                sendToIframe('section-scroll', { sectionId: sec.id });
+            item.addEventListener('click', function () {
+                if (activeSectionId !== section.id && isDirty && !confirmDiscardChanges()) return;
+                markDirty(false);
+                selectSection(section.id);
             });
 
-            // Drag and drop reordering
-            li.addEventListener('dragstart', function(e) {
-                e.dataTransfer.setData('text/plain', idx.toString());
-                li.style.opacity = '0.5';
+            item.addEventListener('dragstart', function (event) {
+                if (isDirty && !confirmDiscardChanges()) {
+                    event.preventDefault();
+                    return;
+                }
+                event.dataTransfer.setData('text/plain', String(index));
+                item.style.opacity = '0.5';
             });
-            li.addEventListener('dragend', function() {
-                li.style.opacity = '1';
+            item.addEventListener('dragend', function () {
+                item.style.opacity = '1';
+                item.style.borderTop = '';
             });
-            li.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                li.style.borderTop = '2px solid #4a7c59';
+            item.addEventListener('dragover', function (event) {
+                event.preventDefault();
+                item.style.borderTop = '2px solid #4a7c59';
             });
-            li.addEventListener('dragleave', function() {
-                li.style.borderTop = '';
+            item.addEventListener('dragleave', function () {
+                item.style.borderTop = '';
             });
-            li.addEventListener('drop', function(e) {
-                e.preventDefault();
-                li.style.borderTop = '';
-                var fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
-                if (isNaN(fromIdx) || fromIdx === idx) return;
-                reorderSections(fromIdx, idx);
+            item.addEventListener('drop', function (event) {
+                event.preventDefault();
+                item.style.borderTop = '';
+                var fromIndex = parseInt(event.dataTransfer.getData('text/plain'), 10);
+                if (isNaN(fromIndex) || fromIndex === index) return;
+                reorderSections(fromIndex, index);
             });
 
-            sectionList.appendChild(li);
+            sectionList.appendChild(item);
         });
     }
 
-    function reorderSections(fromIdx, toIdx) {
-        if (!currentPageId) return;
-        var item = sections.splice(fromIdx, 1)[0];
-        sections.splice(toIdx, 0, item);
-        renderSectionList();
+    function optionMarkup(options, current) {
+        return options.map(function (option) {
+            return '<option value="' + escapeHtml(option) + '"' + (option === current ? ' selected' : '') + '>' + escapeHtml(option) + '</option>';
+        }).join('');
+    }
 
-        var order = sections.map(function(s) { return s.pwId; });
+    function renderFieldEditor() {
+        var section = getSectionById(activeSectionId);
+        if (!section) {
+            fieldEditor.innerHTML = '<div class="ve-empty-state">Wähle einen Abschnitt aus der Liste oder direkt in der Vorschau.</div>';
+            updateActions();
+            return;
+        }
+
+        var button1 = getButton(section, 0);
+        var button2 = getButton(section, 1);
+        var dirtyBadge = isDirty ? '<span class="ve-dirty-pill">Ungespeichert</span>' : '';
+
+        fieldEditor.innerHTML =
+            '<div class="ve-field-group">' +
+                '<div class="ve-sidebar-title">Abschnitt bearbeiten' + dirtyBadge + '</div>' +
+                '<div class="ve-help">Live-Vorschau aktualisiert sofort. Dauerhaft gespeichert wird erst mit "Speichern".</div>' +
+            '</div>' +
+            '<div class="ve-form-grid">' +
+                '<div class="ve-field-group ve-field-group-full">' +
+                    '<label for="ve-field-title">Titel</label>' +
+                    '<input id="ve-field-title" name="title" type="text" value="' + escapeHtml(section.title || '') + '">' +
+                '</div>' +
+                '<div class="ve-field-group ve-field-group-full">' +
+                    '<label for="ve-field-eyebrow">Eyebrow</label>' +
+                    '<input id="ve-field-eyebrow" name="eyebrow" type="text" value="' + escapeHtml(section.eyebrow || '') + '">' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-layout">Layout</label>' +
+                    '<select id="ve-field-layout" name="layout">' + optionMarkup(Object.keys(LAYOUT_LABELS), section.layout || 'rich_text') + '</select>' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-theme">Theme</label>' +
+                    '<select id="ve-field-theme" name="theme">' + optionMarkup(THEME_OPTIONS, section.theme || 'default') + '</select>' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-bg">Hintergrund</label>' +
+                    '<select id="ve-field-bg" name="bgColor">' + optionMarkup(BG_OPTIONS, section.bgColor || 'none') + '</select>' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-overlay">Bild-Overlay</label>' +
+                    '<select id="ve-field-overlay" name="imageOverlay">' + optionMarkup(OVERLAY_OPTIONS, section.imageOverlay || 'none') + '</select>' +
+                '</div>' +
+                '<div class="ve-field-group ve-field-group-full">' +
+                    '<label for="ve-field-component">Komponente</label>' +
+                    '<input id="ve-field-component" name="component" type="text" value="' + escapeHtml(section.component || '') + '">' +
+                '</div>' +
+                '<div class="ve-field-group ve-field-group-full">' +
+                    '<label for="ve-field-text">Text</label>' +
+                    '<textarea id="ve-field-text" name="text">' + escapeHtml(section.text || '') + '</textarea>' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-button0-text">Button 1 Text</label>' +
+                    '<input id="ve-field-button0-text" name="button0_text" type="text" value="' + escapeHtml(button1.text || '') + '">' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-button0-href">Button 1 Link</label>' +
+                    '<input id="ve-field-button0-href" name="button0_href" type="text" value="' + escapeHtml(button1.href || '') + '">' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-button0-variant">Button 1 Stil</label>' +
+                    '<select id="ve-field-button0-variant" name="button0_variant">' + optionMarkup(BUTTON_VARIANTS, button1.variant || 'primary') + '</select>' +
+                '</div>' +
+                '<div class="ve-field-group"></div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-button1-text">Button 2 Text</label>' +
+                    '<input id="ve-field-button1-text" name="button1_text" type="text" value="' + escapeHtml(button2.text || '') + '">' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-button1-href">Button 2 Link</label>' +
+                    '<input id="ve-field-button1-href" name="button1_href" type="text" value="' + escapeHtml(button2.href || '') + '">' +
+                '</div>' +
+                '<div class="ve-field-group">' +
+                    '<label for="ve-field-button1-variant">Button 2 Stil</label>' +
+                    '<select id="ve-field-button1-variant" name="button1_variant">' + optionMarkup(BUTTON_VARIANTS, button2.variant || 'secondary') + '</select>' +
+                '</div>' +
+            '</div>';
+    }
+
+    function buildSavePayload(section) {
+        var button1 = getButton(section, 0);
+        var button2 = getButton(section, 1);
+        return {
+            section_title: section.title || '',
+            section_text: section.text || '',
+            section_eyebrow: section.eyebrow || '',
+            section_layout: section.layout || 'rich_text',
+            section_theme: section.theme || 'default',
+            section_bg_color: section.bgColor || 'none',
+            section_image_overlay: section.imageOverlay || 'none',
+            section_component: section.component || '',
+            button_text: button1.text || '',
+            button_href: button1.href || '',
+            button_variant: button1.variant || 'primary',
+            button2_text: button2.text || '',
+            button2_href: button2.href || '',
+            button2_variant: button2.variant || 'secondary'
+        };
+    }
+
+    function saveActiveSection() {
+        var section = getSectionById(activeSectionId);
+        if (!section || !section.pwId || isSaving) return;
+
+        isSaving = true;
+        updateActions();
+        setStatus('Speichert...', 'is-loading');
+
+        fetch(API_ROOT + 'content-save', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                sectionPwId: section.pwId,
+                fields: buildSavePayload(section)
+            })
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    if (!response.ok || !data.success) {
+                        throw new Error((data && data.error) || 'Speichern fehlgeschlagen');
+                    }
+                    return data;
+                });
+            })
+            .then(function () {
+                isDirty = false;
+                return fetchSections({ keepStatus: true });
+            })
+            .then(function () {
+                setStatus('Gespeichert', 'is-ready');
+                renderSectionList();
+                renderFieldEditor();
+            })
+            .catch(function (error) {
+                setStatus(error.message || 'Speichern fehlgeschlagen', 'is-error');
+            })
+            .finally(function () {
+                isSaving = false;
+                updateActions();
+            });
+    }
+
+    function resetActiveSection() {
+        if (!confirmDiscardChanges()) return;
+        isDirty = false;
+        fetchSections({ keepStatus: true }).then(function () {
+            setStatus('Zurückgesetzt', 'is-ready');
+        });
+    }
+
+    function reorderSections(fromIndex, toIndex) {
+        if (!currentPageId || isSaving) return;
+        var order = sections.slice();
+        var moved = order.splice(fromIndex, 1)[0];
+        order.splice(toIndex, 0, moved);
+
+        setStatus('Sortierung speichern...', 'is-loading');
         fetch(API_ROOT + 'sections-reorder', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ pageId: currentPageId, order: order }),
-        }).then(function(r) { return r.json(); })
-          .then(function(res) {
-              if (res.success) {
-                  // Reload iframe to reflect new order
-                  if (currentPageId) loadPage(currentPageId, currentPath);
-              }
-          })
-          .catch(function() { setStatus('Fehler beim Sortieren', 'is-error'); });
+            body: JSON.stringify({
+                pageId: currentPageId,
+                order: order.map(function (section) { return section.pwId; })
+            })
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    if (!response.ok || !data.success) {
+                        throw new Error((data && data.error) || 'Sortieren fehlgeschlagen');
+                    }
+                    return data;
+                });
+            })
+            .then(function () {
+                return fetchSections({ keepStatus: true });
+            })
+            .then(function () {
+                setStatus('Sortierung aktualisiert', 'is-ready');
+            })
+            .catch(function (error) {
+                setStatus(error.message || 'Sortieren fehlgeschlagen', 'is-error');
+            });
     }
 
-    btnAdd.addEventListener('click', function() {
-        if (!currentPageId) return;
-        var layout = prompt('Layout wählen:\n\n1. Bild + Text\n2. Text + Bild\n3. Banner\n4. Bildergalerie\n5. Video\n6. Nur Text\n7. Komponente\n\n(Nummer eingeben)', '6');
-        var layouts = {
-            '1': 'split_media_text', '2': 'split_text_media',
-            '3': 'full_width_banner', '4': 'media_grid',
-            '5': 'video_embed', '6': 'rich_text', '7': 'component',
-        };
-        var chosen = layouts[layout] || 'rich_text';
-
+    function addSection(layout) {
+        if (!currentPageId || isSaving) return;
+        setStatus('Abschnitt anlegen...', 'is-loading');
         fetch(API_ROOT + 'sections-add', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ pageId: currentPageId, layout: chosen }),
-        }).then(function(r) { return r.json(); })
-          .then(function(res) {
-              if (res.success && res.section) {
-                  sections.push(res.section);
-                  renderSectionList();
-                  loadPage(currentPageId, currentPath);
-              }
-          })
-          .catch(function() { setStatus('Fehler beim Hinzufügen', 'is-error'); });
-    });
+            body: JSON.stringify({ pageId: currentPageId, layout: layout })
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    if (!response.ok || !data.success) {
+                        throw new Error((data && data.error) || 'Abschnitt konnte nicht angelegt werden');
+                    }
+                    return data;
+                });
+            })
+            .then(function (data) {
+                pendingSelectId = data.section && data.section.id ? data.section.id : null;
+                return fetchSections({ keepStatus: true });
+            })
+            .then(function () {
+                if (pendingSelectId && getSectionById(pendingSelectId)) {
+                    selectSection(pendingSelectId);
+                    pendingSelectId = null;
+                }
+                setStatus('Abschnitt angelegt', 'is-ready');
+            })
+            .catch(function (error) {
+                setStatus(error.message || 'Abschnitt konnte nicht angelegt werden', 'is-error');
+            });
+    }
 
-    function deleteSection(pwId) {
-        if (!currentPageId || !pwId) return;
+    function deleteSection(section) {
+        if (!currentPageId || !section || !section.pwId || isSaving) return;
+        setStatus('Abschnitt löschen...', 'is-loading');
         fetch(API_ROOT + 'sections-delete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({ pageId: currentPageId, sectionPwId: pwId }),
-        }).then(function(r) { return r.json(); })
-          .then(function(res) {
-              if (res.success) {
-                  sections = sections.filter(function(s) { return s.pwId !== pwId; });
-                  renderSectionList();
-                  loadPage(currentPageId, currentPath);
-              }
-          })
-          .catch(function() { setStatus('Fehler beim Löschen', 'is-error'); });
+            body: JSON.stringify({ pageId: currentPageId, sectionPwId: section.pwId })
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    if (!response.ok || !data.success) {
+                        throw new Error((data && data.error) || 'Löschen fehlgeschlagen');
+                    }
+                    return data;
+                });
+            })
+            .then(function () {
+                if (activeSectionId === section.id) {
+                    activeSectionId = null;
+                    isDirty = false;
+                }
+                return fetchSections({ keepStatus: true });
+            })
+            .then(function () {
+                setStatus('Abschnitt gelöscht', 'is-ready');
+            })
+            .catch(function (error) {
+                setStatus(error.message || 'Löschen fehlgeschlagen', 'is-error');
+            });
     }
+
+    pageSelect.addEventListener('change', function () {
+        if (!this.value) return;
+        var parts = this.value.split('|');
+        var nextPageId = parseInt(parts[0], 10);
+        var nextPath = parts[1];
+        if (!nextPageId || !nextPath) return;
+        if (currentPageId === nextPageId && currentPath === nextPath) return;
+        if (!confirmDiscardChanges()) {
+            if (currentPageId && currentPath) {
+                pageSelect.value = currentPageId + '|' + currentPath;
+            } else {
+                pageSelect.value = '';
+            }
+            return;
+        }
+        loadPage(nextPageId, nextPath);
+    });
+
+    btnRefresh.addEventListener('click', function () {
+        if (!currentPageId || !currentPath) return;
+        if (!confirmDiscardChanges()) return;
+        loadPage(currentPageId, currentPath, { force: true });
+    });
+
+    btnPw.addEventListener('click', function () {
+        if (!currentPageId) return;
+        window.open('<?= $config->urls->admin ?>page/edit/?id=' + currentPageId, '_blank');
+    });
+
+    btnAdd.addEventListener('click', function () {
+        if (!currentPageId) return;
+        if (!confirmDiscardChanges()) return;
+        var choice = window.prompt(
+            'Layout wählen:\n\n1. Bild + Text\n2. Text + Bild\n3. Banner\n4. Bildergalerie\n5. Video\n6. Nur Text\n7. Komponente\n\nNummer eingeben:',
+            '6'
+        );
+        if (choice === null) return;
+        var layoutMap = {
+            '1': 'split_media_text',
+            '2': 'split_text_media',
+            '3': 'full_width_banner',
+            '4': 'media_grid',
+            '5': 'video_embed',
+            '6': 'rich_text',
+            '7': 'component'
+        };
+        addSection(layoutMap[choice] || 'rich_text');
+    });
+
+    btnSave.addEventListener('click', function () {
+        saveActiveSection();
+    });
+
+    btnReset.addEventListener('click', function () {
+        resetActiveSection();
+    });
+
+    fieldEditor.addEventListener('input', function (event) {
+        var target = event.target;
+        if (!target || !target.name) return;
+        var section = getSectionById(activeSectionId);
+        if (!section) return;
+        applySectionField(section, target.name, target.value);
+        markDirty(true);
+        renderSectionList();
+    });
+
+    fieldEditor.addEventListener('change', function (event) {
+        var target = event.target;
+        if (!target || !target.name) return;
+        var section = getSectionById(activeSectionId);
+        if (!section) return;
+        applySectionField(section, target.name, target.value);
+        markDirty(true);
+        renderSectionList();
+    });
+
+    window.addEventListener('message', function (event) {
+        var data = event.data;
+        if (!data || typeof data.type !== 'string' || data.type.indexOf(PREFIX) !== 0) return;
+
+        var action = data.type.slice(PREFIX.length);
+
+        if (action === 'ready') {
+            iframeReady = true;
+            setStatus('Verbunden', 'is-ready');
+            fetchSections();
+            return;
+        }
+
+        if (action === 'section-click') {
+            if (activeSectionId !== data.sectionId && isDirty && !confirmDiscardChanges()) return;
+            isDirty = false;
+            selectSection(data.sectionId, { scroll: false });
+        }
+    });
+
+    window.addEventListener('beforeunload', function (event) {
+        if (!isDirty) return;
+        event.preventDefault();
+        event.returnValue = '';
+    });
+
+    updateActions();
 })();
 </script>
 </body>
 </html>
-<?php exit; // Prevent PW from wrapping output in admin chrome
+<?php exit;

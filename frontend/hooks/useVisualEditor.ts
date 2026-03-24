@@ -38,11 +38,15 @@ export function useVisualEditor({ enabled, sections: initialSections }: UseVisua
   const [highlightedSectionId, setHighlightedSectionId] = useState<string | null>(null)
   const sectionsRef = useRef(initialSections)
 
-  // Keep ref in sync with initial sections prop
+  // Keep state in sync with server-rendered section data.
   useEffect(() => {
     sectionsRef.current = initialSections
     setSections(initialSections)
   }, [initialSections])
+
+  useEffect(() => {
+    sectionsRef.current = sections
+  }, [sections])
 
   // Send ready message on mount
   useEffect(() => {

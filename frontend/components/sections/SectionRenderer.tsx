@@ -12,7 +12,6 @@ import { DepotMap } from '@/components/DepotMap'
 import { GeisshofMap } from '@/components/GeisshofMap'
 import { Saisonkalender } from '@/components/Saisonkalender'
 import { Gallery } from '@/components/Gallery'
-import { EditableSection } from '@/components/sections/EditableSection'
 import type { ContentSection, ContentMedia } from '@/lib/processwire-types'
 
 interface SectionRendererProps {
@@ -215,15 +214,6 @@ function ComponentSection({ section }: { section: ContentSection }) {
 }
 
 export function SectionRenderer({ sections, isEditing = false, visualEditor = false }: SectionRendererProps) {
-  function wrapEditable(section: ContentSection, content: React.ReactNode) {
-    if (!isEditing) return content
-    return (
-      <EditableSection section={section} isEditing={isEditing}>
-        {content}
-      </EditableSection>
-    )
-  }
-
   function resolveLayout(section: ContentSection): string {
     return section.layout || (section.image || section.media ? 'split_media_text' : 'rich_text')
   }
@@ -268,7 +258,7 @@ export function SectionRenderer({ sections, isEditing = false, visualEditor = fa
 
         return (
           <div key={section.id} className={wrapperClasses} {...veAttrs}>
-            {wrapEditable(section, inner)}
+            {inner}
           </div>
         )
       })}
