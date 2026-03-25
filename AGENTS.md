@@ -19,7 +19,10 @@ Deploys frontend and/or CMS to Novatrend cPanel.
 - 503 after deploy: sharp bindings missing or process not started. Check `tail /home/bioco/logs/nextjs.log`.
 - EADDRINUSE: old process still running. Kill with `pgrep -x next-server`, wait, retry.
 - Zombie processes: after deploy, verify only ONE `next-server` is running. Old instances serve stale code (wrong headers, old middleware). Kill by PID if `pgrep -x` misses them.
-- Cron respawns every 5min: if process keeps dying, fix root cause before restarting.
+- Cron respawns every 5min: during a restart window it can spawn a second `next-server`. Always run `ps -eo pid,ppid,args | grep "next-server" | grep -v grep` after deploy and kill any non-primary PID.
+- Cron uses a minimal `PATH`. In `/home/bioco/bioco-frontend/start.sh`, use absolute paths or export `PATH` before `flock`/`curl`/`pgrep`. If not, the guard checks silently fail under cron and it spawns duplicate workers.
+- CloudLinux Node Selector / Passenger can also spawn a second worker. Check `~/.cl.selector/node-selector.json` and inspect the extra PID environment for `IN_PASSENGER=1`. This is distinct from the standalone `start.sh` process.
+- Public route `404` while local `127.0.0.1:49154` is `200`: check for stray files/symlinks under `/home/bioco/public_html/` matching the route slug. Example: broken `/home/bioco/public_html/wir` symlink bypassed Next via `.htaccess` file checks.
 
 ## Server Setup Agent
 
@@ -27,6 +30,7 @@ Configures Node.js on Novatrend/CloudLinux cPanel.
 
 **Rules:**
 - Apache proxies via `.htaccess` RewriteRule to port 49154. Passenger config exists but is unreliable.
+- `.htaccess` currently short-circuits `/intranet`, `/statuten`, `/wir` when a matching file/dir exists in `public_html`. If external route differs from local app response, inspect `ls -la /home/bioco/public_html/<slug>` first.
 - Env vars go in `start.sh` (not cPanel Passenger UI, not `.htaccess` SetEnv).
 - Node venv: `source /home/bioco/nodevenv/bioco-frontend/18/bin/activate` before any node/npm commands.
 - `127.0.0.1` does NOT resolve to bioco.ch vhost. Test externally with `--resolve`.

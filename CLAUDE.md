@@ -22,6 +22,10 @@ Next.js calls ProcessWire via `http://localhost/cms/api/*` (same server, no CORS
 - **Port 49154** used by Node.js. Apache proxies to it.
 - **sharp needs two packages**: after `--delete` rsync, restore both `sharp-linux-x64` AND `sharp-libvips-linux-x64` from `/tmp/sharp-pkg/`. Remove darwin bindings.
 - **`pgrep -f next-server`** in SSH will match the SSH command itself, killing the session. Always use `pgrep -x next-server`.
+- **Cron race is real.** Even with `start.sh` guards, a restart window can leave a second `next-server`. After every deploy: `ps -eo pid,ppid,args | grep "next-server" | grep -v grep` and kill any extra PID.
+- **Cron PATH is minimal.** `start.sh` must set/export `PATH` before `flock` and use absolute `/usr/bin/flock`, `/usr/bin/curl`, `/usr/bin/pgrep`, `/bin/kill`. Otherwise cron can skip the guard checks and spawn duplicate workers.
+- **CloudLinux Node Selector can spawn Passenger workers in parallel.** Check `~/.cl.selector/node-selector.json`. If an extra `next-server` has `IN_PASSENGER=1` in `/proc/<pid>/environ`, it came from Passenger/Selector, not `start.sh`.
+- **Public route can bypass Next.** `.htaccess` checks for real files/dirs in `/home/bioco/public_html/` before proxying some slugs. A stray symlink like `/home/bioco/public_html/wir` can make external `/wir` fail while `http://127.0.0.1:49154/wir` still works.
 
 ### SSH access
 ```bash
@@ -52,11 +56,27 @@ RewriteRule ^(.*)$ http://127.0.0.1:49154/$1 [P,L]
 ```
 `/cms` and `/matomo` excluded (served by Apache/PHP).
 
+Current gotcha:
+- `.htaccess` also short-circuits `/intranet`, `/statuten`, `/wir` if a matching file/dir exists in `public_html`.
+- If external route != local app route, check:
+```bash
+ls -la /home/bioco/public_html/<slug>
+curl -I -H "Host: bioco.ch" http://127.0.0.1:49154/<slug>
+curl --resolve bioco.ch:443:193.33.128.160 -I https://bioco.ch/<slug>
+```
+- If the local app is `200` but external is not, remove the stray file/symlink in `public_html`.
+
 ### Process management
 - `start.sh` exports env vars, runs `node server.js` with `nohup`, uses flock to prevent duplicates
 - Cron runs `start.sh` every 5 minutes (no-op if already running)
 - Safe restart: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`
 - Fallback restart if old workers remain: `for p in $(ps -eo pid,comm | awk '$2=="next-server"{print $1}'); do kill $p; done`
+- Verify steady state after restart:
+```bash
+ps -eo pid,ppid,args | grep "next-server" | grep -v grep
+curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:49154/
+```
+- Expected: exactly one `next-server`, local health `200`
 
 ### Environment variables (set in start.sh)
 `PORT`, `NODE_ENV`, `HOSTNAME`, `PROCESSWIRE_BASE_URL`, `PROCESSWIRE_API_KEY`, `PW_API_KEY`, `REVALIDATE_SECRET`, `NEXT_PUBLIC_PROCESSWIRE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`
@@ -107,6 +127,17 @@ ssh bioco@193.33.128.160 'for p in $(pgrep -x next-server); do kill $p; done; sl
 # Fallback if old workers remain
 ssh bioco@193.33.128.160 'for p in $(ps -eo pid,comm | awk '\''$2=="next-server"{print $1}'\''); do kill $p; done'
 ```
+
+Post-deploy outage checks:
+```bash
+ssh bioco@193.33.128.160 'ps -eo pid,ppid,args | grep "next-server" | grep -v grep'
+ssh bioco@193.33.128.160 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:49154/'
+curl --resolve bioco.ch:443:193.33.128.160 -s -o /dev/null -w "%{http_code}\n" https://bioco.ch/
+curl --resolve bioco.ch:443:193.33.128.160 -s -o /dev/null -w "%{http_code}\n" https://bioco.ch/wir
+ssh bioco@193.33.128.160 'ls -la /home/bioco/public_html/wir 2>/dev/null || true'
+```
+- If `/wir` external fails but local is healthy, remove `/home/bioco/public_html/wir` if it is a stale symlink.
+- If two workers exist, kill the newer/stale extra PID and re-check health.
 
 **CMS-only deploy** (no frontend build needed):
 ```bash
