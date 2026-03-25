@@ -579,7 +579,9 @@ body {
     var busyTimer = null;
     var busyText = '';
     var waitingForIframeReady = false;
+    var iframeReadyTimer = null;
     var BUSY_DELAY = 320;
+    var IFRAME_READY_TIMEOUT = 10000;
 
     ALL_PAGES.forEach(function (page) {
         var option = document.createElement('option');
@@ -752,6 +754,32 @@ body {
             .finally(function () {
                 endBusy();
             });
+    }
+
+    function clearIframeReadyTimeout() {
+        if (iframeReadyTimer) {
+            clearTimeout(iframeReadyTimer);
+            iframeReadyTimer = null;
+        }
+    }
+
+    function scheduleIframeReadyTimeout() {
+        clearIframeReadyTimeout();
+        iframeReadyTimer = window.setTimeout(function () {
+            if (!waitingForIframeReady || iframeReady) return;
+            waitingForIframeReady = false;
+            busyDepth = 0;
+            busyVisible = false;
+            busyText = '';
+            if (busyTimer) {
+                clearTimeout(busyTimer);
+                busyTimer = null;
+            }
+            renderBusyOverlay();
+            updateActions();
+            syncIframeState('Vorschau konnte nicht verbunden werden');
+            setStatus('Vorschau konnte nicht verbunden werden', 'is-error');
+        }, IFRAME_READY_TIMEOUT);
     }
 
     function updateModeButtons() {
@@ -974,6 +1002,7 @@ body {
         setStatus('Vorschau laden...', 'is-loading');
         waitingForIframeReady = true;
         beginBusy('Vorschau laden…');
+        scheduleIframeReadyTimeout();
 
         var url = SITE_URL + path;
         url += (url.indexOf('?') === -1 ? '?' : '&') + '_visual=1';
@@ -1651,6 +1680,7 @@ body {
 
         if (action === 'ready') {
             iframeReady = true;
+            clearIframeReadyTimeout();
             setStatus('Verbunden', 'is-ready');
             syncIframeState();
             if (currentPath) {

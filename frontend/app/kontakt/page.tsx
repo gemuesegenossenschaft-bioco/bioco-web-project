@@ -1,10 +1,17 @@
 import { ContactForm } from '@/components/forms/ContactForm'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
+import { Suspense } from 'react'
+import { VisualEditorPageSwitch } from '@/components/VisualEditorPageSwitch'
+import { getPageSections } from '@/lib/processwire'
 import Link from 'next/link'
 
-export default function ContactPage() {
-  return (
+export const revalidate = 60
+
+export default async function ContactPage() {
+  const sections = await getPageSections('kontakt')
+
+  const content = (
     <>
       <Header />
       <main className="main-content">
@@ -64,5 +71,11 @@ export default function ContactPage() {
       </main>
       <Footer />
     </>
+  )
+
+  return (
+    <Suspense fallback={content}>
+      <VisualEditorPageSwitch sections={sections}>{content}</VisualEditorPageSwitch>
+    </Suspense>
   )
 }
