@@ -2,6 +2,8 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import { SchnuppertageSection } from '@/components/SchnuppertageSection'
+import { Suspense } from 'react'
+import { VisualEditorPageSwitch } from '@/components/VisualEditorPageSwitch'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -26,7 +28,13 @@ function hasHeadingHtml(html?: string | null): boolean {
   return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
 }
 
-export default async function MitmachenPage() {
+interface MitmachenPageProps {
+  searchParams?: {
+    _visual?: string | string[]
+  }
+}
+
+export default async function MitmachenPage(_: MitmachenPageProps) {
   // Fetch CMS content with fallbacks
   const [cmsSections, cmsGroups] = await Promise.all([
     getPageSections('mitmachen'),
@@ -38,7 +46,7 @@ export default async function MitmachenPage() {
   
   // Get specific sections
   const familienSection = sections.find(s => s.id === 'familien')
-  return (
+  const content = (
     <>
       <Header />
       <main className="main-content">
@@ -249,5 +257,11 @@ export default async function MitmachenPage() {
       </main>
       <Footer />
     </>
+  )
+
+  return (
+    <Suspense fallback={content}>
+      <VisualEditorPageSwitch sections={sections}>{content}</VisualEditorPageSwitch>
+    </Suspense>
   )
 }

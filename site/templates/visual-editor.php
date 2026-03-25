@@ -1116,6 +1116,18 @@ body {
             var actions = document.createElement('div');
             actions.className = 've-section-actions';
 
+            var duplicateBtn = document.createElement('button');
+            duplicateBtn.className = 've-icon-btn';
+            duplicateBtn.type = 'button';
+            duplicateBtn.title = 'Abschnitt kopieren';
+            duplicateBtn.textContent = '⧉';
+            duplicateBtn.addEventListener('click', function (event) {
+                event.stopPropagation();
+                if (blockWhileBusy()) return;
+                if (blockWhileDirty('Kopieren')) return;
+                duplicateSection(section);
+            });
+
             var deleteBtn = document.createElement('button');
             deleteBtn.className = 've-icon-btn';
             deleteBtn.type = 'button';
@@ -1129,6 +1141,7 @@ body {
                 deleteSection(section);
             });
 
+            actions.appendChild(duplicateBtn);
             actions.appendChild(deleteBtn);
 
             item.appendChild(drag);
@@ -1566,21 +1579,9 @@ body {
         if (isBusy()) return;
         if (!currentPageId) return;
         if (blockWhileDirty('Hinzufügen')) return;
-        var choice = window.prompt(
-            'Layout wählen:\n\n1. Bild + Text\n2. Text + Bild\n3. Banner\n4. Bildergalerie\n5. Video\n6. Nur Text\n7. Komponente\n\nNummer eingeben:',
-            '6'
-        );
-        if (choice === null) return;
-        var layoutMap = {
-            '1': 'split_media_text',
-            '2': 'split_text_media',
-            '3': 'full_width_banner',
-            '4': 'media_grid',
-            '5': 'video_embed',
-            '6': 'rich_text',
-            '7': 'component'
-        };
-        addSection(layoutMap[choice] || 'rich_text');
+        var activeSection = getSectionById(activeSectionId);
+        var nextLayout = activeSection && activeSection.layout ? activeSection.layout : 'rich_text';
+        addSection(nextLayout);
     });
 
     btnSave.addEventListener('click', function () {

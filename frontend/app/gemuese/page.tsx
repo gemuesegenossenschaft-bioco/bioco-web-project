@@ -2,6 +2,8 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import { Saisonkalender } from '@/components/Saisonkalender'
+import { Suspense } from 'react'
+import { VisualEditorPageSwitch } from '@/components/VisualEditorPageSwitch'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -43,7 +45,13 @@ function hasHeadingHtml(html?: string | null): boolean {
   return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
 }
 
-export default async function GemusePage() {
+interface GemusePageProps {
+  searchParams?: {
+    _visual?: string | string[]
+  }
+}
+
+export default async function GemusePage(_: GemusePageProps) {
   // Fetch CMS content
   const { sections: cmsSections } = await getPageSectionsWithSeo('gemuese')
   const introSection = cmsSections.find(s => s.id === 'intro')
@@ -52,7 +60,7 @@ export default async function GemusePage() {
     cmsSections.find((s) => (s.title || '').toLowerCase().includes('anbauen'))
   const galleryImages = anbauenSection?.images || []
 
-  return (
+  const content = (
     <>
       <Header />
       <main className="main-content">
@@ -204,5 +212,11 @@ export default async function GemusePage() {
       </main>
       <Footer />
     </>
+  )
+
+  return (
+    <Suspense fallback={content}>
+      <VisualEditorPageSwitch sections={cmsSections}>{content}</VisualEditorPageSwitch>
+    </Suspense>
   )
 }

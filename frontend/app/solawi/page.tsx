@@ -1,6 +1,8 @@
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
+import { Suspense } from 'react'
+import { VisualEditorPageSwitch } from '@/components/VisualEditorPageSwitch'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import { getPageSections } from '@/lib/processwire'
@@ -23,11 +25,17 @@ function hasHeadingHtml(html?: string | null): boolean {
   return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
 }
 
-export default async function SolawiPage() {
+interface SolawiPageProps {
+  searchParams?: {
+    _visual?: string | string[]
+  }
+}
+
+export default async function SolawiPage(_: SolawiPageProps) {
   // Fetch CMS content
   const cmsSections = await getPageSections('solawi')
   const introSection = cmsSections.find(s => s.id === 'intro')
-  return (
+  const content = (
     <>
       <Header />
       <main className="main-content">
@@ -318,5 +326,11 @@ export default async function SolawiPage() {
       </main>
       <Footer />
     </>
+  )
+
+  return (
+    <Suspense fallback={content}>
+      <VisualEditorPageSwitch sections={cmsSections}>{content}</VisualEditorPageSwitch>
+    </Suspense>
   )
 }

@@ -1,5 +1,7 @@
 import { Metadata } from 'next'
+import { Suspense } from 'react'
 import { getPageSections } from '@/lib/processwire'
+import { VisualEditorPageSwitch } from '@/components/VisualEditorPageSwitch'
 import { WirClient } from '@/components/WirClient'
 
 export const metadata: Metadata = {
@@ -25,5 +27,11 @@ export default async function WirPage() {
     text: introSection?.text || '',
   }
 
-  return <WirClient intro={intro} sections={cmsSections} />
+  const content = <WirClient intro={intro} sections={cmsSections} />
+
+  return (
+    <Suspense fallback={content}>
+      <VisualEditorPageSwitch sections={cmsSections}>{content}</VisualEditorPageSwitch>
+    </Suspense>
+  )
 }

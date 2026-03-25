@@ -3,6 +3,8 @@ import { Footer } from '@/components/Footer'
 import { EventsBanner } from '@/components/EventsBanner'
 import { CTA } from '@/components/CTA'
 import { PersonIcons } from '@/components/PersonIcons'
+import { Suspense } from 'react'
+import { VisualEditorPageSwitch } from '@/components/VisualEditorPageSwitch'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -40,8 +42,9 @@ export async function generateMetadata(): Promise<Metadata> {
 // ISR: Revalidate every 60 seconds
 export const revalidate = 60
 
-export default function AbosPage() {
-  return (
+export default async function AbosPage() {
+  const { sections } = await getPageSectionsWithSeo('abos')
+  const content = (
     <>
       <ProductSchema />
       <Header />
@@ -255,5 +258,11 @@ export default function AbosPage() {
       </main>
       <Footer />
     </>
+  )
+
+  return (
+    <Suspense fallback={content}>
+      <VisualEditorPageSwitch sections={sections}>{content}</VisualEditorPageSwitch>
+    </Suspense>
   )
 }

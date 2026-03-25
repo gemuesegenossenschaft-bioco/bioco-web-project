@@ -120,6 +120,35 @@ describe('SectionRenderer data-section-id attributes', () => {
   })
 })
 
+describe('VisualEditorPageSwitch', () => {
+  it('renders cms visual editor page when _visual=1', async () => {
+    mockSearch = '_visual=1'
+    const { VisualEditorPageSwitch } = await import('@/components/VisualEditorPageSwitch')
+    const { container } = render(
+      <VisualEditorPageSwitch sections={testSections}>
+        <div data-testid="fallback">fallback</div>
+      </VisualEditorPageSwitch>
+    )
+
+    await waitFor(() => {
+      expect(container.querySelector('[data-section-id="section-1"]')).toBeTruthy()
+    })
+    expect(screen.queryByTestId('fallback')).toBeNull()
+  })
+
+  it('renders fallback content when _visual is absent', async () => {
+    mockSearch = ''
+    const { VisualEditorPageSwitch } = await import('@/components/VisualEditorPageSwitch')
+    render(
+      <VisualEditorPageSwitch sections={testSections}>
+        <div data-testid="fallback">fallback</div>
+      </VisualEditorPageSwitch>
+    )
+
+    expect(screen.getByTestId('fallback')).toBeTruthy()
+  })
+})
+
 describe('useVisualEditor hook', () => {
   let postMessageSpy: ReturnType<typeof vi.fn>
 

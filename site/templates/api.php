@@ -742,7 +742,11 @@ switch ($endpoint) {
         if (!requireAdminSession()) break;
         $data = json_decode(file_get_contents('php://input'), true);
         $pageId = (int)($data['pageId'] ?? 0);
+        $sanitizer = wire('sanitizer');
         $layout = $sanitizer->name($data['layout'] ?? 'rich_text');
+        if (!$layout) {
+            $layout = 'rich_text';
+        }
         if (!$pageId) {
             http_response_code(400);
             echo json_encode(['error' => 'Missing pageId']);
