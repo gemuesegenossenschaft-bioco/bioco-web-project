@@ -1,8 +1,6 @@
 import { Metadata } from 'next'
-import { Suspense } from 'react'
 import { getPageSections } from '@/lib/processwire'
-import { VisualEditorPageSwitch } from '@/components/VisualEditorPageSwitch'
-import { WirClient } from '@/components/WirClient'
+import { CmsVisualEditorPage } from '@/components/CmsVisualEditorPage'
 
 export const metadata: Metadata = {
   title: 'Über uns | Bio Bauernhof Baden | biocò Gemüsegenossenschaft',
@@ -20,18 +18,5 @@ export const revalidate = 60
 
 export default async function WirPage() {
   const cmsSections = await getPageSections('wir')
-  const introSection = cmsSections.find(s => s.id === 'intro')
-
-  const intro = {
-    title: introSection?.title || 'biocò: Die Gemüsegenossenschaft',
-    text: introSection?.text || '',
-  }
-
-  const content = <WirClient intro={intro} sections={cmsSections} />
-
-  return (
-    <Suspense fallback={content}>
-      <VisualEditorPageSwitch sections={cmsSections}>{content}</VisualEditorPageSwitch>
-    </Suspense>
-  )
+  return <CmsVisualEditorPage sections={cmsSections} />
 }

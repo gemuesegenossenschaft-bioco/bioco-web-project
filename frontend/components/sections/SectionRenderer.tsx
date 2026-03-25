@@ -197,13 +197,16 @@ function RichTextSection({ section, visualEditor }: { section: ContentSection; v
 }
 
 function ComponentSection({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
-  const component = renderRegisteredComponent(section.component)
+  const component = renderRegisteredComponent(section, visualEditor)
+  if (component.ownsLayout) {
+    return <>{component.node}</>
+  }
   return (
     <section className="cms-section cms-component">
       <SectionHeader section={section} visualEditor={visualEditor} />
       <SectionText section={section} visualEditor={visualEditor} />
       <div {...getVeFieldAttrs(visualEditor, section.id, 'component', 'structured', false)}>
-        {component}
+        {component.node}
       </div>
       <SectionButtons section={section} visualEditor={visualEditor} />
     </section>

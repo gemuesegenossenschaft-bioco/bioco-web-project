@@ -708,6 +708,27 @@ body {
         };
     }
 
+    function cloneConfigValue(value) {
+        return cloneJson(value, value);
+    }
+
+    function getComponentDefaultConfig(rawKey) {
+        var meta = resolveComponentMeta(rawKey);
+        return cloneJson(meta && meta.defaultConfig ? meta.defaultConfig : {}, {});
+    }
+
+    function mergeSectionConfig(rawKey, config) {
+        var merged = getComponentDefaultConfig(rawKey);
+        var next = cloneJson(config, {});
+        if (!next || typeof next !== 'object' || Array.isArray(next)) {
+            return merged || {};
+        }
+        Object.keys(next).forEach(function (key) {
+            merged[key] = cloneConfigValue(next[key]);
+        });
+        return merged;
+    }
+
     function normalizeDraftSection(section) {
         if (!section || !section.id) return null;
         var normalized = {
@@ -721,6 +742,7 @@ body {
         if (typeof section.sort === 'number') normalized.sort = section.sort;
         if (section.eyebrow) normalized.eyebrow = String(section.eyebrow);
         if (section.component) normalized.component = String(section.component);
+        if (section.component || section.config) normalized.config = mergeSectionConfig(section.component, section.config);
         if (section.bgColor) normalized.bgColor = String(section.bgColor);
         if (section.imageOverlay) normalized.imageOverlay = String(section.imageOverlay);
         if (section.imageBrightness != null) normalized.imageBrightness = Number(section.imageBrightness);
@@ -776,6 +798,7 @@ body {
                 theme: section.theme || 'default',
                 eyebrow: section.eyebrow || '',
                 component: section.component || '',
+                config: cloneJson(section.config || {}, {}),
                 bgColor: section.bgColor || '',
                 imageOverlay: section.imageOverlay || '',
                 image: section.image || '',
@@ -1019,6 +1042,13 @@ body {
         var meta = resolveComponentMeta(raw);
         if (!meta) return raw;
         return raw === meta.key ? meta.label + ' (' + meta.key + ')' : meta.label + ' (' + raw + ')';
+    }
+
+    function formatSectionListTitle(section) {
+        var title = String(section.title || '(kein Titel)');
+        if (!section.component) return title;
+        var componentLabel = resolveComponentMeta(section.component);
+        return (componentLabel ? componentLabel.label : section.component) + ' · ' + title;
     }
 
     function getActiveSection() {
@@ -1425,7 +1455,18 @@ body {
                 break;
             case 'component':
                 section.component = payload.value || '';
+                section.config = mergeSectionConfig(section.component, section.config);
                 notifySectionUpdate(section.id, 'component', section.component);
+                notifySectionUpdate(section.id, 'config', section.config);
+                break;
+            case 'config':
+                section.config = mergeSectionConfig(section.component, section.config);
+                if (payload.configKey) {
+                    section.config[payload.configKey] = payload.value;
+                } else if (payload.value && typeof payload.value === 'object') {
+                    section.config = mergeSectionConfig(section.component, payload.value);
+                }
+                notifySectionUpdate(section.id, 'config', section.config);
                 break;
             case 'imageAlt':
                 section.imageAlt = payload.value || '';
@@ -1536,7 +1577,7 @@ body {
 
             var title = document.createElement('div');
             title.className = 've-section-title';
-            title.textContent = section.title || '(kein Titel)';
+            title.textContent = formatSectionListTitle(section);
             info.appendChild(title);
 
             var meta = document.createElement('div');
@@ -1670,7 +1711,8 @@ body {
             button_variant: button1.variant || 'primary',
             button2_text: button2.text || '',
             button2_href: button2.href || '',
-            button2_variant: button2.variant || 'secondary'
+            button2_variant: button2.variant || 'secondary',
+            section_config: cloneJson(section.config || {}, {})
         };
     }
 

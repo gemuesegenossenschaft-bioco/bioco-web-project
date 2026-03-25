@@ -1,4 +1,20 @@
 import registryData from '../../site/templates/component-registry.json'
+import type { SectionConfigObject, SectionConfigValue } from '@/lib/processwire-types'
+
+export interface ComponentRegistryConfigOption {
+  label: string
+  value: string | number
+}
+
+export interface ComponentRegistryConfigField {
+  key: string
+  label: string
+  type: 'select' | 'range'
+  options?: ComponentRegistryConfigOption[]
+  min?: number
+  max?: number
+  step?: number
+}
 
 export interface ComponentRegistryEntry {
   key: string
@@ -11,6 +27,8 @@ export interface ComponentRegistryEntry {
   cmsFields: string[]
   notes?: string
   aliases?: string[]
+  defaultConfig?: SectionConfigObject
+  configSchema?: ComponentRegistryConfigField[]
 }
 
 export interface ResolvedComponentRegistryEntry {
@@ -41,6 +59,11 @@ export function getRenderableComponentRegistryEntries(): ComponentRegistryEntry[
   return componentRegistry.filter((entry) => entry.kind === 'renderable')
 }
 
+function cloneConfig<T extends SectionConfigValue | ComponentRegistryConfigField[] | undefined>(value: T): T {
+  if (value == null) return value
+  return JSON.parse(JSON.stringify(value)) as T
+}
+
 export function resolveComponentRegistryEntry(rawKey?: string | null): ResolvedComponentRegistryEntry | null {
   const matchedKey = normalizeLookupKey(rawKey)
   if (!matchedKey) return null
@@ -64,4 +87,24 @@ export function formatComponentDisplayName(rawKey?: string | null): string {
 export function isComponentKey(rawKey: string | null | undefined, canonicalKey: string): boolean {
   const resolved = resolveComponentRegistryEntry(rawKey)
   return resolved?.canonicalKey === canonicalKey
+}
+
+export function getComponentDefaultConfig(rawKey?: string | null): SectionConfigObject {
+  const resolved = resolveComponentRegistryEntry(rawKey)
+  return cloneConfig(resolved?.entry.defaultConfig || {}) || {}
+}
+
+export function getResolvedComponentConfig(
+  rawKey?: string | null,
+  config?: SectionConfigObject | null,
+): SectionConfigObject {
+  return {
+    ...getComponentDefaultConfig(rawKey),
+    ...(cloneConfig(config || {}) || {}),
+  }
+}
+
+export function getComponentConfigSchema(rawKey?: string | null): ComponentRegistryConfigField[] {
+  const resolved = resolveComponentRegistryEntry(rawKey)
+  return cloneConfig(resolved?.entry.configSchema || []) || []
 }

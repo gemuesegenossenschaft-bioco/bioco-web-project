@@ -3,7 +3,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import { formatComponentDisplayName, resolveComponentRegistryEntry } from '@/lib/componentRegistry'
+import {
+  formatComponentDisplayName,
+  getComponentConfigSchema,
+  getResolvedComponentConfig,
+  resolveComponentRegistryEntry,
+} from '@/lib/componentRegistry'
 import type { ContentSection } from '@/lib/processwire-types'
 
 const MSG_PREFIX = 'bioco:visual-editor:'
@@ -112,6 +117,12 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   const selectedComponentMeta = useMemo(() => {
     return resolveComponentRegistryEntry(selectedSection?.component || '')
   }, [selectedSection?.component])
+  const selectedComponentSchema = useMemo(() => {
+    return getComponentConfigSchema(selectedSection?.component || '')
+  }, [selectedSection?.component])
+  const selectedComponentConfig = useMemo(() => {
+    return getResolvedComponentConfig(selectedSection?.component || '', selectedSection?.config || {})
+  }, [selectedSection?.component, selectedSection?.config])
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -552,6 +563,20 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           gap: 8px;
           margin-top: 8px;
         }
+        .ve-inline-config-grid {
+          display: grid;
+          gap: 10px;
+          margin-top: 12px;
+        }
+        .ve-inline-config-grid label {
+          color: #94a3b8;
+          display: block;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.04em;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+        }
         .ve-inline-text-editor {
           background: #0f172a;
           border: 1px solid #334155;
@@ -619,7 +644,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
         <div data-ve-overlay className="ve-inline-overlay" style={toolbarStyle}>
           <div className="ve-inline-panel">
             <div className="ve-inline-header">
-              <h4>Abschnitt</h4>
+              <h4>{selectedSection?.component ? formatComponentDisplayName(selectedSection.component) : 'Abschnitt'}</h4>
               <button className="ve-inline-close" type="button" onClick={() => setInspectorOpen(false)}>×</button>
             </div>
             <div className="ve-inline-actions">
@@ -679,6 +704,42 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
                 <option value="orange">Orange</option>
               </select>
             </div>
+            {selectedSection?.component && selectedComponentSchema.length ? (
+              <div className="ve-inline-config-grid">
+                {selectedComponentSchema.map((field) => (
+                  <div key={field.key}>
+                    <label htmlFor={`ve-config-${field.key}`}>{field.label}</label>
+                    {field.type === 'range' ? (
+                      <input
+                        id={`ve-config-${field.key}`}
+                        aria-label={field.label}
+                        disabled={saveState.busy}
+                        min={field.min}
+                        max={field.max}
+                        step={field.step || 1}
+                        type="range"
+                        value={Number(selectedComponentConfig[field.key] ?? field.min ?? 0)}
+                        onChange={(event) => sendStructuredFieldChange('config', Number(event.target.value), { configKey: field.key })}
+                      />
+                    ) : (
+                      <select
+                        id={`ve-config-${field.key}`}
+                        aria-label={field.label}
+                        disabled={saveState.busy}
+                        value={String(selectedComponentConfig[field.key] ?? '')}
+                        onChange={(event) => sendStructuredFieldChange('config', event.target.value, { configKey: field.key })}
+                      >
+                        {(field.options || []).map((option) => (
+                          <option key={`${field.key}-${option.value}`} value={String(option.value)}>
+                            {option.label}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <p>{saveState.saving ? 'Publiziert…' : saveState.dirty ? 'Lokaler Entwurf noch nicht publiziert' : 'Kein offener Entwurf'}</p>
           </div>
         </div>

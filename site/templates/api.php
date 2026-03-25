@@ -330,6 +330,56 @@ function buildSectionButtons($section) {
     return $buttons;
 }
 
+function parseSectionConfigValue($raw) {
+    if (is_array($raw)) return $raw;
+    $json = trim((string)$raw);
+    if ($json === '') return [];
+    $decoded = json_decode($json, true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function sanitizeSectionConfigValue($value, $depth = 0) {
+    if ($depth > 6) return null;
+    if (is_bool($value) || is_int($value) || is_float($value) || $value === null) {
+        return $value;
+    }
+    if (is_string($value)) {
+        $clean = preg_replace('/[\x00-\x1F\x7F]/u', '', $value);
+        return mb_substr((string)$clean, 0, 400);
+    }
+    if (is_array($value)) {
+        $normalized = [];
+        foreach ($value as $key => $child) {
+            $safeKey = is_int($key) ? $key : preg_replace('/[^a-z0-9_-]+/i', '', (string)$key);
+            if ($safeKey === '') continue;
+            $normalized[$safeKey] = sanitizeSectionConfigValue($child, $depth + 1);
+        }
+        return $normalized;
+    }
+    return null;
+}
+
+function encodeSectionConfigValue($value) {
+    $normalized = sanitizeSectionConfigValue($value);
+    if (!is_array($normalized) || !count($normalized)) {
+        return '';
+    }
+    return json_encode($normalized, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
+
+function normalizeFingerprintValue($value) {
+    if (!is_array($value)) return $value;
+    $isList = array_keys($value) === range(0, count($value) - 1);
+    if ($isList) {
+        return array_map('ProcessWire\\normalizeFingerprintValue', $value);
+    }
+    ksort($value);
+    foreach ($value as $key => $child) {
+        $value[$key] = normalizeFingerprintValue($child);
+    }
+    return $value;
+}
+
 /**
  * Build media array for a section
  */
@@ -398,6 +448,12 @@ function buildSectionData($section, $sortIndex = null) {
 
     if (!empty($componentKey)) {
         $sectionData['component'] = $componentKey;
+    }
+    if ($section->hasField('section_config')) {
+        $config = parseSectionConfigValue($section->get('section_config'));
+        if (!empty($config)) {
+            $sectionData['config'] = $config;
+        }
     }
 
     $primaryImageField = null;
@@ -510,10 +566,55 @@ function buildVisualEditorSections(Page $page) {
     return $sections;
 }
 
+function normalizeVisualEditorFingerprintHero($hero) {
+    if (!is_array($hero)) return null;
+    return [
+        'headline' => (string)($hero['headline'] ?? ''),
+        'subtitle' => (string)($hero['subtitle'] ?? ''),
+        'image' => (string)($hero['image'] ?? ''),
+        'imageAlt' => (string)($hero['imageAlt'] ?? ''),
+    ];
+}
+
+function normalizeVisualEditorFingerprintButtons($buttons) {
+    if (!is_array($buttons)) return [];
+    return array_values(array_map(function ($button) {
+        return [
+            'text' => (string)($button['text'] ?? ''),
+            'href' => (string)($button['href'] ?? ''),
+            'variant' => (string)($button['variant'] ?? ''),
+        ];
+    }, $buttons));
+}
+
+function normalizeVisualEditorFingerprintSections(array $sections) {
+    return array_values(array_map(function ($section) {
+        return [
+            'id' => (string)($section['id'] ?? ''),
+            'pwId' => isset($section['pwId']) ? (int)$section['pwId'] : 0,
+            'title' => (string)($section['title'] ?? ''),
+            'text' => (string)($section['text'] ?? ''),
+            'layout' => (string)($section['layout'] ?? ''),
+            'theme' => (string)($section['theme'] ?? ''),
+            'eyebrow' => (string)($section['eyebrow'] ?? ''),
+            'component' => (string)($section['component'] ?? ''),
+            'bgColor' => (string)($section['bgColor'] ?? ''),
+            'imageOverlay' => (string)($section['imageOverlay'] ?? ''),
+            'image' => (string)($section['image'] ?? ''),
+            'imageAlt' => (string)($section['imageAlt'] ?? ''),
+            'imageBrightness' => array_key_exists('imageBrightness', $section) ? (float)$section['imageBrightness'] : null,
+            'imageContrast' => array_key_exists('imageContrast', $section) ? (float)$section['imageContrast'] : null,
+            'imageSaturate' => array_key_exists('imageSaturate', $section) ? (float)$section['imageSaturate'] : null,
+            'buttons' => normalizeVisualEditorFingerprintButtons($section['buttons'] ?? []),
+            'config' => normalizeFingerprintValue(is_array($section['config'] ?? null) ? $section['config'] : []),
+        ];
+    }, $sections));
+}
+
 function buildVisualEditorFingerprint($hero, array $sections) {
     return hash('sha256', json_encode([
-        'hero' => $hero ?: null,
-        'sections' => array_values($sections),
+        'hero' => normalizeVisualEditorFingerprintHero($hero),
+        'sections' => normalizeVisualEditorFingerprintSections($sections),
     ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
 
@@ -563,6 +664,7 @@ function applyDraftSectionToRepeater(Page $item, array $payload) {
     if ($item->hasField('section_bg_color')) $item->set('section_bg_color', sanitizeDraftOption($payload['bgColor'] ?? 'none', 'none'));
     if ($item->hasField('section_image_overlay')) $item->set('section_image_overlay', sanitizeDraftOption($payload['imageOverlay'] ?? 'none', 'none'));
     if ($item->hasField('section_component')) $item->set('section_component', $sanitizer->purify($payload['component'] ?? ''));
+    if ($item->hasField('section_config')) $item->set('section_config', encodeSectionConfigValue($payload['config'] ?? []));
     if ($item->hasField('image_alt')) $item->set('image_alt', $sanitizer->purify($payload['imageAlt'] ?? ''));
     if ($item->hasField('section_image_brightness')) $item->set('section_image_brightness', $payload['imageBrightness'] ?? 1);
     if ($item->hasField('section_image_contrast')) $item->set('section_image_contrast', $payload['imageContrast'] ?? 1);
@@ -818,7 +920,7 @@ switch ($endpoint) {
             $allowedFields = [
                 'section_title', 'section_text', 'section_eyebrow',
                 'section_layout', 'section_theme', 'section_bg_color',
-                'section_component', 'section_image_overlay',
+                'section_component', 'section_config', 'section_image_overlay',
                 'image_alt',
                 'section_image_brightness', 'section_image_contrast', 'section_image_saturate',
                 'button_text', 'button_href', 'button_variant',
@@ -827,7 +929,11 @@ switch ($endpoint) {
             $section->of(false);
             foreach ($fields as $key => $value) {
                 if (in_array($key, $allowedFields) && $section->hasField($key)) {
-                    $section->set($key, $sanitizer->purify($value));
+                    if ($key === 'section_config') {
+                        $section->set($key, encodeSectionConfigValue($value));
+                    } else {
+                        $section->set($key, $sanitizer->purify($value));
+                    }
                 }
             }
             $section->save();

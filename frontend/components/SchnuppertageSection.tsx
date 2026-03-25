@@ -105,7 +105,6 @@ export function SchnuppertageSection() {
         </div>
 
         <p style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--text-secondary)', marginTop: '16px' }}>
-          Hinweis: Formulareingänge gehen an medien@bioco.ch.
         </p>
       </section>
 

@@ -98,6 +98,12 @@ export interface ContentImage {
   alt: string;
 }
 
+export type SectionConfigValue = string | number | boolean | null | SectionConfigObject | SectionConfigValue[]
+
+export interface SectionConfigObject {
+  [key: string]: SectionConfigValue
+}
+
 export interface ContentSection {
   id: string;
   pwId?: number;  // ProcessWire page ID (for visual editor CRUD)
@@ -120,6 +126,7 @@ export interface ContentSection {
   imageBrightness?: number;  // CSS filter brightness (0.5-1.5, default 1.0)
   imageContrast?: number;    // CSS filter contrast (0.5-1.5, default 1.0)
   imageSaturate?: number;    // CSS filter saturate (0-2.0, default 1.0)
+  config?: SectionConfigObject;
 }
 
 export interface SectionsResponse {

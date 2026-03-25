@@ -132,27 +132,202 @@
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
+    "key": "page_intro",
+    "label": "Seiten-Einstieg",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "PageIntroBlock"
+    },
+    "cmsFields": ["section_component", "section_title", "section_eyebrow", "section_text", "section_config"],
+    "notes": "Intro-Block mit frei konfigurierbarer Textbreite und Ausrichtung.",
+    "defaultConfig": {
+      "containerWidth": "lg",
+      "textWidth": "normal",
+      "align": "left"
+    },
+    "configSchema": [
+      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
+      { "key": "textWidth", "label": "Textbreite", "type": "select", "options": [{ "label": "Schmal", "value": "narrow" }, { "label": "Normal", "value": "normal" }, { "label": "Breit", "value": "wide" }] },
+      { "key": "align", "label": "Ausrichtung", "type": "select", "options": [{ "label": "Links", "value": "left" }, { "label": "Zentriert", "value": "center" }] }
+    ]
+  },
+  {
+    "key": "media_text",
+    "label": "Medien + Text",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "MediaTextBlock"
+    },
+    "cmsFields": ["section_component", "section_title", "section_eyebrow", "section_text", "section_image", "section_images", "image_alt", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant", "section_config"],
+    "notes": "Flexibler Zwei-Spalten-Block für /wir und andere CMS-Seiten.",
+    "defaultConfig": {
+      "containerWidth": "xl",
+      "mediaSide": "left",
+      "mediaWidth": "50",
+      "mediaRatio": "4:3",
+      "mediaFit": "cover",
+      "verticalAlign": "center",
+      "gap": "lg",
+      "rounded": "lg"
+    },
+    "configSchema": [
+      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
+      { "key": "mediaSide", "label": "Bildseite", "type": "select", "options": [{ "label": "Links", "value": "left" }, { "label": "Rechts", "value": "right" }] },
+      { "key": "mediaWidth", "label": "Bildbreite", "type": "select", "options": [{ "label": "40%", "value": "40" }, { "label": "50%", "value": "50" }, { "label": "60%", "value": "60" }] },
+      { "key": "mediaRatio", "label": "Seitenverhältnis", "type": "select", "options": [{ "label": "1:1", "value": "1:1" }, { "label": "4:3", "value": "4:3" }, { "label": "3:4", "value": "3:4" }, { "label": "16:9", "value": "16:9" }, { "label": "Auto", "value": "auto" }] },
+      { "key": "mediaFit", "label": "Bildmodus", "type": "select", "options": [{ "label": "Cover", "value": "cover" }, { "label": "Contain", "value": "contain" }] },
+      { "key": "verticalAlign", "label": "Vertikal", "type": "select", "options": [{ "label": "Oben", "value": "start" }, { "label": "Mitte", "value": "center" }, { "label": "Unten", "value": "end" }] },
+      { "key": "gap", "label": "Abstand", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] },
+      { "key": "rounded", "label": "Radius", "type": "select", "options": [{ "label": "Kein", "value": "none" }, { "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+    ]
+  },
+  {
+    "key": "cards_grid",
+    "label": "Kartenraster",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "CardsGridBlock"
+    },
+    "cmsFields": ["section_component", "section_title", "section_eyebrow", "section_text", "section_images", "section_image", "image_alt", "section_config"],
+    "notes": "Bildkarten-Raster aus den CMS-Bildern einer Section.",
+    "defaultConfig": {
+      "containerWidth": "xl",
+      "columnsDesktop": "3",
+      "columnsMobile": "1",
+      "cardStyle": "soft",
+      "mediaRatio": "3:4",
+      "mediaFit": "cover",
+      "gap": "lg",
+      "rounded": "md"
+    },
+    "configSchema": [
+      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
+      { "key": "columnsDesktop", "label": "Spalten Desktop", "type": "select", "options": [{ "label": "2", "value": "2" }, { "label": "3", "value": "3" }, { "label": "4", "value": "4" }] },
+      { "key": "columnsMobile", "label": "Spalten Mobile", "type": "select", "options": [{ "label": "1", "value": "1" }, { "label": "2", "value": "2" }] },
+      { "key": "cardStyle", "label": "Kartenstil", "type": "select", "options": [{ "label": "Plain", "value": "plain" }, { "label": "Soft", "value": "soft" }, { "label": "Outlined", "value": "outlined" }] },
+      { "key": "mediaRatio", "label": "Bildratio", "type": "select", "options": [{ "label": "1:1", "value": "1:1" }, { "label": "4:3", "value": "4:3" }, { "label": "3:4", "value": "3:4" }] },
+      { "key": "mediaFit", "label": "Bildmodus", "type": "select", "options": [{ "label": "Cover", "value": "cover" }, { "label": "Contain", "value": "contain" }] },
+      { "key": "gap", "label": "Abstand", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+    ]
+  },
+  {
+    "key": "gallery_strip",
+    "label": "Galerie-Streifen",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "GalleryStripBlock"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "section_images", "section_image", "image_alt", "section_config"],
+    "notes": "Mehrere Bilder in einem einfachen Raster oder Streifen.",
+    "defaultConfig": {
+      "containerWidth": "xl",
+      "columnsDesktop": "3",
+      "columnsMobile": "1",
+      "mediaRatio": "4:3",
+      "mediaFit": "cover",
+      "gap": "lg",
+      "rounded": "lg"
+    },
+    "configSchema": [
+      { "key": "columnsDesktop", "label": "Spalten Desktop", "type": "select", "options": [{ "label": "2", "value": "2" }, { "label": "3", "value": "3" }, { "label": "4", "value": "4" }] },
+      { "key": "columnsMobile", "label": "Spalten Mobile", "type": "select", "options": [{ "label": "1", "value": "1" }, { "label": "2", "value": "2" }] },
+      { "key": "mediaRatio", "label": "Bildratio", "type": "select", "options": [{ "label": "1:1", "value": "1:1" }, { "label": "4:3", "value": "4:3" }, { "label": "16:9", "value": "16:9" }] },
+      { "key": "mediaFit", "label": "Bildmodus", "type": "select", "options": [{ "label": "Cover", "value": "cover" }, { "label": "Contain", "value": "contain" }] },
+      { "key": "gap", "label": "Abstand", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] },
+      { "key": "rounded", "label": "Radius", "type": "select", "options": [{ "label": "Kein", "value": "none" }, { "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+    ]
+  },
+  {
+    "key": "text_columns",
+    "label": "Textspalten",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "TextColumnsBlock"
+    },
+    "cmsFields": ["section_component", "section_title", "section_eyebrow", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant", "section_config"],
+    "notes": "Mehrspaltiger Textblock für Mission, Geschichte und ähnliche Inhalte.",
+    "defaultConfig": {
+      "containerWidth": "lg",
+      "columnsDesktop": "2",
+      "columnsMobile": "1",
+      "gap": "lg",
+      "cardStyle": "plain"
+    },
+    "configSchema": [
+      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
+      { "key": "columnsDesktop", "label": "Spalten Desktop", "type": "select", "options": [{ "label": "1", "value": "1" }, { "label": "2", "value": "2" }, { "label": "3", "value": "3" }, { "label": "4", "value": "4" }] },
+      { "key": "columnsMobile", "label": "Spalten Mobile", "type": "select", "options": [{ "label": "1", "value": "1" }, { "label": "2", "value": "2" }] },
+      { "key": "gap", "label": "Abstand", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+    ]
+  },
+  {
     "key": "timeline_header",
     "label": "Timeline-Kopf",
-    "kind": "semantic",
+    "kind": "renderable",
     "frontendTarget": {
-      "file": "frontend/components/WirClient.tsx",
-      "export": "WirClient"
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "TimelineHeaderBlock"
     },
-    "cmsFields": ["section_component", "section_title", "section_text"],
-    "notes": "Wird auf der Wir-Seite als Timeline-Header interpretiert.",
-    "aliases": ["timeline"]
+    "cmsFields": ["section_component", "section_title", "section_text", "section_config"],
+    "notes": "Einleitender Block vor Timeline-Einträgen.",
+    "aliases": ["timeline"],
+    "defaultConfig": {
+      "containerWidth": "lg",
+      "textWidth": "normal",
+      "align": "left"
+    },
+    "configSchema": [
+      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] },
+      { "key": "textWidth", "label": "Textbreite", "type": "select", "options": [{ "label": "Schmal", "value": "narrow" }, { "label": "Normal", "value": "normal" }, { "label": "Breit", "value": "wide" }] },
+      { "key": "align", "label": "Ausrichtung", "type": "select", "options": [{ "label": "Links", "value": "left" }, { "label": "Zentriert", "value": "center" }] }
+    ]
   },
   {
     "key": "timeline_item",
     "label": "Timeline-Eintrag",
-    "kind": "semantic",
+    "kind": "renderable",
     "frontendTarget": {
-      "file": "frontend/components/WirClient.tsx",
-      "export": "WirClient"
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "TimelineItemBlock"
     },
-    "cmsFields": ["section_component", "section_eyebrow", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
-    "notes": "Wird auf der Wir-Seite als Timeline-Eintrag interpretiert.",
-    "aliases": ["timeline-item"]
+    "cmsFields": ["section_component", "section_eyebrow", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant", "section_config"],
+    "notes": "Ein Timeline-Eintrag mit Jahr, Titel, Text und optionalen Buttons.",
+    "aliases": ["timeline-item"],
+    "defaultConfig": {
+      "containerWidth": "lg",
+      "emphasis": "normal"
+    },
+    "configSchema": [
+      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] },
+      { "key": "emphasis", "label": "Betonung", "type": "select", "options": [{ "label": "Normal", "value": "normal" }, { "label": "Highlight", "value": "highlight" }] }
+    ]
+  },
+  {
+    "key": "cta_band",
+    "label": "CTA-Band",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "CtaBandBlock"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant", "section_config"],
+    "notes": "Breiter CTA-Block mit ein bis zwei Buttons.",
+    "defaultConfig": {
+      "containerWidth": "lg",
+      "align": "left",
+      "theme": "soft",
+      "rounded": "xl"
+    },
+    "configSchema": [
+      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
+      { "key": "align", "label": "Ausrichtung", "type": "select", "options": [{ "label": "Links", "value": "left" }, { "label": "Zentriert", "value": "center" }] },
+      { "key": "theme", "label": "Stil", "type": "select", "options": [{ "label": "Light", "value": "light" }, { "label": "Soft", "value": "soft" }, { "label": "Accent", "value": "accent" }, { "label": "Dark", "value": "dark" }] },
+      { "key": "rounded", "label": "Radius", "type": "select", "options": [{ "label": "Kein", "value": "none" }, { "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+    ]
   }
 ]
