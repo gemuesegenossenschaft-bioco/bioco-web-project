@@ -512,6 +512,134 @@ describe('InlineVisualEditorRuntime', () => {
 
     expect(container.querySelector('.ve-inline-text-editor')?.textContent).toBe('New title')
   })
+
+  it('shows component picker options and emits canonical key', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="component">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="component"
+            data-ve-kind="structured"
+            data-ve-inline="false"
+          >
+            Component target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={[{ ...testSections[0], layout: 'component', component: '' }]} />
+      </div>
+    )
+
+    fireEvent.click(screen.getByText('Component target'))
+    const input = screen.getByLabelText('Komponente') as HTMLInputElement
+    fireEvent.change(input, { target: { value: 'timeline-item' } })
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'bioco:visual-editor:field-change',
+        sectionId: 'section-1',
+        field: 'component',
+        value: 'timeline_item',
+      }),
+      '*'
+    )
+  })
+
+  it('edits video url/title and emits field-change events', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="video_embed">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="video"
+            data-ve-kind="structured"
+            data-ve-inline="false"
+          >
+            Video target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime
+          enabled={true}
+          sections={[{
+            ...testSections[0],
+            layout: 'video_embed',
+            video: { url: 'https://example.com/a.mp4', title: 'Old' },
+          }]}
+        />
+      </div>
+    )
+
+    fireEvent.click(screen.getByText('Video target'))
+    const urlInput = screen.getByLabelText('Video URL')
+    const titleInput = screen.getByLabelText('Video Titel')
+
+    fireEvent.change(urlInput, { target: { value: 'https://example.com/new.mp4' } })
+    fireEvent.change(titleInput, { target: { value: 'Neu' } })
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'bioco:visual-editor:field-change',
+        field: 'videoUrl',
+        value: 'https://example.com/new.mp4',
+      }),
+      '*'
+    )
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'bioco:visual-editor:field-change',
+        field: 'videoTitle',
+        value: 'Neu',
+      }),
+      '*'
+    )
+  })
+
+  it('emits mediaItems updates when removing media entries', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="media_grid">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="media"
+            data-ve-kind="media"
+            data-ve-inline="false"
+            data-ve-target-field="section_images"
+          >
+            Media target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime
+          enabled={true}
+          sections={[{
+            ...testSections[0],
+            layout: 'media_grid',
+            media: [
+              { url: '/a.jpg', alt: 'A', type: 'image' },
+              { url: '/b.jpg', alt: 'B', type: 'image' },
+            ],
+          }]}
+        />
+      </div>
+    )
+
+    fireEvent.click(screen.getByText('Media target'))
+    fireEvent.click(screen.getByRole('button', { name: 'Bild 1 löschen' }))
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'bioco:visual-editor:field-change',
+        field: 'mediaItems',
+        value: [{ url: '/b.jpg', alt: 'B', type: 'image' }],
+      }),
+      '*'
+    )
+  })
 })
 
 describe('HomeClient visual editor integration', () => {

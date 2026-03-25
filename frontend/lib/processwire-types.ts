@@ -135,6 +135,31 @@ export interface SectionsResponse {
   seo?: SeoData;
 }
 
+export interface DraftRecord {
+  pageId: number;
+  userId: number;
+  path: string;
+  baseFingerprint: string;
+  baseSections: ContentSection[];
+  sections: ContentSection[];
+  updatedAt: string;
+}
+
+export interface MergeConflict {
+  sectionId: string;
+  field: string;
+  keep: 'local' | 'server';
+}
+
+export interface PresetRecord {
+  id: string;
+  name: string;
+  category: string;
+  description: string;
+  thumbnailUrl: string;
+  payload: Partial<ContentSection>;
+}
+
 // ============================================================================
 // Homepage Types
 // ============================================================================

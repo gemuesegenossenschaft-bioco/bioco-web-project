@@ -127,4 +127,23 @@ describe('SectionRenderer image filters', () => {
     expect(screen.getByText('Neuer Standort')).toBeTruthy()
     expect(screen.getByText('Beschreibung')).toBeTruthy()
   })
+
+  it('adds visual editor markers for video fields on video sections', () => {
+    const sections: ContentSection[] = [
+      {
+        id: 'video-1',
+        title: 'Video section',
+        text: '<p>Video text</p>',
+        layout: 'video_embed',
+        video: {
+          url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          title: 'Video Titel',
+        },
+      },
+    ]
+
+    const { container } = render(<SectionRenderer sections={sections} visualEditor={true} />)
+    expect(container.querySelector('[data-ve-field="video"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-field="videoTitle"]')).toBeTruthy()
+  })
 })

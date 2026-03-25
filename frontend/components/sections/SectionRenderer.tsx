@@ -170,8 +170,12 @@ function VideoSection({ section, visualEditor }: { section: ContentSection; visu
   return (
     <section className="cms-section cms-video">
       <SectionHeader section={section} visualEditor={visualEditor} />
-      {section.video.title ? <p className="cms-section-caption">{section.video.title}</p> : null}
-      <div className="cms-video-frame">
+      {section.video.title ? (
+        <p className="cms-section-caption" {...getVeFieldAttrs(visualEditor, section.id, 'videoTitle', 'text', true)}>
+          {section.video.title}
+        </p>
+      ) : null}
+      <div className="cms-video-frame" {...getVeFieldAttrs(visualEditor, section.id, 'video', 'structured', false)}>
         {isFile ? (
           <video controls preload="metadata">
             <source src={embedUrl} />

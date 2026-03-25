@@ -11,6 +11,11 @@ if (!$user->isLoggedin() || $user->isGuest()) {
     header('Location: ' . $config->urls->admin . 'login/');
     exit;
 }
+if (!$user->hasRole('superuser') && !$user->hasRole('editor')) {
+    http_response_code(403);
+    echo 'Editor or superuser role required';
+    exit;
+}
 
 $siteUrl = rtrim(getenv('NEXT_PUBLIC_SITE_URL') ?: 'https://bioco.ch', '/');
 $draftSecret = getenv('PW_PREVIEW_TOKEN') ?: '';
@@ -381,6 +386,66 @@ body {
     overflow-y: auto;
     padding: 14px;
 }
+.ve-preset-modal {
+    align-items: stretch;
+    background: rgba(15, 23, 42, 0.72);
+    display: none;
+    inset: 0;
+    justify-content: flex-end;
+    position: fixed;
+    z-index: 40;
+}
+.ve-preset-modal.is-open {
+    display: flex;
+}
+.ve-preset-panel {
+    background: #0f172a;
+    border-left: 1px solid #1f2937;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 520px;
+    width: 100%;
+}
+.ve-preset-header {
+    align-items: center;
+    border-bottom: 1px solid #1f2937;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 14px;
+}
+.ve-preset-controls {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1fr 160px;
+    padding: 12px 14px;
+}
+.ve-preset-list {
+    display: grid;
+    gap: 10px;
+    overflow-y: auto;
+    padding: 0 14px 14px;
+}
+.ve-preset-item {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 10px;
+}
+.ve-preset-item strong {
+    display: block;
+    font-size: 13px;
+}
+.ve-preset-item p {
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1.45;
+    margin-top: 6px;
+}
+.ve-preset-item .ve-inline-actions {
+    margin-top: 10px;
+}
 .ve-media-card {
     background: #111827;
     border: 1px solid #1f2937;
@@ -472,6 +537,7 @@ body {
     </div>
     <div class="ve-toolbar-actions">
         <button class="ve-btn" id="ve-btn-refresh" type="button">Neu laden</button>
+        <button class="ve-btn" id="ve-btn-presets" type="button">Vorlagen</button>
         <button class="ve-btn" id="ve-btn-pw" type="button">PW Admin</button>
         <a href="<?= $config->urls->admin ?>" class="ve-btn">Zurück</a>
     </div>
@@ -516,6 +582,23 @@ body {
     </div>
 </div>
 
+<div class="ve-preset-modal" id="ve-preset-modal">
+    <div class="ve-preset-panel">
+        <div class="ve-preset-header">
+            <strong>Abschnitt-Vorlagen</strong>
+            <button class="ve-btn" id="ve-preset-close" type="button">Schliessen</button>
+        </div>
+        <div class="ve-preset-controls">
+            <input id="ve-preset-search" type="text" placeholder="Suche...">
+            <select id="ve-preset-category">
+                <option value="">Alle Kategorien</option>
+            </select>
+        </div>
+        <div class="ve-empty-state" id="ve-preset-empty">Vorlagen werden geladen…</div>
+        <div class="ve-preset-list" id="ve-preset-list"></div>
+    </div>
+</div>
+
 <div class="ve-busy-overlay" id="ve-busy-overlay" aria-hidden="true">
     <div class="ve-busy-dialog">
         <div class="ve-busy-spinner"></div>
@@ -555,6 +638,7 @@ body {
     var fieldEditor = document.getElementById('ve-field-editor');
     var btnAdd = document.getElementById('ve-btn-add');
     var btnRefresh = document.getElementById('ve-btn-refresh');
+    var btnPresets = document.getElementById('ve-btn-presets');
     var btnPw = document.getElementById('ve-btn-pw');
     var btnSave = document.getElementById('ve-btn-save');
     var btnReset = document.getElementById('ve-btn-reset');
@@ -564,6 +648,12 @@ body {
     var mediaClose = document.getElementById('ve-media-close');
     var mediaEmpty = document.getElementById('ve-media-empty');
     var mediaGrid = document.getElementById('ve-media-grid');
+    var presetModal = document.getElementById('ve-preset-modal');
+    var presetClose = document.getElementById('ve-preset-close');
+    var presetSearch = document.getElementById('ve-preset-search');
+    var presetCategory = document.getElementById('ve-preset-category');
+    var presetEmpty = document.getElementById('ve-preset-empty');
+    var presetList = document.getElementById('ve-preset-list');
     var busyOverlay = document.getElementById('ve-busy-overlay');
     var busyLabel = document.getElementById('ve-busy-label');
 
@@ -582,6 +672,8 @@ body {
     var editorMode = 'edit';
     var mediaFiles = [];
     var mediaRequest = null;
+    var presetItems = [];
+    var presetTagsByComponent = {};
     var busyDepth = 0;
     var busyVisible = false;
     var busyTimer = null;
@@ -594,6 +686,10 @@ body {
     var IFRAME_READY_TIMEOUT = 10000;
     var DRAFT_AUTOSAVE_DELAY = 180;
     var DRAFT_STORAGE_PREFIX = 'bioco-ve-draft:v1:';
+    var HISTORY_LIMIT = 120;
+    var historyPast = [];
+    var historyFuture = [];
+    var applyingHistory = false;
 
     ALL_PAGES.forEach(function (page) {
         var option = document.createElement('option');
@@ -770,6 +866,15 @@ body {
         if (Array.isArray(section.media) && section.media.length) {
             normalized.media = cloneJson(section.media, []);
         }
+        if (Array.isArray(section.mediaItems)) {
+            normalized.mediaItems = cloneJson(section.mediaItems, []);
+        }
+        if (section.video && typeof section.video === 'object') {
+            normalized.video = {
+                url: String(section.video.url || ''),
+                title: String(section.video.title || '')
+            };
+        }
         if (section.imageData) {
             normalized.imageData = cloneJson(section.imageData, null);
         }
@@ -777,6 +882,11 @@ body {
         var draftMedia = normalizeDraftMedia(section.draftMedia, targetField);
         if (draftMedia) {
             normalized.draftMedia = draftMedia;
+        }
+        if (Array.isArray(section.draftMediaItems)) {
+            normalized.draftMediaItems = section.draftMediaItems
+                .map(function (item) { return normalizeDraftMedia(item, 'section_images'); })
+                .filter(Boolean);
         }
         return normalized;
     }
@@ -806,8 +916,12 @@ body {
                 imageBrightness: section.imageBrightness == null ? null : section.imageBrightness,
                 imageContrast: section.imageContrast == null ? null : section.imageContrast,
                 imageSaturate: section.imageSaturate == null ? null : section.imageSaturate,
+                video: cloneJson(section.video || null, null),
+                media: cloneJson(section.media || [], []),
+                mediaItems: cloneJson(section.mediaItems || [], []),
                 buttons: cloneJson(section.buttons || [], []),
-                draftMedia: cloneJson(section.draftMedia || null, null)
+                draftMedia: cloneJson(section.draftMedia || null, null),
+                draftMediaItems: cloneJson(section.draftMediaItems || [], [])
             };
         });
     }
@@ -852,6 +966,45 @@ body {
         }
     }
 
+    function readServerDraft(pageId, path) {
+        if (!pageId || !path) return Promise.resolve(null);
+        var query = '?pageId=' + encodeURIComponent(String(pageId)) + '&path=' + encodeURIComponent(String(path));
+        return fetch(API_ROOT + 'content/draft' + query, { credentials: 'include' })
+            .then(function (response) {
+                return parseJson(response).then(function (data) {
+                    if (!response.ok || !data.success) return null;
+                    return data.draft || null;
+                });
+            })
+            .catch(function () { return null; });
+    }
+
+    function saveServerDraft(payload) {
+        if (!payload || !payload.pageId || !payload.path || !payload.baseFingerprint || !Array.isArray(payload.sections)) {
+            return Promise.resolve();
+        }
+        return postJson(API_ROOT + 'content/draft', payload, 'Entwurf konnte nicht gespeichert werden').catch(function () {});
+    }
+
+    function deleteServerDraft(pageId, path) {
+        if (!pageId || !path) return Promise.resolve();
+        var query = '?pageId=' + encodeURIComponent(String(pageId)) + '&path=' + encodeURIComponent(String(path));
+        return fetch(API_ROOT + 'content/draft' + query, {
+            method: 'DELETE',
+            credentials: 'include',
+        }).catch(function () {});
+    }
+
+    function buildCurrentDraftPayload() {
+        return {
+            pageId: currentPageId,
+            path: currentPath,
+            baseFingerprint: canonicalFingerprint || '',
+            baseSections: cloneSections(canonicalSections),
+            sections: cloneSections(sections),
+        };
+    }
+
     function persistCurrentDraftNow() {
         if (!currentPageId || !currentPath) return;
         if (draftAutosaveTimer) {
@@ -860,6 +1013,7 @@ body {
         }
         if (!hasDraftChanges()) {
             clearCurrentDraftStorage();
+            deleteServerDraft(currentPageId, currentPath);
             draftSavedAt = 0;
             return;
         }
@@ -879,6 +1033,7 @@ body {
         } catch (error) {
             // ignore storage errors
         }
+        saveServerDraft(buildCurrentDraftPayload());
     }
 
     function scheduleDraftAutosave() {
@@ -893,6 +1048,38 @@ body {
                 clearStatusLater();
             }
         }, DRAFT_AUTOSAVE_DELAY);
+    }
+
+    function resetHistory() {
+        historyPast = [];
+        historyFuture = [];
+    }
+
+    function pushHistorySnapshot() {
+        if (applyingHistory) return;
+        historyPast.push(cloneSections(sections));
+        if (historyPast.length > HISTORY_LIMIT) {
+            historyPast.shift();
+        }
+        historyFuture = [];
+    }
+
+    function undoChange() {
+        if (!historyPast.length || isBusy()) return;
+        applyingHistory = true;
+        historyFuture.push(cloneSections(sections));
+        sections = cloneSections(historyPast.pop());
+        refreshDraftUi({ persist: true, message: 'Rückgängig' });
+        applyingHistory = false;
+    }
+
+    function redoChange() {
+        if (!historyFuture.length || isBusy()) return;
+        applyingHistory = true;
+        historyPast.push(cloneSections(sections));
+        sections = cloneSections(historyFuture.pop());
+        refreshDraftUi({ persist: true, message: 'Wiederhergestellt' });
+        applyingHistory = false;
     }
 
     function readStoredDraft(pageId, path) {
@@ -949,6 +1136,37 @@ body {
         };
     }
 
+    function restoreServerDraft(draft, nextSections, fingerprint) {
+        if (!draft || !Array.isArray(draft.sections)) {
+            return {
+                sections: nextSections,
+                restored: false,
+                message: ''
+            };
+        }
+        if ((draft.baseFingerprint || '') !== (fingerprint || '')) {
+            deleteServerDraft(currentPageId, currentPath);
+            return {
+                sections: nextSections,
+                restored: false,
+                message: 'Server-Entwurf veraltet und verworfen.'
+            };
+        }
+        var restoredSections = cloneSections(draft.sections);
+        if (!restoredSections.length) {
+            return {
+                sections: nextSections,
+                restored: false,
+                message: ''
+            };
+        }
+        return {
+            sections: restoredSections,
+            restored: true,
+            message: 'Server-Entwurf wiederhergestellt.'
+        };
+    }
+
     function setCanonicalSnapshot(nextSections, nextFingerprint) {
         canonicalSections = cloneSections(nextSections);
         canonicalFingerprint = String(nextFingerprint || '');
@@ -988,7 +1206,7 @@ body {
     }
 
     function applyDraftMedia(section, file, targetField) {
-        section.draftMedia = {
+        var mediaRef = {
             assetId: file.assetId,
             assetTitle: file.assetTitle || '',
             fileField: file.fileField,
@@ -996,6 +1214,8 @@ body {
             targetField: targetField,
             url: file.url
         };
+        section.draftMedia = mediaRef;
+        section.draftMediaItems = [cloneJson(mediaRef, null)];
         section.image = file.url;
         section.imageAlt = section.imageAlt || file.assetTitle || section.title || '';
         section.imageData = {
@@ -1011,6 +1231,32 @@ body {
             alt: section.imageAlt || '',
             type: 'image'
         }];
+    }
+
+    function appendDraftMedia(section, file, targetField) {
+        var mediaRef = {
+            assetId: file.assetId,
+            assetTitle: file.assetTitle || '',
+            fileField: file.fileField,
+            fileName: file.fileName,
+            targetField: targetField || 'section_images',
+            url: file.url
+        };
+        var alt = file.assetTitle || section.imageAlt || section.title || '';
+        var mediaItems = Array.isArray(section.media) ? section.media.slice() : [];
+        mediaItems.push({ url: file.url, alt: alt, type: 'image' });
+        section.media = mediaItems;
+        section.images = mediaItems.map(function (item) {
+            return { url: item.url, alt: item.alt || '' };
+        });
+        if (!section.image && section.images.length) {
+            section.image = section.images[0].url;
+            section.imageAlt = section.images[0].alt || '';
+        }
+        if (!Array.isArray(section.draftMediaItems)) {
+            section.draftMediaItems = [];
+        }
+        section.draftMediaItems.push(mediaRef);
     }
 
     function buildDraftPayloadSections() {
@@ -1201,7 +1447,8 @@ body {
             busy: isBusy(),
             busyLabel: busyText || '',
             message: message || '',
-            selectedSectionId: activeSectionId
+            selectedSectionId: activeSectionId,
+            presetTagsByComponent: presetTagsByComponent
         });
     }
 
@@ -1210,6 +1457,7 @@ body {
         btnAdd.disabled = !currentPageId || isSaving || isBusy();
         btnPw.disabled = !currentPageId || isBusy();
         btnRefresh.disabled = !currentPageId || isBusy();
+        btnPresets.disabled = isBusy();
         btnSave.disabled = !hasDraftChanges() || isSaving || isBusy();
         btnReset.disabled = !hasDraftChanges() || isSaving || isBusy();
         btnModeEdit.disabled = isBusy();
@@ -1232,7 +1480,13 @@ body {
     }
 
     function blockWhileDirty(actionLabel) {
-        return false;
+        if (!hasDraftChanges()) return false;
+        var guarded = {
+            'Seitenwechsel': true,
+            'Neu laden': true
+        };
+        if (!guarded[actionLabel || '']) return false;
+        return !window.confirm('Ungespeicherte Änderungen vorhanden. "' + (actionLabel || 'Weiter') + '" trotzdem ausführen?');
     }
 
     function blockWhileBusy() {
@@ -1255,6 +1509,8 @@ body {
             case 'text': return 'Text';
             case 'media': return 'Bild / Medien';
             case 'component': return 'Komponente';
+            case 'video': return 'Video';
+            case 'videoTitle': return 'Video Titel';
             default: return field.field;
         }
     }
@@ -1268,6 +1524,9 @@ body {
                 return 'Alt-Text und Medienauswahl laufen über das Overlay direkt im iframe.';
             case 'component':
                 return 'Komponentenname wird inline geändert. Komponentenspezifische Optionen sind in V1 noch begrenzt.';
+            case 'video':
+            case 'videoTitle':
+                return 'Video-URL und Titel können direkt im Overlay bearbeitet werden.';
             case 'button':
                 return 'Text, Link und Variante werden inline im Button-Overlay geändert.';
             default:
@@ -1360,21 +1619,28 @@ body {
                     nextSections.unshift(buildHomepageHeroSection(data.hero));
                 }
                 setCanonicalSnapshot(nextSections, data.fingerprint || '');
-                var restore = restoreStoredDraft(nextSections, canonicalFingerprint);
-                sections = cloneSections(restore.sections);
-                if (pendingSelectId && getSectionById(pendingSelectId)) {
-                    activeSectionId = pendingSelectId;
-                } else if (activeSectionId && !getSectionById(activeSectionId)) {
-                    activeSectionId = null;
-                    activeField = null;
-                }
-                pendingSelectId = null;
-                refreshDraftUi({ persist: false, message: restore.message || '' });
-                if (!options.keepStatus) {
-                    setStatus(restore.message || (hasDraftChanges() ? 'Entwurf lokal gespeichert' : 'Verbunden'), hasDraftChanges() ? 'is-loading' : 'is-ready');
-                } else if (restore.message) {
-                    setTransientStatus(restore.message, 'is-loading');
-                }
+                return readServerDraft(currentPageId, currentPath)
+                    .then(function (serverDraft) {
+                        var restore = restoreServerDraft(serverDraft, nextSections, canonicalFingerprint);
+                        if (!restore.restored) {
+                            restore = restoreStoredDraft(nextSections, canonicalFingerprint);
+                        }
+                        sections = cloneSections(restore.sections);
+                        if (pendingSelectId && getSectionById(pendingSelectId)) {
+                            activeSectionId = pendingSelectId;
+                        } else if (activeSectionId && !getSectionById(activeSectionId)) {
+                            activeSectionId = null;
+                            activeField = null;
+                        }
+                        pendingSelectId = null;
+                        resetHistory();
+                        refreshDraftUi({ persist: false, message: restore.message || '' });
+                        if (!options.keepStatus) {
+                            setStatus(restore.message || (hasDraftChanges() ? 'Entwurf lokal gespeichert' : 'Verbunden'), hasDraftChanges() ? 'is-loading' : 'is-ready');
+                        } else if (restore.message) {
+                            setTransientStatus(restore.message, 'is-loading');
+                        }
+                    });
             })
             .catch(function (error) {
                 setStatus(error.message || 'Fehler beim Laden', 'is-error');
@@ -1395,6 +1661,7 @@ body {
         activeSectionId = null;
         activeField = null;
         clearDirtySections();
+        resetHistory();
         draftSavedAt = 0;
         isSaving = false;
 
@@ -1423,6 +1690,20 @@ body {
         if (isBusy()) return;
         var section = getSectionById(payload.sectionId);
         if (!section) return;
+        var historyFields = {
+            layout: true,
+            theme: true,
+            bgColor: true,
+            imageOverlay: true,
+            component: true,
+            config: true,
+            mediaItems: true,
+            videoUrl: true,
+            videoTitle: true
+        };
+        if (payload.__commit || historyFields[payload.field]) {
+            pushHistorySnapshot();
+        }
 
         switch (payload.field) {
             case 'title':
@@ -1487,6 +1768,80 @@ body {
                         return item;
                     });
                 }
+                notifySectionUpdate(section.id, 'imageAlt', section.imageAlt);
+                break;
+            case 'videoUrl':
+                section.video = cloneJson(section.video || {}, {});
+                section.video.url = payload.value || '';
+                notifySectionUpdate(section.id, 'video', section.video);
+                break;
+            case 'videoTitle':
+                section.video = cloneJson(section.video || {}, {});
+                section.video.title = payload.value || '';
+                notifySectionUpdate(section.id, 'video', section.video);
+                notifySectionUpdate(section.id, 'videoTitle', section.video.title || '');
+                break;
+            case 'mediaItems':
+                if (!Array.isArray(payload.value)) return;
+                section.media = payload.value
+                    .map(function (item) {
+                        if (!item || !item.url) return null;
+                        return {
+                            url: String(item.url),
+                            alt: String(item.alt || ''),
+                            type: String(item.type || 'image')
+                        };
+                    })
+                    .filter(Boolean);
+                section.mediaItems = cloneJson(section.media, []);
+                section.images = section.media
+                    .filter(function (item) { return (item.type || 'image') === 'image'; })
+                    .map(function (item) {
+                        return {
+                            url: item.url,
+                            alt: item.alt || ''
+                        };
+                    });
+                if (section.images.length) {
+                    section.image = section.images[0].url;
+                    section.imageAlt = section.images[0].alt || section.imageAlt || '';
+                    section.imageData = {
+                        url: section.image,
+                        description: section.imageAlt || ''
+                    };
+                } else {
+                    section.image = '';
+                    section.imageData = null;
+                }
+                if (Array.isArray(section.draftMediaItems) && section.draftMediaItems.length) {
+                    var refsByUrl = {};
+                    section.draftMediaItems.forEach(function (ref) {
+                        if (!ref || !ref.url) return;
+                        if (!refsByUrl[ref.url]) refsByUrl[ref.url] = [];
+                        refsByUrl[ref.url].push(ref);
+                    });
+                    section.draftMediaItems = section.media.map(function (item) {
+                        if (!refsByUrl[item.url] || !refsByUrl[item.url].length) return null;
+                        return refsByUrl[item.url].shift();
+                    }).filter(Boolean);
+                } else {
+                    section.draftMediaItems = [];
+                }
+                notifySectionUpdate(section.id, 'media', section.media);
+                notifySectionUpdate(section.id, 'images', section.images);
+                notifySectionUpdate(section.id, 'image', section.image || '');
+                break;
+            case 'imageBrightness':
+                section.imageBrightness = Number(payload.value || 1);
+                notifySectionUpdate(section.id, 'imageBrightness', section.imageBrightness);
+                break;
+            case 'imageContrast':
+                section.imageContrast = Number(payload.value || 1);
+                notifySectionUpdate(section.id, 'imageContrast', section.imageContrast);
+                break;
+            case 'imageSaturate':
+                section.imageSaturate = Number(payload.value || 1);
+                notifySectionUpdate(section.id, 'imageSaturate', section.imageSaturate);
                 break;
             case 'button_text':
                 setButtons(section, payload.buttonIndex || 0, { text: payload.value || '' });
@@ -1739,8 +2094,105 @@ body {
             });
     }
 
+    function valueEquals(a, b) {
+        return JSON.stringify(a == null ? null : a) === JSON.stringify(b == null ? null : b);
+    }
+
+    function indexSectionsById(items) {
+        var map = {};
+        (items || []).forEach(function (section) {
+            if (!section || !section.id) return;
+            map[section.id] = cloneJson(section, {});
+        });
+        return map;
+    }
+
+    function resolvePublishConflict(baseSections, serverSections, localSections) {
+        var baseById = indexSectionsById(baseSections);
+        var serverById = indexSectionsById(serverSections);
+        var localById = indexSectionsById(localSections);
+        var mergedById = {};
+        var ids = {};
+        Object.keys(baseById).forEach(function (id) { ids[id] = true; });
+        Object.keys(serverById).forEach(function (id) { ids[id] = true; });
+        Object.keys(localById).forEach(function (id) { ids[id] = true; });
+        var idList = Object.keys(ids);
+        var conflicts = [];
+
+        idList.forEach(function (id) {
+            var base = baseById[id] || null;
+            var server = serverById[id] || null;
+            var local = localById[id] || null;
+
+            if (!server && local) {
+                mergedById[id] = cloneJson(local, {});
+                return;
+            }
+            if (server && !local) {
+                mergedById[id] = cloneJson(server, {});
+                return;
+            }
+            if (!server && !local) return;
+
+            var merged = cloneJson(local, {});
+            var keys = {};
+            Object.keys(base || {}).forEach(function (k) { keys[k] = true; });
+            Object.keys(server || {}).forEach(function (k) { keys[k] = true; });
+            Object.keys(local || {}).forEach(function (k) { keys[k] = true; });
+
+            Object.keys(keys).forEach(function (key) {
+                var baseVal = base ? base[key] : undefined;
+                var serverVal = server ? server[key] : undefined;
+                var localVal = local ? local[key] : undefined;
+                if (valueEquals(localVal, serverVal)) {
+                    merged[key] = cloneJson(localVal, localVal);
+                    return;
+                }
+                if (valueEquals(baseVal, serverVal)) {
+                    merged[key] = cloneJson(localVal, localVal);
+                    return;
+                }
+                if (valueEquals(baseVal, localVal)) {
+                    merged[key] = cloneJson(serverVal, serverVal);
+                    return;
+                }
+                var useLocal = window.confirm('Konflikt in Abschnitt "' + id + '" Feld "' + key + '". OK = lokal behalten, Abbrechen = Server übernehmen.');
+                merged[key] = useLocal ? cloneJson(localVal, localVal) : cloneJson(serverVal, serverVal);
+                conflicts.push({ sectionId: id, field: key, keep: useLocal ? 'local' : 'server' });
+            });
+            mergedById[id] = normalizeDraftSection(merged);
+        });
+
+        var baseOrder = (baseSections || []).map(function (section) { return section.id; }).join('|');
+        var serverOrderList = (serverSections || []).map(function (section) { return section.id; });
+        var localOrderList = (localSections || []).map(function (section) { return section.id; });
+        var serverOrder = serverOrderList.join('|');
+        var localOrder = localOrderList.join('|');
+        var keepLocalOrder = true;
+        if (baseOrder !== serverOrder && baseOrder !== localOrder && serverOrder !== localOrder) {
+            keepLocalOrder = window.confirm('Abschnittsreihenfolge-Konflikt. OK = lokale Reihenfolge behalten, Abbrechen = Server-Reihenfolge übernehmen.');
+        } else if (baseOrder === localOrder && baseOrder !== serverOrder) {
+            keepLocalOrder = false;
+        }
+
+        var orderedIds = keepLocalOrder ? localOrderList.slice() : serverOrderList.slice();
+        Object.keys(mergedById).forEach(function (id) {
+            if (orderedIds.indexOf(id) === -1) orderedIds.push(id);
+        });
+        var mergedSections = orderedIds.map(function (id) {
+            return mergedById[id];
+        }).filter(Boolean);
+
+        return {
+            mergedSections: cloneSections(mergedSections),
+            conflicts: conflicts,
+            keepLocalOrder: keepLocalOrder
+        };
+    }
+
     function saveDirtySections() {
         if (isSaving || !hasDraftChanges() || isBusy()) return;
+        var baseSectionsSnapshot = cloneSections(canonicalSections);
 
         isSaving = true;
         updateActions();
@@ -1762,22 +2214,42 @@ body {
                 }
                 setCanonicalSnapshot(nextSections, data.fingerprint || '');
                 sections = cloneSections(nextSections);
+                resetHistory();
                 clearDirtySections();
                 clearCurrentDraftStorage();
+                deleteServerDraft(currentPageId, currentPath);
                 draftSavedAt = 0;
                 refreshDraftUi({ persist: false, message: 'Publiziert' });
                 setStatus('Publiziert', 'is-ready');
                 sendToIframe('save-result', { success: true });
             })
             .catch(function (error) {
+                var resolvedConflict = false;
                 if (error && error.data && (Array.isArray(error.data.sections) || error.data.hero)) {
                     var canonicalFromError = Array.isArray(error.data.sections) ? error.data.sections.slice() : [];
                     if (currentPath === '/' && error.data.hero) {
                         canonicalFromError.unshift(buildHomepageHeroSection(error.data.hero));
                     }
-                    setCanonicalSnapshot(canonicalFromError, error.data.fingerprint || '');
+                    if (error.data && error.data.fingerprint) {
+                        var resolved = resolvePublishConflict(baseSectionsSnapshot, canonicalFromError, sections);
+                        setCanonicalSnapshot(canonicalFromError, error.data.fingerprint || '');
+                        sections = cloneSections(resolved.mergedSections);
+                        clearDirtySections();
+                        refreshDraftUi({
+                            message: resolved.conflicts.length
+                                ? 'Konflikte gelöst. Bitte prüfen und erneut publizieren.'
+                                : 'Serveränderungen übernommen. Bitte erneut publizieren.'
+                        });
+                        resolvedConflict = true;
+                    } else {
+                        setCanonicalSnapshot(canonicalFromError, error.data.fingerprint || '');
+                    }
                 }
-                setStatus(error.message || 'Publizieren fehlgeschlagen', 'is-error');
+                if (resolvedConflict) {
+                    setStatus('Konflikte gelöst. Erneut publizieren.', 'is-loading');
+                } else {
+                    setStatus(error.message || 'Publizieren fehlgeschlagen', 'is-error');
+                }
                 sendToIframe('save-result', {
                     success: false,
                     error: error.message || 'Publizieren fehlgeschlagen'
@@ -1794,7 +2266,9 @@ body {
         if (isBusy()) return;
         if (!confirmDiscardChanges()) return;
         clearCurrentDraftStorage();
+        deleteServerDraft(currentPageId, currentPath);
         sections = cloneSections(canonicalSections);
+        resetHistory();
         clearDirtySections();
         activeField = null;
         if (activeSectionId && !getSectionById(activeSectionId)) {
@@ -1806,6 +2280,7 @@ body {
 
     function reorderSectionsById(fromSectionId, toSectionId) {
         if (!currentPageId || isSaving || isBusy() || blockWhileDirty('Sortieren')) return;
+        pushHistorySnapshot();
         var hero = sections.filter(function (section) { return isHeroSection(section); });
         var order = getSortableSections().slice();
         var fromIndex = order.findIndex(function (section) { return section.id === fromSectionId; });
@@ -1820,6 +2295,7 @@ body {
 
     function addSection(layout) {
         if (!currentPageId || isSaving || isBusy() || blockWhileDirty('Hinzufügen')) return;
+        pushHistorySnapshot();
         var newSection = normalizeDraftSection({
             id: createDraftId(),
             title: 'Neuer Abschnitt',
@@ -1838,6 +2314,7 @@ body {
 
     function deleteSection(section) {
         if (!currentPageId || !section || isHeroSection(section) || isSaving || isBusy()) return;
+        pushHistorySnapshot();
         sections = sections.filter(function (item) { return item.id !== section.id; });
         if (activeSectionId === section.id) {
             activeSectionId = null;
@@ -1859,6 +2336,7 @@ body {
 
     function duplicateSection(section) {
         if (!section || isHeroSection(section) || !currentPageId || isSaving || isBusy() || blockWhileDirty('Duplizieren')) return;
+        pushHistorySnapshot();
         var newSection = cloneSections([section])[0];
         if (!newSection) return;
         var sourceIndex = sections.findIndex(function (item) { return item.id === section.id; });
@@ -1947,7 +2425,13 @@ body {
         var section = mediaRequest ? getSectionById(mediaRequest.sectionId) : null;
         if (!section || !mediaRequest) return;
 
-        applyDraftMedia(section, file, mediaRequest.targetField || (isHeroSection(section) ? 'hero_image' : 'section_image'));
+        pushHistorySnapshot();
+        var targetField = mediaRequest.targetField || (isHeroSection(section) ? 'hero_image' : 'section_image');
+        if (targetField === 'section_images') {
+            appendDraftMedia(section, file, targetField);
+        } else {
+            applyDraftMedia(section, file, targetField);
+        }
         closeMediaModal();
         refreshDraftUi();
         if (activeField) {
@@ -1978,6 +2462,146 @@ body {
         }
     }
 
+    function rebuildPresetTagsMap() {
+        presetTagsByComponent = {};
+        presetItems.forEach(function (preset) {
+            if (!preset || !preset.payload || !preset.payload.component) return;
+            var key = String(preset.payload.component);
+            if (!presetTagsByComponent[key]) presetTagsByComponent[key] = [];
+            if (preset.category && presetTagsByComponent[key].indexOf(String(preset.category)) === -1) {
+                presetTagsByComponent[key].push(String(preset.category));
+            }
+            if (preset.name && presetTagsByComponent[key].indexOf(String(preset.name)) === -1) {
+                presetTagsByComponent[key].push(String(preset.name));
+            }
+        });
+    }
+
+    function renderPresetCategories() {
+        var current = presetCategory.value || '';
+        var categories = {};
+        presetItems.forEach(function (preset) {
+            if (!preset || !preset.category) return;
+            categories[preset.category] = true;
+        });
+        presetCategory.innerHTML = '<option value="">Alle Kategorien</option>';
+        Object.keys(categories).sort().forEach(function (name) {
+            var option = document.createElement('option');
+            option.value = name;
+            option.textContent = name;
+            presetCategory.appendChild(option);
+        });
+        presetCategory.value = current;
+    }
+
+    function filteredPresets() {
+        var query = String(presetSearch.value || '').trim().toLowerCase();
+        var category = String(presetCategory.value || '');
+        return presetItems.filter(function (preset) {
+            if (category && preset.category !== category) return false;
+            if (!query) return true;
+            var haystack = [preset.name, preset.description, preset.category, preset.payload && preset.payload.component]
+                .filter(Boolean)
+                .join(' ')
+                .toLowerCase();
+            return haystack.indexOf(query) !== -1;
+        });
+    }
+
+    function renderPresetList() {
+        presetList.innerHTML = '';
+        var items = filteredPresets();
+        if (!items.length) {
+            presetEmpty.textContent = 'Keine Vorlagen gefunden.';
+            presetEmpty.style.display = 'block';
+            return;
+        }
+        presetEmpty.style.display = 'none';
+        items.forEach(function (preset) {
+            var card = document.createElement('div');
+            card.className = 've-preset-item';
+            card.innerHTML =
+                '<strong>' + escapeHtml(preset.name || 'Vorlage') + '</strong>' +
+                (preset.category ? '<span class="ve-layout-badge">' + escapeHtml(preset.category) + '</span>' : '') +
+                '<p>' + escapeHtml(preset.description || '') + '</p>';
+            var actions = document.createElement('div');
+            actions.className = 've-inline-actions';
+            var insertBtn = document.createElement('button');
+            insertBtn.type = 'button';
+            insertBtn.className = 've-btn ve-btn-primary';
+            insertBtn.textContent = 'Einfügen';
+            insertBtn.addEventListener('click', function () {
+                insertPreset(preset);
+            });
+            actions.appendChild(insertBtn);
+            card.appendChild(actions);
+            presetList.appendChild(card);
+        });
+    }
+
+    function loadPresets() {
+        return fetch(API_ROOT + 'content/presets', { credentials: 'include' })
+            .then(function (response) {
+                return parseJson(response).then(function (data) {
+                    if (!response.ok || !data.success) {
+                        throw new Error((data && data.error) || 'Vorlagen konnten nicht geladen werden');
+                    }
+                    return data;
+                });
+            })
+            .then(function (data) {
+                presetItems = Array.isArray(data.presets) ? data.presets : [];
+                rebuildPresetTagsMap();
+                renderPresetCategories();
+                renderPresetList();
+                syncIframeState();
+            })
+            .catch(function (error) {
+                presetItems = [];
+                presetEmpty.textContent = error.message || 'Vorlagen konnten nicht geladen werden';
+                presetEmpty.style.display = 'block';
+            });
+    }
+
+    function openPresetModal() {
+        if (isBusy()) return;
+        if (!presetItems.length) {
+            loadPresets().then(function () {
+                renderPresetList();
+            });
+        } else {
+            renderPresetList();
+        }
+        presetModal.classList.add('is-open');
+    }
+
+    function closePresetModal() {
+        presetModal.classList.remove('is-open');
+    }
+
+    function insertPreset(preset) {
+        if (!preset || !preset.payload) return;
+        if (isBusy() || !currentPageId) return;
+        pushHistorySnapshot();
+        var payload = cloneJson(preset.payload, {}) || {};
+        var section = normalizeDraftSection(Object.assign({
+            id: createDraftId(),
+            title: preset.name || 'Neuer Abschnitt',
+            text: '<p></p>',
+            layout: 'rich_text',
+            theme: 'default',
+            buttons: [],
+        }, payload));
+        if (!section) return;
+        sections = cloneSections(sections);
+        sections.push(section);
+        activeSectionId = section.id;
+        activeField = null;
+        closePresetModal();
+        refreshDraftUi();
+        setTransientStatus('Vorlage eingefügt', 'is-loading');
+    }
+
     pageSelect.addEventListener('change', function () {
         if (isBusy()) return;
         if (!this.value) return;
@@ -1986,6 +2610,10 @@ body {
         var nextPath = parts[1];
         if (!nextPageId || !nextPath) return;
         if (currentPageId === nextPageId && currentPath === nextPath) return;
+        if (blockWhileDirty('Seitenwechsel')) {
+            this.value = currentPageId && currentPath ? (currentPageId + '|' + currentPath) : '';
+            return;
+        }
         persistCurrentDraftNow();
         loadPage(nextPageId, nextPath);
     });
@@ -1993,8 +2621,13 @@ body {
     btnRefresh.addEventListener('click', function () {
         if (isBusy()) return;
         if (!currentPageId || !currentPath) return;
+        if (blockWhileDirty('Neu laden')) return;
         persistCurrentDraftNow();
         loadPage(currentPageId, currentPath, { force: true });
+    });
+
+    btnPresets.addEventListener('click', function () {
+        openPresetModal();
     });
 
     btnPw.addEventListener('click', function () {
@@ -2042,6 +2675,39 @@ body {
         }
     });
 
+    presetClose.addEventListener('click', closePresetModal);
+    presetModal.addEventListener('click', function (event) {
+        if (isBusy()) return;
+        if (event.target === presetModal) {
+            closePresetModal();
+        }
+    });
+    presetSearch.addEventListener('input', renderPresetList);
+    presetCategory.addEventListener('change', renderPresetList);
+
+    window.addEventListener('keydown', function (event) {
+        if (isBusy()) return;
+        var isMeta = !!(event.metaKey || event.ctrlKey);
+        if (isMeta && event.key.toLowerCase() === 's') {
+            event.preventDefault();
+            saveDirtySections();
+            return;
+        }
+        if (isMeta && event.key.toLowerCase() === 'z') {
+            event.preventDefault();
+            if (event.shiftKey) {
+                redoChange();
+            } else {
+                undoChange();
+            }
+            return;
+        }
+        if (event.key === 'Escape') {
+            if (mediaModal.classList.contains('is-open')) closeMediaModal();
+            if (presetModal.classList.contains('is-open')) closePresetModal();
+        }
+    });
+
     window.addEventListener('message', function (event) {
         var data = event.data;
         if (!data || typeof data.type !== 'string' || data.type.indexOf(PREFIX) !== 0) return;
@@ -2084,7 +2750,8 @@ body {
         }
 
         if (action === 'field-change' || action === 'field-commit') {
-            applyFieldChange(data);
+            var nextPayload = Object.assign({}, data, { __commit: action === 'field-commit' });
+            applyFieldChange(nextPayload);
             return;
         }
 
@@ -2107,6 +2774,7 @@ body {
 
     renderBusyOverlay();
     updateActions();
+    loadPresets();
 })();
 </script>
 </body>

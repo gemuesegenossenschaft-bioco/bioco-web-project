@@ -589,6 +589,8 @@ function normalizeVisualEditorFingerprintButtons($buttons) {
 
 function normalizeVisualEditorFingerprintSections(array $sections) {
     return array_values(array_map(function ($section) {
+        $video = is_array($section['video'] ?? null) ? $section['video'] : [];
+        $media = is_array($section['media'] ?? null) ? $section['media'] : [];
         return [
             'id' => (string)($section['id'] ?? ''),
             'pwId' => isset($section['pwId']) ? (int)$section['pwId'] : 0,
@@ -605,6 +607,15 @@ function normalizeVisualEditorFingerprintSections(array $sections) {
             'imageBrightness' => array_key_exists('imageBrightness', $section) ? (float)$section['imageBrightness'] : null,
             'imageContrast' => array_key_exists('imageContrast', $section) ? (float)$section['imageContrast'] : null,
             'imageSaturate' => array_key_exists('imageSaturate', $section) ? (float)$section['imageSaturate'] : null,
+            'videoUrl' => (string)($video['url'] ?? ''),
+            'videoTitle' => (string)($video['title'] ?? ''),
+            'media' => array_values(array_map(function ($item) {
+                return [
+                    'url' => (string)($item['url'] ?? ''),
+                    'alt' => (string)($item['alt'] ?? ''),
+                    'type' => (string)($item['type'] ?? 'image'),
+                ];
+            }, $media)),
             'buttons' => normalizeVisualEditorFingerprintButtons($section['buttons'] ?? []),
             'config' => normalizeFingerprintValue(is_array($section['config'] ?? null) ? $section['config'] : []),
         ];
@@ -665,6 +676,9 @@ function applyDraftSectionToRepeater(Page $item, array $payload) {
     if ($item->hasField('section_image_overlay')) $item->set('section_image_overlay', sanitizeDraftOption($payload['imageOverlay'] ?? 'none', 'none'));
     if ($item->hasField('section_component')) $item->set('section_component', $sanitizer->purify($payload['component'] ?? ''));
     if ($item->hasField('section_config')) $item->set('section_config', encodeSectionConfigValue($payload['config'] ?? []));
+    $videoPayload = is_array($payload['video'] ?? null) ? $payload['video'] : [];
+    if ($item->hasField('section_video_url')) $item->set('section_video_url', $sanitizer->purify($videoPayload['url'] ?? ($payload['videoUrl'] ?? '')));
+    if ($item->hasField('section_video_title')) $item->set('section_video_title', $sanitizer->purify($videoPayload['title'] ?? ($payload['videoTitle'] ?? '')));
     if ($item->hasField('image_alt')) $item->set('image_alt', $sanitizer->purify($payload['imageAlt'] ?? ''));
     if ($item->hasField('section_image_brightness')) $item->set('section_image_brightness', $payload['imageBrightness'] ?? 1);
     if ($item->hasField('section_image_contrast')) $item->set('section_image_contrast', $payload['imageContrast'] ?? 1);
@@ -675,6 +689,17 @@ function applyDraftSectionToRepeater(Page $item, array $payload) {
     if ($item->hasField('button2_text')) $item->set('button2_text', $sanitizer->purify($button2['text'] ?? ''));
     if ($item->hasField('button2_href')) $item->set('button2_href', $sanitizer->purify($button2['href'] ?? ''));
     if ($item->hasField('button2_variant')) $item->set('button2_variant', sanitizeDraftOption($button2['variant'] ?? 'secondary', 'secondary'));
+}
+
+function clearMediaField(Page $targetPage, $fieldName) {
+    if (!$targetPage->hasField($fieldName)) return;
+    $files = $targetPage->get($fieldName);
+    if (($files instanceof Pageimages || $files instanceof Pagefiles) && $files->count()) {
+        foreach ($files as $existing) {
+            $files->remove($existing);
+        }
+        $targetPage->save($fieldName);
+    }
 }
 
 function importDraftMediaReference(Page $targetPage, array $draftMedia, $defaultTargetField) {
@@ -691,6 +716,13 @@ function importDraftMediaReference(Page $targetPage, array $draftMedia, $default
     ], $httpCode);
     if (empty($result['success'])) {
         throw new \RuntimeException($result['error'] ?? 'Draft media import failed');
+    }
+}
+
+function importDraftMediaReferences(Page $targetPage, array $draftMediaItems, $defaultTargetField) {
+    foreach ($draftMediaItems as $entry) {
+        if (!is_array($entry)) continue;
+        importDraftMediaReference($targetPage, $entry, $defaultTargetField);
     }
 }
 
@@ -743,7 +775,7 @@ function mediaTypeFromExtension($ext) {
 }
 
 /**
- * Require logged-in ProcessWire admin/editor for admin-only endpoints.
+ * Require logged-in ProcessWire editor/superuser for write/admin endpoints.
  */
 function requireAdminSession() {
     $user = wire('user');
@@ -752,7 +784,215 @@ function requireAdminSession() {
         echo json_encode(['success' => false, 'error' => 'Authentication required']);
         return false;
     }
+    if (!$user->hasRole('superuser') && !$user->hasRole('editor')) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'error' => 'Editor or superuser role required']);
+        return false;
+    }
     return true;
+}
+
+function ensureVisualEditorDraftsTableExists() {
+    static $ready = false;
+    if ($ready) return;
+    $ready = true;
+    $db = wire('database');
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS visual_editor_drafts (
+            id INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            page_id INT UNSIGNED NOT NULL,
+            user_id INT UNSIGNED NOT NULL,
+            path VARCHAR(255) NOT NULL,
+            base_fingerprint VARCHAR(128) NOT NULL,
+            base_sections_json LONGTEXT NULL,
+            draft_sections_json LONGTEXT NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_page_user_path (page_id, user_id, path),
+            KEY idx_user (user_id),
+            KEY idx_page (page_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+}
+
+function normalizeVisualEditorPath($path) {
+    $raw = trim((string)$path);
+    if ($raw === '') return '/';
+    if ($raw[0] !== '/') $raw = '/' . $raw;
+    return rtrim($raw, '/') ?: '/';
+}
+
+function getVisualEditorDraftRecord($pageId, $userId, $path) {
+    ensureVisualEditorDraftsTableExists();
+    $db = wire('database');
+    $stmt = $db->prepare("
+        SELECT page_id, user_id, path, base_fingerprint, base_sections_json, draft_sections_json, updated_at
+        FROM visual_editor_drafts
+        WHERE page_id = :page_id AND user_id = :user_id AND path = :path
+        LIMIT 1
+    ");
+    $stmt->execute([
+        ':page_id' => (int)$pageId,
+        ':user_id' => (int)$userId,
+        ':path' => (string)normalizeVisualEditorPath($path),
+    ]);
+    $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+    if (!$row) return null;
+
+    $baseSections = json_decode((string)($row['base_sections_json'] ?? '[]'), true);
+    $draftSections = json_decode((string)($row['draft_sections_json'] ?? '[]'), true);
+
+    return [
+        'pageId' => (int)$row['page_id'],
+        'userId' => (int)$row['user_id'],
+        'path' => (string)$row['path'],
+        'baseFingerprint' => (string)$row['base_fingerprint'],
+        'baseSections' => is_array($baseSections) ? $baseSections : [],
+        'sections' => is_array($draftSections) ? $draftSections : [],
+        'updatedAt' => (string)$row['updated_at'],
+    ];
+}
+
+function upsertVisualEditorDraftRecord($pageId, $userId, $path, $baseFingerprint, array $baseSections, array $sections) {
+    ensureVisualEditorDraftsTableExists();
+    $db = wire('database');
+    $stmt = $db->prepare("
+        INSERT INTO visual_editor_drafts (page_id, user_id, path, base_fingerprint, base_sections_json, draft_sections_json)
+        VALUES (:page_id, :user_id, :path, :base_fingerprint, :base_sections_json, :draft_sections_json)
+        ON DUPLICATE KEY UPDATE
+            base_fingerprint = VALUES(base_fingerprint),
+            base_sections_json = VALUES(base_sections_json),
+            draft_sections_json = VALUES(draft_sections_json),
+            updated_at = CURRENT_TIMESTAMP
+    ");
+    $stmt->execute([
+        ':page_id' => (int)$pageId,
+        ':user_id' => (int)$userId,
+        ':path' => (string)normalizeVisualEditorPath($path),
+        ':base_fingerprint' => (string)$baseFingerprint,
+        ':base_sections_json' => json_encode(array_values($baseSections), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        ':draft_sections_json' => json_encode(array_values($sections), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+    ]);
+}
+
+function deleteVisualEditorDraftRecord($pageId, $userId, $path) {
+    ensureVisualEditorDraftsTableExists();
+    $db = wire('database');
+    $stmt = $db->prepare("
+        DELETE FROM visual_editor_drafts
+        WHERE page_id = :page_id AND user_id = :user_id AND path = :path
+    ");
+    $stmt->execute([
+        ':page_id' => (int)$pageId,
+        ':user_id' => (int)$userId,
+        ':path' => (string)normalizeVisualEditorPath($path),
+    ]);
+    return $stmt->rowCount() > 0;
+}
+
+function defaultVisualEditorPresets() {
+    return [
+        [
+            'id' => 'preset-page-intro',
+            'name' => 'Page Intro',
+            'category' => 'Layout',
+            'description' => 'Einführung mit flexibel einstellbarer Textbreite.',
+            'thumbnailUrl' => '',
+            'payload' => ['layout' => 'component', 'component' => 'page_intro', 'title' => 'Seiteneinstieg', 'text' => '<p></p>', 'theme' => 'default', 'config' => ['containerWidth' => 'lg', 'textWidth' => 'normal', 'align' => 'left']],
+        ],
+        [
+            'id' => 'preset-media-text-left',
+            'name' => 'Media + Text (Links)',
+            'category' => 'Layout',
+            'description' => 'Bild links, Text rechts.',
+            'thumbnailUrl' => '',
+            'payload' => ['layout' => 'component', 'component' => 'media_text', 'title' => 'Media + Text', 'text' => '<p></p>', 'theme' => 'default', 'config' => ['mediaSide' => 'left']],
+        ],
+        [
+            'id' => 'preset-media-text-right',
+            'name' => 'Media + Text (Rechts)',
+            'category' => 'Layout',
+            'description' => 'Bild rechts, Text links.',
+            'thumbnailUrl' => '',
+            'payload' => ['layout' => 'component', 'component' => 'media_text', 'title' => 'Media + Text', 'text' => '<p></p>', 'theme' => 'default', 'config' => ['mediaSide' => 'right']],
+        ],
+        [
+            'id' => 'preset-cards-grid',
+            'name' => 'Cards Grid',
+            'category' => 'Media',
+            'description' => 'Kartenraster für Bildinhalte.',
+            'thumbnailUrl' => '',
+            'payload' => ['layout' => 'component', 'component' => 'cards_grid', 'title' => 'Kartenraster', 'text' => '<p></p>', 'theme' => 'default', 'config' => ['columnsDesktop' => '3']],
+        ],
+        [
+            'id' => 'preset-gallery-strip',
+            'name' => 'Gallery Strip',
+            'category' => 'Media',
+            'description' => 'Galeriestreifen mit mehreren Bildern.',
+            'thumbnailUrl' => '',
+            'payload' => ['layout' => 'component', 'component' => 'gallery_strip', 'title' => 'Galerie', 'text' => '<p></p>', 'theme' => 'default', 'config' => ['columnsDesktop' => '3']],
+        ],
+        [
+            'id' => 'preset-text-columns',
+            'name' => 'Text Columns',
+            'category' => 'Text',
+            'description' => 'Mehrspaltiger Textblock.',
+            'thumbnailUrl' => '',
+            'payload' => ['layout' => 'component', 'component' => 'text_columns', 'title' => 'Textspalten', 'text' => '<p></p>', 'theme' => 'default', 'config' => ['columnsDesktop' => '2']],
+        ],
+        [
+            'id' => 'preset-cta-band',
+            'name' => 'CTA Band',
+            'category' => 'CTA',
+            'description' => 'Breiter CTA-Block.',
+            'thumbnailUrl' => '',
+            'payload' => ['layout' => 'component', 'component' => 'cta_band', 'title' => 'Mitmachen', 'text' => '<p></p>', 'theme' => 'default', 'buttons' => [['text' => 'Mehr erfahren', 'href' => '/', 'variant' => 'primary']]],
+        ],
+    ];
+}
+
+function readVisualEditorPresetsFromPages() {
+    $pages = wire('pages');
+    $config = wire('config');
+    $items = [];
+    $presetPages = $pages->find('template=component_preset, sort=sort');
+    foreach ($presetPages as $preset) {
+        $payload = [];
+        if ($preset->hasField('preset_payload') && $preset->get('preset_payload')) {
+            $decoded = json_decode((string)$preset->get('preset_payload'), true);
+            if (is_array($decoded)) $payload = $decoded;
+        }
+        if (!count($payload)) {
+            $payload = [
+                'layout' => 'component',
+                'component' => $preset->hasField('section_component') ? (string)$preset->get('section_component') : '',
+                'title' => $preset->hasField('section_title') ? decodeText($preset->get('section_title')) : decodeText($preset->title),
+                'text' => $preset->hasField('section_text') ? (string)$preset->get('section_text') : '<p></p>',
+                'theme' => $preset->hasField('section_theme') ? (string)$preset->get('section_theme') : 'default',
+            ];
+            if ($preset->hasField('section_config')) {
+                $payload['config'] = parseSectionConfigValue($preset->get('section_config'));
+            }
+        }
+
+        $thumb = '';
+        if ($preset->hasField('preset_screenshot')) {
+            $image = getFirstImageFromField($preset, 'preset_screenshot');
+            if ($image && $image->url) {
+                $thumb = $config->urls->httpRoot . ltrim($image->url, '/');
+            }
+        }
+
+        $items[] = [
+            'id' => 'preset-' . (int)$preset->id,
+            'name' => decodeText($preset->title),
+            'category' => $preset->hasField('preset_category') ? decodeText($preset->get('preset_category') ?: 'General') : 'General',
+            'description' => $preset->hasField('preset_description') ? decodeText($preset->get('preset_description') ?: '') : '',
+            'thumbnailUrl' => $thumb,
+            'payload' => $payload,
+        ];
+    }
+    return $items;
 }
 
 /**
@@ -890,7 +1130,7 @@ switch ($endpoint) {
 
     case 'auth-check':
         $user = wire('user');
-        if ($user && !$user->isGuest() && $user->hasRole('superuser')) {
+        if ($user && !$user->isGuest() && ($user->hasRole('superuser') || $user->hasRole('editor'))) {
             echo json_encode(['loggedIn' => true, 'username' => $user->name]);
         } else {
             http_response_code(401);
@@ -921,6 +1161,7 @@ switch ($endpoint) {
                 'section_title', 'section_text', 'section_eyebrow',
                 'section_layout', 'section_theme', 'section_bg_color',
                 'section_component', 'section_config', 'section_image_overlay',
+                'section_video_url', 'section_video_title',
                 'image_alt',
                 'section_image_brightness', 'section_image_contrast', 'section_image_saturate',
                 'button_text', 'button_href', 'button_variant',
@@ -1039,10 +1280,28 @@ switch ($endpoint) {
                 applyDraftSectionToRepeater($item, $payloadSection);
                 $item->sort = $index;
                 $item->save();
+
+                if (array_key_exists('mediaItems', $payloadSection) || array_key_exists('draftMediaItems', $payloadSection)) {
+                    $draftMediaItems = is_array($payloadSection['draftMediaItems'] ?? null) ? $payloadSection['draftMediaItems'] : [];
+                    $mediaItems = is_array($payloadSection['mediaItems'] ?? null) ? $payloadSection['mediaItems'] : [];
+                    if (count($draftMediaItems)) {
+                        clearMediaField($item, 'section_images');
+                        clearMediaField($item, 'section_image');
+                        importDraftMediaReferences($item, $draftMediaItems, 'section_images');
+                    } elseif (count($mediaItems) === 0) {
+                        // Explicit clear request from media manager.
+                        clearMediaField($item, 'section_images');
+                        clearMediaField($item, 'section_image');
+                    } elseif (is_array($payloadSection['draftMedia'] ?? null)) {
+                        clearMediaField($item, 'section_image');
+                        importDraftMediaReference($item, $payloadSection['draftMedia'], 'section_image');
+                    }
+                }
+
                 $keptIds[] = (int)$item->id;
                 $orderedItems[] = $item;
 
-                if (is_array($payloadSection['draftMedia'] ?? null)) {
+                if (!array_key_exists('mediaItems', $payloadSection) && !array_key_exists('draftMediaItems', $payloadSection) && is_array($payloadSection['draftMedia'] ?? null)) {
                     importDraftMediaReference($item, $payloadSection['draftMedia'], 'section_image');
                 }
             }
@@ -1060,6 +1319,10 @@ switch ($endpoint) {
             $page->save('content_sections');
 
             $published = buildVisualEditorCanonicalState($page, $path);
+            $user = wire('user');
+            if ($user && !$user->isGuest()) {
+                deleteVisualEditorDraftRecord((int)$pageId, (int)$user->id, $path);
+            }
             echo json_encode([
                 'success' => true,
                 'fingerprint' => $published['fingerprint'],
@@ -1180,7 +1443,7 @@ switch ($endpoint) {
         http_response_code(404);
         echo json_encode([
             'error' => 'Endpoint not found',
-            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete'],
+            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete', 'content/draft', 'content/presets'],
         ]);
 }
 
@@ -1194,6 +1457,77 @@ function handleContentRequest($type, $param = null) {
     $sanitizer = wire('sanitizer');
     
     switch ($type) {
+        case 'draft':
+            if (!requireAdminSession()) break;
+            $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+            if ($method === 'GET') {
+                $pageId = (int)($input->get('pageId') ?: 0);
+                $path = (string)($input->get('path') ?: '/');
+                if (!$pageId) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => 'pageId required']);
+                    break;
+                }
+                $user = wire('user');
+                $record = getVisualEditorDraftRecord($pageId, (int)$user->id, $path);
+                echo json_encode([
+                    'success' => true,
+                    'draft' => $record,
+                ]);
+                break;
+            }
+            if ($method === 'POST') {
+                $data = json_decode(file_get_contents('php://input'), true) ?: [];
+                $pageId = (int)($data['pageId'] ?? 0);
+                $path = (string)($data['path'] ?? '/');
+                $baseFingerprint = (string)($data['baseFingerprint'] ?? '');
+                $sections = is_array($data['sections'] ?? null) ? array_values($data['sections']) : [];
+                $baseSections = is_array($data['baseSections'] ?? null) ? array_values($data['baseSections']) : [];
+                if (!$pageId || !$baseFingerprint || !count($sections)) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => 'pageId, baseFingerprint and sections required']);
+                    break;
+                }
+                $user = wire('user');
+                upsertVisualEditorDraftRecord($pageId, (int)$user->id, $path, $baseFingerprint, $baseSections, $sections);
+                $record = getVisualEditorDraftRecord($pageId, (int)$user->id, $path);
+                echo json_encode(['success' => true, 'draft' => $record]);
+                break;
+            }
+            if ($method === 'DELETE') {
+                $pageId = (int)($input->get('pageId') ?: 0);
+                $path = (string)($input->get('path') ?: '/');
+                if (!$pageId) {
+                    http_response_code(400);
+                    echo json_encode(['success' => false, 'error' => 'pageId required']);
+                    break;
+                }
+                $user = wire('user');
+                $deleted = deleteVisualEditorDraftRecord($pageId, (int)$user->id, $path);
+                echo json_encode(['success' => true, 'deleted' => $deleted]);
+                break;
+            }
+            http_response_code(405);
+            echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+            break;
+
+        case 'presets':
+            if (!requireAdminSession()) break;
+            if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+                http_response_code(405);
+                echo json_encode(['success' => false, 'error' => 'GET method required']);
+                break;
+            }
+            $presets = readVisualEditorPresetsFromPages();
+            if (!count($presets)) {
+                $presets = defaultVisualEditorPresets();
+            }
+            echo json_encode([
+                'success' => true,
+                'presets' => $presets,
+            ]);
+            break;
+
         // --------------------------------------------------------------------
         // Health check for content subsystem
         // --------------------------------------------------------------------

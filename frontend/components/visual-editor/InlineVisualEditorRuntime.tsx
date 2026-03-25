@@ -5,6 +5,7 @@ import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import {
   formatComponentDisplayName,
+  getComponentRegistry,
   getComponentConfigSchema,
   getResolvedComponentConfig,
   resolveComponentRegistryEntry,
@@ -60,6 +61,7 @@ function getShortTextValue(section: ContentSection | null, selectedField: Select
   }
   if (selectedField.field === 'title') return section.title || ''
   if (selectedField.field === 'eyebrow') return section.eyebrow || ''
+  if (selectedField.field === 'videoTitle') return section.video?.title || ''
   return ''
 }
 
@@ -86,6 +88,10 @@ function getFieldLabel(selectedField: SelectedField | null): string {
       return 'Bild'
     case 'component':
       return 'Komponente'
+    case 'video':
+      return 'Video'
+    case 'videoTitle':
+      return 'Video Titel'
     default:
       return selectedField.field
   }
@@ -97,6 +103,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   const [selectedField, setSelectedField] = useState<SelectedField | null>(null)
   const [inspectorOpen, setInspectorOpen] = useState(true)
   const [saveState, setSaveState] = useState({ dirty: false, saving: false, busy: false, busyLabel: '', message: '' })
+  const [presetTagsByComponent, setPresetTagsByComponent] = useState<Record<string, string[]>>({})
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
   const shortTextRef = useRef<HTMLDivElement | null>(null)
   const sectionToolbarRef = useRef<HTMLButtonElement | null>(null)
@@ -123,6 +130,12 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   const selectedComponentConfig = useMemo(() => {
     return getResolvedComponentConfig(selectedSection?.component || '', selectedSection?.config || {})
   }, [selectedSection?.component, selectedSection?.config])
+  const componentCandidates = useMemo(() => {
+    return getComponentRegistry().map((entry) => ({
+      key: entry.key,
+      label: entry.label,
+    }))
+  }, [])
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -189,6 +202,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
             busyLabel: typeof data.busyLabel === 'string' ? data.busyLabel : '',
             message: typeof data.message === 'string' ? data.message : '',
           })
+          setPresetTagsByComponent((data.presetTagsByComponent && typeof data.presetTagsByComponent === 'object') ? data.presetTagsByComponent : {})
           setSelectedSectionId(typeof data.selectedSectionId === 'string' ? data.selectedSectionId : null)
           break
         case 'section-highlight':
@@ -369,6 +383,10 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
         componentInputRef.current?.focus()
         return
       }
+      if (selectedField?.field === 'video') {
+        componentInputRef.current?.focus()
+        return
+      }
       if (selectedField?.field === 'media') {
         mediaAltRef.current?.focus()
         return
@@ -417,6 +435,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   const shortTextVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField && (selectedField.kind === 'text' || selectedField.kind === 'button') && selectedField.field !== 'text' && anchorRect
   const richTextVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'text' && anchorRect
   const componentVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'component' && anchorRect
+  const videoVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'video' && anchorRect
   const mediaVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'media' && anchorRect
 
   const toolbarStyle = anchorRect ? {
@@ -427,6 +446,29 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   function sendStructuredFieldChange(field: string, value: unknown, extra: Record<string, unknown> = {}) {
     if (!selectedSectionId) return
     sendToParent('field-change', { sectionId: selectedSectionId, field, value, ...extra })
+  }
+
+  function resolveComponentInput(rawValue: string): string {
+    const raw = String(rawValue || '').trim()
+    if (!raw) return ''
+    const resolved = resolveComponentRegistryEntry(raw)
+    return resolved?.canonicalKey || ''
+  }
+
+  function getEditableMediaItems(): Array<{ url: string; alt: string; type: 'image' | 'video' }> {
+    if (!selectedSection?.media?.length) {
+      if (selectedSection?.image) {
+        return [{ url: selectedSection.image, alt: selectedSection.imageAlt || '', type: 'image' }]
+      }
+      return []
+    }
+    return selectedSection.media
+      .filter((item) => (item.type || 'image') === 'image')
+      .map((item) => ({ url: item.url, alt: item.alt || '', type: 'image' }))
+  }
+
+  function pushMediaItems(nextItems: Array<{ url: string; alt: string; type: 'image' | 'video' }>) {
+    sendStructuredFieldChange('mediaItems', nextItems)
   }
 
   function handleShortTextInput() {
@@ -867,8 +909,20 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               disabled={saveState.busy}
               type="text"
               value={selectedSection?.component || ''}
-              onChange={(event) => sendStructuredFieldChange('component', event.target.value)}
+              list="ve-component-options"
+              onChange={(event) => {
+                const next = resolveComponentInput(event.target.value)
+                if (!next) return
+                sendStructuredFieldChange('component', next)
+              }}
             />
+            <datalist id="ve-component-options">
+              {componentCandidates.map((candidate) => (
+                <option key={candidate.key} value={candidate.key}>
+                  {candidate.label}
+                </option>
+              ))}
+            </datalist>
             <p>
               {selectedSection?.component
                 ? selectedComponentMeta
@@ -876,6 +930,42 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
                   : 'Keine bekannte Registry-Zuordnung'
                 : 'Kein Komponenten-Key gesetzt'}
             </p>
+            {selectedSection?.component && presetTagsByComponent[selectedSection.component]?.length ? (
+              <p>Preset Tags: {presetTagsByComponent[selectedSection.component].join(', ')}</p>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
+
+      {videoVisible ? (
+        <div
+          data-ve-overlay
+          className="ve-inline-overlay"
+          style={{
+            top: `${(anchorRect?.bottom || 0) + 10}px`,
+            left: `${anchorRect?.left || 0}px`,
+          }}
+        >
+          <div className="ve-inline-panel">
+            <div className="ve-inline-header">
+              <h4>Video</h4>
+              <button className="ve-inline-close" type="button" onClick={() => setInspectorOpen(false)}>×</button>
+            </div>
+            <input
+              ref={componentInputRef}
+              aria-label="Video URL"
+              disabled={saveState.busy}
+              type="text"
+              value={selectedSection?.video?.url || ''}
+              onChange={(event) => sendStructuredFieldChange('videoUrl', event.target.value)}
+            />
+            <input
+              aria-label="Video Titel"
+              disabled={saveState.busy}
+              type="text"
+              value={selectedSection?.video?.title || ''}
+              onChange={(event) => sendStructuredFieldChange('videoTitle', event.target.value)}
+            />
           </div>
         </div>
       ) : null}
@@ -902,6 +992,67 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               value={selectedSection?.imageAlt || ''}
               onChange={(event) => sendStructuredFieldChange('imageAlt', event.target.value)}
             />
+            {getEditableMediaItems().length ? (
+              <div className="ve-inline-config-grid">
+                {getEditableMediaItems().map((item, index) => (
+                  <div key={`${item.url}-${index}`}>
+                    <label htmlFor={`ve-media-alt-${index}`}>Bild {index + 1}</label>
+                    <input
+                      id={`ve-media-alt-${index}`}
+                      aria-label={`Bild ${index + 1} Alt Text`}
+                      disabled={saveState.busy}
+                      type="text"
+                      value={item.alt || ''}
+                      onChange={(event) => {
+                        const next = getEditableMediaItems().map((entry) => ({ ...entry }))
+                        next[index].alt = event.target.value
+                        pushMediaItems(next)
+                      }}
+                    />
+                    <div className="ve-inline-actions">
+                      <button
+                        type="button"
+                        aria-label={`Bild ${index + 1} hoch`}
+                        disabled={saveState.busy || index === 0}
+                        onClick={() => {
+                          const next = getEditableMediaItems().map((entry) => ({ ...entry }))
+                          const [moved] = next.splice(index, 1)
+                          next.splice(index - 1, 0, moved)
+                          pushMediaItems(next)
+                        }}
+                      >
+                        Hoch
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Bild ${index + 1} runter`}
+                        disabled={saveState.busy || index === getEditableMediaItems().length - 1}
+                        onClick={() => {
+                          const next = getEditableMediaItems().map((entry) => ({ ...entry }))
+                          const [moved] = next.splice(index, 1)
+                          next.splice(index + 1, 0, moved)
+                          pushMediaItems(next)
+                        }}
+                      >
+                        Runter
+                      </button>
+                      <button
+                        type="button"
+                        aria-label={`Bild ${index + 1} löschen`}
+                        disabled={saveState.busy}
+                        onClick={() => {
+                          const next = getEditableMediaItems().map((entry) => ({ ...entry }))
+                          next.splice(index, 1)
+                          pushMediaItems(next)
+                        }}
+                      >
+                        Löschen
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
             <div className="ve-inline-actions">
               <button
                 type="button"
@@ -912,6 +1063,16 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
                 })}
               >
                 Mediathek öffnen
+              </button>
+              <button
+                type="button"
+                disabled={saveState.busy}
+                onClick={() => sendToParent('media-request', {
+                  sectionId: selectedField?.sectionId,
+                  targetField: 'section_images',
+                })}
+              >
+                Bild hinzufügen
               </button>
             </div>
           </div>
