@@ -196,6 +196,98 @@ function biocoExtractSectionTitleFromHtml($html) {
     return mb_substr($plain, 0, 120);
 }
 
+function biocoDomInnerHtml(\DOMNode $node) {
+    $html = '';
+    foreach ($node->childNodes as $child) {
+        $html .= $node->ownerDocument->saveHTML($child);
+    }
+    return $html;
+}
+
+function biocoSetDomNodeText(\DOMNode $node, $text) {
+    while ($node->firstChild) {
+        $node->removeChild($node->firstChild);
+    }
+    $node->appendChild($node->ownerDocument->createTextNode($text));
+}
+
+function biocoMutateAdminNavMarkup($markup) {
+    $markup = (string) $markup;
+    if (trim($markup) === '') return $markup;
+
+    $config = wire('config');
+    $visualEditorUrl = $config->urls->root . 'visual-editor/';
+
+    $previous = libxml_use_internal_errors(true);
+    $dom = new \DOMDocument('1.0', 'UTF-8');
+    $html = '<!DOCTYPE html><html><body><ul id="bioco-nav-root">' . $markup . '</ul></body></html>';
+    $loaded = $dom->loadHTML('<?xml encoding="utf-8" ?>' . $html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    libxml_clear_errors();
+    libxml_use_internal_errors($previous);
+    if (!$loaded) return $markup;
+
+    $xpath = new \DOMXPath($dom);
+    $root = $xpath->query('//ul[@id="bioco-nav-root"]')->item(0);
+    if (!$root) return $markup;
+
+    $mediaItem = null;
+    $mediaAnchor = null;
+    $hasVisualEditor = false;
+
+    foreach ($xpath->query('./li', $root) as $item) {
+        $anchor = $xpath->query('.//a[1]', $item)->item(0);
+        if (!$anchor) continue;
+
+        $href = strtolower((string) $anchor->getAttribute('href'));
+        $text = trim(preg_replace('/\s+/u', ' ', (string) $anchor->textContent));
+        $textLower = mb_strtolower($text);
+
+        if (strpos($href, '/visual-editor/') !== false) {
+            $hasVisualEditor = true;
+            $anchor->setAttribute('class', trim($anchor->getAttribute('class') . ' bioco-visual-editor-link'));
+            biocoSetDomNodeText($anchor, 'Visual Editor');
+        }
+
+        if (!$mediaItem && (strpos($href, '/media/') !== false || $textLower === 'media' || $textLower === 'medien')) {
+            $mediaItem = $item;
+            $mediaAnchor = $anchor;
+        }
+
+        if (strpos($href, '/content-planning/') !== false || $textLower === 'content planning' || $textLower === 'plan & bugs') {
+            biocoSetDomNodeText($anchor, 'Plan & Bugs');
+        }
+    }
+
+    if (!$hasVisualEditor) {
+        $visualItem = $dom->createElement('li');
+        $visualItem->setAttribute('class', 'page-bioco-visual-editor');
+
+        $visualAnchor = $dom->createElement('a', 'Visual Editor');
+        $visualAnchor->setAttribute('href', $visualEditorUrl);
+        $visualAnchor->setAttribute('target', '_blank');
+        $visualAnchor->setAttribute('rel', 'noopener noreferrer');
+        $visualAnchor->setAttribute('class', 'bioco-visual-editor-link');
+
+        if ($mediaAnchor && $mediaAnchor->hasAttribute('class')) {
+            $visualAnchor->setAttribute('class', trim($mediaAnchor->getAttribute('class') . ' bioco-visual-editor-link'));
+        }
+
+        $visualItem->appendChild($visualAnchor);
+
+        if ($mediaItem && $mediaItem->parentNode === $root) {
+            if ($mediaItem->nextSibling) {
+                $root->insertBefore($visualItem, $mediaItem->nextSibling);
+            } else {
+                $root->appendChild($visualItem);
+            }
+        } else {
+            $root->appendChild($visualItem);
+        }
+    }
+
+    return biocoDomInnerHtml($root);
+}
+
 // Load custom admin JavaScript
 $wire->addHookAfter('Page::render', function($event) {
     if($this->wire('page')->template == 'admin') {
@@ -203,12 +295,36 @@ $wire->addHookAfter('Page::render', function($event) {
         $process = $this->wire('process');
         if (!$user || $user->isGuest()) return;
         if ($process && $process instanceof ProcessLogin) return;
+        $adminJsPath = $this->wire('config')->paths->templates . 'admin.js';
+        $adminJsUrl = $this->wire('config')->urls->templates . 'admin.js';
+        if (is_file($adminJsPath)) {
+            $adminJsUrl .= '?v=' . filemtime($adminJsPath);
+        }
         $event->return = str_replace(
             '</body>',
-            '<script src="' . $this->wire('config')->urls->templates . 'admin.js"></script></body>',
+            '<script src="' . $adminJsUrl . '"></script></body>',
             $event->return
         );
     }
+});
+
+$wire->addHookAfter('AdminThemeFramework::renderPrimaryNavItems', function($event) {
+    $event->return = biocoMutateAdminNavMarkup($event->return);
+});
+
+$wire->addHookAfter('AdminThemeFramework::renderSidebarNavItems', function($event) {
+    $event->return = biocoMutateAdminNavMarkup($event->return);
+});
+
+$wire->addHookBefore('ProcessPageEdit::execute', function($event) {
+    $input = wire('input');
+    $pageId = (int) ($input->get('id') ?: 0);
+    if (!$pageId) return;
+
+    $target = wire('pages')->get($pageId);
+    if (!$target->id || !$target->template || $target->template->name !== 'visual-editor') return;
+
+    wire('session')->redirect($target->url);
 });
 
 // Keep usage index updated on content edits.

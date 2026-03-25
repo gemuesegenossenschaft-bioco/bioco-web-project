@@ -20,6 +20,10 @@ $(document).ready(function() {
         return out;
     }
 
+    function getSiteRoot() {
+        return (ProcessWire && ProcessWire.config && ProcessWire.config.urls && ProcessWire.config.urls.root) || '/';
+    }
+
     function isMediaPage() {
         return /\/processwire\/media\/?$/.test(window.location.pathname) || window.location.pathname.indexOf('/processwire/media/') >= 0;
     }
@@ -69,6 +73,37 @@ $(document).ready(function() {
         // Fallback for MediaLibrary edit screens where template config is not exposed.
         if ($('#wrap_Inputfield_MediaImages, #wrap_Inputfield_MediaFiles').length) return 'MediaLibrary';
         return '';
+    }
+
+    function redirectVisualEditorEditScreen() {
+        if (!isPageEditProcess()) return;
+        if (String(getEditedTemplateName() || '').toLowerCase() !== 'visual-editor') return;
+        var target = getSiteRoot() + 'visual-editor/';
+        if (window.location.pathname === target || /\/visual-editor\/?$/.test(window.location.pathname)) return;
+        window.location.replace(target);
+    }
+
+    function renameContentPlanningUi() {
+        var selectors = [
+            '#pw-masthead a',
+            '#topnav a',
+            '.uk-navbar-nav a',
+            'h1',
+            '.pw-content-head-title',
+            '.pw-headline',
+            '.PageEditHeader h1'
+        ];
+
+        selectors.forEach(function(selector) {
+            $(selector).each(function() {
+                var $node = $(this);
+                var href = String($node.attr('href') || '').toLowerCase();
+                var text = $.trim(String($node.text() || ''));
+                if (href.indexOf('/content-planning/') >= 0 || text === 'Content Planning' || text === 'Plan & Bugs') {
+                    $node.text('Plan & Bugs');
+                }
+            });
+        });
     }
 
     function shouldEnforceLibraryOnly() {
@@ -621,6 +656,8 @@ $(document).ready(function() {
     enforceLibraryOnlyOnPageFields();
     addImageEditorButtons();
     renderUsageBlocksInMediaLibrary();
+    renameContentPlanningUi();
+    redirectVisualEditorEditScreen();
 
     $(document).on('reloaded wiretabclick', '.InputfieldRepeater, .Inputfield', function() {
         setTimeout(function() {
@@ -628,6 +665,8 @@ $(document).ready(function() {
             enforceLibraryOnlyOnPageFields();
             addImageEditorButtons();
             renderUsageBlocksInMediaLibrary();
+            renameContentPlanningUi();
+            redirectVisualEditorEditScreen();
         }, 100);
     });
 
@@ -743,12 +782,13 @@ $(document).ready(function() {
     }
 
     function addVisualEditorLink() {
-        if ($('.bioco-visual-editor-link').length) return;
-        var siteRoot = ProcessWire.config.urls.root || '/';
+        if ($('.bioco-visual-editor-link').length || $("a[href$='/visual-editor/'], a[href*='/visual-editor/?']").length) return;
+        var siteRoot = getSiteRoot();
         var veUrl = siteRoot + 'visual-editor/';
         var mediaSelectors = [
             '#pw-masthead-links a',
             '#pw-masthead .pw-masthead-nav a',
+            '#pw-masthead .pw-primary-nav a',
             '#topnav a',
             '.uk-navbar-right a',
             '.uk-navbar-nav a',
@@ -804,6 +844,7 @@ $(document).ready(function() {
         var navSelectors = [
             '#pw-masthead-links',
             '#pw-masthead .pw-masthead-nav',
+            '#pw-masthead .pw-primary-nav',
             '#topnav',
             '.uk-navbar-right',
             '.uk-navbar-nav',

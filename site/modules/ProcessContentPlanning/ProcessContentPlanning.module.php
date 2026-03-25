@@ -1,7 +1,7 @@
 <?php namespace ProcessWire;
 
 /**
- * Process Content Planning Module v2
+ * Process Plan & Bugs Module v2
  * 
  * Dashboard for planning web content with list/kanban views,
  * GitHub issue creation, page linking, publish control, and docs feed.
@@ -14,14 +14,14 @@ class ProcessContentPlanning extends Process {
 
     public static function getModuleInfo() {
         return [
-            'title' => 'Content Planning',
+            'title' => 'Plan & Bugs',
             'version' => 201,
-            'summary' => 'Plan content with list/kanban views, page linking, GitHub issues',
+            'summary' => 'Plan content and track bugs with list/kanban views, page linking, GitHub issues',
             'permission' => 'page-edit',
             'page' => [
                 'name' => 'content-planning',
                 'parent' => '',  // Empty = top-level menu item
-                'title' => 'Content Planning',
+                'title' => 'Plan & Bugs',
                 'icon' => 'calendar-check-o'
             ]
         ];
@@ -29,9 +29,19 @@ class ProcessContentPlanning extends Process {
 
     public function init() {
         parent::init();
+        $this->ensureAdminPageLabel();
         $this->createDatabaseTable();
         $this->createDraftFieldsTable();
         $this->migrateDatabase();
+    }
+
+    private function ensureAdminPageLabel() {
+        $page = $this->wire('pages')->get('process=ProcessContentPlanning, include=all');
+        if (!$page->id) return;
+        if ($page->title === 'Plan & Bugs') return;
+        $page->of(false);
+        $page->title = 'Plan & Bugs';
+        $page->save('title');
     }
 
     /**
@@ -1396,7 +1406,7 @@ class ProcessContentPlanning extends Process {
         }
         
         $itemUrl = $this->wire('pages')->get('template=admin')->httpUrl . 'content-planning/';
-        $subject = "Content Planning: {$changeType} - {$item['title']}";
+        $subject = "Plan & Bugs: {$changeType} - {$item['title']}";
         
         $body = "
         <html>
@@ -1412,7 +1422,7 @@ class ProcessContentPlanning extends Process {
         }
         
         $body .= "
-            <p><a href='{$itemUrl}'>View Content Planning Dashboard</a></p>
+            <p><a href='{$itemUrl}'>View Plan &amp; Bugs Dashboard</a></p>
         </body>
         </html>";
         
