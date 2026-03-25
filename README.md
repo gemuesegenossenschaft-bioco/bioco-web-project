@@ -9,8 +9,8 @@ Alles auf einem Server (Novatrend cPanel, 193.33.128.160):
 ```
 Apache + AutoSSL
 ├── Next.js 14 (bioco.ch)          ← Frontend, SSR, Formulare
-│   └── Standalone Build auf Port 49152
-│   └── Apache .htaccess Proxy → localhost:49152
+│   └── Standalone Build auf Port 49154
+│   └── Apache .htaccess Proxy → localhost:49154
 ├── ProcessWire 3.x (cms.bioco.ch) ← Headless CMS, JSON API
 │   └── PHP 8.1, MySQL
 ├── Matomo (analytics.bioco.ch)    ← Webanalyse
@@ -58,6 +58,8 @@ NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 ## Deployment
 
+Immer lokal bauen. Server-Builds schlagen auf CloudLinux oft fehl.
+
 Build lokal, Upload via rsync:
 
 ```bash
@@ -67,10 +69,15 @@ scripts/deploy.sh main
 # Oder manuell:
 cd frontend
 npm ci && npm run build
-rsync -avz --delete .next/standalone/ bioco@193.33.128.160:/home/bioco/bioco-frontend/
-rsync -avz --delete .next/static/ bioco@193.33.128.160:/home/bioco/bioco-frontend/.next/static/
-rsync -avz --delete public/ bioco@193.33.128.160:/home/bioco/bioco-frontend/public/
-ssh bioco@193.33.128.160 'pkill -f "node.*server.js.*49152"; sleep 1; /home/bioco/bioco-frontend/start.sh'
+rsync -avzc --delete --exclude='start.sh' .next/standalone/ bioco@193.33.128.160:/home/bioco/bioco-frontend/
+rsync -avzc --delete .next/static/ bioco@193.33.128.160:/home/bioco/bioco-frontend/.next/static/
+rsync -avzc --delete public/ bioco@193.33.128.160:/home/bioco/bioco-frontend/public/
+ssh bioco@193.33.128.160 'cp -r /tmp/sharp-pkg/node_modules/@img/sharp-linux-x64 /home/bioco/bioco-frontend/node_modules/@img/ && cp -r /tmp/sharp-pkg/node_modules/@img/sharp-libvips-linux-x64 /home/bioco/bioco-frontend/node_modules/@img/ && rm -rf /home/bioco/bioco-frontend/node_modules/@img/sharp-darwin-arm64 /home/bioco/bioco-frontend/node_modules/@img/sharp-libvips-darwin-arm64'
+rsync -avzc site/templates/admin.js site/templates/api.php site/templates/api-events.php site/templates/visual-editor.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
+ssh bioco@193.33.128.160 'for p in $(pgrep -x next-server); do kill $p; done; sleep 3; /home/bioco/bioco-frontend/start.sh'
+ssh bioco@193.33.128.160 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:49154/'
+curl --resolve bioco.ch:443:193.33.128.160 -s -o /dev/null -w "%{http_code}\n" https://bioco.ch/
 ```
 
 Der Node.js Prozess startet automatisch via Cron (alle 5 Minuten Healthcheck).
@@ -81,6 +88,7 @@ Der Node.js Prozess startet automatisch via Cron (alle 5 Minuten Healthcheck).
 - **Events bearbeiten:** Admin > Seiten > Events
 - **Inhalte bearbeiten:** Admin > Seiten > (Seitenname)
 - **Medien hochladen:** Admin > Media
+- **Visual Editor:** `https://cms.bioco.ch/visual-editor/` oder Admin-Navigation neben `Media`
 
 Die CMS API liefert Events und Seiteninhalte als JSON an das Frontend.
 
@@ -113,6 +121,9 @@ SSH-Key muss in cPanel > Sicherheit > SSH-Zugang hinterlegt sein.
 - `frontend/next.config.js` : Next.js Konfiguration, Redirects, Env Vars
 - `frontend/lib/cmsClient.ts` : CMS API Client (ProcessWire Anbindung)
 - `frontend/middleware.ts` : Security Headers
+- `frontend/components/visual-editor/InlineVisualEditorRuntime.tsx` : Inline-Feldbearbeitung im iframe
+- `site/templates/visual-editor.php` : Standalone Visual Editor Shell
+- `site/templates/admin.js` : ProcessWire Admin-Erweiterungen inkl. Visual-Editor-Link
 - `site/config.php` : ProcessWire DB-Zugangsdaten (nicht im Git)
 - `public_html/.htaccess` : Apache Proxy-Regeln zu Next.js
 - `.env.example` : Alle Umgebungsvariablen dokumentiert

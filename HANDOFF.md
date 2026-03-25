@@ -1,7 +1,7 @@
 # bioco.ch Project Hand-off Documentation
 
-**Version:** 1.0  
-**Last Updated:** January 2026  
+**Version:** 1.1  
+**Last Updated:** March 25, 2026  
 **Project:** bioco.ch Website for Gemüsegenossenschaft biocò
 
 ---
@@ -45,7 +45,7 @@ The bioco.ch website serves as the digital presence for **Gemüsegenossenschaft 
 - **Frontend:** Next.js 14 (React) with App Router
 - **Database:** MySQL (3 databases: live, staging, matomo)
 - **Hosting:** Novatrend cPanel (Swiss hosting, single server)
-  - Frontend: Next.js standalone via Phusion Passenger
+  - Frontend: Next.js standalone behind Apache proxy on port `49154`
   - Backend: ProcessWire via PHP-FPM
 - **Analytics:** Matomo (cookieless, Swiss DSG compliant)
 - **Email:** Novatrend SMTP server
@@ -131,10 +131,10 @@ Everything in ProcessWire is a **Page**. Pages are organized in a hierarchical t
 
 ### How ProcessWire Works in Headless Mode
 
-In headless mode, ProcessWire doesn't render HTML. Instead:
+In headless mode, ProcessWire doesn't render the public HTML. Instead:
 
 1. Content editors use ProcessWire admin (`/processwire/`) to manage content
-2. Custom API endpoints (`site/api/*.php`) expose content as JSON
+2. `site/templates/api.php` exposes JSON endpoints under `/api/*`
 3. Frontend (Next.js) fetches JSON via HTTP requests
 4. Frontend renders the UI using React components
 
@@ -172,9 +172,10 @@ Access ProcessWire admin at: `https://www.bioco.ch/processwire/`
 | `site/config.php` | Environment configuration (not in Git) |
 | `site/ready.php` | Bootstrap file, initializes custom classes |
 | `site/init.php` | Global hooks (optional) |
-| `site/templates/` | Template files (not used in headless mode, but define structure) |
+| `site/templates/api.php` | Unified API router |
+| `site/templates/visual-editor.php` | Standalone visual editor shell |
+| `site/templates/` | Template files and admin integrations |
 | `site/modules/` | Custom modules |
-| `site/api/` | API endpoints |
 | `wire/` | ProcessWire core (don't modify) |
 
 ---
@@ -186,8 +187,7 @@ Access ProcessWire admin at: `https://www.bioco.ch/processwire/`
 ```mermaid
 graph TB
     subgraph "Novatrend cPanel (193.33.128.160)"
-        Passenger[Phusion Passenger] --> NextJS[Next.js 14 Standalone]
-        Apache[Apache + AutoSSL] --> Passenger
+        Apache[Apache + AutoSSL] --> NextJS[Next.js 14 Standalone :49154]
         Apache --> PHP[PHP-FPM]
         PHP --> ProcessWire[ProcessWire CMS]
         ProcessWire --> MySQL[(MySQL Database)]
@@ -202,7 +202,7 @@ graph TB
     ProcessWire -->|Tracking| Matomo
     ProcessWire -->|Send Emails| SMTP
 
-    GitHub[GitHub] -->|git pull| Passenger
+    GitHub[GitHub] -->|local build + rsync deploy| Apache
 ```
 
 ### Data Flow
@@ -217,7 +217,7 @@ sequenceDiagram
     
     Admin->>DB: Content Editor saves page
     User->>NextJS: Visits website
-    NextJS->>API: GET /api/pages?path=/
+    NextJS->>API: GET /api/content/homepage
     API->>DB: Query page data
     DB-->>API: Return page data
     API-->>NextJS: JSON response
@@ -229,11 +229,6 @@ sequenceDiagram
 ```
 bioco-web-project/
 ├── site/                    # ProcessWire site files
-│   ├── api/                 # API endpoints
-│   │   ├── events.php
-│   │   ├── forms.php
-│   │   ├── pages.php
-│   │   └── ...
 │   ├── classes/            # PHP classes
 │   │   └── EventSetup.php
 │   ├── modules/            # Custom modules
@@ -241,16 +236,17 @@ bioco-web-project/
 │   │   ├── FormProcessor/
 │   │   ├── InstagramSync/
 │   │   └── MatomoTracker/
-│   ├── templates/           # Template files
+│   ├── templates/           # Template files, API router, admin UI, visual editor
 │   ├── config-example.php  # Config template
 │   ├── ready.php           # Bootstrap
 │   └── init.php            # Hooks
 ├── frontend/               # Next.js application
 │   ├── app/                # App Router pages
 │   ├── components/         # React components
+│   ├── hooks/              # Client hooks incl. visual editor sync
 │   └── package.json
 ├── wire/                   # ProcessWire core (don't modify)
-├── docs/                   # Documentation
+├── cms/                    # One-off CMS scripts and migration helpers
 ├── Bioco/                  # Design assets
 └── HANDOFF.md              # This file
 ```
@@ -434,71 +430,44 @@ require_once __DIR__ . '/classes/EventSetup.php';
 
 ## 5. API Endpoints
 
-All API endpoints are located in `site/api/` and return JSON. They're accessed via ProcessWire's URL routing.
+All API endpoints are routed through `site/templates/api.php` and exposed under `/api/*`.
 
-### `/api/events`
+### Public content endpoints
 
-**Method:** GET  
-**Purpose:** Returns event feed (upcoming & past events)
+- `GET /api/content/homepage`
+- `GET /api/content/sections/{slug}`
+- `GET /api/content/page?path=/foo`
+- `GET /api/content/pages`
+- `GET /api/content/navigation`
+- `GET /api/content/events`
+- `GET /api/content/aktuelles`
+- `GET /api/content/instagram`
+- `GET /api/content/settings`
+- `GET /api/content/page-path?id=123`
 
-**Response:**
+### Admin-only endpoints
 
-```json
-{
-  "success": true,
-  "generatedAt": "2026-01-27T10:00:00+01:00",
-  "upcoming": [
-    {
-      "id": 1234,
-      "title": "Schnuppertag",
-      "description": "Kurzbeschreibung",
-      "fullDescription": "<p>Vollständige Beschreibung</p>",
-      "location": "Geisshof",
-      "startDate": "2026-04-28T12:00:00Z",
-      "endDate": "2026-04-28T15:00:00Z",
-      "dateLabel": "28.04.2026",
-      "timeLabel": "14:00 - 17:00 Uhr",
-      "signupEnabled": true,
-      "signupNotes": "Treffpunkt 13:45",
-      "status": "upcoming",
-      "media": [],
-      "url": "https://www.bioco.ch/events/..."
-    }
-  ],
-  "past": [...]
-}
-```
+- `POST /api/content-save`
+- `POST /api/sections-reorder`
+- `POST /api/sections-add`
+- `POST /api/sections-delete`
+- `POST /api/content/event-to-recap`
+- `POST /api/media-import`
+- `POST /api/media-import-batch`
+- `GET /api/media-files`
+- `POST /api/media-usage`
 
-### `/api/forms`
+These require a logged-in ProcessWire admin/editor session via `requireAdminSession()`.
 
-**Method:** POST  
-**Purpose:** Handles form submissions
+`/api/content-save` is `sectionPwId`-first. The visual editor sends normalized field changes and the shell maps them back to ProcessWire field names.
 
-**Supported Types:**
+### Form endpoints
 
 - `/api/forms/contact`
 - `/api/forms/subscribe`
 - `/api/forms/visit`
 - `/api/forms/waiting-list`
-- `/api/forms/membership`
-
-**Request Body:**
-
-```json
-{
-  "name": "Max Mustermann",
-  "email": "max@example.com",
-  "message": "Hello..."
-}
-```
-
-**Response:**
-
-```json
-{
-  "success": true
-}
-```
+- `/api/forms/event-signup`
 
 ### `/api/doi`
 
@@ -540,7 +509,7 @@ All API endpoints are located in `site/api/` and return JSON. They're accessed v
 }
 ```
 
-### `/api/navigation`
+### `/api/content/navigation`
 
 **Method:** GET  
 **Purpose:** Returns site navigation structure
@@ -560,7 +529,7 @@ All API endpoints are located in `site/api/` and return JSON. They're accessed v
 }
 ```
 
-### `/api/pages`
+### `/api/content/page`
 
 **Method:** GET  
 **Purpose:** Returns page content
@@ -644,7 +613,7 @@ const data = await response.json();
 
 ### Environment Variables
 
-**Required (cPanel Node.js App UI or .env.production):**
+**Required (`start.sh` on server, `.env.local` locally):**
 
 ```bash
 PROCESSWIRE_BASE_URL=http://localhost/cms
@@ -660,13 +629,21 @@ See `.env.example` for all variables including SMTP secrets.
 
 ### Build & Deploy
 
-Deploy is automated via `.cpanel.yml` on `git pull`:
-1. `npm ci --omit=dev`
-2. `npm run build` (produces standalone output)
-3. Copy standalone to app dir
-4. Touch `tmp/restart.txt` to restart Passenger
+Do not build on server. Build locally, rsync standalone output, restore Linux `sharp`, rsync CMS files, then restart `next-server`.
 
-Manual: `ssh bioco@193.33.128.160` then `bash scripts/deploy.sh develop`
+Canonical deploy flow:
+
+1. `cd frontend && npm ci && npm run build`
+2. rsync `.next/standalone/` with `--exclude='start.sh'`
+3. rsync `.next/static/`
+4. rsync `public/`
+5. restore `/tmp/sharp-pkg/node_modules/@img/sharp-linux-x64` and `sharp-libvips-linux-x64`
+6. rsync `site/templates/admin.js`, `api.php`, `api-events.php`, `visual-editor.php`
+7. rsync `site/ready.php`
+8. restart with `pgrep -x next-server`, never `pgrep -f`
+9. verify local `127.0.0.1:49154`, external `https://bioco.ch/`, and `/api/revalidate`
+
+Shortcut: `scripts/deploy.sh main`
 
 ---
 
@@ -1054,31 +1031,23 @@ class MyModule extends WireData implements Module {
 
 **Creating a New Endpoint:**
 
-1. Create file in `site/api/myendpoint.php`:
+1. Add a new `case` inside `site/templates/api.php`:
 
 ```php
 <?php namespace ProcessWire;
-
-header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-
-$pages = wire('pages');
-
-$response = [
-    'success' => true,
-    'data' => []
-];
-
-// Your logic here
-
-echo json_encode($response);
+switch ($endpoint) {
+    case 'my-endpoint':
+        echo json_encode(['success' => true]);
+        break;
+}
 ```
 
-2. Access via: `https://www.bioco.ch/api/myendpoint`
+2. For content routes, usually add logic under `handleContentRequest()`
+3. Access via: `https://cms.bioco.ch/api/my-endpoint`
 
 **URL Routing:**
 
-ProcessWire routes `/api/*` to `site/api/*.php` files automatically via `.htaccess` or URL segments.
+ProcessWire routes `/api/*` through the `api` template file `site/templates/api.php` using URL segments.
 
 ### Frontend Component Structure
 
@@ -1176,12 +1145,9 @@ $events = $pages->find('template=event, event_status=upcoming');
 
 ## 11. Deployment Process
 
-### Git-Based Deployment
+### Rsync Deployment
 
-Everything deploys via Git to cPanel:
-
-- **Backend (ProcessWire):** cPanel Git Version Control
-- **Frontend (Next.js):** cPanel Git pull triggers `.cpanel.yml` (build + Passenger restart)
+Production deploy is local-build plus rsync.
 
 ### Staging Workflow
 
@@ -1201,8 +1167,8 @@ Everything deploys via Git to cPanel:
    ```
 
 3. **Deploy to staging:**
-   - SSH: `cd /home/bioco/bioco-web-project && git pull origin develop`
-   - `.cpanel.yml` auto-runs: npm ci, build, copy standalone, restart Passenger
+   - build locally
+   - run `scripts/deploy.sh develop` or the manual rsync flow
 
 4. **Test on staging.bioco.ch**
 
@@ -1216,8 +1182,8 @@ Everything deploys via Git to cPanel:
    ```
 
 2. **Deploy to production:**
-   - SSH: `cd /home/bioco/bioco-web-project && git pull origin main`
-   - Or: `bash scripts/deploy.sh main`
+   - run `scripts/deploy.sh main`
+   - or follow the manual rsync flow
 
 3. **Verify on www.bioco.ch**
 
@@ -1284,11 +1250,12 @@ UPDATE pages SET name = REPLACE(name, 'staging.bioco.ch', 'www.bioco.ch');
 
 ### Rollback Procedures
 
-**Frontend (Vercel):**
+**Frontend (Novatrend standalone):**
 
-1. Vercel Dashboard → Deployments
-2. Find previous deployment
-3. Click "⋯" → "Promote to Production"
+1. Check out previous known-good Git commit locally
+2. Rebuild locally
+3. Re-run the rsync deploy flow
+4. Verify `127.0.0.1:49154`, external site, and `/api/revalidate`
 
 **Backend (ProcessWire):**
 
@@ -1435,7 +1402,7 @@ This project has extensive documentation in the `docs/` directory. This hand-off
 2. Template: `event`
 3. Fill in all required fields (see [Event Management](#event-management))
 4. Save
-5. Event appears in `/api/events` automatically
+5. Event appears in `/api/content/events` automatically
 6. Frontend displays event on homepage and `/aktuelles`
 
 ### Debugging Form Submissions
@@ -1481,13 +1448,13 @@ This project has extensive documentation in the `docs/` directory. This hand-off
 
 ```bash
 # Events
-curl https://www.bioco.ch/api/events
+curl https://cms.bioco.ch/api/content/events
 
 # Pages
-curl https://www.bioco.ch/api/pages?path=/
+curl https://cms.bioco.ch/api/content/page?path=/
 
 # Navigation
-curl https://www.bioco.ch/api/navigation
+curl https://cms.bioco.ch/api/content/navigation
 ```
 
 **Check Response:**
@@ -1512,15 +1479,15 @@ curl https://www.bioco.ch/api/navigation
 **Frontend Logs:**
 
 - Browser console (F12) for client-side
-- Vercel Dashboard → Logs for server-side
+- server log: `/home/bioco/logs/nextjs.log`
 
 ### Common Issues
 
 **Issue: API returns 404**
 
-- Check `.htaccess` URL rewriting rules
-- Verify API file exists in `site/api/`
-- Check ProcessWire URL segments configuration
+- Check `/api/` page uses template `api`
+- Verify route exists in `site/templates/api.php`
+- Check template URL segments configuration
 
 **Issue: Forms not submitting**
 
@@ -1651,14 +1618,15 @@ curl https://www.bioco.ch/api/navigation
 
 - **Production Site:** https://www.bioco.ch
 - **Staging Site:** https://staging.bioco.ch
-- **ProcessWire Admin:** https://www.bioco.ch/processwire/
-- **Vercel Dashboard:** https://vercel.com/dashboard
+- **ProcessWire Admin:** https://cms.bioco.ch/processwire/
+- **Visual Editor:** https://cms.bioco.ch/visual-editor/
 - **Matomo Analytics:** https://matomo.bioco.ch/
 
 ### Key File Locations
 
 - **ProcessWire Config:** `site/config.php` (not in Git)
-- **API Endpoints:** `site/api/*.php`
+- **API Router:** `site/templates/api.php`
+- **Visual Editor Shell:** `site/templates/visual-editor.php`
 - **Custom Modules:** `site/modules/*/`
 - **Bootstrap:** `site/ready.php`
 - **Frontend:** `frontend/`

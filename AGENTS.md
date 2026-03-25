@@ -57,7 +57,7 @@ Manages ProcessWire admin UI enhancements in `site/templates/admin.js`.
 - Filerobot image editor on thumbnails
 - Preview button (draft mode via Next.js)
 - Rückblick button (converts upcoming event to past recap)
-- Visual Editor navbar link (green button, opens `/visual-editor/`)
+- Visual Editor navbar link (native masthead item, inserted after `Media` when possible, opens `/visual-editor/` in new tab)
 
 **Patterns:**
 - `getEditedTemplateName()` to detect current template
@@ -73,21 +73,28 @@ Manages the iframe + postMessage WYSIWYG section editor.
 - PW page `/visual-editor/` uses template `visual-editor.php` (standalone HTML, bypasses admin chrome)
 - Embeds Next.js site in iframe with `?_visual=1` query param
 - Bidirectional postMessage with `bioco:visual-editor:` prefix
-- Sidebar: section list, drag reorder, add/delete, field editing
+- Parent shell owns page selection, save/discard, section CRUD, busy state
+- Iframe owns inline field selection/editing for homepage + CMS repeater pages
+- Full-screen busy overlay blocks edits during load/save/refetch/import
 
 **Files:**
 - `site/templates/visual-editor.php`: PW admin page (standalone HTML output)
+- `frontend/components/visual-editor/InlineVisualEditorRuntime.tsx`: iframe inline editor runtime
+- `frontend/components/visual-editor/fieldAttrs.ts`: field marker helpers
 - `frontend/hooks/useVisualEditor.ts`: postMessage protocol, section click/highlight/update
 - `frontend/components/sections/VisualEditorWrapper.tsx`: detects `?_visual=1`, adds `data-section-id` attrs
-- `frontend/components/sections/SectionRenderer.tsx`: `visualEditor` prop adds data attributes
+- `frontend/components/sections/SectionRenderer.tsx`: CMS page field instrumentation
+- `frontend/components/HomeClient.tsx`: homepage field instrumentation
 
 **Rules:**
 - `visual-editor.php` MUST call `while (ob_get_level()) ob_end_clean()` at top and `exit` at bottom (PW admin chrome bypass)
 - PW `has_field` is NOT a valid selector. Iterate `wire('templates')` + check `$t->hasField()` instead
 - Framing: CSP `frame-ancestors` in `next.config.js` `headers()`. Never use middleware for framing headers (ISR cache overwrites them in Next.js 14)
 - `VisualEditorWrapper` uses `useSearchParams()`, requires `<Suspense>` boundary in parent page
+- `content-save` persists by `sectionPwId`; keep legacy `sectionId` only for compatibility
 - Section CRUD endpoints: `sections-reorder`, `sections-add`, `sections-delete` in `api.php`
 - Repeater sort: always use `->sort('sort')` when iterating `content_sections`
+- Keep one protocol. Parent -> iframe: `section-highlight`, `section-scroll`, `section-update`, `sections-replace`, `save-state`. Iframe -> parent: `ready`, `section-click`, `field-select`, `field-change`, `field-commit`, `media-request`
 
 ## CMS Migration Agent
 
@@ -122,4 +129,4 @@ Next.js 14 app router frontend.
   - Client-side events fetch uses `cache: 'no-store'`.
   - `/api/revalidate` supports `path|paths|tag|tags|layout`, secret required.
 - If touching cache/revalidate behavior, update tests: `frontend/tests/revalidate-route.test.ts`, `frontend/tests/middleware.test.ts`.
-- Visual editor tests: `frontend/tests/visual-editor.test.tsx` (postMessage protocol, section attrs, highlight, security).
+- Visual editor tests: `frontend/tests/visual-editor.test.tsx` (postMessage, inline edit selection, busy blocking, field attrs, highlight, security).

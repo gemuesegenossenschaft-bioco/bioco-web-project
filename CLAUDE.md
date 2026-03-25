@@ -146,6 +146,7 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 | `frontend/middleware.ts` | Security headers (no framing headers, see next.config.js) |
 | `frontend/hooks/useVisualEditor.ts` | Visual editor: postMessage protocol, section click/highlight/update |
 | `frontend/components/sections/VisualEditorWrapper.tsx` | Detects `?_visual=1`, wraps SectionRenderer with editor mode |
+| `frontend/components/visual-editor/InlineVisualEditorRuntime.tsx` | Inline field editing runtime inside iframe |
 
 ### CMS (ProcessWire)
 | File | Purpose |
@@ -153,7 +154,7 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 | `site/templates/api.php` | Unified API router, all endpoints |
 | `site/templates/api-events.php` | Events API (upcoming/past split, cardImage) |
 | `site/templates/admin.js` | Admin UI: media library, image editor, preview, recap button, visual editor link |
-| `site/templates/visual-editor.php` | Standalone visual editor: iframe + sidebar, postMessage CRUD |
+| `site/templates/visual-editor.php` | Standalone visual editor shell: page picker, iframe, save/discard, CRUD, loading blocker |
 | `site/templates/admin.php` | Loads admin.js in PW admin |
 | `site/config.php` | PW config (gitignored, secrets via getenv) |
 
@@ -170,7 +171,7 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 | `/api/health` | Health check |
 | `/api/content/hero` | Homepage hero data |
 | `/api/content/homepage` | Homepage sections |
-| `/api/content/sections?path=` | Page sections by path |
+| `/api/content/sections/{slug}` | Page sections by page name / slug |
 | `/api/content/page?path=` | Single page content |
 | `/api/content/pages` | All pages list |
 | `/api/content/navigation` | Site navigation tree |
@@ -185,7 +186,7 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 | Endpoint | Description |
 |----------|-------------|
 | `/api/content/event-to-recap` | Convert upcoming event to past recap |
-| `/api/content-save` | Save section content |
+| `/api/content-save` | Save section fields by `sectionPwId` |
 | `/api/sections-reorder` | Reorder content_sections repeater items |
 | `/api/sections-add` | Add new content_sections repeater item |
 | `/api/sections-delete` | Delete content_sections repeater item |
@@ -209,19 +210,22 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 - **Image editor**: Filerobot-based editor on image thumbnails
 - **Preview button**: opens Next.js draft preview for the current page
 - **Rückblick button**: on upcoming events, converts to past status for recap editing
-- **Visual Editor link**: green button in admin navbar, opens `/visual-editor/` in new tab
+- **Visual Editor link**: native-looking masthead item, inserted after `Media` when possible, opens `/visual-editor/` in new tab
 
 ## Visual Editor
 
-iframe + postMessage WYSIWYG editor for content sections. Pattern from Storyblok/Payload CMS.
+Dedicated `/visual-editor/` screen. Parent shell in ProcessWire, direct inline editing inside the iframe.
 
-**Architecture:** PW admin page (`/visual-editor/`, template `visual-editor.php`) embeds Next.js site in iframe with `?_visual=1`. Bidirectional postMessage with `bioco:visual-editor:` prefix.
+**Architecture:** PW admin page (`/visual-editor/`, template `visual-editor.php`) embeds Next.js site in iframe with `?_visual=1`. Parent shell owns page selection, save/discard, section CRUD, media actions, and busy/loading state. Iframe runtime owns inline field selection/editing for homepage and CMS repeater pages.
 
 **Key constraints:**
 - `visual-editor.php` must call `while (ob_get_level()) ob_end_clean()` at top and `exit` at bottom to bypass PW admin chrome
 - PW `has_field` is NOT a valid selector. Use `wire('templates')` iteration + `$t->hasField('content_sections')` to find pages
 - Framing protection: `next.config.js` `headers()` sets CSP `frame-ancestors 'self' https://cms.bioco.ch`. Do NOT use middleware for framing headers (don't survive ISR cache hits in Next.js 14)
 - `VisualEditorWrapper` requires `<Suspense>` boundary (uses `useSearchParams()`)
+- `content-save` is `sectionPwId`-first. Keep `sectionId` only as temporary compatibility input.
+- Homepage and CMS pages must both emit stable `data-ve-section-id` / `data-ve-field` markers
+- `save-state` carries busy state; while busy, parent + iframe must block edits
 - After deploy, kill ALL `next-server` PIDs. Zombie processes from prior deploys serve stale middleware/headers
 
 ## Running PW Migrations
