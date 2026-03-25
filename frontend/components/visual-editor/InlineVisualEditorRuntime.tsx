@@ -65,6 +65,11 @@ function getRichTextValue(section: ContentSection | null): string {
 function getFieldLabel(selectedField: SelectedField | null): string {
   if (!selectedField) return ''
   if (selectedField.kind === 'button') return 'Button'
+  if (selectedField.sectionId === '__hero__') {
+    if (selectedField.field === 'title') return 'Hero Titel'
+    if (selectedField.field === 'eyebrow') return 'Hero Untertitel'
+    if (selectedField.field === 'media') return 'Hero Bild'
+  }
   switch (selectedField.field) {
     case 'title':
       return 'Titel'
@@ -102,6 +107,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   const selectedSection = useMemo(() => {
     return sections.find((section) => section.id === selectedSectionId) || null
   }, [sections, selectedSectionId])
+  const isHeroSection = selectedSectionId === '__hero__' || selectedSection?.layout === 'hero'
 
   const selectedComponentMeta = useMemo(() => {
     return resolveComponentRegistryEntry(selectedSection?.component || '')
@@ -202,7 +208,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
         case 'save-result':
           setSaveState((current) => ({
             ...current,
-            message: data.success ? 'Gespeichert' : String(data.error || 'Speichern fehlgeschlagen'),
+            message: data.success ? 'Publiziert' : String(data.error || 'Publizieren fehlgeschlagen'),
           }))
           break
       }
@@ -396,7 +402,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
 
   if (!enabled) return null
 
-  const toolbarVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedSectionId && !selectedField && anchorRect
+  const toolbarVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedSectionId && !selectedField && anchorRect && !isHeroSection
   const shortTextVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField && (selectedField.kind === 'text' || selectedField.kind === 'button') && selectedField.field !== 'text' && anchorRect
   const richTextVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'text' && anchorRect
   const componentVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'component' && anchorRect
@@ -673,7 +679,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
                 <option value="orange">Orange</option>
               </select>
             </div>
-            <p>{saveState.saving ? 'Speichert…' : saveState.dirty ? 'Ungespeicherte Änderungen' : 'Kein offener Abschnitt geändert'}</p>
+            <p>{saveState.saving ? 'Publiziert…' : saveState.dirty ? 'Lokaler Entwurf noch nicht publiziert' : 'Kein offener Entwurf'}</p>
           </div>
         </div>
       ) : null}

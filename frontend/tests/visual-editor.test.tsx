@@ -529,6 +529,10 @@ describe('HomeClient visual editor integration', () => {
     expect(container.querySelector('[data-section-id="willkommen"]')).toBeTruthy()
     expect(container.querySelector('[data-section-id="gemeinsam"]')).toBeTruthy()
     expect(container.querySelector('[data-section-id="kennenlernen"]')).toBeTruthy()
+    expect(container.querySelector('[data-section-id="__hero__"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-section-id="__hero__"][data-ve-field="title"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-section-id="__hero__"][data-ve-field="eyebrow"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-section-id="__hero__"][data-ve-field="media"][data-ve-target-field="hero_image"]')).toBeTruthy()
   })
 
   it('updates homepage content on section-update messages', async () => {
@@ -555,5 +559,31 @@ describe('HomeClient visual editor integration', () => {
     })
 
     expect(screen.getByRole('heading', { name: 'Aktualisiert' })).toBeInTheDocument()
+  })
+
+  it('updates homepage hero content on section-update messages', async () => {
+    mockSearch = '_visual=1'
+    const { HomeClient } = await import('@/components/HomeClient')
+
+    render(
+      <HomeClient
+        hero={{ headline: 'Hero', subtitle: 'Sub', image: null, imageAlt: '' }}
+        sections={homepageSections}
+        aktuellesItems={[]}
+      />
+    )
+
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        data: {
+          type: 'bioco:visual-editor:section-update',
+          sectionId: '__hero__',
+          field: 'title',
+          value: 'Neuer Hero Titel',
+        },
+      }))
+    })
+
+    expect(screen.getByRole('heading', { name: /Neuer Hero Titel/i })).toBeInTheDocument()
   })
 })

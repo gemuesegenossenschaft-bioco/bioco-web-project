@@ -51,7 +51,7 @@ if ($apiKey) {
     // Allow unauthenticated access to health and content (read-only) endpoints
     // media-* endpoints use ProcessWire session auth inside handlers
     $endpoint = $input->urlSegment1;
-    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'sections-reorder', 'sections-add', 'sections-delete']) && $requestKey !== $apiKey) {
+    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete']) && $requestKey !== $apiKey) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid API key', 'hint' => 'Set X-API-Key header']);
         exit;
@@ -464,6 +464,134 @@ function buildSectionData($section, $sortIndex = null) {
     return $sectionData;
 }
 
+function buildHomepageHeroData(Page $homepage) {
+    return [
+        'headline' => decodeText($homepage->get('hero_headline') ?: $homepage->title),
+        'subtitle' => decodeText($homepage->get('hero_subtitle') ?: ''),
+        'image' => getImageUrl($homepage, 'hero_image'),
+        'imageAlt' => decodeText($homepage->get('image_alt') ?: ''),
+    ];
+}
+
+function buildVisualEditorSections(Page $page) {
+    $sections = [];
+
+    if ($page->hasField('content_sections') && $page->content_sections) {
+        $sortedSections = $page->content_sections->sort('sort');
+        $idx = 0;
+        foreach ($sortedSections as $section) {
+            $sections[] = buildSectionData($section, $idx++);
+        }
+    }
+
+    if (empty($sections) && ($page->hasField('section_title') || $page->hasField('body'))) {
+        $pageSection = [
+            'id' => 'main',
+            'title' => decodeText($page->get('section_title') ?: $page->title),
+            'text' => $page->get('section_text') ?: $page->get('body') ?: '',
+            'layout' => 'rich_text',
+            'theme' => 'default',
+        ];
+
+        if ($page->hasField('section_image') && $page->section_image) {
+            $pageSection['image'] = getImageUrl($page, 'section_image');
+            $pageSection['imageAlt'] = decodeText($page->get('image_alt') ?: '');
+            $pageSection['imageData'] = getImageDataWithAlt($page, 'section_image', $pageSection['title']);
+        }
+
+        $buttons = buildSectionButtons($page);
+        if (!empty($buttons)) {
+            $pageSection['buttons'] = $buttons;
+        }
+
+        $sections[] = $pageSection;
+    }
+
+    return $sections;
+}
+
+function buildVisualEditorFingerprint($hero, array $sections) {
+    return hash('sha256', json_encode([
+        'hero' => $hero ?: null,
+        'sections' => array_values($sections),
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+}
+
+function buildVisualEditorCanonicalState(Page $page, $path = '') {
+    $isHomepage = $path === '/' || trim((string)$page->path, '/') === 'content/homepage' || trim((string)$page->path, '/') === '';
+    $hero = $isHomepage ? buildHomepageHeroData($page) : null;
+    $sections = buildVisualEditorSections($page);
+
+    return [
+        'hero' => $hero,
+        'sections' => $sections,
+        'fingerprint' => buildVisualEditorFingerprint($hero, $sections),
+        'isHomepage' => $isHomepage,
+    ];
+}
+
+function sanitizeDraftOption($value, $default = '') {
+    $raw = trim((string)$value);
+    $clean = preg_replace('/[^a-z0-9_-]+/i', '', $raw);
+    return $clean !== '' ? $clean : $default;
+}
+
+function createPublishedSectionId($rawId = '') {
+    $clean = sanitizeDraftOption($rawId, '');
+    if ($clean !== '' && strpos($clean, 'draft') !== 0) {
+        return $clean;
+    }
+    return 'section-' . substr(md5(uniqid('', true)), 0, 8);
+}
+
+function applyDraftSectionToRepeater(Page $item, array $payload) {
+    $sanitizer = wire('sanitizer');
+    $buttons = is_array($payload['buttons'] ?? null) ? array_values($payload['buttons']) : [];
+    $button1 = $buttons[0] ?? [];
+    $button2 = $buttons[1] ?? [];
+
+    $item->of(false);
+    if ($item->hasField('section_id')) {
+        $existingId = (string)$item->get('section_id');
+        $item->set('section_id', createPublishedSectionId($payload['id'] ?? $existingId ?: ''));
+    }
+    if ($item->hasField('section_title')) $item->set('section_title', $sanitizer->purify($payload['title'] ?? ''));
+    if ($item->hasField('section_text')) $item->set('section_text', $sanitizer->purify($payload['text'] ?? ''));
+    if ($item->hasField('section_eyebrow')) $item->set('section_eyebrow', $sanitizer->purify($payload['eyebrow'] ?? ''));
+    if ($item->hasField('section_layout')) $item->set('section_layout', sanitizeDraftOption($payload['layout'] ?? 'rich_text', 'rich_text'));
+    if ($item->hasField('section_theme')) $item->set('section_theme', sanitizeDraftOption($payload['theme'] ?? 'default', 'default'));
+    if ($item->hasField('section_bg_color')) $item->set('section_bg_color', sanitizeDraftOption($payload['bgColor'] ?? 'none', 'none'));
+    if ($item->hasField('section_image_overlay')) $item->set('section_image_overlay', sanitizeDraftOption($payload['imageOverlay'] ?? 'none', 'none'));
+    if ($item->hasField('section_component')) $item->set('section_component', $sanitizer->purify($payload['component'] ?? ''));
+    if ($item->hasField('image_alt')) $item->set('image_alt', $sanitizer->purify($payload['imageAlt'] ?? ''));
+    if ($item->hasField('section_image_brightness')) $item->set('section_image_brightness', $payload['imageBrightness'] ?? 1);
+    if ($item->hasField('section_image_contrast')) $item->set('section_image_contrast', $payload['imageContrast'] ?? 1);
+    if ($item->hasField('section_image_saturate')) $item->set('section_image_saturate', $payload['imageSaturate'] ?? 1);
+    if ($item->hasField('button_text')) $item->set('button_text', $sanitizer->purify($button1['text'] ?? ''));
+    if ($item->hasField('button_href')) $item->set('button_href', $sanitizer->purify($button1['href'] ?? ''));
+    if ($item->hasField('button_variant')) $item->set('button_variant', sanitizeDraftOption($button1['variant'] ?? 'primary', 'primary'));
+    if ($item->hasField('button2_text')) $item->set('button2_text', $sanitizer->purify($button2['text'] ?? ''));
+    if ($item->hasField('button2_href')) $item->set('button2_href', $sanitizer->purify($button2['href'] ?? ''));
+    if ($item->hasField('button2_variant')) $item->set('button2_variant', sanitizeDraftOption($button2['variant'] ?? 'secondary', 'secondary'));
+}
+
+function importDraftMediaReference(Page $targetPage, array $draftMedia, $defaultTargetField) {
+    if (empty($draftMedia['assetId']) || empty($draftMedia['fileField']) || empty($draftMedia['fileName'])) {
+        return;
+    }
+    $httpCode = 200;
+    $result = runMediaImport([
+        'targetPageId' => (int)$targetPage->id,
+        'targetField' => $draftMedia['targetField'] ?? $defaultTargetField,
+        'assetId' => (int)$draftMedia['assetId'],
+        'fileField' => (string)$draftMedia['fileField'],
+        'fileName' => (string)$draftMedia['fileName'],
+    ], $httpCode);
+    if (empty($result['success'])) {
+        throw new \RuntimeException($result['error'] ?? 'Draft media import failed');
+    }
+}
+
 /**
  * Format page data with automatic field handling
  */
@@ -672,35 +800,170 @@ switch ($endpoint) {
         if (!requireAdminSession()) break;
         $data = json_decode(file_get_contents('php://input'), true);
         $sectionId = (int)($data['sectionPwId'] ?? ($data['sectionId'] ?? 0));
+        $pageId = (int)($data['pageId'] ?? 0);
         $fields = $data['fields'] ?? [];
-        if (!$sectionId || !$fields) {
+        if ((!$sectionId && !$pageId) || !$fields) {
             http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Missing sectionPwId or fields']);
+            echo json_encode(['success' => false, 'error' => 'Missing sectionPwId|pageId or fields']);
             break;
         }
-        $section = wire('pages')->get($sectionId);
-        if (!$section->id || strpos($section->template->name, 'repeater_') !== 0) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'error' => 'Invalid section']);
-            break;
-        }
-        $allowedFields = [
-            'section_title', 'section_text', 'section_eyebrow',
-            'section_layout', 'section_theme', 'section_bg_color',
-            'section_component', 'section_image_overlay',
-            'image_alt',
-            'section_image_brightness', 'section_image_contrast', 'section_image_saturate',
-            'button_text', 'button_href', 'button_variant',
-            'button2_text', 'button2_href', 'button2_variant',
-        ];
         $sanitizer = wire('sanitizer');
+        if ($sectionId) {
+            $section = wire('pages')->get($sectionId);
+            if (!$section->id || strpos($section->template->name, 'repeater_') !== 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid section']);
+                break;
+            }
+            $allowedFields = [
+                'section_title', 'section_text', 'section_eyebrow',
+                'section_layout', 'section_theme', 'section_bg_color',
+                'section_component', 'section_image_overlay',
+                'image_alt',
+                'section_image_brightness', 'section_image_contrast', 'section_image_saturate',
+                'button_text', 'button_href', 'button_variant',
+                'button2_text', 'button2_href', 'button2_variant',
+            ];
+            $section->of(false);
+            foreach ($fields as $key => $value) {
+                if (in_array($key, $allowedFields) && $section->hasField($key)) {
+                    $section->set($key, $sanitizer->purify($value));
+                }
+            }
+            $section->save();
+            echo json_encode(['success' => true, 'saved' => true, 'sectionId' => $sectionId]);
+            break;
+        }
+
+        $page = wire('pages')->get($pageId);
+        if (!$page->id) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'Invalid page']);
+            break;
+        }
+        $allowedPageFields = ['hero_headline', 'hero_subtitle', 'image_alt'];
+        $page->of(false);
         foreach ($fields as $key => $value) {
-            if (in_array($key, $allowedFields) && $section->hasField($key)) {
-                $section->set($key, $sanitizer->purify($value));
+            if (in_array($key, $allowedPageFields) && $page->hasField($key)) {
+                $page->set($key, $sanitizer->purify($value));
             }
         }
-        $section->save();
-        echo json_encode(['success' => true, 'saved' => true, 'sectionId' => $sectionId]);
+        $page->save();
+        echo json_encode(['success' => true, 'saved' => true, 'pageId' => $pageId]);
+        break;
+
+    case 'content-publish':
+        if (!requireAdminSession()) break;
+        try {
+            $data = json_decode(file_get_contents('php://input'), true) ?: [];
+            $pageId = (int)($data['pageId'] ?? 0);
+            $path = (string)($data['path'] ?? '');
+            $baseFingerprint = (string)($data['baseFingerprint'] ?? '');
+            $sectionsPayload = is_array($data['sections'] ?? null) ? array_values($data['sections']) : [];
+            if (!$pageId || !$path || !$baseFingerprint || !count($sectionsPayload)) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Missing pageId, path, baseFingerprint or sections']);
+                break;
+            }
+
+            $page = wire('pages')->get($pageId);
+            if (!$page->id) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Invalid page']);
+                break;
+            }
+            if (!$page->hasField('content_sections')) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Page does not support visual editor publishing']);
+                break;
+            }
+
+            $canonical = buildVisualEditorCanonicalState($page, $path);
+            if ($baseFingerprint !== ($canonical['fingerprint'] ?? '')) {
+                http_response_code(409);
+                echo json_encode([
+                    'success' => false,
+                    'error' => 'Die Seite wurde zwischenzeitlich geändert. Entwurf neu laden oder verwerfen.',
+                    'fingerprint' => $canonical['fingerprint'] ?? '',
+                    'hero' => $canonical['hero'],
+                    'sections' => $canonical['sections'],
+                ]);
+                break;
+            }
+
+            $page->of(false);
+            $heroPayload = null;
+            $normalSections = [];
+            foreach ($sectionsPayload as $payloadSection) {
+                if (!is_array($payloadSection)) continue;
+                $isHero = (($payloadSection['id'] ?? '') === '__hero__') || (($payloadSection['layout'] ?? '') === 'hero');
+                if ($isHero) {
+                    $heroPayload = $payloadSection;
+                    continue;
+                }
+                $normalSections[] = $payloadSection;
+            }
+
+            if ($canonical['isHomepage'] && $heroPayload) {
+                $sanitizer = wire('sanitizer');
+                if ($page->hasField('hero_headline')) $page->set('hero_headline', $sanitizer->purify($heroPayload['title'] ?? ''));
+                if ($page->hasField('hero_subtitle')) $page->set('hero_subtitle', $sanitizer->purify($heroPayload['eyebrow'] ?? ''));
+                if ($page->hasField('image_alt')) $page->set('image_alt', $sanitizer->purify($heroPayload['imageAlt'] ?? ''));
+                $page->save();
+                if (is_array($heroPayload['draftMedia'] ?? null)) {
+                    importDraftMediaReference($page, $heroPayload['draftMedia'], 'hero_image');
+                }
+            }
+
+            $existingById = [];
+            foreach ($page->content_sections as $item) {
+                $existingById[(int)$item->id] = $item;
+            }
+
+            $keptIds = [];
+            $orderedItems = [];
+            foreach ($normalSections as $index => $payloadSection) {
+                $payloadPwId = (int)($payloadSection['pwId'] ?? 0);
+                if ($payloadPwId && isset($existingById[$payloadPwId])) {
+                    $item = $existingById[$payloadPwId];
+                } else {
+                    $item = $page->content_sections->getNew();
+                }
+                $item->of(false);
+                applyDraftSectionToRepeater($item, $payloadSection);
+                $item->sort = $index;
+                $item->save();
+                $keptIds[] = (int)$item->id;
+                $orderedItems[] = $item;
+
+                if (is_array($payloadSection['draftMedia'] ?? null)) {
+                    importDraftMediaReference($item, $payloadSection['draftMedia'], 'section_image');
+                }
+            }
+
+            foreach ($page->content_sections as $item) {
+                if (!in_array((int)$item->id, $keptIds, true)) {
+                    $page->content_sections->remove($item);
+                }
+            }
+
+            foreach ($orderedItems as $index => $item) {
+                $item->sort = $index;
+                $item->save();
+            }
+            $page->save('content_sections');
+
+            $published = buildVisualEditorCanonicalState($page, $path);
+            echo json_encode([
+                'success' => true,
+                'fingerprint' => $published['fingerprint'],
+                'hero' => $published['hero'],
+                'sections' => $published['sections'],
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Publish failed: ' . $e->getMessage()]);
+        }
         break;
 
     // ====================================================================
@@ -723,6 +986,7 @@ switch ($endpoint) {
             echo json_encode(['error' => 'Invalid page or no content_sections field']);
             break;
         }
+        $parentPage->of(false);
         $repeater = $parentPage->content_sections;
         $sortMap = [];
         foreach ($order as $idx => $pwId) {
@@ -758,7 +1022,9 @@ switch ($endpoint) {
             echo json_encode(['error' => 'Invalid page or no content_sections field']);
             break;
         }
+        $parentPage->of(false);
         $newItem = $parentPage->content_sections->getNew();
+        $newItem->of(false);
         $newItem->set('section_title', 'Neuer Abschnitt');
         $newItem->set('section_text', '<p></p>');
         $newItem->set('section_layout', $layout);
@@ -786,6 +1052,7 @@ switch ($endpoint) {
             echo json_encode(['error' => 'Invalid page or no content_sections field']);
             break;
         }
+        $parentPage->of(false);
         $found = false;
         foreach ($parentPage->content_sections as $item) {
             if ((int) $item->id === $sectionPwId) {
@@ -807,7 +1074,7 @@ switch ($endpoint) {
         http_response_code(404);
         echo json_encode([
             'error' => 'Endpoint not found',
-            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'sections-reorder', 'sections-add', 'sections-delete'],
+            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete'],
         ]);
 }
 
@@ -908,12 +1175,7 @@ function handleContentRequest($type, $param = null) {
             }
             
             echo json_encode([
-                'hero' => [
-                    'headline' => decodeText($homepage->get('hero_headline') ?: $homepage->title),
-                    'subtitle' => decodeText($homepage->get('hero_subtitle') ?: ''),
-                    'image' => getImageUrl($homepage, 'hero_image'),
-                    'imageAlt' => decodeText($homepage->get('image_alt') ?: $homepage->title),
-                ],
+                'hero' => buildHomepageHeroData($homepage),
             ]);
             break;
             
@@ -939,45 +1201,14 @@ function handleContentRequest($type, $param = null) {
                 return;
             }
             
-            $sections = [];
-            
-            // Check for content_sections repeater (explicit sort order)
-            if ($contentPage->hasField('content_sections') && $contentPage->content_sections) {
-                $sortedSections = $contentPage->content_sections->sort('sort');
-                $idx = 0;
-                foreach ($sortedSections as $section) {
-                    $sections[] = buildSectionData($section, $idx++);
-                }
-            }
-            
-            // Also include page-level fields as first section if no repeater
-            if (empty($sections) && ($contentPage->hasField('section_title') || $contentPage->hasField('body'))) {
-                $pageSection = [
-                    'id' => 'main',
-                    'title' => decodeText($contentPage->get('section_title') ?: $contentPage->title),
-                    'text' => $contentPage->get('section_text') ?: $contentPage->get('body') ?: '',
-                    'layout' => 'rich_text',
-                    'theme' => 'default',
-                ];
-
-                if ($contentPage->hasField('section_image') && $contentPage->section_image) {
-                    $pageSection['image'] = getImageUrl($contentPage, 'section_image');
-                    $pageSection['imageAlt'] = decodeText($contentPage->get('image_alt') ?: '');
-                    $pageSection['imageData'] = getImageDataWithAlt($contentPage, 'section_image', $pageSection['title']);
-                }
-
-                $buttons = buildSectionButtons($contentPage);
-                if (!empty($buttons)) {
-                    $pageSection['buttons'] = $buttons;
-                }
-
-                $sections[] = $pageSection;
-            }
+            $sections = buildVisualEditorSections($contentPage);
+            $fingerprint = buildVisualEditorFingerprint(null, $sections);
             
             echo json_encode([
                 'page' => $param,
                 'seo' => getSeoData($contentPage),
                 'sections' => $sections,
+                'fingerprint' => $fingerprint,
             ]);
             break;
             
@@ -1013,24 +1244,11 @@ function handleContentRequest($type, $param = null) {
             }
             
             $response = [
-                'hero' => [
-                    'headline' => decodeText($homepage->get('hero_headline') ?: $homepage->title),
-                    'subtitle' => decodeText($homepage->get('hero_subtitle') ?: ''),
-                    'image' => getImageUrl($homepage, 'hero_image'),
-                    'imageAlt' => decodeText($homepage->get('image_alt') ?: ''),
-                ],
+                'hero' => buildHomepageHeroData($homepage),
                 'seo' => getSeoData($homepage),
-                'sections' => [],
+                'sections' => buildVisualEditorSections($homepage),
             ];
-            
-            // Get sections (explicit sort order)
-            if ($homepage->hasField('content_sections') && $homepage->content_sections) {
-                $sortedSections = $homepage->content_sections->sort('sort');
-                $idx = 0;
-                foreach ($sortedSections as $section) {
-                    $response['sections'][] = buildSectionData($section, $idx++);
-                }
-            }
+            $response['fingerprint'] = buildVisualEditorFingerprint($response['hero'], $response['sections']);
             
             echo json_encode($response);
             break;

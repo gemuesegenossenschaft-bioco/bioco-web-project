@@ -18,7 +18,10 @@ $apiRoot = $config->urls->root . 'api/';
 $componentRegistryJson = json_encode(biocoComponentRegistryEntries(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 $pagesById = [];
-$home = $pages->get('/');
+$home = $pages->get('/content/homepage/');
+if (!$home->id) {
+    $home = $pages->get('/');
+}
 if ($home->id) {
     $pagesById[$home->id] = [
         'id' => (int) $home->id,
@@ -33,6 +36,7 @@ foreach (wire('templates') as $template) {
     foreach ($pages->find("template={$template->name}, sort=sort") as $page) {
         if (!$page->id) continue;
         if (isset($pagesById[$page->id])) continue;
+        if (trim($page->path, '/') === 'content/homepage') continue;
         $pagesById[$page->id] = [
             'id' => (int) $page->id,
             'title' => $page->title ?: $page->name,
@@ -490,8 +494,8 @@ body {
                 <div class="ve-empty-state">Wähle einen Abschnitt oder ein Feld direkt in der Vorschau.</div>
             </div>
             <div class="ve-actions-bar">
-                <button class="ve-btn" id="ve-btn-reset" type="button" disabled>Zurücksetzen</button>
-                <button class="ve-btn ve-btn-primary" id="ve-btn-save" type="button" disabled>Speichern</button>
+                <button class="ve-btn" id="ve-btn-reset" type="button" disabled>Entwurf verwerfen</button>
+                <button class="ve-btn ve-btn-primary" id="ve-btn-save" type="button" disabled>Publizieren</button>
             </div>
         </div>
     </aside>
@@ -529,6 +533,7 @@ body {
     var ALL_PAGES = <?= json_encode($contentPages, JSON_UNESCAPED_UNICODE) ?>;
     var COMPONENT_REGISTRY = <?= $componentRegistryJson ?: '[]' ?>;
     var LAYOUT_LABELS = {
+        hero: 'Hero',
         split_media_text: 'Bild + Text',
         split_text_media: 'Text + Bild',
         full_width_banner: 'Banner',
@@ -565,11 +570,14 @@ body {
     var currentPageId = null;
     var currentPath = null;
     var sections = [];
+    var canonicalSections = [];
+    var canonicalFingerprint = '';
     var activeSectionId = null;
     var activeField = null;
     var pendingSelectId = null;
     var iframeReady = false;
     var dirtySectionIds = {};
+    var draftSavedAt = 0;
     var isSaving = false;
     var editorMode = 'edit';
     var mediaFiles = [];
@@ -580,8 +588,12 @@ body {
     var busyText = '';
     var waitingForIframeReady = false;
     var iframeReadyTimer = null;
+    var draftAutosaveTimer = null;
+    var statusTimer = null;
     var BUSY_DELAY = 320;
     var IFRAME_READY_TIMEOUT = 10000;
+    var DRAFT_AUTOSAVE_DELAY = 180;
+    var DRAFT_STORAGE_PREFIX = 'bioco-ve-draft:v1:';
 
     ALL_PAGES.forEach(function (page) {
         var option = document.createElement('option');
@@ -616,6 +628,370 @@ body {
             if (sections[i].id === sectionId) return sections[i];
         }
         return null;
+    }
+
+    function isHeroSection(sectionOrId) {
+        if (!sectionOrId) return false;
+        if (typeof sectionOrId === 'string') return sectionOrId === '__hero__';
+        return sectionOrId.id === '__hero__' || sectionOrId.layout === 'hero';
+    }
+
+    function buildHomepageHeroSection(hero) {
+        hero = hero || {};
+        return {
+            id: '__hero__',
+            pwId: currentPageId,
+            title: hero.headline || 'Hero',
+            eyebrow: hero.subtitle || '',
+            image: hero.image || '',
+            imageAlt: hero.imageAlt || '',
+            layout: 'hero',
+            theme: 'default'
+        };
+    }
+
+    function getSortableSections() {
+        return sections.filter(function (section) {
+            return !isHeroSection(section);
+        });
+    }
+
+    function cloneJson(value, fallback) {
+        if (value == null) return fallback;
+        try {
+            return JSON.parse(JSON.stringify(value));
+        } catch (error) {
+            return fallback;
+        }
+    }
+
+    function createDraftId() {
+        return 'draft:' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
+    }
+
+    function getDraftStorageKey(pageId, path) {
+        if (!pageId || !path) return '';
+        return DRAFT_STORAGE_PREFIX + String(pageId) + ':' + String(path);
+    }
+
+    function clearStatusLater() {
+        if (statusTimer) {
+            clearTimeout(statusTimer);
+        }
+        statusTimer = window.setTimeout(function () {
+            if (!isSaving && !isBusy()) {
+                if (hasDraftChanges()) {
+                    setStatus('Entwurf lokal gespeichert', 'is-loading');
+                } else {
+                    setStatus('Verbunden', 'is-ready');
+                }
+            }
+        }, 2600);
+    }
+
+    function setTransientStatus(text, cls) {
+        setStatus(text, cls);
+        clearStatusLater();
+    }
+
+    function normalizeDraftMedia(draftMedia, fallbackTargetField) {
+        if (!draftMedia || !draftMedia.assetId || !draftMedia.fileField || !draftMedia.fileName || !draftMedia.url) {
+            return null;
+        }
+        return {
+            assetId: Number(draftMedia.assetId),
+            fileField: String(draftMedia.fileField),
+            fileName: String(draftMedia.fileName),
+            targetField: String(draftMedia.targetField || fallbackTargetField || 'section_image'),
+            url: String(draftMedia.url),
+            assetTitle: draftMedia.assetTitle ? String(draftMedia.assetTitle) : ''
+        };
+    }
+
+    function normalizeDraftSection(section) {
+        if (!section || !section.id) return null;
+        var normalized = {
+            id: String(section.id),
+            title: String(section.title || ''),
+            text: String(section.text || ''),
+            layout: String(section.layout || 'rich_text'),
+            theme: String(section.theme || 'default')
+        };
+        if (section.pwId) normalized.pwId = Number(section.pwId);
+        if (typeof section.sort === 'number') normalized.sort = section.sort;
+        if (section.eyebrow) normalized.eyebrow = String(section.eyebrow);
+        if (section.component) normalized.component = String(section.component);
+        if (section.bgColor) normalized.bgColor = String(section.bgColor);
+        if (section.imageOverlay) normalized.imageOverlay = String(section.imageOverlay);
+        if (section.imageBrightness != null) normalized.imageBrightness = Number(section.imageBrightness);
+        if (section.imageContrast != null) normalized.imageContrast = Number(section.imageContrast);
+        if (section.imageSaturate != null) normalized.imageSaturate = Number(section.imageSaturate);
+        if (section.image) normalized.image = String(section.image);
+        if (section.imageAlt != null) normalized.imageAlt = String(section.imageAlt || '');
+        if (Array.isArray(section.buttons) && section.buttons.length) {
+            normalized.buttons = section.buttons
+                .slice(0, 2)
+                .map(function (button, index) {
+                    return {
+                        text: String((button && button.text) || ''),
+                        href: String((button && button.href) || ''),
+                        variant: String((button && button.variant) || (index === 0 ? 'primary' : 'secondary'))
+                    };
+                })
+                .filter(function (button) {
+                    return button.text.trim() || button.href.trim();
+                });
+        }
+        if (Array.isArray(section.images) && section.images.length) {
+            normalized.images = cloneJson(section.images, []);
+        }
+        if (Array.isArray(section.media) && section.media.length) {
+            normalized.media = cloneJson(section.media, []);
+        }
+        if (section.imageData) {
+            normalized.imageData = cloneJson(section.imageData, null);
+        }
+        var targetField = isHeroSection(section) ? 'hero_image' : 'section_image';
+        var draftMedia = normalizeDraftMedia(section.draftMedia, targetField);
+        if (draftMedia) {
+            normalized.draftMedia = draftMedia;
+        }
+        return normalized;
+    }
+
+    function cloneSections(items) {
+        return (items || []).map(function (section) {
+            return normalizeDraftSection(section);
+        }).filter(Boolean);
+    }
+
+    function buildComparableSections(items) {
+        return cloneSections(items).map(function (section) {
+            return {
+                id: section.id,
+                pwId: section.pwId || null,
+                title: section.title || '',
+                text: section.text || '',
+                layout: section.layout || 'rich_text',
+                theme: section.theme || 'default',
+                eyebrow: section.eyebrow || '',
+                component: section.component || '',
+                bgColor: section.bgColor || '',
+                imageOverlay: section.imageOverlay || '',
+                image: section.image || '',
+                imageAlt: section.imageAlt || '',
+                imageBrightness: section.imageBrightness == null ? null : section.imageBrightness,
+                imageContrast: section.imageContrast == null ? null : section.imageContrast,
+                imageSaturate: section.imageSaturate == null ? null : section.imageSaturate,
+                buttons: cloneJson(section.buttons || [], []),
+                draftMedia: cloneJson(section.draftMedia || null, null)
+            };
+        });
+    }
+
+    function hasDraftChanges() {
+        return JSON.stringify(buildComparableSections(sections)) !== JSON.stringify(buildComparableSections(canonicalSections));
+    }
+
+    function recomputeDirtySections() {
+        var nextDirty = {};
+        var canonicalById = {};
+        var canonicalOrder = canonicalSections.map(function (section) { return section.id; }).join('|');
+        var currentOrder = sections.map(function (section) { return section.id; }).join('|');
+
+        canonicalSections.forEach(function (section) {
+            canonicalById[section.id] = JSON.stringify(buildComparableSections([section])[0] || {});
+        });
+
+        sections.forEach(function (section) {
+            var comparable = JSON.stringify(buildComparableSections([section])[0] || {});
+            if (!canonicalById[section.id] || canonicalById[section.id] !== comparable) {
+                nextDirty[section.id] = true;
+            }
+        });
+
+        if (canonicalOrder !== currentOrder) {
+            sections.forEach(function (section) {
+                nextDirty[section.id] = true;
+            });
+        }
+
+        dirtySectionIds = nextDirty;
+    }
+
+    function clearCurrentDraftStorage() {
+        var key = getDraftStorageKey(currentPageId, currentPath);
+        if (!key) return;
+        try {
+            window.sessionStorage.removeItem(key);
+        } catch (error) {
+            // ignore storage errors
+        }
+    }
+
+    function persistCurrentDraftNow() {
+        if (!currentPageId || !currentPath) return;
+        if (draftAutosaveTimer) {
+            clearTimeout(draftAutosaveTimer);
+            draftAutosaveTimer = null;
+        }
+        if (!hasDraftChanges()) {
+            clearCurrentDraftStorage();
+            draftSavedAt = 0;
+            return;
+        }
+        var key = getDraftStorageKey(currentPageId, currentPath);
+        if (!key) return;
+        draftSavedAt = Date.now();
+        try {
+            window.sessionStorage.setItem(key, JSON.stringify({
+                pageId: currentPageId,
+                path: currentPath,
+                baseFingerprint: canonicalFingerprint || '',
+                savedAt: draftSavedAt,
+                sections: cloneSections(sections),
+                activeSectionId: activeSectionId,
+                activeField: cloneJson(activeField, null)
+            }));
+        } catch (error) {
+            // ignore storage errors
+        }
+    }
+
+    function scheduleDraftAutosave() {
+        if (!currentPageId || !currentPath) return;
+        if (draftAutosaveTimer) {
+            clearTimeout(draftAutosaveTimer);
+        }
+        draftAutosaveTimer = window.setTimeout(function () {
+            persistCurrentDraftNow();
+            if (!isSaving && !isBusy() && hasDraftChanges()) {
+                setStatus('Entwurf lokal gespeichert', 'is-loading');
+                clearStatusLater();
+            }
+        }, DRAFT_AUTOSAVE_DELAY);
+    }
+
+    function readStoredDraft(pageId, path) {
+        var key = getDraftStorageKey(pageId, path);
+        if (!key) return null;
+        try {
+            var raw = window.sessionStorage.getItem(key);
+            if (!raw) return null;
+            return JSON.parse(raw);
+        } catch (error) {
+            return null;
+        }
+    }
+
+    function restoreStoredDraft(nextSections, fingerprint) {
+        var stored = readStoredDraft(currentPageId, currentPath);
+        if (!stored || !Array.isArray(stored.sections)) {
+            return {
+                sections: nextSections,
+                restored: false,
+                message: ''
+            };
+        }
+        if ((stored.baseFingerprint || '') !== (fingerprint || '')) {
+            clearCurrentDraftStorage();
+            return {
+                sections: nextSections,
+                restored: false,
+                message: 'Veralteter Entwurf verworfen, weil die Seite inzwischen geändert wurde.'
+            };
+        }
+        var restoredSections = cloneSections(stored.sections);
+        if (!restoredSections.length) {
+            clearCurrentDraftStorage();
+            return {
+                sections: nextSections,
+                restored: false,
+                message: ''
+            };
+        }
+        activeSectionId = stored.activeSectionId && restoredSections.some(function (section) {
+            return section.id === stored.activeSectionId;
+        }) ? stored.activeSectionId : activeSectionId;
+        if (stored.activeField && activeSectionId === stored.activeField.sectionId) {
+            activeField = stored.activeField;
+        } else if (activeField && !restoredSections.some(function (section) { return section.id === activeField.sectionId; })) {
+            activeField = null;
+        }
+        draftSavedAt = Number(stored.savedAt || 0);
+        return {
+            sections: restoredSections,
+            restored: true,
+            message: 'Lokaler Entwurf wiederhergestellt.'
+        };
+    }
+
+    function setCanonicalSnapshot(nextSections, nextFingerprint) {
+        canonicalSections = cloneSections(nextSections);
+        canonicalFingerprint = String(nextFingerprint || '');
+    }
+
+    function reconcileSelection() {
+        if (activeSectionId && !getSectionById(activeSectionId)) {
+            activeSectionId = null;
+            activeField = null;
+        }
+        if (activeField && activeSectionId !== activeField.sectionId) {
+            activeField = null;
+        }
+    }
+
+    function refreshDraftUi(options) {
+        options = options || {};
+        recomputeDirtySections();
+        reconcileSelection();
+        renderSectionList();
+        renderFieldEditor();
+        updateActions();
+        if (iframeReady) {
+            sendToIframe('sections-replace', { sections: sections });
+            sendToIframe('section-highlight', { sectionId: activeSectionId });
+            if (activeField && activeSectionId === activeField.sectionId) {
+                sendToIframe('field-highlight', activeField);
+            } else {
+                activeField = null;
+                sendToIframe('field-reset', {});
+            }
+        }
+        syncIframeState(options.message || '');
+        if (options.persist !== false) {
+            scheduleDraftAutosave();
+        }
+    }
+
+    function applyDraftMedia(section, file, targetField) {
+        section.draftMedia = {
+            assetId: file.assetId,
+            assetTitle: file.assetTitle || '',
+            fileField: file.fileField,
+            fileName: file.fileName,
+            targetField: targetField,
+            url: file.url
+        };
+        section.image = file.url;
+        section.imageAlt = section.imageAlt || file.assetTitle || section.title || '';
+        section.imageData = {
+            url: file.url,
+            description: section.imageAlt || '',
+        };
+        section.images = [{
+            url: file.url,
+            alt: section.imageAlt || ''
+        }];
+        section.media = [{
+            url: file.url,
+            alt: section.imageAlt || '',
+            type: 'image'
+        }];
+    }
+
+    function buildDraftPayloadSections() {
+        return cloneSections(sections);
     }
 
     function normalizeComponentLookupKey(value) {
@@ -790,7 +1166,7 @@ body {
     function syncIframeState(message) {
         sendToIframe('save-state', {
             mode: editorMode,
-            dirty: hasDirtySections(),
+            dirty: hasDraftChanges(),
             saving: isSaving,
             busy: isBusy(),
             busyLabel: busyText || '',
@@ -804,31 +1180,29 @@ body {
         btnAdd.disabled = !currentPageId || isSaving || isBusy();
         btnPw.disabled = !currentPageId || isBusy();
         btnRefresh.disabled = !currentPageId || isBusy();
-        btnSave.disabled = !hasDirtySections() || isSaving || isBusy();
-        btnReset.disabled = !hasDirtySections() || isSaving || isBusy();
+        btnSave.disabled = !hasDraftChanges() || isSaving || isBusy();
+        btnReset.disabled = !hasDraftChanges() || isSaving || isBusy();
         btnModeEdit.disabled = isBusy();
         btnModeBrowse.disabled = isBusy();
         pageSelect.disabled = isBusy();
         if (isSaving) {
-            btnSave.textContent = 'Speichert...';
+            btnSave.textContent = 'Publiziert...';
         } else {
-            btnSave.textContent = 'Speichern';
+            btnSave.textContent = 'Publizieren';
         }
         if (!hasActive) {
-            btnReset.disabled = !hasDirtySections() || isSaving;
+            btnReset.disabled = !hasDraftChanges() || isSaving;
         }
         updateModeButtons();
     }
 
     function confirmDiscardChanges() {
-        if (!hasDirtySections()) return true;
-        return window.confirm('Ungespeicherte Änderungen verwerfen?');
+        if (!hasDraftChanges()) return true;
+        return window.confirm('Lokalen Entwurf wirklich verwerfen?');
     }
 
     function blockWhileDirty(actionLabel) {
-        if (!hasDirtySections()) return false;
-        window.alert('Vor "' + actionLabel + '" zuerst speichern oder zurücksetzen.');
-        return true;
+        return false;
     }
 
     function blockWhileBusy() {
@@ -859,7 +1233,7 @@ body {
         if (!field) return 'Klicke ein Feld in der Vorschau an, um inline zu bearbeiten.';
         switch (field.field) {
             case 'text':
-                return 'Rich Text wird direkt im iframe bearbeitet. Änderungen bleiben lokal bis zum Speichern.';
+                return 'Rich Text wird direkt im iframe bearbeitet. Änderungen bleiben lokal, bis du publizierst.';
             case 'media':
                 return 'Alt-Text und Medienauswahl laufen über das Overlay direkt im iframe.';
             case 'component':
@@ -875,6 +1249,7 @@ body {
         var section = getActiveSection();
         var page = getPageDescriptor(currentPageId, currentPath);
         var dirtyCount = getDirtySectionIds().length;
+        var hasDraft = hasDraftChanges();
 
         if (!currentPageId || !page) {
             fieldEditor.innerHTML =
@@ -895,7 +1270,7 @@ body {
                 '</div>' +
                 '<div class="ve-info-card">' +
                     '<strong>Status</strong>' +
-                    '<p>' + (dirtyCount ? dirtyCount + ' Abschnitt(e) mit ungespeicherten Änderungen.' : 'Keine offenen Änderungen.') + '</p>' +
+                    '<p>' + (hasDraft ? 'Lokaler Entwurf gespeichert und noch nicht publiziert.' : 'Keine offenen Entwürfe.') + '</p>' +
                 '</div>';
             updateActions();
             return;
@@ -913,12 +1288,12 @@ body {
                 '<p>' + escapeHtml(fieldHint(activeField)) + '</p>' +
             '</div>' +
             '<div class="ve-info-card">' +
-                '<strong>Offene Änderungen</strong>' +
-                '<p>' + (dirtyCount ? dirtyCount + ' Abschnitt(e) warten auf Speichern.' : 'Keine offenen Änderungen.') + '</p>' +
+                '<strong>Entwurfsstatus</strong>' +
+                '<p>' + (hasDraft ? 'Lokaler Entwurf aktiv' + (dirtyCount ? ' · ' + dirtyCount + ' markierte Abschnitt(e).' : '') : 'Kein unveröffentlichter Entwurf.') + '</p>' +
             '</div>' +
             '<div class="ve-info-card">' +
                 '<strong>Hinweis</strong>' +
-                '<p>Abschnitt-CRUD bleibt in der linken Spalte. Inline-Änderungen werden erst mit "Speichern" dauerhaft.</p>' +
+                '<p>Alle Änderungen bleiben lokal im Browser, bis du "Publizieren" klickst.</p>' +
             '</div>';
 
         updateActions();
@@ -950,7 +1325,13 @@ body {
                 });
             })
             .then(function (data) {
-                sections = Array.isArray(data.sections) ? data.sections : [];
+                var nextSections = Array.isArray(data.sections) ? data.sections.slice() : [];
+                if (currentPath === '/' && data.hero) {
+                    nextSections.unshift(buildHomepageHeroSection(data.hero));
+                }
+                setCanonicalSnapshot(nextSections, data.fingerprint || '');
+                var restore = restoreStoredDraft(nextSections, canonicalFingerprint);
+                sections = cloneSections(restore.sections);
                 if (pendingSelectId && getSectionById(pendingSelectId)) {
                     activeSectionId = pendingSelectId;
                 } else if (activeSectionId && !getSectionById(activeSectionId)) {
@@ -958,22 +1339,11 @@ body {
                     activeField = null;
                 }
                 pendingSelectId = null;
-                renderSectionList();
-                renderFieldEditor();
-                updateActions();
-                if (iframeReady) {
-                    sendToIframe('sections-replace', { sections: sections });
-                    sendToIframe('section-highlight', { sectionId: activeSectionId });
-                    if (activeField && activeSectionId === activeField.sectionId) {
-                        sendToIframe('field-highlight', activeField);
-                    } else {
-                        activeField = null;
-                        sendToIframe('field-reset', {});
-                    }
-                    syncIframeState();
-                }
+                refreshDraftUi({ persist: false, message: restore.message || '' });
                 if (!options.keepStatus) {
-                    setStatus('Verbunden', 'is-ready');
+                    setStatus(restore.message || (hasDraftChanges() ? 'Entwurf lokal gespeichert' : 'Verbunden'), hasDraftChanges() ? 'is-loading' : 'is-ready');
+                } else if (restore.message) {
+                    setTransientStatus(restore.message, 'is-loading');
                 }
             })
             .catch(function (error) {
@@ -989,10 +1359,13 @@ body {
         currentPath = path;
         iframeReady = false;
         sections = [];
+        canonicalSections = [];
+        canonicalFingerprint = '';
         pendingSelectId = null;
         activeSectionId = null;
         activeField = null;
         clearDirtySections();
+        draftSavedAt = 0;
         isSaving = false;
 
         pageSelect.value = pageId + '|' + path;
@@ -1056,6 +1429,23 @@ body {
                 break;
             case 'imageAlt':
                 section.imageAlt = payload.value || '';
+                if (section.imageData) {
+                    section.imageData.description = section.imageAlt || '';
+                }
+                if (Array.isArray(section.images)) {
+                    section.images = section.images.map(function (image) {
+                        image.alt = section.imageAlt || '';
+                        return image;
+                    });
+                }
+                if (Array.isArray(section.media)) {
+                    section.media = section.media.map(function (item) {
+                        if ((item.type || 'image') === 'image') {
+                            item.alt = section.imageAlt || '';
+                        }
+                        return item;
+                    });
+                }
                 break;
             case 'button_text':
                 setButtons(section, payload.buttonIndex || 0, { text: payload.value || '' });
@@ -1077,6 +1467,7 @@ body {
         markSectionDirty(section.id, true);
         renderSectionList();
         renderFieldEditor();
+        scheduleDraftAutosave();
         syncIframeState();
         updateActions();
     }
@@ -1131,13 +1522,14 @@ body {
         emptyList.style.display = sections.length ? 'none' : 'block';
 
         sections.forEach(function (section, index) {
+            var isHero = isHeroSection(section);
             var item = document.createElement('li');
             item.className = 've-section-item' + (section.id === activeSectionId ? ' is-active' : '');
-            item.draggable = true;
+            item.draggable = !isHero;
 
             var drag = document.createElement('span');
             drag.className = 've-section-drag';
-            drag.textContent = '⠿';
+            drag.textContent = isHero ? '★' : '⠿';
 
             var info = document.createElement('div');
             info.className = 've-section-info';
@@ -1174,33 +1566,35 @@ body {
             var actions = document.createElement('div');
             actions.className = 've-section-actions';
 
-            var duplicateBtn = document.createElement('button');
-            duplicateBtn.className = 've-icon-btn';
-            duplicateBtn.type = 'button';
-            duplicateBtn.title = 'Abschnitt kopieren';
-            duplicateBtn.textContent = '⧉';
-            duplicateBtn.addEventListener('click', function (event) {
-                event.stopPropagation();
-                if (blockWhileBusy()) return;
-                if (blockWhileDirty('Kopieren')) return;
-                duplicateSection(section);
-            });
+            if (!isHero) {
+                var duplicateBtn = document.createElement('button');
+                duplicateBtn.className = 've-icon-btn';
+                duplicateBtn.type = 'button';
+                duplicateBtn.title = 'Abschnitt kopieren';
+                duplicateBtn.textContent = '⧉';
+                duplicateBtn.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    if (blockWhileBusy()) return;
+                    if (blockWhileDirty('Kopieren')) return;
+                    duplicateSection(section);
+                });
 
-            var deleteBtn = document.createElement('button');
-            deleteBtn.className = 've-icon-btn';
-            deleteBtn.type = 'button';
-            deleteBtn.title = 'Abschnitt löschen';
-            deleteBtn.textContent = '✕';
-            deleteBtn.addEventListener('click', function (event) {
-                event.stopPropagation();
-                if (blockWhileBusy()) return;
-                if (blockWhileDirty('Löschen')) return;
-                if (!window.confirm('Abschnitt "' + (section.title || '') + '" wirklich löschen?')) return;
-                deleteSection(section);
-            });
+                var deleteBtn = document.createElement('button');
+                deleteBtn.className = 've-icon-btn';
+                deleteBtn.type = 'button';
+                deleteBtn.title = 'Abschnitt löschen';
+                deleteBtn.textContent = '✕';
+                deleteBtn.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    if (blockWhileBusy()) return;
+                    if (blockWhileDirty('Löschen')) return;
+                    if (!window.confirm('Abschnitt "' + (section.title || '') + '" wirklich löschen?')) return;
+                    deleteSection(section);
+                });
 
-            actions.appendChild(duplicateBtn);
-            actions.appendChild(deleteBtn);
+                actions.appendChild(duplicateBtn);
+                actions.appendChild(deleteBtn);
+            }
 
             item.appendChild(drag);
             item.appendChild(info);
@@ -1212,6 +1606,10 @@ body {
             });
 
             item.addEventListener('dragstart', function (event) {
+                if (isHero) {
+                    event.preventDefault();
+                    return;
+                }
                 if (blockWhileBusy()) {
                     event.preventDefault();
                     return;
@@ -1220,7 +1618,7 @@ body {
                     event.preventDefault();
                     return;
                 }
-                event.dataTransfer.setData('text/plain', String(index));
+                event.dataTransfer.setData('text/plain', section.id);
                 item.style.opacity = '0.5';
             });
             item.addEventListener('dragend', function () {
@@ -1237,9 +1635,10 @@ body {
             item.addEventListener('drop', function (event) {
                 event.preventDefault();
                 item.style.borderTop = '';
-                var fromIndex = parseInt(event.dataTransfer.getData('text/plain'), 10);
-                if (isNaN(fromIndex) || fromIndex === index) return;
-                reorderSections(fromIndex, index);
+                if (isHero) return;
+                var fromSectionId = event.dataTransfer.getData('text/plain');
+                if (!fromSectionId || fromSectionId === section.id) return;
+                reorderSectionsById(fromSectionId, section.id);
             });
 
             sectionList.appendChild(item);
@@ -1247,6 +1646,13 @@ body {
     }
 
     function buildSavePayload(section) {
+        if (isHeroSection(section)) {
+            return {
+                hero_headline: section.title || '',
+                hero_subtitle: section.eyebrow || '',
+                image_alt: section.imageAlt || ''
+            };
+        }
         var button1 = getButton(section, 0);
         var button2 = getButton(section, 1);
         return {
@@ -1282,54 +1688,57 @@ body {
             .then(function (response) {
                 return parseJson(response).then(function (data) {
                     if (!response.ok || !data.success) {
-                        throw new Error((data && data.error) || fallbackError);
+                        var error = new Error((data && data.error) || fallbackError);
+                        error.data = data || {};
+                        throw error;
                     }
                     return data;
                 });
             });
     }
 
-    function saveSection(section) {
-        if (!section || !section.pwId) return Promise.resolve();
-        return postJson(API_ROOT + 'content-save', {
-            sectionPwId: section.pwId,
-            fields: buildSavePayload(section)
-        }, 'Speichern fehlgeschlagen').then(function () {
-            markSectionDirty(section.id, false);
-        });
-    }
-
     function saveDirtySections() {
-        if (isSaving || !hasDirtySections() || isBusy()) return;
-        var ordered = sections.filter(function (section) {
-            return isSectionDirty(section.id);
-        });
+        if (isSaving || !hasDraftChanges() || isBusy()) return;
 
         isSaving = true;
         updateActions();
-        setStatus('Speichert...', 'is-loading');
+        setStatus('Publiziert...', 'is-loading');
         syncIframeState();
 
-        runWithBusy('Änderungen speichern…', function () {
-            return ordered.reduce(function (promise, section) {
-                return promise.then(function () {
-                    return saveSection(section);
-                });
-            }, Promise.resolve())
-                .then(function () {
-                    clearDirtySections();
-                    return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
-                });
-            })
-            .then(function () {
-                setStatus('Gespeichert', 'is-ready');
+        runWithBusy('Änderungen publizieren…', function () {
+            return postJson(API_ROOT + 'content-publish', {
+                pageId: currentPageId,
+                path: currentPath,
+                baseFingerprint: canonicalFingerprint,
+                sections: buildDraftPayloadSections()
+            }, 'Publizieren fehlgeschlagen');
+        })
+            .then(function (data) {
+                var nextSections = Array.isArray(data.sections) ? data.sections.slice() : [];
+                if (currentPath === '/' && data.hero) {
+                    nextSections.unshift(buildHomepageHeroSection(data.hero));
+                }
+                setCanonicalSnapshot(nextSections, data.fingerprint || '');
+                sections = cloneSections(nextSections);
+                clearDirtySections();
+                clearCurrentDraftStorage();
+                draftSavedAt = 0;
+                refreshDraftUi({ persist: false, message: 'Publiziert' });
+                setStatus('Publiziert', 'is-ready');
                 sendToIframe('save-result', { success: true });
             })
             .catch(function (error) {
-                setStatus(error.message || 'Speichern fehlgeschlagen', 'is-error');
+                if (error && error.data && (Array.isArray(error.data.sections) || error.data.hero)) {
+                    var canonicalFromError = Array.isArray(error.data.sections) ? error.data.sections.slice() : [];
+                    if (currentPath === '/' && error.data.hero) {
+                        canonicalFromError.unshift(buildHomepageHeroSection(error.data.hero));
+                    }
+                    setCanonicalSnapshot(canonicalFromError, error.data.fingerprint || '');
+                }
+                setStatus(error.message || 'Publizieren fehlgeschlagen', 'is-error');
                 sendToIframe('save-result', {
                     success: false,
-                    error: error.message || 'Speichern fehlgeschlagen'
+                    error: error.message || 'Publizieren fehlgeschlagen'
                 });
             })
             .finally(function () {
@@ -1342,150 +1751,97 @@ body {
     function resetChanges() {
         if (isBusy()) return;
         if (!confirmDiscardChanges()) return;
+        clearCurrentDraftStorage();
+        sections = cloneSections(canonicalSections);
         clearDirtySections();
-        fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' })
-            .then(function () {
-                setStatus('Zurückgesetzt', 'is-ready');
-                syncIframeState();
-            })
-            .catch(function () {});
+        activeField = null;
+        if (activeSectionId && !getSectionById(activeSectionId)) {
+            activeSectionId = null;
+        }
+        refreshDraftUi({ persist: false, message: 'Entwurf verworfen' });
+        setStatus('Entwurf verworfen', 'is-ready');
     }
 
-    function reorderSections(fromIndex, toIndex) {
+    function reorderSectionsById(fromSectionId, toSectionId) {
         if (!currentPageId || isSaving || isBusy() || blockWhileDirty('Sortieren')) return;
-        var order = sections.slice();
+        var hero = sections.filter(function (section) { return isHeroSection(section); });
+        var order = getSortableSections().slice();
+        var fromIndex = order.findIndex(function (section) { return section.id === fromSectionId; });
+        var toIndex = order.findIndex(function (section) { return section.id === toSectionId; });
+        if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) return;
         var moved = order.splice(fromIndex, 1)[0];
         order.splice(toIndex, 0, moved);
-
-        setStatus('Sortierung speichern...', 'is-loading');
-        runWithBusy('Abschnitte sortieren…', function () {
-            return postJson(API_ROOT + 'sections-reorder', {
-            pageId: currentPageId,
-            order: order.map(function (section) { return section.pwId; })
-        }, 'Sortieren fehlgeschlagen')
-            .then(function () {
-                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
-            });
-        })
-            .then(function () {
-                setStatus('Sortierung aktualisiert', 'is-ready');
-            })
-            .catch(function (error) {
-                setStatus(error.message || 'Sortieren fehlgeschlagen', 'is-error');
-            });
+        sections = hero.concat(order);
+        refreshDraftUi();
+        setTransientStatus('Reihenfolge im Entwurf aktualisiert', 'is-loading');
     }
 
     function addSection(layout) {
         if (!currentPageId || isSaving || isBusy() || blockWhileDirty('Hinzufügen')) return;
-        setStatus('Abschnitt anlegen...', 'is-loading');
-        runWithBusy('Abschnitt anlegen…', function () {
-            return postJson(API_ROOT + 'sections-add', { pageId: currentPageId, layout: layout }, 'Abschnitt konnte nicht angelegt werden')
-            .then(function (data) {
-                pendingSelectId = data.section && data.section.id ? data.section.id : null;
-                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
-            });
-        })
-            .then(function () {
-                if (pendingSelectId && getSectionById(pendingSelectId)) {
-                    selectSection(pendingSelectId);
-                    pendingSelectId = null;
-                }
-                setStatus('Abschnitt angelegt', 'is-ready');
-            })
-            .catch(function (error) {
-                setStatus(error.message || 'Abschnitt konnte nicht angelegt werden', 'is-error');
-            });
+        var newSection = normalizeDraftSection({
+            id: createDraftId(),
+            title: 'Neuer Abschnitt',
+            text: '<p></p>',
+            layout: layout || 'rich_text',
+            theme: 'default',
+            buttons: []
+        });
+        sections = cloneSections(sections);
+        sections.push(newSection);
+        activeSectionId = newSection.id;
+        activeField = null;
+        refreshDraftUi();
+        setTransientStatus('Abschnitt zum Entwurf hinzugefügt', 'is-loading');
     }
 
     function deleteSection(section) {
-        if (!currentPageId || !section || !section.pwId || isSaving || isBusy()) return;
-        setStatus('Abschnitt löschen...', 'is-loading');
-        runWithBusy('Abschnitt löschen…', function () {
-            return postJson(API_ROOT + 'sections-delete', { pageId: currentPageId, sectionPwId: section.pwId }, 'Löschen fehlgeschlagen')
-            .then(function () {
-                if (activeSectionId === section.id) {
-                    activeSectionId = null;
-                    activeField = null;
-                }
-                markSectionDirty(section.id, false);
-                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
-            });
-        })
-            .then(function () {
-                setStatus('Abschnitt gelöscht', 'is-ready');
-            })
-            .catch(function (error) {
-                setStatus(error.message || 'Löschen fehlgeschlagen', 'is-error');
-            });
+        if (!currentPageId || !section || isHeroSection(section) || isSaving || isBusy()) return;
+        sections = sections.filter(function (item) { return item.id !== section.id; });
+        if (activeSectionId === section.id) {
+            activeSectionId = null;
+            activeField = null;
+        }
+        refreshDraftUi();
+        setTransientStatus('Abschnitt im Entwurf gelöscht', 'is-loading');
     }
 
     function moveSection(sectionId, direction) {
         if (!currentPageId || isSaving || isBusy() || blockWhileDirty('Verschieben')) return;
-        var index = sections.findIndex(function (section) { return section.id === sectionId; });
+        var order = getSortableSections();
+        var index = order.findIndex(function (section) { return section.id === sectionId; });
         if (index === -1) return;
         var targetIndex = index + direction;
-        if (targetIndex < 0 || targetIndex >= sections.length) return;
-        reorderSections(index, targetIndex);
+        if (targetIndex < 0 || targetIndex >= order.length) return;
+        reorderSectionsById(order[index].id, order[targetIndex].id);
     }
 
     function duplicateSection(section) {
-        if (!section || !currentPageId || isSaving || isBusy() || blockWhileDirty('Duplizieren')) return;
-        var copyPayload = buildSavePayload(section);
-        copyPayload.section_title = (section.title || 'Neuer Abschnitt') + ' (Kopie)';
-
-        setStatus('Abschnitt duplizieren...', 'is-loading');
-        runWithBusy('Abschnitt duplizieren…', function () {
-            return postJson(API_ROOT + 'sections-add', {
-            pageId: currentPageId,
-            layout: section.layout || 'rich_text'
-        }, 'Duplizieren fehlgeschlagen')
-            .then(function (data) {
-                var newSection = data.section || null;
-                if (!newSection || !newSection.pwId) {
-                    throw new Error('Neuer Abschnitt konnte nicht erstellt werden');
-                }
-                pendingSelectId = newSection.id || null;
-                return postJson(API_ROOT + 'content-save', {
-                    sectionPwId: newSection.pwId,
-                    fields: copyPayload
-                }, 'Kopie speichern fehlgeschlagen').then(function () {
-                    return newSection;
-                });
-            })
-            .then(function (newSection) {
-                var order = sections.map(function (item) { return item.pwId; }).filter(Boolean);
-                var sourceIndex = order.indexOf(section.pwId);
-                if (sourceIndex === -1) {
-                    order.push(newSection.pwId);
-                } else {
-                    order.splice(sourceIndex + 1, 0, newSection.pwId);
-                }
-                return postJson(API_ROOT + 'sections-reorder', {
-                    pageId: currentPageId,
-                    order: order
-                }, 'Kopie einsortieren fehlgeschlagen');
-            })
-            .then(function () {
-                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
-            });
-        })
-            .then(function () {
-                if (pendingSelectId && getSectionById(pendingSelectId)) {
-                    selectSection(pendingSelectId);
-                    pendingSelectId = null;
-                }
-                setStatus('Abschnitt dupliziert. Medien prüfen.', 'is-ready');
-            })
-            .catch(function (error) {
-                setStatus(error.message || 'Duplizieren fehlgeschlagen', 'is-error');
-            });
+        if (!section || isHeroSection(section) || !currentPageId || isSaving || isBusy() || blockWhileDirty('Duplizieren')) return;
+        var newSection = cloneSections([section])[0];
+        if (!newSection) return;
+        var sourceIndex = sections.findIndex(function (item) { return item.id === section.id; });
+        newSection.id = createDraftId();
+        delete newSection.pwId;
+        newSection.title = (section.title || 'Neuer Abschnitt') + ' (Kopie)';
+        if (newSection.draftMedia) {
+            newSection.draftMedia = cloneJson(newSection.draftMedia, null);
+        }
+        if (sourceIndex === -1) {
+            sections.push(newSection);
+        } else {
+            sections.splice(sourceIndex + 1, 0, newSection);
+        }
+        activeSectionId = newSection.id;
+        activeField = null;
+        refreshDraftUi();
+        setTransientStatus('Abschnitt im Entwurf dupliziert. Medien prüfen.', 'is-loading');
     }
 
     function openMediaModal(request) {
         if (!request || !request.sectionId || isBusy()) return;
         mediaRequest = {
             sectionId: request.sectionId,
-            targetField: request.targetField || 'section_image'
+            targetField: request.targetField || (request.sectionId === '__hero__' ? 'hero_image' : 'section_image')
         };
         mediaFiles = [];
         mediaGrid.innerHTML = '';
@@ -1493,8 +1849,7 @@ body {
         mediaEmpty.style.display = 'block';
         mediaModal.classList.add('is-open');
 
-        runWithBusy('Mediathek laden…', function () {
-            return fetch(API_ROOT + 'media-files', { credentials: 'include' })
+        fetch(API_ROOT + 'media-files', { credentials: 'include' })
             .then(function (response) {
                 return parseJson(response).then(function (data) {
                     if (!response.ok || !data.success) {
@@ -1506,8 +1861,7 @@ body {
             .then(function (data) {
                 mediaFiles = Array.isArray(data.files) ? data.files : [];
                 renderMediaGrid();
-            });
-        })
+            })
             .catch(function (error) {
                 mediaGrid.innerHTML = '';
                 mediaEmpty.textContent = error.message || 'Medien konnten nicht geladen werden';
@@ -1549,41 +1903,22 @@ body {
     function importMediaFile(file) {
         if (isBusy()) return;
         var section = mediaRequest ? getSectionById(mediaRequest.sectionId) : null;
-        if (!section || !section.pwId || !mediaRequest) return;
+        if (!section || !mediaRequest) return;
 
-        mediaEmpty.textContent = 'Medium wird importiert…';
-        mediaEmpty.style.display = 'block';
-
-        runWithBusy('Medium importieren…', function () {
-            return postJson(API_ROOT + 'media-import', {
-            repeaterItemId: section.pwId,
-            targetField: mediaRequest.targetField || 'section_image',
-            assetId: file.assetId,
-            fileField: file.fileField,
-            fileName: file.fileName
-        }, 'Import fehlgeschlagen')
-            .then(function () {
-                closeMediaModal();
-                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
-            });
-        })
-            .then(function () {
-                if (activeField) {
-                    selectField(activeField, { scroll: false });
-                } else if (section.id) {
-                    selectSection(section.id, { scroll: false });
-                }
-                setStatus('Medium importiert', 'is-ready');
-            })
-            .catch(function (error) {
-                mediaEmpty.textContent = error.message || 'Import fehlgeschlagen';
-                mediaEmpty.style.display = 'block';
-            });
+        applyDraftMedia(section, file, mediaRequest.targetField || (isHeroSection(section) ? 'hero_image' : 'section_image'));
+        closeMediaModal();
+        refreshDraftUi();
+        if (activeField) {
+            selectField(activeField, { scroll: false });
+        } else if (section.id) {
+            selectSection(section.id, { scroll: false });
+        }
+        setTransientStatus('Medium im Entwurf ausgewählt', 'is-loading');
     }
 
     function handleSectionAction(sectionId, action) {
         var section = getSectionById(sectionId);
-        if (!section) return;
+        if (!section || isHeroSection(section)) return;
         switch (action) {
             case 'delete':
                 if (!window.confirm('Abschnitt "' + (section.title || '') + '" wirklich löschen?')) return;
@@ -1609,21 +1944,14 @@ body {
         var nextPath = parts[1];
         if (!nextPageId || !nextPath) return;
         if (currentPageId === nextPageId && currentPath === nextPath) return;
-        if (!confirmDiscardChanges()) {
-            if (currentPageId && currentPath) {
-                pageSelect.value = currentPageId + '|' + currentPath;
-            } else {
-                pageSelect.value = '';
-            }
-            return;
-        }
+        persistCurrentDraftNow();
         loadPage(nextPageId, nextPath);
     });
 
     btnRefresh.addEventListener('click', function () {
         if (isBusy()) return;
         if (!currentPageId || !currentPath) return;
-        if (!confirmDiscardChanges()) return;
+        persistCurrentDraftNow();
         loadPage(currentPageId, currentPath, { force: true });
     });
 
@@ -1729,7 +2057,8 @@ body {
     });
 
     window.addEventListener('beforeunload', function (event) {
-        if (!hasDirtySections()) return;
+        persistCurrentDraftNow();
+        if (!hasDraftChanges()) return;
         event.preventDefault();
         event.returnValue = '';
     });

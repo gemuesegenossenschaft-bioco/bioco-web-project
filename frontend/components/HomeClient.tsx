@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { UtilityNavigation } from '@/components/UtilityNavigation'
 import { PrimaryNavigation } from '@/components/SecondaryNavigation'
@@ -38,14 +38,30 @@ function hasHeadingHtml(html?: string | null): boolean {
   return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
 }
 
+const HERO_SECTION_ID = '__hero__'
+
 export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) {
   const searchParams = useSearchParams()
   const isVisualEditor = searchParams.get('_visual') === '1'
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const initialSections = useMemo(() => {
+    if (!isVisualEditor) return sections
+    const heroSection: ContentSection = {
+      id: HERO_SECTION_ID,
+      title: hero.headline || 'Hero',
+      text: '',
+      eyebrow: hero.subtitle || '',
+      layout: 'hero',
+      image: hero.image,
+      imageAlt: hero.imageAlt || '',
+      theme: 'default',
+    }
+    return [heroSection, ...sections]
+  }, [hero, isVisualEditor, sections])
   const { sections: liveSections, highlightedSectionId } = useVisualEditor({
     enabled: isVisualEditor,
-    sections,
+    sections: initialSections,
   })
 
   const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(6)
@@ -78,6 +94,13 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
   const willkommenSection = getSection('willkommen')
   const gemeinsamSection = getSection('gemeinsam')
   const kennenlernenSection = getSection('kennenlernen')
+  const heroSection = getSection(HERO_SECTION_ID)
+  const heroHeadline = heroSection?.title || hero.headline || ''
+  const heroSubtitle = heroSection?.eyebrow || hero.subtitle || ''
+  const displayHeroHeadline = heroHeadline || (isVisualEditor ? 'Hero Titel' : '')
+  const displayHeroSubtitle = heroSubtitle || (isVisualEditor ? 'Hero Untertitel' : '')
+  const heroImage = heroSection?.image || hero.image
+  const heroImageAlt = heroSection?.imageAlt || hero.imageAlt || 'Solidarische Landwirtschaft auf dem Feld'
 
   return (
     <div className="page-shell">
@@ -121,16 +144,19 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
       </div>
       
       {/* Hero */}
-      <section className="hero-bleed">
+      <section className="hero-bleed" {...getVisualAttrs(heroSection)}>
         {/* Navbar inside hero - becomes fixed when scrolled past */}
         <div className="navbar-overlay mobile-nav-shell">
           <PrimaryNavigation />
           <MobileMenu />
         </div>
-        <div className="hero-bg">
-          {hero.image && <Image
-            src={hero.image}
-            alt={hero.imageAlt || 'Solidarische Landwirtschaft auf dem Feld'}
+        <div
+          className="hero-bg"
+          {...getVeFieldAttrs(isVisualEditor, HERO_SECTION_ID, 'media', 'media', false, { targetField: 'hero_image' })}
+        >
+          {heroImage && <Image
+            src={heroImage}
+            alt={heroImageAlt}
             fill
             priority
             sizes="100vw"
@@ -138,19 +164,22 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
           />}
           <div className="hero-overlay" />
           <div className="hero-content">
-            <h1 className="hero-headline">
-              {hero.headline.split('\n').map((line, i) => (
+            <h1 className="hero-headline" {...getVeFieldAttrs(isVisualEditor, HERO_SECTION_ID, 'title', 'text', true)}>
+              {displayHeroHeadline.split('\n').map((line, i) => (
                 <span key={i}>
                   {line}
-                  {i < hero.headline.split('\n').length - 1 && <br />}
+                  {i < displayHeroHeadline.split('\n').length - 1 && <br />}
                 </span>
               ))}
-              {hero.subtitle && (
-                <span className="hero-title-secondary">
-                  {hero.subtitle.split('\n').map((line, i) => (
+              {(heroSubtitle || isVisualEditor) && (
+                <span
+                  className="hero-title-secondary"
+                  {...getVeFieldAttrs(isVisualEditor, HERO_SECTION_ID, 'eyebrow', 'text', true)}
+                >
+                  {displayHeroSubtitle.split('\n').map((line, i) => (
                     <span key={i}>
                       {line}
-                      {i < hero.subtitle.split('\n').length - 1 && <br />}
+                      {i < displayHeroSubtitle.split('\n').length - 1 && <br />}
                     </span>
                   ))}
                 </span>
