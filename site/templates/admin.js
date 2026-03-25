@@ -720,34 +720,87 @@ $(document).ready(function() {
     // ================================================================
     // Visual Editor link in admin navigation
     // ================================================================
+    function cleanedClassNames(value) {
+        return String(value || '')
+            .split(/\s+/)
+            .filter(Boolean)
+            .filter(function(name) {
+                return ['uk-active', 'pw-active', 'ui-state-active', 'current', 'on'].indexOf(name) === -1;
+            })
+            .join(' ');
+    }
+
+    function createVisualEditorAnchor(className, veUrl) {
+        var $link = $('<a class="bioco-visual-editor-link">')
+            .attr('href', veUrl)
+            .attr('target', '_blank')
+            .attr('rel', 'noopener noreferrer')
+            .text('Visual Editor');
+        if (className) {
+            $link.attr('class', className + ' bioco-visual-editor-link');
+        }
+        return $link;
+    }
+
     function addVisualEditorLink() {
         if ($('.bioco-visual-editor-link').length) return;
         var siteRoot = ProcessWire.config.urls.root || '/';
         var veUrl = siteRoot + 'visual-editor/';
-        var $link = $('<a class="bioco-visual-editor-link">')
-            .attr('href', veUrl)
-            .attr('target', '_blank')
-            .css({
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                background: '#4a7c59',
-                color: '#fff',
-                borderRadius: '6px',
-                fontSize: '13px',
-                fontWeight: '600',
-                textDecoration: 'none',
-                marginLeft: '10px',
-                cursor: 'pointer',
-                transition: 'background 0.15s',
-            })
-            .html('<i class="fa fa-eye"></i> Visual Editor')
-            .on('mouseenter', function() { $(this).css('background', '#3a6c49'); })
+        var mediaSelectors = [
+            '#pw-masthead-links a',
+            '#pw-masthead .pw-masthead-nav a',
+            '#topnav a',
+            '.uk-navbar-right a',
+            '.uk-navbar-nav a',
+            '#masthead .container a'
+        ];
+        var $mediaAnchor = $();
+
+        for (var i = 0; i < mediaSelectors.length; i++) {
+            var $candidate = $(mediaSelectors[i]).filter(function() {
+                var $anchor = $(this);
+                var href = String($anchor.attr('href') || '').toLowerCase();
+                var text = $.trim(String($anchor.text() || '')).toLowerCase();
+                return href.indexOf('/media/') >= 0 || text === 'media' || text === 'medien';
+            }).first();
+            if ($candidate.length) {
+                $mediaAnchor = $candidate;
+                break;
+            }
+        }
+
+        if ($mediaAnchor.length) {
+            var anchorClass = cleanedClassNames($mediaAnchor.attr('class'));
+            var $nativeLink = createVisualEditorAnchor(anchorClass, veUrl);
+            var $mediaItem = $mediaAnchor.closest('li');
+            if ($mediaItem.length) {
+                var itemClass = cleanedClassNames($mediaItem.attr('class'));
+                var $nativeItem = $('<li class="bioco-visual-editor-nav-item">');
+                if (itemClass) $nativeItem.addClass(itemClass);
+                $nativeItem.append($nativeLink);
+                $mediaItem.after($nativeItem);
+                return;
+            }
+            $mediaAnchor.after($nativeLink);
+            return;
+        }
+
+        var $fallbackLink = createVisualEditorAnchor('', veUrl).css({
+            display: 'inline-flex',
+            alignItems: 'center',
+            padding: '6px 14px',
+            background: '#4a7c59',
+            color: '#fff',
+            borderRadius: '6px',
+            fontSize: '13px',
+            fontWeight: '600',
+            textDecoration: 'none',
+            marginLeft: '10px',
+            cursor: 'pointer',
+            transition: 'background 0.15s',
+        }).on('mouseenter', function() { $(this).css('background', '#3a6c49'); })
             .on('mouseleave', function() { $(this).css('background', '#4a7c59'); });
 
-        // Try multiple PW admin nav selectors
-        var placed = false;
         var navSelectors = [
             '#pw-masthead-links',
             '#pw-masthead .pw-masthead-nav',
@@ -756,21 +809,18 @@ $(document).ready(function() {
             '.uk-navbar-nav',
             '#masthead .container',
         ];
-        for (var i = 0; i < navSelectors.length; i++) {
-            var $nav = $(navSelectors[i]).first();
+        for (var j = 0; j < navSelectors.length; j++) {
+            var $nav = $(navSelectors[j]).first();
             if ($nav.length) {
-                $nav.append($link);
-                placed = true;
-                break;
+                $nav.append($fallbackLink);
+                return;
             }
         }
-        // Fallback: prepend to page content area
-        if (!placed) {
-            var $content = $('#pw-content-body, #content, .pw-container').first();
-            if ($content.length) {
-                $link.css({ marginBottom: '12px', display: 'inline-flex' });
-                $content.prepend($link);
-            }
+
+        var $content = $('#pw-content-body, #content, .pw-container').first();
+        if ($content.length) {
+            $fallbackLink.css({ marginBottom: '12px', display: 'inline-flex' });
+            $content.prepend($fallbackLink);
         }
     }
 });

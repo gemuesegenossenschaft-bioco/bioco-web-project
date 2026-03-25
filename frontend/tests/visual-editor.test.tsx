@@ -1,6 +1,6 @@
 import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, act, fireEvent } from '@testing-library/react'
+import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import type { ContentSection } from '@/lib/processwire-types'
 
 let mockSearch = ''
@@ -285,6 +285,203 @@ describe('Visual editor postMessage protocol', () => {
     })
 
     expect(screen.getByTestId('highlighted').textContent).toBe('section-2')
+  })
+})
+
+describe('InlineVisualEditorRuntime', () => {
+  let postMessageSpy: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    postMessageSpy = vi.fn()
+    Object.defineProperty(window, 'parent', {
+      value: { postMessage: postMessageSpy },
+      writable: true,
+    })
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('opens the matching inline editor on first field click and focuses it', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    const { container } = render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="title"
+            data-ve-kind="text"
+            data-ve-inline="true"
+          >
+            Title target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={testSections} />
+      </div>
+    )
+
+    fireEvent.click(screen.getByText('Title target'))
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'bioco:visual-editor:field-select',
+        sectionId: 'section-1',
+        field: 'title',
+      }),
+      '*'
+    )
+
+    const editor = container.querySelector('.ve-inline-text-editor') as HTMLDivElement | null
+    expect(editor).toBeTruthy()
+    await waitFor(() => {
+      expect(document.activeElement).toBe(editor)
+    })
+  })
+
+  it('opens section tools only when clicking section space outside fields', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    const { container } = render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <div data-testid="section-space">Section space</div>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={testSections} />
+      </div>
+    )
+
+    fireEvent.click(screen.getByTestId('section-space'))
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'bioco:visual-editor:section-click',
+        sectionId: 'section-1',
+      }),
+      '*'
+    )
+    expect(screen.getByRole('button', { name: 'Duplizieren' })).toBeInTheDocument()
+    expect(container.querySelector('.ve-inline-text-editor')).toBeFalsy()
+  })
+
+  it('does not intercept field clicks in browse mode', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="title"
+            data-ve-kind="text"
+            data-ve-inline="true"
+          >
+            Title target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={testSections} />
+      </div>
+    )
+
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        data: {
+          type: 'bioco:visual-editor:save-state',
+          mode: 'browse',
+        },
+      }))
+    })
+
+    fireEvent.click(screen.getByText('Title target'))
+
+    expect(postMessageSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'bioco:visual-editor:field-select' }),
+      '*'
+    )
+  })
+
+  it('shows a busy blocker and suppresses editor interaction while locked', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="title"
+            data-ve-kind="text"
+            data-ve-inline="true"
+          >
+            Title target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={testSections} />
+      </div>
+    )
+
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        data: {
+          type: 'bioco:visual-editor:save-state',
+          mode: 'edit',
+          busy: true,
+          busyLabel: 'Abschnitte laden…',
+        },
+      }))
+    })
+
+    postMessageSpy.mockClear()
+    fireEvent.click(screen.getByText('Title target'))
+
+    expect(postMessageSpy).not.toHaveBeenCalled()
+    expect(screen.getByText('Abschnitte laden…')).toBeInTheDocument()
+  })
+
+  it('keeps the selected field open across section refreshes with the same id', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    const initialSections: ContentSection[] = [
+      { id: 'section-1', title: 'Old title', text: '<p>One</p>', layout: 'rich_text' },
+    ]
+    const nextSections: ContentSection[] = [
+      { id: 'section-1', title: 'New title', text: '<p>One</p>', layout: 'rich_text' },
+    ]
+
+    const { container, rerender } = render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="title"
+            data-ve-kind="text"
+            data-ve-inline="true"
+          >
+            Title target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={initialSections} />
+      </div>
+    )
+
+    fireEvent.click(screen.getByText('Title target'))
+    rerender(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="title"
+            data-ve-kind="text"
+            data-ve-inline="true"
+          >
+            Title target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={nextSections} />
+      </div>
+    )
+
+    expect(container.querySelector('.ve-inline-text-editor')?.textContent).toBe('New title')
   })
 })
 

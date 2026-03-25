@@ -84,9 +84,13 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   const [mode, setMode] = useState<EditorMode>('edit')
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null)
   const [selectedField, setSelectedField] = useState<SelectedField | null>(null)
-  const [saveState, setSaveState] = useState({ dirty: false, saving: false, message: '' })
+  const [inspectorOpen, setInspectorOpen] = useState(true)
+  const [saveState, setSaveState] = useState({ dirty: false, saving: false, busy: false, busyLabel: '', message: '' })
   const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
   const shortTextRef = useRef<HTMLDivElement | null>(null)
+  const sectionToolbarRef = useRef<HTMLButtonElement | null>(null)
+  const componentInputRef = useRef<HTMLInputElement | null>(null)
+  const mediaAltRef = useRef<HTMLInputElement | null>(null)
   const selectedFieldRef = useRef<SelectedField | null>(null)
 
   const selectedSection = useMemo(() => {
@@ -132,14 +136,15 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           setSaveState({
             dirty: !!data.dirty,
             saving: !!data.saving,
+            busy: !!data.busy,
+            busyLabel: typeof data.busyLabel === 'string' ? data.busyLabel : '',
             message: typeof data.message === 'string' ? data.message : '',
           })
-          if (data.selectedSectionId) {
-            setSelectedSectionId(data.selectedSectionId)
-          }
+          setSelectedSectionId(typeof data.selectedSectionId === 'string' ? data.selectedSectionId : null)
           break
         case 'section-highlight':
           setSelectedSectionId(data.sectionId || null)
+          setInspectorOpen(!!data.sectionId)
           if (!data.sectionId) {
             setSelectedField(null)
           }
@@ -155,10 +160,12 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               buttonIndex: typeof data.buttonIndex === 'number' ? data.buttonIndex : undefined,
               targetField: typeof data.targetField === 'string' ? data.targetField : undefined,
             })
+            setInspectorOpen(true)
           }
           break
         case 'field-reset':
           setSelectedField(null)
+          setInspectorOpen(!!selectedSectionId)
           break
         case 'save-result':
           setSaveState((current) => ({
@@ -171,10 +178,10 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [enabled])
+  }, [enabled, selectedSectionId])
 
   useEffect(() => {
-    if (!enabled || mode !== 'edit') return
+    if (!enabled || mode !== 'edit' || saveState.busy) return
 
     function handleClick(event: MouseEvent) {
       const target = event.target as HTMLElement | null
@@ -196,6 +203,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
         if (!nextField.sectionId || !nextField.field) return
         setSelectedSectionId(nextField.sectionId)
         setSelectedField(nextField)
+        setInspectorOpen(true)
         sendToParent('field-select', { ...nextField })
         return
       }
@@ -208,13 +216,36 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
         if (!sectionId) return
         setSelectedSectionId(sectionId)
         setSelectedField(null)
+        setInspectorOpen(true)
         sendToParent('section-click', { sectionId })
       }
     }
 
     document.addEventListener('click', handleClick, true)
     return () => document.removeEventListener('click', handleClick, true)
-  }, [enabled, mode])
+  }, [enabled, mode, saveState.busy])
+
+  useEffect(() => {
+    if (!enabled || mode !== 'edit') return
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      if (!inspectorOpen) return
+      event.preventDefault()
+      setInspectorOpen(false)
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [enabled, inspectorOpen, mode])
+
+  useEffect(() => {
+    if (!saveState.busy) return
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur()
+    }
+    editor?.commands.blur()
+  }, [editor, saveState.busy])
 
   useEffect(() => {
     if (!enabled) return
@@ -254,6 +285,46 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   }, [enabled, selectedField, selectedSection])
 
   useEffect(() => {
+    if (!inspectorOpen || saveState.busy || mode !== 'edit') return
+
+    function focusEditable(node: HTMLDivElement | null) {
+      if (!node) return
+      node.focus()
+      const selection = window.getSelection()
+      if (!selection) return
+      const range = document.createRange()
+      range.selectNodeContents(node)
+      range.collapse(false)
+      selection.removeAllRanges()
+      selection.addRange(range)
+    }
+
+    const timer = window.setTimeout(() => {
+      if (selectedField?.field === 'text') {
+        editor?.chain().focus('end').run()
+        return
+      }
+      if (selectedField && (selectedField.kind === 'text' || selectedField.kind === 'button') && selectedField.field !== 'text') {
+        focusEditable(shortTextRef.current)
+        return
+      }
+      if (selectedField?.field === 'component') {
+        componentInputRef.current?.focus()
+        return
+      }
+      if (selectedField?.field === 'media') {
+        mediaAltRef.current?.focus()
+        return
+      }
+      if (selectedSectionId && !selectedField) {
+        sectionToolbarRef.current?.focus()
+      }
+    }, 0)
+
+    return () => window.clearTimeout(timer)
+  }, [editor, inspectorOpen, mode, saveState.busy, selectedField, selectedSectionId])
+
+  useEffect(() => {
     if (!editor) return
     const richTextActive = !!selectedField && selectedField.field === 'text' && mode === 'edit'
     editor.setEditable(richTextActive)
@@ -270,11 +341,11 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
 
   if (!enabled) return null
 
-  const toolbarVisible = mode === 'edit' && selectedSectionId && anchorRect
-  const shortTextVisible = mode === 'edit' && selectedField && (selectedField.kind === 'text' || selectedField.kind === 'button') && selectedField.field !== 'text' && anchorRect
-  const richTextVisible = mode === 'edit' && selectedField?.field === 'text' && anchorRect
-  const componentVisible = mode === 'edit' && selectedField?.field === 'component' && anchorRect
-  const mediaVisible = mode === 'edit' && selectedField?.field === 'media' && anchorRect
+  const toolbarVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedSectionId && !selectedField && anchorRect
+  const shortTextVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField && (selectedField.kind === 'text' || selectedField.kind === 'button') && selectedField.field !== 'text' && anchorRect
+  const richTextVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'text' && anchorRect
+  const componentVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'component' && anchorRect
+  const mediaVisible = mode === 'edit' && !saveState.busy && inspectorOpen && selectedField?.field === 'media' && anchorRect
 
   const toolbarStyle = anchorRect ? {
     top: `${Math.max(anchorRect.top - 56, 12)}px`,
@@ -377,6 +448,30 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           cursor: pointer;
           width: auto;
         }
+        .ve-inline-panel button:disabled,
+        .ve-inline-panel input:disabled,
+        .ve-inline-panel select:disabled {
+          cursor: not-allowed;
+          opacity: 0.55;
+        }
+        .ve-inline-header {
+          align-items: center;
+          display: flex;
+          gap: 10px;
+          justify-content: space-between;
+          margin-bottom: 8px;
+        }
+        .ve-inline-header h4 {
+          margin-bottom: 0;
+        }
+        .ve-inline-close {
+          align-items: center;
+          display: inline-flex;
+          height: 32px;
+          justify-content: center;
+          min-width: 32px;
+          padding: 0;
+        }
         .ve-inline-actions {
           display: flex;
           flex-wrap: wrap;
@@ -408,14 +503,53 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
         .ve-inline-save-state {
           margin-top: 10px;
         }
+        .ve-inline-blocker {
+          align-items: center;
+          background: rgba(15, 23, 42, 0.72);
+          display: flex;
+          inset: 0;
+          justify-content: center;
+          position: fixed;
+          z-index: 10000;
+        }
+        .ve-inline-blocker .ve-inline-panel {
+          min-width: 320px;
+          text-align: center;
+        }
+        .ve-inline-spinner {
+          animation: ve-spin 0.9s linear infinite;
+          border: 4px solid rgba(148, 163, 184, 0.25);
+          border-top-color: #8ab272;
+          border-radius: 999px;
+          height: 44px;
+          margin: 0 auto 14px;
+          width: 44px;
+        }
+        @keyframes ve-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
       ` }} />
+
+      {saveState.busy ? (
+        <div data-ve-overlay className="ve-inline-blocker">
+          <div className="ve-inline-panel">
+            <div className="ve-inline-spinner" />
+            <strong>{saveState.busyLabel || 'Bitte warten…'}</strong>
+            <p>Bearbeitung ist kurz gesperrt, bis der Vorgang abgeschlossen ist.</p>
+          </div>
+        </div>
+      ) : null}
 
       {toolbarVisible ? (
         <div data-ve-overlay className="ve-inline-overlay" style={toolbarStyle}>
           <div className="ve-inline-panel">
-            <h4>Abschnitt</h4>
+            <div className="ve-inline-header">
+              <h4>Abschnitt</h4>
+              <button className="ve-inline-close" type="button" onClick={() => setInspectorOpen(false)}>×</button>
+            </div>
             <div className="ve-inline-actions">
-              <button type="button" onClick={() => sendToParent('section-action', { sectionId: selectedSectionId, action: 'duplicate' })}>Duplizieren</button>
+              <button ref={sectionToolbarRef} type="button" disabled={saveState.busy} onClick={() => sendToParent('section-action', { sectionId: selectedSectionId, action: 'duplicate' })}>Duplizieren</button>
               <button type="button" onClick={() => sendToParent('section-action', { sectionId: selectedSectionId, action: 'move-up' })}>Hoch</button>
               <button type="button" onClick={() => sendToParent('section-action', { sectionId: selectedSectionId, action: 'move-down' })}>Runter</button>
               <button type="button" onClick={() => sendToParent('section-action', { sectionId: selectedSectionId, action: 'delete' })}>Löschen</button>
@@ -423,6 +557,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
             <div className="ve-inline-actions">
               <select
                 aria-label="Layout"
+                disabled={saveState.busy}
                 value={selectedSection?.layout || 'rich_text'}
                 onChange={(event) => sendStructuredFieldChange('layout', event.target.value)}
               >
@@ -436,6 +571,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               </select>
               <select
                 aria-label="Theme"
+                disabled={saveState.busy}
                 value={selectedSection?.theme || 'default'}
                 onChange={(event) => sendStructuredFieldChange('theme', event.target.value)}
               >
@@ -446,6 +582,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               </select>
               <select
                 aria-label="Hintergrund"
+                disabled={saveState.busy}
                 value={selectedSection?.bgColor || 'none'}
                 onChange={(event) => sendStructuredFieldChange('bgColor', event.target.value)}
               >
@@ -458,6 +595,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               </select>
               <select
                 aria-label="Overlay"
+                disabled={saveState.busy}
                 value={selectedSection?.imageOverlay || 'none'}
                 onChange={(event) => sendStructuredFieldChange('imageOverlay', event.target.value)}
               >
@@ -482,11 +620,14 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           }}
         >
           <div className="ve-inline-panel">
-            <h4>{getFieldLabel(selectedField)}</h4>
+            <div className="ve-inline-header">
+              <h4>{getFieldLabel(selectedField)}</h4>
+              <button className="ve-inline-close" type="button" onClick={() => setInspectorOpen(false)}>×</button>
+            </div>
             <div
               ref={shortTextRef}
               className="ve-inline-text-editor"
-              contentEditable
+              contentEditable={!saveState.busy}
               suppressContentEditableWarning
               onInput={handleShortTextInput}
               onBlur={handleShortTextCommit}
@@ -501,6 +642,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               <div className="ve-inline-actions">
                 <input
                   aria-label="Button Link"
+                  disabled={saveState.busy}
                   type="text"
                   value={selectedSection?.buttons?.[selectedField.buttonIndex || 0]?.href || ''}
                   onChange={(event) => sendToParent('field-change', {
@@ -512,6 +654,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
                 />
                 <select
                   aria-label="Button Stil"
+                  disabled={saveState.busy}
                   value={selectedSection?.buttons?.[selectedField.buttonIndex || 0]?.variant || ((selectedField.buttonIndex || 0) === 0 ? 'primary' : 'secondary')}
                   onChange={(event) => sendToParent('field-change', {
                     sectionId: selectedField.sectionId,
@@ -539,12 +682,15 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           }}
         >
           <div className="ve-inline-panel" style={{ width: 'min(720px, calc(100vw - 24px))' }}>
-            <h4>Rich Text</h4>
+            <div className="ve-inline-header">
+              <h4>Rich Text</h4>
+              <button className="ve-inline-close" type="button" onClick={() => setInspectorOpen(false)}>×</button>
+            </div>
             <div className="ve-inline-toolbar">
-              <button type="button" onClick={() => editor?.chain().focus().toggleBold().run()}>B</button>
-              <button type="button" onClick={() => editor?.chain().focus().toggleItalic().run()}>I</button>
-              <button type="button" onClick={() => editor?.chain().focus().toggleBulletList().run()}>• List</button>
-              <button type="button" onClick={() => editor?.chain().focus().toggleOrderedList().run()}>1. List</button>
+              <button type="button" disabled={saveState.busy} onClick={() => editor?.chain().focus().toggleBold().run()}>B</button>
+              <button type="button" disabled={saveState.busy} onClick={() => editor?.chain().focus().toggleItalic().run()}>I</button>
+              <button type="button" disabled={saveState.busy} onClick={() => editor?.chain().focus().toggleBulletList().run()}>• List</button>
+              <button type="button" disabled={saveState.busy} onClick={() => editor?.chain().focus().toggleOrderedList().run()}>1. List</button>
             </div>
             <EditorContent
               editor={editor}
@@ -571,9 +717,14 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           }}
         >
           <div className="ve-inline-panel">
-            <h4>Komponente</h4>
+            <div className="ve-inline-header">
+              <h4>Komponente</h4>
+              <button className="ve-inline-close" type="button" onClick={() => setInspectorOpen(false)}>×</button>
+            </div>
             <input
+              ref={componentInputRef}
               aria-label="Komponente"
+              disabled={saveState.busy}
               type="text"
               value={selectedSection?.component || ''}
               onChange={(event) => sendStructuredFieldChange('component', event.target.value)}
@@ -592,9 +743,14 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           }}
         >
           <div className="ve-inline-panel">
-            <h4>Bild</h4>
+            <div className="ve-inline-header">
+              <h4>Bild</h4>
+              <button className="ve-inline-close" type="button" onClick={() => setInspectorOpen(false)}>×</button>
+            </div>
             <input
+              ref={mediaAltRef}
               aria-label="Alt Text"
+              disabled={saveState.busy}
               type="text"
               value={selectedSection?.imageAlt || ''}
               onChange={(event) => sendStructuredFieldChange('imageAlt', event.target.value)}
@@ -602,6 +758,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
             <div className="ve-inline-actions">
               <button
                 type="button"
+                disabled={saveState.busy}
                 onClick={() => sendToParent('media-request', {
                   sectionId: selectedField?.sectionId,
                   targetField: selectedField?.targetField || 'section_image',

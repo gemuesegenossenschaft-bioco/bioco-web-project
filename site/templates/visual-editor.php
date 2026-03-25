@@ -404,6 +404,53 @@ body {
     display: block;
     font-size: 11px;
 }
+.ve-busy-overlay {
+    align-items: center;
+    background: rgba(15, 23, 42, 0.78);
+    display: none;
+    inset: 0;
+    justify-content: center;
+    position: fixed;
+    z-index: 80;
+}
+.ve-busy-overlay.is-visible {
+    display: flex;
+}
+.ve-busy-dialog {
+    align-items: center;
+    background: #0f172a;
+    border: 1px solid #334155;
+    border-radius: 18px;
+    box-shadow: 0 28px 70px rgba(15, 23, 42, 0.45);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-width: 360px;
+    padding: 28px 24px;
+    text-align: center;
+    width: calc(100vw - 32px);
+}
+.ve-busy-dialog strong {
+    font-size: 18px;
+    font-weight: 700;
+}
+.ve-busy-dialog p {
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.ve-busy-spinner {
+    animation: ve-spin 0.9s linear infinite;
+    border: 5px solid rgba(148, 163, 184, 0.22);
+    border-radius: 999px;
+    border-top-color: #8ab272;
+    height: 54px;
+    width: 54px;
+}
+@keyframes ve-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
@@ -464,6 +511,14 @@ body {
     </div>
 </div>
 
+<div class="ve-busy-overlay" id="ve-busy-overlay" aria-hidden="true">
+    <div class="ve-busy-dialog">
+        <div class="ve-busy-spinner"></div>
+        <strong id="ve-busy-label">Bitte warten…</strong>
+        <p>Der Editor verarbeitet gerade deine Aktion. Andere Interaktionen sind kurz gesperrt.</p>
+    </div>
+</div>
+
 <script>
 (function () {
     var PREFIX = 'bioco:visual-editor:';
@@ -502,6 +557,8 @@ body {
     var mediaClose = document.getElementById('ve-media-close');
     var mediaEmpty = document.getElementById('ve-media-empty');
     var mediaGrid = document.getElementById('ve-media-grid');
+    var busyOverlay = document.getElementById('ve-busy-overlay');
+    var busyLabel = document.getElementById('ve-busy-label');
 
     var currentPageId = null;
     var currentPath = null;
@@ -515,6 +572,12 @@ body {
     var editorMode = 'edit';
     var mediaFiles = [];
     var mediaRequest = null;
+    var busyDepth = 0;
+    var busyVisible = false;
+    var busyTimer = null;
+    var busyText = '';
+    var waitingForIframeReady = false;
+    var BUSY_DELAY = 320;
 
     ALL_PAGES.forEach(function (page) {
         var option = document.createElement('option');
@@ -604,6 +667,64 @@ body {
         iframe.contentWindow.postMessage(Object.assign({ type: PREFIX + action }, data || {}), '*');
     }
 
+    function isBusy() {
+        return busyDepth > 0;
+    }
+
+    function renderBusyOverlay() {
+        busyOverlay.classList.toggle('is-visible', busyVisible);
+        busyOverlay.setAttribute('aria-hidden', busyVisible ? 'false' : 'true');
+        busyLabel.textContent = busyText || 'Bitte warten…';
+    }
+
+    function beginBusy(label) {
+        busyDepth += 1;
+        busyText = label || busyText || 'Bitte warten…';
+        updateActions();
+        if (busyVisible) {
+            renderBusyOverlay();
+            syncIframeState();
+            return;
+        }
+        if (busyTimer) {
+            clearTimeout(busyTimer);
+        }
+        busyTimer = window.setTimeout(function () {
+            busyVisible = true;
+            renderBusyOverlay();
+            syncIframeState();
+        }, BUSY_DELAY);
+        syncIframeState();
+    }
+
+    function endBusy() {
+        if (busyDepth > 0) {
+            busyDepth -= 1;
+        }
+        updateActions();
+        if (busyDepth > 0) {
+            syncIframeState();
+            return;
+        }
+        if (busyTimer) {
+            clearTimeout(busyTimer);
+            busyTimer = null;
+        }
+        busyVisible = false;
+        busyText = '';
+        renderBusyOverlay();
+        syncIframeState();
+    }
+
+    function runWithBusy(label, task) {
+        beginBusy(label);
+        return Promise.resolve()
+            .then(task)
+            .finally(function () {
+                endBusy();
+            });
+    }
+
     function updateModeButtons() {
         btnModeEdit.classList.toggle('is-active', editorMode === 'edit');
         btnModeBrowse.classList.toggle('is-active', editorMode === 'browse');
@@ -614,6 +735,8 @@ body {
             mode: editorMode,
             dirty: hasDirtySections(),
             saving: isSaving,
+            busy: isBusy(),
+            busyLabel: busyText || '',
             message: message || '',
             selectedSectionId: activeSectionId
         });
@@ -621,10 +744,14 @@ body {
 
     function updateActions() {
         var hasActive = !!getSectionById(activeSectionId);
-        btnAdd.disabled = !currentPageId || isSaving;
-        btnPw.disabled = !currentPageId;
-        btnSave.disabled = !hasDirtySections() || isSaving;
-        btnReset.disabled = !hasDirtySections() || isSaving;
+        btnAdd.disabled = !currentPageId || isSaving || isBusy();
+        btnPw.disabled = !currentPageId || isBusy();
+        btnRefresh.disabled = !currentPageId || isBusy();
+        btnSave.disabled = !hasDirtySections() || isSaving || isBusy();
+        btnReset.disabled = !hasDirtySections() || isSaving || isBusy();
+        btnModeEdit.disabled = isBusy();
+        btnModeBrowse.disabled = isBusy();
+        pageSelect.disabled = isBusy();
         if (isSaving) {
             btnSave.textContent = 'Speichert...';
         } else {
@@ -645,6 +772,10 @@ body {
         if (!hasDirtySections()) return false;
         window.alert('Vor "' + actionLabel + '" zuerst speichern oder zurücksetzen.');
         return true;
+    }
+
+    function blockWhileBusy() {
+        return isBusy();
     }
 
     function normalizeChoice(value, fallback) {
@@ -751,7 +882,8 @@ body {
             setStatus('Abschnitte laden...', 'is-loading');
         }
 
-        return fetch(endpoint, { credentials: 'include' })
+        return runWithBusy(options.busyLabel || 'Abschnitte laden…', function () {
+            return fetch(endpoint, { credentials: 'include' })
             .then(function (response) {
                 return response.json().then(function (data) {
                     if (!response.ok) {
@@ -789,7 +921,9 @@ body {
             })
             .catch(function (error) {
                 setStatus(error.message || 'Fehler beim Laden', 'is-error');
+                throw error;
             });
+        });
     }
 
     function loadPage(pageId, path, options) {
@@ -809,6 +943,8 @@ body {
         renderFieldEditor();
         updateActions();
         setStatus('Vorschau laden...', 'is-loading');
+        waitingForIframeReady = true;
+        beginBusy('Vorschau laden…');
 
         var url = SITE_URL + path;
         url += (url.indexOf('?') === -1 ? '?' : '&') + '_visual=1';
@@ -823,6 +959,7 @@ body {
     }
 
     function applyFieldChange(payload) {
+        if (isBusy()) return;
         var section = getSectionById(payload.sectionId);
         if (!section) return;
 
@@ -986,6 +1123,7 @@ body {
             deleteBtn.textContent = '✕';
             deleteBtn.addEventListener('click', function (event) {
                 event.stopPropagation();
+                if (blockWhileBusy()) return;
                 if (blockWhileDirty('Löschen')) return;
                 if (!window.confirm('Abschnitt "' + (section.title || '') + '" wirklich löschen?')) return;
                 deleteSection(section);
@@ -998,10 +1136,15 @@ body {
             item.appendChild(actions);
 
             item.addEventListener('click', function () {
+                if (blockWhileBusy()) return;
                 selectSection(section.id);
             });
 
             item.addEventListener('dragstart', function (event) {
+                if (blockWhileBusy()) {
+                    event.preventDefault();
+                    return;
+                }
                 if (blockWhileDirty('Sortieren')) {
                     event.preventDefault();
                     return;
@@ -1086,7 +1229,7 @@ body {
     }
 
     function saveDirtySections() {
-        if (isSaving || !hasDirtySections()) return;
+        if (isSaving || !hasDirtySections() || isBusy()) return;
         var ordered = sections.filter(function (section) {
             return isSectionDirty(section.id);
         });
@@ -1096,14 +1239,16 @@ body {
         setStatus('Speichert...', 'is-loading');
         syncIframeState();
 
-        ordered.reduce(function (promise, section) {
-            return promise.then(function () {
-                return saveSection(section);
-            });
-        }, Promise.resolve())
-            .then(function () {
-                clearDirtySections();
-                return fetchSections({ keepStatus: true });
+        runWithBusy('Änderungen speichern…', function () {
+            return ordered.reduce(function (promise, section) {
+                return promise.then(function () {
+                    return saveSection(section);
+                });
+            }, Promise.resolve())
+                .then(function () {
+                    clearDirtySections();
+                    return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
+                });
             })
             .then(function () {
                 setStatus('Gespeichert', 'is-ready');
@@ -1124,28 +1269,33 @@ body {
     }
 
     function resetChanges() {
+        if (isBusy()) return;
         if (!confirmDiscardChanges()) return;
         clearDirtySections();
-        fetchSections({ keepStatus: true }).then(function () {
-            setStatus('Zurückgesetzt', 'is-ready');
-            syncIframeState();
-        });
+        fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' })
+            .then(function () {
+                setStatus('Zurückgesetzt', 'is-ready');
+                syncIframeState();
+            })
+            .catch(function () {});
     }
 
     function reorderSections(fromIndex, toIndex) {
-        if (!currentPageId || isSaving || blockWhileDirty('Sortieren')) return;
+        if (!currentPageId || isSaving || isBusy() || blockWhileDirty('Sortieren')) return;
         var order = sections.slice();
         var moved = order.splice(fromIndex, 1)[0];
         order.splice(toIndex, 0, moved);
 
         setStatus('Sortierung speichern...', 'is-loading');
-        postJson(API_ROOT + 'sections-reorder', {
+        runWithBusy('Abschnitte sortieren…', function () {
+            return postJson(API_ROOT + 'sections-reorder', {
             pageId: currentPageId,
             order: order.map(function (section) { return section.pwId; })
         }, 'Sortieren fehlgeschlagen')
             .then(function () {
-                return fetchSections({ keepStatus: true });
-            })
+                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
+            });
+        })
             .then(function () {
                 setStatus('Sortierung aktualisiert', 'is-ready');
             })
@@ -1155,13 +1305,15 @@ body {
     }
 
     function addSection(layout) {
-        if (!currentPageId || isSaving || blockWhileDirty('Hinzufügen')) return;
+        if (!currentPageId || isSaving || isBusy() || blockWhileDirty('Hinzufügen')) return;
         setStatus('Abschnitt anlegen...', 'is-loading');
-        postJson(API_ROOT + 'sections-add', { pageId: currentPageId, layout: layout }, 'Abschnitt konnte nicht angelegt werden')
+        runWithBusy('Abschnitt anlegen…', function () {
+            return postJson(API_ROOT + 'sections-add', { pageId: currentPageId, layout: layout }, 'Abschnitt konnte nicht angelegt werden')
             .then(function (data) {
                 pendingSelectId = data.section && data.section.id ? data.section.id : null;
-                return fetchSections({ keepStatus: true });
-            })
+                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
+            });
+        })
             .then(function () {
                 if (pendingSelectId && getSectionById(pendingSelectId)) {
                     selectSection(pendingSelectId);
@@ -1175,17 +1327,19 @@ body {
     }
 
     function deleteSection(section) {
-        if (!currentPageId || !section || !section.pwId || isSaving) return;
+        if (!currentPageId || !section || !section.pwId || isSaving || isBusy()) return;
         setStatus('Abschnitt löschen...', 'is-loading');
-        postJson(API_ROOT + 'sections-delete', { pageId: currentPageId, sectionPwId: section.pwId }, 'Löschen fehlgeschlagen')
+        runWithBusy('Abschnitt löschen…', function () {
+            return postJson(API_ROOT + 'sections-delete', { pageId: currentPageId, sectionPwId: section.pwId }, 'Löschen fehlgeschlagen')
             .then(function () {
                 if (activeSectionId === section.id) {
                     activeSectionId = null;
                     activeField = null;
                 }
                 markSectionDirty(section.id, false);
-                return fetchSections({ keepStatus: true });
-            })
+                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
+            });
+        })
             .then(function () {
                 setStatus('Abschnitt gelöscht', 'is-ready');
             })
@@ -1195,7 +1349,7 @@ body {
     }
 
     function moveSection(sectionId, direction) {
-        if (!currentPageId || isSaving || blockWhileDirty('Verschieben')) return;
+        if (!currentPageId || isSaving || isBusy() || blockWhileDirty('Verschieben')) return;
         var index = sections.findIndex(function (section) { return section.id === sectionId; });
         if (index === -1) return;
         var targetIndex = index + direction;
@@ -1204,12 +1358,13 @@ body {
     }
 
     function duplicateSection(section) {
-        if (!section || !currentPageId || isSaving || blockWhileDirty('Duplizieren')) return;
+        if (!section || !currentPageId || isSaving || isBusy() || blockWhileDirty('Duplizieren')) return;
         var copyPayload = buildSavePayload(section);
         copyPayload.section_title = (section.title || 'Neuer Abschnitt') + ' (Kopie)';
 
         setStatus('Abschnitt duplizieren...', 'is-loading');
-        postJson(API_ROOT + 'sections-add', {
+        runWithBusy('Abschnitt duplizieren…', function () {
+            return postJson(API_ROOT + 'sections-add', {
             pageId: currentPageId,
             layout: section.layout || 'rich_text'
         }, 'Duplizieren fehlgeschlagen')
@@ -1240,8 +1395,9 @@ body {
                 }, 'Kopie einsortieren fehlgeschlagen');
             })
             .then(function () {
-                return fetchSections({ keepStatus: true });
-            })
+                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
+            });
+        })
             .then(function () {
                 if (pendingSelectId && getSectionById(pendingSelectId)) {
                     selectSection(pendingSelectId);
@@ -1255,7 +1411,7 @@ body {
     }
 
     function openMediaModal(request) {
-        if (!request || !request.sectionId) return;
+        if (!request || !request.sectionId || isBusy()) return;
         mediaRequest = {
             sectionId: request.sectionId,
             targetField: request.targetField || 'section_image'
@@ -1266,7 +1422,8 @@ body {
         mediaEmpty.style.display = 'block';
         mediaModal.classList.add('is-open');
 
-        fetch(API_ROOT + 'media-files', { credentials: 'include' })
+        runWithBusy('Mediathek laden…', function () {
+            return fetch(API_ROOT + 'media-files', { credentials: 'include' })
             .then(function (response) {
                 return parseJson(response).then(function (data) {
                     if (!response.ok || !data.success) {
@@ -1278,7 +1435,8 @@ body {
             .then(function (data) {
                 mediaFiles = Array.isArray(data.files) ? data.files : [];
                 renderMediaGrid();
-            })
+            });
+        })
             .catch(function (error) {
                 mediaGrid.innerHTML = '';
                 mediaEmpty.textContent = error.message || 'Medien konnten nicht geladen werden';
@@ -1318,13 +1476,15 @@ body {
     }
 
     function importMediaFile(file) {
+        if (isBusy()) return;
         var section = mediaRequest ? getSectionById(mediaRequest.sectionId) : null;
         if (!section || !section.pwId || !mediaRequest) return;
 
         mediaEmpty.textContent = 'Medium wird importiert…';
         mediaEmpty.style.display = 'block';
 
-        postJson(API_ROOT + 'media-import', {
+        runWithBusy('Medium importieren…', function () {
+            return postJson(API_ROOT + 'media-import', {
             repeaterItemId: section.pwId,
             targetField: mediaRequest.targetField || 'section_image',
             assetId: file.assetId,
@@ -1333,8 +1493,9 @@ body {
         }, 'Import fehlgeschlagen')
             .then(function () {
                 closeMediaModal();
-                return fetchSections({ keepStatus: true });
-            })
+                return fetchSections({ keepStatus: true, busyLabel: 'Abschnitte aktualisieren…' });
+            });
+        })
             .then(function () {
                 if (activeField) {
                     selectField(activeField, { scroll: false });
@@ -1370,6 +1531,7 @@ body {
     }
 
     pageSelect.addEventListener('change', function () {
+        if (isBusy()) return;
         if (!this.value) return;
         var parts = this.value.split('|');
         var nextPageId = parseInt(parts[0], 10);
@@ -1388,17 +1550,20 @@ body {
     });
 
     btnRefresh.addEventListener('click', function () {
+        if (isBusy()) return;
         if (!currentPageId || !currentPath) return;
         if (!confirmDiscardChanges()) return;
         loadPage(currentPageId, currentPath, { force: true });
     });
 
     btnPw.addEventListener('click', function () {
+        if (isBusy()) return;
         if (!currentPageId) return;
         window.open('<?= $config->urls->admin ?>page/edit/?id=' + currentPageId, '_blank');
     });
 
     btnAdd.addEventListener('click', function () {
+        if (isBusy()) return;
         if (!currentPageId) return;
         if (blockWhileDirty('Hinzufügen')) return;
         var choice = window.prompt(
@@ -1427,12 +1592,14 @@ body {
     });
 
     btnModeEdit.addEventListener('click', function () {
+        if (isBusy()) return;
         editorMode = 'edit';
         updateActions();
         syncIframeState();
     });
 
     btnModeBrowse.addEventListener('click', function () {
+        if (isBusy()) return;
         editorMode = 'browse';
         updateActions();
         syncIframeState();
@@ -1440,6 +1607,7 @@ body {
 
     mediaClose.addEventListener('click', closeMediaModal);
     mediaModal.addEventListener('click', function (event) {
+        if (isBusy()) return;
         if (event.target === mediaModal) {
             closeMediaModal();
         }
@@ -1456,8 +1624,22 @@ body {
             setStatus('Verbunden', 'is-ready');
             syncIframeState();
             if (currentPath) {
-                fetchSections();
+                fetchSections({ busyLabel: 'Abschnitte laden…' })
+                    .catch(function () {})
+                    .finally(function () {
+                        if (waitingForIframeReady) {
+                            waitingForIframeReady = false;
+                            endBusy();
+                        }
+                    });
+            } else if (waitingForIframeReady) {
+                waitingForIframeReady = false;
+                endBusy();
             }
+            return;
+        }
+
+        if (isBusy()) {
             return;
         }
 
@@ -1492,6 +1674,7 @@ body {
         event.returnValue = '';
     });
 
+    renderBusyOverlay();
     updateActions();
 })();
 </script>
