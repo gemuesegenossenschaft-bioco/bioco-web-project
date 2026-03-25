@@ -82,4 +82,49 @@ describe('SectionRenderer image filters', () => {
     expect(headings).toHaveLength(1)
     expect(screen.getByText('Duplicate Heading')).toBeTruthy()
   })
+
+  it('renders layout-owned media_text component without generic cms-component wrapper', () => {
+    const sections: ContentSection[] = [
+      {
+        id: 'media-text-component',
+        title: 'Wir',
+        text: '<p>Body</p>',
+        layout: 'component',
+        component: 'media_text',
+        image: '/wir.jpg',
+        config: {
+          mediaSide: 'right',
+          mediaWidth: '40',
+          mediaRatio: '1:1',
+        },
+      },
+    ]
+
+    const { container } = render(<SectionRenderer sections={sections} visualEditor={true} />)
+    expect(container.querySelector('.cms-component')).toBeNull()
+    expect(container.querySelector('[data-section-id="media-text-component"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-field="media"]')).toBeTruthy()
+    expect(screen.getByText('Wir')).toBeTruthy()
+  })
+
+  it('renders timeline_item component with eyebrow badge and rich text body', () => {
+    const sections: ContentSection[] = [
+      {
+        id: 'timeline-item',
+        title: 'Neuer Standort',
+        eyebrow: '2024',
+        text: '<p>Beschreibung</p>',
+        layout: 'component',
+        component: 'timeline_item',
+        config: {
+          emphasis: 'highlight',
+        },
+      },
+    ]
+
+    render(<SectionRenderer sections={sections} visualEditor={true} />)
+    expect(screen.getByText('2024')).toBeTruthy()
+    expect(screen.getByText('Neuer Standort')).toBeTruthy()
+    expect(screen.getByText('Beschreibung')).toBeTruthy()
+  })
 })
