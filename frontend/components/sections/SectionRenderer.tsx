@@ -1,39 +1,13 @@
 import Image from 'next/image'
 import { CTA } from '@/components/CTA'
-import { ContactForm } from '@/components/forms/ContactForm'
-import { MembershipForm } from '@/components/forms/MembershipForm'
-import { SubscribeForm } from '@/components/forms/SubscribeForm'
-import { VisitDayForm } from '@/components/forms/VisitDayForm'
-import { WaitingListForm } from '@/components/forms/WaitingListForm'
-import { PricingCalculator } from '@/components/PricingCalculator'
-import { EventsSection } from '@/components/EventsSection'
-import { SchnuppertageSection } from '@/components/SchnuppertageSection'
-import { DepotMap } from '@/components/DepotMap'
-import { GeisshofMap } from '@/components/GeisshofMap'
-import { Saisonkalender } from '@/components/Saisonkalender'
-import { Gallery } from '@/components/Gallery'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
+import { renderRegisteredComponent } from '@/lib/componentRenderers'
 import type { ContentSection, ContentMedia } from '@/lib/processwire-types'
 
 interface SectionRendererProps {
   sections: ContentSection[]
   isEditing?: boolean
   visualEditor?: boolean
-}
-
-const componentMap: Record<string, React.ReactNode> = {
-  contact_form: <ContactForm />,
-  membership_form: <MembershipForm />,
-  subscribe_form: <SubscribeForm />,
-  visit_day_form: <VisitDayForm />,
-  waiting_list_form: <WaitingListForm />,
-  pricing_calculator: <PricingCalculator />,
-  events_feed: <EventsSection />,
-  schnuppertage: <SchnuppertageSection />,
-  depot_map: <DepotMap />,
-  geisshof_map: <GeisshofMap />,
-  saisonkalender: <Saisonkalender />,
-  gallery: <Gallery />,
 }
 
 function hasHeadingHtml(html?: string | null): boolean {
@@ -223,8 +197,7 @@ function RichTextSection({ section, visualEditor }: { section: ContentSection; v
 }
 
 function ComponentSection({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
-  const componentKey = section.component || ''
-  const component = componentMap[componentKey] || null
+  const component = renderRegisteredComponent(section.component)
   return (
     <section className="cms-section cms-component">
       <SectionHeader section={section} visualEditor={visualEditor} />

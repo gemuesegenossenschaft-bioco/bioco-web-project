@@ -2,6 +2,9 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  experimental: {
+    externalDir: true,
+  },
   env: {
     PROCESSWIRE_BASE_URL:
       process.env.PROCESSWIRE_BASE_URL ||

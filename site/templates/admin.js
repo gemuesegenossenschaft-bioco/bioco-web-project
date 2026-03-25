@@ -649,6 +649,91 @@ $(document).ready(function() {
         });
     }
 
+    function normalizeComponentKey(value) {
+        return $.trim(String(value || '')).toLowerCase();
+    }
+
+    function getComponentRegistryLookup($helper) {
+        var cached = $helper.data('biocoComponentRegistryLookup');
+        if (cached) return cached;
+
+        var raw = $.trim(String($helper.find('.bioco-component-registry-json').first().text() || ''));
+        if (!raw) return {};
+
+        var entries;
+        try {
+            entries = JSON.parse(raw);
+        } catch (error) {
+            return {};
+        }
+
+        var lookup = {};
+        (entries || []).forEach(function(entry) {
+            if (!entry || !entry.key) return;
+            lookup[normalizeComponentKey(entry.key)] = entry;
+            (entry.aliases || []).forEach(function(alias) {
+                lookup[normalizeComponentKey(alias)] = entry;
+            });
+        });
+
+        $helper.data('biocoComponentRegistryLookup', lookup);
+        return lookup;
+    }
+
+    function updateComponentHelper($helper) {
+        var $scope = $helper.closest('.InputfieldRepeaterItem, form, body');
+        var $input = $scope.find('input[name="section_component"]').first();
+        if (!$input.length) return;
+
+        var raw = $.trim(String($input.val() || ''));
+        var entry = getComponentRegistryLookup($helper)[normalizeComponentKey(raw)] || null;
+        var status = !raw ? 'Leer' : (entry ? 'Mapped' : 'Unmapped');
+        var statusClass = entry ? 'is-mapped' : (!raw ? 'is-empty' : 'is-unmapped');
+        var target = entry && entry.frontendTarget
+            ? [entry.frontendTarget.file || '', entry.frontendTarget.export || ''].filter(Boolean).join(' · ')
+            : 'Keine bekannte Frontend-Zuordnung';
+        var fields = entry && $.isArray(entry.cmsFields) && entry.cmsFields.length
+            ? entry.cmsFields.join(', ')
+            : 'Keine Feldzuordnung hinterlegt';
+        var notes = entry && entry.notes
+            ? entry.notes
+            : 'Freitext-Key ohne bekannte Registry-Zuordnung.';
+
+        var $status = $helper.find('.bioco-component-helper-status');
+        $status
+            .removeClass('is-mapped is-unmapped is-empty')
+            .addClass(statusClass)
+            .text(status)
+            .css({
+                background: entry ? '#dff5e3' : (!raw ? '#eef2f7' : '#fde7e7'),
+                color: entry ? '#1c6b2d' : (!raw ? '#475569' : '#9f1239')
+            });
+
+        $helper.find('.bioco-component-helper-name').text(entry ? entry.label : (raw ? 'Keine bekannte Zuordnung' : 'Keine Komponente gesetzt'));
+        $helper.find('.bioco-component-helper-key').text(raw || '—');
+        $helper.find('.bioco-component-helper-target').text(target);
+        $helper.find('.bioco-component-helper-fields').text(fields);
+        $helper.find('.bioco-component-helper-notes').text(notes);
+    }
+
+    function initComponentFieldHelpers() {
+        $('[data-bioco-component-helper]').each(function() {
+            var $helper = $(this);
+            var $scope = $helper.closest('.InputfieldRepeaterItem, form, body');
+            var $input = $scope.find('input[name="section_component"]').first();
+            if (!$input.length) return;
+            if ($input.data('biocoComponentHelperInit')) {
+                updateComponentHelper($helper);
+                return;
+            }
+            $input.data('biocoComponentHelperInit', true);
+            $input.on('input change keyup', function() {
+                updateComponentHelper($helper);
+            });
+            updateComponentHelper($helper);
+        });
+    }
+
     // ================================================================
     // Initialize
     // ================================================================
@@ -658,6 +743,7 @@ $(document).ready(function() {
     renderUsageBlocksInMediaLibrary();
     renameContentPlanningUi();
     redirectVisualEditorEditScreen();
+    initComponentFieldHelpers();
 
     $(document).on('reloaded wiretabclick', '.InputfieldRepeater, .Inputfield', function() {
         setTimeout(function() {
@@ -667,6 +753,7 @@ $(document).ready(function() {
             renderUsageBlocksInMediaLibrary();
             renameContentPlanningUi();
             redirectVisualEditorEditScreen();
+            initComponentFieldHelpers();
         }, 100);
     });
 

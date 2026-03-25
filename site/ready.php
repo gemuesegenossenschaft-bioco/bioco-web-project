@@ -37,6 +37,113 @@ function biocoParseAssetIdFromTags($tags) {
     return 0;
 }
 
+function biocoComponentRegistryPath() {
+    return __DIR__ . '/templates/component-registry.json';
+}
+
+function biocoComponentRegistryEntries() {
+    static $entries = null;
+    if ($entries !== null) return $entries;
+
+    $entries = [];
+    $path = biocoComponentRegistryPath();
+    if (!is_file($path)) return $entries;
+
+    $json = @file_get_contents($path);
+    if ($json === false || $json === '') return $entries;
+
+    $decoded = json_decode($json, true);
+    if (!is_array($decoded)) return $entries;
+
+    foreach ($decoded as $entry) {
+        if (!is_array($entry) || empty($entry['key']) || empty($entry['label'])) continue;
+        $entries[] = $entry;
+    }
+
+    return $entries;
+}
+
+function biocoNormalizeComponentLookupKey($value) {
+    return strtolower(trim((string) $value));
+}
+
+function biocoComponentRegistryLookup() {
+    static $lookup = null;
+    if ($lookup !== null) return $lookup;
+
+    $lookup = [];
+    foreach (biocoComponentRegistryEntries() as $entry) {
+        $lookup[biocoNormalizeComponentLookupKey($entry['key'])] = $entry;
+        if (!empty($entry['aliases']) && is_array($entry['aliases'])) {
+            foreach ($entry['aliases'] as $alias) {
+                $lookup[biocoNormalizeComponentLookupKey($alias)] = $entry;
+            }
+        }
+    }
+    return $lookup;
+}
+
+function biocoResolveComponentRegistryEntry($rawKey) {
+    $lookupKey = biocoNormalizeComponentLookupKey($rawKey);
+    if ($lookupKey === '') return null;
+    $lookup = biocoComponentRegistryLookup();
+    return $lookup[$lookupKey] ?? null;
+}
+
+function biocoComponentDisplayLabel($rawKey) {
+    $raw = trim((string) $rawKey);
+    if ($raw === '') return '';
+    $entry = biocoResolveComponentRegistryEntry($raw);
+    if (!$entry) return $raw;
+    return $raw === $entry['key'] ? "{$entry['label']} ({$entry['key']})" : "{$entry['label']} ({$raw})";
+}
+
+function biocoRenderComponentHelperMarkup($rawKey, $datalistId) {
+    $sanitizer = wire('sanitizer');
+    $raw = trim((string) $rawKey);
+    $entry = biocoResolveComponentRegistryEntry($raw);
+    $entries = biocoComponentRegistryEntries();
+    $json = json_encode($entries, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $json = str_replace('</script', '<\/script', (string) $json);
+    $status = $raw === '' ? 'Leer' : ($entry ? 'Mapped' : 'Unmapped');
+    $statusClass = $entry ? 'is-mapped' : ($raw === '' ? 'is-empty' : 'is-unmapped');
+    $name = $entry['label'] ?? 'Keine bekannte Zuordnung';
+    $target = $entry
+        ? (($entry['frontendTarget']['file'] ?? '') . ' · ' . ($entry['frontendTarget']['export'] ?? ''))
+        : 'Keine bekannte Frontend-Zuordnung';
+    $fields = !empty($entry['cmsFields']) && is_array($entry['cmsFields'])
+        ? implode(', ', $entry['cmsFields'])
+        : 'Keine Feldzuordnung hinterlegt';
+    $notes = $entry['notes'] ?? 'Freitext-Key ohne bekannte Registry-Zuordnung.';
+
+    $options = '';
+    foreach ($entries as $registryEntry) {
+        $value = $sanitizer->entities((string) ($registryEntry['key'] ?? ''));
+        if ($value === '') continue;
+        $label = $sanitizer->entities((string) ($registryEntry['label'] ?? ''));
+        $options .= '<option value="' . $value . '">' . $label . '</option>';
+    }
+
+    return
+        '<div class="bioco-component-helper" data-bioco-component-helper>' .
+            '<script type="application/json" class="bioco-component-registry-json">' . $json . '</script>' .
+            '<datalist id="' . $sanitizer->entities($datalistId) . '">' . $options . '</datalist>' .
+            '<div class="uk-card uk-card-default" style="padding:12px;border:1px solid #d9d9d9;background:#fbfbfb">' .
+                '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px">' .
+                    '<strong>Frontend-Mapping</strong>' .
+                    '<span class="bioco-component-helper-status ' . $statusClass . '" style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:' . ($entry ? '#dff5e3' : ($raw === '' ? '#eef2f7' : '#fde7e7')) . ';color:' . ($entry ? '#1c6b2d' : ($raw === '' ? '#475569' : '#9f1239')) . '">' . $sanitizer->entities($status) . '</span>' .
+                '</div>' .
+                '<div style="display:grid;gap:6px">' .
+                    '<div><strong>Name:</strong> <span class="bioco-component-helper-name">' . $sanitizer->entities($name) . '</span></div>' .
+                    '<div><strong>Raw key:</strong> <code class="bioco-component-helper-key">' . $sanitizer->entities($raw !== '' ? $raw : '—') . '</code></div>' .
+                    '<div><strong>Frontend:</strong> <code class="bioco-component-helper-target">' . $sanitizer->entities($target) . '</code></div>' .
+                    '<div><strong>CMS-Felder:</strong> <span class="bioco-component-helper-fields">' . $sanitizer->entities($fields) . '</span></div>' .
+                    '<div class="bioco-component-helper-notes" style="color:#5f6b7a">' . $sanitizer->entities($notes) . '</div>' .
+                '</div>' .
+            '</div>' .
+        '</div>';
+}
+
 function biocoUsageContext(Page $page) {
     $ctx = [
         'pageId' => (int)$page->id,
@@ -427,14 +534,33 @@ $wire->addHookAfter('ProcessPageEdit::buildForm', function($event) {
     if (!$page instanceof Page || !$page->id) return;
     if (strpos($page->template->name, 'repeater_content_sections') !== 0) return;
 
+    $modules = wire('modules');
+    $componentField = $form->getChildByName('section_component');
+    if ($componentField) {
+        $componentField->label = 'Frontend-Komponente';
+        $componentField->notes = 'Freier Key. Bekannte Komponenten und ihre Frontend-Zuordnung werden unten angezeigt.';
+        $datalistId = 'bioco-component-registry-' . (int) $page->id;
+        $componentField->attr('list', $datalistId);
+
+        $helper = $modules->get('InputfieldMarkup');
+        if ($helper) {
+            $helper->attr('name', '_bioco_component_helper');
+            $helper->label = '';
+            $helper->value = biocoRenderComponentHelperMarkup((string) $page->get('section_component'), $datalistId);
+            if (method_exists($form, 'insertAfter')) {
+                $form->insertAfter($helper, $componentField);
+            } else {
+                $form->add($helper);
+            }
+        }
+    }
+
     $advancedFields = [
-        'section_id', 'section_component', 'section_bg_color', 'section_image_overlay',
+        'section_id', 'section_bg_color', 'section_image_overlay',
         'section_image_brightness', 'section_image_contrast', 'section_image_saturate',
         'section_video_url', 'section_video_title',
         'button2_text', 'button2_href', 'button2_variant',
     ];
-
-    $modules = wire('modules');
     $fieldset = $modules->get('InputfieldFieldset');
     $fieldset->label = 'Erweitert';
     $fieldset->collapsed = \ProcessWire\Inputfield::collapsedYes;

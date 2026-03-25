@@ -5,6 +5,7 @@ import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import Image from 'next/image'
 import Link from 'next/link'
+import { isComponentKey } from '@/lib/componentRegistry'
 import type { ContentSection } from '@/lib/processwire-types'
 
 interface TimelineItem {
@@ -80,7 +81,7 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const geschichteSection = getSection('geschichte')
   const timelineHeaderSection =
     getSection('timeline') ||
-    sections.find((s) => ['timeline', 'timeline_header'].includes(String(s.component || '').toLowerCase())) ||
+    sections.find((s) => isComponentKey(s.component, 'timeline_header')) ||
     sections.find((s) => ['timeline', 'timeline_header'].includes(String(s.layout || '').toLowerCase())) ||
     sections.find((s) => String(s.title || '').toLowerCase() === 'timeline')
   
@@ -91,14 +92,12 @@ export function WirClient({ intro, sections, timeline }: WirClientProps) {
   const cmsTimelineItems: TimelineItem[] = sections
     .filter((s) => {
       const id = String(s.id || '').toLowerCase()
-      const component = String(s.component || '').toLowerCase()
       const layout = String(s.layout || '').toLowerCase()
       const title = stripHtml(s.title).toLowerCase()
       const hasTimelineMarker =
         id.startsWith('timeline_') ||
         id.startsWith('timeline-') ||
-        component === 'timeline_item' ||
-        component === 'timeline-item' ||
+        isComponentKey(s.component, 'timeline_item') ||
         layout === 'timeline_item' ||
         layout === 'timeline-item'
       const hasYearSignal = !!extractYear(s.eyebrow || s.title || s.id)

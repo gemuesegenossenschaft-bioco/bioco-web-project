@@ -1,0 +1,158 @@
+[
+  {
+    "key": "contact_form",
+    "label": "Kontaktformular",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/forms/ContactForm.tsx",
+      "export": "ContactForm"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "membership_form",
+    "label": "Mitgliedschaftsformular",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/forms/MembershipForm.tsx",
+      "export": "MembershipForm"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "subscribe_form",
+    "label": "Newsletter-Formular",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/forms/SubscribeForm.tsx",
+      "export": "SubscribeForm"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "visit_day_form",
+    "label": "Schnuppertag-Formular",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/forms/VisitDayForm.tsx",
+      "export": "VisitDayForm"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "waiting_list_form",
+    "label": "Wartelisten-Formular",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/forms/WaitingListForm.tsx",
+      "export": "WaitingListForm"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "pricing_calculator",
+    "label": "Preisrechner",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/PricingCalculator.tsx",
+      "export": "PricingCalculator"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "events_feed",
+    "label": "Events-Feed",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/EventsSection.tsx",
+      "export": "EventsSection"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "schnuppertage",
+    "label": "Schnuppertage",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/SchnuppertageSection.tsx",
+      "export": "SchnuppertageSection"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "depot_map",
+    "label": "Depot-Karte",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/DepotMap.tsx",
+      "export": "DepotMap"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "geisshof_map",
+    "label": "Geisshof-Karte",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/GeisshofMap.tsx",
+      "export": "GeisshofMap"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "saisonkalender",
+    "label": "Saisonkalender",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/Saisonkalender.tsx",
+      "export": "Saisonkalender"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "gallery",
+    "label": "Galerie",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/Gallery.tsx",
+      "export": "Gallery"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+  },
+  {
+    "key": "timeline_header",
+    "label": "Timeline-Kopf",
+    "kind": "semantic",
+    "frontendTarget": {
+      "file": "frontend/components/WirClient.tsx",
+      "export": "WirClient"
+    },
+    "cmsFields": ["section_component", "section_title", "section_text"],
+    "notes": "Wird auf der Wir-Seite als Timeline-Header interpretiert.",
+    "aliases": ["timeline"]
+  },
+  {
+    "key": "timeline_item",
+    "label": "Timeline-Eintrag",
+    "kind": "semantic",
+    "frontendTarget": {
+      "file": "frontend/components/WirClient.tsx",
+      "export": "WirClient"
+    },
+    "cmsFields": ["section_component", "section_eyebrow", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "notes": "Wird auf der Wir-Seite als Timeline-Eintrag interpretiert.",
+    "aliases": ["timeline-item"]
+  }
+]

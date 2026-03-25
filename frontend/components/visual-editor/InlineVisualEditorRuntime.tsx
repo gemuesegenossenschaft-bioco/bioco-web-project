@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import { formatComponentDisplayName, resolveComponentRegistryEntry } from '@/lib/componentRegistry'
 import type { ContentSection } from '@/lib/processwire-types'
 
 const MSG_PREFIX = 'bioco:visual-editor:'
@@ -92,10 +93,19 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   const componentInputRef = useRef<HTMLInputElement | null>(null)
   const mediaAltRef = useRef<HTMLInputElement | null>(null)
   const selectedFieldRef = useRef<SelectedField | null>(null)
+  const shortTextValueRef = useRef('')
+  const shortTextChangeTimerRef = useRef<number | null>(null)
+  const richTextValueRef = useRef('')
+  const richTextChangeTimerRef = useRef<number | null>(null)
+  const richTextSyncingRef = useRef(false)
 
   const selectedSection = useMemo(() => {
     return sections.find((section) => section.id === selectedSectionId) || null
   }, [sections, selectedSectionId])
+
+  const selectedComponentMeta = useMemo(() => {
+    return resolveComponentRegistryEntry(selectedSection?.component || '')
+  }, [selectedSection?.component])
 
   const editor = useEditor({
     extensions: [StarterKit],
@@ -105,11 +115,19 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
     onUpdate: ({ editor }) => {
       const activeField = selectedFieldRef.current
       if (!activeField || activeField.field !== 'text') return
-      sendToParent('field-change', {
-        sectionId: activeField.sectionId,
-        field: 'text',
-        value: editor.getHTML(),
-      })
+      if (richTextSyncingRef.current) return
+      const value = editor.getHTML()
+      richTextValueRef.current = value
+      if (richTextChangeTimerRef.current) {
+        window.clearTimeout(richTextChangeTimerRef.current)
+      }
+      richTextChangeTimerRef.current = window.setTimeout(() => {
+        sendToParent('field-change', {
+          sectionId: activeField.sectionId,
+          field: 'text',
+          value,
+        })
+      }, 120)
     },
     editorProps: {
       attributes: {
@@ -120,6 +138,20 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
 
   useEffect(() => {
     selectedFieldRef.current = selectedField
+    if (!selectedField || selectedField.field !== 'text') {
+      richTextValueRef.current = ''
+      if (richTextChangeTimerRef.current) {
+        window.clearTimeout(richTextChangeTimerRef.current)
+        richTextChangeTimerRef.current = null
+      }
+    }
+    if (!selectedField || (selectedField.kind !== 'text' && selectedField.kind !== 'button')) {
+      shortTextValueRef.current = ''
+      if (shortTextChangeTimerRef.current) {
+        window.clearTimeout(shortTextChangeTimerRef.current)
+        shortTextChangeTimerRef.current = null
+      }
+    }
   }, [selectedField])
 
   useEffect(() => {
@@ -281,7 +313,15 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   useEffect(() => {
     if (!enabled || !selectedField || selectedField.kind !== 'text' && selectedField.kind !== 'button') return
     if (!shortTextRef.current) return
-    shortTextRef.current.textContent = getShortTextValue(selectedSection, selectedField)
+    const nextValue = getShortTextValue(selectedSection, selectedField)
+    const isEditing = document.activeElement === shortTextRef.current
+    if (isEditing && shortTextValueRef.current === nextValue) return
+    if (shortTextRef.current.textContent !== nextValue) {
+      shortTextRef.current.textContent = nextValue
+    }
+    if (!isEditing) {
+      shortTextValueRef.current = nextValue
+    }
   }, [enabled, selectedField, selectedSection])
 
   useEffect(() => {
@@ -329,12 +369,27 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
     const richTextActive = !!selectedField && selectedField.field === 'text' && mode === 'edit'
     editor.setEditable(richTextActive)
     if (richTextActive) {
-      editor.commands.setContent(getRichTextValue(selectedSection), { emitUpdate: false })
+      const nextValue = getRichTextValue(selectedSection)
+      const currentValue = editor.getHTML()
+      if (nextValue !== currentValue && nextValue !== richTextValueRef.current) {
+        richTextSyncingRef.current = true
+        editor.commands.setContent(nextValue, { emitUpdate: false })
+        richTextSyncingRef.current = false
+      }
+      if (richTextValueRef.current !== nextValue && document.activeElement !== editor.view.dom) {
+        richTextValueRef.current = nextValue
+      }
     }
   }, [editor, mode, selectedField, selectedSection])
 
   useEffect(() => {
     return () => {
+      if (shortTextChangeTimerRef.current) {
+        window.clearTimeout(shortTextChangeTimerRef.current)
+      }
+      if (richTextChangeTimerRef.current) {
+        window.clearTimeout(richTextChangeTimerRef.current)
+      }
       editor?.destroy()
     }
   }, [editor])
@@ -360,25 +415,38 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   function handleShortTextInput() {
     if (!selectedField || !shortTextRef.current) return
     const value = shortTextRef.current.innerText.replace(/\n/g, '')
+    shortTextValueRef.current = value
+    if (shortTextChangeTimerRef.current) {
+      window.clearTimeout(shortTextChangeTimerRef.current)
+    }
     if (selectedField.kind === 'button') {
-      sendToParent('field-change', {
-        sectionId: selectedField.sectionId,
-        field: 'button_text',
-        buttonIndex: selectedField.buttonIndex || 0,
-        value,
-      })
+      shortTextChangeTimerRef.current = window.setTimeout(() => {
+        sendToParent('field-change', {
+          sectionId: selectedField.sectionId,
+          field: 'button_text',
+          buttonIndex: selectedField.buttonIndex || 0,
+          value,
+        })
+      }, 90)
       return
     }
-    sendToParent('field-change', {
-      sectionId: selectedField.sectionId,
-      field: selectedField.field,
-      value,
-    })
+    shortTextChangeTimerRef.current = window.setTimeout(() => {
+      sendToParent('field-change', {
+        sectionId: selectedField.sectionId,
+        field: selectedField.field,
+        value,
+      })
+    }, 90)
   }
 
   function handleShortTextCommit() {
     if (!selectedField || !shortTextRef.current) return
     const value = shortTextRef.current.innerText.replace(/\n/g, '')
+    shortTextValueRef.current = value
+    if (shortTextChangeTimerRef.current) {
+      window.clearTimeout(shortTextChangeTimerRef.current)
+      shortTextChangeTimerRef.current = null
+    }
     if (selectedField.kind === 'button') {
       sendToParent('field-commit', {
         sectionId: selectedField.sectionId,
@@ -696,6 +764,11 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               editor={editor}
               onBlur={() => {
                 if (!selectedField) return
+                if (richTextChangeTimerRef.current) {
+                  window.clearTimeout(richTextChangeTimerRef.current)
+                  richTextChangeTimerRef.current = null
+                }
+                richTextValueRef.current = editor?.getHTML() || ''
                 sendToParent('field-commit', {
                   sectionId: selectedField.sectionId,
                   field: 'text',
@@ -729,6 +802,13 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               value={selectedSection?.component || ''}
               onChange={(event) => sendStructuredFieldChange('component', event.target.value)}
             />
+            <p>
+              {selectedSection?.component
+                ? selectedComponentMeta
+                  ? `${formatComponentDisplayName(selectedSection.component)}`
+                  : 'Keine bekannte Registry-Zuordnung'
+                : 'Kein Komponenten-Key gesetzt'}
+            </p>
           </div>
         </div>
       ) : null}

@@ -15,6 +15,7 @@ if (!$user->isLoggedin() || $user->isGuest()) {
 $siteUrl = rtrim(getenv('NEXT_PUBLIC_SITE_URL') ?: 'https://bioco.ch', '/');
 $draftSecret = getenv('PW_PREVIEW_TOKEN') ?: '';
 $apiRoot = $config->urls->root . 'api/';
+$componentRegistryJson = json_encode(biocoComponentRegistryEntries(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 $pagesById = [];
 $home = $pages->get('/');
@@ -526,6 +527,7 @@ body {
     var DRAFT_SECRET = <?= json_encode($draftSecret) ?>;
     var API_ROOT = <?= json_encode($apiRoot) ?>;
     var ALL_PAGES = <?= json_encode($contentPages, JSON_UNESCAPED_UNICODE) ?>;
+    var COMPONENT_REGISTRY = <?= $componentRegistryJson ?: '[]' ?>;
     var LAYOUT_LABELS = {
         split_media_text: 'Bild + Text',
         split_text_media: 'Text + Bild',
@@ -612,6 +614,33 @@ body {
             if (sections[i].id === sectionId) return sections[i];
         }
         return null;
+    }
+
+    function normalizeComponentLookupKey(value) {
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function resolveComponentMeta(rawKey) {
+        var lookup = normalizeComponentLookupKey(rawKey);
+        if (!lookup) return null;
+        for (var i = 0; i < COMPONENT_REGISTRY.length; i++) {
+            var entry = COMPONENT_REGISTRY[i] || {};
+            if (normalizeComponentLookupKey(entry.key) === lookup) return entry;
+            if (Array.isArray(entry.aliases)) {
+                for (var j = 0; j < entry.aliases.length; j++) {
+                    if (normalizeComponentLookupKey(entry.aliases[j]) === lookup) return entry;
+                }
+            }
+        }
+        return null;
+    }
+
+    function formatComponentLabel(rawKey) {
+        var raw = String(rawKey || '').trim();
+        if (!raw) return '';
+        var meta = resolveComponentMeta(raw);
+        if (!meta) return raw;
+        return raw === meta.key ? meta.label + ' (' + meta.key + ')' : meta.label + ' (' + raw + ')';
     }
 
     function getActiveSection() {
@@ -848,7 +877,7 @@ body {
             '<div class="ve-info-card">' +
                 '<strong>Aktiver Abschnitt</strong>' +
                 '<p>' + escapeHtml(section.title || '(kein Titel)') + '</p>' +
-                '<p>Layout: ' + escapeHtml(LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt') + (section.component ? ' · Komponente: ' + escapeHtml(section.component) : '') + '</p>' +
+                '<p>Layout: ' + escapeHtml(LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt') + (section.component ? ' · Komponente: ' + escapeHtml(formatComponentLabel(section.component)) : '') + '</p>' +
             '</div>' +
             '<div class="ve-info-card">' +
                 '<strong>Aktives Feld</strong>' +
@@ -1100,7 +1129,7 @@ body {
             if (section.component) {
                 var component = document.createElement('span');
                 component.className = 've-layout-badge';
-                component.textContent = section.component;
+                component.textContent = formatComponentLabel(section.component);
                 meta.appendChild(component);
             }
 
