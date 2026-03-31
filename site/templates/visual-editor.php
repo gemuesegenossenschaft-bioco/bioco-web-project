@@ -102,7 +102,6 @@ body {
     font-weight: 700;
     white-space: nowrap;
 }
-.ve-toolbar select,
 .ve-toolbar button,
 .ve-toolbar a,
 .ve-field-editor input,
@@ -114,9 +113,8 @@ body {
     color: #e5e7eb;
     font: inherit;
 }
-.ve-toolbar select {
-    min-width: 260px;
-    padding: 7px 10px;
+.ve-toolbar-spacer {
+    flex: 1;
 }
 .ve-toolbar-actions {
     display: flex;
@@ -180,16 +178,39 @@ body {
     width: 430px;
 }
 .ve-sidebar-header {
-    align-items: center;
+    align-items: flex-start;
     border-bottom: 1px solid #1f2937;
     display: flex;
     gap: 8px;
     justify-content: space-between;
     padding: 12px 14px;
 }
+.ve-sidebar-page {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+.ve-sidebar-kicker {
+    color: #64748b;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
 .ve-sidebar-title {
     font-size: 13px;
     font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ve-sidebar-path {
+    color: #94a3b8;
+    font-size: 11px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .ve-section-list-wrap {
     border-bottom: 1px solid #1f2937;
@@ -640,9 +661,7 @@ body {
 
 <div class="ve-toolbar">
     <span class="ve-toolbar-logo">bioco Visual Editor</span>
-    <select id="ve-page-select">
-        <option value="">Seite wählen...</option>
-    </select>
+    <span class="ve-toolbar-spacer" aria-hidden="true"></span>
     <span id="ve-status" class="ve-status">Nicht verbunden</span>
     <div class="ve-mode-switch">
         <button class="ve-btn ve-mode-btn is-active" id="ve-mode-edit" type="button">Edit</button>
@@ -659,12 +678,16 @@ body {
 <div class="ve-main">
     <aside class="ve-sidebar">
         <div class="ve-sidebar-header">
-            <span class="ve-sidebar-title">Inhaltsbereiche</span>
+            <div class="ve-sidebar-page">
+                <span class="ve-sidebar-kicker">Seite</span>
+                <span class="ve-sidebar-title" id="ve-current-page-title">Startseite</span>
+                <span class="ve-sidebar-path" id="ve-current-page-path">Navigation in der Vorschau verwenden.</span>
+            </div>
             <button class="ve-btn ve-btn-primary" id="ve-btn-add" type="button" disabled>Abschnitt hinzufügen</button>
         </div>
 
         <div class="ve-section-list-wrap">
-            <div class="ve-empty-state" id="ve-empty-list">Seite wählen, um Abschnitte zu laden.</div>
+            <div class="ve-empty-state" id="ve-empty-list">Navigation in der Vorschau verwenden, um eine Seite zu bearbeiten.</div>
             <ul class="ve-section-list" id="ve-section-list"></ul>
         </div>
 
@@ -763,10 +786,11 @@ body {
     var BUTTON_VARIANTS = ['primary', 'secondary'];
 
     var iframe = document.getElementById('ve-iframe');
-    var pageSelect = document.getElementById('ve-page-select');
     var statusEl = document.getElementById('ve-status');
     var sectionList = document.getElementById('ve-section-list');
     var emptyList = document.getElementById('ve-empty-list');
+    var currentPageTitleEl = document.getElementById('ve-current-page-title');
+    var currentPagePathEl = document.getElementById('ve-current-page-path');
     var fieldEditor = document.getElementById('ve-field-editor');
     var btnAdd = document.getElementById('ve-btn-add');
     var btnRefresh = document.getElementById('ve-btn-refresh');
@@ -823,17 +847,11 @@ body {
     var IFRAME_READY_TIMEOUT = 10000;
     var DRAFT_AUTOSAVE_DELAY = 180;
     var DRAFT_STORAGE_PREFIX = 'bioco-ve-draft:v1:';
+    var LAST_PAGE_STORAGE_KEY = 'bioco-ve:last-page:v1';
     var HISTORY_LIMIT = 120;
     var historyPast = [];
     var historyFuture = [];
     var applyingHistory = false;
-
-    ALL_PAGES.forEach(function (page) {
-        var option = document.createElement('option');
-        option.value = page.id + '|' + page.path;
-        option.textContent = page.title + ' (' + page.path + ')';
-        pageSelect.appendChild(option);
-    });
 
     function setStatus(text, cls) {
         statusEl.textContent = text;
@@ -854,6 +872,117 @@ body {
             if (ALL_PAGES[i].id === pageId && ALL_PAGES[i].path === path) return ALL_PAGES[i];
         }
         return null;
+    }
+
+    function normalizePagePath(path) {
+        var next = String(path || '').trim();
+        if (!next) return '';
+        if (/^https?:\/\//i.test(next)) {
+            try {
+                next = new URL(next, window.location.origin).pathname || '';
+            } catch (error) {}
+        }
+        next = next.replace(/[?#].*$/, '');
+        if (!next) return '';
+        if (next === '/') return '/';
+        return '/' + next.replace(/^\/+|\/+$/g, '');
+    }
+
+    function getPageDescriptorByPath(path) {
+        var normalized = normalizePagePath(path);
+        if (!normalized) return null;
+        for (var i = 0; i < ALL_PAGES.length; i++) {
+            if (normalizePagePath(ALL_PAGES[i].path) === normalized) return ALL_PAGES[i];
+        }
+        return null;
+    }
+
+    function rememberCurrentPage() {
+        if (!currentPageId || !currentPath) return;
+        try {
+            window.localStorage.setItem(LAST_PAGE_STORAGE_KEY, JSON.stringify({
+                pageId: currentPageId,
+                path: currentPath
+            }));
+        } catch (error) {}
+    }
+
+    function getStoredPageDescriptor() {
+        try {
+            var raw = window.localStorage.getItem(LAST_PAGE_STORAGE_KEY);
+            if (!raw) return null;
+            var parsed = JSON.parse(raw);
+            var parsedId = parseInt(String(parsed.pageId || ''), 10);
+            var parsedPath = normalizePagePath(parsed.path);
+            if (parsedId && parsedPath) {
+                return getPageDescriptor(parsedId, parsedPath) || getPageDescriptorByPath(parsedPath);
+            }
+        } catch (error) {}
+        return null;
+    }
+
+    function getDefaultPageDescriptor() {
+        return getStoredPageDescriptor() || getPageDescriptorByPath('/') || ALL_PAGES[0] || null;
+    }
+
+    function renderCurrentPageContext(page, fallbackPath) {
+        if (page) {
+            currentPageTitleEl.textContent = page.title || page.name || 'Seite';
+            currentPagePathEl.textContent = page.path || '/';
+            return;
+        }
+        if (fallbackPath) {
+            currentPageTitleEl.textContent = 'Nicht bearbeitbar';
+            currentPagePathEl.textContent = normalizePagePath(fallbackPath) || fallbackPath;
+            return;
+        }
+        currentPageTitleEl.textContent = 'Bearbeitbare Seite';
+        currentPagePathEl.textContent = 'Navigation in der Vorschau verwenden.';
+    }
+
+    function setCurrentPageContext(pageId, path) {
+        currentPageId = pageId || null;
+        currentPath = normalizePagePath(path) || path || null;
+        renderCurrentPageContext(getPageDescriptor(currentPageId, currentPath) || getPageDescriptorByPath(currentPath), currentPath);
+        rememberCurrentPage();
+    }
+
+    function resetPageState() {
+        iframeReady = false;
+        sections = [];
+        canonicalSections = [];
+        canonicalFingerprint = '';
+        pendingSelectId = null;
+        activeSectionId = null;
+        activeField = null;
+        clearDirtySections();
+        resetHistory();
+        draftSavedAt = 0;
+        isSaving = false;
+    }
+
+    function adoptIframePage(path) {
+        var descriptor = getPageDescriptorByPath(path);
+        if (!descriptor) {
+            setCurrentPageContext(null, path);
+            resetPageState();
+            renderSectionList();
+            renderFieldEditor();
+            updateActions();
+            setStatus('Seite im Visual Editor nicht verfügbar', 'is-error');
+            return null;
+        }
+        if (currentPageId === descriptor.id && currentPath === descriptor.path) {
+            return descriptor;
+        }
+        persistCurrentDraftNow();
+        setCurrentPageContext(descriptor.id, descriptor.path);
+        resetPageState();
+        renderSectionList();
+        renderFieldEditor();
+        updateActions();
+        setStatus('Abschnitte laden...', 'is-loading');
+        return descriptor;
     }
 
     function getSectionById(sectionId) {
@@ -1480,7 +1609,7 @@ body {
         var url = VISUAL_EDITOR_URL;
         var params = [];
         if (pageId) params.push('pageId=' + encodeURIComponent(String(pageId)));
-        if (path) params.push('path=' + encodeURIComponent(String(path)));
+        if (path) params.push('path=' + encodeURIComponent(normalizePagePath(path) || String(path)));
         return url + (params.length ? '?' + params.join('&') : '');
     }
 
@@ -1537,10 +1666,23 @@ body {
     }
 
     function formatSectionListTitle(section) {
-        var title = String(section.title || '(kein Titel)');
-        if (!section.component) return title;
-        var componentLabel = resolveComponentMeta(section.component);
-        return (componentLabel ? componentLabel.label : section.component) + ' · ' + title;
+        var title = String(section.title || '').trim();
+        if (title) return title;
+        if (section.component) {
+            var componentLabel = resolveComponentMeta(section.component);
+            return componentLabel ? componentLabel.label : section.component;
+        }
+        return LAYOUT_LABELS[section.layout] || section.layout || '(kein Titel)';
+    }
+
+    function getProcessWireTypeKey(section) {
+        if (!section) return '';
+        if (isHeroSection(section)) return 'hero';
+        if (section.component) {
+            var componentMeta = resolveComponentMeta(section.component);
+            return componentMeta && componentMeta.key ? componentMeta.key : String(section.component || '');
+        }
+        return String(section.layout || '');
     }
 
     function getActiveSection() {
@@ -1708,7 +1850,6 @@ body {
         btnReset.disabled = !hasDraftChanges() || isSaving || isBusy();
         btnModeEdit.disabled = isBusy();
         btnModeBrowse.disabled = isBusy();
-        pageSelect.disabled = isBusy();
         if (isSaving) {
             btnSave.textContent = 'Publiziert...';
         } else {
@@ -1788,7 +1929,7 @@ body {
 
         if (!currentPageId || !page) {
             fieldEditor.innerHTML =
-                '<div class="ve-empty-state">Seite wählen, dann direkt in der Vorschau bearbeiten.</div>';
+                '<div class="ve-empty-state">Navigation in der Vorschau verwenden und eine bearbeitbare Seite öffnen.</div>';
             updateActions();
             return;
         }
@@ -1801,7 +1942,7 @@ body {
                 '</div>' +
                 '<div class="ve-info-card">' +
                     '<strong>Modus</strong>' +
-                    '<p>' + (editorMode === 'edit' ? 'Edit: Felder klicken, inline ändern, explizit speichern.' : 'Browse: Seite verhält sich wie normale Vorschau.') + '</p>' +
+                    '<p>' + (editorMode === 'edit' ? 'Navigation über die echte Website, Bearbeitung direkt im Layout.' : 'Browse: Seite verhält sich wie normale Vorschau.') + '</p>' +
                 '</div>' +
                 '<div class="ve-info-card">' +
                     '<strong>Status</strong>' +
@@ -1815,7 +1956,8 @@ body {
             '<div class="ve-info-card">' +
                 '<strong>Aktiver Abschnitt</strong>' +
                 '<p>' + escapeHtml(section.title || '(kein Titel)') + '</p>' +
-                '<p>Layout: ' + escapeHtml(LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt') + (section.component ? ' · Komponente: ' + escapeHtml(formatComponentLabel(section.component)) : '') + '</p>' +
+                '<p>Layout: ' + escapeHtml(LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt') + '</p>' +
+                '<p>PW Typ: ' + escapeHtml(getProcessWireTypeKey(section) || 'section') + '</p>' +
             '</div>' +
             '<div class="ve-info-card">' +
                 '<strong>Aktives Feld</strong>' +
@@ -1897,21 +2039,8 @@ body {
 
     function loadPage(pageId, path, options) {
         options = options || {};
-        currentPageId = pageId;
-        currentPath = path;
-        iframeReady = false;
-        sections = [];
-        canonicalSections = [];
-        canonicalFingerprint = '';
-        pendingSelectId = null;
-        activeSectionId = null;
-        activeField = null;
-        clearDirtySections();
-        resetHistory();
-        draftSavedAt = 0;
-        isSaving = false;
-
-        pageSelect.value = pageId + '|' + path;
+        setCurrentPageContext(pageId, path);
+        resetPageState();
         renderSectionList();
         renderFieldEditor();
         updateActions();
@@ -1920,7 +2049,7 @@ body {
         beginBusy('Vorschau laden…');
         scheduleIframeReadyTimeout();
 
-        var url = SITE_URL + path;
+        var url = SITE_URL + (currentPath || path);
         url += (url.indexOf('?') === -1 ? '?' : '&') + '_visual=1';
         if (DRAFT_SECRET) {
             url += '&draft_secret=' + encodeURIComponent(DRAFT_SECRET);
@@ -2161,6 +2290,9 @@ body {
 
     function renderSectionList() {
         sectionList.innerHTML = '';
+        emptyList.textContent = currentPageId
+            ? 'Noch keine Abschnitte vorhanden. Füge rechts oben einen Abschnitt hinzu.'
+            : 'Navigation in der Vorschau verwenden, um eine bearbeitbare Seite zu öffnen.';
         emptyList.style.display = sections.length ? 'none' : 'block';
 
         sections.forEach(function (section, index) {
@@ -2189,10 +2321,11 @@ body {
             layout.textContent = LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt';
             meta.appendChild(layout);
 
-            if (section.component) {
+            var pwType = getProcessWireTypeKey(section);
+            if (pwType) {
                 var component = document.createElement('span');
                 component.className = 've-layout-badge';
-                component.textContent = formatComponentLabel(section.component);
+                component.textContent = 'PW: ' + pwType;
                 meta.appendChild(component);
             }
 
@@ -3014,22 +3147,6 @@ body {
         setTransientStatus('Vorlage eingefügt', 'is-loading');
     }
 
-    pageSelect.addEventListener('change', function () {
-        if (isBusy()) return;
-        if (!this.value) return;
-        var parts = this.value.split('|');
-        var nextPageId = parseInt(parts[0], 10);
-        var nextPath = parts[1];
-        if (!nextPageId || !nextPath) return;
-        if (currentPageId === nextPageId && currentPath === nextPath) return;
-        if (blockWhileDirty('Seitenwechsel')) {
-            this.value = currentPageId && currentPath ? (currentPageId + '|' + currentPath) : '';
-            return;
-        }
-        persistCurrentDraftNow();
-        loadPage(nextPageId, nextPath);
-    });
-
     btnRefresh.addEventListener('click', function () {
         if (isBusy()) return;
         if (!currentPageId || !currentPath) return;
@@ -3130,11 +3247,23 @@ body {
         var action = data.type.slice(PREFIX.length);
 
         if (action === 'ready') {
+            var readyPath = normalizePagePath(data.path);
+            var readyDescriptor = null;
+            if (readyPath) {
+                readyDescriptor = adoptIframePage(readyPath);
+            }
             iframeReady = true;
             clearIframeReadyTimeout();
-            setStatus('Verbunden', 'is-ready');
             syncIframeState();
-            if (currentPath) {
+            if (readyPath && !readyDescriptor) {
+                if (waitingForIframeReady) {
+                    waitingForIframeReady = false;
+                    endBusy();
+                }
+                return;
+            }
+            setStatus('Verbunden', 'is-ready');
+            if (currentPageId && currentPath) {
                 fetchSections({ busyLabel: 'Abschnitte laden…' })
                     .catch(function () {})
                     .finally(function () {
@@ -3199,10 +3328,19 @@ body {
         if (!window.URLSearchParams) return;
         var params = new URLSearchParams(window.location.search || '');
         var bootPageId = parseInt(params.get('pageId') || '', 10);
-        var bootPath = String(params.get('path') || '');
-        if (!bootPageId || !bootPath) return;
-        if (!getPageDescriptor(bootPageId, bootPath)) return;
-        loadPage(bootPageId, bootPath);
+        var bootPath = normalizePagePath(params.get('path') || '');
+        var descriptor = null;
+        if (bootPageId && bootPath) {
+            descriptor = getPageDescriptor(bootPageId, bootPath);
+        }
+        if (!descriptor && bootPath) {
+            descriptor = getPageDescriptorByPath(bootPath);
+        }
+        if (!descriptor) {
+            descriptor = getDefaultPageDescriptor();
+        }
+        if (!descriptor) return;
+        loadPage(descriptor.id, descriptor.path);
     })();
 })();
 </script>

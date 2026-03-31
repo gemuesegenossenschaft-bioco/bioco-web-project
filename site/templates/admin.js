@@ -28,17 +28,65 @@ $(document).ready(function() {
         return /\/processwire\/media\/?$/.test(window.location.pathname) || window.location.pathname.indexOf('/processwire/media/') >= 0;
     }
 
-    function getTargetFieldName($field) {
+    function normalizeTargetFieldToken(value) {
+        var next = String(value || '').trim();
+        if (!next) return '';
+        next = next.replace(/^wrap_Inputfield_/, '').replace(/\[\]$/, '');
+        var bracketMatches = next.match(/\[([^\]]+)\]/g);
+        if (bracketMatches && bracketMatches.length) {
+            next = bracketMatches[bracketMatches.length - 1].slice(1, -1);
+        }
+        return next;
+    }
+
+    function getFieldNameCandidates($field) {
+        var candidates = [];
+
+        function pushCandidate(value) {
+            var normalized = normalizeTargetFieldToken(value);
+            if (!normalized || candidates.indexOf(normalized) >= 0) return;
+            candidates.push(normalized);
+        }
+
         var id = $field.attr('id') || '';
-        var m = id.match(/wrap_Inputfield_([^ ]+)/);
-        if (m && m[1]) return m[1];
-        var fieldClass = ($field.attr('class') || '').match(/Inputfield_([A-Za-z0-9_]+)/);
-        if (fieldClass && fieldClass[1]) return fieldClass[1];
-        var dataName = $field.attr('data-name') || '';
-        if (dataName) return dataName;
-        var inputName = $field.find('input[name]').first().attr('name') || '';
-        if (inputName) return inputName.replace(/\[\]$/, '');
-        return '';
+        var idMatch = id.match(/wrap_Inputfield_([^ ]+)/);
+        if (idMatch && idMatch[1]) pushCandidate(idMatch[1]);
+
+        var classMatches = ($field.attr('class') || '').match(/Inputfield_([A-Za-z0-9_]+)/g) || [];
+        classMatches.forEach(function(match) {
+            pushCandidate(String(match || '').replace(/^Inputfield_/, ''));
+        });
+
+        pushCandidate($field.attr('data-name') || '');
+
+        $field.find('input[name], textarea[name], select[name]').each(function() {
+            pushCandidate($(this).attr('name') || '');
+        });
+
+        return candidates;
+    }
+
+    function fieldMatchesTargetName(candidate, targetName) {
+        var normalizedCandidate = normalizeTargetFieldToken(candidate);
+        var normalizedTarget = normalizeTargetFieldToken(targetName);
+        if (!normalizedCandidate || !normalizedTarget) return false;
+        if (normalizedCandidate === normalizedTarget) return true;
+        return normalizedCandidate.slice(-(normalizedTarget.length + 1)) === '_' + normalizedTarget;
+    }
+
+    function getTargetFieldName($field, expectedNames) {
+        var candidates = getFieldNameCandidates($field);
+        if (Array.isArray(expectedNames) && expectedNames.length) {
+            for (var i = 0; i < expectedNames.length; i++) {
+                for (var j = 0; j < candidates.length; j++) {
+                    if (fieldMatchesTargetName(candidates[j], expectedNames[i])) {
+                        return normalizeTargetFieldToken(expectedNames[i]);
+                    }
+                }
+            }
+            return '';
+        }
+        return candidates[0] || '';
     }
 
     function getPageEditId() {
@@ -218,16 +266,11 @@ $(document).ready(function() {
     }
 
     function collectInputfieldsByName($scope, fieldNames) {
-        var lookup = {};
-        (fieldNames || []).forEach(function(name) {
-            lookup[String(name)] = true;
-        });
-
         var found = [];
         $scope.find('.Inputfield').each(function() {
             var $field = $(this);
-            var name = getTargetFieldName($field);
-            if (!name || !lookup[name]) return;
+            var name = getTargetFieldName($field, fieldNames);
+            if (!name) return;
             if (found.indexOf(this) >= 0) return;
             found.push(this);
         });
@@ -315,8 +358,8 @@ $(document).ready(function() {
                 renderVisualEditorFocusBanner({
                     warning: true,
                     returnUrl: returnUrl,
-                    title: 'Visual-Editor-Felder fehlen',
-                    text: 'Die angeforderten Felder wurden im Zielabschnitt nicht gefunden. Normale ProcessWire-Ansicht bleibt aktiv.'
+                    title: 'Visual-Editor-Feldzuordnung fehlt',
+                    text: 'Im Zielabschnitt wurde keines dieser Felder gefunden: ' + fieldNames.join(', ') + '. Normale ProcessWire-Ansicht bleibt aktiv.'
                 });
                 return;
             }
@@ -340,7 +383,7 @@ $(document).ready(function() {
 
             $targetItem.find('.Inputfield').each(function() {
                 var $field = $(this);
-                var name = getTargetFieldName($field);
+                var name = getTargetFieldName($field, fieldNames);
                 if (!name) return;
                 if (fieldNames.indexOf(name) >= 0) {
                     $field.removeClass('bioco-ve-focus-hidden').show();
@@ -364,15 +407,15 @@ $(document).ready(function() {
             renderVisualEditorFocusBanner({
                 warning: true,
                 returnUrl: returnUrl,
-                title: 'Visual-Editor-Felder fehlen',
-                text: 'Die angeforderten Seitenfelder wurden nicht gefunden. Normale ProcessWire-Ansicht bleibt aktiv.'
+                title: 'Visual-Editor-Feldzuordnung fehlt',
+                text: 'Im Seitenformular wurde keines dieser Felder gefunden: ' + fieldNames.join(', ') + '. Normale ProcessWire-Ansicht bleibt aktiv.'
             });
             return;
         }
 
         $inputfields.children('.Inputfield').each(function() {
             var $field = $(this);
-            var name = getTargetFieldName($field);
+            var name = getTargetFieldName($field, fieldNames);
             if (!name) return;
             if (fieldNames.indexOf(name) >= 0) {
                 $field.removeClass('bioco-ve-focus-hidden').show();

@@ -4,6 +4,7 @@ import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import type { ContentSection } from '@/lib/processwire-types'
 
 let mockSearch = ''
+let mockPathname = '/'
 
 vi.mock('next/image', () => ({
   default: (props: Record<string, unknown>) => <img data-testid="next-image" {...props} />,
@@ -15,6 +16,7 @@ vi.mock('next/navigation', () => ({
   useSearchParams: () => ({
     get: (key: string) => new URLSearchParams(mockSearch).get(key),
   }),
+  usePathname: () => mockPathname,
 }))
 vi.mock('@/components/forms/ContactForm', () => ({ ContactForm: () => null }))
 vi.mock('@/components/forms/MembershipForm', () => ({ MembershipForm: () => null }))
@@ -59,6 +61,7 @@ const homepageSections: ContentSection[] = [
 
 beforeEach(() => {
   mockSearch = ''
+  mockPathname = '/'
 })
 
 describe('SectionRenderer data-section-id attributes', () => {
@@ -176,9 +179,29 @@ describe('useVisualEditor hook', () => {
     render(<TestComponent />)
 
     expect(postMessageSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'bioco:visual-editor:ready' }),
+      expect.objectContaining({ type: 'bioco:visual-editor:ready', path: '/' }),
       '*'
     )
+  })
+
+  it('re-sends ready message when pathname changes', async () => {
+    const { useVisualEditor } = await import('@/hooks/useVisualEditor')
+
+    function TestComponent() {
+      useVisualEditor({ enabled: true, sections: testSections })
+      return <div>test</div>
+    }
+
+    const { rerender } = render(<TestComponent />)
+    mockPathname = '/mitmachen'
+    rerender(<TestComponent />)
+
+    await waitFor(() => {
+      expect(postMessageSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'bioco:visual-editor:ready', path: '/mitmachen' }),
+        '*'
+      )
+    })
   })
 
   it('sends section-click message when handleSectionClick called', async () => {

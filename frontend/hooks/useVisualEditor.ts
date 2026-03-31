@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { usePathname } from 'next/navigation'
 import type { ContentSection } from '@/lib/processwire-types'
 
 const MSG_PREFIX = 'bioco:visual-editor:'
@@ -40,6 +41,7 @@ export function useVisualEditor({ enabled, sections: initialSections }: UseVisua
   const [highlightedSectionId, setHighlightedSectionId] = useState<string | null>(null)
   const [mode, setMode] = useState<VisualEditorMode>('edit')
   const sectionsRef = useRef(initialSections)
+  const pathname = usePathname()
 
   // Keep state in sync with server-rendered section data.
   useEffect(() => {
@@ -55,9 +57,10 @@ export function useVisualEditor({ enabled, sections: initialSections }: UseVisua
   useEffect(() => {
     if (!enabled) return
     sendToParent('ready', {
+      path: pathname || '/',
       sectionIds: sectionsRef.current.map(s => s.id),
     })
-  }, [enabled])
+  }, [enabled, pathname])
 
   // Listen for messages from PW admin
   useEffect(() => {
