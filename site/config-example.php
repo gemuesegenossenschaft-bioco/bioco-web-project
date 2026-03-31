@@ -219,6 +219,7 @@ $config->githubDocsRepo = 'wgusta/bioco-doku';
 // - GET /api/content/instagram?limit=10 - Instagram posts
 //
 // Forms (POST):
+// - All form POST payloads must include `captchaToken` (Cloudflare Turnstile)
 // - POST /api/forms/contact - Contact form
 // - POST /api/forms/subscribe - Newsletter subscription
 // - POST /api/forms/visit - Visit day registration

@@ -16,7 +16,11 @@ PROCESSWIRE_BASE_URL=https://cms.bioco.ch
 PROCESSWIRE_API_KEY=bioco2026ready
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 NEXT_PUBLIC_PROCESSWIRE_BASE_URL=https://cms.bioco.ch
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=your-public-site-key
+TURNSTILE_SECRET_KEY=your-secret-key
 ```
+
+`TURNSTILE_SECRET_KEY` is required for both Next.js form routes (`/api/forms/*`) and legacy CMS form routes (`/cms/api/forms/*`).
 
 ## Important routes
 

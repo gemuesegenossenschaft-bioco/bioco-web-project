@@ -2419,6 +2419,87 @@ function handleMediaFilesRequest() {
 // Forms Handler (migrated from forms.php)
 // ============================================================================
 
+function getTurnstileSecretKey() {
+    $secret = trim((string)(getenv('TURNSTILE_SECRET_KEY') ?: ''));
+    if ($secret !== '') return $secret;
+
+    $config = wire('config');
+    if (isset($config->turnstileSecretKey)) {
+        return trim((string)$config->turnstileSecretKey);
+    }
+
+    return '';
+}
+
+function getRequestIpForTurnstile() {
+    $candidates = [
+        $_SERVER['HTTP_CF_CONNECTING_IP'] ?? '',
+        $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '',
+        $_SERVER['HTTP_X_REAL_IP'] ?? '',
+        $_SERVER['REMOTE_ADDR'] ?? '',
+    ];
+
+    foreach ($candidates as $raw) {
+        if (!is_string($raw) || $raw === '') continue;
+        $first = trim(explode(',', $raw)[0] ?? '');
+        if ($first !== '') return $first;
+    }
+
+    return '';
+}
+
+function verifyTurnstileToken($token) {
+    if (!is_string($token) || trim($token) === '') {
+        return ['ok' => false, 'errorCode' => 'captcha_missing'];
+    }
+
+    $secret = getTurnstileSecretKey();
+    if ($secret === '') {
+        wire('log')->save('api-forms', 'TURNSTILE_SECRET_KEY is missing for forms endpoint.');
+        return ['ok' => false, 'errorCode' => 'captcha_unavailable'];
+    }
+
+    if (!function_exists('curl_init')) {
+        wire('log')->save('api-forms', 'cURL extension missing, cannot verify Turnstile token.');
+        return ['ok' => false, 'errorCode' => 'captcha_service_unreachable'];
+    }
+
+    $payload = [
+        'secret' => $secret,
+        'response' => trim($token),
+    ];
+
+    $remoteIp = getRequestIpForTurnstile();
+    if ($remoteIp !== '') {
+        $payload['remoteip'] = $remoteIp;
+    }
+
+    $ch = curl_init('https://challenges.cloudflare.com/turnstile/v0/siteverify');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+
+    $response = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($response === false || $httpCode < 200 || $httpCode >= 300) {
+        wire('log')->save('api-forms', 'Turnstile verification request failed: ' . ($curlError ?: ('HTTP ' . $httpCode)));
+        return ['ok' => false, 'errorCode' => 'captcha_service_error'];
+    }
+
+    $decoded = json_decode($response, true);
+    if (!is_array($decoded) || empty($decoded['success'])) {
+        $codes = is_array($decoded['error-codes'] ?? null) ? $decoded['error-codes'] : [];
+        return ['ok' => false, 'errorCode' => $codes[0] ?? 'captcha_invalid'];
+    }
+
+    return ['ok' => true];
+}
+
 function handleFormsRequest($formType) {
     $modules = wire('modules');
     
@@ -2442,6 +2523,20 @@ function handleFormsRequest($formType) {
     }
     
     $postData = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($postData)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Ungültige Anfrage.']);
+        return;
+    }
+
+    $captcha = verifyTurnstileToken($postData['captchaToken'] ?? '');
+    if (!$captcha['ok']) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Bitte bestätigen Sie, dass Sie kein Roboter sind.']);
+        return;
+    }
+
+    unset($postData['captchaToken']);
     $result = null;
     
     switch ($formType) {

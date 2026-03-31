@@ -31,6 +31,9 @@ npm-debug.log
 .env
 .env.local
 
+# Local browser automation artifacts
+.playwright-cli/
+
 # Internal planning docs (keep local only)
 /docs/
 /migration-novatrend.md
