@@ -22,6 +22,10 @@
     color: #fff;
 }
 
+.header-center {
+    flex: 0 0 auto;
+}
+
 .view-toggle {
     display: flex;
     gap: 4px;

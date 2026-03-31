@@ -2,17 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
-
-function isStaleDeploymentError(error: Error & { digest?: string }) {
-  const haystack = `${error?.message || ''} ${error?.digest || ''}`.toLowerCase()
-  return (
-    haystack.includes('failed to find server action') ||
-    haystack.includes('chunkloaderror') ||
-    haystack.includes('loading chunk') ||
-    haystack.includes('failed to fetch dynamically imported module') ||
-    haystack.includes("reading 'workers'")
-  )
-}
+import { buildStaleRecoveryUrl, isStaleDeploymentError } from './staleDeploymentRecovery'
 
 export default function Error({
   error,
@@ -27,11 +17,13 @@ export default function Error({
   useEffect(() => {
     if (!isStaleDeploy || typeof window === 'undefined') return
     const reloadKey = `bioco:stale-reload:${window.location.pathname}`
-    if (window.sessionStorage.getItem(reloadKey)) return
-    window.sessionStorage.setItem(reloadKey, '1')
+    const now = Date.now()
+    const previousReloadTs = Number(window.sessionStorage.getItem(reloadKey) || '0')
+    if (Number.isFinite(previousReloadTs) && now - previousReloadTs < 15000) return
+    window.sessionStorage.setItem(reloadKey, String(now))
     setIsRefreshing(true)
     const timer = window.setTimeout(() => {
-      window.location.reload()
+      window.location.replace(buildStaleRecoveryUrl(window.location.href, now))
     }, 150)
     return () => window.clearTimeout(timer)
   }, [isStaleDeploy])

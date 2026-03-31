@@ -231,6 +231,11 @@ class ProcessContentPlanning extends Process {
                     <i class='fa fa-download'></i> Export Backup
                 </a>
             </div>
+            <div class='header-center'>
+                <button id='add-item-btn' class='ui-button ui-priority-primary'>
+                    <i class='fa fa-plus'></i> Add Item
+                </button>
+            </div>
             <div class='view-toggle'>
                 <a href='{$baseUrl}?view=list' class='view-btn {$listActive}'>
                     <i class='fa fa-list'></i> List
@@ -522,8 +527,9 @@ class ProcessContentPlanning extends Process {
      * Get all CMS pages for dropdown (only /content/ branch, exclude 404)
      */
     private function getPageOptions() {
-        // Find pages under /content/ and exclude 404 page
-        $pages = $this->wire('pages')->find("template!=admin, has_parent=/content/, template!=404, include=all, limit=500, sort=path");
+        // Find all front-end pages, exclude system/admin templates
+        $excludeTemplates = 'admin|user|role|permission|api|api-events|visual-editor|MediaLibrary|site_settings|repeater_content_sections';
+        $pages = $this->wire('pages')->find("template!=$excludeTemplates, id>1, include=all, limit=500, sort=path");
         $options = ['<option value="">-- No Page (Optional) --</option>'];
         
         foreach ($pages as $p) {
@@ -539,18 +545,20 @@ class ProcessContentPlanning extends Process {
      * Get all ProcessWire users for dropdown
      */
     private function getUserOptions($includeEmpty = true) {
-        $users = $this->wire('users')->find("roles!=guest, limit=100");
+        // Direct DB query to bypass PW access control on user pages
+        $db = $this->wire('database');
+        $stmt = $db->prepare("SELECT p.id, p.name FROM pages p JOIN templates t ON p.templates_id = t.id WHERE t.name = 'user' AND p.name != 'guest' ORDER BY p.name LIMIT 100");
+        $stmt->execute();
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
         $options = [];
-        
         if ($includeEmpty) {
             $options[] = '<option value="">-- Select User --</option>';
         }
-        
-        foreach ($users as $user) {
-            $name = $this->wire('sanitizer')->entities($user->name);
-            $options[] = "<option value='{$user->id}'>{$name}</option>";
+        foreach ($rows as $row) {
+            $name = $this->wire('sanitizer')->entities($row['name']);
+            $options[] = "<option value='{$row['id']}'>{$name}</option>";
         }
-        
         return implode("\n", $options);
     }
 
@@ -673,10 +681,7 @@ class ProcessContentPlanning extends Process {
                     </div>
                 </form>
             </div>
-        </div>
-        <button id='add-item-btn' class='ui-button ui-priority-primary'>
-            <i class='fa fa-plus'></i> Add Item
-        </button>";
+        </div>";
     }
 
     /**

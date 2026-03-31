@@ -23,6 +23,7 @@ Next.js calls ProcessWire via `http://localhost/cms/api/*` (same server, no CORS
 - **sharp needs two packages**: after `--delete` rsync, restore both `sharp-linux-x64` AND `sharp-libvips-linux-x64` from `/tmp/sharp-pkg/`. Remove darwin bindings.
 - **`pgrep -f next-server`** in SSH will match the SSH command itself, killing the session. Always use `pgrep -x next-server`.
 - **Cron race is real.** Even with `start.sh` guards, a restart window can leave a second `next-server`. After every deploy: `ps -eo pid,ppid,args | grep "next-server" | grep -v grep` and kill any extra PID.
+- **`HTTP 200` is not enough.** Stale Next deploy mismatches can render the `Fehler` page with status 200 (`Failed to find Server Action`, `reading 'workers'`, `reading 'digest'`). Always run body smoke checks + log gate.
 - **Cron PATH is minimal.** `start.sh` must set/export `PATH` before `flock` and use absolute `/usr/bin/flock`, `/usr/bin/curl`, `/usr/bin/pgrep`, `/bin/kill`. Otherwise cron can skip the guard checks and spawn duplicate workers.
 - **CloudLinux Node Selector can spawn Passenger workers in parallel.** Check `~/.cl.selector/node-selector.json`. If an extra `next-server` has `IN_PASSENGER=1` in `/proc/<pid>/environ`, it came from Passenger/Selector, not `start.sh`.
 - **Public route can bypass Next.** `.htaccess` checks for real files/dirs in `/home/bioco/public_html/` before proxying some slugs. A stray symlink like `/home/bioco/public_html/wir` can make external `/wir` fail while `http://127.0.0.1:49154/wir` still works.
@@ -69,7 +70,7 @@ curl --resolve bioco.ch:443:193.33.128.160 -I https://bioco.ch/<slug>
 ### Process management
 - `start.sh` exports env vars, runs `node server.js` with `nohup`, uses flock to prevent duplicates
 - Cron runs `start.sh` every 5 minutes (no-op if already running)
-- Safe restart: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`
+- Safe restart: `for p in $(pgrep -a next-server | awk '{print $1}'); do kill "$p"; done; sleep 3; start.sh`
 - Fallback restart if old workers remain: `for p in $(ps -eo pid,comm | awk '$2=="next-server"{print $1}'); do kill $p; done`
 - Verify steady state after restart:
 ```bash
@@ -133,6 +134,9 @@ Post-deploy outage checks:
 ssh bioco@193.33.128.160 'ps -eo pid,ppid,args | grep "next-server" | grep -v grep'
 ssh bioco@193.33.128.160 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:49154/'
 curl --resolve bioco.ch:443:193.33.128.160 -s -o /dev/null -w "%{http_code}\n" https://bioco.ch/
+ssh bioco@193.33.128.160 'curl -s http://127.0.0.1:49154/ | rg -q "Fehler|Etwas ist schiefgelaufen" && echo "BAD: local error boundary rendered" || echo "OK: local html"'
+curl --resolve bioco.ch:443:193.33.128.160 -s https://bioco.ch/ | rg -q "Fehler|Etwas ist schiefgelaufen" && echo "BAD: external error boundary rendered" || echo "OK: external html"
+ssh bioco@193.33.128.160 'tail -n 200 /home/bioco/logs/nextjs.log | rg -q "Failed to find Server Action|reading '\''workers'\''|reading '\''digest'\''|Unexpected end of form" && echo "BAD: stale deploy errors in log" || echo "OK: no stale deploy errors in tail"'
 curl --resolve bioco.ch:443:193.33.128.160 -s -o /dev/null -w "%{http_code}\n" https://bioco.ch/wir
 ssh bioco@193.33.128.160 'ls -la /home/bioco/public_html/wir 2>/dev/null || true'
 ```

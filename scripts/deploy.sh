@@ -34,7 +34,10 @@ rsync -avzc "$LOCAL_DIR/site/ready.php" "$DEPLOY_HOST:/home/bioco/public_html/cm
 
 echo "=== Restarting Node.js ==="
 ssh "$DEPLOY_HOST" '
-  for p in $(pgrep -x next-server 2>/dev/null); do kill $p; done
+  # Primary kill path.
+  for p in $(pgrep -a next-server 2>/dev/null | awk "{print \$1}"); do kill "$p"; done
+  # Fallback: catch workers primary matcher can miss on this host.
+  for p in $(ps -eo pid,comm | awk "\$2 ~ /^next-server/ {print \$1}"); do kill "$p"; done
   sleep 3
   rm -f /tmp/bioco-next-start.lock /tmp/bioco-next.pid
   rm -rf /home/bioco/bioco-frontend/.next/cache
@@ -44,4 +47,5 @@ ssh "$DEPLOY_HOST" '
 echo "=== Verifying ==="
 sleep 3
 ssh "$DEPLOY_HOST" 'curl -s -o /dev/null -w "Local: HTTP %{http_code}\n" http://127.0.0.1:49154/'
+ssh "$DEPLOY_HOST" 'echo "Workers:"; ps -eo pid,ppid,comm,args | awk "\$3 ~ /^next-server/ {print}"'
 echo "Deployed $BRANCH."
