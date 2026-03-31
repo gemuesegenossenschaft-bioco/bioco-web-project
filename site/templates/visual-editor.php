@@ -446,6 +446,108 @@ body {
 .ve-preset-item .ve-inline-actions {
     margin-top: 10px;
 }
+.ve-add-modal {
+    align-items: stretch;
+    background: rgba(15, 23, 42, 0.72);
+    display: none;
+    inset: 0;
+    justify-content: flex-end;
+    position: fixed;
+    z-index: 41;
+}
+.ve-add-modal.is-open {
+    display: flex;
+}
+.ve-add-panel {
+    background: #0f172a;
+    border-left: 1px solid #1f2937;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-width: 560px;
+    width: 100%;
+}
+.ve-add-header {
+    align-items: center;
+    border-bottom: 1px solid #1f2937;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    padding: 14px;
+}
+.ve-add-controls {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1fr 160px;
+    padding: 12px 14px;
+}
+.ve-add-scroll {
+    overflow-y: auto;
+    padding: 0 14px 14px;
+}
+.ve-add-group-label {
+    color: #94a3b8;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin: 16px 0 8px;
+    text-transform: uppercase;
+}
+.ve-add-group-label:first-child {
+    margin-top: 4px;
+}
+.ve-add-grid {
+    display: grid;
+    gap: 6px;
+    grid-template-columns: 1fr 1fr;
+}
+.ve-add-card {
+    align-items: flex-start;
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    transition: border-color 0.15s;
+}
+.ve-add-card:hover {
+    border-color: #4a7c59;
+}
+.ve-add-icon {
+    align-items: center;
+    background: #1e293b;
+    border-radius: 6px;
+    color: #94a3b8;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 15px;
+    height: 32px;
+    justify-content: center;
+    width: 32px;
+}
+.ve-add-card:hover .ve-add-icon {
+    background: #4a7c59;
+    color: #e5e7eb;
+}
+.ve-add-text {
+    flex: 1;
+    min-width: 0;
+}
+.ve-add-label {
+    font-size: 12px;
+    font-weight: 600;
+}
+.ve-add-desc {
+    color: #64748b;
+    font-size: 10px;
+    line-height: 1.4;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 .ve-media-card {
     background: #111827;
     border: 1px solid #1f2937;
@@ -599,6 +701,22 @@ body {
     </div>
 </div>
 
+<div class="ve-add-modal" id="ve-add-modal">
+    <div class="ve-add-panel">
+        <div class="ve-add-header">
+            <strong>Abschnitt hinzufügen</strong>
+            <button class="ve-btn" id="ve-add-close" type="button">Schliessen</button>
+        </div>
+        <div class="ve-add-controls">
+            <input id="ve-add-search" type="text" placeholder="Typ suchen...">
+            <select id="ve-add-filter">
+                <option value="">Alle</option>
+            </select>
+        </div>
+        <div class="ve-add-scroll" id="ve-add-scroll"></div>
+    </div>
+</div>
+
 <div class="ve-busy-overlay" id="ve-busy-overlay" aria-hidden="true">
     <div class="ve-busy-dialog">
         <div class="ve-busy-spinner"></div>
@@ -654,6 +772,11 @@ body {
     var presetCategory = document.getElementById('ve-preset-category');
     var presetEmpty = document.getElementById('ve-preset-empty');
     var presetList = document.getElementById('ve-preset-list');
+    var addModal = document.getElementById('ve-add-modal');
+    var addClose = document.getElementById('ve-add-close');
+    var addSearch = document.getElementById('ve-add-search');
+    var addFilter = document.getElementById('ve-add-filter');
+    var addScroll = document.getElementById('ve-add-scroll');
     var busyOverlay = document.getElementById('ve-busy-overlay');
     var busyLabel = document.getElementById('ve-busy-label');
 
@@ -2563,6 +2686,172 @@ body {
             });
     }
 
+    // -- Section type picker catalog ------------------------------------------
+    var ADD_SECTION_CATALOG = (function () {
+        var CORE_ICONS = {
+            rich_text: '\u00B6', split_media_text: '\u25E7', split_text_media: '\u25E8',
+            full_width_banner: '\u25AC', media_grid: '\u229E', video_embed: '\u25B6'
+        };
+        var CORE_DESCS = {
+            rich_text: 'Einfacher Textblock mit optionalen Buttons.',
+            split_media_text: 'Bild links, Text rechts.',
+            split_text_media: 'Text links, Bild rechts.',
+            full_width_banner: 'Vollbreites Bild mit Text-Overlay.',
+            media_grid: 'Mehrspaltige Bildergalerie.',
+            video_embed: 'Video-Einbettung (YouTube, Vimeo).'
+        };
+        var COMP_CATS = {
+            page_intro: 'Layout', media_text: 'Layout', cards_grid: 'Layout',
+            gallery_strip: 'Layout', text_columns: 'Layout', cta_band: 'Layout',
+            timeline_header: 'Timeline', timeline_item: 'Timeline',
+            contact_form: 'Formulare', membership_form: 'Formulare',
+            subscribe_form: 'Formulare', visit_day_form: 'Formulare',
+            waiting_list_form: 'Formulare',
+            pricing_calculator: 'Interaktiv', events_feed: 'Interaktiv',
+            schnuppertage: 'Interaktiv', saisonkalender: 'Interaktiv',
+            gallery: 'Interaktiv',
+            depot_map: 'Karten', geisshof_map: 'Karten'
+        };
+        var COMP_ICONS = {
+            page_intro: '\u00A7', media_text: '\u25EB', cards_grid: '\u25A6',
+            gallery_strip: '\u2261', text_columns: '\u2630', cta_band: '\u25B8',
+            timeline_header: '\u25C9', timeline_item: '\u25C9',
+            contact_form: '\u2709', membership_form: '\u2709', subscribe_form: '\u2709',
+            visit_day_form: '\u2709', waiting_list_form: '\u2709',
+            pricing_calculator: '\u2295', events_feed: '\u25C6', schnuppertage: '\u2740',
+            saisonkalender: '\u2740', gallery: '\u25A6',
+            depot_map: '\u25CE', geisshof_map: '\u25CE'
+        };
+        var items = [];
+        var CAT_ORDER = ['Basis', 'Layout', 'Timeline', 'Formulare', 'Interaktiv', 'Karten'];
+        ['rich_text', 'split_media_text', 'split_text_media', 'full_width_banner', 'media_grid', 'video_embed'].forEach(function (key) {
+            items.push({
+                id: 'layout-' + key,
+                category: 'Basis',
+                label: LAYOUT_LABELS[key] || key,
+                description: CORE_DESCS[key] || '',
+                icon: CORE_ICONS[key] || '\u25C6',
+                payload: { layout: key }
+            });
+        });
+        COMPONENT_REGISTRY.forEach(function (entry) {
+            items.push({
+                id: 'component-' + entry.key,
+                category: COMP_CATS[entry.key] || 'Sonstiges',
+                label: entry.label || entry.key,
+                description: entry.notes || '',
+                icon: COMP_ICONS[entry.key] || '\u25C6',
+                payload: {
+                    layout: 'component',
+                    component: entry.key,
+                    config: entry.defaultConfig || {}
+                }
+            });
+        });
+        items.sort(function (a, b) {
+            var ai = CAT_ORDER.indexOf(a.category), bi = CAT_ORDER.indexOf(b.category);
+            if (ai === -1) ai = 99;
+            if (bi === -1) bi = 99;
+            return ai - bi;
+        });
+        return items;
+    })();
+
+    function buildAddFilterOptions() {
+        var cats = {};
+        ADD_SECTION_CATALOG.forEach(function (entry) { cats[entry.category] = true; });
+        addFilter.innerHTML = '<option value="">Alle</option>';
+        Object.keys(cats).forEach(function (name) {
+            var opt = document.createElement('option');
+            opt.value = name;
+            opt.textContent = name;
+            addFilter.appendChild(opt);
+        });
+    }
+
+    function filteredAddCatalog() {
+        var query = String(addSearch.value || '').trim().toLowerCase();
+        var cat = String(addFilter.value || '');
+        return ADD_SECTION_CATALOG.filter(function (entry) {
+            if (cat && entry.category !== cat) return false;
+            if (!query) return true;
+            return [entry.label, entry.description, entry.category]
+                .join(' ').toLowerCase().indexOf(query) !== -1;
+        });
+    }
+
+    function renderAddGrid() {
+        addScroll.innerHTML = '';
+        var items = filteredAddCatalog();
+        if (!items.length) {
+            addScroll.innerHTML = '<div class="ve-empty-state">Kein passender Abschnittstyp gefunden.</div>';
+            return;
+        }
+        var currentCat = '';
+        var grid = null;
+        items.forEach(function (entry) {
+            if (entry.category !== currentCat) {
+                currentCat = entry.category;
+                var label = document.createElement('div');
+                label.className = 've-add-group-label';
+                label.textContent = currentCat;
+                addScroll.appendChild(label);
+                grid = document.createElement('div');
+                grid.className = 've-add-grid';
+                addScroll.appendChild(grid);
+            }
+            var card = document.createElement('div');
+            card.className = 've-add-card';
+            card.innerHTML =
+                '<div class="ve-add-icon">' + escapeHtml(entry.icon) + '</div>' +
+                '<div class="ve-add-text">' +
+                    '<div class="ve-add-label">' + escapeHtml(entry.label) + '</div>' +
+                    '<div class="ve-add-desc">' + escapeHtml(entry.description) + '</div>' +
+                '</div>';
+            card.addEventListener('click', function () {
+                addSectionFromType(entry);
+            });
+            grid.appendChild(card);
+        });
+    }
+
+    function addSectionFromType(entry) {
+        if (!currentPageId || isSaving || isBusy()) return;
+        pushHistorySnapshot();
+        var payload = cloneJson(entry.payload, {});
+        var section = normalizeDraftSection(Object.assign({
+            id: createDraftId(),
+            title: 'Neuer Abschnitt',
+            text: '<p></p>',
+            layout: 'rich_text',
+            theme: 'default',
+            buttons: []
+        }, payload));
+        if (!section) return;
+        sections = cloneSections(sections);
+        sections.push(section);
+        activeSectionId = section.id;
+        activeField = null;
+        closeAddModal();
+        refreshDraftUi();
+        setTransientStatus(escapeHtml(entry.label) + ' hinzugefuegt', 'is-loading');
+    }
+
+    function openAddModal() {
+        if (isBusy() || !currentPageId) return;
+        if (blockWhileDirty('Hinzufuegen')) return;
+        buildAddFilterOptions();
+        addSearch.value = '';
+        addFilter.value = '';
+        renderAddGrid();
+        addModal.classList.add('is-open');
+        addSearch.focus();
+    }
+
+    function closeAddModal() {
+        addModal.classList.remove('is-open');
+    }
+
     function openPresetModal() {
         if (isBusy()) return;
         if (!presetItems.length) {
@@ -2637,12 +2926,7 @@ body {
     });
 
     btnAdd.addEventListener('click', function () {
-        if (isBusy()) return;
-        if (!currentPageId) return;
-        if (blockWhileDirty('Hinzufügen')) return;
-        var activeSection = getSectionById(activeSectionId);
-        var nextLayout = activeSection && activeSection.layout ? activeSection.layout : 'rich_text';
-        addSection(nextLayout);
+        openAddModal();
     });
 
     btnSave.addEventListener('click', function () {
@@ -2685,6 +2969,13 @@ body {
     presetSearch.addEventListener('input', renderPresetList);
     presetCategory.addEventListener('change', renderPresetList);
 
+    addClose.addEventListener('click', closeAddModal);
+    addModal.addEventListener('click', function (event) {
+        if (event.target === addModal) closeAddModal();
+    });
+    addSearch.addEventListener('input', renderAddGrid);
+    addFilter.addEventListener('change', renderAddGrid);
+
     window.addEventListener('keydown', function (event) {
         if (isBusy()) return;
         var isMeta = !!(event.metaKey || event.ctrlKey);
@@ -2703,6 +2994,7 @@ body {
             return;
         }
         if (event.key === 'Escape') {
+            if (addModal.classList.contains('is-open')) closeAddModal();
             if (mediaModal.classList.contains('is-open')) closeMediaModal();
             if (presetModal.classList.contains('is-open')) closePresetModal();
         }
