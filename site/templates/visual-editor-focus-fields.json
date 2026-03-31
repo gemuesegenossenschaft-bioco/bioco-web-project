@@ -1,0 +1,80 @@
+{
+  "heroBaseFields": [
+    "hero_headline",
+    "hero_subtitle",
+    "hero_image",
+    "image_alt"
+  ],
+  "sectionBaseFields": [
+    "section_title",
+    "section_eyebrow",
+    "section_text",
+    "section_layout",
+    "section_theme",
+    "section_bg_color",
+    "section_component",
+    "section_config",
+    "section_image",
+    "section_images",
+    "image_alt",
+    "section_image_overlay",
+    "section_video_url",
+    "section_video_title",
+    "section_image_brightness",
+    "section_image_contrast",
+    "section_image_saturate",
+    "button_text",
+    "button_href",
+    "button_variant",
+    "button2_text",
+    "button2_href",
+    "button2_variant"
+  ],
+  "fieldMappings": {
+    "title": [
+      "section_title"
+    ],
+    "text": [
+      "section_text"
+    ],
+    "eyebrow": [
+      "section_eyebrow"
+    ],
+    "component": [
+      "section_component",
+      "section_config"
+    ],
+    "video": [
+      "section_video_url",
+      "section_video_title"
+    ],
+    "videoTitle": [
+      "section_video_title",
+      "section_video_url"
+    ]
+  },
+  "heroFieldMappings": {
+    "title": [
+      "hero_headline"
+    ],
+    "eyebrow": [
+      "hero_subtitle"
+    ],
+    "media": [
+      "hero_image",
+      "image_alt"
+    ]
+  },
+  "buttonFieldMappings": {
+    "0": [
+      "button_text",
+      "button_href",
+      "button_variant"
+    ],
+    "1": [
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ]
+  }
+}

@@ -21,6 +21,17 @@ $siteUrl = rtrim(getenv('NEXT_PUBLIC_SITE_URL') ?: 'https://bioco.ch', '/');
 $draftSecret = getenv('PW_PREVIEW_TOKEN') ?: '';
 $apiRoot = $config->urls->root . 'api/';
 $componentRegistryJson = json_encode(biocoComponentRegistryEntries(), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$focusFieldConfig = [];
+$focusFieldConfigPath = __DIR__ . '/visual-editor-focus-fields.json';
+if (is_file($focusFieldConfigPath)) {
+    $decodedFocusFieldConfig = json_decode((string) file_get_contents($focusFieldConfigPath), true);
+    if (is_array($decodedFocusFieldConfig)) {
+        $focusFieldConfig = $decodedFocusFieldConfig;
+    }
+}
+$focusFieldConfigJson = json_encode($focusFieldConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+$visualEditorUrl = $config->urls->root . 'visual-editor/';
+$pageEditUrl = $config->urls->admin . 'page/edit/';
 
 $pagesById = [];
 $home = $pages->get('/content/homepage/');
@@ -733,6 +744,9 @@ body {
     var API_ROOT = <?= json_encode($apiRoot) ?>;
     var ALL_PAGES = <?= json_encode($contentPages, JSON_UNESCAPED_UNICODE) ?>;
     var COMPONENT_REGISTRY = <?= $componentRegistryJson ?: '[]' ?>;
+    var PW_FOCUS_CONFIG = <?= $focusFieldConfigJson ?: '{}' ?>;
+    var VISUAL_EDITOR_URL = <?= json_encode($visualEditorUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    var PAGE_EDIT_URL = <?= json_encode($pageEditUrl, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     var LAYOUT_LABELS = {
         hero: 'Hero',
         split_media_text: 'Bild + Text',
@@ -1390,6 +1404,18 @@ body {
         return String(value || '').trim().toLowerCase();
     }
 
+    function uniqueStrings(items) {
+        var seen = {};
+        var next = [];
+        (items || []).forEach(function (item) {
+            var value = String(item || '').trim();
+            if (!value || seen[value]) return;
+            seen[value] = true;
+            next.push(value);
+        });
+        return next;
+    }
+
     function resolveComponentMeta(rawKey) {
         var lookup = normalizeComponentLookupKey(rawKey);
         if (!lookup) return null;
@@ -1411,6 +1437,103 @@ body {
         var meta = resolveComponentMeta(raw);
         if (!meta) return raw;
         return raw === meta.key ? meta.label + ' (' + meta.key + ')' : meta.label + ' (' + raw + ')';
+    }
+
+    function getProcessWireFocusFields(section, request) {
+        request = request || {};
+        if (!section) return [];
+
+        var field = String(request.field || '').trim();
+        var focusConfig = PW_FOCUS_CONFIG || {};
+        var sectionBaseFields = Array.isArray(focusConfig.sectionBaseFields) ? focusConfig.sectionBaseFields : [];
+        var heroBaseFields = Array.isArray(focusConfig.heroBaseFields) ? focusConfig.heroBaseFields : [];
+        var fieldMappings = focusConfig.fieldMappings || {};
+        var heroFieldMappings = focusConfig.heroFieldMappings || {};
+        var buttonFieldMappings = focusConfig.buttonFieldMappings || {};
+
+        if (isHeroSection(section)) {
+            if (!field) return uniqueStrings(heroBaseFields);
+            if (field === 'media') return uniqueStrings(heroFieldMappings.media || heroBaseFields);
+            return uniqueStrings(heroFieldMappings[field] || heroBaseFields);
+        }
+
+        if (!field) {
+            var componentMeta = resolveComponentMeta(section.component);
+            if (componentMeta && Array.isArray(componentMeta.cmsFields) && componentMeta.cmsFields.length) {
+                return uniqueStrings(componentMeta.cmsFields);
+            }
+            return uniqueStrings(sectionBaseFields);
+        }
+
+        if (field === 'button') {
+            return uniqueStrings(buttonFieldMappings[String(request.buttonIndex != null ? request.buttonIndex : 0)] || buttonFieldMappings['0'] || []);
+        }
+
+        if (field === 'media') {
+            return uniqueStrings([request.targetField || 'section_image', 'image_alt']);
+        }
+
+        return uniqueStrings(fieldMappings[field] || sectionBaseFields);
+    }
+
+    function buildVisualEditorReturnUrl(pageId, path) {
+        var url = VISUAL_EDITOR_URL;
+        var params = [];
+        if (pageId) params.push('pageId=' + encodeURIComponent(String(pageId)));
+        if (path) params.push('path=' + encodeURIComponent(String(path)));
+        return url + (params.length ? '?' + params.join('&') : '');
+    }
+
+    function buildProcessWireFocusUrl(request) {
+        request = request || {};
+        var section = request.sectionId ? getSectionById(request.sectionId) : getActiveSection();
+        if (!currentPageId || !section) return { error: 'missing_target' };
+        if (!isHeroSection(section) && !section.pwId) return { error: 'publish_first' };
+
+        var fields = getProcessWireFocusFields(section, request);
+        if (!fields.length) return { error: 'missing_fields' };
+
+        var params = [
+            'id=' + encodeURIComponent(String(currentPageId)),
+            'veFocus=1',
+            'vePageId=' + encodeURIComponent(String(currentPageId)),
+            'vePath=' + encodeURIComponent(String(currentPath || '')),
+            'veSectionId=' + encodeURIComponent(String(section.id || '')),
+            'veFields=' + encodeURIComponent(fields.join(',')),
+            'veReturn=' + encodeURIComponent(buildVisualEditorReturnUrl(currentPageId, currentPath || ''))
+        ];
+
+        if (!isHeroSection(section) && section.pwId) {
+            params.push('veSectionPwId=' + encodeURIComponent(String(section.pwId)));
+        }
+        if (request.field) params.push('veField=' + encodeURIComponent(String(request.field)));
+        if (request.kind) params.push('veKind=' + encodeURIComponent(String(request.kind)));
+        if (request.buttonIndex != null) params.push('veButtonIndex=' + encodeURIComponent(String(request.buttonIndex)));
+        if (request.targetField) params.push('veTargetField=' + encodeURIComponent(String(request.targetField)));
+        if (section.component) params.push('veComponent=' + encodeURIComponent(String(section.component)));
+
+        return {
+            url: PAGE_EDIT_URL + '?' + params.join('&')
+        };
+    }
+
+    function openProcessWireFocus(request) {
+        if (isBusy()) return;
+        if (!currentPageId) return;
+        if (hasDraftChanges()) {
+            window.alert('ProcessWire-Fokus ist nur ohne offenen Entwurf verfügbar. Bitte zuerst publizieren oder den Entwurf verwerfen.');
+            return;
+        }
+        var next = buildProcessWireFocusUrl(request);
+        if (!next || !next.url) {
+            if (next && next.error === 'publish_first') {
+                window.alert('Dieser Abschnitt existiert nur im lokalen Entwurf. Bitte zuerst publizieren, dann in ProcessWire öffnen.');
+                return;
+            }
+            window.alert('ProcessWire-Fokus konnte für dieses Ziel nicht vorbereitet werden.');
+            return;
+        }
+        window.open(next.url, '_blank', 'noopener');
     }
 
     function formatSectionListTitle(section) {
@@ -3052,6 +3175,11 @@ body {
             return;
         }
 
+        if (action === 'open-processwire') {
+            openProcessWireFocus(data);
+            return;
+        }
+
         if (action === 'section-action') {
             handleSectionAction(data.sectionId, data.action);
         }
@@ -3067,6 +3195,15 @@ body {
     renderBusyOverlay();
     updateActions();
     loadPresets();
+    (function bootFromQuery() {
+        if (!window.URLSearchParams) return;
+        var params = new URLSearchParams(window.location.search || '');
+        var bootPageId = parseInt(params.get('pageId') || '', 10);
+        var bootPath = String(params.get('path') || '');
+        if (!bootPageId || !bootPath) return;
+        if (!getPageDescriptor(bootPageId, bootPath)) return;
+        loadPage(bootPageId, bootPath);
+    })();
 })();
 </script>
 </body>

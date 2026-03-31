@@ -9,7 +9,7 @@ vi.mock('next/image', () => ({
   default: (props: Record<string, unknown>) => <img data-testid="next-image" {...props} />,
 }))
 vi.mock('next/link', () => ({
-  default: ({ href, children, ...props }: Record<string, unknown>) => <a href={String(href)} {...props}>{children}</a>,
+  default: ({ href, children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <a href={String(href)} {...props}>{children}</a>,
 }))
 vi.mock('next/navigation', () => ({
   useSearchParams: () => ({
@@ -36,7 +36,7 @@ vi.mock('@/components/Footer', () => ({ Footer: () => null }))
 vi.mock('@/components/AktuellesItem', () => ({ AktuellesItemComponent: () => null }))
 vi.mock('@/components/ItemDetailModal', () => ({ ItemDetailModal: () => null }))
 vi.mock('@/components/ScrollToTopLink', () => ({
-  ScrollToTopLink: ({ children, ...props }: Record<string, unknown>) => <a {...props}>{children}</a>,
+  ScrollToTopLink: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => <a {...props}>{children}</a>,
 }))
 vi.mock('@/hooks/useEventsFeed', () => ({
   useEventsFeed: () => ({ upcoming: [], isLoading: false }),
@@ -636,6 +636,62 @@ describe('InlineVisualEditorRuntime', () => {
         type: 'bioco:visual-editor:field-change',
         field: 'mediaItems',
         value: [{ url: '/b.jpg', alt: 'B', type: 'image' }],
+      }),
+      '*'
+    )
+  })
+
+  it('emits open-processwire for a focused text field', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="title"
+            data-ve-kind="text"
+            data-ve-inline="true"
+          >
+            Title target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={testSections} />
+      </div>
+    )
+
+    fireEvent.click(screen.getByText('Title target'))
+    fireEvent.click(screen.getByRole('button', { name: 'In ProcessWire öffnen' }))
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'bioco:visual-editor:open-processwire',
+        sectionId: 'section-1',
+        field: 'title',
+        kind: 'text',
+      }),
+      '*'
+    )
+  })
+
+  it('emits open-processwire for a focused section toolbar', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <div data-testid="section-space">Section space</div>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={testSections} />
+      </div>
+    )
+
+    fireEvent.click(screen.getByTestId('section-space'))
+    fireEvent.click(screen.getByRole('button', { name: 'In ProcessWire öffnen' }))
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'bioco:visual-editor:open-processwire',
+        sectionId: 'section-1',
       }),
       '*'
     )

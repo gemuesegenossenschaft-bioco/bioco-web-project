@@ -118,7 +118,7 @@ describe('form routes captcha enforcement', () => {
 
   it('returns 200 and sends email when captcha valid', async () => {
     vi.mocked(verifyTurnstileToken).mockResolvedValue({ ok: true })
-    vi.mocked(sendFormEmail).mockResolvedValue(undefined)
+    vi.mocked(sendFormEmail).mockResolvedValue({ success: true, id: 'test-message-id' })
 
     for (const route of routeSpecs) {
       const { POST } = await route.load()

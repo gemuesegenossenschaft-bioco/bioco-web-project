@@ -448,6 +448,18 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
     sendToParent('field-change', { sectionId: selectedSectionId, field, value, ...extra })
   }
 
+  function openProcessWireFocus() {
+    if (!selectedSectionId || saveState.busy) return
+    sendToParent('open-processwire', {
+      sectionId: selectedSectionId,
+      field: selectedField?.field,
+      kind: selectedField?.kind,
+      inline: selectedField?.inline,
+      buttonIndex: selectedField?.buttonIndex,
+      targetField: selectedField?.targetField,
+    })
+  }
+
   function resolveComponentInput(rawValue: string): string {
     const raw = String(rawValue || '').trim()
     if (!raw) return ''
@@ -694,6 +706,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               <button type="button" onClick={() => sendToParent('section-action', { sectionId: selectedSectionId, action: 'move-up' })}>Hoch</button>
               <button type="button" onClick={() => sendToParent('section-action', { sectionId: selectedSectionId, action: 'move-down' })}>Runter</button>
               <button type="button" onClick={() => sendToParent('section-action', { sectionId: selectedSectionId, action: 'delete' })}>Löschen</button>
+              <button type="button" disabled={saveState.busy} onClick={openProcessWireFocus}>In ProcessWire öffnen</button>
             </div>
             <div className="ve-inline-actions">
               <select
@@ -815,6 +828,9 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
                 }
               }}
             />
+            <div className="ve-inline-actions">
+              <button type="button" disabled={saveState.busy} onClick={openProcessWireFocus}>In ProcessWire öffnen</button>
+            </div>
             {selectedField?.kind === 'button' ? (
               <div className="ve-inline-actions">
                 <input
@@ -885,6 +901,9 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
                 })
               }}
             />
+            <div className="ve-inline-actions">
+              <button type="button" disabled={saveState.busy} onClick={openProcessWireFocus}>In ProcessWire öffnen</button>
+            </div>
           </div>
         </div>
       ) : null}
@@ -933,6 +952,9 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
             {selectedSection?.component && presetTagsByComponent[selectedSection.component]?.length ? (
               <p>Preset Tags: {presetTagsByComponent[selectedSection.component].join(', ')}</p>
             ) : null}
+            <div className="ve-inline-actions">
+              <button type="button" disabled={saveState.busy} onClick={openProcessWireFocus}>In ProcessWire öffnen</button>
+            </div>
           </div>
         </div>
       ) : null}
@@ -966,6 +988,9 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               value={selectedSection?.video?.title || ''}
               onChange={(event) => sendStructuredFieldChange('videoTitle', event.target.value)}
             />
+            <div className="ve-inline-actions">
+              <button type="button" disabled={saveState.busy} onClick={openProcessWireFocus}>In ProcessWire öffnen</button>
+            </div>
           </div>
         </div>
       ) : null}
@@ -1074,6 +1099,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
               >
                 Bild hinzufügen
               </button>
+              <button type="button" disabled={saveState.busy} onClick={openProcessWireFocus}>In ProcessWire öffnen</button>
             </div>
           </div>
         </div>

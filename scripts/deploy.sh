@@ -33,7 +33,7 @@ rsync -avzc "$LOCAL_DIR/scripts/healthcheck.sh" "$DEPLOY_HOST:$DEPLOY_DIR/health
 ssh "$DEPLOY_HOST" "chmod +x $DEPLOY_DIR/healthcheck.sh"
 
 echo "=== Uploading CMS templates + hooks ==="
-rsync -avzc "$LOCAL_DIR/site/templates/admin.js" "$LOCAL_DIR/site/templates/api.php" "$LOCAL_DIR/site/templates/api-events.php" "$LOCAL_DIR/site/templates/visual-editor.php" "$DEPLOY_HOST:$CMS_DIR/"
+rsync -avzc "$LOCAL_DIR/site/templates/admin.js" "$LOCAL_DIR/site/templates/api.php" "$LOCAL_DIR/site/templates/api-events.php" "$LOCAL_DIR/site/templates/visual-editor.php" "$LOCAL_DIR/site/templates/visual-editor-focus-fields.json" "$DEPLOY_HOST:$CMS_DIR/"
 rsync -avzc "$LOCAL_DIR/site/ready.php" "$DEPLOY_HOST:/home/bioco/public_html/cms/site/ready.php"
 
 echo "=== Restarting Node.js ==="

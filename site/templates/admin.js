@@ -162,6 +162,234 @@ $(document).ready(function() {
         return null;
     }
 
+    function parseCsvList(value) {
+        return String(value || '')
+            .split(',')
+            .map(function(part) { return $.trim(String(part || '')); })
+            .filter(Boolean);
+    }
+
+    function injectVisualEditorFocusStyles() {
+        if ($('#bioco-ve-focus-styles').length) return;
+        $('<style id="bioco-ve-focus-styles">\
+.bioco-ve-focus-hidden{display:none !important;}\
+.bioco-ve-focus-banner{margin:12px 0;padding:12px 14px;border-radius:8px;border:1px solid #cbd5e1;background:#eef6f0;color:#0f172a;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;}\
+.bioco-ve-focus-banner.is-warning{background:#fef3c7;border-color:#f59e0b;}\
+.bioco-ve-focus-banner strong{display:block;margin-bottom:2px;}\
+.bioco-ve-focus-banner a{display:inline-flex;align-items:center;padding:6px 10px;border-radius:6px;background:#4a7c59;color:#fff;text-decoration:none;font-weight:600;}\
+</style>').appendTo(document.head);
+    }
+
+    function renderVisualEditorFocusBanner(options) {
+        options = options || {};
+        injectVisualEditorFocusStyles();
+
+        var $banner = $('.bioco-ve-focus-banner');
+        if (!$banner.length) {
+            $banner = $('<div class="bioco-ve-focus-banner">');
+            var $header = $('#ProcessPageEditHeader, #pw-content-head, .PageEditHeader').first();
+            if ($header.length) {
+                $header.before($banner);
+            } else {
+                $('body').prepend($banner);
+            }
+        }
+
+        $banner.toggleClass('is-warning', !!options.warning);
+        $banner.empty();
+
+        var $text = $('<div>');
+        $('<strong>').text(options.title || 'Fokussierte ProcessWire-Bearbeitung').appendTo($text);
+        $('<span>').text(options.text || 'Nur die aus dem Visual Editor angeforderte Bearbeitung ist sichtbar.').appendTo($text);
+        $banner.append($text);
+        $banner.append(
+            $('<a>')
+                .attr('href', String(options.returnUrl || getSiteRoot() + 'visual-editor/'))
+                .text('Zurück zum Visual Editor')
+        );
+    }
+
+    function expandInputfield($field) {
+        if (!$field || !$field.length) return;
+        $field.removeClass('InputfieldStateCollapsed InputfieldStateHidden collapsed');
+        $field.show();
+        $field.children('.InputfieldContent').show();
+        $field.find('> .InputfieldContent').show();
+    }
+
+    function collectInputfieldsByName($scope, fieldNames) {
+        var lookup = {};
+        (fieldNames || []).forEach(function(name) {
+            lookup[String(name)] = true;
+        });
+
+        var found = [];
+        $scope.find('.Inputfield').each(function() {
+            var $field = $(this);
+            var name = getTargetFieldName($field);
+            if (!name || !lookup[name]) return;
+            if (found.indexOf(this) >= 0) return;
+            found.push(this);
+        });
+
+        return $(found);
+    }
+
+    function focusFirstEditable($scope) {
+        if (!$scope || !$scope.length) return;
+        var node = $scope.get(0);
+        if (node && typeof node.scrollIntoView === 'function') {
+            node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        var $input = $scope.find('input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), [contenteditable="true"]').first();
+        if ($input.length) {
+            try {
+                $input.trigger('focus');
+            } catch (error) {}
+        }
+    }
+
+    function applyVisualEditorFocusedMode() {
+        if (!isPageEditProcess()) return;
+        var query = parseQuery();
+        if (String(query.veFocus || '') !== '1') return;
+
+        var returnUrl = String(query.veReturn || (getSiteRoot() + 'visual-editor/'));
+        var fieldNames = parseCsvList(query.veFields);
+        if (!fieldNames.length) {
+            renderVisualEditorFocusBanner({
+                warning: true,
+                returnUrl: returnUrl,
+                title: 'Visual-Editor-Fokus unvollständig',
+                text: 'Es wurden keine fokussierten Felder übergeben. Normale ProcessWire-Ansicht bleibt aktiv.'
+            });
+            return;
+        }
+
+        var $inputfields = $('#ProcessPageEdit .Inputfields').first();
+        if (!$inputfields.length) {
+            $inputfields = $('form').find('.Inputfields').first();
+        }
+        if (!$inputfields.length) {
+            renderVisualEditorFocusBanner({
+                warning: true,
+                returnUrl: returnUrl,
+                title: 'Visual-Editor-Fokus fehlgeschlagen',
+                text: 'ProcessWire-Felder konnten nicht gefunden werden. Normale Ansicht bleibt aktiv.'
+            });
+            return;
+        }
+
+        var sectionPwId = parseInt(String(query.veSectionPwId || ''), 10) || null;
+        var focusLabel = String(query.veField || '').trim() || 'Abschnitt';
+
+        if (sectionPwId) {
+            var $sectionsWrap = $('#wrap_Inputfield_content_sections').first();
+            if (!$sectionsWrap.length) {
+                renderVisualEditorFocusBanner({
+                    warning: true,
+                    returnUrl: returnUrl,
+                    title: 'Visual-Editor-Ziel fehlt',
+                    text: 'Das Abschnitts-Feld ist auf dieser Seite nicht verfügbar. Normale ProcessWire-Ansicht bleibt aktiv.'
+                });
+                return;
+            }
+
+            var $targetItem = $sectionsWrap.find('.InputfieldRepeaterItem').filter(function() {
+                return getRepeaterItemId($(this)) === sectionPwId;
+            }).first();
+
+            if (!$targetItem.length) {
+                renderVisualEditorFocusBanner({
+                    warning: true,
+                    returnUrl: returnUrl,
+                    title: 'Visual-Editor-Ziel nicht gefunden',
+                    text: 'Der angeforderte Abschnitt existiert nicht mehr. Normale ProcessWire-Ansicht bleibt aktiv.'
+                });
+                return;
+            }
+
+            var $allowedFields = collectInputfieldsByName($targetItem, fieldNames);
+            if (!$allowedFields.length) {
+                renderVisualEditorFocusBanner({
+                    warning: true,
+                    returnUrl: returnUrl,
+                    title: 'Visual-Editor-Felder fehlen',
+                    text: 'Die angeforderten Felder wurden im Zielabschnitt nicht gefunden. Normale ProcessWire-Ansicht bleibt aktiv.'
+                });
+                return;
+            }
+
+            $inputfields.children('.Inputfield').each(function() {
+                var $field = $(this);
+                if ($field.is($sectionsWrap)) return;
+                $field.addClass('bioco-ve-focus-hidden').hide();
+            });
+
+            expandInputfield($sectionsWrap);
+            $sectionsWrap.find('.InputfieldRepeaterItem').each(function() {
+                var $item = $(this);
+                if ($item.is($targetItem)) {
+                    $item.removeClass('bioco-ve-focus-hidden').show();
+                    expandInputfield($item);
+                    return;
+                }
+                $item.addClass('bioco-ve-focus-hidden').hide();
+            });
+
+            $targetItem.find('.Inputfield').each(function() {
+                var $field = $(this);
+                var name = getTargetFieldName($field);
+                if (!name) return;
+                if (fieldNames.indexOf(name) >= 0) {
+                    $field.removeClass('bioco-ve-focus-hidden').show();
+                    expandInputfield($field);
+                    return;
+                }
+                $field.addClass('bioco-ve-focus-hidden').hide();
+            });
+
+            renderVisualEditorFocusBanner({
+                returnUrl: returnUrl,
+                title: 'Fokussierte Abschnittsbearbeitung',
+                text: 'Nur die für "' + focusLabel + '" relevanten Felder dieses Abschnitts sind sichtbar.'
+            });
+            focusFirstEditable($allowedFields.first());
+            return;
+        }
+
+        var $allowedPageFields = collectInputfieldsByName($inputfields, fieldNames);
+        if (!$allowedPageFields.length) {
+            renderVisualEditorFocusBanner({
+                warning: true,
+                returnUrl: returnUrl,
+                title: 'Visual-Editor-Felder fehlen',
+                text: 'Die angeforderten Seitenfelder wurden nicht gefunden. Normale ProcessWire-Ansicht bleibt aktiv.'
+            });
+            return;
+        }
+
+        $inputfields.children('.Inputfield').each(function() {
+            var $field = $(this);
+            var name = getTargetFieldName($field);
+            if (!name) return;
+            if (fieldNames.indexOf(name) >= 0) {
+                $field.removeClass('bioco-ve-focus-hidden').show();
+                expandInputfield($field);
+                return;
+            }
+            $field.addClass('bioco-ve-focus-hidden').hide();
+        });
+
+        renderVisualEditorFocusBanner({
+            returnUrl: returnUrl,
+            title: 'Fokussierte Seitenbearbeitung',
+            text: 'Nur die für "' + focusLabel + '" relevanten Seitenfelder sind sichtbar.'
+        });
+        focusFirstEditable($allowedPageFields.first());
+    }
+
     function findClosestCard($node) {
         var $card = $node.closest('.PageListItem');
         if ($card.length) return $card;
@@ -754,6 +982,7 @@ $(document).ready(function() {
             renameContentPlanningUi();
             redirectVisualEditorEditScreen();
             initComponentFieldHelpers();
+            applyVisualEditorFocusedMode();
         }, 100);
     });
 
@@ -792,6 +1021,7 @@ $(document).ready(function() {
     addPreviewButton();
     addRecapButton();
     addVisualEditorLink();
+    applyVisualEditorFocusedMode();
 
     // ================================================================
     // "Rückblick erstellen" button for upcoming events
