@@ -17,7 +17,7 @@ npm ci
 npm run build
 
 echo "=== Uploading standalone output ==="
-rsync -avzc --delete --exclude='start.sh' .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
+rsync -avzc --delete --exclude='start.sh' --exclude='healthcheck.sh' .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
 rsync -avzc --delete .next/static/ "$DEPLOY_HOST:$DEPLOY_DIR/.next/static/"
 rsync -avzc --delete public/ "$DEPLOY_HOST:$DEPLOY_DIR/public/"
 
@@ -27,6 +27,10 @@ ssh "$DEPLOY_HOST" '
   cp -r /tmp/sharp-pkg/node_modules/@img/sharp-libvips-linux-x64 /home/bioco/bioco-frontend/node_modules/@img/ 2>/dev/null || echo "WARN: sharp-libvips-linux-x64 not found"
   rm -rf /home/bioco/bioco-frontend/node_modules/@img/sharp-darwin-arm64 /home/bioco/bioco-frontend/node_modules/@img/sharp-libvips-darwin-arm64 2>/dev/null
 '
+
+echo "=== Uploading healthcheck script ==="
+rsync -avzc "$LOCAL_DIR/scripts/healthcheck.sh" "$DEPLOY_HOST:$DEPLOY_DIR/healthcheck.sh"
+ssh "$DEPLOY_HOST" "chmod +x $DEPLOY_DIR/healthcheck.sh"
 
 echo "=== Uploading CMS templates + hooks ==="
 rsync -avzc "$LOCAL_DIR/site/templates/admin.js" "$LOCAL_DIR/site/templates/api.php" "$LOCAL_DIR/site/templates/api-events.php" "$LOCAL_DIR/site/templates/visual-editor.php" "$DEPLOY_HOST:$CMS_DIR/"

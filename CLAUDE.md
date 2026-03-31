@@ -9,7 +9,7 @@ Single Novatrend cPanel server (193.33.128.160):
 - **ProcessWire** via PHP-FPM (cms.bioco.ch)
 - **MySQL** localhost:3306 (bioco_cms)
 - **SMTP** mail.bioco.ch:465
-- Cron job every 5min keeps Node.js alive (`/home/bioco/bioco-frontend/start.sh`)
+- Cron job every 5min runs health check watchdog (`/home/bioco/bioco-frontend/healthcheck.sh`) which calls `start.sh` if needed
 
 Next.js calls ProcessWire via `http://localhost/cms/api/*` (same server, no CORS).
 
@@ -17,6 +17,7 @@ Next.js calls ProcessWire via `http://localhost/cms/api/*` (same server, no CORS
 
 ### Critical constraints
 - **CloudLinux Passenger IS active** but unreliable for restarts. Use `pgrep -x next-server` + kill for process management.
+- **PHP OPcache caches module files.** After rsyncing any `.php` file under `site/modules/`, the running PHP-FPM process may serve the old compiled bytecode. CLI `php -r "opcache_reset()"` does NOT affect the web PHP process. To force reload: place a PHP file accessible via `cms.bioco.ch` (outside PW's `.htaccess` routing) and call `opcache_invalidate($path, true)` or `opcache_reset()` from a web request. PW's `.htaccess` in `/cms/` intercepts all requests — put the reset file at the vhost root, not inside `/cms/`. Alternatively, wait for `opcache.revalidate_freq` to expire, or ask user to log out and back in to get a fresh PHP-FPM worker.
 - **`npm run build` fails on server.** CloudLinux thread limits cause SWC/Rayon panics. Always build locally.
 - **Node 18.20.8** (no Node 20+). Fine for Next.js 14.
 - **Port 49154** used by Node.js. Apache proxies to it.
@@ -39,6 +40,7 @@ ssh bioco@193.33.128.160
 ├── bioco-frontend/            # Deployed Next.js standalone
 │   ├── server.js              # Next.js standalone entry
 │   ├── start.sh               # Startup script with env vars (DO NOT rsync --delete)
+│   ├── healthcheck.sh         # Watchdog: deep body check, calls start.sh (from repo)
 │   ├── .next/                 # Compiled app + static assets
 │   ├── public/                # Images, PDFs, fonts
 │   └── node_modules/@img/     # sharp bindings (restore after deploy)
@@ -67,9 +69,17 @@ curl --resolve bioco.ch:443:193.33.128.160 -I https://bioco.ch/<slug>
 ```
 - If the local app is `200` but external is not, remove the stray file/symlink in `public_html`.
 
+### Health check watchdog
+- `healthcheck.sh` (in repo at `scripts/healthcheck.sh`, deployed to `/home/bioco/bioco-frontend/healthcheck.sh`)
+- Cron runs it every 5 min; it calls `start.sh` when the server needs starting or restarting
+- Deep body check: detects error boundary content (`>Fehler</h1>` + `Etwas ist schiefgelaufen`) even when HTTP 200
+- Double-check: curls twice with 2s gap to avoid false positives from transient errors
+- Cooldown: skips restart if last restart was < 3 min ago (prevents restart loops)
+- Logs to `/home/bioco/logs/healthcheck.log`
+
 ### Process management
 - `start.sh` exports env vars, runs `node server.js` with `nohup`, uses flock to prevent duplicates
-- Cron runs `start.sh` every 5 minutes (no-op if already running)
+- Cron runs `healthcheck.sh` every 5 minutes, which calls `start.sh` as needed
 - Safe restart: `for p in $(pgrep -a next-server | awk '{print $1}'); do kill "$p"; done; sleep 3; start.sh`
 - Fallback restart if old workers remain: `for p in $(ps -eo pid,comm | awk '$2=="next-server"{print $1}'); do kill $p; done`
 - Verify steady state after restart:
@@ -197,6 +207,7 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 | File | Purpose |
 |------|---------|
 | `scripts/deploy.sh` | Full deploy: build, rsync, sharp restore, restart |
+| `scripts/healthcheck.sh` | Watchdog: deep body check, cooldown, calls start.sh |
 
 ## API Endpoints
 
