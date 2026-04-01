@@ -173,7 +173,8 @@ Access ProcessWire admin at: `https://www.bioco.ch/processwire/`
 | `site/ready.php` | Bootstrap file, initializes custom classes |
 | `site/init.php` | Global hooks (optional) |
 | `site/templates/api.php` | Unified API router |
-| `site/templates/visual-editor.php` | Standalone visual editor shell |
+| `site/templates/visual-editor.php` | Standalone visual editor shell; real-site nav inside iframe drives page changes |
+| `site/templates/visual-editor-focus-fields.json` | Shared field map for VE -> focused ProcessWire deep-links |
 | `site/templates/` | Template files and admin integrations |
 | `site/modules/` | Custom modules |
 | `wire/` | ProcessWire core (don't modify) |
@@ -461,6 +462,11 @@ These require a logged-in ProcessWire admin/editor session via `requireAdminSess
 
 `/api/content-save` is `sectionPwId`-first. The visual editor sends normalized field changes and the shell maps them back to ProcessWire field names.
 
+Focused ProcessWire editing is separate from `/api/content-save`:
+- VE can open a focused ProcessWire edit tab for the selected field/section
+- field visibility is driven by `site/templates/visual-editor-focus-fields.json`
+- `site/templates/admin.js` must match repeater field names suffix-aware because DOM ids/names are often prefixed
+
 ### Form endpoints
 
 - `/api/forms/contact`
@@ -638,7 +644,7 @@ Canonical deploy flow:
 3. rsync `.next/static/`
 4. rsync `public/`
 5. restore `/tmp/sharp-pkg/node_modules/@img/sharp-linux-x64` and `sharp-libvips-linux-x64`
-6. rsync `site/templates/admin.js`, `api.php`, `api-events.php`, `visual-editor.php`
+6. rsync `site/templates/admin.js`, `api.php`, `api-events.php`, `visual-editor.php`, `visual-editor-focus-fields.json`
 7. rsync `site/ready.php`
 8. restart with `pgrep -x next-server`, never `pgrep -f`
 9. verify local `127.0.0.1:49154`, external `https://bioco.ch/`, and `/api/revalidate`

@@ -30,7 +30,7 @@ describe('Image sizes props', () => {
     imageProps.length = 0
   })
 
-  it('SplitSection images have sizes with 50vw for desktop', () => {
+  it('SplitSection images use the reduced desktop width hint', () => {
     const sections: ContentSection[] = [{
       id: 'split-test',
       title: 'Test',
@@ -38,11 +38,12 @@ describe('Image sizes props', () => {
       layout: 'split_media_text',
       image: '/test.jpg',
     }]
-    render(<SectionRenderer sections={sections} />)
+    render(<SectionRenderer sections={sections} pagePath="/wir" />)
     const imgCall = imageProps.find(p => p.src === '/test.jpg')
     expect(imgCall).toBeDefined()
     expect(imgCall!.sizes).toBeDefined()
-    expect(imgCall!.sizes).toContain('50vw')
+    expect(imgCall!.sizes).toContain('42vw')
+    expect(imgCall!.sizes).toContain('520px')
   })
 
   it('MediaGridSection images have sizes with 33vw for desktop', () => {

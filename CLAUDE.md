@@ -119,7 +119,7 @@ Build locally, rsync frontend + CMS templates, restore sharp, restart.
 scripts/deploy.sh main
 ```
 
-This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, rsyncs CMS templates (admin.js, api.php, api-events.php, visual-editor.php) + `site/ready.php`, restarts Node.js, verifies.
+This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, rsyncs CMS templates (`admin.js`, `api.php`, `api-events.php`, `visual-editor.php`, `visual-editor-focus-fields.json`) + `site/ready.php`, restarts Node.js, verifies.
 
 **Manual deploy:**
 ```bash
@@ -130,7 +130,7 @@ rsync -avzc --delete public/ bioco@193.33.128.160:/home/bioco/bioco-frontend/pub
 # Restore sharp (REQUIRED after standalone rsync)
 ssh bioco@193.33.128.160 'cp -r /tmp/sharp-pkg/node_modules/@img/sharp-{linux-x64,libvips-linux-x64} /home/bioco/bioco-frontend/node_modules/@img/'
 # CMS templates
-rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php,visual-editor-focus-fields.json} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
 # CMS hooks
 rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 # Restart
@@ -155,7 +155,7 @@ ssh bioco@193.33.128.160 'ls -la /home/bioco/public_html/wir 2>/dev/null || true
 
 **CMS-only deploy** (no frontend build needed):
 ```bash
-rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php,visual-editor-focus-fields.json} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
 rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 ```
 
@@ -198,8 +198,9 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 |------|---------|
 | `site/templates/api.php` | Unified API router, all endpoints |
 | `site/templates/api-events.php` | Events API (upcoming/past split, cardImage) |
-| `site/templates/admin.js` | Admin UI: media library, image editor, preview, recap button, visual editor link |
-| `site/templates/visual-editor.php` | Standalone visual editor shell: page picker, iframe, save/discard, CRUD, loading blocker |
+| `site/templates/admin.js` | Admin UI: media library, image editor, preview, recap button, visual editor link, focused PW edit mode |
+| `site/templates/visual-editor.php` | Standalone visual editor shell: real-site nav in iframe, sidebar context, save/discard, CRUD, loading blocker |
+| `site/templates/visual-editor-focus-fields.json` | Shared VE -> ProcessWire focus field map |
 | `site/templates/admin.php` | Loads admin.js in PW admin |
 | `site/config.php` | PW config (gitignored, secrets via getenv) |
 
@@ -257,12 +258,13 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 - **Preview button**: opens Next.js draft preview for the current page
 - **Rückblick button**: on upcoming events, converts to past status for recap editing
 - **Visual Editor link**: native-looking masthead item, inserted after `Media` when possible, opens `/visual-editor/` in new tab
+- **Focused ProcessWire mode**: VE can open a new PW tab for the selected field/section and hide unrelated inputs
 
 ## Visual Editor
 
 Dedicated `/visual-editor/` screen. Parent shell in ProcessWire, direct inline editing inside the iframe.
 
-**Architecture:** PW admin page (`/visual-editor/`, template `visual-editor.php`) embeds Next.js site in iframe with `?_visual=1`. Parent shell owns page selection, save/discard, section CRUD, media actions, and busy/loading state. Iframe runtime owns inline field selection/editing for homepage and CMS repeater pages.
+**Architecture:** PW admin page (`/visual-editor/`, template `visual-editor.php`) embeds Next.js site in iframe with `?_visual=1`. Parent shell owns current page context, save/discard, section CRUD, media actions, and busy/loading state. Real site navigation inside the iframe drives page changes. Iframe runtime owns inline field selection/editing for homepage and CMS repeater pages.
 
 **Key constraints:**
 - `visual-editor.php` must call `while (ob_get_level()) ob_end_clean()` at top and `exit` at bottom to bypass PW admin chrome
@@ -272,6 +274,10 @@ Dedicated `/visual-editor/` screen. Parent shell in ProcessWire, direct inline e
 - `content-save` is `sectionPwId`-first. Keep `sectionId` only as temporary compatibility input.
 - Homepage and CMS pages must both emit stable `data-ve-section-id` / `data-ve-field` markers
 - `save-state` carries busy state; while busy, parent + iframe must block edits
+- Do not reintroduce the old page picker. The VE sidebar is context only; route changes come from iframe navigation.
+- `ready` messages from the iframe must include the current pathname so the parent can sync the active page.
+- VE -> ProcessWire focus mapping is shared in `site/templates/visual-editor-focus-fields.json`.
+- `admin.js` focused-mode matching must be suffix-aware because repeater field wrappers and input names may be prefixed.
 - After deploy, kill ALL `next-server` PIDs. Zombie processes from prior deploys serve stale middleware/headers
 
 ## Running PW Migrations

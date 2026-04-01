@@ -128,6 +128,31 @@ body {
   }
 }
 
+.cms-page-wir .cms-split {
+  max-width: 1160px;
+  margin-inline: auto;
+}
+
+.cms-page-wir .cms-split-media {
+  width: 100%;
+  max-width: 520px;
+  justify-self: center;
+}
+
+.cms-page-wir .cms-split-content {
+  width: 100%;
+  max-width: 38rem;
+}
+
+@media (min-width: 900px) {
+  .cms-page-wir .cms-split {
+    grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  }
+  .cms-page-wir .cms-split-content {
+    justify-self: start;
+  }
+}
+
 .cms-media-frame {
   position: relative;
   width: 100%;

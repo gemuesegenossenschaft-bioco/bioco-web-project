@@ -6,6 +6,7 @@ import { VisualEditorWrapper } from '@/components/sections/VisualEditorWrapper'
 import { getAllPages, getPageContent } from '@/lib/processwire'
 import { generateMetadata as generateSeoMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
+import type { ContentSection } from '@/lib/processwire-types'
 
 // ISR: revalidate every 60 seconds
 export const revalidate = 60
@@ -65,6 +66,21 @@ export async function generateMetadata({ params }: { params: { slug?: string[] }
   })
 }
 
+function SectionsFallback({ sections }: { sections: ContentSection[] }) {
+  return (
+    <div className="cms-sections">
+      {sections.map((section) => (
+        <div key={section.id}>
+          {section.title ? <h2>{section.title}</h2> : null}
+          {section.text ? (
+            <div dangerouslySetInnerHTML={{ __html: section.text }} />
+          ) : null}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default async function CmsPage({ params }: { params: { slug?: string[] } }) {
   const slug = normalizeSlug(params.slug)
   if (!slug || RESERVED_PATHS.has(slug) || STATIC_FILES.test(slug)) {
@@ -81,7 +97,7 @@ export default async function CmsPage({ params }: { params: { slug?: string[] } 
     <>
       <Header />
       <main className="main-content">
-        <Suspense fallback={null}>
+        <Suspense fallback={<SectionsFallback sections={sections} />}>
           <VisualEditorWrapper sections={sections} />
         </Suspense>
       </main>

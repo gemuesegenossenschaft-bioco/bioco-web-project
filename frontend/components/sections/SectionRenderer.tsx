@@ -1,3 +1,5 @@
+'use client'
+
 import Image from 'next/image'
 import { CTA } from '@/components/CTA'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
@@ -8,6 +10,7 @@ interface SectionRendererProps {
   sections: ContentSection[]
   isEditing?: boolean
   visualEditor?: boolean
+  pagePath?: string
 }
 
 function hasHeadingHtml(html?: string | null): boolean {
@@ -103,7 +106,17 @@ function SectionButtons({ section, visualEditor }: { section: ContentSection; vi
   )
 }
 
-function SplitSection({ section, mediaFirst, visualEditor }: { section: ContentSection; mediaFirst: boolean; visualEditor: boolean }) {
+function SplitSection({
+  section,
+  mediaFirst,
+  visualEditor,
+  imageSizes,
+}: {
+  section: ContentSection
+  mediaFirst: boolean
+  visualEditor: boolean
+  imageSizes: string
+}) {
   const media = getSectionMedia(section)
   const overlayClass = section.imageOverlay && section.imageOverlay !== 'none' ? `image-overlay-${section.imageOverlay}` : ''
   return (
@@ -114,7 +127,7 @@ function SplitSection({ section, mediaFirst, visualEditor }: { section: ContentS
       >
         {media ? (
           <div className="cms-media-frame" style={getImageFilterStyle(section)}>
-            <Image src={media.url} alt={media.alt || section.title} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: 'cover' }} />
+            <Image src={media.url} alt={media.alt || section.title} fill sizes={imageSizes} style={{ objectFit: 'cover' }} />
           </div>
         ) : null}
       </div>
@@ -217,13 +230,20 @@ function ComponentSection({ section, visualEditor }: { section: ContentSection; 
   )
 }
 
-export function SectionRenderer({ sections, isEditing = false, visualEditor = false }: SectionRendererProps) {
+export function SectionRenderer({ sections, isEditing = false, visualEditor = false, pagePath }: SectionRendererProps) {
+  const isWirPage = pagePath === '/wir'
+  const splitImageSizes = isWirPage
+    ? '(max-width: 768px) 100vw, (max-width: 1400px) 42vw, 520px'
+    : '(max-width: 768px) 100vw, 50vw'
+
   function resolveLayout(section: ContentSection): string {
+    // If a component key is set, render as component regardless of layout field
+    if (section.component) return 'component'
     return section.layout || (section.image || section.media ? 'split_media_text' : 'rich_text')
   }
 
   return (
-    <div className="cms-sections">
+    <div className={`cms-sections${isWirPage ? ' cms-page-wir' : ''}`}>
       {sections.map((section) => {
         const layout = resolveLayout(section)
         const theme = section.theme ? `cms-theme-${section.theme}` : 'cms-theme-default'
@@ -232,7 +252,7 @@ export function SectionRenderer({ sections, isEditing = false, visualEditor = fa
         let inner: React.ReactNode
         switch (layout) {
           case 'split_text_media':
-            inner = <SplitSection section={section} mediaFirst={false} visualEditor={visualEditor} />
+            inner = <SplitSection section={section} mediaFirst={false} visualEditor={visualEditor} imageSizes={splitImageSizes} />
             break
           case 'full_width_banner':
             inner = <BannerSection section={section} visualEditor={visualEditor} />
@@ -247,7 +267,7 @@ export function SectionRenderer({ sections, isEditing = false, visualEditor = fa
             inner = <ComponentSection section={section} visualEditor={visualEditor} />
             break
           case 'split_media_text':
-            inner = <SplitSection section={section} mediaFirst={true} visualEditor={visualEditor} />
+            inner = <SplitSection section={section} mediaFirst={true} visualEditor={visualEditor} imageSizes={splitImageSizes} />
             break
           case 'rich_text':
           default:

@@ -597,8 +597,9 @@ class ProcessContentPlanning extends Process {
     private function renderAddForm() {
         $pageOptions = $this->getPageOptions();
         $userOptions = $this->getUserOptions();
+        $debugInfo = "<!-- DEBUG v2: pages=" . substr_count($pageOptions, '<option') . " users=" . substr_count($userOptions, '<option') . " -->";
         
-        return "
+        return "{$debugInfo}
         <div id='item-form-overlay' class='form-overlay' style='display:none;'>
             <div class='form-modal'>
                 <h3 id='form-title'>Add Item</h3>

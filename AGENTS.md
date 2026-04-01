@@ -8,17 +8,22 @@ Deploys frontend and/or CMS to Novatrend cPanel.
 1. Always build locally. Server builds fail (CloudLinux thread limits).
 2. Rsync three dirs in order: `.next/standalone/` (exclude start.sh), `.next/static/`, `public/`.
 3. Restore sharp: copy `sharp-linux-x64` AND `sharp-libvips-linux-x64` from `/tmp/sharp-pkg/`. Remove darwin bindings.
-4. Rsync CMS files: `admin.js`, `api.php`, `api-events.php`, `visual-editor.php` to `/home/bioco/public_html/cms/site/templates/` **and** `site/ready.php` to `/home/bioco/public_html/cms/site/ready.php`.
-5. Restart primary: `for p in $(pgrep -x next-server); do kill $p; done; sleep 3; start.sh`. Never use `pgrep -f` (kills SSH session).
+4. Rsync CMS files: `admin.js`, `api.php`, `api-events.php`, `visual-editor.php`, `visual-editor-focus-fields.json` to `/home/bioco/public_html/cms/site/templates/` **and** `site/ready.php` to `/home/bioco/public_html/cms/site/ready.php`.
+5. Restart primary: `for p in $(pgrep -a next-server | awk '{print $1}'); do kill "$p"; done; sleep 3; start.sh`. Never use `pgrep -f` (kills SSH session).
 6. Restart fallback if primary misses old workers: `for p in $(ps -eo pid,comm | awk '$2=="next-server"{print $1}'); do kill $p; done`.
 7. Verify: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:49154/` from server.
 8. External test: `curl --resolve bioco.ch:443:193.33.128.160 https://bioco.ch/`
 9. Verify revalidate auth from server: `POST http://127.0.0.1:49154/api/revalidate` must return `200` with secret from `site/config.php`.
+10. HTML smoke gate: local + external response body must NOT contain `Fehler` / `Etwas ist schiefgelaufen.` (200 alone is not enough).
+11. Log gate: after restart, check `/home/bioco/logs/nextjs.log` and ensure no fresh `Failed to find Server Action` entries.
+12. If local repo has unrelated dirty files, deploy from a clean temp clone. Do not rsync accidental local-only changes to production.
 
 **Common issues:**
 - 503 after deploy: sharp bindings missing or process not started. Check `tail /home/bioco/logs/nextjs.log`.
+- PW module changes not reflected after rsync: PHP OPcache is caching the old bytecode. CLI `opcache_reset()` does NOT affect web PHP-FPM. Place a reset script accessible via `cms.bioco.ch` OUTSIDE `/cms/` (PW `.htaccess` intercepts everything inside). The vhost root is `/home/bioco/public_html/cms/` — place file there and access as `cms.bioco.ch/<file>.php`. Call `opcache_invalidate('/path/to/file.php', true)` or `opcache_reset()` then delete the script. If vhost root is uncertain, check Apache config or test with a plain file.
 - EADDRINUSE: old process still running. Kill with `pgrep -x next-server`, wait, retry.
 - Zombie processes: after deploy, verify only ONE `next-server` is running. Old instances serve stale code (wrong headers, old middleware). Kill by PID if `pgrep -x` misses them.
+- `Fehler` page with `HTTP 200`: stale client/server deploy mismatch (`Failed to find Server Action`, `reading 'workers'`, `reading 'digest'`). Fix by killing stale workers + restart + hard refresh (`?__fresh=<ts>`). Do not mark deploy healthy until HTML smoke + log gate pass.
 - Cron respawns every 5min: during a restart window it can spawn a second `next-server`. Always run `ps -eo pid,ppid,args | grep "next-server" | grep -v grep` after deploy and kill any non-primary PID.
 - Cron uses a minimal `PATH`. In `/home/bioco/bioco-frontend/start.sh`, use absolute paths or export `PATH` before `flock`/`curl`/`pgrep`. If not, the guard checks silently fail under cron and it spawns duplicate workers.
 - CloudLinux Node Selector / Passenger can also spawn a second worker. Check `~/.cl.selector/node-selector.json` and inspect the extra PID environment for `IN_PASSENGER=1`. This is distinct from the standalone `start.sh` process.
@@ -62,6 +67,7 @@ Manages ProcessWire admin UI enhancements in `site/templates/admin.js`.
 - Preview button (draft mode via Next.js)
 - Rückblick button (converts upcoming event to past recap)
 - Visual Editor navbar link (native masthead item, inserted after `Media` when possible, opens `/visual-editor/` in new tab)
+- Focused ProcessWire mode for Visual Editor deep-links (`veFocus=1`): hides unrelated fields, shows back-link to VE
 
 **Patterns:**
 - `getEditedTemplateName()` to detect current template
@@ -77,15 +83,18 @@ Manages the iframe + postMessage WYSIWYG section editor.
 - PW page `/visual-editor/` uses template `visual-editor.php` (standalone HTML, bypasses admin chrome)
 - Embeds Next.js site in iframe with `?_visual=1` query param
 - Bidirectional postMessage with `bioco:visual-editor:` prefix
-- Parent shell owns page selection, save/discard, section CRUD, busy state
+- Parent shell owns current page context, save/discard, section CRUD, busy state
+- Page switching happens through the real site navigation inside the iframe, not a PW-side page picker
 - Iframe owns inline field selection/editing for homepage + CMS repeater pages
 - Full-screen busy overlay blocks edits during load/save/refetch/import
 
 **Files:**
 - `site/templates/visual-editor.php`: PW admin page (standalone HTML output)
+- `site/templates/visual-editor-focus-fields.json`: shared VE -> ProcessWire focus field map
 - `frontend/components/visual-editor/InlineVisualEditorRuntime.tsx`: iframe inline editor runtime
 - `frontend/components/visual-editor/fieldAttrs.ts`: field marker helpers
 - `frontend/hooks/useVisualEditor.ts`: postMessage protocol, section click/highlight/update
+- `frontend/lib/visualEditorProcessWire.ts`: shared focus-field mapping logic for tests/runtime
 - `frontend/components/sections/VisualEditorWrapper.tsx`: detects `?_visual=1`, adds `data-section-id` attrs
 - `frontend/components/sections/SectionRenderer.tsx`: CMS page field instrumentation
 - `frontend/components/HomeClient.tsx`: homepage field instrumentation
@@ -98,7 +107,11 @@ Manages the iframe + postMessage WYSIWYG section editor.
 - `content-save` persists by `sectionPwId`; keep legacy `sectionId` only for compatibility
 - Section CRUD endpoints: `sections-reorder`, `sections-add`, `sections-delete` in `api.php`
 - Repeater sort: always use `->sort('sort')` when iterating `content_sections`
-- Keep one protocol. Parent -> iframe: `section-highlight`, `section-scroll`, `section-update`, `sections-replace`, `save-state`. Iframe -> parent: `ready`, `section-click`, `field-select`, `field-change`, `field-commit`, `media-request`
+- Do not reintroduce the old VE page dropdown. Sidebar shows current page title/path and PW type labels, but page changes come from iframe navigation.
+- `ready` must include the current pathname so the parent shell can adopt route changes after in-iframe navigation.
+- Focused ProcessWire deep-links rely on `veFields` from `visual-editor-focus-fields.json`.
+- `admin.js` field matching for focused mode must stay suffix-aware because repeater field DOM ids/names can be prefixed.
+- Keep one protocol. Parent -> iframe: `section-highlight`, `section-scroll`, `section-update`, `sections-replace`, `save-state`. Iframe -> parent: `ready`, `section-click`, `field-select`, `field-change`, `field-commit`, `media-request`, `open-processwire`
 
 ## CMS Migration Agent
 

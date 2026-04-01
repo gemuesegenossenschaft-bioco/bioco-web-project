@@ -2,6 +2,11 @@
 
 if(!defined("PROCESSWIRE")) die();
 
+// TEMP: bust opcache for module update
+if (\function_exists('opcache_invalidate')) {
+    \opcache_invalidate(__DIR__ . '/modules/ProcessContentPlanning/ProcessContentPlanning.module.php', true);
+}
+
 /** @var ProcessWire $wire */
 
 /**
@@ -133,165 +138,6 @@ function biocoEnsureSectionConfigField() {
         if (!$fieldgroup || $fieldgroup->hasField($field)) continue;
         $fieldgroup->add($field);
         $fieldgroup->save();
-    }
-}
-
-function biocoNormalizeWirSectionId(Page $section) {
-    $raw = (string)($section->get('section_id') ?: $section->name ?: '');
-    return strtolower(trim($raw));
-}
-
-function biocoWirSectionDefaultConfig($componentKey, Page $section) {
-    $imageCount = 0;
-    foreach (['section_images', 'section_image', 'image'] as $fieldName) {
-        if (!$section->hasField($fieldName)) continue;
-        $value = $section->get($fieldName);
-        if ($value instanceof Pageimage || $value instanceof Pagefile) {
-            $imageCount += 1;
-            continue;
-        }
-        if (($value instanceof Pageimages || $value instanceof Pagefiles) && $value->count()) {
-            $imageCount += (int)$value->count();
-        }
-    }
-
-    switch ($componentKey) {
-        case 'page_intro':
-            return ['containerWidth' => 'lg', 'textWidth' => 'normal', 'align' => 'left'];
-        case 'media_text':
-            return [
-                'containerWidth' => 'xl',
-                'mediaSide' => in_array(biocoNormalizeWirSectionId($section), ['betriebsgruppe', 'gotti'], true) ? 'right' : 'left',
-                'mediaWidth' => '50',
-                'mediaRatio' => '4:3',
-                'mediaFit' => 'cover',
-                'verticalAlign' => 'center',
-                'gap' => 'lg',
-                'rounded' => 'lg',
-            ];
-        case 'cards_grid':
-            return [
-                'containerWidth' => 'xl',
-                'columnsDesktop' => $imageCount >= 4 ? '4' : ($imageCount >= 3 ? '3' : '2'),
-                'columnsMobile' => '1',
-                'cardStyle' => 'soft',
-                'mediaRatio' => '3:4',
-                'mediaFit' => 'cover',
-                'gap' => 'lg',
-                'rounded' => 'md',
-            ];
-        case 'gallery_strip':
-            return [
-                'containerWidth' => 'xl',
-                'columnsDesktop' => $imageCount >= 4 ? '4' : ($imageCount >= 3 ? '3' : '2'),
-                'columnsMobile' => '1',
-                'mediaRatio' => '4:3',
-                'mediaFit' => 'cover',
-                'gap' => 'lg',
-                'rounded' => 'lg',
-            ];
-        case 'text_columns':
-            return ['containerWidth' => 'lg', 'columnsDesktop' => '2', 'columnsMobile' => '1', 'gap' => 'lg', 'cardStyle' => 'plain'];
-        case 'timeline_header':
-            return ['containerWidth' => 'lg', 'textWidth' => 'normal', 'align' => 'left'];
-        case 'timeline_item':
-            return ['containerWidth' => 'lg', 'emphasis' => 'normal'];
-        case 'cta_band':
-            return ['containerWidth' => 'lg', 'align' => 'left', 'theme' => 'soft', 'rounded' => 'xl'];
-        default:
-            return [];
-    }
-}
-
-function biocoResolveWirComponentKey(Page $section) {
-    $sectionId = biocoNormalizeWirSectionId($section);
-    $title = strtolower(trim((string)$section->get('section_title')));
-    $text = strtolower(trim(strip_tags((string)$section->get('section_text'))));
-
-    if ($sectionId === 'intro') return 'page_intro';
-    if (in_array($sectionId, ['wir', 'alle_mitglieder', 'betriebsgruppe', 'gotti'], true)) return 'media_text';
-    if ($sectionId === 'hof_team' || $sectionId === 'team') return 'cards_grid';
-    if ($sectionId === 'geisshof') return 'gallery_strip';
-    if (in_array($sectionId, ['mission', 'solidaritaet', 'nachhaltigkeit', 'gemeinschaft', 'regionalitaet', 'geschichte'], true)) return 'text_columns';
-    if ($sectionId === 'timeline' || $title === 'timeline') return 'timeline_header';
-    if (strpos($sectionId, 'timeline_') === 0 || strpos($sectionId, 'timeline-') === 0) return 'timeline_item';
-    if (preg_match('/\b(19|20)\d{2}\b/', (string)$section->get('section_eyebrow'))) return 'timeline_item';
-    if ($section->get('section_component')) return (string)$section->get('section_component');
-    if ($section->hasField('section_image') && $section->get('section_image')) return 'media_text';
-    if ($section->hasField('section_images') && $section->get('section_images') && $section->get('section_images')->count() > 1) return 'gallery_strip';
-    if ($text !== '' || $title !== '') return 'text_columns';
-    return 'page_intro';
-}
-
-function biocoEnsureWirPageMigrated() {
-    static $done = false;
-    if ($done) return;
-    $done = true;
-
-    biocoEnsureSectionConfigField();
-
-    try {
-        $page = wire('pages')->get('/wir/');
-        if (!$page->id) {
-            $page = wire('pages')->get('/content/wir/');
-        }
-        if (!$page->id || !$page->hasField('content_sections') || !$page->content_sections) return;
-
-        $sections = $page->content_sections->sort('sort');
-        if (!$sections->count()) return;
-
-        $alreadyMigrated = true;
-        foreach ($sections as $section) {
-            if ((string)$section->get('section_layout') !== 'component' || !(string)$section->get('section_component')) {
-                $alreadyMigrated = false;
-                break;
-            }
-        }
-        if ($alreadyMigrated) return;
-
-        $page->of(false);
-        $sort = 0;
-        $hasCtaBand = false;
-
-        foreach ($sections as $section) {
-            $section->of(false);
-            $componentKey = biocoResolveWirComponentKey($section);
-            $section->set('section_layout', 'component');
-            if ($section->hasField('section_component')) {
-                $section->set('section_component', $componentKey);
-            }
-            if ($section->hasField('section_config')) {
-                $section->set('section_config', json_encode(biocoWirSectionDefaultConfig($componentKey, $section), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-            }
-            $section->sort = $sort++;
-            $section->save();
-            if ($componentKey === 'cta_band') {
-                $hasCtaBand = true;
-            }
-        }
-
-        if (!$hasCtaBand) {
-            $cta = $page->content_sections->getNew();
-            $cta->of(false);
-            if ($cta->hasField('section_id')) $cta->set('section_id', 'wir_cta');
-            if ($cta->hasField('section_title')) $cta->set('section_title', 'Mitmachen?');
-            if ($cta->hasField('section_text')) $cta->set('section_text', '<p>Werde Teil unserer Gemeinschaft und unterstütze die solidarische Landwirtschaft rund um den Geisshof.</p>');
-            if ($cta->hasField('section_layout')) $cta->set('section_layout', 'component');
-            if ($cta->hasField('section_component')) $cta->set('section_component', 'cta_band');
-            if ($cta->hasField('button_text')) $cta->set('button_text', 'Jetzt Mitglied werden');
-            if ($cta->hasField('button_href')) $cta->set('button_href', '/mitmachen');
-            if ($cta->hasField('button_variant')) $cta->set('button_variant', 'primary');
-            if ($cta->hasField('button2_text')) $cta->set('button2_text', 'Kontakt');
-            if ($cta->hasField('button2_href')) $cta->set('button2_href', '/kontakt');
-            if ($cta->hasField('button2_variant')) $cta->set('button2_variant', 'secondary');
-            if ($cta->hasField('section_config')) {
-                $cta->set('section_config', json_encode(biocoWirSectionDefaultConfig('cta_band', $cta), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-            }
-            $cta->sort = $sort;
-            $cta->save();
-        }
-    } catch (\Throwable $error) {
-        wire('log')->save('wir-migration', $error->getMessage());
     }
 }
 
@@ -593,7 +439,6 @@ function biocoMutateAdminNavMarkup($markup) {
 }
 
 biocoEnsureSectionConfigField();
-biocoEnsureWirPageMigrated();
 
 // Load custom admin JavaScript
 $wire->addHookAfter('Page::render', function($event) {

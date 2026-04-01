@@ -1,6 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { useVisualEditor } from '@/hooks/useVisualEditor'
 import { InlineVisualEditorRuntime } from '@/components/visual-editor/InlineVisualEditorRuntime'
 import { SectionRenderer } from './SectionRenderer'
@@ -12,6 +12,7 @@ interface VisualEditorWrapperProps {
 }
 
 export function VisualEditorWrapper({ sections: initialSections, isEditing = false }: VisualEditorWrapperProps) {
+  const pathname = usePathname()
   const searchParams = useSearchParams()
   const isVisualEditor = searchParams.get('_visual') === '1'
   const { sections, highlightedSectionId } = useVisualEditor({
@@ -20,7 +21,7 @@ export function VisualEditorWrapper({ sections: initialSections, isEditing = fal
   })
 
   if (!isVisualEditor) {
-    return <SectionRenderer sections={initialSections} isEditing={isEditing} />
+    return <SectionRenderer sections={initialSections} isEditing={isEditing} pagePath={pathname || undefined} />
   }
 
   return (
@@ -60,6 +61,7 @@ export function VisualEditorWrapper({ sections: initialSections, isEditing = fal
         sections={sections}
         isEditing={isEditing}
         visualEditor={true}
+        pagePath={pathname || undefined}
       />
     </>
   )
