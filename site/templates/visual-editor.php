@@ -212,10 +212,73 @@ body {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+.ve-page-nav {
+    border-bottom: 1px solid #1f2937;
+    padding: 12px 14px;
+}
+.ve-page-nav-header {
+    align-items: center;
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.ve-page-count {
+    color: #94a3b8;
+    font-size: 11px;
+}
+.ve-page-search {
+    padding: 8px 10px;
+    width: 100%;
+}
+.ve-page-list-wrap {
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.ve-page-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.ve-page-item {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    color: #e5e7eb;
+    cursor: pointer;
+    display: block;
+    padding: 10px 12px;
+    text-align: left;
+    transition: background 0.15s, border-color 0.15s;
+    width: 100%;
+}
+.ve-page-item:hover {
+    background: #172033;
+    border-color: #475569;
+}
+.ve-page-item.is-active {
+    background: #17321f;
+    border-color: #4a7c59;
+}
+.ve-page-item-title {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+}
+.ve-page-item-path {
+    color: #94a3b8;
+    display: block;
+    font-size: 11px;
+    margin-top: 4px;
+}
+.ve-page-item.is-active .ve-page-item-path {
+    color: #b7d8c0;
+}
 .ve-section-list-wrap {
     border-bottom: 1px solid #1f2937;
-    max-height: 42%;
-    min-height: 180px;
+    max-height: 34%;
+    min-height: 160px;
     overflow-y: auto;
 }
 .ve-section-list {
@@ -681,13 +744,25 @@ body {
             <div class="ve-sidebar-page">
                 <span class="ve-sidebar-kicker">Seite</span>
                 <span class="ve-sidebar-title" id="ve-current-page-title">Startseite</span>
-                <span class="ve-sidebar-path" id="ve-current-page-path">Navigation in der Vorschau verwenden.</span>
+                <span class="ve-sidebar-path" id="ve-current-page-path">Links Seite wählen oder in der Vorschau navigieren.</span>
             </div>
             <button class="ve-btn ve-btn-primary" id="ve-btn-add" type="button" disabled>Abschnitt hinzufügen</button>
         </div>
 
+        <div class="ve-page-nav">
+            <div class="ve-page-nav-header">
+                <span class="ve-sidebar-kicker">Seiten</span>
+                <span class="ve-page-count" id="ve-page-count">0 / 0</span>
+            </div>
+            <input class="ve-page-search" id="ve-page-search" type="text" placeholder="Seite suchen...">
+            <div class="ve-page-list-wrap">
+                <div class="ve-empty-state" id="ve-page-empty" style="display:none;">Keine passende Seite gefunden.</div>
+                <div class="ve-page-list" id="ve-page-list"></div>
+            </div>
+        </div>
+
         <div class="ve-section-list-wrap">
-            <div class="ve-empty-state" id="ve-empty-list">Navigation in der Vorschau verwenden, um eine Seite zu bearbeiten.</div>
+            <div class="ve-empty-state" id="ve-empty-list">Links eine Seite wählen oder in der Vorschau navigieren, um sie zu bearbeiten.</div>
             <ul class="ve-section-list" id="ve-section-list"></ul>
         </div>
 
@@ -791,6 +866,10 @@ body {
     var emptyList = document.getElementById('ve-empty-list');
     var currentPageTitleEl = document.getElementById('ve-current-page-title');
     var currentPagePathEl = document.getElementById('ve-current-page-path');
+    var pageCountEl = document.getElementById('ve-page-count');
+    var pageSearch = document.getElementById('ve-page-search');
+    var pageEmpty = document.getElementById('ve-page-empty');
+    var pageList = document.getElementById('ve-page-list');
     var fieldEditor = document.getElementById('ve-field-editor');
     var btnAdd = document.getElementById('ve-btn-add');
     var btnRefresh = document.getElementById('ve-btn-refresh');
@@ -925,19 +1004,68 @@ body {
         return getStoredPageDescriptor() || getPageDescriptorByPath('/') || ALL_PAGES[0] || null;
     }
 
+    function filteredPageDescriptors() {
+        var query = String((pageSearch && pageSearch.value) || '').trim().toLowerCase();
+        if (!query) return ALL_PAGES.slice();
+        return ALL_PAGES.filter(function (page) {
+            return [page.title, page.path, page.template]
+                .join(' ')
+                .toLowerCase()
+                .indexOf(query) !== -1;
+        });
+    }
+
+    function navigateToPage(page) {
+        if (!page || !page.id || !page.path) return;
+        if (isBusy()) return;
+        if (currentPageId === page.id && normalizePagePath(currentPath) === normalizePagePath(page.path)) return;
+        if (blockWhileDirty('Seitenwechsel')) return;
+        persistCurrentDraftNow();
+        loadPage(page.id, page.path);
+    }
+
+    function renderPageNavigator() {
+        if (!pageList || !pageEmpty || !pageCountEl) return;
+        var items = filteredPageDescriptors();
+        pageList.innerHTML = '';
+        pageCountEl.textContent = items.length + ' / ' + ALL_PAGES.length;
+        pageEmpty.style.display = items.length ? 'none' : 'block';
+
+        items.forEach(function (page) {
+            var item = document.createElement('button');
+            item.type = 'button';
+            item.className = 've-page-item' + (currentPageId === page.id ? ' is-active' : '');
+            item.innerHTML =
+                '<span class="ve-page-item-title">' + escapeHtml(page.title || page.name || page.path || 'Seite') + '</span>' +
+                '<span class="ve-page-item-path">' + escapeHtml(page.path || '/') + '</span>';
+            item.addEventListener('click', function () {
+                navigateToPage(page);
+            });
+            pageList.appendChild(item);
+        });
+
+        var activeItem = pageList.querySelector('.ve-page-item.is-active');
+        if (activeItem && typeof activeItem.scrollIntoView === 'function') {
+            activeItem.scrollIntoView({ block: 'nearest' });
+        }
+    }
+
     function renderCurrentPageContext(page, fallbackPath) {
         if (page) {
             currentPageTitleEl.textContent = page.title || page.name || 'Seite';
             currentPagePathEl.textContent = page.path || '/';
+            renderPageNavigator();
             return;
         }
         if (fallbackPath) {
             currentPageTitleEl.textContent = 'Nicht bearbeitbar';
             currentPagePathEl.textContent = normalizePagePath(fallbackPath) || fallbackPath;
+            renderPageNavigator();
             return;
         }
         currentPageTitleEl.textContent = 'Bearbeitbare Seite';
-        currentPagePathEl.textContent = 'Navigation in der Vorschau verwenden.';
+        currentPagePathEl.textContent = 'Links Seite wählen oder in der Vorschau navigieren.';
+        renderPageNavigator();
     }
 
     function setCurrentPageContext(pageId, path) {
@@ -1929,7 +2057,7 @@ body {
 
         if (!currentPageId || !page) {
             fieldEditor.innerHTML =
-                '<div class="ve-empty-state">Navigation in der Vorschau verwenden und eine bearbeitbare Seite öffnen.</div>';
+                '<div class="ve-empty-state">Links eine Seite wählen oder in der Vorschau navigieren und dann direkt im Layout bearbeiten.</div>';
             updateActions();
             return;
         }
@@ -2292,7 +2420,7 @@ body {
         sectionList.innerHTML = '';
         emptyList.textContent = currentPageId
             ? 'Noch keine Abschnitte vorhanden. Füge rechts oben einen Abschnitt hinzu.'
-            : 'Navigation in der Vorschau verwenden, um eine bearbeitbare Seite zu öffnen.';
+            : 'Links eine Seite wählen oder in der Vorschau navigieren, um sie zu bearbeiten.';
         emptyList.style.display = sections.length ? 'none' : 'block';
 
         sections.forEach(function (section, index) {
@@ -3208,6 +3336,7 @@ body {
     });
     presetSearch.addEventListener('input', renderPresetList);
     presetCategory.addEventListener('change', renderPresetList);
+    pageSearch.addEventListener('input', renderPageNavigator);
 
     addClose.addEventListener('click', closeAddModal);
     addModal.addEventListener('click', function (event) {
@@ -3340,6 +3469,7 @@ body {
             descriptor = getDefaultPageDescriptor();
         }
         if (!descriptor) return;
+        renderPageNavigator();
         loadPage(descriptor.id, descriptor.path);
     })();
 })();
