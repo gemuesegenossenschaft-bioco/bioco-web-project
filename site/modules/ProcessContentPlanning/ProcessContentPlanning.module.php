@@ -527,25 +527,17 @@ class ProcessContentPlanning extends Process {
      * Get all CMS pages for dropdown (only /content/ branch, exclude 404)
      */
     private function getPageOptions() {
+        // Find all front-end pages, exclude system/admin templates
         $excludeTemplates = 'admin|user|role|permission|api|api-events|visual-editor|MediaLibrary|site_settings|repeater_content_sections';
         $pages = $this->wire('pages')->find("template!=$excludeTemplates, id>1, include=all, limit=500, sort=path");
         $options = ['<option value="">-- No Page (Optional) --</option>'];
-
+        
         foreach ($pages as $p) {
             $status = $p->isUnpublished() ? ' (unpublished)' : '';
             $title = $this->wire('sanitizer')->entities($p->title . $status);
             $options[] = "<option value='{$p->id}'>{$p->path} - {$title}</option>";
         }
-
-        if (count($options) <= 1) {
-            // Fallback: try without include=all (non-superuser)
-            $pages = $this->wire('pages')->find("template!=$excludeTemplates, id>1, limit=500, sort=path");
-            foreach ($pages as $p) {
-                $title = $this->wire('sanitizer')->entities($p->title);
-                $options[] = "<option value='{$p->id}'>{$p->path} - {$title}</option>";
-            }
-        }
-
+        
         return implode("\n", $options);
     }
 
@@ -553,14 +545,19 @@ class ProcessContentPlanning extends Process {
      * Get all ProcessWire users for dropdown
      */
     private function getUserOptions($includeEmpty = true) {
-        $users = $this->wire('users')->find("name!=guest, sort=name, limit=100");
+        // Direct DB query to bypass PW access control on user pages
+        $db = $this->wire('database');
+        $stmt = $db->prepare("SELECT p.id, p.name FROM pages p JOIN templates t ON p.templates_id = t.id WHERE t.name = 'user' AND p.name != 'guest' ORDER BY p.name LIMIT 100");
+        $stmt->execute();
+        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
         $options = [];
         if ($includeEmpty) {
             $options[] = '<option value="">-- Select User --</option>';
         }
-        foreach ($users as $u) {
-            $label = $this->wire('sanitizer')->entities($u->name);
-            $options[] = "<option value='{$u->id}'>{$label}</option>";
+        foreach ($rows as $row) {
+            $name = $this->wire('sanitizer')->entities($row['name']);
+            $options[] = "<option value='{$row['id']}'>{$name}</option>";
         }
         return implode("\n", $options);
     }
@@ -600,7 +597,7 @@ class ProcessContentPlanning extends Process {
     private function renderAddForm() {
         $pageOptions = $this->getPageOptions();
         $userOptions = $this->getUserOptions();
-        $debugInfo = "<!-- DEBUG v3: pages=" . substr_count($pageOptions, '<option') . " users=" . substr_count($userOptions, '<option') . " currentUser=" . $this->wire('user')->name . " isSuperuser=" . ($this->wire('user')->isSuperuser() ? '1' : '0') . " -->";
+        $debugInfo = "<!-- DEBUG v2: pages=" . substr_count($pageOptions, '<option') . " users=" . substr_count($userOptions, '<option') . " -->";
         
         return "{$debugInfo}
         <div id='item-form-overlay' class='form-overlay' style='display:none;'>
