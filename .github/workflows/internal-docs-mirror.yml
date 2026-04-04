@@ -1,0 +1,51 @@
+# Nightly export of internal handbook from ProcessWire, optional auto-fixes, commit mirror, sync back to CMS.
+name: internal-docs-mirror
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Export from ProcessWire
+        env:
+          CMS_BASE: ${{ secrets.CMS_INTERNAL_DOCS_API_BASE }}
+          TOKEN: ${{ secrets.PW_INTERNAL_DOCS_SYNC_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${CMS_BASE:-}" && test -n "${TOKEN:-}"
+          curl -fsS -H "X-Internal-Docs-Token: ${TOKEN}" "${CMS_BASE%/}/api/internal-docs-export" -o export.json
+          node scripts/internal-docs-export-to-fs.mjs export.json
+
+      - name: Automated doc fixes
+        run: node scripts/internal-docs-fix.mjs
+
+      - name: Commit mirror changes
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add internal-docs
+          if git diff --staged --quiet; then
+            echo "No mirror diff"
+          else
+            git commit -m "chore(internal-docs): nightly mirror and auto-fix"
+            git push
+          fi
+
+      - name: Sync mirror to ProcessWire
+        env:
+          CMS_BASE: ${{ secrets.CMS_INTERNAL_DOCS_API_BASE }}
+          TOKEN: ${{ secrets.PW_INTERNAL_DOCS_SYNC_TOKEN }}
+        run: node scripts/internal-docs-sync-to-cms.mjs

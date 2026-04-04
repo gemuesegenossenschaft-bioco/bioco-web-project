@@ -40,20 +40,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+/**
+ * GitHub Actions (or automation) may use X-Internal-Docs-Token instead of X-API-Key
+ * for internal-docs-export and internal-docs-sync only.
+ */
+function biocoInternalDocsSyncTokenValid($endpoint) {
+    if (!in_array($endpoint, ['internal-docs-export', 'internal-docs-sync'], true)) {
+        return false;
+    }
+    $expected = wire('config')->internalDocsSyncToken ?? '';
+    if ($expected === '' || !is_string($expected)) {
+        return false;
+    }
+    $given = $_SERVER['HTTP_X_INTERNAL_DOCS_TOKEN'] ?? '';
+    return is_string($given) && hash_equals($expected, $given);
+}
+
 // ============================================================================
 // API Key Authentication
 // ============================================================================
 
 $apiKey = $config->apiKey ?? '';
+$endpoint = $input->urlSegment1;
 if ($apiKey) {
     $requestKey = $_SERVER['HTTP_X_API_KEY'] ?? '';
-    
+
+    $internalDocsTokenOk = biocoInternalDocsSyncTokenValid($endpoint);
+
     // Allow unauthenticated access to health and content (read-only) endpoints
     // media-* endpoints use ProcessWire session auth inside handlers
-    $endpoint = $input->urlSegment1;
-    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete']) && $requestKey !== $apiKey) {
+    // internal-docs-export|sync: X-Internal-Docs-Token matching $config->internalDocsSyncToken
+    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete']) && $requestKey !== $apiKey && !$internalDocsTokenOk) {
         http_response_code(401);
-        echo json_encode(['error' => 'Invalid API key', 'hint' => 'Set X-API-Key header']);
+        echo json_encode(['error' => 'Invalid API key', 'hint' => 'Set X-API-Key header or valid X-Internal-Docs-Token for internal-docs endpoints']);
         exit;
     }
 }
@@ -1084,10 +1103,193 @@ function upsertMediaUsageRow($assetId, Page $page, $field, $fileName) {
 }
 
 // ============================================================================
+// Internal handbook (ProcessWire auth-only; mirror for GitHub Actions)
+// ============================================================================
+
+function biocoIsInternalDocsPage(Page $page) {
+    if (!$page || !$page->id) {
+        return false;
+    }
+    $t = $page->template->name;
+    if (in_array($t, ['internal-doc', 'internal_docs_root', 'internal_docs_container'], true)) {
+        return true;
+    }
+    $path = (string) $page->path;
+    return strpos($path, '/internal-docs') !== false;
+}
+
+function biocoInternalDocsMirrorRelativePath(Page $page) {
+    $pages = wire('pages');
+    $root = $pages->get('/internal-docs/');
+    if (!$root->id || $page->template->name !== 'internal-doc') {
+        return null;
+    }
+    $parts = [];
+    $p = $page;
+    while ($p->id && $p->id !== $root->id) {
+        array_unshift($parts, $p->name);
+        $p = $p->parent;
+    }
+    if (!$p->id || $p->id !== $root->id) {
+        return null;
+    }
+    return implode('/', $parts) . '.md';
+}
+
+function biocoParseInternalDocFile(string $raw) {
+    if (!preg_match('/^---[\r\n]+(.+?)[\r\n]+---[\r\n]+(.*)$/s', $raw, $m)) {
+        return null;
+    }
+    $meta = [];
+    foreach (preg_split('/\r\n|\r|\n/', $m[1]) as $line) {
+        $line = trim($line);
+        if ($line === '' || $line[0] === '#') {
+            continue;
+        }
+        if (preg_match('/^([a-zA-Z0-9_]+):\s*(.+)$/', $line, $mm)) {
+            $meta[$mm[1]] = trim($mm[2], " \t\"'");
+        }
+    }
+    return ['meta' => $meta, 'body' => $m[2]];
+}
+
+function biocoBuildInternalDocExportFile(Page $page) {
+    $body = $page->hasField('body') ? (string) $page->get('body') : '';
+    $checksum = hash('sha256', $body);
+    $lines = [
+        '---',
+        'pw_id: ' . (int) $page->id,
+        'title: ' . json_encode(decodeText($page->title), JSON_UNESCAPED_UNICODE),
+        'modified: ' . (int) $page->modified,
+        'checksum: ' . $checksum,
+        '---',
+        '',
+    ];
+    return implode("\n", $lines) . $body;
+}
+
+function biocoHandleInternalDocsExport() {
+    if (strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'GET required']);
+        return;
+    }
+    $pages = wire('pages');
+    $root = $pages->get('/internal-docs/');
+    if (!$root->id) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'error' => 'internal-docs root not found']);
+        return;
+    }
+    $selector = 'template=internal-doc, has_parent=' . (int) $root->id . ', include=all, sort=path';
+    $list = $pages->find($selector);
+    $files = [];
+    $manifest = [];
+    foreach ($list as $page) {
+        $rel = biocoInternalDocsMirrorRelativePath($page);
+        if (!$rel) {
+            continue;
+        }
+        $content = biocoBuildInternalDocExportFile($page);
+        $files[$rel] = $content;
+        $manifest[] = [
+            'id' => (int) $page->id,
+            'path' => $rel,
+            'title' => decodeText($page->title),
+            'modified' => (int) $page->modified,
+            'checksum' => hash('sha256', (string) $page->get('body')),
+        ];
+    }
+    echo json_encode([
+        'success' => true,
+        'generatedAt' => date(DATE_ATOM),
+        'manifest' => $manifest,
+        'files' => $files,
+    ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+}
+
+function biocoHandleInternalDocsSync() {
+    if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        http_response_code(405);
+        echo json_encode(['success' => false, 'error' => 'POST required']);
+        return;
+    }
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+    if (!is_array($data)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Invalid JSON']);
+        return;
+    }
+    $files = $data['files'] ?? null;
+    if (!is_array($files)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'files object required']);
+        return;
+    }
+    $force = !empty($data['force']);
+    $pages = wire('pages');
+    $updated = [];
+    $skipped = [];
+    $errors = [];
+
+    foreach ($files as $relPath => $fileContent) {
+        if (!is_string($relPath) || !is_string($fileContent)) {
+            $errors[] = ['path' => (string) $relPath, 'error' => 'invalid entry'];
+            continue;
+        }
+        if (!preg_match('/^[a-zA-Z0-9_./-]+\.md$/', $relPath)) {
+            $errors[] = ['path' => $relPath, 'error' => 'invalid path'];
+            continue;
+        }
+        $parsed = biocoParseInternalDocFile($fileContent);
+        if (!$parsed) {
+            $errors[] = ['path' => $relPath, 'error' => 'missing YAML front matter'];
+            continue;
+        }
+        $pwId = (int) ($parsed['meta']['pw_id'] ?? 0);
+        if (!$pwId) {
+            $errors[] = ['path' => $relPath, 'error' => 'pw_id missing'];
+            continue;
+        }
+        $page = $pages->get($pwId);
+        if (!$page->id || $page->template->name !== 'internal-doc') {
+            $errors[] = ['path' => $relPath, 'error' => 'not an internal-doc page'];
+            continue;
+        }
+        $expectedRel = biocoInternalDocsMirrorRelativePath($page);
+        if ($expectedRel !== $relPath) {
+            $errors[] = ['path' => $relPath, 'error' => 'path does not match page tree'];
+            continue;
+        }
+        $fileModified = (int) ($parsed['meta']['modified'] ?? 0);
+        if (!$force && $fileModified && $page->modified > $fileModified) {
+            $skipped[] = ['id' => $pwId, 'path' => $relPath, 'reason' => 'cms newer than file modified'];
+            continue;
+        }
+        $newBody = $parsed['body'];
+        $newTitle = isset($parsed['meta']['title']) ? (string) $parsed['meta']['title'] : '';
+        $page->of(false);
+        $page->set('body', $newBody);
+        if ($newTitle !== '') {
+            $page->set('title', $newTitle);
+        }
+        $page->save();
+        $updated[] = ['id' => $pwId, 'path' => $relPath];
+    }
+
+    echo json_encode([
+        'success' => count($errors) === 0,
+        'updated' => $updated,
+        'skipped' => $skipped,
+        'errors' => $errors,
+    ], JSON_UNESCAPED_UNICODE);
+}
+
+// ============================================================================
 // Routing
 // ============================================================================
 
-$endpoint = $input->urlSegment1;
 $subEndpoint = $input->urlSegment2;
 $param1 = $input->urlSegment3;
 
@@ -1439,11 +1641,19 @@ switch ($endpoint) {
         echo json_encode(['success' => true, 'deleted' => $sectionPwId]);
         break;
 
+    case 'internal-docs-export':
+        biocoHandleInternalDocsExport();
+        break;
+
+    case 'internal-docs-sync':
+        biocoHandleInternalDocsSync();
+        break;
+
     default:
         http_response_code(404);
         echo json_encode([
             'error' => 'Endpoint not found',
-            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete', 'content/draft', 'content/presets'],
+            'available' => ['health', 'content', 'forms', 'doi', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete', 'internal-docs-export', 'internal-docs-sync', 'content/draft', 'content/presets'],
         ]);
 }
 
@@ -1709,6 +1919,12 @@ function handleContentRequest($type, $param = null) {
                 echo json_encode(['error' => 'Page not found']);
                 return;
             }
+
+            if (biocoIsInternalDocsPage($page)) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Page not found']);
+                return;
+            }
             
             $pageData = [
                 'id' => $page->id,
@@ -1795,6 +2011,9 @@ function handleContentRequest($type, $param = null) {
                 if (!$page->id || !$page->url) {
                     continue;
                 }
+                if (biocoIsInternalDocsPage($page)) {
+                    continue;
+                }
                 // Skip internal paths
                 $path = $page->path;
                 if (strpos($path, '/content/') === 0 
@@ -1831,6 +2050,9 @@ function handleContentRequest($type, $param = null) {
             
             if ($home->children->count()) {
                 foreach ($home->children as $child) {
+                    if (biocoIsInternalDocsPage($child)) {
+                        continue;
+                    }
                     $navigation[] = [
                         'id' => $child->id,
                         'title' => decodeText($child->title),
@@ -2009,6 +2231,10 @@ function handleContentRequest($type, $param = null) {
             }
             $target = $pages->get($id);
             if (!$target->id) {
+                echo json_encode(['error' => 'Page not found']);
+                break;
+            }
+            if (biocoIsInternalDocsPage($target)) {
                 echo json_encode(['error' => 'Page not found']);
                 break;
             }

@@ -61,8 +61,12 @@ $config->githubToken = 'github_pat_xxxxxxxxxxxx';
 // Repo for creating issues (owner/repo format)
 $config->githubRepo = 'wgusta/bioco-web-project';
 
-// Docs repo for commit feed (owner/repo format)
+// Deprecated: handbook lives in ProcessWire /internal-docs/; commit feed removed from Plan & Bugs.
 $config->githubDocsRepo = 'wgusta/bioco-doku';
+
+// Token for GitHub Actions: GET /api/internal-docs-export and POST /api/internal-docs-sync
+// Header: X-Internal-Docs-Token (prefer env PW_INTERNAL_DOCS_SYNC_TOKEN on server)
+$config->internalDocsSyncToken = getenv('PW_INTERNAL_DOCS_SYNC_TOKEN') ?: '';
 
 // =============================================================================
 // REQUIRED MODULES (install via ProcessWire admin)

@@ -1320,6 +1320,34 @@ These files document the design process and can be useful for:
 
 This project has extensive documentation in the `docs/` directory. This hand-off document provides an overview; refer to these documents for detailed procedures.
 
+### Internal handbook (ProcessWire, auth-only)
+
+**Canonical content** for the cooperative handbook lives in ProcessWire under **`/internal-docs/`** (templates `internal_docs_root`, `internal_docs_container`, `internal-doc`). It is **not** exposed on the public site or headless JSON: `content/page` and `content/pages` return 404 for these templates, and they are omitted from `content/navigation`.
+
+**Bootstrap (staging or local DB first):**
+
+```bash
+php cms/setup-internal-docs.php
+php cms/import-bioco-doku.php /path/to/bioco-doku   # one-time migration from MkDocs repo
+```
+
+**Plan & Bugs** sidebar shows recent `internal-doc` edits (links into the admin editor). The old GitHub “docs commits” feed was removed.
+
+**Git mirror + nightly automation:** Repository directory [`internal-docs/`](internal-docs/) holds Markdown exports for CI. Workflow [`.github/workflows/internal-docs-mirror.yml`](.github/workflows/internal-docs-mirror.yml) runs on a schedule: export from CMS → write files → run [`scripts/internal-docs-fix.mjs`](scripts/internal-docs-fix.mjs) → commit if needed → `POST /api/internal-docs-sync`.
+
+**Secrets (GitHub Actions):**
+
+| Secret | Purpose |
+|--------|---------|
+| `CMS_INTERNAL_DOCS_API_BASE` | e.g. `https://cms.bioco.ch` (no trailing path; uses `/api/internal-docs-export` and `/api/internal-docs-sync`) |
+| `PW_INTERNAL_DOCS_SYNC_TOKEN` | Same value as server env `PW_INTERNAL_DOCS_SYNC_TOKEN`; sent as header `X-Internal-Docs-Token` |
+
+Set in `site/config.php`: `$config->internalDocsSyncToken = getenv('PW_INTERNAL_DOCS_SYNC_TOKEN') ?: '';` (see `site/config-example.php`). The main `X-API-Key` may be used instead of the internal token if you prefer a single secret.
+
+**Rollback:** Disable the workflow in GitHub; fix bad content in ProcessWire admin.
+
+The separate **bioco-doku** MkDocs repository is **archived** for deployment purposes; do not rely on `docs.bioco.ch`.
+
 ### `docs/processwire-migration.md`
 
 **Comprehensive deployment guide** covering:

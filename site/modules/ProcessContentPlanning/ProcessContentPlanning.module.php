@@ -461,7 +461,7 @@ class ProcessContentPlanning extends Process {
     private function renderSidebar() {
         $out = "<div class='planning-sidebar'>";
         $out .= $this->renderGitHubIssuesPanel();
-        $out .= $this->renderDocsFeed();
+        $out .= $this->renderInternalDocsFeed();
         $out .= "</div>";
         return $out;
     }
@@ -497,29 +497,54 @@ class ProcessContentPlanning extends Process {
     }
 
     /**
-     * Docs feed panel
+     * Recently edited internal handbook pages (ProcessWire, not GitHub)
      */
-    private function renderDocsFeed() {
-        $commits = $this->fetchDocsCommits();
-        
+    private function renderInternalDocsFeed() {
+        $items = $this->fetchRecentInternalDocs();
+
         $out = "<div class='docs-feed'>";
-        $out .= "<div class='panel-header'><i class='fa fa-history'></i> Docs Changes</div>";
+        $out .= "<div class='panel-header'><i class='fa fa-book'></i> Handbuch (CMS)</div>";
         $out .= "<div class='panel-items'>";
-        
-        if (empty($commits)) {
-            $out .= "<div class='panel-empty'>No recent changes</div>";
+
+        if (empty($items)) {
+            $out .= "<div class='panel-empty'>Keine internen Doku-Seiten</div>";
         } else {
-            foreach ($commits as $c) {
-                $msg = $this->wire('sanitizer')->entities(substr($c['message'], 0, 50));
+            $adminUrl = $this->wire('pages')->get('template=admin')->httpUrl;
+            foreach ($items as $row) {
+                $title = $this->wire('sanitizer')->entities($row['title']);
+                $edit = $adminUrl . 'page/edit/?id=' . (int) $row['id'];
                 $out .= "
                 <div class='feed-item'>
-                    <a href='{$c['url']}' target='_blank'>{$msg}</a>
-                    <div class='feed-meta'>{$c['author']} · {$c['time']}</div>
+                    <a href='{$edit}'>{$title}</a>
+                    <div class='feed-meta'>" . $this->wire('sanitizer')->entities($row['path']) . " · {$row['time']}</div>
                 </div>";
             }
         }
-        
+
         $out .= "</div></div>";
+        return $out;
+    }
+
+    /**
+     * @return array<int, array{id:int,title:string,path:string,time:string}>
+     */
+    private function fetchRecentInternalDocs() {
+        $pages = $this->wire('pages');
+        $root = $pages->get('/internal-docs/');
+        if (!$root->id) {
+            return [];
+        }
+        $selector = 'template=internal-doc, has_parent=' . (int) $root->id . ', include=all, sort=-modified, limit=12';
+        $list = $pages->find($selector);
+        $out = [];
+        foreach ($list as $p) {
+            $out[] = [
+                'id' => (int) $p->id,
+                'title' => $p->title ?: $p->name,
+                'path' => $p->path,
+                'time' => $this->timeAgo($p->modified),
+            ];
+        }
         return $out;
     }
 
@@ -528,7 +553,7 @@ class ProcessContentPlanning extends Process {
      */
     private function getPageOptions() {
         // Find all front-end pages, exclude system/admin templates
-        $excludeTemplates = 'admin|user|role|permission|api|api-events|visual-editor|MediaLibrary|site_settings|repeater_content_sections';
+        $excludeTemplates = 'admin|user|role|permission|api|api-events|visual-editor|MediaLibrary|site_settings|repeater_content_sections|internal-doc|internal_docs_root|internal_docs_container';
         $pages = $this->wire('pages')->find("template!=$excludeTemplates, id>1, include=all, limit=500, sort=path");
         $options = ['<option value="">-- No Page (Optional) --</option>'];
         
@@ -1585,52 +1610,6 @@ class ProcessContentPlanning extends Process {
                 'url' => $issue['html_url'],
                 'labels' => $labels,
                 'time' => $this->timeAgo(strtotime($issue['created_at'])),
-            ];
-        }
-        
-        $cache->save($cacheKey, $result, 300);
-        return $result;
-    }
-
-    private function fetchDocsCommits() {
-        $repo = $this->wire('config')->githubDocsRepo ?? '';
-        if (!$repo) return [];
-        
-        $cache = $this->wire('cache');
-        $cacheKey = 'planning_docs_commits';
-        $cached = $cache->get($cacheKey);
-        if ($cached !== null) return $cached;
-        
-        $token = $this->wire('config')->githubToken ?? '';
-        $headers = [
-            'Accept: application/vnd.github+json',
-            'X-GitHub-Api-Version: 2022-11-28',
-            'User-Agent: ProcessWire-Planning',
-        ];
-        if ($token) $headers[] = 'Authorization: Bearer ' . $token;
-        
-        $ch = curl_init("https://api.github.com/repos/{$repo}/commits?per_page=10");
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => $headers,
-        ]);
-        
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        
-        if ($httpCode !== 200) return [];
-        
-        $commits = json_decode($response, true);
-        $result = [];
-        
-        foreach ($commits as $c) {
-            $date = strtotime($c['commit']['author']['date']);
-            $result[] = [
-                'message' => explode("\n", $c['commit']['message'])[0],
-                'author' => $c['commit']['author']['name'],
-                'time' => $this->timeAgo($date),
-                'url' => $c['html_url'],
             ];
         }
         
