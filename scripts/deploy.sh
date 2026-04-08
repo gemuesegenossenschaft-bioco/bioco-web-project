@@ -6,6 +6,7 @@ BRANCH=${1:-main}
 DEPLOY_HOST="bioco@193.33.128.160"
 DEPLOY_DIR="/home/bioco/bioco-frontend"
 CMS_DIR="/home/bioco/public_html/cms/site/templates"
+CMS_MODULES_DIR="/home/bioco/public_html/cms/site/modules"
 LOCAL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FRONTEND_DIR="$LOCAL_DIR/frontend"
 
@@ -46,8 +47,47 @@ rsync -avzc \
 rsync -avzc "$LOCAL_DIR/site/ready.php" "$DEPLOY_HOST:/home/bioco/public_html/cms/site/ready.php"
 
 echo "=== Uploading CMS modules (internal docs + planning) ==="
-rsync -avzc "$LOCAL_DIR/site/modules/ProcessContentPlanning/ProcessContentPlanning.module.php" \
-  "$DEPLOY_HOST:/home/bioco/public_html/cms/site/modules/ProcessContentPlanning/"
+ssh "$DEPLOY_HOST" "mkdir -p $CMS_MODULES_DIR/ProcessContentPlanning"
+rsync -avzc \
+  "$LOCAL_DIR/site/modules/ProcessContentPlanning/ProcessContentPlanning.module.php" \
+  "$LOCAL_DIR/site/modules/ProcessContentPlanning/planning.css" \
+  "$DEPLOY_HOST:$CMS_MODULES_DIR/ProcessContentPlanning/"
+
+echo "=== Removing stale legacy planning module path ==="
+ssh "$DEPLOY_HOST" '
+  legacy_module="/home/bioco/public_html/cms/site/modules/ProcessContentPlanning.module.php"
+  legacy_css="/home/bioco/public_html/cms/site/modules/planning.css"
+  if [ -f "$legacy_module" ]; then
+    cp "$legacy_module" "$legacy_module.bak.$(date +%Y%m%d%H%M%S)"
+    rm -f "$legacy_module"
+  fi
+  if [ -f "$legacy_css" ]; then
+    cp "$legacy_css" "$legacy_css.bak.$(date +%Y%m%d%H%M%S)"
+    rm -f "$legacy_css"
+  fi
+'
+
+echo "=== Refreshing ProcessWire modules ==="
+ssh "$DEPLOY_HOST" 'php <<'"'"'PHP'"'"'
+<?php
+chdir("/home/bioco/public_html/cms");
+$_SERVER["HTTP_HOST"] = "cms.bioco.ch";
+$_SERVER["REQUEST_URI"] = "/";
+include "index.php";
+$admin = $users->get("roles=superuser");
+if ($admin->id) {
+    $users->setCurrentUser($admin);
+}
+$modules->refresh();
+$module = $modules->get("ProcessContentPlanning");
+$ref = new ReflectionClass($module);
+$path = $ref->getFileName();
+echo "Loaded module: {$path}\n";
+if ($path !== "/home/bioco/public_html/cms/site/modules/ProcessContentPlanning/ProcessContentPlanning.module.php") {
+    fwrite(STDERR, "Unexpected module path\n");
+    exit(1);
+}
+PHP'
 
 echo "=== Uploading one-off CMS CLI scripts ==="
 ssh "$DEPLOY_HOST" "mkdir -p /home/bioco/public_html/cms/cms"
@@ -70,4 +110,6 @@ echo "=== Verifying ==="
 sleep 3
 ssh "$DEPLOY_HOST" 'curl -s -o /dev/null -w "Local: HTTP %{http_code}\n" http://127.0.0.1:49154/'
 ssh "$DEPLOY_HOST" 'echo "Workers:"; ps -eo pid,ppid,comm,args | awk "\$3 ~ /^next-server/ {print}"'
+ssh "$DEPLOY_HOST" 'test ! -f /home/bioco/public_html/cms/site/modules/ProcessContentPlanning.module.php'
+ssh "$DEPLOY_HOST" 'test ! -f /home/bioco/public_html/cms/site/modules/planning.css'
 echo "Deployed $BRANCH."

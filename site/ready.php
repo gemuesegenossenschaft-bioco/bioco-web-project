@@ -4,7 +4,14 @@ if(!defined("PROCESSWIRE")) die();
 
 // TEMP: bust opcache for module update
 if (\function_exists('opcache_invalidate')) {
-    \opcache_invalidate(__DIR__ . '/modules/ProcessContentPlanning/ProcessContentPlanning.module.php', true);
+    foreach ([
+        __DIR__ . '/modules/ProcessContentPlanning/ProcessContentPlanning.module.php',
+        __DIR__ . '/modules/ProcessContentPlanning.module.php',
+    ] as $path) {
+        if (\is_file($path)) {
+            \opcache_invalidate($path, true);
+        }
+    }
 }
 
 /** @var ProcessWire $wire */

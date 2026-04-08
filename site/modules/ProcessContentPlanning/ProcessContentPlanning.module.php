@@ -15,7 +15,7 @@ class ProcessContentPlanning extends Process {
     public static function getModuleInfo() {
         return [
             'title' => 'Plan & Bugs',
-            'version' => 201,
+            'version' => 202,
             'summary' => 'Plan content and track bugs with list/kanban views, page linking, GitHub issues',
             'permission' => 'page-edit',
             'page' => [
@@ -558,9 +558,24 @@ class ProcessContentPlanning extends Process {
         $options = ['<option value="">-- No Page (Optional) --</option>'];
         
         foreach ($pages as $p) {
+            if ($p->name === 'http404') {
+                continue;
+            }
             $status = $p->isUnpublished() ? ' (unpublished)' : '';
             $title = $this->wire('sanitizer')->entities($p->title . $status);
             $options[] = "<option value='{$p->id}'>{$p->path} - {$title}</option>";
+        }
+
+        if (count($options) <= 1) {
+            // Fallback: try without include=all if an environment filters aggressively.
+            $pages = $this->wire('pages')->find("template!=$excludeTemplates, id>1, limit=500, sort=path");
+            foreach ($pages as $p) {
+                if ($p->name === 'http404') {
+                    continue;
+                }
+                $title = $this->wire('sanitizer')->entities($p->title);
+                $options[] = "<option value='{$p->id}'>{$p->path} - {$title}</option>";
+            }
         }
         
         return implode("\n", $options);
@@ -570,19 +585,14 @@ class ProcessContentPlanning extends Process {
      * Get all ProcessWire users for dropdown
      */
     private function getUserOptions($includeEmpty = true) {
-        // Direct DB query to bypass PW access control on user pages
-        $db = $this->wire('database');
-        $stmt = $db->prepare("SELECT p.id, p.name FROM pages p JOIN templates t ON p.templates_id = t.id WHERE t.name = 'user' AND p.name != 'guest' ORDER BY p.name LIMIT 100");
-        $stmt->execute();
-        $rows = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-
+        $users = $this->wire('users')->find("name!=guest, sort=name, limit=100");
         $options = [];
         if ($includeEmpty) {
             $options[] = '<option value="">-- Select User --</option>';
         }
-        foreach ($rows as $row) {
-            $name = $this->wire('sanitizer')->entities($row['name']);
-            $options[] = "<option value='{$row['id']}'>{$name}</option>";
+        foreach ($users as $user) {
+            $label = $this->wire('sanitizer')->entities($user->name);
+            $options[] = "<option value='{$user->id}'>{$label}</option>";
         }
         return implode("\n", $options);
     }
