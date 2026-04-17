@@ -90,7 +90,11 @@ curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:49154/
 - Expected: exactly one `next-server`, local health `200`
 
 ### Environment variables (set in start.sh)
-`PORT`, `NODE_ENV`, `HOSTNAME`, `PROCESSWIRE_BASE_URL`, `PROCESSWIRE_API_KEY`, `PW_API_KEY`, `REVALIDATE_SECRET`, `NEXT_PUBLIC_PROCESSWIRE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`
+`PORT`, `NODE_ENV`, `HOSTNAME`, `PROCESSWIRE_BASE_URL`, `PROCESSWIRE_API_KEY`, `PW_API_KEY`, `REVALIDATE_SECRET`, `NEXT_PUBLIC_PROCESSWIRE_BASE_URL`, `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_MATOMO_URL`, `NEXT_PUBLIC_MATOMO_SITE_ID`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_SECURE`, `SMTP_FROM_EMAIL`, `SMTP_FROM_NAME`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`
+
+**Critical ordering rule**: all `export` statements in `start.sh` MUST come before the `nohup node server.js` line. Anything exported after nohup is NOT inherited by the running process. This previously caused all forms to silently fail captcha verification (`TURNSTILE_SECRET_KEY is not configured` in logs) even though the keys appeared in `start.sh`. Verify: `tail /home/bioco/logs/nextjs.log | grep "is not configured"`.
+
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` is also baked into the JS bundle at build time from `frontend/.env.production`. Both must stay in sync (Cloudflare dashboard > Turnstile > your site).
 
 ### CMS ISR settings (set in `site/config.php`)
 `nextRevalidateSecret`, `nextRevalidateUrl`, `nextRevalidateDebounceSeconds`, `nextRevalidateMaxWaitSeconds`, `nextRevalidateQueueFile`

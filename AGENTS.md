@@ -43,6 +43,7 @@ Configures Node.js on Novatrend/CloudLinux cPanel.
 - Keep ISR hook config in `site/config.php`: `nextRevalidateSecret`, `nextRevalidateUrl`, debounce/max-wait/queue-file keys.
 - Keep secrets synced: `start.sh: REVALIDATE_SECRET` == `site/config.php: nextRevalidateSecret`.
 - Required values: `nextRevalidateUrl=http://127.0.0.1:49154/api/revalidate`, debounce `10`, max-wait `45`, queue file `/tmp/bioco-next-revalidate-state.json`.
+- **Cloudflare Turnstile captcha**: `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (baked at build, also in `start.sh`) and `TURNSTILE_SECRET_KEY` (server-only, in `start.sh`) MUST both be exported BEFORE the `nohup node server.js` line. If placed after, the running process inherits empty strings. Verify with: `tail /home/bioco/logs/nextjs.log | grep "TURNSTILE_SECRET_KEY is not configured"`. Keys are in Cloudflare dashboard > Turnstile > site. The site key also lives in `frontend/.env.production` for build-time embedding.
 
 ## CMS API Agent
 
