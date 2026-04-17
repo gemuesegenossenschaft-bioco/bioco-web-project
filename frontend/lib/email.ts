@@ -154,7 +154,7 @@ function formatFormEmail(formType: string, data: Record<string, any>): string {
   }
 
   const fields = Object.entries(data)
-    .filter(([key]) => key !== 'privacy_accept' && key !== 'commitmentAccepted')
+    .filter(([key]) => key !== 'privacy_accept' && key !== 'commitmentAccepted' && key !== 'captchaToken')
     .map(([key, value]) => {
       const label = formatLabel(key)
       return `<tr><td style="padding: 8px; font-weight: bold; border-bottom: 1px solid #eee; width: 200px;">${label}:</td><td style="padding: 8px; border-bottom: 1px solid #eee;">${formatValue(value)}</td></tr>`
