@@ -19,7 +19,7 @@ import { SectionRenderer } from '@/components/sections/SectionRenderer'
 import { useVisualEditor } from '@/hooks/useVisualEditor'
 import type { ContentSection, HeroContent } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
-import { getEventTypeLabel, groupEventsByType } from '@/components/AktuellesData'
+import { groupEventsByType } from '@/components/AktuellesData'
 
 interface HomeClientProps {
   hero: HeroContent
@@ -67,6 +67,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
 
   const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(6)
   const eventGroups = groupEventsByType(eventItems)
+  const visibleEventItems = [...eventGroups.general.slice(0, 3), ...eventGroups.schnuppertage.slice(0, 3)]
 
   const handleItemClick = (item: AktuellesItem) => {
     setSelectedItem(item)
@@ -306,37 +307,18 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
             ) : (
               <>
-                {eventGroups.general.length > 0 && (
-                  <div style={{ marginTop: '16px' }}>
-                    <h3>{getEventTypeLabel('general')}</h3>
-                    <div className="events-list">
-                      {eventGroups.general.slice(0, 3).map((item, index) => (
-                        <AktuellesItemComponent
-                          key={item.id || index}
-                          item={item}
-                          variant="event"
-                          onClick={handleItemClick}
-                        />
-                      ))}
-                    </div>
+                {visibleEventItems.length > 0 ? (
+                  <div className="events-list">
+                    {visibleEventItems.map((item, index) => (
+                      <AktuellesItemComponent
+                        key={item.id || index}
+                        item={item}
+                        variant="event"
+                        onClick={handleItemClick}
+                      />
+                    ))}
                   </div>
-                )}
-                {eventGroups.schnuppertage.length > 0 && (
-                  <div style={{ marginTop: '16px' }}>
-                    <h3>{getEventTypeLabel('schnuppertag')}</h3>
-                    <div className="events-list">
-                      {eventGroups.schnuppertage.slice(0, 3).map((item, index) => (
-                        <AktuellesItemComponent
-                          key={item.id || index}
-                          item={item}
-                          variant="event"
-                          onClick={handleItemClick}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {eventItems.length === 0 && (
+                ) : (
                   <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine Events geplant.</p>
                 )}
               </>

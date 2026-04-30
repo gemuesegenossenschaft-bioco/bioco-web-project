@@ -5,6 +5,7 @@ import { useEffect } from 'react'
 declare global {
   interface Window {
     _paq?: any[]
+    __matomoInitialized?: boolean
   }
 }
 
@@ -17,23 +18,28 @@ export function MatomoScript() {
       return
     }
 
-    // Initialize Matomo
     window._paq = window._paq || []
+
+    if (window.__matomoInitialized) {
+      return
+    }
+
+    window.__matomoInitialized = true
     window._paq.push(['trackPageView'])
     window._paq.push(['enableLinkTracking'])
     window._paq.push(['setTrackerUrl', `${matomoUrl}matomo.php`])
     window._paq.push(['setSiteId', parseInt(siteId)])
     window._paq.push(['disableCookies']) // Cookieless mode for DSG compliance
 
-    // Load Matomo script
+    if (document.getElementById('matomo-js')) {
+      return
+    }
+
     const script = document.createElement('script')
+    script.id = 'matomo-js'
     script.async = true
     script.src = `${matomoUrl}matomo.js`
     document.head.appendChild(script)
-
-    return () => {
-      // Cleanup if needed
-    }
   }, [])
 
   return null

@@ -16,6 +16,9 @@ if (\function_exists('opcache_invalidate')) {
 
 /** @var ProcessWire $wire */
 
+require_once __DIR__ . '/classes/EventSetup.php';
+(new EventSetup($wire))->bootstrap();
+
 /**
  * Ensure usage index table exists.
  */

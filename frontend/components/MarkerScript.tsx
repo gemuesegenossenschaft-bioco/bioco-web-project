@@ -1,9 +1,16 @@
 import Script from 'next/script'
 
 export function MarkerScript() {
+  const projectId = process.env.NEXT_PUBLIC_MARKER_PROJECT_ID
+  const enabled = process.env.NEXT_PUBLIC_ENABLE_MARKER === 'true'
+
+  if (!enabled || !projectId) {
+    return null
+  }
+
   const snippet = `
     window.markerConfig = {
-      project: '6928126ecfe84caa90aeddfc',
+      project: '${projectId}',
       source: 'snippet'
     };
 
@@ -18,4 +25,3 @@ export function MarkerScript() {
     />
   )
 }
-

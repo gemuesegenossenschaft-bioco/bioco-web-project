@@ -10,15 +10,7 @@ import Image from 'next/image'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import type { ContentSection } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
-import {
-  filterGeneralEvents,
-  filterSchnuppertage,
-  getEventTypeLabel,
-  groupEventsByType,
-} from '@/components/AktuellesData'
-
-export { filterSchnuppertage }
-export const filterOtherEvents = filterGeneralEvents
+import { groupEventsByType } from '@/components/AktuellesData'
 
 function hasHeadingHtml(html?: string | null): boolean {
   return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
@@ -47,6 +39,8 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
 
   const upcomingGroups = groupEventsByType(eventItems)
   const pastGroups = groupEventsByType(past)
+  const upcomingItems = [...upcomingGroups.general, ...upcomingGroups.schnuppertage]
+  const pastItems = [...pastGroups.general, ...pastGroups.schnuppertage]
   
   // Get CMS content if available
   const introSection = sections?.find(s => s.id === 'intro')
@@ -94,39 +88,18 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
               ) : (
                 <>
-                  {upcomingGroups.general.length > 0 && (
-                    <div style={{ marginTop: '16px' }}>
-                      <h4>{getEventTypeLabel('general')}</h4>
-                      <div className="events-list">
-                        {upcomingGroups.general.map((item, index) => (
-                          <AktuellesItemComponent
-                            key={item.id || index}
-                            item={item}
-                            variant="event"
-                            onClick={handleItemClick}
-                          />
-                        ))}
-                      </div>
+                  {upcomingItems.length > 0 ? (
+                    <div className="events-list">
+                      {upcomingItems.map((item, index) => (
+                        <AktuellesItemComponent
+                          key={item.id || index}
+                          item={item}
+                          variant="event"
+                          onClick={handleItemClick}
+                        />
+                      ))}
                     </div>
-                  )}
-
-                  {upcomingGroups.schnuppertage.length > 0 && (
-                    <div style={{ marginTop: '16px' }}>
-                      <h4>{getEventTypeLabel('schnuppertag')}</h4>
-                      <div className="events-list">
-                        {upcomingGroups.schnuppertage.map((item, index) => (
-                          <AktuellesItemComponent
-                            key={item.id || index}
-                            item={item}
-                            variant="event"
-                            onClick={handleItemClick}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {eventItems.length === 0 && (
+                  ) : (
                     <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine Events geplant.</p>
                   )}
                 </>
@@ -140,7 +113,7 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                 <h3>Vergangene Events</h3>
               </div>
               <div className="card-body past-events-grid">
-                {[...pastGroups.general, ...pastGroups.schnuppertage].map((item, index) => (
+                {pastItems.map((item, index) => (
                     <button
                       key={item.id || index}
                       className="past-event-tile"
@@ -160,7 +133,6 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                       <div className="past-event-meta">
                         <p className="past-event-date">{item.date}</p>
                         <p className="past-event-title">{item.title}</p>
-                        <p className="past-event-location">{getEventTypeLabel(item.eventType)}</p>
                         <span className="past-event-cta">Rückblick ansehen →</span>
                       </div>
                     </button>

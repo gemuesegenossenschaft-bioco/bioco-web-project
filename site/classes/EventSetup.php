@@ -61,16 +61,22 @@ class EventSetup {
             'label' => 'Beginn',
             'required' => true,
             'dateOutputFormat' => 'Y-m-d H:i',
-            'showDateInput' => 1,
-            'showTimeInput' => 1,
+            'dateInputFormat' => 'Y-m-d',
+            'timeInputFormat' => 'H:i',
+            'inputType' => 'html',
+            'htmlType' => 'datetime',
+            'requiredAttr' => 1,
         ]);
 
         $this->ensureField('event_end', 'FieldtypeDatetime', [
             'label' => 'Ende',
             'required' => true,
             'dateOutputFormat' => 'Y-m-d H:i',
-            'showDateInput' => 1,
-            'showTimeInput' => 1,
+            'dateInputFormat' => 'Y-m-d',
+            'timeInputFormat' => 'H:i',
+            'inputType' => 'html',
+            'htmlType' => 'datetime',
+            'requiredAttr' => 1,
         ]);
 
         $this->ensureField('event_location', 'FieldtypeText', [
@@ -216,14 +222,15 @@ class EventSetup {
 
     private function ensureOptions(Field $field, array $options): void
     {
-        if(!isset($field->options)) {
+        if(!method_exists($field->type, 'getOptions') || !method_exists($field->type, 'setOptions')) {
             return;
         }
 
         $changed = false;
         $seen = [];
+        $fieldOptions = $field->type->getOptions($field);
 
-        foreach($field->options as $option) {
+        foreach($fieldOptions as $option) {
             $value = (string) $option->value;
             if(!array_key_exists($value, $options)) {
                 continue;
@@ -239,16 +246,19 @@ class EventSetup {
             if(isset($seen[$value])) {
                 continue;
             }
-            $field->addOption($value, $title);
-            $changed = true;
-        }
-
-        if((int) $field->optionColumns !== 1) {
-            $field->optionColumns = 1;
+            $option = new SelectableOption();
+            $option->value = $value;
+            $option->title = $title;
+            $fieldOptions->add($option);
             $changed = true;
         }
 
         if($changed) {
+            $field->type->setOptions($field, $fieldOptions);
+        }
+
+        if((int) $field->optionColumns !== 1) {
+            $field->optionColumns = 1;
             $this->wire->fields->save($field);
         }
     }
