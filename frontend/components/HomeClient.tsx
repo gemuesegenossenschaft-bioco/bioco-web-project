@@ -15,6 +15,7 @@ import { ScrollToTopLink } from '@/components/ScrollToTopLink'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
 import { InlineVisualEditorRuntime } from '@/components/visual-editor/InlineVisualEditorRuntime'
+import { SectionRenderer } from '@/components/sections/SectionRenderer'
 import { useVisualEditor } from '@/hooks/useVisualEditor'
 import type { ContentSection, HeroContent } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
@@ -95,6 +96,12 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
   const gemeinsamSection = getSection('gemeinsam')
   const kennenlernenSection = getSection('kennenlernen')
   const heroSection = getSection(HERO_SECTION_ID)
+  const genericSections = liveSections.filter((section) => (
+    section.id !== HERO_SECTION_ID &&
+    section.id !== 'willkommen' &&
+    section.id !== 'gemeinsam' &&
+    section.id !== 'kennenlernen'
+  ))
   const heroHeadline = heroSection?.title || hero.headline || ''
   const heroSubtitle = heroSection?.eyebrow || hero.subtitle || ''
   const displayHeroHeadline = heroHeadline || (isVisualEditor ? 'Hero Titel' : '')
@@ -360,6 +367,13 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
             </div>
           </section>
         </div>
+        {genericSections.length ? (
+          <SectionRenderer
+            sections={genericSections}
+            visualEditor={isVisualEditor}
+            pagePath="/"
+          />
+        ) : null}
       </main>
 
       <Footer />

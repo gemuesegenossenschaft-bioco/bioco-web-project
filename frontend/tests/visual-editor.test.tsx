@@ -793,4 +793,28 @@ describe('HomeClient visual editor integration', () => {
 
     expect(screen.getByRole('heading', { name: /Neuer Hero Titel/i })).toBeInTheDocument()
   })
+
+  it('renders new homepage CMS sections through the generic section renderer in visual mode', async () => {
+    mockSearch = '_visual=1'
+    const { HomeClient } = await import('@/components/HomeClient')
+
+    const newSection: ContentSection = {
+      id: 'new-cms-section',
+      title: 'Neue CMS Section',
+      text: '<p>Neue Inhalte</p>',
+      layout: 'rich_text',
+    }
+
+    const { container } = render(
+      <HomeClient
+        hero={{ headline: 'Hero', subtitle: '', image: null, imageAlt: '' }}
+        sections={[...homepageSections, newSection]}
+        aktuellesItems={[]}
+      />
+    )
+
+    expect(screen.getByRole('heading', { name: 'Neue CMS Section' })).toBeInTheDocument()
+    expect(container.querySelector('[data-section-id="new-cms-section"]')).toBeTruthy()
+    expect(container.querySelector('[data-ve-section-id="new-cms-section"][data-ve-field="text"]')).toBeTruthy()
+  })
 })

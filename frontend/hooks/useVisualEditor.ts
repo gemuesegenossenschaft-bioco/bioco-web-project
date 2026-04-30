@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import type { ContentSection } from '@/lib/processwire-types'
+import { applyVisualEditorFieldChange } from '@/lib/visualEditorContract'
 
 const MSG_PREFIX = 'bioco:visual-editor:'
 
@@ -78,7 +79,7 @@ export function useVisualEditor({ enabled, sections: initialSections }: UseVisua
           if (!sectionId || !field) return
           setSections(prev =>
             prev.map(s =>
-              s.id === sectionId ? { ...s, [field]: value } : s
+              s.id === sectionId ? applyVisualEditorFieldChange(s, { field, value }) : s
             )
           )
           break
