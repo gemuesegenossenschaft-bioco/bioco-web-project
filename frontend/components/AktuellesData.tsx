@@ -29,6 +29,8 @@ export interface AktuellesItem {
   signupUrl?: string
   signupNotes?: string
   imageUrl?: string
+  cardImage?: string
+  cardImageAlt?: string
   media?: EventMediaItem[]
   // ProcessWire fields (for future API integration)
   body?: string // Full content from ProcessWire
@@ -215,8 +217,6 @@ function mapEventFromApi(event: EventsApiEvent): AktuellesItem {
   const resolvedStartDate = resolvedDate ? resolvedDate.toISOString() : event.startDate
   const fallbackDate = resolvedDate ? formatDateCompact(resolvedDate) : ''
 
-  const previewImage = event.media?.find(media => media.type === 'image')
-
   return {
     id: event.id,
     date: event.dateLabel || fallbackDate,
@@ -233,7 +233,9 @@ function mapEventFromApi(event: EventsApiEvent): AktuellesItem {
     signupEnabled: event.signupEnabled,
     signupRequired: event.signupEnabled,
     signupNotes: event.signupNotes,
-    imageUrl: event.cardImage || previewImage?.url,
+    imageUrl: event.cardImage || undefined,
+    cardImage: event.cardImage || undefined,
+    cardImageAlt: event.cardImageAlt || undefined,
     media: event.media,
     url: event.url,
     parentTitle: event.parentTitle,
@@ -260,6 +262,33 @@ function normalizeEventType(value: unknown, title?: string, description?: string
   const text = `${title || ''} ${description || ''}`.toLowerCase()
   if (text.includes('schnuppertag')) return 'schnuppertag'
   return 'general'
+}
+
+export function isSchnuppertagEvent(item: AktuellesItem): boolean {
+  return item.eventType === 'schnuppertag'
+}
+
+export function isGeneralEvent(item: AktuellesItem): boolean {
+  return item.type === 'event' && !isSchnuppertagEvent(item)
+}
+
+export function filterSchnuppertage(events: AktuellesItem[]): AktuellesItem[] {
+  return events.filter(isSchnuppertagEvent)
+}
+
+export function filterGeneralEvents(events: AktuellesItem[]): AktuellesItem[] {
+  return events.filter(isGeneralEvent)
+}
+
+export function groupEventsByType(events: AktuellesItem[]) {
+  return {
+    general: filterGeneralEvents(events),
+    schnuppertage: filterSchnuppertage(events),
+  }
+}
+
+export function getEventTypeLabel(type?: string): string {
+  return type === 'schnuppertag' ? 'Schnuppertage' : 'Allgemeiner Event'
 }
 
 export function getFallbackEventsFeed(): EventsFeed {

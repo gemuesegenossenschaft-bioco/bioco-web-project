@@ -19,7 +19,7 @@ import { SectionRenderer } from '@/components/sections/SectionRenderer'
 import { useVisualEditor } from '@/hooks/useVisualEditor'
 import type { ContentSection, HeroContent } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
-import { filterSchnuppertage } from '@/components/AktuellesClient'
+import { getEventTypeLabel, groupEventsByType } from '@/components/AktuellesData'
 
 interface HomeClientProps {
   hero: HeroContent
@@ -66,7 +66,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
   })
 
   const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(6)
-  const schnuppertageEvents = filterSchnuppertage(eventItems)
+  const eventGroups = groupEventsByType(eventItems)
 
   const handleItemClick = (item: AktuellesItem) => {
     setSelectedItem(item)
@@ -281,9 +281,9 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
         </section>
 
         <div className="home-grid-12">
-          {/* Aktuelles */}
+          {/* Beiträge */}
           <section className="home-block col-span-12" style={{ marginTop: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>Aktuelles</h2>
+            <h2>Beiträge</h2>
             <div className="aktuelles-list">
               {aktuellesItems.slice(0, 3).map((item, index) => (
                 <AktuellesItemComponent
@@ -295,36 +295,58 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
               ))}
             </div>
             <ScrollToTopLink href="/aktuelles" className="btn btn-primary btn-organic" style={{ marginTop: '16px', marginBottom: '16px', display: 'inline-block' }}>
-              Alle Neuigkeiten ansehen
+              Alle Beiträge ansehen
             </ScrollToTopLink>
           </section>
 
-          {/* Schnuppertage */}
+          {/* Kommende Events */}
           <section className="home-block col-span-12" style={{ marginTop: 'clamp(24px, 4vw, 48px)' }}>
-            <h2>Schnuppertage</h2>
+            <h2>Kommende Events</h2>
             {eventsLoading ? (
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
             ) : (
-              <div className="events-list">
-                {schnuppertageEvents.slice(0, 3).map((item, index) => (
-                  <AktuellesItemComponent
-                    key={item.id || index}
-                    item={item}
-                    variant="event"
-                    onClick={handleItemClick}
-                  />
-                ))}
-                {schnuppertageEvents.length === 0 && (
-                  <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
+              <>
+                {eventGroups.general.length > 0 && (
+                  <div style={{ marginTop: '16px' }}>
+                    <h3>{getEventTypeLabel('general')}</h3>
+                    <div className="events-list">
+                      {eventGroups.general.slice(0, 3).map((item, index) => (
+                        <AktuellesItemComponent
+                          key={item.id || index}
+                          item={item}
+                          variant="event"
+                          onClick={handleItemClick}
+                        />
+                      ))}
+                    </div>
+                  </div>
                 )}
-              </div>
+                {eventGroups.schnuppertage.length > 0 && (
+                  <div style={{ marginTop: '16px' }}>
+                    <h3>{getEventTypeLabel('schnuppertag')}</h3>
+                    <div className="events-list">
+                      {eventGroups.schnuppertage.slice(0, 3).map((item, index) => (
+                        <AktuellesItemComponent
+                          key={item.id || index}
+                          item={item}
+                          variant="event"
+                          onClick={handleItemClick}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {eventItems.length === 0 && (
+                  <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine Events geplant.</p>
+                )}
+              </>
             )}
             <ScrollToTopLink
               href="/aktuelles"
               className="btn btn-primary btn-organic"
               style={{ marginTop: '16px', marginBottom: '16px', display: 'inline-block' }}
             >
-              Alle Schnuppertage ansehen
+              Alle Events ansehen
             </ScrollToTopLink>
           </section>
 

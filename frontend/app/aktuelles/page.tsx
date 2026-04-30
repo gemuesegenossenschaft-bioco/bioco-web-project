@@ -37,7 +37,7 @@ function mapNewsToAktuellesItem(item: AktuellesNewsItem): AktuellesItem {
 export default async function AktuellesPage() {
   const [cmsSections, cmsNews] = await Promise.all([
     getPageSections('aktuelles'),
-    getAktuelles(10),
+    getAktuelles(50),
   ])
 
   const aktuellesItems: AktuellesItem[] =

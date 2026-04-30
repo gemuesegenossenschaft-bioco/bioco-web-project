@@ -14,8 +14,32 @@ $response = [
     'past' => [],
 ];
 
-// Find all events, sorted by date (newest first)
-$events = $pages->find('template=event, sort=-event_date');
+function eventOptionValue($value, $fallback = '') {
+    if (!$value) return $fallback;
+    if (is_string($value)) return $value ?: $fallback;
+    if (is_object($value) && method_exists($value, 'count') && $value->count()) {
+        $value = $value->first();
+    }
+    if (is_object($value)) {
+        foreach (['value', 'name', 'title'] as $property) {
+            if (isset($value->$property) && is_string($value->$property) && trim($value->$property) !== '') {
+                return $value->$property;
+            }
+        }
+    }
+    return $fallback;
+}
+
+function normalizeEventType($value) {
+    $normalized = strtolower(trim(eventOptionValue($value, 'general')));
+    $normalized = str_replace(['_', ' '], '-', $normalized);
+    if (in_array($normalized, ['schnuppertag', 'schnuppertage'], true)) return 'schnuppertag';
+    if (in_array($normalized, ['general', 'allgemein', 'allgemeiner-event', 'allgemeiner'], true)) return 'general';
+    return $normalized ?: 'general';
+}
+
+// Find all events, sorted by start date.
+$events = $pages->find('template=event, sort=event_start');
 
 foreach($events as $event) {
     $status = $event->event_status && in_array($event->event_status, ['upcoming', 'past'])
@@ -37,28 +61,37 @@ foreach($events as $event) {
 
     $signupEnabled = ($status === 'upcoming') ? (bool) $event->event_signup_enabled : false;
 
-    // Build date fields from event_date
     $dateLabel = '';
     $startDate = null;
-    if ($event->event_date) {
-        $ts = is_numeric($event->event_date) ? (int)$event->event_date : strtotime($event->event_date);
+    $endDate = null;
+    if ($event->event_start) {
+        $ts = is_numeric($event->event_start) ? (int)$event->event_start : strtotime($event->event_start);
         if ($ts) {
             $dateLabel = date('d.m.Y', $ts);
             $startDate = date(DATE_ATOM, $ts);
         }
     }
-
-    // Normalize eventType (Options field returns SelectableOptionArray)
-    $eventType = 'general';
-    if ($event->event_type && $event->event_type->count()) {
-        $opt = $event->event_type->first();
-        $eventType = $opt->value ?: strtolower($opt->title) ?: 'general';
+    if ($event->event_end) {
+        $ts = is_numeric($event->event_end) ? (int)$event->event_end : strtotime($event->event_end);
+        if ($ts) {
+            $endDate = date(DATE_ATOM, $ts);
+        }
     }
+    $timeLabel = '';
+    if ($event->event_start && $event->event_end) {
+        $startTs = is_numeric($event->event_start) ? (int)$event->event_start : strtotime($event->event_start);
+        $endTs = is_numeric($event->event_end) ? (int)$event->event_end : strtotime($event->event_end);
+        if ($startTs && $endTs) {
+            $timeLabel = date('H:i', $startTs) . ' - ' . date('H:i', $endTs) . ' Uhr';
+        }
+    }
+
+    $eventType = $event->hasField('event_type') ? normalizeEventType($event->event_type) : 'general';
 
     // Card image for grid thumbnails
     $cardImage = '';
     $cardImageAlt = '';
-    $cardImg = $event->event_card_image;
+    $cardImg = $event->hasField('event_card_image') ? $event->event_card_image : null;
     if ($cardImg && !($cardImg instanceof \Countable && $cardImg->count() === 0)) {
         if (is_object($cardImg) && method_exists($cardImg, 'httpUrl')) {
             $cardImage = $cardImg->httpUrl();
@@ -76,9 +109,11 @@ foreach($events as $event) {
         'description' => $event->event_summary ?: ($event->body ? $sanitizer->truncate($event->body, 200) : ''),
         'fullDescription' => $event->body ?: '',
         'location' => $event->event_location ?: '',
-        'time' => $event->event_time ?: '',
+        'time' => $timeLabel,
         'dateLabel' => $dateLabel,
         'startDate' => $startDate,
+        'endDate' => $endDate,
+        'timeLabel' => $timeLabel,
         'signupEnabled' => $signupEnabled,
         'signupNotes' => $event->event_signup_notes ?: '',
         'status' => $status,

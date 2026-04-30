@@ -277,6 +277,8 @@ export interface EventItem {
   signupNotes: string;
   status: 'upcoming' | 'past';
   media: EventMedia[];
+  cardImage?: string;
+  cardImageAlt?: string;
   url: string;
   parentTitle: string;
   eventType?: string;

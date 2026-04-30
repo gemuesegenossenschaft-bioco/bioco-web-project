@@ -1,8 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
-import { AktuellesItem } from './AktuellesData'
+import type { AktuellesItem } from './AktuellesData'
 
 interface AktuellesItemProps {
   item: AktuellesItem
@@ -17,6 +16,8 @@ export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }:
     .trim()
 
   const className = variant === 'event' ? 'event-item' : 'aktuelles-item'
+  const cardImage = item.type === 'event' ? item.cardImage : item.imageUrl
+  const cardImageAlt = item.type === 'event' ? item.cardImageAlt : undefined
   const canRegister = item.type === 'event' && (item.signupEnabled ?? item.signupRequired ?? false)
   const hasDetails =
     item.fullDescription ||
@@ -54,6 +55,17 @@ export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }:
         }
       }}
     >
+      {cardImage && (
+        <div className="event-card-image">
+          <Image
+            src={cardImage}
+            alt={cardImageAlt || item.title}
+            fill
+            sizes="(max-width: 768px) 100vw, 33vw"
+            style={{ objectFit: 'cover' }}
+          />
+        </div>
+      )}
       <h3>{item.date}</h3>
       <p><strong>{item.title}</strong></p>
       <p>{previewText}</p>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import type { AktuellesItem } from './AktuellesData'
-import { filterSchnuppertage } from './AktuellesClient'
+import { filterSchnuppertage } from './AktuellesData'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import { EventSignupForm } from './EventSignupForm'
 

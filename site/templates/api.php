@@ -793,6 +793,43 @@ function mediaTypeFromExtension($ext) {
     return in_array(strtolower($ext), $videoExtensions, true) ? 'video' : 'image';
 }
 
+function optionFieldValue($value, $fallback = '') {
+    if (!$value) return $fallback;
+
+    if (is_string($value)) {
+        return $value ?: $fallback;
+    }
+
+    if (is_object($value) && method_exists($value, 'count') && $value->count()) {
+        $value = $value->first();
+    }
+
+    if (is_object($value)) {
+        foreach (['value', 'name', 'title'] as $property) {
+            if (isset($value->$property) && is_string($value->$property) && trim($value->$property) !== '') {
+                return $value->$property;
+            }
+        }
+    }
+
+    return $fallback;
+}
+
+function normalizeEventTypeValue($value) {
+    $normalized = strtolower(trim(optionFieldValue($value, 'general')));
+    $normalized = str_replace(['_', ' '], '-', $normalized);
+
+    if (in_array($normalized, ['schnuppertag', 'schnuppertage'], true)) {
+        return 'schnuppertag';
+    }
+
+    if (in_array($normalized, ['general', 'allgemein', 'allgemeiner-event', 'allgemeiner'], true)) {
+        return 'general';
+    }
+
+    return $normalized ?: 'general';
+}
+
 /**
  * Require logged-in ProcessWire editor/superuser for write/admin endpoints.
  */
@@ -2104,6 +2141,7 @@ function handleContentRequest($type, $param = null) {
                 }
                 
                 $signupEnabled = ($status === 'upcoming') ? (bool) $event->event_signup_enabled : false;
+                $cardImage = $event->hasField('event_card_image') ? getImageData($event, 'event_card_image') : null;
                 
                 $response[$status][] = [
                     'id' => $event->id,
@@ -2121,9 +2159,11 @@ function handleContentRequest($type, $param = null) {
                     'signupNotes' => $event->event_signup_notes ?: '',
                     'status' => $status,
                     'media' => $media,
+                    'cardImage' => $cardImage['url'] ?? '',
+                    'cardImageAlt' => $cardImage['description'] ?? '',
                     'url' => $event->httpUrl(),
                     'parentTitle' => $event->parent?->title ?: '',
-                    'eventType' => $event->event_type ?: 'general',
+                    'eventType' => $event->hasField('event_type') ? normalizeEventTypeValue($event->event_type) : 'general',
                 ];
             }
             

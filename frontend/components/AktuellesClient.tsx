@@ -6,19 +6,19 @@ import { Footer } from '@/components/Footer'
 import { CTA } from '@/components/CTA'
 import { AktuellesItemComponent } from '@/components/AktuellesItem'
 import { ItemDetailModal } from '@/components/ItemDetailModal'
-import Link from 'next/link'
 import Image from 'next/image'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import type { ContentSection } from '@/lib/processwire-types'
 import type { AktuellesItem } from '@/components/AktuellesData'
+import {
+  filterGeneralEvents,
+  filterSchnuppertage,
+  getEventTypeLabel,
+  groupEventsByType,
+} from '@/components/AktuellesData'
 
-export function filterSchnuppertage(events: AktuellesItem[]): AktuellesItem[] {
-  return events.filter((item) => item.eventType === 'schnuppertag')
-}
-
-export function filterOtherEvents(events: AktuellesItem[]): AktuellesItem[] {
-  return events.filter((item) => item.eventType !== 'schnuppertag')
-}
+export { filterSchnuppertage }
+export const filterOtherEvents = filterGeneralEvents
 
 function hasHeadingHtml(html?: string | null): boolean {
   return /<h[1-6]\b[^>]*>/i.test(String(html || ''))
@@ -31,7 +31,7 @@ interface AktuellesClientProps {
 
 export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientProps) {
   const allAktuellesItems = aktuellesItems
-  const { upcoming: eventItems, past, isLoading: eventsLoading, error: eventsError } = useEventsFeed()
+  const { upcoming: eventItems, past, isLoading: eventsLoading } = useEventsFeed()
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -45,8 +45,8 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
     setSelectedItem(null)
   }
 
-  const schnuppertageEvents = filterSchnuppertage(eventItems)
-  const otherEvents = filterOtherEvents(eventItems)
+  const upcomingGroups = groupEventsByType(eventItems)
+  const pastGroups = groupEventsByType(past)
   
   // Get CMS content if available
   const introSection = sections?.find(s => s.id === 'intro')
@@ -69,8 +69,9 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
               />
             )}
             <div style={{ marginTop: '24px' }}>
+              <h2>Beiträge</h2>
               <div className="aktuelles-list">
-                {allAktuellesItems.slice(0, 3).map((item, index) => (
+                {allAktuellesItems.map((item, index) => (
                   <AktuellesItemComponent 
                     key={item.id || index} 
                       item={item} 
@@ -81,94 +82,54 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                 {allAktuellesItems.length === 0 && (
                   <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Keine Beiträge verfügbar.</p>
                 )}
-                {allAktuellesItems.length > 3 && (
-                  <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                    <Link href="/aktuelles" className="btn btn-secondary btn-organic" style={{ display: 'inline-block' }}>
-                      Alle Neuigkeiten
-                    </Link>
-                  </div>
-                )}
               </div>
             </div>
           </section>
 
           <section id="G-02" style={{ marginBottom: 'clamp(24px, 4vw, 48px)' }}>
-            <h2>Schnuppertage</h2>
+            <h2>Events</h2>
             <div style={{ marginTop: '16px' }}>
+              <h3>Kommende Events</h3>
               {eventsLoading ? (
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
               ) : (
-                <div className="events-list">
-                  {schnuppertageEvents.slice(0, 3).map((item, index) => (
-                    <AktuellesItemComponent 
-                      key={item.id || index} 
-                      item={item} 
-                      variant="event"
-                      onClick={handleItemClick}
-                    />
-                  ))}
-                  {schnuppertageEvents.length === 0 && (
-                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
-                  )}
-                  {schnuppertageEvents.length > 3 && (
-                    <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                      <Link href="/aktuelles" className="btn btn-secondary btn-organic" style={{ display: 'inline-block' }}>
-                        Alle Schnuppertage
-                      </Link>
+                <>
+                  {upcomingGroups.general.length > 0 && (
+                    <div style={{ marginTop: '16px' }}>
+                      <h4>{getEventTypeLabel('general')}</h4>
+                      <div className="events-list">
+                        {upcomingGroups.general.map((item, index) => (
+                          <AktuellesItemComponent
+                            key={item.id || index}
+                            item={item}
+                            variant="event"
+                            onClick={handleItemClick}
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
-                </div>
-              )}
-              <div
-                style={{
-                  marginTop: '16px',
-                  background: 'var(--bioco-green)',
-                  color: '#fff',
-                  padding: '14px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  boxShadow: 'var(--shadow-sm)',
-                }}
-              >
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', marginBottom: '8px', color: '#fff' }}>
-                  Neugierig? Schau vorbei und mach mit. Erlebe an unseren Schnuppertagen, wie solidarische Landwirtschaft funktioniert – direkt auf dem Geisshof in Gebenstorf, umgeben von Natur, Wildpflanzen, auf unserem sonnigen Feld. Als Dank für deine Mithilfe erhältst du eine Tasche frisch geerntetes Demeter-Gemüse und ein kleines zVieri spendiert.
-                </p>
-                <Link
-                  href="/mitmachen"
-                  className="btn btn-secondary btn-organic"
-                  style={{
-                    display: 'inline-block',
-                    marginTop: '4px',
-                    background: '#fff',
-                    color: 'var(--bioco-green)',
-                    borderColor: '#fff',
-                  }}
-                >
-                  Zur Mitmachen-Seite
-                </Link>
-              </div>
-            </div>
-          </section>
 
-          <section id="G-02b" style={{ marginBottom: 'clamp(24px, 4vw, 48px)' }}>
-            <h2>Weitere Events</h2>
-            <div style={{ marginTop: '16px' }}>
-              {eventsLoading ? (
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
-              ) : (
-                <div className="events-list">
-                  {otherEvents.map((item, index) => (
-                    <AktuellesItemComponent 
-                      key={item.id || index} 
-                      item={item} 
-                      variant="event"
-                      onClick={handleItemClick}
-                    />
-                  ))}
-                  {otherEvents.length === 0 && (
-                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine weiteren Events geplant.</p>
+                  {upcomingGroups.schnuppertage.length > 0 && (
+                    <div style={{ marginTop: '16px' }}>
+                      <h4>{getEventTypeLabel('schnuppertag')}</h4>
+                      <div className="events-list">
+                        {upcomingGroups.schnuppertage.map((item, index) => (
+                          <AktuellesItemComponent
+                            key={item.id || index}
+                            item={item}
+                            variant="event"
+                            onClick={handleItemClick}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   )}
-                </div>
+
+                  {eventItems.length === 0 && (
+                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine Events geplant.</p>
+                  )}
+                </>
               )}
             </div>
           </section>
@@ -179,34 +140,31 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                 <h3>Vergangene Events</h3>
               </div>
               <div className="card-body past-events-grid">
-                {past.map((item, index) => (
-                  <button
-                    key={item.id || index}
-                    className="past-event-tile"
-                    onClick={() => handleItemClick(item)}
-                  >
-                    {(item.media?.[0] || item.imageUrl) && (
-                      <div className="past-event-media">
-                        {item.media?.[0]?.type === 'video' ? (
-                          <video src={item.media[0].url} muted playsInline />
-                        ) : (
+                {[...pastGroups.general, ...pastGroups.schnuppertage].map((item, index) => (
+                    <button
+                      key={item.id || index}
+                      className="past-event-tile"
+                      onClick={() => handleItemClick(item)}
+                    >
+                      {item.cardImage && (
+                        <div className="past-event-media">
                           <Image
-                            src={item.media?.[0]?.url || item.imageUrl!}
-                            alt={item.media?.[0]?.description || item.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 25vw"
-                            style={{ objectFit: 'cover' }}
-                          />
-                        )}
+                              src={item.cardImage}
+                              alt={item.cardImageAlt || item.title}
+                              fill
+                              sizes="(max-width: 768px) 100vw, 25vw"
+                              style={{ objectFit: 'cover' }}
+                            />
+                        </div>
+                      )}
+                      <div className="past-event-meta">
+                        <p className="past-event-date">{item.date}</p>
+                        <p className="past-event-title">{item.title}</p>
+                        <p className="past-event-location">{getEventTypeLabel(item.eventType)}</p>
+                        <span className="past-event-cta">Rückblick ansehen →</span>
                       </div>
-                    )}
-                    <div className="past-event-meta">
-                      <p className="past-event-date">{item.date}</p>
-                      <p className="past-event-title">{item.title}</p>
-                      <span className="past-event-cta">Rückblick ansehen →</span>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  ))}
               </div>
             </section>
           )}

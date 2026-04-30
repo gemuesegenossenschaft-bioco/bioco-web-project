@@ -34,19 +34,28 @@ class EventSetup {
     {
         $modules = $this->wire->modules;
 
+        $typeField = $this->ensureField('event_type', 'FieldtypeOptions', [
+            'label' => 'Event Kategorie',
+            'description' => 'Unterkategorie innerhalb von Events.',
+            'inputType' => 'radios',
+            'required' => true,
+            'defaultValue' => 'general',
+        ]);
+        $this->ensureOptions($typeField, [
+            'general' => 'Allgemeiner Event',
+            'schnuppertag' => 'Schnuppertage',
+        ]);
+
         $statusField = $this->ensureField('event_status', 'FieldtypeOptions', [
             'label' => 'Event Status',
             'inputType' => 'radios',
             'required' => true,
             'defaultValue' => 'upcoming',
         ]);
-
-        if(!$statusField->options->count()) {
-            $statusField->addOption('upcoming', 'Bevorstehend');
-            $statusField->addOption('past', 'Vergangen');
-            $statusField->optionColumns = 1;
-            $this->wire->fields->save($statusField);
-        }
+        $this->ensureOptions($statusField, [
+            'upcoming' => 'Kommend',
+            'past' => 'Vorbei',
+        ]);
 
         $this->ensureField('event_start', 'FieldtypeDatetime', [
             'label' => 'Beginn',
@@ -74,6 +83,17 @@ class EventSetup {
             'rows' => 5,
             'required' => true,
         ]);
+
+        $cardImageField = $this->ensureField('event_card_image', 'FieldtypeImage', [
+            'label' => 'Event-Kartenbild',
+            'description' => 'Bild für Event-Karten. Event-Medien erscheinen nur in der Detailansicht.',
+            'maxFiles' => 1,
+        ]);
+        if(isset($cardImageField->extensions) && $cardImageField->extensions !== 'jpg jpeg png webp') {
+            $cardImageField->extensions = 'jpg jpeg png webp';
+            $cardImageField->maxFiles = 1;
+            $this->wire->fields->save($cardImageField);
+        }
 
         $mediaField = $this->ensureField('event_media', 'FieldtypeFile', [
             'label' => 'Fotos & Videos',
@@ -118,11 +138,13 @@ class EventSetup {
         $fieldGroup = $template->fieldgroup ?: new Fieldgroup();
         $fieldGroup->name = self::TEMPLATE_NAME;
         $this->addFieldToGroup($fieldGroup, $fields->get('title'));
+        $this->addFieldToGroup($fieldGroup, $fields->get('event_type'));
         $this->addFieldToGroup($fieldGroup, $fields->get('event_status'));
         $this->addFieldToGroup($fieldGroup, $fields->get('event_start'));
         $this->addFieldToGroup($fieldGroup, $fields->get('event_end'));
         $this->addFieldToGroup($fieldGroup, $fields->get('event_location'));
         $this->addFieldToGroup($fieldGroup, $fields->get('event_summary'));
+        $this->addFieldToGroup($fieldGroup, $fields->get('event_card_image'));
         $this->addFieldToGroup($fieldGroup, $fields->get('body'));
         $this->addFieldToGroup($fieldGroup, $fields->get('event_media'));
         $this->addFieldToGroup($fieldGroup, $fields->get('event_signup_enabled'));
@@ -192,6 +214,45 @@ class EventSetup {
         return $field;
     }
 
+    private function ensureOptions(Field $field, array $options): void
+    {
+        if(!isset($field->options)) {
+            return;
+        }
+
+        $changed = false;
+        $seen = [];
+
+        foreach($field->options as $option) {
+            $value = (string) $option->value;
+            if(!array_key_exists($value, $options)) {
+                continue;
+            }
+            $seen[$value] = true;
+            if($option->title !== $options[$value]) {
+                $option->title = $options[$value];
+                $changed = true;
+            }
+        }
+
+        foreach($options as $value => $title) {
+            if(isset($seen[$value])) {
+                continue;
+            }
+            $field->addOption($value, $title);
+            $changed = true;
+        }
+
+        if((int) $field->optionColumns !== 1) {
+            $field->optionColumns = 1;
+            $changed = true;
+        }
+
+        if($changed) {
+            $this->wire->fields->save($field);
+        }
+    }
+
     private function registerAutomationHooks(): void
     {
         $wire = $this->wire;
@@ -231,4 +292,3 @@ class EventSetup {
         }
     }
 }
-

@@ -75,20 +75,15 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
           </div>
           <div className="card-body past-events-grid">
             {past.slice(0, 4).map((item, index) => {
-              const heroMedia = item.media?.[0]
               return (
                 <button
                   key={item.id || index}
                   className="past-event-tile"
                   onClick={() => handleItemClick(item)}
                 >
-                  {heroMedia && (
+                  {item.cardImage && (
                     <div className="past-event-media">
-                      {heroMedia.type === 'image' ? (
-                        <Image src={heroMedia.url} alt={heroMedia.description || item.title} fill sizes="(max-width: 768px) 100vw, 25vw" style={{ objectFit: 'cover' }} />
-                      ) : (
-                        <video src={heroMedia.url} muted playsInline />
-                      )}
+                      <Image src={item.cardImage} alt={item.cardImageAlt || item.title} fill sizes="(max-width: 768px) 100vw, 25vw" style={{ objectFit: 'cover' }} />
                     </div>
                   )}
                   <div className="past-event-meta">
@@ -116,4 +111,3 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
     </>
   )
 }
-

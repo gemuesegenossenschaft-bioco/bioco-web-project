@@ -37,10 +37,9 @@ test('Homepage: hero section has headline', async ({ page }) => {
   expect(text?.length).toBeGreaterThan(5)
 })
 
-test('Aktuelles: three sections visible (news, schnuppertage, events)', async ({ page }) => {
+test('Aktuelles: Beiträge and Events sections visible', async ({ page }) => {
   await page.goto('/aktuelles', { waitUntil: 'networkidle' })
 
   await expect(page.locator('#G-01')).toBeVisible()
   await expect(page.locator('#G-02')).toBeVisible()
-  await expect(page.locator('#G-02b')).toBeVisible()
 })
