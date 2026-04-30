@@ -55,8 +55,8 @@ describe('ISR caching exports', () => {
     expect((mod as Record<string, unknown>).dynamic).not.toBe('force-dynamic')
   })
 
-  it('api/events does not export force-dynamic', async () => {
+  it('api/events stays force-dynamic so ProcessWire event edits are live', async () => {
     const mod = await import('@/app/api/events/route')
-    expect((mod as Record<string, unknown>).dynamic).not.toBe('force-dynamic')
+    expect((mod as Record<string, unknown>).dynamic).toBe('force-dynamic')
   })
 })

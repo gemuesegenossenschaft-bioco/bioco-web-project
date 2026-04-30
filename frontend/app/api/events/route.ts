@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
-import { buildCmsHeaders, cmsApiUrl, cmsFetchOptions } from '@/lib/cmsClient'
+import { buildCmsHeaders, cmsApiUrl } from '@/lib/cmsClient'
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 // Fallback response when API is unavailable
 const FALLBACK_RESPONSE = {
@@ -25,7 +25,7 @@ async function fetchEventsFromCms() {
   for (const endpoint of endpoints) {
     try {
       const response = await fetch(cmsApiUrl(endpoint), {
-        ...cmsFetchOptions(revalidate),
+        cache: 'no-store',
         headers: buildCmsHeaders(),
         signal: createTimeoutSignal(5000),
       })
@@ -79,7 +79,7 @@ export async function GET() {
     }
 
     const res = NextResponse.json(data, { status: 200 })
-    res.headers.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=60')
+    res.headers.set('Cache-Control', 'no-store')
     return res
   } catch (error) {
     console.warn('Failed to fetch ProcessWire events, using fallback:', error)
