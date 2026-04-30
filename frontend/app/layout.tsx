@@ -4,6 +4,8 @@ import { MatomoScript } from '@/components/MatomoScript'
 import { MarkerScript } from '@/components/MarkerScript'
 import { OrganizationSchema, LocalBusinessSchema } from '@/components/StructuredData'
 import { PathnameBodyClass } from '@/components/PathnameBodyClass'
+import { BuildVersionWatcher } from '@/components/BuildVersionWatcher'
+import { getCurrentBuildId } from '@/lib/buildId'
 import { getGlobalSettings } from '@/lib/processwire'
 
 export const metadata: Metadata = {
@@ -47,6 +49,7 @@ export default async function RootLayout({
 }) {
   const globalSettings = await getGlobalSettings()
   const cssVars = typographyCssVars(globalSettings)
+  const buildId = getCurrentBuildId()
 
   return (
     <html lang="de">
@@ -55,9 +58,11 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet" />
         <style id="cms-global-typography" dangerouslySetInnerHTML={{ __html: cssVars }} />
+        <meta name="bioco-build-id" content={buildId} />
       </head>
       <body>
         <PathnameBodyClass />
+        <BuildVersionWatcher initialBuildId={buildId} />
         <OrganizationSchema />
         <LocalBusinessSchema />
         {children}

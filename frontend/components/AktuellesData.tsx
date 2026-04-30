@@ -177,8 +177,8 @@ const DEFAULT_SITE_URL = SITE_URL || 'https://bioco.ch'
 export async function fetchEventsFromCms(): Promise<EventsFeed> {
   const endpoints =
     typeof window === 'undefined'
-      ? [`${DEFAULT_SITE_URL}/api/events`, `${DEFAULT_SITE_URL}/cms/api/events/`, 'https://cms.bioco.ch/api/events/']
-      : ['/api/events', '/cms/api/events/', 'https://cms.bioco.ch/api/events/']
+      ? [`${DEFAULT_SITE_URL}/api/events`, 'https://cms.bioco.ch/api/content/events', `${DEFAULT_SITE_URL}/cms/api/events/`, 'https://cms.bioco.ch/api/events/']
+      : ['/api/events', 'https://cms.bioco.ch/api/content/events', '/cms/api/events/', 'https://cms.bioco.ch/api/events/']
 
   let data: EventsApiResponse | null = null
 

@@ -20,7 +20,6 @@ const nextConfig = {
     NEXT_PUBLIC_MATOMO_SITE_ID: process.env.NEXT_PUBLIC_MATOMO_SITE_ID || '',
   },
   images: {
-    domains: ['localhost', 'staging.bioco.ch', 'bioco.ch', 'api.bioco.ch', 'cms.bioco.ch'],
     remotePatterns: [
       {
         protocol: 'http',

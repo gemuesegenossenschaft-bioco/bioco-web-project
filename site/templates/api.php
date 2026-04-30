@@ -216,6 +216,57 @@ function getImageDataWithAlt($page, $field, $fallbackAlt = '') {
     return null;
 }
 
+function mediaItemToApiData($file) {
+    if (!$file) {
+        return null;
+    }
+
+    if ($file instanceof Pageimage) {
+        $file = resizeForApi($file);
+    }
+
+    $filename = property_exists($file, 'filename') ? (string) $file->filename : '';
+    if ($filename !== '' && !is_file($filename)) {
+        return null;
+    }
+
+    $url = !empty($file->url) ? normalizeAssetUrl($file->url) : '';
+    if ($url === '') {
+        return null;
+    }
+
+    return [
+        'url' => $url,
+        'description' => $file->description ?: '',
+        'type' => mediaTypeFromExtension($file->ext),
+    ];
+}
+
+function getMediaItems($page, $field) {
+    $value = $page->get($field);
+    if (!$value) {
+        return [];
+    }
+
+    $items = [];
+
+    if ($value instanceof Pageimage || $value instanceof Pagefile) {
+        $item = mediaItemToApiData($value);
+        return $item ? [$item] : [];
+    }
+
+    if ($value instanceof Pageimages || $value instanceof Pagefiles) {
+        foreach ($value as $file) {
+            $item = mediaItemToApiData($file);
+            if ($item) {
+                $items[] = $item;
+            }
+        }
+    }
+
+    return $items;
+}
+
 /**
  * Get SEO data for a page
  */
@@ -2156,17 +2207,7 @@ function handleContentRequest($type, $param = null) {
                 $status = $event->event_status && in_array($event->event_status, ['upcoming', 'past']) 
                     ? $event->event_status 
                     : 'upcoming';
-                $media = [];
-                
-                if ($event->hasField('event_media') && $event->event_media) {
-                    foreach ($event->event_media as $file) {
-                        $media[] = [
-                            'url' => $file->httpUrl(),
-                            'description' => $file->description,
-                            'type' => mediaTypeFromExtension($file->ext),
-                        ];
-                    }
-                }
+                $media = $event->hasField('event_media') ? getMediaItems($event, 'event_media') : [];
                 
                 if (!$event->title) {
                     continue;

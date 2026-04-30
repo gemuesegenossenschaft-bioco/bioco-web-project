@@ -3582,6 +3582,13 @@ footer a:hover {
   align-items: flex-start; /* Vertical alignment */
 }
 
+.event-item-with-image {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr);
+  align-items: stretch;
+  gap: var(--spacing-md);
+}
+
 .event-item h3 {
   color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
@@ -3598,11 +3605,34 @@ footer a:hover {
 .event-card-image {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  min-height: 100%;
   overflow: hidden;
   border-radius: var(--radius-sm);
   background: var(--bg-secondary);
-  margin-bottom: var(--spacing-sm);
+}
+
+.event-item-with-image .event-card-content {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .event-item-with-image {
+    grid-template-columns: 1fr;
+  }
+
+  .event-item-with-image .event-card-image {
+    aspect-ratio: 4 / 3;
+    min-height: 0;
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+@media (min-width: 769px) {
+  .event-item-with-image .event-card-image {
+    aspect-ratio: auto;
+    height: 100%;
+    margin-bottom: 0;
+  }
 }
 
 .past-events-card {

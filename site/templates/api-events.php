@@ -38,6 +38,45 @@ function normalizeEventType($value) {
     return $normalized ?: 'general';
 }
 
+function normalizeAssetUrl($url) {
+    $raw = trim((string) $url);
+    if ($raw === '') return '';
+
+    $raw = preg_replace('#^\./#', '', $raw);
+
+    if (preg_match('#^https?://#i', $raw)) {
+        $parts = parse_url($raw);
+        if (!$parts || empty($parts['host'])) return $raw;
+
+        $scheme = $parts['scheme'] ?? 'https';
+        $host = rtrim((string) $parts['host'], '.');
+        $path = '/' . ltrim((string) ($parts['path'] ?? ''), '/');
+        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+
+        return $scheme . '://' . $host . $path . $query;
+    }
+
+    $host = rtrim((string) ($_SERVER['HTTP_HOST'] ?? parse_url((string) wire('config')->urls->httpRoot, PHP_URL_HOST) ?? ''), '.');
+    $scheme = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
+    $path = '/' . ltrim($raw, '/');
+
+    return $host !== '' ? ($scheme . '://' . $host . $path) : $path;
+}
+
+function eventMediaItem($file) {
+    if (!$file) return null;
+    $filename = property_exists($file, 'filename') ? (string) $file->filename : '';
+    if ($filename !== '' && !is_file($filename)) return null;
+    $url = !empty($file->url) ? normalizeAssetUrl($file->url) : '';
+    if ($url === '') return null;
+
+    return [
+        'url' => $url,
+        'description' => $file->description,
+        'type' => (in_array(strtolower($file->ext), ['mp4', 'mov', 'webm']) ? 'video' : 'image'),
+    ];
+}
+
 // Find all events, sorted by start date.
 $events = $pages->find('template=event, sort=event_start');
 
@@ -49,11 +88,8 @@ foreach($events as $event) {
     $media = [];
     if($event->event_media) {
         foreach($event->event_media as $file) {
-            $media[] = [
-                'url' => $file->httpUrl(),
-                'description' => $file->description,
-                'type' => (in_array(strtolower($file->ext), ['mp4', 'mov', 'webm']) ? 'video' : 'image'),
-            ];
+            $item = eventMediaItem($file);
+            if ($item) $media[] = $item;
         }
     }
 
@@ -94,11 +130,11 @@ foreach($events as $event) {
     $cardImg = $event->hasField('event_card_image') ? $event->event_card_image : null;
     if ($cardImg && !($cardImg instanceof \Countable && $cardImg->count() === 0)) {
         if (is_object($cardImg) && method_exists($cardImg, 'httpUrl')) {
-            $cardImage = $cardImg->httpUrl();
+            $cardImage = normalizeAssetUrl($cardImg->url);
             $cardImageAlt = $cardImg->description ?: '';
         } elseif ($cardImg instanceof \Countable && $cardImg->count()) {
             $first = $cardImg->first();
-            $cardImage = $first->httpUrl();
+            $cardImage = normalizeAssetUrl($first->url);
             $cardImageAlt = $first->description ?: '';
         }
     }

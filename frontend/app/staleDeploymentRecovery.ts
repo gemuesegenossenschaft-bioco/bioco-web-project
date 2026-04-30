@@ -25,3 +25,9 @@ export function buildStaleRecoveryUrl(href: string, now = Date.now()): string {
   parsed.searchParams.set('__fresh', String(now))
   return `${parsed.pathname}${parsed.search}${parsed.hash}`
 }
+
+export function shouldReloadForBuildChange(currentBuildId?: string | null, nextBuildId?: string | null): boolean {
+  const current = String(currentBuildId || '').trim()
+  const next = String(nextBuildId || '').trim()
+  return current !== '' && next !== '' && current !== next
+}

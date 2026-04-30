@@ -18,6 +18,7 @@ export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }:
   const className = variant === 'event' ? 'event-item' : 'aktuelles-item'
   const cardImage = item.type === 'event' ? item.cardImage : item.imageUrl
   const cardImageAlt = item.type === 'event' ? item.cardImageAlt : undefined
+  const cardClassName = `${className}${variant === 'event' && cardImage ? ' event-item-with-image' : ''}`
   const canRegister = item.type === 'event' && (item.signupEnabled ?? item.signupRequired ?? false)
   const hasDetails =
     item.fullDescription ||
@@ -35,7 +36,7 @@ export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }:
   
   return (
     <div 
-      className={className}
+      className={cardClassName}
       onClick={handleClick}
       style={{
         cursor: hasDetails ? 'pointer' : 'default',
@@ -66,19 +67,21 @@ export function AktuellesItemComponent({ item, variant = 'aktuelles', onClick }:
           />
         </div>
       )}
-      <h3>{item.date}</h3>
-      <p><strong>{item.title}</strong></p>
-      <p>{previewText}</p>
-      {hasDetails && (
-        <p style={{ 
-          marginTop: '8px', 
-          fontSize: '0.875rem', 
-          color: 'var(--bioco-green)',
-          fontWeight: 600
-        }}>
-          Mehr erfahren →
-        </p>
-      )}
+      <div className="event-card-content">
+        <h3>{item.date}</h3>
+        <p><strong>{item.title}</strong></p>
+        <p>{previewText}</p>
+        {hasDetails && (
+          <p style={{ 
+            marginTop: '8px', 
+            fontSize: '0.875rem', 
+            color: 'var(--bioco-green)',
+            fontWeight: 600
+          }}>
+            Mehr erfahren →
+          </p>
+        )}
+      </div>
     </div>
   )
 }
