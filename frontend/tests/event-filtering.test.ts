@@ -1,20 +1,6 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import type { AktuellesItem } from '@/components/AktuellesData'
-
-// Mock React hooks to allow importing the client component
-vi.mock('react', async () => {
-  const actual = await vi.importActual('react')
-  return { ...actual, useState: vi.fn((init: unknown) => [init, vi.fn()]) }
-})
-vi.mock('@/hooks/useEventsFeed', () => ({
-  useEventsFeed: () => ({ upcoming: [], past: [], isLoading: false, error: null }),
-}))
-vi.mock('@/components/Header', () => ({ Header: () => null }))
-vi.mock('@/components/Footer', () => ({ Footer: () => null }))
-vi.mock('@/components/CTA', () => ({ CTA: () => null }))
-vi.mock('@/components/AktuellesItem', () => ({ AktuellesItemComponent: () => null }))
-vi.mock('@/components/ItemDetailModal', () => ({ ItemDetailModal: () => null }))
-vi.mock('next/link', () => ({ default: () => null }))
+import { filterGeneralEvents, filterSchnuppertage, groupEventsByType } from '@/components/AktuellesData'
 
 describe('Event filtering by eventType', () => {
   const events: AktuellesItem[] = [
@@ -45,14 +31,54 @@ describe('Event filtering by eventType', () => {
   ]
 
   it('filters schnuppertage by eventType, not title', async () => {
-    const { filterSchnuppertage, filterOtherEvents } = await import('@/components/AktuellesClient')
-
     const schnuppertage = filterSchnuppertage(events)
     expect(schnuppertage).toHaveLength(1)
     expect(schnuppertage[0].id).toBe(1)
 
-    const other = filterOtherEvents(events)
+    const other = filterGeneralEvents(events)
     expect(other).toHaveLength(2)
     expect(other.map((e: AktuellesItem) => e.id)).toEqual([2, 3])
+  })
+
+  it('preserves chronological input order inside each event section', () => {
+    const chronologicallySortedEvents: AktuellesItem[] = [
+      {
+        id: 10,
+        date: '10.05.2026',
+        title: 'General Event Mai',
+        description: 'A',
+        type: 'event',
+        eventType: 'general',
+      },
+      {
+        id: 11,
+        date: '20.05.2026',
+        title: 'Schnuppertag Mai',
+        description: 'B',
+        type: 'event',
+        eventType: 'schnuppertag',
+      },
+      {
+        id: 12,
+        date: '02.06.2026',
+        title: 'General Event Juni',
+        description: 'C',
+        type: 'event',
+        eventType: 'general',
+      },
+      {
+        id: 13,
+        date: '15.06.2026',
+        title: 'Schnuppertag Juni',
+        description: 'D',
+        type: 'event',
+        eventType: 'schnuppertag',
+      },
+    ]
+
+    const grouped = groupEventsByType(chronologicallySortedEvents)
+
+    expect(grouped.general.map((e) => e.id)).toEqual([10, 12])
+    expect(grouped.schnuppertage.map((e) => e.id)).toEqual([11, 13])
   })
 })

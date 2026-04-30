@@ -38,9 +38,9 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
   }
 
   const upcomingGroups = groupEventsByType(eventItems)
-  const pastGroups = groupEventsByType(past)
-  const upcomingItems = [...upcomingGroups.general, ...upcomingGroups.schnuppertage]
-  const pastItems = [...pastGroups.general, ...pastGroups.schnuppertage]
+  const upcomingGeneralItems = upcomingGroups.general
+  const upcomingSchnuppertagItems = upcomingGroups.schnuppertage
+  const pastItems = past
   
   // Get CMS content if available
   const introSection = sections?.find(s => s.id === 'intro')
@@ -88,9 +88,9 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
               ) : (
                 <>
-                  {upcomingItems.length > 0 ? (
+                  {upcomingGeneralItems.length > 0 ? (
                     <div className="events-list">
-                      {upcomingItems.map((item, index) => (
+                      {upcomingGeneralItems.map((item, index) => (
                         <AktuellesItemComponent
                           key={item.id || index}
                           item={item}
@@ -100,7 +100,31 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                       ))}
                     </div>
                   ) : (
-                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine Events geplant.</p>
+                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine allgemeinen Events geplant.</p>
+                  )}
+                </>
+              )}
+            </div>
+
+            <div style={{ marginTop: '32px' }}>
+              <h3>Schnuppertage</h3>
+              {eventsLoading ? (
+                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+              ) : (
+                <>
+                  {upcomingSchnuppertagItems.length > 0 ? (
+                    <div className="events-list">
+                      {upcomingSchnuppertagItems.map((item, index) => (
+                        <AktuellesItemComponent
+                          key={item.id || index}
+                          item={item}
+                          variant="event"
+                          onClick={handleItemClick}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
                   )}
                 </>
               )}

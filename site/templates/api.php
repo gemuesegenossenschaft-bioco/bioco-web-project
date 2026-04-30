@@ -101,6 +101,38 @@ function resizeForApi($image, $maxWidth = 1600) {
 /**
  * Get full image URL (required for Next.js Image component)
  */
+function normalizeAssetUrl($url) {
+    $raw = trim((string) $url);
+    if ($raw === '') {
+        return '';
+    }
+
+    $raw = preg_replace('#^\./#', '', $raw);
+
+    if (preg_match('#^https?://#i', $raw)) {
+        $parts = parse_url($raw);
+        if (!$parts || empty($parts['host'])) {
+            return $raw;
+        }
+
+        $scheme = $parts['scheme'] ?? 'https';
+        $host = rtrim((string) $parts['host'], '.');
+        $path = '/' . ltrim((string) ($parts['path'] ?? ''), '/');
+        $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+
+        return $scheme . '://' . $host . $path . $query;
+    }
+
+    $host = rtrim((string) ($_SERVER['HTTP_HOST'] ?? parse_url((string) wire('config')->urls->httpRoot, PHP_URL_HOST) ?? ''), '.');
+    $scheme = !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'https' : 'http';
+    $path = '/' . ltrim($raw, '/');
+
+    return $host !== '' ? ($scheme . '://' . $host . $path) : $path;
+}
+
+/**
+ * Get full image URL (required for Next.js Image component)
+ */
 function getFirstImageFromField($page, $field) {
     $value = $page->get($field);
     if (!$value) return null;
@@ -145,7 +177,7 @@ function getImageUrl($page, $field) {
     $image = getFirstImageFromField($page, $field);
     if ($image && !empty($image->url)) {
         $image = resizeForApi($image);
-        return wire('config')->urls->httpRoot . ltrim($image->url, '/');
+        return normalizeAssetUrl($image->url);
     }
     return null;
 }
@@ -158,7 +190,7 @@ function getImageData($page, $field) {
     if ($image && !empty($image->url)) {
         $image = resizeForApi($image);
         return [
-            'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
+            'url' => normalizeAssetUrl($image->url),
             'description' => $image->description ?: '',
             'width' => property_exists($image, 'width') ? $image->width : null,
             'height' => property_exists($image, 'height') ? $image->height : null,
@@ -175,7 +207,7 @@ function getImageDataWithAlt($page, $field, $fallbackAlt = '') {
     if ($image && !empty($image->url)) {
         $image = resizeForApi($image);
         return [
-            'url' => wire('config')->urls->httpRoot . ltrim($image->url, '/'),
+            'url' => normalizeAssetUrl($image->url),
             'alt' => $image->description ?: $fallbackAlt,
             'width' => property_exists($image, 'width') ? $image->width : null,
             'height' => property_exists($image, 'height') ? $image->height : null,
@@ -2136,7 +2168,7 @@ function handleContentRequest($type, $param = null) {
                     }
                 }
                 
-                if (!$event->title || !$event->event_start) {
+                if (!$event->title) {
                     continue;
                 }
                 

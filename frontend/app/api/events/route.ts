@@ -20,7 +20,7 @@ function isValidEventsResponse(data: unknown): data is { upcoming: unknown[]; pa
 
 async function fetchEventsFromCms() {
   // Current CMS endpoint first; keep legacy endpoints for compatibility.
-  const endpoints = ['/events/', '/content/events', '/events.php']
+  const endpoints = ['/content/events', '/events/', '/events.php']
 
   for (const endpoint of endpoints) {
     try {

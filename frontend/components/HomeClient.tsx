@@ -65,9 +65,10 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
     sections: initialSections,
   })
 
-  const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed(6)
+  const { upcoming: eventItems, isLoading: eventsLoading } = useEventsFeed()
   const eventGroups = groupEventsByType(eventItems)
-  const visibleEventItems = [...eventGroups.general.slice(0, 3), ...eventGroups.schnuppertage.slice(0, 3)]
+  const visibleGeneralEventItems = eventGroups.general.slice(0, 3)
+  const visibleSchnuppertagItems = eventGroups.schnuppertage.slice(0, 3)
 
   const handleItemClick = (item: AktuellesItem) => {
     setSelectedItem(item)
@@ -307,9 +308,9 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
               <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
             ) : (
               <>
-                {visibleEventItems.length > 0 ? (
+                {visibleGeneralEventItems.length > 0 ? (
                   <div className="events-list">
-                    {visibleEventItems.map((item, index) => (
+                    {visibleGeneralEventItems.map((item, index) => (
                       <AktuellesItemComponent
                         key={item.id || index}
                         item={item}
@@ -319,7 +320,7 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
                     ))}
                   </div>
                 ) : (
-                  <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine Events geplant.</p>
+                  <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine allgemeinen Events geplant.</p>
                 )}
               </>
             )}
@@ -330,6 +331,30 @@ export function HomeClient({ hero, sections, aktuellesItems }: HomeClientProps) 
             >
               Alle Events ansehen
             </ScrollToTopLink>
+          </section>
+
+          <section className="home-block col-span-12" style={{ marginTop: 'clamp(24px, 4vw, 48px)' }}>
+            <h2>Schnuppertage</h2>
+            {eventsLoading ? (
+              <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+            ) : (
+              <>
+                {visibleSchnuppertagItems.length > 0 ? (
+                  <div className="events-list">
+                    {visibleSchnuppertagItems.map((item, index) => (
+                      <AktuellesItemComponent
+                        key={item.id || index}
+                        item={item}
+                        variant="event"
+                        onClick={handleItemClick}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
+                )}
+              </>
+            )}
           </section>
 
           {/* Kennenlernen */}
