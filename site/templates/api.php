@@ -2142,6 +2142,29 @@ function handleContentRequest($type, $param = null) {
                 
                 $signupEnabled = ($status === 'upcoming') ? (bool) $event->event_signup_enabled : false;
                 $cardImage = $event->hasField('event_card_image') ? getImageData($event, 'event_card_image') : null;
+                $startDate = null;
+                $endDate = null;
+                $dateLabel = '';
+                $timeLabel = '';
+
+                if ($event->event_start) {
+                    $startTs = is_numeric($event->event_start) ? (int) $event->event_start : strtotime((string) $event->event_start);
+                    if ($startTs) {
+                        $startDate = date(DATE_ATOM, $startTs);
+                        $dateLabel = date('d.m.Y', $startTs);
+                    }
+                }
+
+                if ($event->event_end) {
+                    $endTs = is_numeric($event->event_end) ? (int) $event->event_end : strtotime((string) $event->event_end);
+                    if ($endTs) {
+                        $endDate = date(DATE_ATOM, $endTs);
+                    }
+                }
+
+                if (!empty($startTs) && !empty($endTs)) {
+                    $timeLabel = date('H:i', $startTs) . ' - ' . date('H:i', $endTs) . ' Uhr';
+                }
                 
                 $response[$status][] = [
                     'id' => $event->id,
@@ -2149,12 +2172,10 @@ function handleContentRequest($type, $param = null) {
                     'description' => $event->event_summary ?: ($event->body ? $sanitizer->truncate($event->body, 200) : ''),
                     'fullDescription' => $event->body ?: '',
                     'location' => $event->event_location ?: '',
-                    'startDate' => $event->event_start ? $event->event_start->format(DATE_ATOM) : null,
-                    'endDate' => $event->event_end ? $event->event_end->format(DATE_ATOM) : null,
-                    'dateLabel' => $event->event_start ? $event->event_start->format('d.m.Y') : '',
-                    'timeLabel' => $event->event_start && $event->event_end
-                        ? $event->event_start->format('H:i') . ' - ' . $event->event_end->format('H:i') . ' Uhr'
-                        : '',
+                    'startDate' => $startDate,
+                    'endDate' => $endDate,
+                    'dateLabel' => $dateLabel,
+                    'timeLabel' => $timeLabel,
                     'signupEnabled' => $signupEnabled,
                     'signupNotes' => $event->event_signup_notes ?: '',
                     'status' => $status,
