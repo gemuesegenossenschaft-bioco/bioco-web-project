@@ -54,24 +54,24 @@ describe('visual editor route availability', () => {
     vi.clearAllMocks()
   })
 
-  it('renders standorte-depots from CMS sections in visual mode', async () => {
+  it('renders standorte-depots fallback content instead of CMS sections', async () => {
     const { default: StandortePage } = await import('@/app/standorte-depots/page')
     const element = await StandortePage()
-    const { container } = render(element)
+    render(element)
 
-    expect(screen.getByText('CMS Standorte')).toBeInTheDocument()
-    expect(container.querySelector('[data-section-id="standorte-intro"]')).toBeTruthy()
-    expect(container.querySelector('[data-section-id="geisshof-map"] [data-ve-field="component"]')).toBeTruthy()
-    expect(container.querySelector('[data-section-id="depot-map"] [data-ve-field="component"]')).toBeTruthy()
+    expect(screen.getByText('Unsere Standorte & Depots')).toBeInTheDocument()
+    expect(screen.queryByText('CMS Standorte')).not.toBeInTheDocument()
+    expect(screen.getByTestId('geisshof-map')).toBeInTheDocument()
+    expect(screen.getByTestId('depot-map')).toBeInTheDocument()
   })
 
-  it('renders bioco-werden from CMS sections in visual mode', async () => {
+  it('renders bioco-werden fallback content instead of CMS sections', async () => {
     const { default: BiocoWerdenPage } = await import('@/app/bioco-werden/page')
     const element = await BiocoWerdenPage()
-    const { container } = render(element)
+    render(element)
 
-    expect(screen.getByText('CMS Mitglied werden')).toBeInTheDocument()
-    expect(container.querySelector('[data-section-id="pricing"] [data-ve-field="component"]')).toBeTruthy()
+    expect(screen.getByText('biocò werden')).toBeInTheDocument()
+    expect(screen.queryByText('CMS Mitglied werden')).not.toBeInTheDocument()
     expect(screen.getByTestId('pricing-calculator')).toBeInTheDocument()
   })
 })
