@@ -11,16 +11,11 @@ vi.mock('@/lib/turnstile', () => ({
 import { sendFormEmail } from '@/lib/email'
 import { verifyTurnstileToken } from '@/lib/turnstile'
 
-const routeSpecs = [
+const captchaProtectedRouteSpecs = [
   {
     name: 'contact',
     load: () => import('@/app/api/forms/contact/route'),
     validPayload: { name: 'Jane', email: 'jane@example.com', subject: 'Hi', message: 'Hello', captchaToken: 'tok' },
-  },
-  {
-    name: 'subscribe',
-    load: () => import('@/app/api/forms/subscribe/route'),
-    validPayload: { email: 'jane@example.com', privacy_accept: true, captchaToken: 'tok' },
   },
   {
     name: 'visit',
@@ -48,6 +43,19 @@ const routeSpecs = [
     },
   },
   {
+    name: 'event-signup',
+    load: () => import('@/app/api/forms/event-signup/route'),
+    validPayload: { name: 'Jane', email: 'jane@example.com', eventTitle: 'Event', captchaToken: 'tok' },
+  },
+] as const
+
+const captchaFreeRouteSpecs = [
+  {
+    name: 'subscribe',
+    load: () => import('@/app/api/forms/subscribe/route'),
+    validPayload: { email: 'jane@example.com', privacy_accept: true },
+  },
+  {
     name: 'membership',
     load: () => import('@/app/api/forms/membership/route'),
     validPayload: {
@@ -58,13 +66,7 @@ const routeSpecs = [
       zip: '8000',
       city: 'Zurich',
       privacyAccept: true,
-      captchaToken: 'tok',
     },
-  },
-  {
-    name: 'event-signup',
-    load: () => import('@/app/api/forms/event-signup/route'),
-    validPayload: { name: 'Jane', email: 'jane@example.com', eventTitle: 'Event', captchaToken: 'tok' },
   },
 ] as const
 
@@ -76,7 +78,7 @@ describe('form routes captcha enforcement', () => {
   it('returns 400 when captcha missing', async () => {
     vi.mocked(verifyTurnstileToken).mockResolvedValue({ ok: false, errorCode: 'captcha_missing' })
 
-    for (const route of routeSpecs) {
+    for (const route of captchaProtectedRouteSpecs) {
       const { POST } = await route.load()
       const payload = { ...route.validPayload }
       delete (payload as { captchaToken?: string }).captchaToken
@@ -99,7 +101,7 @@ describe('form routes captcha enforcement', () => {
   it('returns 400 when captcha invalid', async () => {
     vi.mocked(verifyTurnstileToken).mockResolvedValue({ ok: false, errorCode: 'invalid-input-response' })
 
-    for (const route of routeSpecs) {
+    for (const route of captchaProtectedRouteSpecs) {
       const { POST } = await route.load()
       const response = await POST(
         new Request(`https://bioco.ch/api/forms/${route.name}`, {
@@ -120,7 +122,7 @@ describe('form routes captcha enforcement', () => {
     vi.mocked(verifyTurnstileToken).mockResolvedValue({ ok: true })
     vi.mocked(sendFormEmail).mockResolvedValue({ success: true, id: 'test-message-id' })
 
-    for (const route of routeSpecs) {
+    for (const route of captchaProtectedRouteSpecs) {
       const { POST } = await route.load()
       const response = await POST(
         new Request(`https://bioco.ch/api/forms/${route.name}`, {
@@ -134,7 +136,28 @@ describe('form routes captcha enforcement', () => {
       await expect(response.json()).resolves.toEqual({ success: true })
     }
 
-    expect(sendFormEmail).toHaveBeenCalledTimes(routeSpecs.length)
-    expect(verifyTurnstileToken).toHaveBeenCalledTimes(routeSpecs.length)
+    expect(sendFormEmail).toHaveBeenCalledTimes(captchaProtectedRouteSpecs.length)
+    expect(verifyTurnstileToken).toHaveBeenCalledTimes(captchaProtectedRouteSpecs.length)
+  })
+
+  it('allows subscribe and membership submissions without captcha verification', async () => {
+    vi.mocked(sendFormEmail).mockResolvedValue({ success: true, id: 'test-message-id' })
+
+    for (const route of captchaFreeRouteSpecs) {
+      const { POST } = await route.load()
+      const response = await POST(
+        new Request(`https://bioco.ch/api/forms/${route.name}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(route.validPayload),
+        }) as never
+      )
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toEqual({ success: true })
+    }
+
+    expect(sendFormEmail).toHaveBeenCalledTimes(captchaFreeRouteSpecs.length)
+    expect(verifyTurnstileToken).not.toHaveBeenCalled()
   })
 })

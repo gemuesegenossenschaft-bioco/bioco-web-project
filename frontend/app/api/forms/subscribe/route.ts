@@ -1,23 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendFormEmail } from '@/lib/email'
-import { verifyTurnstileToken } from '@/lib/turnstile'
-
-const CAPTCHA_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.'
-
-function getClientIp(request: NextRequest): string | null {
-  const forwardedFor = request.headers.get('x-forwarded-for')
-  if (!forwardedFor) return null
-  return forwardedFor.split(',')[0]?.trim() || null
-}
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const captcha = await verifyTurnstileToken(body.captchaToken, getClientIp(request))
-
-    if (!captcha.ok) {
-      return NextResponse.json({ success: false, error: CAPTCHA_ERROR }, { status: 400 })
-    }
 
     if (!body.email || !body.privacy_accept) {
       return NextResponse.json(

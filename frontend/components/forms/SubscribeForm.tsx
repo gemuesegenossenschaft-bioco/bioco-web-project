@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { trackEvent } from '../MatomoScript'
-import { CaptchaField } from './CaptchaField'
 
 export function SubscribeForm() {
   const [formData, setFormData] = useState({
@@ -13,17 +12,10 @@ export function SubscribeForm() {
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [captchaToken, setCaptchaToken] = useState('')
-  const [captchaResetKey, setCaptchaResetKey] = useState(0)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
-    if (!captchaToken) {
-      setError('Bitte bestätigen Sie, dass Sie kein Roboter sind.')
-      return
-    }
 
     setIsSubmitting(true)
     trackEvent('Form', 'Subscribe', 'Submit')
@@ -34,7 +26,7 @@ export function SubscribeForm() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData, captchaToken }),
+        body: JSON.stringify(formData),
       })
 
       const data = await response.json()
@@ -43,13 +35,9 @@ export function SubscribeForm() {
         setSubmitted(true)
       } else {
         setError(data.error || 'Es ist ein Fehler aufgetreten.')
-        setCaptchaToken('')
-        setCaptchaResetKey((prev) => prev + 1)
       }
     } catch (err) {
       setError('Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.')
-      setCaptchaToken('')
-      setCaptchaResetKey((prev) => prev + 1)
     } finally {
       setIsSubmitting(false)
     }
@@ -107,17 +95,11 @@ export function SubscribeForm() {
         </label>
       </div>
 
-      <CaptchaField
-        token={captchaToken}
-        onTokenChange={setCaptchaToken}
-        resetKey={captchaResetKey}
-      />
-
       <input
         type="submit"
         value={isSubmitting ? 'Wird gesendet...' : 'Abonnieren'}
         className="cta-button"
-        disabled={isSubmitting || !captchaToken}
+        disabled={isSubmitting}
       />
     </form>
   )
