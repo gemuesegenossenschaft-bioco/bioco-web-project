@@ -62,6 +62,11 @@ kill_and_cleanup() {
     log "Cleaned up lock and pid files."
 }
 
+has_next_server() {
+    $PGREP -x next-server > /dev/null 2>&1 && return 0
+    $PS -eo comm | $AWK '$1 ~ /^next-server/ {found=1} END {exit found ? 0 : 1}'
+}
+
 # Returns 0 if healthy, 1 if error boundary detected
 check_body_health() {
     local body
@@ -72,16 +77,19 @@ check_body_health() {
     return 0
 }
 
-# --- STEP 1: Process running? ---
-if ! $PGREP -x next-server > /dev/null 2>&1; then
-    log "NOT RUNNING: next-server not found. Starting..."
+# --- STEP 1: HTTP status check ---
+http_status=$($CURL -s -o /dev/null -w '%{http_code}' --max-time "$CURL_TIMEOUT" "$URL" 2>/dev/null)
+if [ "$http_status" != "200" ]; then
+    log "HTTP $http_status (not 200). Restarting..."
+    check_cooldown
+    record_restart
+    kill_and_cleanup
     exec "$START_SCRIPT"
 fi
 
-# --- STEP 2: HTTP status check ---
-http_status=$($CURL -s -o /dev/null -w '%{http_code}' --max-time "$CURL_TIMEOUT" "$URL" 2>/dev/null)
-if [ "$http_status" != "200" ]; then
-    log "HTTP $http_status (not 200). Delegating to start.sh..."
+# --- STEP 2: Process visible? ---
+if ! has_next_server; then
+    log "HTTP 200 but next-server process not visible. Refreshing pid via start.sh..."
     exec "$START_SCRIPT"
 fi
 

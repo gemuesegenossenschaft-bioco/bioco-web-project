@@ -771,9 +771,17 @@ function biocoNextRevalidateWriteState($fh, array $state): void {
     fflush($fh);
 }
 
-function biocoDispatchRevalidatePayload(array $payload): bool {
+/**
+ * Dispatch a revalidate payload to Next. Returns a structured result so callers
+ * (e.g. content-publish) can report build status to the editor instead of failing silently.
+ *
+ * @return array{ok: bool, status: int, error: string}
+ */
+function biocoDispatchRevalidatePayload(array $payload): array {
     $cfg = biocoNextRevalidateConfig();
-    if ($cfg['secret'] === '' || $cfg['url'] === '') return false;
+    if ($cfg['secret'] === '' || $cfg['url'] === '') {
+        return ['ok' => false, 'status' => 0, 'error' => 'missing_secret_or_url'];
+    }
 
     $payload['secret'] = $cfg['secret'];
     $ch = curl_init($cfg['url']);
@@ -788,19 +796,40 @@ function biocoDispatchRevalidatePayload(array $payload): bool {
 
     $response = curl_exec($ch);
     if ($response === false) {
-        wire('log')->save('next-revalidate', 'cURL failed: ' . curl_error($ch));
+        $err = curl_error($ch);
+        wire('log')->save('next-revalidate', 'cURL failed: ' . $err);
         curl_close($ch);
-        return false;
+        return ['ok' => false, 'status' => 0, 'error' => 'curl_failed: ' . $err];
     }
 
     $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
     if ($status >= 400) {
         wire('log')->save('next-revalidate', "HTTP {$status} from {$cfg['url']}: {$response}");
-        return false;
+        return ['ok' => false, 'status' => $status, 'error' => "http_{$status}"];
     }
 
-    return true;
+    return ['ok' => true, 'status' => $status, 'error' => ''];
+}
+
+/**
+ * Synchronously revalidate the given Next paths, bypassing the debounce queue, and
+ * return the dispatch result. Used by content-publish so the Visual Editor can tell
+ * the editor whether the published change actually reached the live build.
+ *
+ * @return array{ok: bool, status: int, error: string}
+ */
+function biocoRevalidatePathsNow(array $paths, array $tags = ['cms'], bool $layout = true): array {
+    $cfg = biocoNextRevalidateConfig();
+    if ($cfg['secret'] === '') {
+        return ['ok' => false, 'status' => 0, 'error' => 'missing_secret'];
+    }
+    $payload = [
+        'paths' => biocoNextRevalidateSanitizePaths($paths),
+        'tags' => biocoNextRevalidateSanitizeTags($tags),
+        'layout' => $layout,
+    ];
+    return biocoDispatchRevalidatePayload($payload);
 }
 
 function biocoNextRevalidateFlushQueue(bool $force = false): bool {
@@ -849,7 +878,8 @@ function biocoNextRevalidateFlushQueue(bool $force = false): bool {
         'tags' => $state['pendingTags'],
         'layout' => (bool)$state['pendingLayout'],
     ];
-    $ok = biocoDispatchRevalidatePayload($payload);
+    $dispatch = biocoDispatchRevalidatePayload($payload);
+    $ok = $dispatch['ok'];
     $state['lastDispatchAt'] = $now;
     if ($ok) {
         $state['firstPendingAt'] = 0;

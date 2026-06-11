@@ -2,7 +2,7 @@
 # Deploy bioco.ch Next.js frontend + CMS templates to cPanel
 # Build locally, rsync standalone output, restore sharp, restart Node.js
 set -e
-BRANCH=${1:-main}
+BRANCH=${1:-}
 DEPLOY_HOST="bioco@193.33.128.160"
 DEPLOY_DIR="/home/bioco/bioco-frontend"
 CMS_DIR="/home/bioco/public_html/cms/site/templates"
@@ -10,17 +10,29 @@ CMS_MODULES_DIR="/home/bioco/public_html/cms/site/modules"
 LOCAL_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 FRONTEND_DIR="$LOCAL_DIR/frontend"
 
-echo "=== Building $BRANCH locally ==="
+if [ -n "$BRANCH" ]; then
+  echo "=== Updating $BRANCH locally ==="
+  git -C "$LOCAL_DIR" checkout "$BRANCH"
+  git -C "$LOCAL_DIR" pull origin "$BRANCH"
+else
+  BRANCH="$(git -C "$LOCAL_DIR" rev-parse --abbrev-ref HEAD)"
+  echo "=== Building current worktree ($BRANCH) ==="
+fi
+
+echo "=== Building locally ==="
 cd "$FRONTEND_DIR"
-git checkout "$BRANCH"
-git pull origin "$BRANCH"
 npm ci
 npm run build
 
 echo "=== Uploading standalone output ==="
-rsync -avzc --delete --exclude='start.sh' --exclude='healthcheck.sh' .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
+rsync -avzc --delete \
+  --filter='P /start.sh' \
+  --filter='P /healthcheck.sh' \
+  --exclude='start.sh' \
+  --exclude='healthcheck.sh' \
+  .next/standalone/ "$DEPLOY_HOST:$DEPLOY_DIR/"
 rsync -avzc --delete .next/static/ "$DEPLOY_HOST:$DEPLOY_DIR/.next/static/"
-rsync -avzc --delete public/ "$DEPLOY_HOST:$DEPLOY_DIR/public/"
+rsync -av --delete public/ "$DEPLOY_HOST:$DEPLOY_DIR/public/"
 
 echo "=== Restoring sharp Linux bindings ==="
 ssh "$DEPLOY_HOST" '
@@ -31,7 +43,8 @@ ssh "$DEPLOY_HOST" '
 
 echo "=== Uploading healthcheck script ==="
 rsync -avzc "$LOCAL_DIR/scripts/healthcheck.sh" "$DEPLOY_HOST:$DEPLOY_DIR/healthcheck.sh"
-ssh "$DEPLOY_HOST" "chmod +x $DEPLOY_DIR/healthcheck.sh"
+ssh "$DEPLOY_HOST" "chmod +x $DEPLOY_DIR/healthcheck.sh && test -x $DEPLOY_DIR/healthcheck.sh && bash -n $DEPLOY_DIR/healthcheck.sh"
+ssh "$DEPLOY_HOST" 'grep -F '\''kill "$oldpid"'\'' /home/bioco/bioco-frontend/start.sh >/dev/null'
 
 echo "=== Uploading CMS templates + hooks ==="
 rsync -avzc \
@@ -108,8 +121,23 @@ ssh "$DEPLOY_HOST" '
 
 echo "=== Verifying ==="
 sleep 3
-ssh "$DEPLOY_HOST" 'curl -s -o /dev/null -w "Local: HTTP %{http_code}\n" http://127.0.0.1:49154/'
-ssh "$DEPLOY_HOST" 'echo "Workers:"; ps -eo pid,ppid,comm,args | awk "\$3 ~ /^next-server/ {print}"'
+ssh "$DEPLOY_HOST" '
+  set -e
+  local_status=$(curl -s -o /tmp/bioco-deploy-root.html -w "%{http_code}" http://127.0.0.1:49154/)
+  echo "Local: HTTP $local_status"
+  test "$local_status" = "200"
+  ! grep -q -E "Fehler|Etwas ist schiefgelaufen" /tmp/bioco-deploy-root.html
+  test -x /home/bioco/bioco-frontend/healthcheck.sh
+  /home/bioco/bioco-frontend/healthcheck.sh
+  worker_count=$(ps -eo comm,args | awk "\$1 ~ /^next-server/ {count++} END {print count+0}")
+  echo "Workers: $worker_count"
+  test "$worker_count" = "1"
+  ps -eo pid,ppid,comm,args | awk "\$3 ~ /^next-server/ {print}"
+'
+external_status=$(curl -s -o /tmp/bioco-deploy-external.html -w "%{http_code}" --resolve bioco.ch:443:193.33.128.160 https://bioco.ch/)
+echo "External: HTTP $external_status"
+test "$external_status" = "200"
+! grep -q -E "Fehler|Etwas ist schiefgelaufen" /tmp/bioco-deploy-external.html
 ssh "$DEPLOY_HOST" 'test ! -f /home/bioco/public_html/cms/site/modules/ProcessContentPlanning.module.php'
 ssh "$DEPLOY_HOST" 'test ! -f /home/bioco/public_html/cms/site/modules/planning.css'
 echo "Deployed $BRANCH."

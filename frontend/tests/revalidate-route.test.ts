@@ -96,4 +96,35 @@ describe('POST /api/revalidate', () => {
     const res = await POST(req)
     expect(res.status).toBe(401)
   })
+
+  // Publish contract: content-publish (PHP) calls this endpoint synchronously and
+  // surfaces `revalidated`/HTTP status to the editor. A successful dispatch MUST be
+  // HTTP 200 with `revalidated: true` so the VE pill does not falsely go red.
+  it('publish contract: success is HTTP 200 with revalidated:true', async () => {
+    const { POST } = await import('@/app/api/revalidate/route')
+    const req = new Request('https://bioco.ch/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: SECRET, paths: ['/abos', '/'], tags: ['cms'], layout: true }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(200)
+    const body = await res.json()
+    expect(body.revalidated).toBe(true)
+    expect(body.paths).toEqual(['/abos', '/'])
+    expect(body.layout).toBe(true)
+    expect(body.tags).toEqual(['cms'])
+  })
+
+  it('publish contract: a wrong secret yields a non-200 the VE can detect', async () => {
+    const { POST } = await import('@/app/api/revalidate/route')
+    const req = new Request('https://bioco.ch/api/revalidate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: 'drifted', paths: ['/abos'] }),
+    })
+    const res = await POST(req)
+    expect(res.status).toBe(401)
+    expect(res.status).not.toBe(200)
+  })
 })

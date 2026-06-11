@@ -17,6 +17,7 @@ import {
   GalleryStripBlock,
   MediaTextBlock,
   PageIntroBlock,
+  PricingTableBlock,
   TextColumnsBlock,
   TimelineHeaderBlock,
   TimelineItemBlock,
@@ -35,6 +36,7 @@ const layoutOwnedKeys = new Set([
   'timeline_header',
   'timeline_item',
   'cta_band',
+  'pricing_table',
 ])
 
 export const componentRenderers: Record<string, ComponentRenderer> = {
@@ -51,6 +53,7 @@ export const componentRenderers: Record<string, ComponentRenderer> = {
   saisonkalender: () => <Saisonkalender />,
   gallery: () => <Gallery />,
   page_intro: (section, visualEditor) => <PageIntroBlock section={section} visualEditor={visualEditor} />,
+  pricing_table: (section, visualEditor) => <PricingTableBlock section={section} visualEditor={visualEditor} />,
   media_text: (section, visualEditor) => <MediaTextBlock section={section} visualEditor={visualEditor} />,
   cards_grid: (section, visualEditor) => <CardsGridBlock section={section} visualEditor={visualEditor} />,
   gallery_strip: (section, visualEditor) => <GalleryStripBlock section={section} visualEditor={visualEditor} />,

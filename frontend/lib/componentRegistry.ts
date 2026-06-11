@@ -9,11 +9,12 @@ export interface ComponentRegistryConfigOption {
 export interface ComponentRegistryConfigField {
   key: string
   label: string
-  type: 'select' | 'range'
+  type: 'select' | 'range' | 'text' | 'number'
   options?: ComponentRegistryConfigOption[]
   min?: number
   max?: number
   step?: number
+  placeholder?: string
 }
 
 export interface ComponentRegistryEntry {

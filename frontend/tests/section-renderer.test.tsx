@@ -147,3 +147,43 @@ describe('SectionRenderer image filters', () => {
     expect(container.querySelector('[data-ve-field="videoTitle"]')).toBeTruthy()
   })
 })
+
+describe('pricing_table component (replaces hardcoded /abos table)', () => {
+  it('renders default tiers when config is empty', () => {
+    const sections: ContentSection[] = [
+      { id: 'pt-1', title: 'Gemüse-Abos', text: '', layout: 'component', component: 'pricing_table' },
+    ]
+    const { container } = render(<SectionRenderer sections={sections} />)
+    const table = container.querySelector('.pricing-table table')
+    expect(table).toBeTruthy()
+    expect(screen.getByText('Halb')).toBeTruthy()
+    expect(screen.getByText('Standard')).toBeTruthy()
+    expect(screen.getByText('Doppel')).toBeTruthy()
+    expect(screen.getByText('CHF 750.-')).toBeTruthy()
+    expect(container.querySelectorAll('tbody tr').length).toBe(3)
+  })
+
+  it('overrides cell values from section_config', () => {
+    const sections: ContentSection[] = [
+      {
+        id: 'pt-2',
+        title: 'Preise',
+        text: '',
+        layout: 'component',
+        component: 'pricing_table',
+        config: { tier1_name: 'Mini', tier1_price: 'CHF 900.-', tier1_persons: 1 },
+      },
+    ]
+    render(<SectionRenderer sections={sections} />)
+    expect(screen.getByText('Mini')).toBeTruthy()
+    expect(screen.getByText('CHF 900.-')).toBeTruthy()
+  })
+
+  it('exposes the title as a VE-editable field marker', () => {
+    const sections: ContentSection[] = [
+      { id: 'pt-3', title: 'Gemüse-Abos', text: '', layout: 'component', component: 'pricing_table' },
+    ]
+    const { container } = render(<SectionRenderer sections={sections} visualEditor={true} />)
+    expect(container.querySelector('[data-ve-field="title"]')).toBeTruthy()
+  })
+})

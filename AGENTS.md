@@ -6,23 +6,30 @@ Deploys frontend and/or CMS to Novatrend cPanel.
 
 **Rules:**
 1. Always build locally. Server builds fail (CloudLinux thread limits).
-2. Rsync three dirs in order: `.next/standalone/` (exclude start.sh), `.next/static/`, `public/`.
-3. Restore sharp: copy `sharp-linux-x64` AND `sharp-libvips-linux-x64` from `/tmp/sharp-pkg/`. Remove darwin bindings.
-4. Rsync CMS files: `admin.js`, `api.php`, `api-events.php`, `visual-editor.php`, `visual-editor-focus-fields.json` to `/home/bioco/public_html/cms/site/templates/` **and** `site/ready.php` to `/home/bioco/public_html/cms/site/ready.php`.
-5. Restart primary: `for p in $(pgrep -a next-server | awk '{print $1}'); do kill "$p"; done; sleep 3; start.sh`. Never use `pgrep -f` (kills SSH session).
-6. Restart fallback if primary misses old workers: `for p in $(ps -eo pid,comm | awk '$2=="next-server"{print $1}'); do kill $p; done`.
-7. Verify: `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:49154/` from server.
-8. External test: `curl --resolve bioco.ch:443:193.33.128.160 https://bioco.ch/`
-9. Verify revalidate auth from server: `POST http://127.0.0.1:49154/api/revalidate` must return `200` with secret from `site/config.php`.
-10. HTML smoke gate: local + external response body must NOT contain `Fehler` / `Etwas ist schiefgelaufen.` (200 alone is not enough).
-11. Log gate: after restart, check `/home/bioco/logs/nextjs.log` and ensure no fresh `Failed to find Server Action` entries.
-12. If local repo has unrelated dirty files, deploy from a clean temp clone. Do not rsync accidental local-only changes to production.
+2. Prefer `scripts/deploy.sh` for deploys. No args builds current worktree; passing a branch checks out/pulls that branch.
+3. Rsync three dirs in order: `.next/standalone/`, `.next/static/`, `public/`. Protect/exclude `start.sh` and `healthcheck.sh` from standalone `--delete`.
+4. Always upload `/home/bioco/bioco-frontend/healthcheck.sh` from `scripts/healthcheck.sh`, `chmod +x`, and `bash -n` it.
+5. Verify `start.sh` stale-PID guard: it must kill `$oldpid` instead of exiting when local HTTP is down.
+6. Restore sharp: copy `sharp-linux-x64` AND `sharp-libvips-linux-x64` from `/tmp/sharp-pkg/`. Remove darwin bindings.
+7. Rsync CMS files: `admin.js`, `api.php`, `api-events.php`, `visual-editor.php`, `visual-editor-focus-fields.json` to `/home/bioco/public_html/cms/site/templates/` **and** `site/ready.php` to `/home/bioco/public_html/cms/site/ready.php`.
+8. Restart primary: `for p in $(pgrep -a next-server | awk '{print $1}'); do kill "$p"; done; sleep 3; start.sh`. Never use `pgrep -f` (kills SSH session).
+9. Restart fallback if primary misses old workers: `for p in $(ps -eo pid,comm | awk '$2=="next-server"{print $1}'); do kill $p; done`.
+10. Verify local: `curl -s -o /tmp/root.html -w "%{http_code}" http://127.0.0.1:49154/` from server must be `200`.
+11. External test: `curl --resolve bioco.ch:443:193.33.128.160 https://bioco.ch/`
+12. Verify watchdog: `test -x /home/bioco/bioco-frontend/healthcheck.sh && /home/bioco/bioco-frontend/healthcheck.sh`.
+13. Verify worker count with `ps`, not only `pgrep`: exactly one `next-server` row from `ps -eo pid,ppid,comm,args | awk '$3 ~ /^next-server/ {print}'`.
+14. Verify revalidate auth from server: `POST http://127.0.0.1:49154/api/revalidate` must return `200` with secret from `site/config.php`.
+15. HTML smoke gate: local + external response body must NOT contain `Fehler` / `Etwas ist schiefgelaufen.` (200 alone is not enough).
+16. Log gate: after restart, check `/home/bioco/logs/nextjs.log` and ensure no fresh `Failed to find Server Action` entries.
+17. If local repo has unrelated dirty files, deploy from a clean temp clone. Do not rsync accidental local-only changes to production.
 
 **Common issues:**
-- 503 after deploy: sharp bindings missing or process not started. Check `tail /home/bioco/logs/nextjs.log`.
+- 503 after deploy: process not started, missing `healthcheck.sh`, or sharp bindings missing. Check `curl http://127.0.0.1:49154/`, `ls -l /home/bioco/bioco-frontend/healthcheck.sh`, and `tail /home/bioco/logs/nextjs.log`.
+- Missing watchdog: if health log says `/home/bioco/bioco-frontend/healthcheck.sh: No such file or directory`, rsync `scripts/healthcheck.sh` there, chmod it, then run it once.
 - PW module changes not reflected after rsync: PHP OPcache is caching the old bytecode. CLI `opcache_reset()` does NOT affect web PHP-FPM. Place a reset script accessible via `cms.bioco.ch` OUTSIDE `/cms/` (PW `.htaccess` intercepts everything inside). The vhost root is `/home/bioco/public_html/cms/` — place file there and access as `cms.bioco.ch/<file>.php`. Call `opcache_invalidate('/path/to/file.php', true)` or `opcache_reset()` then delete the script. If vhost root is uncertain, check Apache config or test with a plain file.
 - EADDRINUSE: old process still running. Kill with `pgrep -x next-server`, wait, retry.
-- Zombie processes: after deploy, verify only ONE `next-server` is running. Old instances serve stale code (wrong headers, old middleware). Kill by PID if `pgrep -x` misses them.
+- `pgrep -x next-server` can miss the worker on this host. Always use the `ps ... awk '$3 ~ /^next-server/'` fallback before deciding there is no process.
+- Zombie processes: after deploy, verify only ONE `next-server` is running. Old instances serve stale code (wrong headers, old middleware). Kill by PID if `pgrep` misses them.
 - `Fehler` page with `HTTP 200`: stale client/server deploy mismatch (`Failed to find Server Action`, `reading 'workers'`, `reading 'digest'`). Fix by killing stale workers + restart + hard refresh (`?__fresh=<ts>`). Do not mark deploy healthy until HTML smoke + log gate pass.
 - Cron respawns every 5min: during a restart window it can spawn a second `next-server`. Always run `ps -eo pid,ppid,args | grep "next-server" | grep -v grep` after deploy and kill any non-primary PID.
 - Cron uses a minimal `PATH`. In `/home/bioco/bioco-frontend/start.sh`, use absolute paths or export `PATH` before `flock`/`curl`/`pgrep`. If not, the guard checks silently fail under cron and it spawns duplicate workers.

@@ -7,7 +7,17 @@
       "file": "frontend/components/forms/ContactForm.tsx",
       "export": "ContactForm"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -18,7 +28,17 @@
       "file": "frontend/components/forms/MembershipForm.tsx",
       "export": "MembershipForm"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -29,7 +49,17 @@
       "file": "frontend/components/forms/SubscribeForm.tsx",
       "export": "SubscribeForm"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -40,7 +70,17 @@
       "file": "frontend/components/forms/VisitDayForm.tsx",
       "export": "VisitDayForm"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -51,7 +91,17 @@
       "file": "frontend/components/forms/WaitingListForm.tsx",
       "export": "WaitingListForm"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -62,7 +112,17 @@
       "file": "frontend/components/PricingCalculator.tsx",
       "export": "PricingCalculator"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -73,7 +133,17 @@
       "file": "frontend/components/EventsSection.tsx",
       "export": "EventsSection"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -84,7 +154,17 @@
       "file": "frontend/components/SchnuppertageSection.tsx",
       "export": "SchnuppertageSection"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -95,7 +175,17 @@
       "file": "frontend/components/DepotMap.tsx",
       "export": "DepotMap"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -106,7 +196,17 @@
       "file": "frontend/components/GeisshofMap.tsx",
       "export": "GeisshofMap"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -117,7 +217,17 @@
       "file": "frontend/components/Saisonkalender.tsx",
       "export": "Saisonkalender"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -128,7 +238,17 @@
       "file": "frontend/components/Gallery.tsx",
       "export": "Gallery"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant"
+    ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
@@ -139,7 +259,13 @@
       "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
       "export": "PageIntroBlock"
     },
-    "cmsFields": ["section_component", "section_title", "section_eyebrow", "section_text", "section_config"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_eyebrow",
+      "section_text",
+      "section_config"
+    ],
     "notes": "Intro-Block mit frei konfigurierbarer Textbreite und Ausrichtung.",
     "defaultConfig": {
       "containerWidth": "lg",
@@ -147,9 +273,67 @@
       "align": "left"
     },
     "configSchema": [
-      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
-      { "key": "textWidth", "label": "Textbreite", "type": "select", "options": [{ "label": "Schmal", "value": "narrow" }, { "label": "Normal", "value": "normal" }, { "label": "Breit", "value": "wide" }] },
-      { "key": "align", "label": "Ausrichtung", "type": "select", "options": [{ "label": "Links", "value": "left" }, { "label": "Zentriert", "value": "center" }] }
+      {
+        "key": "containerWidth",
+        "label": "Container",
+        "type": "select",
+        "options": [
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          },
+          {
+            "label": "Voll",
+            "value": "full"
+          }
+        ]
+      },
+      {
+        "key": "textWidth",
+        "label": "Textbreite",
+        "type": "select",
+        "options": [
+          {
+            "label": "Schmal",
+            "value": "narrow"
+          },
+          {
+            "label": "Normal",
+            "value": "normal"
+          },
+          {
+            "label": "Breit",
+            "value": "wide"
+          }
+        ]
+      },
+      {
+        "key": "align",
+        "label": "Ausrichtung",
+        "type": "select",
+        "options": [
+          {
+            "label": "Links",
+            "value": "left"
+          },
+          {
+            "label": "Zentriert",
+            "value": "center"
+          }
+        ]
+      }
     ]
   },
   {
@@ -160,7 +344,22 @@
       "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
       "export": "MediaTextBlock"
     },
-    "cmsFields": ["section_component", "section_title", "section_eyebrow", "section_text", "section_image", "section_images", "image_alt", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant", "section_config"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_eyebrow",
+      "section_text",
+      "section_image",
+      "section_images",
+      "image_alt",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant",
+      "section_config"
+    ],
     "notes": "Flexibler Zwei-Spalten-Block für /wir und andere CMS-Seiten.",
     "defaultConfig": {
       "containerWidth": "xl",
@@ -173,14 +372,178 @@
       "rounded": "lg"
     },
     "configSchema": [
-      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
-      { "key": "mediaSide", "label": "Bildseite", "type": "select", "options": [{ "label": "Links", "value": "left" }, { "label": "Rechts", "value": "right" }] },
-      { "key": "mediaWidth", "label": "Bildbreite", "type": "select", "options": [{ "label": "40%", "value": "40" }, { "label": "50%", "value": "50" }, { "label": "60%", "value": "60" }] },
-      { "key": "mediaRatio", "label": "Seitenverhältnis", "type": "select", "options": [{ "label": "1:1", "value": "1:1" }, { "label": "4:3", "value": "4:3" }, { "label": "3:4", "value": "3:4" }, { "label": "16:9", "value": "16:9" }, { "label": "Auto", "value": "auto" }] },
-      { "key": "mediaFit", "label": "Bildmodus", "type": "select", "options": [{ "label": "Cover", "value": "cover" }, { "label": "Contain", "value": "contain" }] },
-      { "key": "verticalAlign", "label": "Vertikal", "type": "select", "options": [{ "label": "Oben", "value": "start" }, { "label": "Mitte", "value": "center" }, { "label": "Unten", "value": "end" }] },
-      { "key": "gap", "label": "Abstand", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] },
-      { "key": "rounded", "label": "Radius", "type": "select", "options": [{ "label": "Kein", "value": "none" }, { "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+      {
+        "key": "containerWidth",
+        "label": "Container",
+        "type": "select",
+        "options": [
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          },
+          {
+            "label": "Voll",
+            "value": "full"
+          }
+        ]
+      },
+      {
+        "key": "mediaSide",
+        "label": "Bildseite",
+        "type": "select",
+        "options": [
+          {
+            "label": "Links",
+            "value": "left"
+          },
+          {
+            "label": "Rechts",
+            "value": "right"
+          }
+        ]
+      },
+      {
+        "key": "mediaWidth",
+        "label": "Bildbreite",
+        "type": "select",
+        "options": [
+          {
+            "label": "40%",
+            "value": "40"
+          },
+          {
+            "label": "50%",
+            "value": "50"
+          },
+          {
+            "label": "60%",
+            "value": "60"
+          }
+        ]
+      },
+      {
+        "key": "mediaRatio",
+        "label": "Seitenverhältnis",
+        "type": "select",
+        "options": [
+          {
+            "label": "1:1",
+            "value": "1:1"
+          },
+          {
+            "label": "4:3",
+            "value": "4:3"
+          },
+          {
+            "label": "3:4",
+            "value": "3:4"
+          },
+          {
+            "label": "16:9",
+            "value": "16:9"
+          },
+          {
+            "label": "Auto",
+            "value": "auto"
+          }
+        ]
+      },
+      {
+        "key": "mediaFit",
+        "label": "Bildmodus",
+        "type": "select",
+        "options": [
+          {
+            "label": "Cover",
+            "value": "cover"
+          },
+          {
+            "label": "Contain",
+            "value": "contain"
+          }
+        ]
+      },
+      {
+        "key": "verticalAlign",
+        "label": "Vertikal",
+        "type": "select",
+        "options": [
+          {
+            "label": "Oben",
+            "value": "start"
+          },
+          {
+            "label": "Mitte",
+            "value": "center"
+          },
+          {
+            "label": "Unten",
+            "value": "end"
+          }
+        ]
+      },
+      {
+        "key": "gap",
+        "label": "Abstand",
+        "type": "select",
+        "options": [
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      },
+      {
+        "key": "rounded",
+        "label": "Radius",
+        "type": "select",
+        "options": [
+          {
+            "label": "Kein",
+            "value": "none"
+          },
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      }
     ]
   },
   {
@@ -191,7 +554,16 @@
       "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
       "export": "CardsGridBlock"
     },
-    "cmsFields": ["section_component", "section_title", "section_eyebrow", "section_text", "section_images", "section_image", "image_alt", "section_config"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_eyebrow",
+      "section_text",
+      "section_images",
+      "section_image",
+      "image_alt",
+      "section_config"
+    ],
     "notes": "Bildkarten-Raster aus den CMS-Bildern einer Section.",
     "defaultConfig": {
       "containerWidth": "xl",
@@ -204,13 +576,139 @@
       "rounded": "md"
     },
     "configSchema": [
-      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
-      { "key": "columnsDesktop", "label": "Spalten Desktop", "type": "select", "options": [{ "label": "2", "value": "2" }, { "label": "3", "value": "3" }, { "label": "4", "value": "4" }] },
-      { "key": "columnsMobile", "label": "Spalten Mobile", "type": "select", "options": [{ "label": "1", "value": "1" }, { "label": "2", "value": "2" }] },
-      { "key": "cardStyle", "label": "Kartenstil", "type": "select", "options": [{ "label": "Plain", "value": "plain" }, { "label": "Soft", "value": "soft" }, { "label": "Outlined", "value": "outlined" }] },
-      { "key": "mediaRatio", "label": "Bildratio", "type": "select", "options": [{ "label": "1:1", "value": "1:1" }, { "label": "4:3", "value": "4:3" }, { "label": "3:4", "value": "3:4" }] },
-      { "key": "mediaFit", "label": "Bildmodus", "type": "select", "options": [{ "label": "Cover", "value": "cover" }, { "label": "Contain", "value": "contain" }] },
-      { "key": "gap", "label": "Abstand", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+      {
+        "key": "containerWidth",
+        "label": "Container",
+        "type": "select",
+        "options": [
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          },
+          {
+            "label": "Voll",
+            "value": "full"
+          }
+        ]
+      },
+      {
+        "key": "columnsDesktop",
+        "label": "Spalten Desktop",
+        "type": "select",
+        "options": [
+          {
+            "label": "2",
+            "value": "2"
+          },
+          {
+            "label": "3",
+            "value": "3"
+          },
+          {
+            "label": "4",
+            "value": "4"
+          }
+        ]
+      },
+      {
+        "key": "columnsMobile",
+        "label": "Spalten Mobile",
+        "type": "select",
+        "options": [
+          {
+            "label": "1",
+            "value": "1"
+          },
+          {
+            "label": "2",
+            "value": "2"
+          }
+        ]
+      },
+      {
+        "key": "cardStyle",
+        "label": "Kartenstil",
+        "type": "select",
+        "options": [
+          {
+            "label": "Plain",
+            "value": "plain"
+          },
+          {
+            "label": "Soft",
+            "value": "soft"
+          },
+          {
+            "label": "Outlined",
+            "value": "outlined"
+          }
+        ]
+      },
+      {
+        "key": "mediaRatio",
+        "label": "Bildratio",
+        "type": "select",
+        "options": [
+          {
+            "label": "1:1",
+            "value": "1:1"
+          },
+          {
+            "label": "4:3",
+            "value": "4:3"
+          },
+          {
+            "label": "3:4",
+            "value": "3:4"
+          }
+        ]
+      },
+      {
+        "key": "mediaFit",
+        "label": "Bildmodus",
+        "type": "select",
+        "options": [
+          {
+            "label": "Cover",
+            "value": "cover"
+          },
+          {
+            "label": "Contain",
+            "value": "contain"
+          }
+        ]
+      },
+      {
+        "key": "gap",
+        "label": "Abstand",
+        "type": "select",
+        "options": [
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      }
     ]
   },
   {
@@ -221,7 +719,15 @@
       "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
       "export": "GalleryStripBlock"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "section_images", "section_image", "image_alt", "section_config"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "section_images",
+      "section_image",
+      "image_alt",
+      "section_config"
+    ],
     "notes": "Mehrere Bilder in einem einfachen Raster oder Streifen.",
     "defaultConfig": {
       "containerWidth": "xl",
@@ -233,12 +739,124 @@
       "rounded": "lg"
     },
     "configSchema": [
-      { "key": "columnsDesktop", "label": "Spalten Desktop", "type": "select", "options": [{ "label": "2", "value": "2" }, { "label": "3", "value": "3" }, { "label": "4", "value": "4" }] },
-      { "key": "columnsMobile", "label": "Spalten Mobile", "type": "select", "options": [{ "label": "1", "value": "1" }, { "label": "2", "value": "2" }] },
-      { "key": "mediaRatio", "label": "Bildratio", "type": "select", "options": [{ "label": "1:1", "value": "1:1" }, { "label": "4:3", "value": "4:3" }, { "label": "16:9", "value": "16:9" }] },
-      { "key": "mediaFit", "label": "Bildmodus", "type": "select", "options": [{ "label": "Cover", "value": "cover" }, { "label": "Contain", "value": "contain" }] },
-      { "key": "gap", "label": "Abstand", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] },
-      { "key": "rounded", "label": "Radius", "type": "select", "options": [{ "label": "Kein", "value": "none" }, { "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+      {
+        "key": "columnsDesktop",
+        "label": "Spalten Desktop",
+        "type": "select",
+        "options": [
+          {
+            "label": "2",
+            "value": "2"
+          },
+          {
+            "label": "3",
+            "value": "3"
+          },
+          {
+            "label": "4",
+            "value": "4"
+          }
+        ]
+      },
+      {
+        "key": "columnsMobile",
+        "label": "Spalten Mobile",
+        "type": "select",
+        "options": [
+          {
+            "label": "1",
+            "value": "1"
+          },
+          {
+            "label": "2",
+            "value": "2"
+          }
+        ]
+      },
+      {
+        "key": "mediaRatio",
+        "label": "Bildratio",
+        "type": "select",
+        "options": [
+          {
+            "label": "1:1",
+            "value": "1:1"
+          },
+          {
+            "label": "4:3",
+            "value": "4:3"
+          },
+          {
+            "label": "16:9",
+            "value": "16:9"
+          }
+        ]
+      },
+      {
+        "key": "mediaFit",
+        "label": "Bildmodus",
+        "type": "select",
+        "options": [
+          {
+            "label": "Cover",
+            "value": "cover"
+          },
+          {
+            "label": "Contain",
+            "value": "contain"
+          }
+        ]
+      },
+      {
+        "key": "gap",
+        "label": "Abstand",
+        "type": "select",
+        "options": [
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      },
+      {
+        "key": "rounded",
+        "label": "Radius",
+        "type": "select",
+        "options": [
+          {
+            "label": "Kein",
+            "value": "none"
+          },
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      }
     ]
   },
   {
@@ -249,7 +867,19 @@
       "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
       "export": "TextColumnsBlock"
     },
-    "cmsFields": ["section_component", "section_title", "section_eyebrow", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant", "section_config"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_eyebrow",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant",
+      "section_config"
+    ],
     "notes": "Mehrspaltiger Textblock für Mission, Geschichte und ähnliche Inhalte.",
     "defaultConfig": {
       "containerWidth": "lg",
@@ -259,10 +889,90 @@
       "cardStyle": "plain"
     },
     "configSchema": [
-      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
-      { "key": "columnsDesktop", "label": "Spalten Desktop", "type": "select", "options": [{ "label": "1", "value": "1" }, { "label": "2", "value": "2" }, { "label": "3", "value": "3" }, { "label": "4", "value": "4" }] },
-      { "key": "columnsMobile", "label": "Spalten Mobile", "type": "select", "options": [{ "label": "1", "value": "1" }, { "label": "2", "value": "2" }] },
-      { "key": "gap", "label": "Abstand", "type": "select", "options": [{ "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+      {
+        "key": "containerWidth",
+        "label": "Container",
+        "type": "select",
+        "options": [
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          },
+          {
+            "label": "Voll",
+            "value": "full"
+          }
+        ]
+      },
+      {
+        "key": "columnsDesktop",
+        "label": "Spalten Desktop",
+        "type": "select",
+        "options": [
+          {
+            "label": "1",
+            "value": "1"
+          },
+          {
+            "label": "2",
+            "value": "2"
+          },
+          {
+            "label": "3",
+            "value": "3"
+          },
+          {
+            "label": "4",
+            "value": "4"
+          }
+        ]
+      },
+      {
+        "key": "columnsMobile",
+        "label": "Spalten Mobile",
+        "type": "select",
+        "options": [
+          {
+            "label": "1",
+            "value": "1"
+          },
+          {
+            "label": "2",
+            "value": "2"
+          }
+        ]
+      },
+      {
+        "key": "gap",
+        "label": "Abstand",
+        "type": "select",
+        "options": [
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      }
     ]
   },
   {
@@ -273,18 +983,75 @@
       "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
       "export": "TimelineHeaderBlock"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "section_config"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "section_config"
+    ],
     "notes": "Einleitender Block vor Timeline-Einträgen.",
-    "aliases": ["timeline"],
+    "aliases": [
+      "timeline"
+    ],
     "defaultConfig": {
       "containerWidth": "lg",
       "textWidth": "normal",
       "align": "left"
     },
     "configSchema": [
-      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] },
-      { "key": "textWidth", "label": "Textbreite", "type": "select", "options": [{ "label": "Schmal", "value": "narrow" }, { "label": "Normal", "value": "normal" }, { "label": "Breit", "value": "wide" }] },
-      { "key": "align", "label": "Ausrichtung", "type": "select", "options": [{ "label": "Links", "value": "left" }, { "label": "Zentriert", "value": "center" }] }
+      {
+        "key": "containerWidth",
+        "label": "Container",
+        "type": "select",
+        "options": [
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      },
+      {
+        "key": "textWidth",
+        "label": "Textbreite",
+        "type": "select",
+        "options": [
+          {
+            "label": "Schmal",
+            "value": "narrow"
+          },
+          {
+            "label": "Normal",
+            "value": "normal"
+          },
+          {
+            "label": "Breit",
+            "value": "wide"
+          }
+        ]
+      },
+      {
+        "key": "align",
+        "label": "Ausrichtung",
+        "type": "select",
+        "options": [
+          {
+            "label": "Links",
+            "value": "left"
+          },
+          {
+            "label": "Zentriert",
+            "value": "center"
+          }
+        ]
+      }
     ]
   },
   {
@@ -295,16 +1062,62 @@
       "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
       "export": "TimelineItemBlock"
     },
-    "cmsFields": ["section_component", "section_eyebrow", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant", "section_config"],
+    "cmsFields": [
+      "section_component",
+      "section_eyebrow",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant",
+      "section_config"
+    ],
     "notes": "Ein Timeline-Eintrag mit Jahr, Titel, Text und optionalen Buttons.",
-    "aliases": ["timeline-item"],
+    "aliases": [
+      "timeline-item"
+    ],
     "defaultConfig": {
       "containerWidth": "lg",
       "emphasis": "normal"
     },
     "configSchema": [
-      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] },
-      { "key": "emphasis", "label": "Betonung", "type": "select", "options": [{ "label": "Normal", "value": "normal" }, { "label": "Highlight", "value": "highlight" }] }
+      {
+        "key": "containerWidth",
+        "label": "Container",
+        "type": "select",
+        "options": [
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      },
+      {
+        "key": "emphasis",
+        "label": "Betonung",
+        "type": "select",
+        "options": [
+          {
+            "label": "Normal",
+            "value": "normal"
+          },
+          {
+            "label": "Highlight",
+            "value": "highlight"
+          }
+        ]
+      }
     ]
   },
   {
@@ -315,7 +1128,18 @@
       "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
       "export": "CtaBandBlock"
     },
-    "cmsFields": ["section_component", "section_title", "section_text", "button_text", "button_href", "button_variant", "button2_text", "button2_href", "button2_variant", "section_config"],
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text",
+      "button_text",
+      "button_href",
+      "button_variant",
+      "button2_text",
+      "button2_href",
+      "button2_variant",
+      "section_config"
+    ],
     "notes": "Breiter CTA-Block mit ein bis zwei Buttons.",
     "defaultConfig": {
       "containerWidth": "lg",
@@ -324,10 +1148,259 @@
       "rounded": "xl"
     },
     "configSchema": [
-      { "key": "containerWidth", "label": "Container", "type": "select", "options": [{ "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }, { "label": "Voll", "value": "full" }] },
-      { "key": "align", "label": "Ausrichtung", "type": "select", "options": [{ "label": "Links", "value": "left" }, { "label": "Zentriert", "value": "center" }] },
-      { "key": "theme", "label": "Stil", "type": "select", "options": [{ "label": "Light", "value": "light" }, { "label": "Soft", "value": "soft" }, { "label": "Accent", "value": "accent" }, { "label": "Dark", "value": "dark" }] },
-      { "key": "rounded", "label": "Radius", "type": "select", "options": [{ "label": "Kein", "value": "none" }, { "label": "S", "value": "sm" }, { "label": "M", "value": "md" }, { "label": "L", "value": "lg" }, { "label": "XL", "value": "xl" }] }
+      {
+        "key": "containerWidth",
+        "label": "Container",
+        "type": "select",
+        "options": [
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          },
+          {
+            "label": "Voll",
+            "value": "full"
+          }
+        ]
+      },
+      {
+        "key": "align",
+        "label": "Ausrichtung",
+        "type": "select",
+        "options": [
+          {
+            "label": "Links",
+            "value": "left"
+          },
+          {
+            "label": "Zentriert",
+            "value": "center"
+          }
+        ]
+      },
+      {
+        "key": "theme",
+        "label": "Stil",
+        "type": "select",
+        "options": [
+          {
+            "label": "Light",
+            "value": "light"
+          },
+          {
+            "label": "Soft",
+            "value": "soft"
+          },
+          {
+            "label": "Accent",
+            "value": "accent"
+          },
+          {
+            "label": "Dark",
+            "value": "dark"
+          }
+        ]
+      },
+      {
+        "key": "rounded",
+        "label": "Radius",
+        "type": "select",
+        "options": [
+          {
+            "label": "Kein",
+            "value": "none"
+          },
+          {
+            "label": "S",
+            "value": "sm"
+          },
+          {
+            "label": "M",
+            "value": "md"
+          },
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "key": "pricing_table",
+    "label": "Preis-Tabelle (Abos)",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "PricingTableBlock"
+    },
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_eyebrow",
+      "section_text",
+      "section_config",
+      "button_text",
+      "button_href",
+      "button_variant"
+    ],
+    "notes": "Abo-Preistabelle mit 3 Stufen. Titel und Einleitung aus dem Section-Wrapper, Tabellenzellen aus der Konfiguration.",
+    "defaultConfig": {
+      "containerWidth": "xl",
+      "workSuffix": "à 2 Stunden",
+      "tier1_name": "Halb",
+      "tier1_shares": "1 Anteilsschein",
+      "tier1_persons": 1,
+      "tier1_price": "CHF 750.-",
+      "tier1_sharecost": "CHF 250.-",
+      "tier1_work": "10 Arbeitseinsätze",
+      "tier2_name": "Standard",
+      "tier2_shares": "2 Anteilsscheine",
+      "tier2_persons": 2,
+      "tier2_price": "CHF 1'280.-",
+      "tier2_sharecost": "CHF 500.-",
+      "tier2_work": "20 Arbeitseinsätze",
+      "tier3_name": "Doppel",
+      "tier3_shares": "4 Anteilsscheine",
+      "tier3_persons": 4,
+      "tier3_price": "CHF 2'350.-",
+      "tier3_sharecost": "CHF 1'000.-",
+      "tier3_work": "40 Arbeitseinsätze"
+    },
+    "configSchema": [
+      {
+        "key": "containerWidth",
+        "label": "Container",
+        "type": "select",
+        "options": [
+          {
+            "label": "L",
+            "value": "lg"
+          },
+          {
+            "label": "XL",
+            "value": "xl"
+          },
+          {
+            "label": "Voll",
+            "value": "full"
+          }
+        ]
+      },
+      {
+        "key": "workSuffix",
+        "label": "Mitarbeit-Zusatz",
+        "type": "text",
+        "placeholder": "à 2 Stunden"
+      },
+      {
+        "key": "tier1_name",
+        "label": "Stufe 1: Name",
+        "type": "text"
+      },
+      {
+        "key": "tier1_shares",
+        "label": "Stufe 1: Anteile",
+        "type": "text"
+      },
+      {
+        "key": "tier1_persons",
+        "label": "Stufe 1: Personen",
+        "type": "number",
+        "min": 1,
+        "max": 8
+      },
+      {
+        "key": "tier1_price",
+        "label": "Stufe 1: Jahrespreis",
+        "type": "text"
+      },
+      {
+        "key": "tier1_sharecost",
+        "label": "Stufe 1: Anteilskosten",
+        "type": "text"
+      },
+      {
+        "key": "tier1_work",
+        "label": "Stufe 1: Mitarbeit",
+        "type": "text"
+      },
+      {
+        "key": "tier2_name",
+        "label": "Stufe 2: Name",
+        "type": "text"
+      },
+      {
+        "key": "tier2_shares",
+        "label": "Stufe 2: Anteile",
+        "type": "text"
+      },
+      {
+        "key": "tier2_persons",
+        "label": "Stufe 2: Personen",
+        "type": "number",
+        "min": 1,
+        "max": 8
+      },
+      {
+        "key": "tier2_price",
+        "label": "Stufe 2: Jahrespreis",
+        "type": "text"
+      },
+      {
+        "key": "tier2_sharecost",
+        "label": "Stufe 2: Anteilskosten",
+        "type": "text"
+      },
+      {
+        "key": "tier2_work",
+        "label": "Stufe 2: Mitarbeit",
+        "type": "text"
+      },
+      {
+        "key": "tier3_name",
+        "label": "Stufe 3: Name",
+        "type": "text"
+      },
+      {
+        "key": "tier3_shares",
+        "label": "Stufe 3: Anteile",
+        "type": "text"
+      },
+      {
+        "key": "tier3_persons",
+        "label": "Stufe 3: Personen",
+        "type": "number",
+        "min": 1,
+        "max": 8
+      },
+      {
+        "key": "tier3_price",
+        "label": "Stufe 3: Jahrespreis",
+        "type": "text"
+      },
+      {
+        "key": "tier3_sharecost",
+        "label": "Stufe 3: Anteilskosten",
+        "type": "text"
+      },
+      {
+        "key": "tier3_work",
+        "label": "Stufe 3: Mitarbeit",
+        "type": "text"
+      }
     ]
   }
 ]

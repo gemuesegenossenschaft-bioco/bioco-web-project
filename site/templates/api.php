@@ -1645,11 +1645,27 @@ switch ($endpoint) {
             if ($user && !$user->isGuest()) {
                 deleteVisualEditorDraftRecord((int)$pageId, (int)$user->id, $path);
             }
+
+            // Synchronously revalidate the published page so the Visual Editor can report
+            // whether the change reached the live build (the Pages::saved hook also enqueues
+            // an async revalidation; double-dispatch is idempotent in Next).
+            $revalidate = ['ok' => false, 'status' => 0, 'error' => 'unavailable'];
+            if (function_exists('ProcessWire\\biocoRevalidatePathsNow')) {
+                $revalidatePaths = array_values(array_unique(array_filter([
+                    biocoNextPathFromPage($page),
+                    '/',
+                ])));
+                $revalidate = biocoRevalidatePathsNow($revalidatePaths, ['cms'], true);
+            }
+
             echo json_encode([
                 'success' => true,
                 'fingerprint' => $published['fingerprint'],
                 'hero' => $published['hero'],
                 'sections' => $published['sections'],
+                'revalidated' => (bool) ($revalidate['ok'] ?? false),
+                'revalidateStatus' => (int) ($revalidate['status'] ?? 0),
+                'revalidateError' => (string) ($revalidate['error'] ?? ''),
             ]);
         } catch (\Throwable $e) {
             http_response_code(500);

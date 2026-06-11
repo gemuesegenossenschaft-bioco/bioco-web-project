@@ -776,6 +776,29 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
                         value={Number(selectedComponentConfig[field.key] ?? field.min ?? 0)}
                         onChange={(event) => sendStructuredFieldChange('config', Number(event.target.value), { configKey: field.key })}
                       />
+                    ) : field.type === 'text' ? (
+                      <input
+                        id={`ve-config-${field.key}`}
+                        aria-label={field.label}
+                        disabled={saveState.busy}
+                        type="text"
+                        placeholder={field.placeholder || ''}
+                        value={String(selectedComponentConfig[field.key] ?? '')}
+                        onChange={(event) => sendStructuredFieldChange('config', event.target.value, { configKey: field.key })}
+                      />
+                    ) : field.type === 'number' ? (
+                      <input
+                        id={`ve-config-${field.key}`}
+                        aria-label={field.label}
+                        disabled={saveState.busy}
+                        type="number"
+                        min={field.min}
+                        max={field.max}
+                        step={field.step || 1}
+                        placeholder={field.placeholder || ''}
+                        value={String(selectedComponentConfig[field.key] ?? '')}
+                        onChange={(event) => sendStructuredFieldChange('config', event.target.value === '' ? '' : Number(event.target.value), { configKey: field.key })}
+                      />
                     ) : (
                       <select
                         id={`ve-config-${field.key}`}

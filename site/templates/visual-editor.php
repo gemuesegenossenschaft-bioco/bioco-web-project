@@ -718,6 +718,62 @@ body {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
 }
+.ve-ownership-header {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 0 5px;
+    border-bottom: 1px solid #1f2937;
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.ve-ownership-header::before {
+    content: '';
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    flex-shrink: 0;
+}
+.ve-ownership-ve { color: #8ab272; }
+.ve-ownership-ve::before { background: #4a7c59; }
+.ve-ownership-pw { color: #f59e0b; margin-top: 10px; }
+.ve-ownership-pw::before { background: #b45309; }
+.ve-ownership-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 4px;
+}
+.ve-ownership-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 8px;
+    background: #111827;
+    border-radius: 6px;
+    font-size: 12px;
+    gap: 8px;
+}
+.ve-ownership-item-label { color: #e5e7eb; flex-shrink: 0; }
+.ve-ownership-item-hint { color: #4b5563; font-size: 10px; text-align: right; flex: 1; }
+.ve-ownership-pw-btn {
+    background: #1c2030;
+    border: 1px solid #334155;
+    border-radius: 6px;
+    color: #f59e0b;
+    cursor: pointer;
+    font: inherit;
+    font-size: 10px;
+    padding: 3px 7px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.ve-ownership-pw-btn:hover { background: #232b3e; border-color: #f59e0b; }
+.ve-ownership-pw-btn:disabled { cursor: not-allowed; opacity: 0.45; }
 </style>
 </head>
 <body>
@@ -2080,28 +2136,103 @@ body {
             return;
         }
 
-        fieldEditor.innerHTML =
-            '<div class="ve-info-card">' +
-                '<strong>Aktiver Abschnitt</strong>' +
-                '<p>' + escapeHtml(section.title || '(kein Titel)') + '</p>' +
-                '<p>Layout: ' + escapeHtml(LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt') + '</p>' +
-                '<p>PW Typ: ' + escapeHtml(getProcessWireTypeKey(section) || 'section') + '</p>' +
-            '</div>' +
-            '<div class="ve-info-card">' +
-                '<strong>Aktives Feld</strong>' +
-                '<p>' + escapeHtml(fieldLabel(activeField)) + '</p>' +
-                '<p>' + escapeHtml(fieldHint(activeField)) + '</p>' +
-            '</div>' +
-            '<div class="ve-info-card">' +
-                '<strong>Entwurfsstatus</strong>' +
-                '<p>' + (hasDraft ? 'Lokaler Entwurf aktiv' + (dirtyCount ? ' · ' + dirtyCount + ' markierte Abschnitt(e).' : '') : 'Kein unveröffentlichter Entwurf.') + '</p>' +
-            '</div>' +
-            '<div class="ve-info-card">' +
-                '<strong>Hinweis</strong>' +
-                '<p>Alle Änderungen bleiben lokal im Browser, bis du "Publizieren" klickst.</p>' +
+        var isHero = isHeroSection(section);
+        var mediaLayouts = ['split_media_text', 'split_text_media', 'full_width_banner', 'media_grid'];
+        var hasMedia = isHero || mediaLayouts.indexOf(section.layout) !== -1;
+
+        var html = '';
+
+        // Section identity (compact)
+        html +=
+            '<div class="ve-info-card" style="margin-bottom:10px">' +
+                '<strong style="display:flex;justify-content:space-between;align-items:center">' +
+                    escapeHtml(section.title || '(kein Titel)') +
+                    (isSectionDirty(section.id) ? '<span class="ve-dirty-pill">UNGESPEICHERT</span>' : '') +
+                '</strong>' +
+                '<p style="color:#64748b;font-size:11px;margin-top:2px">' +
+                    escapeHtml(LAYOUT_LABELS[section.layout] || section.layout || 'Abschnitt') +
+                    (section.component ? ' · ' + escapeHtml(formatComponentLabel(section.component)) : '') +
+                '</p>' +
             '</div>';
 
+        // VE-editable fields
+        html += '<div class="ve-ownership-header ve-ownership-ve">Visual Editor</div>';
+        html += '<div class="ve-ownership-list">';
+
+        if (isHero) {
+            html += veFieldRow('Headline', 'Klicken in der Vorschau');
+            html += veFieldRow('Untertitel', 'Klicken in der Vorschau');
+            html += veFieldRow('Bild Alt-Text', 'Via Bild-Overlay');
+        } else {
+            html += veFieldRow('Titel', 'Klicken in der Vorschau');
+            html += veFieldRow('Eyebrow', 'Klicken in der Vorschau');
+            html += veFieldRow('Text', 'Klicken → Rich-Text-Editor');
+            html += veFieldRow('Layout & Thema', 'Via Abschnitt-Overlay');
+            html += veFieldRow('Hintergrundfarbe & Overlay', 'Via Abschnitt-Overlay');
+            html += veFieldRow('Buttons', 'Klicken auf Button → Overlay');
+            if (hasMedia) {
+                html += veFieldRow('Bild (aus Mediathek)', 'Klicken auf Bild → Overlay');
+                html += veFieldRow('Alt-Text, Helligkeit/Kontrast', 'Im Bild-Overlay');
+            }
+            if (section.layout === 'video_embed') {
+                html += veFieldRow('Video-URL & Titel', 'Via Video-Overlay');
+            }
+            if (section.component) {
+                html += veFieldRow('Komponenten-Config', 'Via Komponenten-Overlay');
+            }
+        }
+
+        html += '</div>';
+
+        // PW-only fields
+        html += '<div class="ve-ownership-header ve-ownership-pw">ProcessWire</div>';
+        html += '<div class="ve-ownership-list">';
+
+        if (isHero) {
+            html += pwFieldRow('Hero-Bild (Datei)', 'media');
+            html += pwFieldRow('Alle Hero-Felder', '');
+        } else {
+            if (hasMedia) {
+                html += pwFieldRow('Bild-Datei(en)', 'media');
+            }
+            html += pwFieldRow('Alle Felder (Vollansicht)', '');
+        }
+
+        html += '</div>';
+
+        if (hasDraft && dirtyCount) {
+            html +=
+                '<div class="ve-info-card" style="margin-top:10px">' +
+                    '<strong>Entwurf</strong>' +
+                    '<p>' + dirtyCount + ' Abschnitt(e) ungespeichert. Klicke "Publizieren".</p>' +
+                '</div>';
+        }
+
+        fieldEditor.innerHTML = html;
+
+        var pwBtns = fieldEditor.querySelectorAll('[data-pw-focus]');
+        Array.prototype.forEach.call(pwBtns, function (btn) {
+            var field = btn.getAttribute('data-pw-focus') || '';
+            btn.addEventListener('click', function () {
+                openProcessWireFocus(field ? { field: field } : {});
+            });
+        });
+
         updateActions();
+    }
+
+    function veFieldRow(label, hint) {
+        return '<div class="ve-ownership-item">' +
+            '<span class="ve-ownership-item-label">' + escapeHtml(label) + '</span>' +
+            '<span class="ve-ownership-item-hint">' + escapeHtml(hint) + '</span>' +
+            '</div>';
+    }
+
+    function pwFieldRow(label, field) {
+        return '<div class="ve-ownership-item">' +
+            '<span class="ve-ownership-item-label">' + escapeHtml(label) + '</span>' +
+            '<button class="ve-ownership-pw-btn" type="button" data-pw-focus="' + escapeHtml(field) + '">→ In PW öffnen</button>' +
+            '</div>';
     }
 
     function sectionEndpointForCurrentPath() {
@@ -2727,8 +2858,13 @@ body {
                 deleteServerDraft(currentPageId, currentPath);
                 draftSavedAt = 0;
                 refreshDraftUi({ persist: false, message: 'Publiziert' });
-                setStatus('Publiziert', 'is-ready');
-                sendToIframe('save-result', { success: true });
+                if (data && data.revalidated === false) {
+                    var why = data.revalidateError ? ' (' + data.revalidateError + ')' : '';
+                    setStatus('Publiziert, aber Build nicht aktualisiert' + why, 'is-error');
+                } else {
+                    setStatus('Publiziert & live', 'is-ready');
+                }
+                sendToIframe('save-result', { success: true, revalidated: data ? data.revalidated !== false : true });
             })
             .catch(function (error) {
                 var resolvedConflict = false;

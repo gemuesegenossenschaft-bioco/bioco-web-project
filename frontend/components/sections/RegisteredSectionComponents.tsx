@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import type { CSSProperties } from 'react'
 import { CTA } from '@/components/CTA'
+import { PersonIcons } from '@/components/PersonIcons'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
 import { getResolvedComponentConfig } from '@/lib/componentRegistry'
 import type { ContentMedia, ContentSection, SectionConfigObject } from '@/lib/processwire-types'
@@ -153,6 +154,82 @@ function renderImageFrame(section: ContentSection, visualEditor = false, targetF
     >
       <Image src={media.url} alt={media.alt || section.title} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: fit as 'cover' | 'contain' }} />
     </div>
+  )
+}
+
+const PRICING_TIER_DEFAULTS = [
+  { name: 'Halb', shares: '1 Anteilsschein', persons: 1, price: 'CHF 750.-', shareCost: 'CHF 250.-', work: '10 Arbeitseinsätze' },
+  { name: 'Standard', shares: '2 Anteilsscheine', persons: 2, price: "CHF 1'280.-", shareCost: 'CHF 500.-', work: '20 Arbeitseinsätze' },
+  { name: 'Doppel', shares: '4 Anteilsscheine', persons: 4, price: "CHF 2'350.-", shareCost: "CHF 1'000.-", work: '40 Arbeitseinsätze' },
+]
+
+export function PricingTableBlock({ section, visualEditor = false }: RegisteredComponentProps) {
+  const config = getConfig(section)
+  const maxWidth = containerMaxWidth(configValue(config, 'containerWidth', 'xl'))
+  const workSuffix = configValue(config, 'workSuffix', 'à 2 Stunden')
+
+  const tiers = PRICING_TIER_DEFAULTS.map((def, index) => {
+    const t = index + 1
+    const persons = Number(configValue(config, `tier${t}_persons`, String(def.persons))) || def.persons
+    return {
+      name: configValue(config, `tier${t}_name`, def.name),
+      shares: configValue(config, `tier${t}_shares`, def.shares),
+      persons,
+      price: configValue(config, `tier${t}_price`, def.price),
+      shareCost: configValue(config, `tier${t}_sharecost`, def.shareCost),
+      work: configValue(config, `tier${t}_work`, def.work),
+    }
+  })
+
+  return (
+    <section style={{ margin: '0 auto 80px', maxWidth }}>
+      {renderHeader(section, visualEditor)}
+      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75, marginBottom: '24px' })}
+      <div
+        className="pricing-table"
+        {...getVeFieldAttrs(visualEditor, section.id, 'component', 'structured', false)}
+      >
+        <table>
+          <thead>
+            <tr>
+              <th>Gemüsekorb</th>
+              <th>Personen</th>
+              <th>Jahrespreis</th>
+              <th>Anteilsscheine Kosten</th>
+              <th>Mitarbeit pro Jahr</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tiers.map((tier, index) => (
+              <tr key={`${section.id}-tier-${index}`}>
+                <td>
+                  <strong>{tier.name}</strong>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>{tier.shares}</div>
+                </td>
+                <td>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <PersonIcons count={tier.persons} />
+                    {tier.persons >= 2 ? <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>+</span> : null}
+                  </div>
+                </td>
+                <td>{tier.price}</td>
+                <td>{tier.shareCost}</td>
+                <td>
+                  {tier.work}
+                  {workSuffix ? (
+                    <>
+                      <br />
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{workSuffix}</span>
+                    </>
+                  ) : null}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {renderButtons(section, visualEditor)}
+    </section>
   )
 }
 
