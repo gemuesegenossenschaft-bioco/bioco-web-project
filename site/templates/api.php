@@ -70,7 +70,7 @@ if ($apiKey) {
     // Allow unauthenticated access to health and content (read-only) endpoints
     // media-* endpoints use ProcessWire session auth inside handlers
     // internal-docs-export|sync: X-Internal-Docs-Token matching $config->internalDocsSyncToken
-    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete']) && $requestKey !== $apiKey && !$internalDocsTokenOk) {
+    if (!in_array($endpoint, ['health', 'content', 'media-import', 'media-import-batch', 'media-usage', 'media-files', 'auth-check', 'content-save', 'content-publish', 'sections-reorder', 'sections-add', 'sections-delete', 'collection-create']) && $requestKey !== $apiKey && !$internalDocsTokenOk) {
         http_response_code(401);
         echo json_encode(['error' => 'Invalid API key', 'hint' => 'Set X-API-Key header or valid X-Internal-Docs-Token for internal-docs endpoints']);
         exit;
@@ -1775,6 +1775,69 @@ switch ($endpoint) {
         }
         $parentPage->save('content_sections');
         echo json_encode(['success' => true, 'deleted' => $sectionPwId]);
+        break;
+
+    case 'collection-create':
+        // Create a new collection entry (event) under /aktuelles/ with a given date,
+        // then return its PW edit URL so the Visual Editor can open it focused.
+        if (!requireAdminSession()) break;
+        try {
+            $data = json_decode(file_get_contents('php://input'), true) ?: [];
+            $type = wire('sanitizer')->name($data['type'] ?? 'event');
+            $dateStr = trim((string)($data['date'] ?? ''));
+            $ts = $dateStr ? strtotime($dateStr) : time();
+            if (!$ts) $ts = time();
+
+            if ($type !== 'event') {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Nur Events werden derzeit unterstützt.']);
+                break;
+            }
+
+            $parent = wire('pages')->get('/aktuelles/');
+            if (!$parent->id) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'error' => 'Eltern-Seite /aktuelles/ nicht gefunden.']);
+                break;
+            }
+
+            $p = new Page();
+            $p->template = wire('templates')->get('event');
+            $p->parent = $parent;
+            $p->of(false);
+            $p->title = 'Neuer Event ' . date('d.m.Y', $ts);
+            $p->name = 'event-' . date('Ymd', $ts) . '-' . substr(md5(uniqid('', true)), 0, 6);
+            $p->set('event_status', 'upcoming');
+            $p->set('event_start', $ts);
+            $p->set('event_end', $ts);
+            $p->set('event_location', '');
+            $p->set('event_summary', '');
+
+            // event_type is required + an options field: default to the first option.
+            $etField = wire('fields')->get('event_type');
+            if ($etField && $etField->type instanceof FieldtypeOptions) {
+                $opts = $etField->type->getOptions($etField);
+                if ($opts && $opts->count()) {
+                    $p->set('event_type', $opts->first()->id);
+                }
+            }
+
+            $p->save();
+
+            if (function_exists('ProcessWire\\biocoRevalidatePathsNow')) {
+                biocoRevalidatePathsNow(['/aktuelles', '/'], ['cms'], true);
+            }
+
+            echo json_encode([
+                'success' => true,
+                'pwId' => $p->id,
+                'title' => $p->title,
+                'editUrl' => wire('config')->urls->admin . 'page/edit/?id=' . $p->id,
+            ]);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => 'Erstellen fehlgeschlagen: ' . $e->getMessage()]);
+        }
         break;
 
     case 'internal-docs-export':

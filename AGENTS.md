@@ -59,6 +59,7 @@ Manages ProcessWire API endpoints in `site/templates/api.php`.
 **Rules:**
 - All endpoints routed through `api.php` switch statement.
 - Content sub-endpoints in `handleContentRequest()`: hero, homepage, sections, page, pages, navigation, events, aktuelles, instagram, page-path, event-to-recap, sections-reorder, sections-add, sections-delete.
+- `collection-create` (admin): creates an `event` page under `/aktuelles/` (id 1740) by date, defaults `event_status=upcoming` + first `event_type` option, fires `biocoRevalidatePathsNow`, returns `pwId` + `editUrl`. Events/blog are page lists (template `event`; `news_item` unused), not section repeaters.
 - Form sub-endpoints: contact, subscribe, visit, waiting-list, event-signup.
 - Admin endpoints require `requireAdminSession()` (checks PW login).
 - Events also served by standalone `api-events.php` template.
@@ -114,6 +115,7 @@ Manages the iframe + postMessage WYSIWYG section editor.
 - `VisualEditorWrapper` uses `useSearchParams()`, requires `<Suspense>` boundary in parent page
 - `content-save` persists by `sectionPwId`; keep legacy `sectionId` only for compatibility
 - Section CRUD endpoints: `sections-reorder`, `sections-add`, `sections-delete` in `api.php`
+- Collection mode: when the iframe navigates to a `COLLECTIONS` path (`/aktuelles`), the sidebar shows a collection panel (entry list + date-picker "Neuer Event" → `collection-create` → opens PW edit) instead of the section editor. Entries deep-link to PW via `PAGE_EDIT_URL?id=`.
 - Repeater sort: always use `->sort('sort')` when iterating `content_sections`
 - Do not reintroduce the old VE page dropdown. Sidebar shows current page title/path and PW type labels, but page changes come from iframe navigation.
 - `ready` must include the current pathname so the parent shell can adopt route changes after in-iframe navigation.

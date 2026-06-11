@@ -241,6 +241,7 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 | `/api/sections-reorder` | Reorder content_sections repeater items |
 | `/api/sections-add` | Add new content_sections repeater item |
 | `/api/sections-delete` | Delete content_sections repeater item |
+| `/api/collection-create` | Create a collection entry (event) under `/aktuelles/` by date; returns `pwId` + `editUrl` |
 | `/api/media-import` | Import single media file |
 | `/api/media-import-batch` | Batch media import |
 | `/api/media-usage` | Check media usage |

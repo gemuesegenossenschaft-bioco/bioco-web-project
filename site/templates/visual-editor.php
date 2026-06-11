@@ -774,6 +774,37 @@ body {
 }
 .ve-ownership-pw-btn:hover { background: #232b3e; border-color: #f59e0b; }
 .ve-ownership-pw-btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.ve-collection-add {
+    align-items: end;
+    display: grid;
+    gap: 8px;
+    grid-template-columns: 1fr auto;
+    margin-bottom: 12px;
+}
+.ve-collection-add label {
+    color: #94a3b8;
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+.ve-collection-add input[type="date"] {
+    background: #111827;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    color: #e5e7eb;
+    font: inherit;
+    padding: 7px 10px;
+    width: 100%;
+}
+.ve-collection-add .ve-btn { white-space: nowrap; }
+.ve-collection-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
 </style>
 </head>
 <body>
@@ -915,6 +946,11 @@ body {
     var BG_OPTIONS = ['none', 'green', 'darkgreen', 'orange', 'gray', 'white'];
     var OVERLAY_OPTIONS = ['none', 'dark', 'green', 'orange'];
     var BUTTON_VARIANTS = ['primary', 'secondary'];
+    // Collection pages (events/blog) are not section-based: they are page lists edited
+    // directly in ProcessWire. The VE shows a collection panel instead of "not editable".
+    var COLLECTIONS = {
+        '/aktuelles': { type: 'event', root: '/aktuelles', label: 'Events', listEndpoint: 'content/events', addLabel: 'Neuen Event erstellen' }
+    };
 
     var iframe = document.getElementById('ve-iframe');
     var statusEl = document.getElementById('ve-status');
@@ -955,6 +991,7 @@ body {
 
     var currentPageId = null;
     var currentPath = null;
+    var currentCollection = null;
     var sections = [];
     var canonicalSections = [];
     var canonicalFingerprint = '';
@@ -1145,9 +1182,33 @@ body {
         isSaving = false;
     }
 
+    function getCollectionForPath(path) {
+        var norm = normalizePagePath(path);
+        if (!norm) return null;
+        var keys = Object.keys(COLLECTIONS);
+        for (var i = 0; i < keys.length; i++) {
+            var root = keys[i];
+            if (norm === root || norm.indexOf(root + '/') === 0) {
+                return COLLECTIONS[root];
+            }
+        }
+        return null;
+    }
+
     function adoptIframePage(path) {
+        var collection = getCollectionForPath(path);
+        if (collection) {
+            if (currentCollection && currentCollection.root === collection.root) {
+                return null;
+            }
+            persistCurrentDraftNow();
+            enterCollectionMode(collection, path);
+            return null;
+        }
+
         var descriptor = getPageDescriptorByPath(path);
         if (!descriptor) {
+            currentCollection = null;
             setCurrentPageContext(null, path);
             resetPageState();
             renderSectionList();
@@ -1156,9 +1217,10 @@ body {
             setStatus('Seite im Visual Editor nicht verfügbar', 'is-error');
             return null;
         }
-        if (currentPageId === descriptor.id && currentPath === descriptor.path) {
+        if (!currentCollection && currentPageId === descriptor.id && currentPath === descriptor.path) {
             return descriptor;
         }
+        currentCollection = null;
         persistCurrentDraftNow();
         setCurrentPageContext(descriptor.id, descriptor.path);
         resetPageState();
@@ -1167,6 +1229,105 @@ body {
         updateActions();
         setStatus('Abschnitte laden...', 'is-loading');
         return descriptor;
+    }
+
+    function enterCollectionMode(collection, path) {
+        currentCollection = collection;
+        currentPageId = null;
+        currentPath = normalizePagePath(path);
+        sections = [];
+        canonicalSections = [];
+        activeSectionId = null;
+        activeField = null;
+        clearDirtySections();
+        if (currentPageTitleEl) currentPageTitleEl.textContent = collection.label;
+        if (currentPagePathEl) currentPagePathEl.textContent = collection.root + ' · Sammlung (ProcessWire)';
+        renderPageNavigator();
+        renderSectionList();
+        updateActions();
+        setStatus('Sammlung: ' + collection.label, 'is-ready');
+        renderCollectionPanel();
+    }
+
+    function renderCollectionPanel() {
+        if (!currentCollection || !fieldEditor) return;
+        var col = currentCollection;
+        var today = new Date().toISOString().slice(0, 10);
+        fieldEditor.innerHTML =
+            '<div class="ve-info-card" style="margin-bottom:10px">' +
+                '<strong>' + escapeHtml(col.label) + '</strong>' +
+                '<p>Diese Einträge liegen als einzelne Seiten unter ' + escapeHtml(col.root) + ' und werden direkt in ProcessWire bearbeitet.</p>' +
+            '</div>' +
+            '<div class="ve-collection-add">' +
+                '<label for="ve-col-date">Datum</label>' +
+                '<input type="date" id="ve-col-date" value="' + escapeHtml(today) + '">' +
+                '<button class="ve-btn ve-btn-primary" id="ve-col-add" type="button">' + escapeHtml(col.addLabel) + '</button>' +
+            '</div>' +
+            '<div class="ve-ownership-header ve-ownership-pw">Einträge</div>' +
+            '<div class="ve-collection-list" id="ve-col-list"><div class="ve-empty-state">Laden…</div></div>';
+        var addBtn = document.getElementById('ve-col-add');
+        if (addBtn) addBtn.addEventListener('click', createCollectionEntry);
+        fetchCollectionEntries();
+    }
+
+    function fetchCollectionEntries() {
+        if (!currentCollection) return;
+        var listEl = document.getElementById('ve-col-list');
+        if (!listEl) return;
+        fetch(API_ROOT + currentCollection.listEndpoint, { credentials: 'include' })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                var entries = [];
+                ['upcoming', 'past'].forEach(function (k) {
+                    if (Array.isArray(data[k])) {
+                        data[k].forEach(function (e) { entries.push(Object.assign({ _status: k }, e)); });
+                    }
+                });
+                if (!entries.length) {
+                    listEl.innerHTML = '<div class="ve-empty-state">Noch keine Einträge. Erstelle den ersten oben.</div>';
+                    return;
+                }
+                listEl.innerHTML = entries.map(renderCollectionRow).join('');
+                Array.prototype.forEach.call(listEl.querySelectorAll('[data-edit-id]'), function (btn) {
+                    btn.addEventListener('click', function () { openEntryInPw(btn.getAttribute('data-edit-id')); });
+                });
+            })
+            .catch(function () {
+                listEl.innerHTML = '<div class="ve-empty-state">Einträge konnten nicht geladen werden.</div>';
+            });
+    }
+
+    function renderCollectionRow(e) {
+        var status = e.status || e._status || '';
+        var badge = status === 'past' ? 'Vergangen' : 'Bevorstehend';
+        var meta = [e.dateLabel || '', badge].filter(Boolean).join(' · ');
+        return '<div class="ve-ownership-item">' +
+            '<span class="ve-ownership-item-label">' + escapeHtml(e.title || '(ohne Titel)') +
+                '<br><span style="color:#64748b;font-size:10px">' + escapeHtml(meta) + '</span></span>' +
+            '<button class="ve-ownership-pw-btn" type="button" data-edit-id="' + escapeHtml(String(e.id || '')) + '">→ In PW öffnen</button>' +
+            '</div>';
+    }
+
+    function openEntryInPw(id) {
+        if (!id) return;
+        window.open(PAGE_EDIT_URL + '?id=' + encodeURIComponent(id), '_blank', 'noopener');
+    }
+
+    function createCollectionEntry() {
+        if (isBusy() || !currentCollection) return;
+        var dateEl = document.getElementById('ve-col-date');
+        var date = dateEl ? dateEl.value : '';
+        runWithBusy('Eintrag erstellen…', function () {
+            return postJson(API_ROOT + 'collection-create', { type: currentCollection.type, date: date }, 'Erstellen fehlgeschlagen')
+                .then(function (data) {
+                    setTransientStatus('Eintrag erstellt — in ProcessWire geöffnet', 'is-ready');
+                    if (data && data.editUrl) window.open(data.editUrl, '_blank', 'noopener');
+                    fetchCollectionEntries();
+                })
+                .catch(function (err) {
+                    setStatus((err && err.message) || 'Erstellen fehlgeschlagen', 'is-error');
+                });
+        });
     }
 
     function getSectionById(sectionId) {
@@ -2106,6 +2267,11 @@ body {
     }
 
     function renderFieldEditor() {
+        if (currentCollection) {
+            // Collection panel owns the editor area; leave it intact.
+            updateActions();
+            return;
+        }
         var section = getActiveSection();
         var page = getPageDescriptor(currentPageId, currentPath);
         var dirtyCount = getDirtySectionIds().length;
@@ -2298,6 +2464,7 @@ body {
 
     function loadPage(pageId, path, options) {
         options = options || {};
+        currentCollection = null;
         setCurrentPageContext(pageId, path);
         resetPageState();
         renderSectionList();
