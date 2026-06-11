@@ -59,10 +59,10 @@ $config->matomo_site_id = 1;
 $config->githubToken = 'github_pat_xxxxxxxxxxxx';
 
 // Repo for creating issues (owner/repo format)
-$config->githubRepo = 'wgusta/bioco-web-project';
+$config->githubRepo = 'gemuesegenossenschaft-bioco/bioco-web-project';
 
-// Deprecated: handbook lives in ProcessWire /internal-docs/; commit feed removed from Plan & Bugs.
-$config->githubDocsRepo = 'wgusta/bioco-doku';
+// Documentation repo (MkDocs -> docs.bioco.ch). Not used at runtime.
+$config->githubDocsRepo = 'gemuesegenossenschaft-bioco/bioco-docs';
 
 // Token for GitHub Actions: GET /api/internal-docs-export and POST /api/internal-docs-sync
 // Header: X-Internal-Docs-Token (prefer env PW_INTERNAL_DOCS_SYNC_TOKEN on server)
