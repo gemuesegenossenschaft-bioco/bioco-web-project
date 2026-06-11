@@ -2,6 +2,14 @@
 
 Swiss organic vegetable cooperative. Headless CMS: ProcessWire (PHP). Frontend: Next.js 14 (standalone). Both on Novatrend cPanel.
 
+## Repository, hosting & secrets (read first)
+
+- **GitHub org**: `gemuesegenossenschaft-bioco`. Repos: `bioco-web-project` (this repo) and `bioco-docs` (docs). Remote `origin` points at the org. `$config->githubRepo` (server `site/config.php`, gitignored) must be `gemuesegenossenschaft-bioco/bioco-web-project`.
+- **This repo is PUBLIC.** Never commit secrets, tokens, passwords, or `.env`. `site/config.php` is gitignored (secrets via `getenv()`); keep it that way. Server IP/paths appear in this file by design, but do not add new credentials anywhere tracked.
+- **docs.bioco.ch** is a MkDocs site hosted on **GitHub Pages** from the `bioco-docs` repo (`gh-pages` branch, `docs/CNAME` = docs.bioco.ch). DNS is at **Tophost** (not Novatrend). Deploy docs via `gh workflow run deploy.yml -R gemuesegenossenschaft-bioco/bioco-docs` or `mkdocs gh-deploy`. Do NOT host docs on Novatrend; the `docs-deploy-novatrend.yml` path is archived.
+- The old `internal-docs-mirror` workflow + `internal-docs/` mirror were removed. Do not reintroduce a CMS->git docs mirror; docs.bioco.ch is the single source of truth. Dormant PW `/internal-docs/` plumbing remains but is unused.
+- **Content is CMS-driven only where converted.** `/abos` renders from `content_sections` (reference). Many other `app/*/page.tsx` are still hardcoded JSX: editing them in the CMS/Visual Editor changes nothing until the page is converted to `SectionRenderer`. When "CMS edits don't show", check the page is not hardcoded before suspecting revalidation.
+
 ## Architecture
 
 Single Novatrend cPanel server (193.33.128.160):
@@ -238,6 +246,7 @@ ssh bioco@193.33.128.160 'CFG=/home/bioco/public_html/cms/site/config.php; SECRE
 |----------|-------------|
 | `/api/content/event-to-recap` | Convert upcoming event to past recap |
 | `/api/content-save` | Save section fields by `sectionPwId` |
+| `/api/content-publish` | Publish VE draft; returns `revalidated` + `revalidateStatus` (VE pill goes red on `false`) |
 | `/api/sections-reorder` | Reorder content_sections repeater items |
 | `/api/sections-add` | Add new content_sections repeater item |
 | `/api/sections-delete` | Delete content_sections repeater item |
@@ -284,6 +293,14 @@ Dedicated `/visual-editor/` screen. Parent shell in ProcessWire, direct inline e
 - VE -> ProcessWire focus mapping is shared in `site/templates/visual-editor-focus-fields.json`.
 - `admin.js` focused-mode matching must be suffix-aware because repeater field wrappers and input names may be prefixed.
 - After deploy, kill ALL `next-server` PIDs. Zombie processes from prior deploys serve stale middleware/headers
+
+**Field ownership panel:** the VE field editor groups each section's fields into **Visual Editor** (inline-editable: title, eyebrow, text, layout/theme, buttons, media) vs **ProcessWire** (deep-link "→ In PW öffnen" via `PAGE_EDIT_URL?id=`). Keep both groups in sync with what the iframe runtime can actually edit.
+
+**Collection mode (events/blog):** non-section pages are not editable inline. `COLLECTIONS` in `visual-editor.php` maps a path (`/aktuelles`) to a collection panel: lists entries via `/api/content/events`, each deep-links to PW, plus a date-picker "Neuer Event" -> `collection-create`. Events are pages `template=event` under `/aktuelles/` (id 1740); `news_item` template exists but is unused. Add new collections via `COLLECTIONS` + a `collection-create` `type` branch.
+
+**Structured components:** `section_component` + `section_config` (JSON) drive registered components (`frontend/lib/componentRenderers.tsx`, registry `site/templates/component-registry.json`). The VE config editor supports field types `select`, `range`, `text`, `number`. `pricing_table` (Abo table, 3 tiers) is the reference. New component = registry entry (with `configSchema`) + renderer in `RegisteredSectionComponents.tsx` + add to `componentRenderers` and `layoutOwnedKeys`.
+
+**Publish/revalidate:** `content-publish` saves then calls `biocoRevalidatePathsNow` (in `site/ready.php`) synchronously and returns `revalidated`/`revalidateStatus`; the VE pill shows "Publiziert, aber Build nicht aktualisiert" on failure. `ready.php` also enqueues async revalidation on every save.
 
 ## Running PW Migrations
 

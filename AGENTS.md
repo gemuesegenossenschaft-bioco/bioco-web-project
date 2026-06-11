@@ -1,5 +1,13 @@
 # AGENTS.md
 
+## Repository, hosting & secrets
+
+- GitHub org `gemuesegenossenschaft-bioco`: repos `bioco-web-project` + `bioco-docs`. `origin` and `$config->githubRepo` point at the org.
+- **Repo is PUBLIC.** Never commit secrets/tokens/`.env`. `site/config.php` is gitignored (secrets via `getenv()`); never track it.
+- `docs.bioco.ch` = MkDocs on **GitHub Pages** from `bioco-docs` (`gh-pages`, `docs/CNAME`). DNS at Tophost. Deploy: `gh workflow run deploy.yml -R gemuesegenossenschaft-bioco/bioco-docs` (org workflow write is enabled). Not hosted on Novatrend.
+- The CMS->git `internal-docs-mirror` was removed; do not reintroduce it. docs.bioco.ch is the single source of truth.
+- Many `app/*/page.tsx` are still hardcoded JSX, not CMS-driven. `/abos` is the converted reference. CMS/VE edits to a hardcoded page do nothing until it renders via `SectionRenderer`.
+
 ## Deploy Agent
 
 Deploys frontend and/or CMS to Novatrend cPanel.
@@ -64,6 +72,7 @@ Manages ProcessWire API endpoints in `site/templates/api.php`.
 - Admin endpoints require `requireAdminSession()` (checks PW login).
 - Events also served by standalone `api-events.php` template.
 - Cache invalidation hook lives in `site/ready.php` (not `api.php`): queued + debounced + trailing flush via `LazyCron::everyMinute`.
+- `content-publish` saves the VE draft then revalidates synchronously via `biocoRevalidatePathsNow($paths)` (in `ready.php`, returns `{ok,status,error}`) and includes `revalidated` + `revalidateStatus` in its JSON. Keep this contract: the VE pill depends on it.
 
 ## CMS Admin Agent
 
@@ -116,6 +125,8 @@ Manages the iframe + postMessage WYSIWYG section editor.
 - `content-save` persists by `sectionPwId`; keep legacy `sectionId` only for compatibility
 - Section CRUD endpoints: `sections-reorder`, `sections-add`, `sections-delete` in `api.php`
 - Collection mode: when the iframe navigates to a `COLLECTIONS` path (`/aktuelles`), the sidebar shows a collection panel (entry list + date-picker "Neuer Event" → `collection-create` → opens PW edit) instead of the section editor. Entries deep-link to PW via `PAGE_EDIT_URL?id=`.
+- Field-ownership panel: the field editor splits each section's fields into Visual Editor (inline) vs ProcessWire (deep-link "→ In PW öffnen"). Keep the two groups consistent with what the iframe runtime can actually edit.
+- Structured component config is edited inline via `section_config` (field types `select`/`range`/`text`/`number`); `pricing_table` is the reference.
 - Repeater sort: always use `->sort('sort')` when iterating `content_sections`
 - Do not reintroduce the old VE page dropdown. Sidebar shows current page title/path and PW type labels, but page changes come from iframe navigation.
 - `ready` must include the current pathname so the parent shell can adopt route changes after in-iframe navigation.
@@ -143,6 +154,12 @@ Next.js 14 app router frontend.
 - Events: `AktuellesData.tsx` (types + API fetch), `AktuellesClient.tsx` (UI), `useEventsFeed.ts` (hook)
 - Catch-all: `(cms)/[...slug]/page.tsx` handles CMS-driven pages (uses `VisualEditorWrapper` with Suspense)
 - `app/icon.png` for favicon (catch-all intercepts `/favicon.ico`)
+
+**Structured components (section_component + section_config):**
+- Registry `site/templates/component-registry.json` -> renderers `frontend/lib/componentRenderers.tsx` + `frontend/components/sections/RegisteredSectionComponents.tsx`.
+- New component = registry entry (key, `frontendTarget`, `cmsFields`, `defaultConfig`, `configSchema`) + renderer + add to `componentRenderers` and (if it owns its layout) `layoutOwnedKeys`.
+- `configSchema` field types: `select`, `range`, `text`, `number` (the VE inline config grid renders these). `pricing_table` (Abo table, 3 fixed tiers) is the reference; test in `frontend/tests/section-renderer.test.tsx`.
+- `/abos` (`app/abos/page.tsx`) renders fully from CMS via `<SectionRenderer>`; use it as the template when converting other hardcoded pages.
 
 **Patterns:**
 - Events split by `event_status`: upcoming vs past
