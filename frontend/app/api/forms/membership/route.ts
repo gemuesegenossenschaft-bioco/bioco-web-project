@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendFormEmail } from '@/lib/email'
+import { validateMembership } from '@/lib/membership'
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
 
-    if (!body.firstName || !body.lastName || !body.email || !body.address || !body.zip || !body.city || !body.privacyAccept) {
+    const v = validateMembership(body)
+    if (!v.ok) {
       return NextResponse.json(
-        { success: false, error: 'Bitte füllen Sie alle Pflichtfelder aus.' },
+        { success: false, error: 'Bitte füllen Sie alle Pflichtfelder aus.', fieldErrors: v.errors },
         { status: 400 }
       )
     }
