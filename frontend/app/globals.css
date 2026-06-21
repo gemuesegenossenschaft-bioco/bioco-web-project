@@ -9,9 +9,6 @@
 }
 
 :root {
-  --page-max-width: 1400px;
-  --page-inline-padding: clamp(20px, 5vw, 64px);
-
   /* Bioco Colors */
   --bioco-green: #2e7d32;
   --bioco-green-light: #4caf50;
