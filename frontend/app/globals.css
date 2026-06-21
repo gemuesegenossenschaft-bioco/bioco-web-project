@@ -8,6 +8,19 @@
   padding: 0;
 }
 
+/* Accessible keyboard focus */
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+.primary-nav a:focus-visible {
+  outline: 3px solid var(--bioco-green);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px rgba(255, 255, 255, 0.95);
+}
+
 :root {
   /* Bioco Colors */
   --bioco-green: #2e7d32;
