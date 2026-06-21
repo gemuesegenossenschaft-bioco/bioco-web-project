@@ -39,6 +39,8 @@
   --spacing-lg: 32px;
   --spacing-xl: 48px;
   --spacing-2xl: 64px;
+  --page-max-width: 1400px;
+  --page-inline-padding: clamp(16px, 6vw, 96px);
   --mobile-nav-height: 60px;
   --cms-h1-color: #1a1a1a;
   --cms-h1-font-size-mobile: calc(1.375rem + 1.5vw);
@@ -1387,10 +1389,10 @@ a:hover {
 
 .primary-nav-container,
 .secondary-nav-container {
-  max-width: 1400px; /* Match content max-width */
+  max-width: var(--page-max-width); /* Match content max-width */
   width: 100%;
   margin: 0 auto; /* Center the container */
-  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding exactly - ESSENTIAL for alignment */
+  padding: 0 var(--page-inline-padding); /* Match content horizontal padding exactly - ESSENTIAL for alignment */
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
@@ -2378,9 +2380,9 @@ header .header-nav-container .beet-leaves {
   grid-template-columns: 1fr 2fr;
   gap: var(--spacing-md);
   width: 100%;
-  max-width: 100%;
+  max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: 0 clamp(var(--spacing-sm), 5vw, 150px);
+  padding: 0 var(--page-inline-padding);
 }
 
 .hero-image-card {
