@@ -6419,3 +6419,25 @@ footer a:hover {
     padding-top: calc(clamp(24px, 4vw, 48px) + var(--mobile-nav-height)) !important;
   }
 }
+
+/* C.3 — canonical page heading contract (shell-aligned, tokenized spacing) */
+.page-header {
+  width: 100%;
+  max-width: var(--page-max-width);
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--page-inline-padding) var(--spacing-md);
+  box-sizing: border-box;
+}
+.page-header-eyebrow {
+  margin: 0 0 var(--spacing-xs);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+.page-header-title {
+  margin: 0 0 var(--spacing-md);
+}
+.page-header-intro {
+  margin: 0;
+  max-width: 60ch;
+  color: var(--text-secondary);
+}
