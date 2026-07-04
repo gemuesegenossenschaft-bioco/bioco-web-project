@@ -166,6 +166,20 @@ describe('content-seed schema (cms/content-seed/*.json)', () => {
     },
   )
 
+  it.each(seeds.map(({ file, seed }) => [file, seed] as const))(
+    '%s page name (last path segment) equals its slug so api.php sections/{slug} resolves',
+    (_file, seed) => {
+      // api.php resolves sections/{slug} via /content/{slug}/ or name={slug};
+      // the migration names the page after the last path segment, so the two
+      // must agree or getPageSections(slug) 404s in production. Homepage ('/')
+      // resolves via the dedicated homepage endpoint instead.
+      const path = seed.path as string
+      if (path === '/') return
+      const lastSegment = path.replace(/\/$/, '').split('/').pop()
+      expect(lastSegment).toBe(seed.slug as string)
+    },
+  )
+
   it('has a unique slug and a unique path across all seeds', () => {
     const slugs = seeds.map(({ seed }) => seed.slug as string)
     const paths = seeds.map(({ seed }) => seed.path as string)

@@ -121,17 +121,17 @@ Statusspalten im Bericht:
 | `skip-cms-wins` | PW-Feld ist nicht leer → bleibt unverändert (nur `force=1` überschreibt) |
 | `ok-equal` | PW-Wert ist bereits byte-identisch mit dem Seed |
 | `schema-field-add` / `label-update` / `option-labels` | Schema: fehlende Felder, deutsche Labels/Options-Titel |
-| `warn` / `error` | Prüfen! (z.B. Seitenname ≠ Slug bei `/anmeldung/danke/`, fehlende Templates) |
+| `warn` / `error` | Prüfen! (z.B. Seitenname ≠ Slug, fehlende Templates) |
 
 Erwartete Punkte beim Review:
 
 - Für `gemuese`, `mitmachen`, `solawi`, `aktuelles`, `home` viele
   `skip-cms-wins`/`ok-equal` — das ist korrekt („CMS gewinnt“).
-- `warn` bei `anmeldung-danke`: die PW-Seite unter `/anmeldung/danke/` heisst
-  `danke`; `api.php` löst `sections/anmeldung-danke` nur über
-  `/content/anmeldung-danke/` oder `name=anmeldung-danke` auf → Follow-up
-  nötig, bevor diese eine Seite CMS-getrieben rendert.
-- Keine `error`-Zeilen.
+- `anmeldung-danke` wird flach unter Home angelegt (`/anmeldung-danke/`,
+  Titel «Anmeldung – Danke»), damit der PW-Seitenname dem Slug entspricht
+  und `api.php` `sections/anmeldung-danke` auflöst. Die öffentliche Route
+  bleibt `/anmeldung/danke` (Next.js-Routing). Kein `warn` erwartet.
+- Keine `warn`- oder `error`-Zeilen.
 
 ### 4.3 apply
 

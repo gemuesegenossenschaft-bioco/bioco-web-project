@@ -1,8 +1,8 @@
 {
-  "path": "/anmeldung/danke/",
+  "path": "/anmeldung-danke/",
   "slug": "anmeldung-danke",
   "template": "basic-page",
-  "title": "Danke",
+  "title": "Anmeldung – Danke",
   "sections": [
     {
       "section_id": "intro",
@@ -41,6 +41,7 @@
     "Fragen? block: the mailto button is kept as an inline <a href=\"mailto:info@bioco.ch\" class=\"btn btn-secondary\" style=\"display: inline-block; margin-top: 8px\"> in section_text instead of the buttons array, because CTA.tsx pushes non-http(s)/non-file hrefs through next/navigation router.push, which would break mailto:. The migration/CMS richtext field must NOT strip class/style attributes here.",
     "'Fragen?' is an <h3> today — kept in section_text, no section_title. The block sits in an inline-styled box (background var(--bg-secondary), border-radius 12px) — visual container not representable.",
     "zurueck-cta: today a next/link with class 'btn btn-primary' (WITHOUT btn-organic); the CTA component adds btn-organic — minor class/border-radius difference after conversion. This section has buttons only, no text.",
-    "Page exports no metadata — 'seo' omitted; the layout default <title> applies today."
+    "Page exports no metadata — 'seo' omitted; the layout default <title> applies today.",
+    "Path is /anmeldung-danke/ (flat, not nested under /anmeldung/) so the PW page NAME equals the slug — api.php resolves sections/{slug} only via /content/{slug}/ or name={slug}. The PW tree position is admin-only cosmetics in this headless setup; the public route stays /anmeldung/danke (Next.js owns routing)."
   ]
 }
