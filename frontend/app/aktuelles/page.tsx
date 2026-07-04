@@ -1,5 +1,4 @@
 import { getPageSections, getAktuelles } from '@/lib/processwire'
-import { getAktuellesItems } from '@/components/AktuellesData'
 import { Suspense } from 'react'
 import { VisualEditorPageSwitch } from '@/components/VisualEditorPageSwitch'
 import type { AktuellesItem } from '@/components/AktuellesData'
@@ -40,10 +39,7 @@ export default async function AktuellesPage() {
     getAktuelles(50),
   ])
 
-  const aktuellesItems: AktuellesItem[] =
-    cmsNews.length > 0
-      ? cmsNews.map(mapNewsToAktuellesItem)
-      : getAktuellesItems()
+  const aktuellesItems: AktuellesItem[] = cmsNews.map(mapNewsToAktuellesItem)
 
   const content = <AktuellesClient sections={cmsSections} aktuellesItems={aktuellesItems} />
 
