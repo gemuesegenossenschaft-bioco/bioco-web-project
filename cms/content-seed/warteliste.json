@@ -1,0 +1,22 @@
+{
+  "path": "/warteliste/",
+  "slug": "warteliste",
+  "template": "basic-page",
+  "title": "Warteliste",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_text": "<h1>Warteliste</h1>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "warteliste-formular",
+      "section_component": "waiting_list_form"
+    }
+  ],
+  "conversion_notes": [
+    "h1 lives in intro section_text. WaitingListForm renders NO heading of its own — the heading is NOT duplicated in the component section.",
+    "All form labels, the 'Interesse an *' select options (currently placeholder values 'Programm 1'-'Programm 3'), captcha, submit label 'Anmelden'/'Wird gesendet...', and success/error messages live inside frontend/components/forms/WaitingListForm.tsx (registered component 'waiting_list_form') and are intentionally not part of the seed.",
+    "Page exports no metadata — 'seo' omitted; the layout default <title> applies today."
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "path": "/anmeldung/danke/",
+  "slug": "anmeldung-danke",
+  "template": "basic-page",
+  "title": "Danke",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_text": "<h1>Vielen Dank für deine Anmeldung!</h1><p>Wir prüfen deine Anmeldung. In der Zwischenzeit kannst du unseren Mitgliederbereich schon anschauen. Klicke dafür oben rechts auf die Ente.</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "naechste-schritte",
+      "section_component": "steps",
+      "section_config": {
+        "step1_title": "Bestätigungs-E-Mail",
+        "step1_text": "Du erhältst eine E-Mail mit Bestätigungslink (Double Opt-In). Bitte bestätige deine Anmeldung.",
+        "step2_title": "Rechnung",
+        "step2_text": "Nach Bestätigung erhältst du eine Rechnung per 31. Januar. Du kannst quartalsweise oder das ganze Jahr bezahlen.",
+        "step3_title": "Start",
+        "step3_text": "Du erhältst Zugang zum Intranet und kannst deine Arbeitseinsätze planen. Ab Januar startet die Gemüseverteilung!"
+      }
+    },
+    {
+      "section_id": "fragen",
+      "section_text": "<h3>Fragen?</h3><p>Bei Fragen zur Anmeldung oder zu biocò kannst du uns jederzeit kontaktieren:</p><p><a href=\"mailto:info@bioco.ch\" class=\"btn btn-secondary\" style=\"display: inline-block; margin-top: 8px\">info@bioco.ch</a></p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "zurueck-cta",
+      "section_layout": "rich_text",
+      "buttons": [
+        { "text": "Zurück zur Startseite", "href": "/", "variant": "primary" }
+      ]
+    }
+  ],
+  "conversion_notes": [
+    "h1 lives in intro section_text.",
+    "The intro paragraph currently has inline styling (font-size 1.125rem, margin-bottom 24px) — styling is not representable in the schema; text is preserved as a plain <p>.",
+    "'steps' is registered (StepsBlock in frontend/components/sections/RegisteredSectionComponents.tsx + component-registry.json, working tree as of this seed) and renders the same .next-steps/.step-item/.step-number markup with <h3> step titles as the current page. Config keys are flat and match the registry schema: step1_title/step1_text/step2_*/step3_* (step4_* unused). The step numbers 1-3 are rendered by the component, not stored as content. There is no card heading above the steps today, hence no section_title.",
+    "Fragen? block: the mailto button is kept as an inline <a href=\"mailto:info@bioco.ch\" class=\"btn btn-secondary\" style=\"display: inline-block; margin-top: 8px\"> in section_text instead of the buttons array, because CTA.tsx pushes non-http(s)/non-file hrefs through next/navigation router.push, which would break mailto:. The migration/CMS richtext field must NOT strip class/style attributes here.",
+    "'Fragen?' is an <h3> today — kept in section_text, no section_title. The block sits in an inline-styled box (background var(--bg-secondary), border-radius 12px) — visual container not representable.",
+    "zurueck-cta: today a next/link with class 'btn btn-primary' (WITHOUT btn-organic); the CTA component adds btn-organic — minor class/border-radius difference after conversion. This section has buttons only, no text.",
+    "Page exports no metadata — 'seo' omitted; the layout default <title> applies today."
+  ]
+}

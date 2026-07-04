@@ -1,0 +1,54 @@
+{
+  "path": "/datenschutz/",
+  "slug": "datenschutz",
+  "template": "basic-page",
+  "title": "Datenschutz",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_text": "<h3>Datenschutzerklärung</h3>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "datenschutz-auf-einen-blick",
+      "section_text": "<h2>1. Datenschutz auf einen Blick</h2><h3>Allgemeine Hinweise</h3><p>Die folgenden Hinweise geben einen einfachen Überblick darüber, was mit Ihren personenbezogenen Daten passiert, wenn Sie diese Website besuchen. Personenbezogene Daten sind alle Daten, mit denen Sie persönlich identifiziert werden können.</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "verantwortliche-stelle",
+      "section_title": "2. Verantwortliche Stelle",
+      "section_text": "<p>Die verantwortliche Stelle für die Datenverarbeitung auf dieser Website ist:</p><p><strong>Gemüsegenossenschaft biocò</strong><br>Geisshof<br>5412 Gebenstorf<br>Schweiz<br>E-Mail: <a href=\"mailto:info@bioco.ch\">info@bioco.ch</a></p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "datenerfassung",
+      "section_text": "<h2>3. Datenerfassung auf dieser Website</h2><h3>Kontaktformular</h3><p>Wenn Sie uns per Kontaktformular Anfragen zukommen lassen, werden Ihre Angaben aus dem Anfrageformular inklusive der von Ihnen dort angegebenen Kontaktdaten zwecks Bearbeitung der Anfrage und für den Fall von Anschlussfragen bei uns gespeichert. Diese Daten geben wir nicht ohne Ihre Einwilligung weiter.</p><h3>Double Opt-In (DOI)</h3><p>Bei allen Formularen verwenden wir ein Double Opt-In Verfahren. Das bedeutet, dass Sie nach der Anmeldung eine E-Mail erhalten, in der Sie um Bestätigung Ihrer Anmeldung gebeten werden. Erst nach Bestätigung werden Ihre Daten gespeichert.</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "cookies",
+      "section_title": "4. Cookies",
+      "section_text": "<p>Diese Website verwendet keine Cookies. Wir verwenden Matomo Analytics im cookieless Modus, um die Nutzung der Website zu analysieren, ohne personenbezogene Daten zu speichern.</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "ihre-rechte",
+      "section_title": "5. Ihre Rechte",
+      "section_text": "<p>Sie haben jederzeit das Recht, Auskunft über Ihre bei uns gespeicherten personenbezogenen Daten zu erhalten. Sie haben ausserdem ein Recht auf Berichtigung, Sperrung oder Löschung dieser Daten. Hierzu sowie zu weiteren Fragen zum Thema Datenschutz können Sie sich jederzeit unter der im Impressum angegebenen Adresse an uns wenden.</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "ssl-verschluesselung",
+      "section_title": "6. SSL-Verschlüsselung",
+      "section_text": "<p>Diese Seite nutzt aus Sicherheitsgründen und zum Schutz der Übertragung vertraulicher Inhalte eine SSL-Verschlüsselung.</p>",
+      "section_layout": "rich_text"
+    }
+  ],
+  "conversion_notes": [
+    "Page has NO h1 today: the bento-card header renders <h3>Datenschutzerklärung</h3>. It is kept as <h3> in the intro section_text to preserve heading levels exactly.",
+    "Sections 'datenschutz-auf-einen-blick' and 'datenerfassung' keep their <h2> INSIDE section_text (no section_title) because SectionRenderer suppresses section_title whenever section_text already contains a heading — and these blocks contain <h3> subheadings. The other numbered <h2> headings map to section_title.",
+    "PW page title 'Datenschutz' matches the footer navigation label; the visible page heading is 'Datenschutzerklärung' (intro section).",
+    "Page exports no metadata — 'seo' omitted; the layout default <title> applies today.",
+    "Current card chrome (bento-card bento-card-large, plant-pattern, card-header/card-body wrappers) is layout, not content, and is not represented in the seed."
+  ]
+}
