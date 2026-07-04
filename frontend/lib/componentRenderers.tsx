@@ -4,6 +4,7 @@ import { SubscribeForm } from '@/components/forms/SubscribeForm'
 import { VisitDayForm } from '@/components/forms/VisitDayForm'
 import { WaitingListForm } from '@/components/forms/WaitingListForm'
 import { PricingCalculator } from '@/components/PricingCalculator'
+import { EventsBanner } from '@/components/EventsBanner'
 import { EventsSection } from '@/components/EventsSection'
 import { SchnuppertageSection } from '@/components/SchnuppertageSection'
 import { DepotMap } from '@/components/DepotMap'
@@ -25,7 +26,7 @@ import {
   TimelineHeaderBlock,
   TimelineItemBlock,
 } from '@/components/sections/RegisteredSectionComponents'
-import { resolveComponentRegistryEntry } from '@/lib/componentRegistry'
+import { getResolvedComponentConfig, resolveComponentRegistryEntry } from '@/lib/componentRegistry'
 import type { ContentSection } from '@/lib/processwire-types'
 
 type ComponentRenderer = (section: ContentSection, visualEditor?: boolean) => ReactNode
@@ -52,7 +53,16 @@ export const componentRenderers: Record<string, ComponentRenderer> = {
   visit_day_form: () => <VisitDayForm />,
   waiting_list_form: () => <WaitingListForm />,
   pricing_calculator: () => <PricingCalculator />,
-  events_feed: () => <EventsSection />,
+  events_feed: (section) => {
+    // config.variant 'banner' preserves the former hardcoded /kundenportal
+    // rendering (EventsBanner); default 'standard' keeps EventsSection.
+    const config = getResolvedComponentConfig(section.component, section.config)
+    if (String(config.variant || 'standard') === 'banner') {
+      const limit = Number(config.limit)
+      return <EventsBanner limit={Number.isFinite(limit) && limit > 0 ? limit : 3} />
+    }
+    return <EventsSection />
+  },
   schnuppertage: () => <SchnuppertageSection />,
   depot_map: () => <DepotMap />,
   geisshof_map: () => <GeisshofMap />,

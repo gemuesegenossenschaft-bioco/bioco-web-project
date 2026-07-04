@@ -137,6 +137,7 @@
       "section_component",
       "section_title",
       "section_text",
+      "section_config",
       "button_text",
       "button_href",
       "button_variant",
@@ -144,7 +145,31 @@
       "button2_href",
       "button2_variant"
     ],
-    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+    "configSchema": [
+      {
+        "key": "variant",
+        "label": "Darstellung",
+        "type": "select",
+        "options": [
+          {
+            "label": "Standard",
+            "value": "standard"
+          },
+          {
+            "label": "Banner",
+            "value": "banner"
+          }
+        ]
+      },
+      {
+        "key": "limit",
+        "label": "Anzahl Einträge",
+        "type": "number",
+        "min": 1,
+        "max": 12
+      }
+    ],
+    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper. Darstellung 'Banner' rendert EventsBanner (kompakte Liste mit 'Alle Events ansehen'-Link, wie /kundenportal); 'Standard' rendert EventsSection. 'Anzahl Einträge' begrenzt die Banner-Liste."
   },
   {
     "key": "schnuppertage",
