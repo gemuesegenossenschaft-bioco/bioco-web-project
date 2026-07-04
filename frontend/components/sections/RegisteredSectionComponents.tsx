@@ -233,6 +233,108 @@ export function PricingTableBlock({ section, visualEditor = false }: RegisteredC
   )
 }
 
+export function AccordionItemBlock({ section, visualEditor = false }: RegisteredComponentProps) {
+  return (
+    <section className="demeter-accordion" style={{ margin: '0 auto', maxWidth: containerMaxWidth('lg') }}>
+      <details>
+        <summary {...getVeFieldAttrs(visualEditor, section.id, 'title', 'text', true)}>
+          {section.title}
+        </summary>
+        <div
+          {...getVeFieldAttrs(visualEditor, section.id, 'text', 'richtext', true)}
+          dangerouslySetInnerHTML={{ __html: section.text || '' }}
+        />
+      </details>
+    </section>
+  )
+}
+
+const STEPS_MAX = 4
+
+export function StepsBlock({ section, visualEditor = false }: RegisteredComponentProps) {
+  const config = getConfig(section)
+  const maxWidth = containerMaxWidth(configValue(config, 'containerWidth', 'lg'))
+
+  const steps = []
+  for (let n = 1; n <= STEPS_MAX; n++) {
+    const title = configValue(config, `step${n}_title`, '').trim()
+    const text = configValue(config, `step${n}_text`, '').trim()
+    if (!title && !text) continue
+    steps.push({ title, text })
+  }
+
+  return (
+    <section style={{ margin: '0 auto 80px', maxWidth }}>
+      {renderHeader(section, visualEditor)}
+      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75 })}
+      <div
+        className="next-steps"
+        style={{ marginTop: '32px' }}
+        {...getVeFieldAttrs(visualEditor, section.id, 'component', 'structured', false)}
+      >
+        {steps.map((step, index) => (
+          <div key={`${section.id}-step-${index}`} className="step-item">
+            <div className="step-number">{index + 1}</div>
+            <div>
+              {step.title ? <h3>{step.title}</h3> : null}
+              {step.text ? <p>{step.text}</p> : null}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+const LINK_TILES_MAX = 4
+
+export function LinkTilesBlock({ section, visualEditor = false }: RegisteredComponentProps) {
+  const config = getConfig(section)
+  const maxWidth = containerMaxWidth(configValue(config, 'containerWidth', 'lg'))
+
+  const tiles = []
+  for (let n = 1; n <= LINK_TILES_MAX; n++) {
+    const title = configValue(config, `tile${n}_title`, '').trim()
+    if (!title) continue
+    tiles.push({
+      title,
+      text: configValue(config, `tile${n}_text`, '').trim(),
+      href: configValue(config, `tile${n}_href`, '').trim(),
+      icon: configValue(config, `tile${n}_icon`, '').trim(),
+    })
+  }
+
+  return (
+    <section style={{ margin: '0 auto 80px', maxWidth }}>
+      {renderHeader(section, visualEditor)}
+      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75 })}
+      <div
+        className="portal-gateway"
+        {...getVeFieldAttrs(visualEditor, section.id, 'component', 'structured', false)}
+      >
+        {tiles.map((tile, index) => {
+          const inner = (
+            <>
+              {tile.icon ? <div className="portal-icon">{tile.icon}</div> : null}
+              <h3>{tile.title}</h3>
+              {tile.text ? <p>{tile.text}</p> : null}
+            </>
+          )
+          return tile.href ? (
+            <a key={`${section.id}-tile-${index}`} className="portal-tile" href={tile.href}>
+              {inner}
+            </a>
+          ) : (
+            <div key={`${section.id}-tile-${index}`} className="portal-tile">
+              {inner}
+            </div>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
 export function PageIntroBlock({ section, visualEditor = false }: RegisteredComponentProps) {
   const config = getConfig(section)
   const maxWidth = containerMaxWidth(configValue(config, 'containerWidth', 'lg'))

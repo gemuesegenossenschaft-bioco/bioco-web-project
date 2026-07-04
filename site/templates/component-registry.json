@@ -1402,5 +1402,202 @@
         "type": "text"
       }
     ]
+  },
+  {
+    "key": "accordion_item",
+    "label": "Akkordeon-Eintrag",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "AccordionItemBlock"
+    },
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text"
+    ],
+    "notes": "Aufklappbarer Eintrag (details/summary) im Stil des Demeter-Akkordeons. Titel = Zeile, Text = Inhalt."
+  },
+  {
+    "key": "steps",
+    "label": "Nummerierte Schritte",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "StepsBlock"
+    },
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_config"
+    ],
+    "notes": "Bis zu 4 nummerierte Schritte mit Kreis-Nummer. Nur ausgefüllte Schritte werden angezeigt.",
+    "defaultConfig": {
+      "step1_title": "",
+      "step1_text": "",
+      "step2_title": "",
+      "step2_text": "",
+      "step3_title": "",
+      "step3_text": "",
+      "step4_title": "",
+      "step4_text": ""
+    },
+    "configSchema": [
+      {
+        "key": "step1_title",
+        "label": "Schritt 1 — Titel",
+        "type": "text"
+      },
+      {
+        "key": "step1_text",
+        "label": "Schritt 1 — Text",
+        "type": "text"
+      },
+      {
+        "key": "step2_title",
+        "label": "Schritt 2 — Titel",
+        "type": "text"
+      },
+      {
+        "key": "step2_text",
+        "label": "Schritt 2 — Text",
+        "type": "text"
+      },
+      {
+        "key": "step3_title",
+        "label": "Schritt 3 — Titel",
+        "type": "text"
+      },
+      {
+        "key": "step3_text",
+        "label": "Schritt 3 — Text",
+        "type": "text"
+      },
+      {
+        "key": "step4_title",
+        "label": "Schritt 4 — Titel",
+        "type": "text"
+      },
+      {
+        "key": "step4_text",
+        "label": "Schritt 4 — Text",
+        "type": "text"
+      }
+    ]
+  },
+  {
+    "key": "link_tiles",
+    "label": "Portal-Kacheln",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/sections/RegisteredSectionComponents.tsx",
+      "export": "LinkTilesBlock"
+    },
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_config"
+    ],
+    "notes": "Kachel-Raster mit Symbol, Titel, Text und optionalem Link. Nur Kacheln mit Titel werden angezeigt.",
+    "defaultConfig": {
+      "tile1_title": "",
+      "tile1_text": "",
+      "tile1_href": "",
+      "tile1_icon": "",
+      "tile2_title": "",
+      "tile2_text": "",
+      "tile2_href": "",
+      "tile2_icon": "",
+      "tile3_title": "",
+      "tile3_text": "",
+      "tile3_href": "",
+      "tile3_icon": "",
+      "tile4_title": "",
+      "tile4_text": "",
+      "tile4_href": "",
+      "tile4_icon": ""
+    },
+    "configSchema": [
+      {
+        "key": "tile1_title",
+        "label": "Kachel 1 — Titel",
+        "type": "text"
+      },
+      {
+        "key": "tile1_text",
+        "label": "Kachel 1 — Text",
+        "type": "text"
+      },
+      {
+        "key": "tile1_href",
+        "label": "Kachel 1 — Link",
+        "type": "text"
+      },
+      {
+        "key": "tile1_icon",
+        "label": "Kachel 1 — Symbol (Emoji)",
+        "type": "text"
+      },
+      {
+        "key": "tile2_title",
+        "label": "Kachel 2 — Titel",
+        "type": "text"
+      },
+      {
+        "key": "tile2_text",
+        "label": "Kachel 2 — Text",
+        "type": "text"
+      },
+      {
+        "key": "tile2_href",
+        "label": "Kachel 2 — Link",
+        "type": "text"
+      },
+      {
+        "key": "tile2_icon",
+        "label": "Kachel 2 — Symbol (Emoji)",
+        "type": "text"
+      },
+      {
+        "key": "tile3_title",
+        "label": "Kachel 3 — Titel",
+        "type": "text"
+      },
+      {
+        "key": "tile3_text",
+        "label": "Kachel 3 — Text",
+        "type": "text"
+      },
+      {
+        "key": "tile3_href",
+        "label": "Kachel 3 — Link",
+        "type": "text"
+      },
+      {
+        "key": "tile3_icon",
+        "label": "Kachel 3 — Symbol (Emoji)",
+        "type": "text"
+      },
+      {
+        "key": "tile4_title",
+        "label": "Kachel 4 — Titel",
+        "type": "text"
+      },
+      {
+        "key": "tile4_text",
+        "label": "Kachel 4 — Text",
+        "type": "text"
+      },
+      {
+        "key": "tile4_href",
+        "label": "Kachel 4 — Link",
+        "type": "text"
+      },
+      {
+        "key": "tile4_icon",
+        "label": "Kachel 4 — Symbol (Emoji)",
+        "type": "text"
+      }
+    ]
   }
 ]

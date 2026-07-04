@@ -12,12 +12,15 @@ import { Saisonkalender } from '@/components/Saisonkalender'
 import { Gallery } from '@/components/Gallery'
 import type { ReactNode } from 'react'
 import {
+  AccordionItemBlock,
   CardsGridBlock,
   CtaBandBlock,
   GalleryStripBlock,
+  LinkTilesBlock,
   MediaTextBlock,
   PageIntroBlock,
   PricingTableBlock,
+  StepsBlock,
   TextColumnsBlock,
   TimelineHeaderBlock,
   TimelineItemBlock,
@@ -37,6 +40,9 @@ const layoutOwnedKeys = new Set([
   'timeline_item',
   'cta_band',
   'pricing_table',
+  'accordion_item',
+  'steps',
+  'link_tiles',
 ])
 
 export const componentRenderers: Record<string, ComponentRenderer> = {
@@ -61,6 +67,9 @@ export const componentRenderers: Record<string, ComponentRenderer> = {
   timeline_header: (section, visualEditor) => <TimelineHeaderBlock section={section} visualEditor={visualEditor} />,
   timeline_item: (section, visualEditor) => <TimelineItemBlock section={section} visualEditor={visualEditor} />,
   cta_band: (section, visualEditor) => <CtaBandBlock section={section} visualEditor={visualEditor} />,
+  accordion_item: (section, visualEditor) => <AccordionItemBlock section={section} visualEditor={visualEditor} />,
+  steps: (section, visualEditor) => <StepsBlock section={section} visualEditor={visualEditor} />,
+  link_tiles: (section, visualEditor) => <LinkTilesBlock section={section} visualEditor={visualEditor} />,
 } as const
 
 export const componentRendererKeys = Object.keys(componentRenderers)
