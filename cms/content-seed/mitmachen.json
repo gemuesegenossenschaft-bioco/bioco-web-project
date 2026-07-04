@@ -1,0 +1,64 @@
+{
+  "path": "/mitmachen/",
+  "slug": "mitmachen",
+  "template": "basic-page",
+  "title": "Mitmachen bei biocò",
+  "seo": {
+    "title": "Mitmachen bei solidarischer Landwirtschaft | biocò Baden",
+    "description": "Werde Teil der Gemüsegenossenschaft biocò. Solidarische Landwirtschaft leben: Mitarbeit auf dem Geisshof und frisches Demeter-Gemüse für Baden-Brugg."
+  },
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_text": "<h1>Mitmachen bei biocò</h1><p>Werde Teil unserer Gemüsegenossenschaft und erlebe <a href=\"/solawi\">solidarische Landwirtschaft</a> hautnah. Hier erfährst du, wie du dich einbringen kannst und was Mitarbeit bei biocò bedeutet.</p>"
+    },
+    {
+      "section_id": "mitarbeit",
+      "section_layout": "rich_text",
+      "section_text": "<h2>Was es braucht, damit wir gesundes Gemüse haben</h2><h3>Mitarbeit bei biocò</h3><p>Jedes Mitglied bringt sich ein und unterstützt die Genossenschaft aktiv. Die Mitarbeit ist ein wichtiger Teil unserer <a href=\"/solawi\">solidarischen Landwirtschaft</a>.</p><h3>Tätigkeitsbereiche</h3><p>Du kannst dich in verschiedenen Bereichen einbringen:</p><ul><li><strong>Feld/Anbau:</strong> Säen, Pflanzen, Jäten, Ernten, Unkraut bekämpfen</li><li><strong>Logistik:</strong> Gemüse waschen, sortieren, packen, verteilen</li><li><strong>Administration:</strong> Büroarbeit, Rechnungen, Kommunikation</li><li><strong>Events/Organisation:</strong> Schnuppertage, Veranstaltungen, Gemeinschaftsanlässe</li><li><strong>Andere:</strong> Nach Absprache kannst du auch andere Fähigkeiten einbringen</li></ul><h3>Planung</h3><p>Nach der Anmeldung erhältst du Zugang zum Intranet. Dort kannst du:</p><ul><li>Deine bevorzugten Tage angeben (Mo-Sa)</li><li>Deine bevorzugten Zeiten wählen (morgens, nachmittags, abends)</li><li>Tätigkeitsbereiche auswählen</li><li>Arbeitseinsätze planen und buchen</li></ul>"
+    },
+    {
+      "section_id": "gruppen",
+      "section_title": "Gruppen & Gemeinschaft",
+      "section_layout": "rich_text",
+      "section_text": "<p>Bei biocò gibt es verschiedene Arbeitsgruppen und Gemeinschaftsaktivitäten, die das Herzstück unserer Genossenschaft bilden:</p>"
+    },
+    {
+      "section_id": "gruppen-outro",
+      "section_layout": "rich_text",
+      "section_text": "<p>Diese Gruppen ermöglichen es, sich nach eigenen Interessen und Fähigkeiten einzubringen und die Genossenschaft aktiv mitzugestalten. Jede Gruppe trägt auf ihre Weise zum Erfolg und zur Gemeinschaft bei biocò bei.</p>"
+    },
+    {
+      "section_id": "schnuppertage",
+      "section_component": "schnuppertage"
+    },
+    {
+      "section_id": "familien",
+      "section_layout": "split_media_text",
+      "image_alt": "Frisch geerntetes Demeter-Gemüse vom Geisshof",
+      "section_text": "<h2>Familien & Kinder auf dem Geisshof</h2><h3>Kinder sind willkommen</h3><p>Familien und Kinder sind sehr regelmässige Helfer auf dem Geisshof. Die Einbindung von Kindern in den Prozess des Gemüseanbaus ist ein zentraler Bestandteil der biocò-Kultur.</p><p>Auf dem Geisshof erleben Kinder hautnah, wie Gemüse wächst, gepflegt wird und geerntet wird. Sie lernen spielerisch den Kreislauf der Natur kennen und entwickeln ein tiefes Verständnis für die Herkunft ihrer Nahrung. Diese praktische Erfahrung prägt nicht nur ihr Verhältnis zu Lebensmitteln, sondern stärkt auch das Gemeinschaftsgefühl zwischen den Generationen.</p><p>Die Elki-Gruppe organisiert spezielle Aktivitäten für Familien, bei denen Kinder aktiv mithelfen können – sei es beim Säen, Jäten, Ernten oder beim gemeinsamen Verarbeiten des Gemüses. Diese gemeinsamen Erlebnisse schaffen bleibende Erinnerungen und fördern das Verständnis für nachhaltige Landwirtschaft von klein auf.</p>"
+    },
+    {
+      "section_id": "kennenlernen-cta",
+      "section_title": "Möchtest du uns kennenlernen?",
+      "section_layout": "rich_text",
+      "section_text": "<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
+      "buttons": [
+        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
+        { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }
+      ]
+    }
+  ],
+  "conversion_notes": [
+    "Die Gruppen-Karten zwischen 'gruppen' und 'gruppen-outro' kommen heute aus dem CMS via getGroupCards() (bereits CMS-getrieben) – NICHT seeden. Die beiden Absätze umschliessen das Karten-Grid; deshalb zwei getrennte Sections, damit die Reihenfolge erhalten bleibt.",
+    "Der 'Mitarbeit'-Block rendert 'Tätigkeitsbereiche' und 'Planung' heute als zwei-spaltiges CSS-Grid (auto-fit, minmax(300px,1fr)). Die registrierte Komponente text_columns (TextColumnsBlock) nutzt CSS columnCount (Fliess-Spalten) und kann die feste Zuordnung Überschrift+Liste pro Spalte NICHT exakt abbilden – daher als rich_text geseedet; die Zweispaltigkeit ist ein Layout-Thema für die Umstellung.",
+    "Am Ende der Mitarbeit-Section steht heute ein leerer Anker <div id=\"anmelden\"> als Scroll-Ziel – code-owned, beim Umbau erhalten.",
+    "Die Seite prüft bereits eine CMS-Section 'familien' (sections.find(id === 'familien')); wenn vorhanden, rendert deren title/text/image statt des Fallbacks. Das Seed enthält den HARDCODIERTEN FALLBACK-Text. Das Bild kommt ausschliesslich aus dem CMS (kein hardcodierter Bildpfad, ohne CMS-Bild bleibt die Fläche leer); der Fallback-Alt-Text ist als image_alt geführt. Bild links, Text rechts → split_media_text.",
+    "Schnuppertage: sämtliche Texte (h2 'Schnuppertage', h3 'Komm schnuppern: So geht solidarischer Gemüseanbau.', Beschreibung, 'Was dich erwartet'-Box, 'Nächste Termine', Anmelde-Modal) leben in frontend/components/SchnuppertageSection.tsx und bleiben code-owned; hier nur die Platzierung als section_component 'schnuppertage'. Der volle-Breite-Hintergrundverlauf um die Section ist ebenfalls code-owned.",
+    "Die Gruppen-Section rendert heute in einer abgerundeten Box (var(--surface-secondary)) – Styling code-owned.",
+    "Heutige DOM-Section-IDs: D-01 (Mitarbeit), D-02 (Gruppen), D-02b (Schnuppertage, in der Komponente), D-03 (Familien), B-06 (Kennenlernen).",
+    "metadata.keywords und metadata.openGraph existieren im Code, sind im Seed-Schema nicht abbildbar.",
+    "F.1b-verify: Sections 'mitarbeit' und 'familien' — section_title entfernt und als <h2> an den Anfang von section_text verschoben: beide Texte enthalten <h3>-Unterüberschriften, und sowohl SectionRenderer als auch der heutige familien-Zweig der Seite (hasHeadingHtml-Check in app/mitmachen/page.tsx) unterdrücken den Titel, sobald section_text eine Überschrift enthält — mit section_title wären die h2 'Was es braucht, damit wir gesundes Gemüse haben' und 'Familien & Kinder auf dem Geisshof' nach der Migration verschwunden (gleiche Konvention wie datenschutz.json)."
+  ]
+}

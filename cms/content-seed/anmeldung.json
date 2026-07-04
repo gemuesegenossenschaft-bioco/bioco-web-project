@@ -1,0 +1,25 @@
+{
+  "path": "/anmeldung/",
+  "slug": "anmeldung",
+  "template": "basic-page",
+  "title": "Anmeldung",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_text": "<h1>Anmeldung</h1>"
+    },
+    {
+      "section_id": "membership-form",
+      "section_component": "membership_form"
+    }
+  ],
+  "conversion_notes": [
+    "Die Seite verwendet MinimalHeader statt Header – code-owned Seiten-Chrome, das beim Umbau erhalten bleiben muss.",
+    "Footer wird zwar importiert, aber NICHT gerendert – die Seite hat heute keinen Footer.",
+    "h1 und Formular rendern heute in einer Bento-Karte (<div class=\"bento-grid\"><section class=\"bento-card bento-card-fullwidth\">) mit dekorativem <div class=\"plant-pattern\"> – Struktur/Styling code-owned; einziger Seiteninhalt neben dem Formular ist die h1 'Anmeldung'.",
+    "Das Mitgliedschaftsformular (frontend/components/forms/MembershipForm.tsx, ~992 Zeilen: alle Schritte, Labels, Validierungs- und Erfolgstexte) bleibt komplett code-owned; hier nur die Platzierung als section_component 'membership_form' (bereits in component-registry.json registriert).",
+    "Die Seite exportiert KEINE metadata (erbt aus dem Root-Layout) – deshalb kein seo-Block im Seed.",
+    "Die Seite ist heute komplett hardcodiert (kein getPageSections-Aufruf, kein VisualEditorPageSwitch)."
+  ]
+}

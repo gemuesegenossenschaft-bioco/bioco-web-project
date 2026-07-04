@@ -1,0 +1,42 @@
+{
+  "path": "/kontakt/",
+  "slug": "kontakt",
+  "template": "basic-page",
+  "title": "Kontakt",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_text": "<h1>Kontakt</h1><p>Hast du Fragen zu biocò? Wir freuen uns auf deine Nachricht! Wir melden uns in der Regel innerhalb von 2-3 Werktagen bei dir zurück.</p>"
+    },
+    {
+      "section_id": "intranet-box",
+      "section_layout": "rich_text",
+      "section_text": "<h4>Du bist bereits Mitglied?</h4><p>Als Mitglied hast du Zugang zum Intranet, wo du alle wichtigen Informationen, Dokumente und Tools findest.</p><a href=\"/intranet\" class=\"btn btn-primary btn-organic\">Zum Intranet →</a>"
+    },
+    {
+      "section_id": "mitglied-werden-box",
+      "section_layout": "rich_text",
+      "section_text": "<h4>Möchtest du Mitglied werden?</h4><p>Interessierst du dich für ein Gemüseabo oder möchtest du mehr über die Mitgliedschaft erfahren? Hier findest du alle Informationen zur Anmeldung.</p><a href=\"/bioco-werden\" class=\"btn btn-primary btn-organic\">biocò werden →</a>"
+    },
+    {
+      "section_id": "kontakt-formular-intro",
+      "section_layout": "rich_text",
+      "section_text": "<h4>Allgemeine Anfragen</h4><p>Für alle anderen Fragen nutze bitte das Kontaktformular unten. Wir beantworten deine Anfrage gerne persönlich.</p>"
+    },
+    {
+      "section_id": "contact-form",
+      "section_component": "contact_form"
+    }
+  ],
+  "conversion_notes": [
+    "Die Seite exportiert KEINE metadata (erbt <title>/<description> aus dem Root-Layout) – deshalb kein seo-Block im Seed.",
+    "Die beiden Box-CTAs ('Zum Intranet →', 'biocò werden →') sind heute Next.js-<Link>-Anker mit class 'btn btn-primary btn-organic' (plus Inline-Style display:inline-block, code-owned) – KEINE CTA.tsx-Buttons. Sie sind bewusst als <a> im section_text belassen statt im buttons-Array: CTA.tsx navigiert intern per router.push, aber /intranet wird von Apache ausserhalb der Next-App bedient (.htaccess-Short-Circuit) und braucht einen echten <a href>-Hard-Link.",
+    "Beide Boxen rendern heute in gestylten Containern (var(--bg-secondary), abgerundet) – Box-Styling code-owned.",
+    "Der Block 'Allgemeine Anfragen' steht heute in einem Wrapper mit DOM-ID 'kontakt-formular' und scrollMarginTop:100px; das ist das Scroll-Ziel, das CTA.tsx für href '/kontakt' verwendet ('Nimm Kontakt auf' von anderen Seiten). Der Anker muss beim Umbau erhalten bleiben.",
+    "Die Box-Überschriften sind heute <h4> – als <h4> im section_text belassen (nicht section_title, das würde h2 rendern).",
+    "Kein 'Möchtest du uns kennenlernen?'-Block auf dieser Seite.",
+    "Die Seite lädt bereits getPageSections('kontakt') für den VisualEditorPageSwitch, rendert aber alle Inhalte hardcodiert; die CMS-Sections werden heute NICHT ins Markup übernommen.",
+    "Sämtliche Formulartexte (Labels, Validierung, Erfolgsmeldungen) leben in frontend/components/forms/ContactForm.tsx und bleiben code-owned."
+  ]
+}

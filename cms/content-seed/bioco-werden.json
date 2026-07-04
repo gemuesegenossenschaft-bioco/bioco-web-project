@@ -1,0 +1,26 @@
+{
+  "path": "/bioco-werden/",
+  "slug": "bioco-werden",
+  "template": "basic-page",
+  "title": "biocò werden",
+  "seo": {
+    "title": "biocò werden | Mitglied werden | biocò Baden",
+    "description": "Werde Mitglied der Gemüsegenossenschaft biocò. Wähle dein Gemüseabo und werde Teil unserer solidarischen Landwirtschaft."
+  },
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_text": "<h1>biocò werden</h1><p>Wähle dein Gemüseabo und werde Teil unserer Gemüsegenossenschaft. Deine Auswahl wird automatisch ins Anmeldeformular übernommen.</p>"
+    },
+    {
+      "section_id": "pricing-calculator",
+      "section_component": "pricing_calculator"
+    }
+  ],
+  "conversion_notes": [
+    "Der komplette Rechner-Inhalt (Abo-Stufen, Preise, Interaktion, Übergabe an das Anmeldeformular) lebt in frontend/components/PricingCalculator.tsx und bleibt code-owned; hier nur die Platzierung als section_component 'pricing_calculator' (bereits in component-registry.json registriert).",
+    "Die Seite ist heute komplett hardcodiert (kein getPageSections-Aufruf, kein VisualEditorPageSwitch).",
+    "metadata.keywords und metadata.openGraph existieren im Code, sind im Seed-Schema nicht abbildbar."
+  ]
+}
