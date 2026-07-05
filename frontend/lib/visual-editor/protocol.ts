@@ -57,6 +57,7 @@ export type ParentToIframeMessage =
   | { type: 'field-reset' }
   | { type: 'section-scroll'; sectionId: string }
   | { type: 'section-update'; sectionId: string; field: string; value?: unknown }
+  | { type: 'sections-replace'; sections: unknown[] }
   | { type: 'save-result'; success: boolean; revalidated?: boolean; error?: string }
 
 /** Messages the iframe runtime sends up to the parent shell. */
@@ -190,6 +191,8 @@ const PARSERS: ParserMap = {
     if (!isNonEmptyString(payload.sectionId) || !isNonEmptyString(payload.field)) return null
     return { type: 'section-update', sectionId: payload.sectionId, field: payload.field, value: payload.value }
   },
+  'sections-replace': (payload) =>
+    Array.isArray(payload.sections) ? { type: 'sections-replace', sections: payload.sections } : null,
   'save-result': (payload) => {
     if (typeof payload.success !== 'boolean') return null
     return {
@@ -260,6 +263,7 @@ export const PARENT_MESSAGE_TYPES = [
   'field-reset',
   'section-scroll',
   'section-update',
+  'sections-replace',
   'save-result',
 ] as const satisfies readonly ParentToIframeMessage['type'][]
 

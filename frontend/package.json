@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:ve-shell": "esbuild visual-editor-shell/main.ts --bundle --minify --format=iife --target=es2018 --charset=utf8 --alias:@=. --outfile=../site/templates/visual-editor-app.js",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
@@ -30,6 +31,7 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^5.1.4",
+    "esbuild": "0.28.1",
     "eslint": "^8.57.1",
     "eslint-config-next": "^14.2.35",
     "happy-dom": "^20.7.0",

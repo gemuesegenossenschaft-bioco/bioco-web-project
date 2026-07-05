@@ -142,7 +142,7 @@ rsync -avzc --delete public/ bioco@193.33.128.160:/home/bioco/bioco-frontend/pub
 # Restore sharp (REQUIRED after standalone rsync)
 ssh bioco@193.33.128.160 'cp -r /tmp/sharp-pkg/node_modules/@img/sharp-{linux-x64,libvips-linux-x64} /home/bioco/bioco-frontend/node_modules/@img/'
 # CMS templates
-rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php,visual-editor-focus-fields.json} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php,visual-editor-app.js,visual-editor-focus-fields.json} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
 # CMS hooks
 rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 # Restart
@@ -167,7 +167,7 @@ ssh bioco@193.33.128.160 'ls -la /home/bioco/public_html/wir 2>/dev/null || true
 
 **CMS-only deploy** (no frontend build needed):
 ```bash
-rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php,visual-editor-focus-fields.json} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
+rsync -avzc site/templates/{admin.js,api.php,api-events.php,visual-editor.php,visual-editor-app.js,visual-editor-focus-fields.json} bioco@193.33.128.160:/home/bioco/public_html/cms/site/templates/
 rsync -avzc site/ready.php bioco@193.33.128.160:/home/bioco/public_html/cms/site/ready.php
 ```
 

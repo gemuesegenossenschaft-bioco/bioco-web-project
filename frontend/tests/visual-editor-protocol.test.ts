@@ -63,6 +63,7 @@ const parentMessages: ParentToIframeMessage[] = [
   { type: 'section-scroll', sectionId: 'section-2' },
   { type: 'section-update', sectionId: 'section-1', field: 'title', value: 'Neuer Titel' },
   { type: 'section-update', sectionId: 'section-1', field: 'buttons', value: [{ text: 'A', href: '/a', variant: 'primary' }] },
+  { type: 'sections-replace', sections: [{ id: 'section-1', title: 'Neuer Titel' }] },
   { type: 'save-result', success: true, revalidated: false },
   { type: 'save-result', success: false, error: 'Publizieren fehlgeschlagen' },
 ]
@@ -141,7 +142,9 @@ describe('visual editor postMessage protocol', () => {
   })
 
   it('returns null for unknown message types without throwing', () => {
-    expect(parseMessage({ origin: PARENT_ORIGIN, data: { type: `${MSG_PREFIX}sections-replace`, sections: [] } }, ALLOWED)).toBeNull()
+    // 'sections-replace' used to be the example here while it lived outside the
+    // protocol; it is a formalized parent message now (G.2), so use another.
+    expect(parseMessage({ origin: PARENT_ORIGIN, data: { type: `${MSG_PREFIX}draft-sync`, sections: [] } }, ALLOWED)).toBeNull()
     expect(parseMessage({ origin: PARENT_ORIGIN, data: { type: `${MSG_PREFIX}totally-unknown` } }, ALLOWED)).toBeNull()
     expect(parseMessage({ origin: PARENT_ORIGIN, data: { type: 'other-prefix:ready' } }, ALLOWED)).toBeNull()
   })
