@@ -40,11 +40,13 @@ export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
       return
     }
 
+    // Scroll targets are CMS section ids (SectionRenderer renders each
+    // section wrapper with id={section.id}).
     let scrollTarget: string | null = null
     if (href === '/kontakt') {
-      scrollTarget = 'kontakt-formular'
+      scrollTarget = 'kontakt-formular-intro'
     } else if (href === '/standorte-depots') {
-      scrollTarget = 'E-02'
+      scrollTarget = 'depots'
     }
 
     router.push(href)

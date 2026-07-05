@@ -11,8 +11,10 @@ interface CmsVisualEditorPageProps {
 /**
  * Lightweight SSR fallback: renders section content as plain HTML
  * without importing client components. Shown until client JS hydrates.
+ * Exported for pages that keep their own chrome (e.g. /anmeldung with
+ * MinimalHeader) but render CMS sections through VisualEditorWrapper.
  */
-function SectionsFallback({ sections }: { sections: ContentSection[] }) {
+export function SectionsFallback({ sections }: { sections: ContentSection[] }) {
   return (
     <div className="cms-sections">
       {sections.map((section) => (

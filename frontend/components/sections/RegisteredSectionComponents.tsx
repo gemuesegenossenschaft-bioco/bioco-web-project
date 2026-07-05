@@ -234,8 +234,13 @@ export function PricingTableBlock({ section, visualEditor = false }: RegisteredC
 }
 
 export function AccordionItemBlock({ section, visualEditor = false }: RegisteredComponentProps) {
+  // Consecutive accordion_item sections must stack like the former single
+  // `.demeter-accordion` wrapper on /gemuese: full container width and no
+  // per-item vertical margins (spacing comes from `details { margin-bottom }`
+  // in globals.css). Keep margin 0 so the CSS class' margin-top only ever
+  // applied to the old grouped wrapper, not to every item.
   return (
-    <section className="demeter-accordion" style={{ margin: '0 auto', maxWidth: containerMaxWidth('lg') }}>
+    <section className="demeter-accordion" style={{ margin: 0 }}>
       <details>
         <summary {...getVeFieldAttrs(visualEditor, section.id, 'title', 'text', true)}>
           {section.title}

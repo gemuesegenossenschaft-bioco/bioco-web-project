@@ -193,6 +193,21 @@
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
   },
   {
+    "key": "group_cards",
+    "label": "Gruppen-Karten",
+    "kind": "renderable",
+    "frontendTarget": {
+      "file": "frontend/components/GroupCardsSection.tsx",
+      "export": "GroupCardsSection"
+    },
+    "cmsFields": [
+      "section_component",
+      "section_title",
+      "section_text"
+    ],
+    "notes": "Karten-Grid der Arbeitsgruppen (Mitmachen). Die Karten selbst kommen live aus dem CMS-Endpoint /api/content/groups; Titel und Einleitungstext kommen aus dem Component-Section-Wrapper."
+  },
+  {
     "key": "depot_map",
     "label": "Depot-Karte",
     "kind": "renderable",

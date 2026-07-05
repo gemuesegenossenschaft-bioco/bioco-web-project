@@ -7,6 +7,7 @@ import { PricingCalculator } from '@/components/PricingCalculator'
 import { EventsBanner } from '@/components/EventsBanner'
 import { EventsSection } from '@/components/EventsSection'
 import { SchnuppertageSection } from '@/components/SchnuppertageSection'
+import { GroupCardsSection } from '@/components/GroupCardsSection'
 import { DepotMap } from '@/components/DepotMap'
 import { GeisshofMap } from '@/components/GeisshofMap'
 import { Saisonkalender } from '@/components/Saisonkalender'
@@ -64,6 +65,7 @@ export const componentRenderers: Record<string, ComponentRenderer> = {
     return <EventsSection />
   },
   schnuppertage: () => <SchnuppertageSection />,
+  group_cards: () => <GroupCardsSection />,
   depot_map: () => <DepotMap />,
   geisshof_map: () => <GeisshofMap />,
   saisonkalender: () => <Saisonkalender />,

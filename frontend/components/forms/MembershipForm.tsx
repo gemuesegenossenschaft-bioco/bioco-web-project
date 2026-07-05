@@ -113,7 +113,10 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
     }
   }
 
-  const urlData = getInitialDataFromURL()
+  // Read the URL params exactly once (lazy init): a fresh object on every
+  // render would retrigger the initialData effect below indefinitely
+  // (setFormData -> re-render -> new reference -> effect -> ...).
+  const [urlData] = useState(getInitialDataFromURL)
   const effectiveInitialData = initialData || urlData
 
   const [formData, setFormData] = useState<FormData>({

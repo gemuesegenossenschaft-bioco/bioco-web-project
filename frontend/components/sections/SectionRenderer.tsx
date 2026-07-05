@@ -282,7 +282,9 @@ export function SectionRenderer({ sections, isEditing = false, visualEditor = fa
         } : {}
 
         return (
-          <div key={section.id} className={wrapperClasses} {...veAttrs}>
+          // id anchors each section (like the former hardcoded <section id>),
+          // so CTA scroll targets and deep links keep working on CMS pages.
+          <div key={section.id} id={section.id} className={wrapperClasses} {...veAttrs}>
             {inner}
           </div>
         )

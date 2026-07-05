@@ -22,6 +22,7 @@
       "section_id": "gruppen",
       "section_title": "Gruppen & Gemeinschaft",
       "section_layout": "rich_text",
+      "section_component": "group_cards",
       "section_text": "<p>Bei biocò gibt es verschiedene Arbeitsgruppen und Gemeinschaftsaktivitäten, die das Herzstück unserer Genossenschaft bilden:</p>"
     },
     {
@@ -52,6 +53,7 @@
   ],
   "conversion_notes": [
     "Die Gruppen-Karten zwischen 'gruppen' und 'gruppen-outro' kommen heute aus dem CMS via getGroupCards() (bereits CMS-getrieben) – NICHT seeden. Die beiden Absätze umschliessen das Karten-Grid; deshalb zwei getrennte Sections, damit die Reihenfolge erhalten bleibt.",
+    "F.5-Umsetzung: Die 'gruppen'-Section trägt section_component 'group_cards' (registrierte Komponente GroupCardsSection, lädt die Karten client-seitig von /api/content/groups). Der Component-Wrapper rendert h2 + Einleitungsabsatz + Karten-Grid in dieser Reihenfolge; 'gruppen-outro' bleibt eine eigene rich_text-Section dahinter. Die abgerundete Box um den Block war code-owned Styling und entfällt mit dem Umbau.",
     "Der 'Mitarbeit'-Block rendert 'Tätigkeitsbereiche' und 'Planung' heute als zwei-spaltiges CSS-Grid (auto-fit, minmax(300px,1fr)). Die registrierte Komponente text_columns (TextColumnsBlock) nutzt CSS columnCount (Fliess-Spalten) und kann die feste Zuordnung Überschrift+Liste pro Spalte NICHT exakt abbilden – daher als rich_text geseedet; die Zweispaltigkeit ist ein Layout-Thema für die Umstellung.",
     "Am Ende der Mitarbeit-Section steht heute ein leerer Anker <div id=\"anmelden\"> als Scroll-Ziel – code-owned, beim Umbau erhalten.",
     "Die Seite prüft bereits eine CMS-Section 'familien' (sections.find(id === 'familien')); wenn vorhanden, rendert deren title/text/image statt des Fallbacks. Das Seed enthält den HARDCODIERTEN FALLBACK-Text. Das Bild kommt ausschliesslich aus dem CMS (kein hardcodierter Bildpfad, ohne CMS-Bild bleibt die Fläche leer); der Fallback-Alt-Text ist als image_alt geführt. Bild links, Text rechts → split_media_text.",
