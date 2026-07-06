@@ -131,7 +131,7 @@ Build locally, rsync frontend + CMS templates, restore sharp, restart.
 scripts/deploy.sh main
 ```
 
-This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, rsyncs CMS templates (`admin.js`, `api.php`, `api-events.php`, `visual-editor.php`, `visual-editor-focus-fields.json`) + `site/ready.php`, restarts Node.js, verifies.
+This script: builds frontend, rsyncs standalone/static/public, restores sharp bindings, builds the Visual Editor shell bundle (`build:ve-shell`), rsyncs CMS templates (`admin.js`, `api.php`, `api-events.php`, `visual-editor.php`, `visual-editor-app.js`, `visual-editor-focus-fields.json`) + `site/ready.php`, restarts Node.js, verifies.
 
 **Manual deploy:**
 ```bash

@@ -348,8 +348,8 @@ class BiocoContentFreezeMigration
             'section_image'     => ['Bild', 'Bild für diesen Bereich.'],
             'section_images'    => ['Bilder', 'Mehrere Bilder für Galerien oder Raster.'],
             'image_alt'         => ['Bild Alt-Text', 'Alternativtext für Barrierefreiheit und SEO.'],
-            'section_layout'    => ['Layout', 'Anordnung von Text und Bild in diesem Bereich.'],
-            'section_theme'     => ['Farbschema', 'Farbstimmung des Bereichs.'],
+            'section_layout'    => ['Layout', 'Anordnung von Text und Bild. Erlaubte Werte: rich_text (Fliesstext), split_media_text (Bild links, Text rechts), split_text_media (Text links, Bild rechts), full_width_banner (Banner, volle Breite), media_grid (Bild-Raster), video_embed (Video), component (Komponenten-Block).'],
+            'section_theme'     => ['Farbschema', 'Farbstimmung des Bereichs. Erlaubte Werte: default (Standard), muted (Gedimmt), accent (Akzent), dark (Dunkel).'],
             'section_component' => ['Komponente', 'Registrierte Frontend-Komponente (z.B. contact_form). Leer lassen für normale Text-/Bild-Bereiche.'],
             'section_config'    => ['Komponenten-Einstellungen (JSON)', 'Konfiguration der Komponente. Wird primär durch den Visual Editor gepflegt.'],
             'button_text'       => ['Button 1: Text', 'Beschriftung des ersten Buttons. Leer = kein Button.'],
@@ -536,7 +536,13 @@ class BiocoContentFreezeMigration
         $existing = (string) $field->get('options');
         $isSelectish = $existing !== '' || stripos((string) $field->get('inputfieldClass'), 'select') !== false;
         if (!$isSelectish) {
-            return; // Freitextfeld — keine Optionsliste vorhanden, nichts zu übersetzen
+            // Freitextfeld (so legt diese Migration section_layout/section_theme/
+            // button_variant an): eine echte Optionsliste gibt es nicht, daher
+            // können keine Options-Titel gesetzt werden. Die deutschen
+            // Werte-Bedeutungen stehen stattdessen in der Feldbeschreibung
+            // (fieldLabelPlan). Wir melden das transparent statt still zu überspringen.
+            $this->row('(Schema)', '', $field->name, 'option-labels-skip', 'Freitextfeld — deutsche Werte stehen in der Feldbeschreibung (keine Optionsliste zu übersetzen)');
+            return;
         }
 
         $lines = [];
@@ -1258,10 +1264,14 @@ if (!defined('BIOCO_CONTENT_FREEZE_RAN')) {
         }
 
         // --- Guard 1: kein unverschlüsseltes HTTP ---
+        // Nur vertrauenswürdige Server-Signale prüfen. HTTP_X_FORWARDED_PROTO
+        // ist ein client-gesetzter Request-Header und darf die HTTPS-Pflicht
+        // NICHT aufheben (sonst genügt `X-Forwarded-Proto: https` auf einer
+        // Klartext-Verbindung). Novatrend/cPanel terminiert TLS direkt in
+        // Apache, daher reichen HTTPS + SERVER_PORT.
         if (!$isCli) {
             $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
-                || (($_SERVER['SERVER_PORT'] ?? '') === '443')
-                || (strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https');
+                || (($_SERVER['SERVER_PORT'] ?? '') === '443');
             if (!$https) {
                 http_response_code(403);
                 header('Content-Type: text/plain; charset=utf-8');
