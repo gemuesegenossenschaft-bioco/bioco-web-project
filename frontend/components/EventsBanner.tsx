@@ -11,14 +11,16 @@ interface EventsBannerProps {
   title?: string
   showTitle?: boolean
   variant?: 'default' | 'embedded'
+  limit?: number
 }
 
 export function EventsBanner({
   title = 'Nächste Events',
   showTitle = true,
   variant = 'default',
+  limit = 3,
 }: EventsBannerProps) {
-  const { upcoming: eventItems, isLoading, error } = useEventsFeed(3)
+  const { upcoming: eventItems, isLoading, error } = useEventsFeed(limit)
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 

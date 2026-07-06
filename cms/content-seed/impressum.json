@@ -1,0 +1,43 @@
+{
+  "path": "/impressum/",
+  "slug": "impressum",
+  "template": "basic-page",
+  "title": "Impressum",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_text": "<h3>Impressum</h3>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "kontakt",
+      "section_title": "Kontakt",
+      "section_text": "<p><strong>Gemüsegenossenschaft biocò</strong><br>Geisshof<br>5412 Gebenstorf<br>Schweiz</p><p><strong>E-Mail:</strong> <a href=\"mailto:info@bioco.ch\">info@bioco.ch</a></p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "vertretungsberechtigte-personen",
+      "section_title": "Vertretungsberechtigte Personen",
+      "section_text": "<p>Betriebsgruppe der Gemüsegenossenschaft biocò</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "haftungsausschluss",
+      "section_title": "Haftungsausschluss",
+      "section_text": "<p>Der Inhalt dieser Website wurde mit grösster Sorgfalt erstellt. Für die Richtigkeit, Vollständigkeit und Aktualität der Inhalte können wir jedoch keine Gewähr übernehmen.</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "urheberrecht",
+      "section_title": "Urheberrecht",
+      "section_text": "<p>Die durch die Seitenbetreiber erstellten Inhalte und Werke auf diesen Seiten unterliegen dem schweizerischen Urheberrecht. Die Vervielfältigung, Bearbeitung, Verbreitung und jede Art der Verwertung ausserhalb der Grenzen des Urheberrechtes bedürfen der schriftlichen Zustimmung des jeweiligen Autors bzw. Erstellers.</p>",
+      "section_layout": "rich_text"
+    }
+  ],
+  "conversion_notes": [
+    "Page has NO h1 today: the bento-card header renders <h3>Impressum</h3>. It is kept as <h3> in the intro section_text to preserve heading levels exactly.",
+    "All content headings are <h2> today and map to section_title (SectionRenderer emits h2). None of these sections contain other headings in section_text, so section_title is not suppressed.",
+    "Page exports no metadata — 'seo' omitted; the layout default <title> applies today.",
+    "Current card chrome (bento-card bento-card-large, plant-pattern, card-header/card-body wrappers) is layout, not content, and is not represented in the seed."
+  ]
+}

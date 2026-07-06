@@ -33,7 +33,9 @@ describe('captcha-free subscription forms', () => {
     const { MembershipForm } = await import('@/components/forms/MembershipForm')
     const { container } = render(<MembershipForm initialData={{ aboType: 'standard', additionalShares: 0, membershipType: 'abo' }} />)
 
-    for (const checkbox of container.querySelectorAll<HTMLInputElement>('.commitment-checklist input[type="checkbox"]')) {
+    for (const checkbox of Array.from(
+      container.querySelectorAll<HTMLInputElement>('.commitment-checklist input[type="checkbox"]')
+    )) {
       fireEvent.click(checkbox)
     }
     fireEvent.click(screen.getByRole('button', { name: 'Weiter' }))

@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import type { ContentSection } from '@/lib/processwire-types'
 import { applyVisualEditorFieldChange } from '@/lib/visualEditorContract'
-
-const MSG_PREFIX = 'bioco:visual-editor:'
+import { useIframeChannel } from '@/lib/visual-editor/useIframeChannel'
+import type { MessageOfType, ParentToIframeMessage } from '@/lib/visual-editor/protocol'
 
 interface UseVisualEditorOptions {
   enabled: boolean
@@ -19,23 +19,6 @@ interface UseVisualEditorReturn {
 }
 
 type VisualEditorMode = 'edit' | 'browse'
-
-function isInIframe(): boolean {
-  try {
-    return typeof window !== 'undefined' && window.parent !== window
-  } catch {
-    return false
-  }
-}
-
-function sendToParent(type: string, data: Record<string, unknown> = {}) {
-  if (!isInIframe()) return
-  try {
-    window.parent.postMessage({ type: `${MSG_PREFIX}${type}`, ...data }, '*')
-  } catch {
-    // cross-origin or unavailable
-  }
-}
 
 export function useVisualEditor({ enabled, sections: initialSections }: UseVisualEditorOptions): UseVisualEditorReturn {
   const [sections, setSections] = useState<ContentSection[]>(initialSections)
@@ -54,78 +37,59 @@ export function useVisualEditor({ enabled, sections: initialSections }: UseVisua
     sectionsRef.current = sections
   }, [sections])
 
-  // Send ready message on mount
-  useEffect(() => {
-    if (!enabled) return
-    sendToParent('ready', {
-      path: pathname || '/',
-      sectionIds: sectionsRef.current.map(s => s.id),
-    })
-  }, [enabled, pathname])
-
-  // Listen for messages from PW admin
-  useEffect(() => {
-    if (!enabled) return
-
-    function handleMessage(event: MessageEvent) {
-      const data = event.data
-      if (!data || typeof data.type !== 'string' || !data.type.startsWith(MSG_PREFIX)) return
-
-      const action = data.type.slice(MSG_PREFIX.length)
-
-      switch (action) {
-        case 'section-update': {
-          const { sectionId, field, value } = data
-          if (!sectionId || !field) return
-          setSections(prev =>
-            prev.map(s =>
-              s.id === sectionId ? applyVisualEditorFieldChange(s, { field, value }) : s
-            )
+  // Inbound messages arrive already origin-validated and structurally parsed by
+  // the shared iframe channel (fail-closed against a non-allowlisted origin);
+  // only parent->iframe types reach this handler.
+  const handleParentMessage = useCallback((message: ParentToIframeMessage) => {
+    switch (message.type) {
+      case 'section-update': {
+        const { sectionId, field, value } = message
+        setSections(prev =>
+          prev.map(s =>
+            s.id === sectionId ? applyVisualEditorFieldChange(s, { field, value }) : s
           )
-          break
-        }
-        case 'section-highlight': {
-          setHighlightedSectionId(data.sectionId || null)
-          break
-        }
-        case 'save-state': {
-          setMode(data.mode === 'browse' ? 'browse' : 'edit')
-          break
-        }
-        case 'sections-replace': {
-          if (Array.isArray(data.sections)) {
-            setSections(data.sections)
-          }
-          break
-        }
+        )
+        break
+      }
+      case 'section-highlight': {
+        setHighlightedSectionId(message.sectionId || null)
+        break
+      }
+      case 'save-state': {
+        setMode(message.mode === 'browse' ? 'browse' : 'edit')
+        break
+      }
+      case 'sections-replace': {
+        // Entries are validated (records with a non-empty string id) by the
+        // protocol parser before delivery.
+        setSections(message.sections as ContentSection[])
+        break
+      }
+      case 'section-scroll': {
+        const el = document.querySelector(`[data-section-id="${message.sectionId}"]`)
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        break
       }
     }
+  }, [])
 
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [enabled])
+  const { send } = useIframeChannel({ enabled, onMessage: handleParentMessage })
+
+  // Send ready message on mount / when the pathname changes. Outbound posts
+  // target the adopted parent origin (or broadcast across the allowlist), never '*'.
+  useEffect(() => {
+    if (!enabled) return
+    send('ready', { path: pathname || '/' })
+  }, [enabled, pathname, send])
 
   const handleSectionClick = useCallback((sectionId: string) => {
     if (!enabled || mode !== 'edit') return
     const section = sectionsRef.current.find(s => s.id === sectionId)
     if (!section) return
-    sendToParent('section-click', { sectionId, section })
-  }, [enabled, mode])
-
-  // Handle scroll-to-section messages
-  useEffect(() => {
-    if (!enabled) return
-
-    function handleMessage(event: MessageEvent) {
-      const data = event.data
-      if (!data || data.type !== `${MSG_PREFIX}section-scroll`) return
-      const el = document.querySelector(`[data-section-id="${data.sectionId}"]`)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [enabled])
+    // `section` is carried alongside `sectionId` for the parent shell; the
+    // wire encoder passes it through unchanged.
+    send('section-click', { sectionId, section } as Omit<MessageOfType<'section-click'>, 'type'>)
+  }, [enabled, mode, send])
 
   return {
     sections: enabled ? sections : initialSections,

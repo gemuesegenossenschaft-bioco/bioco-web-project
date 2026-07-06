@@ -25,6 +25,9 @@ vi.mock('next/navigation', () => ({
   usePathname: () => '/standorte-depots',
 }))
 vi.mock('@/lib/processwire', () => ({
+  getPageSections: vi.fn(
+    async (pageName: string) => cmsSectionsByPage[pageName as keyof typeof cmsSectionsByPage] || []
+  ),
   getPageSectionsWithSeo: vi.fn(async (pageName: string) => ({
     sections: cmsSectionsByPage[pageName as keyof typeof cmsSectionsByPage] || [],
     seo: null,
@@ -54,24 +57,27 @@ describe('visual editor route availability', () => {
     vi.clearAllMocks()
   })
 
-  it('renders standorte-depots fallback content instead of CMS sections', async () => {
+  // F.5 inverted the old contract: these routes are CMS-driven now — the
+  // pages render whatever ProcessWire returns and no hardcoded fallback
+  // copy exists to shadow it.
+  it('renders standorte-depots from CMS sections with no hardcoded fallback', async () => {
     const { default: StandortePage } = await import('@/app/standorte-depots/page')
     const element = await StandortePage()
     render(element)
 
-    expect(screen.getByText('Unsere Standorte & Depots')).toBeInTheDocument()
-    expect(screen.queryByText('CMS Standorte')).not.toBeInTheDocument()
+    expect(screen.getAllByText('CMS Standorte').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Unsere Standorte & Depots')).not.toBeInTheDocument()
     expect(screen.getByTestId('geisshof-map')).toBeInTheDocument()
     expect(screen.getByTestId('depot-map')).toBeInTheDocument()
   })
 
-  it('renders bioco-werden fallback content instead of CMS sections', async () => {
+  it('renders bioco-werden from CMS sections with no hardcoded fallback', async () => {
     const { default: BiocoWerdenPage } = await import('@/app/bioco-werden/page')
     const element = await BiocoWerdenPage()
     render(element)
 
-    expect(screen.getByText('biocò werden')).toBeInTheDocument()
-    expect(screen.queryByText('CMS Mitglied werden')).not.toBeInTheDocument()
+    expect(screen.getAllByText('CMS Mitglied werden').length).toBeGreaterThan(0)
+    expect(screen.queryByText('biocò werden')).not.toBeInTheDocument()
     expect(screen.getByTestId('pricing-calculator')).toBeInTheDocument()
   })
 })

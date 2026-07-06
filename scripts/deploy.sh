@@ -46,12 +46,18 @@ rsync -avzc "$LOCAL_DIR/scripts/healthcheck.sh" "$DEPLOY_HOST:$DEPLOY_DIR/health
 ssh "$DEPLOY_HOST" "chmod +x $DEPLOY_DIR/healthcheck.sh && test -x $DEPLOY_DIR/healthcheck.sh && bash -n $DEPLOY_DIR/healthcheck.sh"
 ssh "$DEPLOY_HOST" 'grep -F '\''kill "$oldpid"'\'' /home/bioco/bioco-frontend/start.sh >/dev/null'
 
+echo "=== Building visual-editor shell bundle ==="
+npm run build:ve-shell
+test -s "$LOCAL_DIR/site/templates/visual-editor-app.js"
+grep -q "bioco:visual-editor:" "$LOCAL_DIR/site/templates/visual-editor-app.js"
+
 echo "=== Uploading CMS templates + hooks ==="
 rsync -avzc \
   "$LOCAL_DIR/site/templates/admin.js" \
   "$LOCAL_DIR/site/templates/api.php" \
   "$LOCAL_DIR/site/templates/api-events.php" \
   "$LOCAL_DIR/site/templates/visual-editor.php" \
+  "$LOCAL_DIR/site/templates/visual-editor-app.js" \
   "$LOCAL_DIR/site/templates/visual-editor-focus-fields.json" \
   "$LOCAL_DIR/site/templates/internal-doc.php" \
   "$LOCAL_DIR/site/templates/internal_docs_container.php" \

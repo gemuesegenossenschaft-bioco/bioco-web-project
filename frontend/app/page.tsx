@@ -1,7 +1,6 @@
 import { Metadata } from 'next'
 import { Suspense } from 'react'
 import { getHomepageContent, getAktuelles } from '@/lib/processwire'
-import { getAktuellesItems } from '@/components/AktuellesData'
 import type { AktuellesItem } from '@/components/AktuellesData'
 import type { AktuellesNewsItem } from '@/lib/processwire-types'
 import type { HeroContent } from '@/lib/processwire-types'
@@ -62,8 +61,7 @@ export default async function Home() {
 
   const sections = cmsContent?.sections || []
 
-  const aktuellesItems: AktuellesItem[] =
-    cmsNews.length > 0 ? cmsNews.map(mapNewsToAktuellesItem) : getAktuellesItems()
+  const aktuellesItems: AktuellesItem[] = cmsNews.map(mapNewsToAktuellesItem)
 
   return (
     <Suspense fallback={null}>

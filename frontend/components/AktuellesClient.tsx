@@ -42,8 +42,9 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
   const upcomingSchnuppertagItems = upcomingGroups.schnuppertage
   const pastItems = past
   
-  // Get CMS content if available
+  // CMS-owned content sections (seeded from cms/content-seed/aktuelles.json)
   const introSection = sections?.find(s => s.id === 'intro')
+  const kennenlernenSection = sections?.find(s => s.id === 'kennenlernen-cta')
 
   return (
     <>
@@ -51,9 +52,9 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
       <main className="main-content">
         <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
           <section id="G-01" style={{ marginBottom: 'clamp(24px, 4vw, 48px)' }}>
-            {!hasHeadingHtml(introSection?.text) && (
+            {introSection && !hasHeadingHtml(introSection.text) && introSection.title && (
               <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
-                {introSection?.title || 'Aktuelles'}
+                {introSection.title}
               </h1>
             )}
             {introSection?.text && (
@@ -165,23 +166,32 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
             </section>
           )}
 
-          {/* Möchtest du uns kennenlernen - Am Ende */}
-          <section id="B-06" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
-            <h2>Möchtest du uns kennenlernen?</h2>
-            <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>
-            <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
-              <CTA
-                text="Nimm Kontakt auf"
-                href="/kontakt"
-                variant="primary"
-              />
-              <CTA
-                text="Zu uns finden"
-                href="/standorte-depots"
-                variant="secondary"
-              />
-            </div>
-          </section>
+          {/* CMS section 'kennenlernen-cta' - Am Ende */}
+          {kennenlernenSection && (
+            <section id="B-06" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+              {!hasHeadingHtml(kennenlernenSection.text) && (
+                <h2>{kennenlernenSection.title}</h2>
+              )}
+              {kennenlernenSection.text && (
+                <div
+                  style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}
+                  dangerouslySetInnerHTML={{ __html: kennenlernenSection.text }}
+                />
+              )}
+              {kennenlernenSection.buttons?.length ? (
+                <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+                  {kennenlernenSection.buttons.map((btn, i) => (
+                    <CTA
+                      key={i}
+                      text={btn.text}
+                      href={btn.href}
+                      variant={btn.variant as 'primary' | 'secondary'}
+                    />
+                  ))}
+                </div>
+              ) : null}
+            </section>
+          )}
         </div>
       </main>
       <Footer />

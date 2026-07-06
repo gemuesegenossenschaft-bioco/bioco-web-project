@@ -49,9 +49,7 @@ export default async function AbosPage() {
       <ProductSchema />
       <Header />
       <main className="main-content">
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
-          <SectionRenderer sections={sections} pagePath="/abos" />
-        </div>
+        <SectionRenderer sections={sections} pagePath="/abos" />
       </main>
       <Footer />
     </>

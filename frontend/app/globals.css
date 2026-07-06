@@ -92,7 +92,7 @@ body {
 .cms-sections {
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: clamp(32px, 6vw, 96px) clamp(16px, 6vw, 96px);
+  padding: clamp(32px, 6vw, 96px) var(--page-inline-padding);
 }
 
 .cms-section {

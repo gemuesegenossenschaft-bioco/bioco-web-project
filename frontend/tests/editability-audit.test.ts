@@ -18,12 +18,19 @@ function routeFiles(dir: string, base = 'app'): string[] {
 }
 const routes = routeFiles('app')
 
-describe('editability audit (B.1)', () => {
+describe('editability audit (B.1, flipped by F.7)', () => {
   it('classifies known routes', () => {
     expect(classifyRoute('/abos')).toBe('cms')
     expect(classifyRoute('/(cms)/[...slug]')).toBe('cms')
-    expect(classifyRoute('/wir')).toBe('hardcoded')
-    expect(classifyRoute('/impressum')).toBe('hardcoded')
+    expect(classifyRoute('/wir')).toBe('cms')
+    expect(classifyRoute('/impressum')).toBe('cms')
+    expect(classifyRoute('/anmeldung')).toBe('cms')
+    expect(classifyRoute('/')).toBe('cms')
+  })
+
+  it('every route is cms except the single code-owned functional route (F.7)', () => {
+    const exceptions = Object.entries(AUDIT).filter(([, e]) => e.status !== 'cms')
+    expect(exceptions.map(([route]) => route)).toEqual(['/doi-confirm'])
   })
 
   it('throws on an unknown route', () => {

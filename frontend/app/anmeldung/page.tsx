@@ -1,8 +1,17 @@
+import { Suspense } from 'react'
 import { MinimalHeader } from '@/components/MinimalHeader'
-import { Footer } from '@/components/Footer'
-import { MembershipForm } from '@/components/forms/MembershipForm'
+import { getPageSections } from '@/lib/processwire'
+import { VisualEditorWrapper } from '@/components/sections/VisualEditorWrapper'
+import { SectionsFallback } from '@/components/CmsVisualEditorPage'
 
-export default function AnmeldungPage() {
+// ISR: Revalidate every 60 seconds
+export const revalidate = 60
+
+// Page chrome (MinimalHeader, bento card, plant pattern) is code-owned;
+// the h1 and the membership_form placement come from the CMS sections
+// for /anmeldung. The page intentionally has no footer, as before.
+export default async function AnmeldungPage() {
+  const sections = await getPageSections('anmeldung')
   return (
     <>
       <MinimalHeader />
@@ -10,8 +19,9 @@ export default function AnmeldungPage() {
         <div className="bento-grid">
           <section className="bento-card bento-card-fullwidth">
             <div className="plant-pattern"></div>
-            <h1>Anmeldung</h1>
-            <MembershipForm />
+            <Suspense fallback={<SectionsFallback sections={sections} />}>
+              <VisualEditorWrapper sections={sections} />
+            </Suspense>
           </section>
         </div>
       </main>

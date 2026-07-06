@@ -1,0 +1,34 @@
+name: Claude Task (manual)
+
+# Fire-and-forget automation: start a one-off Claude task from the Actions
+# tab with a free-text prompt (e.g. "run the frontend test suite and fix
+# any failures", "update ROADMAP.md checkboxes from merged PRs"). Uses the
+# same repo-scoped credentials as claude.yml. Requires ANTHROPIC_API_KEY.
+on:
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Task for Claude (German or English)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
+jobs:
+  claude-task:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude Code task
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: ${{ inputs.prompt }}
