@@ -62,7 +62,17 @@ export type ParentToIframeMessage =
 
 /** Messages the iframe runtime sends up to the parent shell. */
 export type IframeToParentMessage =
-  | { type: 'ready'; path: string; sectionIds: string[] }
+  | {
+      type: 'ready'
+      path: string
+      /**
+       * @deprecated Dead payload (G.1 latent bug 4): the parent shell only
+       * reads `path`. The iframe stopped sending it in G.3; the parser still
+       * tolerates (and sanitizes) it from older senders but no longer
+       * fabricates an empty array when absent.
+       */
+      sectionIds?: string[]
+    }
   | { type: 'section-click'; sectionId: string }
   | ({ type: 'field-select' } & VeFieldDescriptor)
   | {
@@ -192,7 +202,14 @@ const PARSERS: ParserMap = {
     return { type: 'section-update', sectionId: payload.sectionId, field: payload.field, value: payload.value }
   },
   'sections-replace': (payload) =>
-    Array.isArray(payload.sections) ? { type: 'sections-replace', sections: payload.sections } : null,
+    // Entries stay `unknown` at the type level (full ContentSection shapes are
+    // impractical to validate on the wire), but structurally every entry must
+    // be a record with a non-empty string id — the invariant both runtimes
+    // key on. Malformed lists reject the whole message (no partial applies).
+    Array.isArray(payload.sections) &&
+    payload.sections.every((entry) => isRecord(entry) && isNonEmptyString(entry.id))
+      ? { type: 'sections-replace', sections: payload.sections }
+      : null,
   'save-result': (payload) => {
     if (typeof payload.success !== 'boolean') return null
     return {
@@ -206,7 +223,13 @@ const PARSERS: ParserMap = {
   /* ---- iframe -> parent ---- */
   ready: (payload) => {
     if (typeof payload.path !== 'string') return null
-    return { type: 'ready', path: payload.path, sectionIds: sanitizeStringArray(payload.sectionIds) }
+    return {
+      type: 'ready',
+      path: payload.path,
+      // Deprecated dead payload: pass through (sanitized) only when a sender
+      // still includes it; never invent it.
+      ...(Array.isArray(payload.sectionIds) ? { sectionIds: sanitizeStringArray(payload.sectionIds) } : {}),
+    }
   },
   'section-click': (payload) =>
     isNonEmptyString(payload.sectionId) ? { type: 'section-click', sectionId: payload.sectionId } : null,

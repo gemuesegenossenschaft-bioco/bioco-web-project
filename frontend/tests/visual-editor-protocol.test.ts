@@ -69,7 +69,9 @@ const parentMessages: ParentToIframeMessage[] = [
 ]
 
 const iframeMessages: IframeToParentMessage[] = [
-  { type: 'ready', path: '/abos', sectionIds: ['__hero__', 'section-1', 'section-2'] },
+  { type: 'ready', path: '/abos' },
+  // sectionIds is a deprecated dead payload (the shell never reads it); the
+  // parser must keep tolerating senders that still include it.
   { type: 'ready', path: '/', sectionIds: [] },
   { type: 'section-click', sectionId: 'section-1' },
   { type: 'field-select', sectionId: 'section-1', field: 'text', kind: 'richtext', inline: true },
@@ -210,6 +212,15 @@ describe('visual editor postMessage protocol', () => {
     }, ALLOWED)
     expect(ready).toEqual({ type: 'ready', path: '/wir', sectionIds: ['a', 'b'] })
 
+    // G.3: sectionIds is dead (the shell only reads `path`); when the sender
+    // omits it, the parser must not fabricate an empty array.
+    const bare = parseMessage({
+      origin: PARENT_ORIGIN,
+      data: { type: `${MSG_PREFIX}ready`, path: '/wir' },
+    }, ALLOWED)
+    expect(bare).toEqual({ type: 'ready', path: '/wir' })
+    expect(bare).not.toHaveProperty('sectionIds')
+
     const saveState = parseMessage({
       origin: PARENT_ORIGIN,
       data: {
@@ -219,6 +230,31 @@ describe('visual editor postMessage protocol', () => {
       },
     }, ALLOWED)
     expect(saveState).toMatchObject({ presetTagsByComponent: { pricing_table: ['Abos'] } })
+  })
+
+  it('validates sections-replace entries structurally (records with a non-empty string id)', () => {
+    // G.1 latent bug (2): sections-replace used to be applied with only
+    // Array.isArray validation. The shell still sends it (app.ts
+    // refreshDraftUi), so the parser must reject malformed entries.
+    const parse = (sections: unknown) =>
+      parseMessage({ origin: PARENT_ORIGIN, data: { type: `${MSG_PREFIX}sections-replace`, sections } }, ALLOWED)
+
+    expect(parse([])).toEqual({ type: 'sections-replace', sections: [] })
+    expect(parse([{ id: 'section-1' }, { id: 'draft:abc', title: 'Neu', buttons: [] }])).toEqual({
+      type: 'sections-replace',
+      sections: [{ id: 'section-1' }, { id: 'draft:abc', title: 'Neu', buttons: [] }],
+    })
+
+    expect(parse(undefined)).toBeNull()
+    expect(parse('nope')).toBeNull()
+    expect(parse(['nope'])).toBeNull()
+    expect(parse([null])).toBeNull()
+    expect(parse([42])).toBeNull()
+    expect(parse([[]])).toBeNull()
+    expect(parse([{}])).toBeNull()
+    expect(parse([{ id: '' }])).toBeNull()
+    expect(parse([{ id: 7 }])).toBeNull()
+    expect(parse([{ id: 'ok' }, { title: 'missing id' }])).toBeNull()
   })
 
   it('defaults field descriptor inline to true unless explicitly false', () => {
@@ -297,6 +333,8 @@ describe('visual editor postMessage protocol', () => {
     expect(isIframeMessage({ type: 'section-action', sectionId: 's1', action: 'explode' })).toBe(false)
     expect(isIframeMessage({ type: 'ready', path: 42 })).toBe(false)
     expect(isIframeMessage({ type: 'section-click', sectionId: '' })).toBe(false)
+    expect(isParentMessage({ type: 'sections-replace', sections: [{}] })).toBe(false)
+    expect(isParentMessage({ type: 'sections-replace', sections: [{ id: 's1' }] })).toBe(true)
     expect(isParentMessage(null)).toBe(false)
     expect(isIframeMessage('ready')).toBe(false)
   })

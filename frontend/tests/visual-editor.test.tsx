@@ -2,9 +2,24 @@ import React from 'react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render, screen, act, fireEvent, waitFor } from '@testing-library/react'
 import type { ContentSection } from '@/lib/processwire-types'
+import { CMS_PARENT_ORIGIN } from '@/lib/visual-editor/protocol'
 
 let mockSearch = ''
 let mockPathname = '/'
+
+// The iframe runtimes now validate every inbound message against an origin
+// allowlist (cms.bioco.ch + same-origin + a parent origin derived from the
+// referrer / ?_visual_origin). These tests previously relied on the old
+// no-origin-check bug, so they must dispatch from — and assert posts targeted
+// at — the real CMS shell origin. Setting document.referrer seeds that origin.
+const FOREIGN_ORIGIN = 'https://evil.example'
+
+function setCmsReferrer() {
+  Object.defineProperty(document, 'referrer', {
+    value: 'https://cms.bioco.ch/visual-editor/?path=/',
+    configurable: true,
+  })
+}
 
 vi.mock('next/image', () => ({
   default: (props: Record<string, unknown>) => <img data-testid="next-image" {...props} />,
@@ -62,6 +77,7 @@ const homepageSections: ContentSection[] = [
 beforeEach(() => {
   mockSearch = ''
   mockPathname = '/'
+  setCmsReferrer()
 })
 
 describe('SectionRenderer data-section-id attributes', () => {
@@ -180,7 +196,7 @@ describe('useVisualEditor hook', () => {
 
     expect(postMessageSpy).toHaveBeenCalledWith(
       expect.objectContaining({ type: 'bioco:visual-editor:ready', path: '/' }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 
@@ -199,7 +215,7 @@ describe('useVisualEditor hook', () => {
     await waitFor(() => {
       expect(postMessageSpy).toHaveBeenCalledWith(
         expect.objectContaining({ type: 'bioco:visual-editor:ready', path: '/mitmachen' }),
-        '*'
+        CMS_PARENT_ORIGIN
       )
     })
   })
@@ -223,7 +239,7 @@ describe('useVisualEditor hook', () => {
         sectionId: 'section-1',
         section: testSections[0],
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 
@@ -246,6 +262,7 @@ describe('useVisualEditor hook', () => {
     // Simulate incoming postMessage from PW admin
     act(() => {
       window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
         data: {
           type: 'bioco:visual-editor:section-update',
           sectionId: 'section-1',
@@ -284,6 +301,7 @@ describe('useVisualEditor hook', () => {
 
     act(() => {
       window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
         data: {
           type: 'bioco:visual-editor:save-state',
           mode: 'browse',
@@ -295,7 +313,7 @@ describe('useVisualEditor hook', () => {
 
     expect(postMessageSpy).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'bioco:visual-editor:section-click' }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 })
@@ -313,6 +331,7 @@ describe('Visual editor postMessage protocol', () => {
 
     act(() => {
       window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
         data: { type: 'unrelated:message', sectionId: 'section-1', field: 'title', value: 'HACKED' },
       }))
     })
@@ -332,6 +351,7 @@ describe('Visual editor postMessage protocol', () => {
 
     act(() => {
       window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
         data: { type: 'bioco:visual-editor:section-highlight', sectionId: 'section-2' },
       }))
     })
@@ -382,7 +402,7 @@ describe('InlineVisualEditorRuntime', () => {
         sectionId: 'section-1',
         field: 'title',
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
 
     const editor = container.querySelector('.ve-inline-text-editor') as HTMLDivElement | null
@@ -410,7 +430,7 @@ describe('InlineVisualEditorRuntime', () => {
         type: 'bioco:visual-editor:section-click',
         sectionId: 'section-1',
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
     expect(screen.getByRole('button', { name: 'Duplizieren' })).toBeInTheDocument()
     expect(container.querySelector('.ve-inline-text-editor')).toBeFalsy()
@@ -437,6 +457,7 @@ describe('InlineVisualEditorRuntime', () => {
 
     act(() => {
       window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
         data: {
           type: 'bioco:visual-editor:save-state',
           mode: 'browse',
@@ -448,7 +469,7 @@ describe('InlineVisualEditorRuntime', () => {
 
     expect(postMessageSpy).not.toHaveBeenCalledWith(
       expect.objectContaining({ type: 'bioco:visual-editor:field-select' }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 
@@ -473,6 +494,7 @@ describe('InlineVisualEditorRuntime', () => {
 
     act(() => {
       window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
         data: {
           type: 'bioco:visual-editor:save-state',
           mode: 'edit',
@@ -566,7 +588,7 @@ describe('InlineVisualEditorRuntime', () => {
         field: 'component',
         value: 'timeline_item',
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 
@@ -609,7 +631,7 @@ describe('InlineVisualEditorRuntime', () => {
         field: 'videoUrl',
         value: 'https://example.com/new.mp4',
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
     expect(postMessageSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -617,7 +639,7 @@ describe('InlineVisualEditorRuntime', () => {
         field: 'videoTitle',
         value: 'Neu',
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 
@@ -660,7 +682,7 @@ describe('InlineVisualEditorRuntime', () => {
         field: 'mediaItems',
         value: [{ url: '/b.jpg', alt: 'B', type: 'image' }],
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 
@@ -693,7 +715,7 @@ describe('InlineVisualEditorRuntime', () => {
         field: 'title',
         kind: 'text',
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 
@@ -716,7 +738,7 @@ describe('InlineVisualEditorRuntime', () => {
         type: 'bioco:visual-editor:open-processwire',
         sectionId: 'section-1',
       }),
-      '*'
+      CMS_PARENT_ORIGIN
     )
   })
 })
@@ -756,6 +778,7 @@ describe('HomeClient visual editor integration', () => {
 
     act(() => {
       window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
         data: {
           type: 'bioco:visual-editor:section-update',
           sectionId: 'willkommen',
@@ -782,6 +805,7 @@ describe('HomeClient visual editor integration', () => {
 
     act(() => {
       window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
         data: {
           type: 'bioco:visual-editor:section-update',
           sectionId: '__hero__',
@@ -816,5 +840,156 @@ describe('HomeClient visual editor integration', () => {
     expect(screen.getByRole('heading', { name: 'Neue CMS Section' })).toBeInTheDocument()
     expect(container.querySelector('[data-section-id="new-cms-section"]')).toBeTruthy()
     expect(container.querySelector('[data-ve-section-id="new-cms-section"][data-ve-field="text"]')).toBeTruthy()
+  })
+})
+
+// G.3 iframe-runtime origin hardening: the confirmed finding was that both
+// iframe consumers accepted postMessages from ANY origin and posted to
+// targetOrigin '*'. These tests exercise the real React runtimes (not just the
+// channel module) to prove the fix end-to-end: foreign-origin traffic is
+// dropped fail-closed, allowed-origin traffic still works, and every outbound
+// post carries a concrete targetOrigin — never '*'.
+describe('visual editor iframe-runtime origin hardening (G.3)', () => {
+  let postMessageSpy: ReturnType<typeof vi.fn>
+
+  beforeEach(() => {
+    postMessageSpy = vi.fn()
+    Object.defineProperty(window, 'parent', {
+      value: { postMessage: postMessageSpy },
+      writable: true,
+    })
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('useVisualEditor drops a section-update from a foreign origin but applies one from the CMS origin', async () => {
+    const { useVisualEditor } = await import('@/hooks/useVisualEditor')
+
+    function TestComponent() {
+      const { sections: liveSections } = useVisualEditor({ enabled: true, sections: testSections })
+      return <span data-testid="title">{liveSections[0].title}</span>
+    }
+
+    render(<TestComponent />)
+
+    // Attacker-controlled origin: must be ignored (fail-closed).
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        origin: FOREIGN_ORIGIN,
+        data: { type: 'bioco:visual-editor:section-update', sectionId: 'section-1', field: 'title', value: 'HACKED' },
+      }))
+    })
+    expect(screen.getByTestId('title').textContent).toBe('First')
+
+    // Legitimate CMS shell origin: processed as before.
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
+        data: { type: 'bioco:visual-editor:section-update', sectionId: 'section-1', field: 'title', value: 'Legit' },
+      }))
+    })
+    expect(screen.getByTestId('title').textContent).toBe('Legit')
+  })
+
+  it('useVisualEditor drops sections-replace from a foreign origin', async () => {
+    const { useVisualEditor } = await import('@/hooks/useVisualEditor')
+
+    function TestComponent() {
+      const { sections: liveSections } = useVisualEditor({ enabled: true, sections: testSections })
+      return <span data-testid="count">{liveSections.length}</span>
+    }
+
+    render(<TestComponent />)
+
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        origin: FOREIGN_ORIGIN,
+        data: { type: 'bioco:visual-editor:sections-replace', sections: [{ id: 'x', title: 'evil' }] },
+      }))
+    })
+
+    expect(screen.getByTestId('count').textContent).toBe('3')
+  })
+
+  it('useVisualEditor posts ready to a concrete parent origin, never "*"', async () => {
+    const { useVisualEditor } = await import('@/hooks/useVisualEditor')
+
+    function TestComponent() {
+      useVisualEditor({ enabled: true, sections: testSections })
+      return <div>test</div>
+    }
+
+    render(<TestComponent />)
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'bioco:visual-editor:ready', path: '/' }),
+      CMS_PARENT_ORIGIN
+    )
+    // The old bug: broadcast to '*'. That must never happen anymore.
+    for (const call of postMessageSpy.mock.calls) {
+      expect(call[1]).not.toBe('*')
+    }
+  })
+
+  it('InlineVisualEditorRuntime ignores a save-state busy lock from a foreign origin', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <div data-testid="section-space">Section space</div>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={testSections} />
+      </div>
+    )
+
+    // Foreign origin busy lock: must NOT block the editor.
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        origin: FOREIGN_ORIGIN,
+        data: { type: 'bioco:visual-editor:save-state', mode: 'edit', busy: true, busyLabel: 'Foreign lock' },
+      }))
+    })
+    expect(screen.queryByText('Foreign lock')).not.toBeInTheDocument()
+
+    // CMS origin busy lock: applied as before.
+    act(() => {
+      window.dispatchEvent(new MessageEvent('message', {
+        origin: CMS_PARENT_ORIGIN,
+        data: { type: 'bioco:visual-editor:save-state', mode: 'edit', busy: true, busyLabel: 'Echte Sperre' },
+      }))
+    })
+    expect(screen.getByText('Echte Sperre')).toBeInTheDocument()
+  })
+
+  it('InlineVisualEditorRuntime posts field-select to a concrete origin, never "*"', async () => {
+    const { InlineVisualEditorRuntime } = await import('@/components/visual-editor/InlineVisualEditorRuntime')
+    render(
+      <div>
+        <div data-section-id="section-1" data-section-layout="rich_text">
+          <button
+            type="button"
+            data-ve-section-id="section-1"
+            data-ve-field="title"
+            data-ve-kind="text"
+            data-ve-inline="true"
+          >
+            Title target
+          </button>
+        </div>
+        <InlineVisualEditorRuntime enabled={true} sections={testSections} />
+      </div>
+    )
+
+    fireEvent.click(screen.getByText('Title target'))
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'bioco:visual-editor:field-select', sectionId: 'section-1', field: 'title' }),
+      CMS_PARENT_ORIGIN
+    )
+    for (const call of postMessageSpy.mock.calls) {
+      expect(call[1]).not.toBe('*')
+    }
   })
 })

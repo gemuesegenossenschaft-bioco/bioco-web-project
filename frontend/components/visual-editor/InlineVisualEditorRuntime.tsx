@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { EditorContent, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import {
@@ -11,8 +11,8 @@ import {
   resolveComponentRegistryEntry,
 } from '@/lib/componentRegistry'
 import type { ContentSection } from '@/lib/processwire-types'
-
-const MSG_PREFIX = 'bioco:visual-editor:'
+import { useIframeChannel } from '@/lib/visual-editor/useIframeChannel'
+import type { IframeToParentMessage, ParentToIframeMessage } from '@/lib/visual-editor/protocol'
 
 type EditorMode = 'edit' | 'browse'
 
@@ -28,23 +28,6 @@ interface SelectedField {
 interface InlineVisualEditorRuntimeProps {
   enabled: boolean
   sections: ContentSection[]
-}
-
-function isInIframe(): boolean {
-  try {
-    return typeof window !== 'undefined' && window.parent !== window
-  } catch {
-    return false
-  }
-}
-
-function sendToParent(type: string, data: Record<string, unknown> = {}) {
-  if (!isInIframe()) return
-  try {
-    window.parent.postMessage({ type: `${MSG_PREFIX}${type}`, ...data }, '*')
-  } catch {
-    // cross-origin or unavailable
-  }
 }
 
 function escapeSelector(value: string): string {
@@ -116,6 +99,68 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
   const richTextChangeTimerRef = useRef<number | null>(null)
   const richTextSyncingRef = useRef(false)
 
+  // Inbound messages are origin-validated + structurally parsed by the shared
+  // iframe channel before reaching this handler (fail-closed against a
+  // non-allowlisted origin); only parent->iframe types arrive here.
+  const handleParentMessage = useCallback((message: ParentToIframeMessage) => {
+    switch (message.type) {
+      case 'save-state':
+        setMode(message.mode === 'browse' ? 'browse' : 'edit')
+        setSaveState({
+          dirty: message.dirty,
+          saving: message.saving,
+          busy: message.busy,
+          busyLabel: message.busyLabel,
+          message: message.message,
+        })
+        setPresetTagsByComponent(message.presetTagsByComponent)
+        setSelectedSectionId(message.selectedSectionId)
+        break
+      case 'section-highlight':
+        setSelectedSectionId(message.sectionId || null)
+        setInspectorOpen(!!message.sectionId)
+        if (!message.sectionId) {
+          setSelectedField(null)
+        }
+        break
+      case 'field-highlight':
+        setSelectedSectionId(message.sectionId)
+        setSelectedField({
+          sectionId: message.sectionId,
+          field: message.field,
+          kind: message.kind,
+          inline: message.inline,
+          buttonIndex: message.buttonIndex,
+          targetField: message.targetField,
+        })
+        setInspectorOpen(true)
+        break
+      case 'field-reset':
+        setSelectedField(null)
+        setInspectorOpen(!!selectedSectionId)
+        break
+      case 'save-result':
+        setSaveState((current) => ({
+          ...current,
+          message: message.success ? 'Publiziert' : String(message.error || 'Publizieren fehlgeschlagen'),
+        }))
+        break
+    }
+  }, [selectedSectionId])
+
+  const { send } = useIframeChannel({ enabled, onMessage: handleParentMessage })
+
+  // Ergonomic adapter preserving every existing call site: the shared channel's
+  // `send` targets the adopted parent origin (or broadcasts across the
+  // allowlist), never '*'. Types stay loose here because these payloads carry
+  // possibly-null section ids the strict per-message types would reject.
+  const sendToParent = useCallback(
+    (type: IframeToParentMessage['type'], data: Record<string, unknown> = {}) => {
+      ;(send as (t: IframeToParentMessage['type'], p: Record<string, unknown>) => void)(type, data)
+    },
+    [send]
+  )
+
   const selectedSection = useMemo(() => {
     return sections.find((section) => section.id === selectedSectionId) || null
   }, [sections, selectedSectionId])
@@ -183,65 +228,6 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
       }
     }
   }, [selectedField])
-
-  useEffect(() => {
-    if (!enabled) return
-
-    function handleMessage(event: MessageEvent) {
-      const data = event.data
-      if (!data || typeof data.type !== 'string' || !data.type.startsWith(MSG_PREFIX)) return
-
-      const action = data.type.slice(MSG_PREFIX.length)
-      switch (action) {
-        case 'save-state':
-          setMode(data.mode === 'browse' ? 'browse' : 'edit')
-          setSaveState({
-            dirty: !!data.dirty,
-            saving: !!data.saving,
-            busy: !!data.busy,
-            busyLabel: typeof data.busyLabel === 'string' ? data.busyLabel : '',
-            message: typeof data.message === 'string' ? data.message : '',
-          })
-          setPresetTagsByComponent((data.presetTagsByComponent && typeof data.presetTagsByComponent === 'object') ? data.presetTagsByComponent : {})
-          setSelectedSectionId(typeof data.selectedSectionId === 'string' ? data.selectedSectionId : null)
-          break
-        case 'section-highlight':
-          setSelectedSectionId(data.sectionId || null)
-          setInspectorOpen(!!data.sectionId)
-          if (!data.sectionId) {
-            setSelectedField(null)
-          }
-          break
-        case 'field-highlight':
-          if (data.sectionId && data.field && data.kind) {
-            setSelectedSectionId(data.sectionId)
-            setSelectedField({
-              sectionId: data.sectionId,
-              field: data.field,
-              kind: data.kind,
-              inline: data.inline !== false,
-              buttonIndex: typeof data.buttonIndex === 'number' ? data.buttonIndex : undefined,
-              targetField: typeof data.targetField === 'string' ? data.targetField : undefined,
-            })
-            setInspectorOpen(true)
-          }
-          break
-        case 'field-reset':
-          setSelectedField(null)
-          setInspectorOpen(!!selectedSectionId)
-          break
-        case 'save-result':
-          setSaveState((current) => ({
-            ...current,
-            message: data.success ? 'Publiziert' : String(data.error || 'Publizieren fehlgeschlagen'),
-          }))
-          break
-      }
-    }
-
-    window.addEventListener('message', handleMessage)
-    return () => window.removeEventListener('message', handleMessage)
-  }, [enabled, selectedSectionId])
 
   useEffect(() => {
     if (!enabled || mode !== 'edit' || saveState.busy) return
