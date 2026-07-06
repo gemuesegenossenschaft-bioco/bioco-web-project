@@ -5,13 +5,43 @@ import type { AktuellesItem } from './AktuellesData'
 import { filterSchnuppertage } from './AktuellesData'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import { EventSignupForm } from './EventSignupForm'
+import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
+import { getResolvedComponentConfig } from '@/lib/componentRegistry'
+import type { ContentSection, SectionConfigObject } from '@/lib/processwire-types'
 
-export function SchnuppertageSection() {
+// Editorial copy (heading, subheading + intro prose, the "Was dich erwartet"
+// list and the closing paragraph) is CMS-driven: section_title -> heading,
+// section_text -> subheading + intro (rich text), section_config -> list label,
+// item1..item7 and the closing paragraph. The live useEventsFeed date list and
+// the signup modal/button below stay code-owned (functional, not content).
+const SCHNUPPERTAGE_ITEM_COUNT = 7
+
+interface SchnuppertageSectionProps {
+  section?: ContentSection
+  visualEditor?: boolean
+}
+
+function configString(config: SectionConfigObject, key: string): string {
+  const value = config[key]
+  return value == null ? '' : String(value)
+}
+
+export function SchnuppertageSection({ section, visualEditor = false }: SchnuppertageSectionProps) {
   const [selectedEvent, setSelectedEvent] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const { upcoming } = useEventsFeed()
 
   const schnuppertage = filterSchnuppertage(upcoming).slice(0, 3)
+
+  const sectionId = section?.id || ''
+  const config = getResolvedComponentConfig(section?.component || 'schnuppertage', section?.config)
+  const listLabel = configString(config, 'list_label')
+  const closing = configString(config, 'closing')
+  const listItems: string[] = []
+  for (let n = 1; n <= SCHNUPPERTAGE_ITEM_COUNT; n++) {
+    const value = configString(config, `item${n}`).trim()
+    if (value) listItems.push(value)
+  }
 
   const openModal = (event: AktuellesItem) => {
     setSelectedEvent(event)
@@ -32,53 +62,61 @@ export function SchnuppertageSection() {
   return (
     <>
       <section id="D-02b">
-        <h2>Schnuppertage</h2>
-        <h3 style={{ fontSize: '1.25rem', marginTop: '16px', marginBottom: '12px', color: 'var(--bioco-green-dark)' }}>
-          Komm schnuppern: So geht solidarischer Gemüseanbau.
-        </h3>
-        <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-          Möchtest du dein Gemüse in Gemeinschaft anbauen und erfahren, wie es sich anfühlt, Teil einer Solawi zu sein?
-          Dann komm an einen unserer Schnuppertage vorbei. Geniesse einen Nachmittag auf dem Geisshof in Gebenstorf AG,
-          auf dem Feld umgeben von Natur und Tieren, Wildpflanzen, Bäumen, Beerensträuchern und Kräuterspirale.
-        </p>
+        {section?.title ? (
+          <h2 {...getVeFieldAttrs(visualEditor, sectionId, 'title', 'text', true)}>{section.title}</h2>
+        ) : null}
+        {section?.text ? (
+          <div
+            className="cms-section-text"
+            style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}
+            {...getVeFieldAttrs(visualEditor, sectionId, 'text', 'richtext', true)}
+            dangerouslySetInnerHTML={{ __html: section.text }}
+          />
+        ) : null}
 
-        {/* General description - shown once */}
-        <div style={{ 
-          background: 'var(--bg-secondary)', 
-          padding: '24px', 
-          borderRadius: '12px', 
-          marginBottom: '24px' 
-        }}>
-          <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-            <strong>Was dich erwartet:</strong>
-          </p>
-          <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px', paddingLeft: '20px' }}>
-            <li>Gemeinschaft auf dem Feld, umgeben von Natur</li>
-            <li>Unser Hof liegt auf einem Hügel über Gebenstorf AG</li>
-            <li>Deine Hilfe auf dem Feld</li>
-            <li>Danke: du bekommst eine Tasche frisch geerntetes Demeter-Gemüse</li>
-            <li>Kleines zVieri von uns spendiert</li>
-            <li>Hof und Demeteranbau kennenlernen</li>
-            <li>Möglichkeit anschliessend auf dem Gemeinschaftsplatz zu bräteln</li>
-          </ul>
-          <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '0' }}>
-            Uns ist ein achtsamer Umgang mit der Natur wichtig. Wir lassen viel Platz für Wildpflanzen, haben eine Kräuterspirale,
-            eine Naschecke mit Beeren, Sandkasten und Enten auf dem Hof. Auf dem Gemeinschaftsplatz hat es einen Sandkasten für Kinder
-            und eine Feuerstelle. Nach dem Schnuppernachmittag darfst du gerne noch bleiben und etwas grillieren.
-          </p>
-        </div>
+        {/* "Was dich erwartet" info box — label, list items and closing come
+            from section_config (CMS-editable). The grey card styling is code-owned. */}
+        {(listLabel || listItems.length > 0 || closing) ? (
+          <div
+            style={{
+              background: 'var(--bg-secondary)',
+              padding: '24px',
+              borderRadius: '12px',
+              marginBottom: '24px',
+            }}
+            {...getVeFieldAttrs(visualEditor, sectionId, 'component', 'structured', false)}
+          >
+            {listLabel ? (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                <strong>{listLabel}</strong>
+              </p>
+            ) : null}
+            {listItems.length > 0 ? (
+              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px', paddingLeft: '20px' }}>
+                {listItems.map((item, idx) => (
+                  <li key={idx}>{item}</li>
+                ))}
+              </ul>
+            ) : null}
+            {closing ? (
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '0' }}>
+                {closing}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
 
-        {/* Compact date list */}
+        {/* Compact date list — live from useEventsFeed (code-owned, functional) */}
         <h4 style={{ fontSize: '1.1rem', marginBottom: '16px', color: 'var(--text-primary)' }}>
           Nächste Termine
         </h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {schnuppertage.map((item, idx) => (
-            <div 
-              key={item.id || idx} 
-              style={{ 
-                background: 'rgba(var(--bioco-green-rgb), 0.15)', 
-                padding: '16px 20px', 
+            <div
+              key={item.id || idx}
+              style={{
+                background: 'rgba(var(--bioco-green-rgb), 0.15)',
+                padding: '16px 20px',
                 borderRadius: '12px',
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -103,9 +141,6 @@ export function SchnuppertageSection() {
             </div>
           ))}
         </div>
-
-        <p style={{ fontSize: '0.9rem', fontStyle: 'italic', color: 'var(--text-secondary)', marginTop: '16px' }}>
-        </p>
       </section>
 
       {/* Modal */}
@@ -125,7 +160,7 @@ export function SchnuppertageSection() {
               backdropFilter: 'blur(4px)'
             }}
           />
-          
+
           {/* Modal Content */}
           <div
             style={{

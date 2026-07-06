@@ -183,14 +183,67 @@
       "section_component",
       "section_title",
       "section_text",
-      "button_text",
-      "button_href",
-      "button_variant",
-      "button2_text",
-      "button2_href",
-      "button2_variant"
+      "section_config"
     ],
-    "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper."
+    "notes": "Redaktionelle Texte sind CMS-getrieben: section_title = Überschrift (h2), section_text = Unterüberschrift + Einleitungsabsatz (Rich-Text), section_config = Titel und die sieben Punkte der 'Was dich erwartet'-Liste sowie der Schlussabsatz. Die live Terminliste (useEventsFeed) und das Anmelde-Modal bleiben code-owned (funktional).",
+    "defaultConfig": {
+      "list_label": "",
+      "item1": "",
+      "item2": "",
+      "item3": "",
+      "item4": "",
+      "item5": "",
+      "item6": "",
+      "item7": "",
+      "closing": ""
+    },
+    "configSchema": [
+      {
+        "key": "list_label",
+        "label": "Was dich erwartet — Titel",
+        "type": "text"
+      },
+      {
+        "key": "item1",
+        "label": "Was dich erwartet — Punkt 1",
+        "type": "text"
+      },
+      {
+        "key": "item2",
+        "label": "Was dich erwartet — Punkt 2",
+        "type": "text"
+      },
+      {
+        "key": "item3",
+        "label": "Was dich erwartet — Punkt 3",
+        "type": "text"
+      },
+      {
+        "key": "item4",
+        "label": "Was dich erwartet — Punkt 4",
+        "type": "text"
+      },
+      {
+        "key": "item5",
+        "label": "Was dich erwartet — Punkt 5",
+        "type": "text"
+      },
+      {
+        "key": "item6",
+        "label": "Was dich erwartet — Punkt 6",
+        "type": "text"
+      },
+      {
+        "key": "item7",
+        "label": "Was dich erwartet — Punkt 7",
+        "type": "text"
+      },
+      {
+        "key": "closing",
+        "label": "Schlussabsatz",
+        "type": "text"
+      }
+    ]
   },
   {
     "key": "group_cards",

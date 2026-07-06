@@ -45,6 +45,7 @@ const layoutOwnedKeys = new Set([
   'accordion_item',
   'steps',
   'link_tiles',
+  'schnuppertage',
 ])
 
 export const componentRenderers: Record<string, ComponentRenderer> = {
@@ -64,7 +65,7 @@ export const componentRenderers: Record<string, ComponentRenderer> = {
     }
     return <EventsSection />
   },
-  schnuppertage: () => <SchnuppertageSection />,
+  schnuppertage: (section, visualEditor) => <SchnuppertageSection section={section} visualEditor={visualEditor} />,
   group_cards: () => <GroupCardsSection />,
   depot_map: () => <DepotMap />,
   geisshof_map: () => <GeisshofMap />,

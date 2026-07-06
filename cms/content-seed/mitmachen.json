@@ -32,7 +32,20 @@
     },
     {
       "section_id": "schnuppertage",
-      "section_component": "schnuppertage"
+      "section_title": "Schnuppertage",
+      "section_component": "schnuppertage",
+      "section_text": "<h3>Komm schnuppern: So geht solidarischer Gemüseanbau.</h3><p>Möchtest du dein Gemüse in Gemeinschaft anbauen und erfahren, wie es sich anfühlt, Teil einer Solawi zu sein? Dann komm an einen unserer Schnuppertage vorbei. Geniesse einen Nachmittag auf dem Geisshof in Gebenstorf AG, auf dem Feld umgeben von Natur und Tieren, Wildpflanzen, Bäumen, Beerensträuchern und Kräuterspirale.</p>",
+      "section_config": {
+        "list_label": "Was dich erwartet:",
+        "item1": "Gemeinschaft auf dem Feld, umgeben von Natur",
+        "item2": "Unser Hof liegt auf einem Hügel über Gebenstorf AG",
+        "item3": "Deine Hilfe auf dem Feld",
+        "item4": "Danke: du bekommst eine Tasche frisch geerntetes Demeter-Gemüse",
+        "item5": "Kleines zVieri von uns spendiert",
+        "item6": "Hof und Demeteranbau kennenlernen",
+        "item7": "Möglichkeit anschliessend auf dem Gemeinschaftsplatz zu bräteln",
+        "closing": "Uns ist ein achtsamer Umgang mit der Natur wichtig. Wir lassen viel Platz für Wildpflanzen, haben eine Kräuterspirale, eine Naschecke mit Beeren, Sandkasten und Enten auf dem Hof. Auf dem Gemeinschaftsplatz hat es einen Sandkasten für Kinder und eine Feuerstelle. Nach dem Schnuppernachmittag darfst du gerne noch bleiben und etwas grillieren."
+      }
     },
     {
       "section_id": "familien",
@@ -57,7 +70,7 @@
     "Der 'Mitarbeit'-Block rendert 'Tätigkeitsbereiche' und 'Planung' heute als zwei-spaltiges CSS-Grid (auto-fit, minmax(300px,1fr)). Die registrierte Komponente text_columns (TextColumnsBlock) nutzt CSS columnCount (Fliess-Spalten) und kann die feste Zuordnung Überschrift+Liste pro Spalte NICHT exakt abbilden – daher als rich_text geseedet; die Zweispaltigkeit ist ein Layout-Thema für die Umstellung.",
     "Am Ende der Mitarbeit-Section steht heute ein leerer Anker <div id=\"anmelden\"> als Scroll-Ziel – code-owned, beim Umbau erhalten.",
     "Die Seite prüft bereits eine CMS-Section 'familien' (sections.find(id === 'familien')); wenn vorhanden, rendert deren title/text/image statt des Fallbacks. Das Seed enthält den HARDCODIERTEN FALLBACK-Text. Das Bild kommt ausschliesslich aus dem CMS (kein hardcodierter Bildpfad, ohne CMS-Bild bleibt die Fläche leer); der Fallback-Alt-Text ist als image_alt geführt. Bild links, Text rechts → split_media_text.",
-    "Schnuppertage: sämtliche Texte (h2 'Schnuppertage', h3 'Komm schnuppern: So geht solidarischer Gemüseanbau.', Beschreibung, 'Was dich erwartet'-Box, 'Nächste Termine', Anmelde-Modal) leben in frontend/components/SchnuppertageSection.tsx und bleiben code-owned; hier nur die Platzierung als section_component 'schnuppertage'. Der volle-Breite-Hintergrundverlauf um die Section ist ebenfalls code-owned.",
+    "Schnuppertage: Die redaktionellen Texte sind jetzt CMS-getrieben — section_title = h2 'Schnuppertage', section_text = h3 'Komm schnuppern: So geht solidarischer Gemüseanbau.' + Einleitungsabsatz (Rich-Text), section_config.list_label = 'Was dich erwartet:', section_config.item1..item7 = die sieben Listenpunkte, section_config.closing = Schlussabsatz. Die Komponente SchnuppertageSection (registriert, ownsLayout) rendert diese Felder byte-identisch zur bisherigen Hartkodierung. CODE-OWNED bleibt nur das Funktionale: die live aus useEventsFeed gespeiste Terminliste inkl. Label 'Nächste Termine' und 'Jetzt anmelden', das Anmelde-Modal (Ort/Zeit/Formular) sowie der volle-Breite-Hintergrundverlauf und die graue Info-Box als Styling.",
     "Die Gruppen-Section rendert heute in einer abgerundeten Box (var(--surface-secondary)) – Styling code-owned.",
     "Heutige DOM-Section-IDs: D-01 (Mitarbeit), D-02 (Gruppen), D-02b (Schnuppertage, in der Komponente), D-03 (Familien), B-06 (Kennenlernen).",
     "metadata.keywords und metadata.openGraph existieren im Code, sind im Seed-Schema nicht abbildbar.",
