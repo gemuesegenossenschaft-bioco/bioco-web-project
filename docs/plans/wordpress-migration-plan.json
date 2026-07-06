@@ -1,0 +1,238 @@
+{
+  "epicTitle": "Rebuild bioco.ch on full WordPress (Bedrock + native block theme + ACF Blocks)",
+  "epicBody": "## Goal\n\nReplace the headless ProcessWire + Next.js stack with a **full WordPress** site that renders `bioco.ch` directly (Gutenberg is both the editor and the production render engine), rebuilt **pixel-perfect** to the cleaned current design and **self-hosted on the existing Novatrend cPanel box** for Swiss data sovereignty. Structure lives in git (Bedrock + block theme + ACF Local JSON + `theme.json`); content lives in MySQL. Deploy is build-in-CI + rsync-over-SSH via GitHub Actions, mirroring the repo's established off-server-build pattern.\n\n## Context & key decisions\n\n- **Full WP, not headless (ID-1):** deleting the bespoke Visual Editor subsystem and the entire Node ops surface (Passenger/`next-server` duplicate saga, `start.sh`/`healthcheck.sh` watchdog, `sharp` restore, ISR revalidate contract) is the payoff; the price is re-implementing ~20 pages and every bespoke component as blocks.\n- **Bedrock (ID-2):** `web/` docroot, WP core Composer-managed & gitignored, secrets via `.env`, ACF Pro key + Composer auth only in CI/server secrets. New **public** repo `gemuesegenossenschaft-bioco/bioco-wordpress`.\n- **Block theme + ACF Blocks + ACF Local JSON + `theme.json` (ID-3, ID-7):** layout/content sections are PHP-rendered ACF Blocks; field defs auto-written to git-tracked `acf-json/`; tokens mapped into `theme.json` (palette/custom/typography) with self-hosted Inter; `tokens.css` enqueued verbatim as the canonical variable layer.\n- **Server reuse (ID-5, ID-6):** same box (`193.33.128.160`), Apache + PHP-FPM, PHP 8.2 via MultiPHP, **new** `bioco_wp` DB (no PW schema reuse). `develop`→`staging.bioco.ch`, `main`→prod. OPcache-staleness-on-rsync gotcha applies exactly as it does for PW modules today.\n- **Content model (ID-8):** `content_sections` repeater + registered components → ~20 ACF Blocks on one shared \"Section Common\" clone group; config JSON exploded into native ACF fields; events → `event` CPT (past/upcoming `meta_query`); forms → custom mu-plugin handlers re-verifying Turnstile + SMTP.\n- **Cutover (ID-6):** flip `/home/bioco/public_html/.htaccess` docroot to Bedrock `web/`; keep `next-server` on :49154 and `cms.bioco.ch` alive for instant rollback until WP fully owns content.\n\n## Method\n\nMatt Pocock thin vertical slices: each cuts through all layers (block-in-git → ACF Local JSON → render → deploy) and is independently demoable. **Prefactor first** (Slice 1 de-risks server + captures the pixel-reference baseline), then a **tracer-bullet** slice (Slice 4) proves the entire pipeline to real staging before the block-building volume begins. Slices are dependency-ordered; the block slices (5–9) parallelize once the tracer bullet lands.\n\n## Slices (ordered)\n\n1. **Server capability spike + Phase 0 design baseline** — prefactor: verify the box, extract cleaned tokens, capture pixel references, inventory redirects.\n2. **Bedrock skeleton with DDEV local boot** — repo, Composer pins, DDEV, CI validate.\n3. **Block theme shell with theme.json design tokens** — FSE theme + tokens + self-hosted Inter + header/footer parts.\n4. **Tracer bullet: Hero block end-to-end with Actions deploy to staging** — THE pipeline proof.\n5. **Layout blocks** (rich text, media+text L/R, banner, media grid, video oEmbed).\n6. **Structured content blocks I** (page intro, cards grid, gallery strip, text columns, CTA band).\n7. **Structured content blocks II** (timeline, pricing table, accordion, steps, link tiles).\n8. **Events & news CPTs with events-feed and group-cards blocks.**\n9. **Interactive blocks** (depot/geisshof maps, pricing calculator, seasonal calendar, schnuppertage, gallery).\n10. **Forms, Turnstile, double-opt-in and SMTP delivery** (5 forms + `/doi-confirm`).\n11. **Page authoring and content migration to pixel parity** (~20 pages + events/news import).\n12. **SEO metadata, redirect map, Matomo and security hardening.**\n13. **Production cutover with instant rollback.**\n\n## Cross-cutting parity checklist (applies to blocks/pages slices)\n\nHeading-suppression parity (`hasHeadingHtml`); preserve HTML in rich text via `wp_kses` (anchors/`btn`/`<details>`/`mailto:`/inline `style`); Gutenberg `anchor`/HTML-id support for deep-link targets (`kontakt-formular`, depot `E-02`, `#anmelden`); `target=_blank`/`rel` on PDFs & externals; per-page `kennenlernen-cta` instances (not centralized); empty-href link tiles render `<div>` not `<a>`.\n\n## Definition of done\n\n`staging.bioco.ch` on WP is pixel-verified against the Slice 1 reference set for all ~20 routes; forms deliver mail with Turnstile+DOI; every redirect resolves; Matomo records; then `.htaccess` docroot flip makes WP authoritative on `bioco.ch` with `next-server`/PW retained for rollback.",
+  "slices": [
+    {
+      "title": "Server capability spike + Phase 0 design baseline",
+      "whatToBuild": "Prefactor slice that removes all downstream risk before any WP code exists. Confirm the four server unknowns and produce the pixel-parity + redirect ground truth every later slice verifies against. On the box: confirm cPanel MultiPHP offers PHP 8.2/8.3 and set the target; determine whether PHP-FPM reload is permitted (clean OPcache bust) or the vhost-root opcache_reset web-hit trick is required; confirm an Actions runner SSH deploy key can reach the bioco@193.33.128.160 account; confirm a fresh bioco_wp MySQL DB + least-privilege user can be created alongside the existing bioco_live/bioco_staging/matomo DBs and staging.bioco.ch subdomain. In the repo: extract the cleaned design tokens (brand greens/orange/beet, bg/bg-alt/text/grey, radii 6/12/18, spacing 8-64, three soft shadows, Inter) into a single documented token map; capture full-page screenshots + DOM snapshots of all ~20 live routes at mobile+desktop as the pixel-reference baseline; inventory every redirect from next.config.js redirects() (14 rules including the legacy /wp-content/uploads/2017/07 PDF rule).",
+      "acceptanceCriteria": [
+        "A written server matrix records: chosen PHP version for the bioco.ch vhost, the exact OPcache-busting mechanism available (FPM reload vs vhost-root reset file), confirmation the runner SSH key authenticates to bioco@193.33.128.160, and confirmation bioco_wp DB+user can be provisioned",
+        "A token map document lists every token name, its exact value (e.g. --bioco-green #39A933, --radius-lg 18px, --shadow-lg 0 8px 24px rgba(31,42,27,0.16)), and its intended theme.json destination (palette / custom / typography)",
+        "A reference set of screenshots + saved DOM/HTML exists for every public route (home, solawi, gemuese, mitmachen, standorte-depots, aktuelles, kontakt, bioco-werden, anmeldung, anmeldung-danke, newsletter, warteliste, tag-der-offenen-tuer, kundenportal, datenschutz, impressum, statuten, wir, abos) at mobile and desktop widths",
+        "A redirect inventory table lists all 14 source->destination(+permanent) pairs verbatim, explicitly including /wp-content/uploads/2017/07/1704_Gemueseabo.pdf -> /abos",
+        "No production change is made; deliverables are documents/assets only"
+      ],
+      "blockedBy": "None - can start immediately",
+      "labels": [
+        "prefactor",
+        "spike",
+        "infra",
+        "design-tokens"
+      ]
+    },
+    {
+      "title": "Bedrock skeleton with DDEV local boot",
+      "whatToBuild": "Stand up the git-developable project skeleton so a fresh WordPress boots locally with the security posture the org already commits to. Create the public repo with Bedrock layout: composer.json/composer.lock pinning WP core, ACF Pro (via Composer auth), and wpackagist plugins; config/application.php + per-env config; .env.example documenting every key (real .env server-only, gitignored); web/ docroot with core in web/wp (gitignored) and app content under web/app (themes, mu-plugins in git; plugins, uploads gitignored). Add a DDEV config reproducing the prod stack (Apache/PHP-FPM 8.2 + MySQL, docroot web/) so contributors get trusted-HTTPS local WP + WP-CLI. Add a minimal CI job that runs composer validate and PHP lint/phpcs on push. No custom theme behavior and no deploy yet - this slice proves the structure boots and installs reproducibly.",
+      "acceptanceCriteria": [
+        "ddev start boots a working WordPress install screen locally against real MySQL with docroot web/",
+        "composer install resolves WP core + ACF Pro + pinned plugins using CI/local Composer auth, and composer.lock is committed",
+        "git status confirms web/wp, web/app/plugins, web/app/uploads, and .env are untracked while composer.json/.lock, config/, .env.example, and web/app/themes|mu-plugins are tracked",
+        "No ACF Pro license key, Composer auth token, or secret appears anywhere in tracked files",
+        "CI runs on push and fails on invalid composer.json or PHP lint errors"
+      ],
+      "blockedBy": "None - can start immediately",
+      "labels": [
+        "infra",
+        "bedrock",
+        "ci-cd"
+      ]
+    },
+    {
+      "title": "Block theme shell with theme.json design tokens",
+      "whatToBuild": "Build the FSE block theme shell whose theme.json is the single token source feeding both the block editor UI and the frontend, giving editors on-brand guardrails and editor<->frontend pixel parity. Map the Slice 1 token map into theme.json: settings.color.palette (emitting --wp--preset--color--bioco-* ), settings.custom for radii/spacing/shadows, settings.typography.fontFamilies with self-hosted Inter via fontFace (woff2 in the theme, no Google Fonts CDN). Enqueue the existing tokens.css verbatim as the canonical variable layer for bespoke component CSS. Provide base FSE templates (index, page, single, 404) and header/footer template parts matching the current site chrome. No bespoke section blocks yet - a plain page rendered by this theme must already read as bioco.ch typographically and chromatically.",
+      "acceptanceCriteria": [
+        "theme.json defines the full brand palette, radii (6/12/18), spacing (8-64), three shadows, and Inter fontFamily; the editor color/typography pickers show only these on-brand presets",
+        "Inter loads from a self-hosted woff2 declared in theme.json fontFace with zero requests to fonts.googleapis.com / fonts.gstatic.com (verified in network panel)",
+        "tokens.css is enqueued on the frontend and its CSS custom properties resolve to the exact reference values",
+        "A default WordPress page rendered by the theme shows the correct background (#F6F9F5), text color (#1F2A1B), Inter font, and header/footer parts matching the reference chrome",
+        "--wp--preset--color--bioco-green and --wp--custom--* variables are present in the rendered CSS"
+      ],
+      "blockedBy": "Server capability spike + Phase 0 design baseline, Bedrock skeleton with DDEV local boot",
+      "labels": [
+        "theme",
+        "design-tokens",
+        "fse"
+      ]
+    },
+    {
+      "title": "Tracer bullet: Hero block end-to-end with Actions deploy to staging",
+      "whatToBuild": "The pipeline-proving slice: one real ACF Block travels the entire path (block-in-git -> ACF Local JSON -> PHP render -> GitHub Actions build -> rsync -> live on the real server) and establishes the reusable Section Common foundation. Build the Hero as an ACF Block (block.json + PHP render.php + an ACF field group written to git-tracked acf-json/ via Local JSON). Establish the shared Section Common ACF clone group (anchor, title, eyebrow, text WYSIWYG, theme, bg_color, buttons repeater max 2, image + alt, gallery, image overlay/brightness/contrast/saturate) that every later block reuses. Author deploy.yml: checkout -> setup-php 8.2 + composer install --no-dev with ACF Pro/Composer auth from CI secrets -> setup-node + build the theme's block view assets -> rsync -avzc --delete over SSH (deploy key from secret) to the server, EXCLUDING web/app/uploads, .env, and server-only drop-ins. After rsync, run the Slice 1 OPcache-bust mechanism and wp cache flush, then body smoke checks (no PHP fatal / white screen, wp option get home, external curl --resolve). develop deploys to staging.bioco.ch against a staging DB.",
+      "acceptanceCriteria": [
+        "Pushing to develop triggers deploy.yml which builds off-server and rsyncs to the box; staging.bioco.ch renders a page containing the Hero block matching the reference hero pixel-for-pixel",
+        "The Hero block appears in the Gutenberg inserter and edits to its fields (via Section Common clone) render server-side with no React block toolchain",
+        "Editing the Hero field group in wp-admin writes/updates a JSON file under the theme acf-json/ directory (Local JSON), and that change is diffable in git; loading admin on another env auto-syncs it",
+        "The deploy rsync excludes web/app/uploads (never --delete), .env, and object-cache.php; a file placed in staging uploads survives a redeploy",
+        "The post-deploy job runs the OPcache-bust step and fails the workflow if the smoke check detects a PHP fatal, white screen, or non-200 external response",
+        "The Section Common clone group is defined once and referenced by the Hero block (proving the reuse mechanism for slices 5-9)"
+      ],
+      "blockedBy": "Block theme shell with theme.json design tokens",
+      "labels": [
+        "blocks",
+        "acf",
+        "ci-cd",
+        "deploy",
+        "tracer-bullet"
+      ]
+    },
+    {
+      "title": "Layout blocks (rich text, media+text, banner, media grid, video)",
+      "whatToBuild": "Port the six no-component section_layout paths as server-rendered ACF Blocks on the Section Common clone group. rich_text (default: title/eyebrow/text/buttons); split_media_text and split_text_media as one media-text block with a media_side flag plus image overlay/brightness/contrast/saturate filters; full_width_banner; media_grid (gallery); video_embed rebuilt on WP oEmbed (replacing the custom YouTube/Vimeo URL parsing). Reimplement the heading-suppression rule (hide the block title when the WYSIWYG text already contains an h1-h6) in the PHP render, since several pages depend on it. Each block renders SSR, appears in the inserter, and matches its reference sections.",
+      "acceptanceCriteria": [
+        "All five block types (rich_text, media_text with left/right variants, full_width_banner, media_grid, video_embed) are available in the inserter and render server-side",
+        "media_text honors media_side and applies overlay + brightness/contrast/saturate filters matching the reference",
+        "video_embed renders via WP oEmbed for a YouTube and a Vimeo URL with no custom URL-parsing code",
+        "When a block's WYSIWYG text contains an h2/h3, the separate block title is suppressed exactly as hasHeadingHtml did on the live site",
+        "wp_kses config permits the anchors, btn classes, mailto:, <details>, and inline style used in existing rich text so pasted content is not stripped",
+        "Each rendered block visually matches its corresponding reference screenshot"
+      ],
+      "blockedBy": "Tracer bullet: Hero block end-to-end with Actions deploy to staging",
+      "labels": [
+        "blocks",
+        "acf",
+        "content-migration"
+      ]
+    },
+    {
+      "title": "Structured content blocks I (intro, cards, gallery strip, text columns, CTA band)",
+      "whatToBuild": "Port five layout-owning registered components (ownsLayout=true) as SSR ACF Blocks, exploding each component's section_config JSON schema into native ACF fields (select->Select, range->Range, number->Number, text->Text) rather than carrying a JSON blob. page_intro (container_width, text_width, align); cards_grid (columns_desktop/mobile, card_style, media_ratio, media_fit, gap, rounded, per-card sub-repeater so card titles are explicit rather than derived from image alt); gallery_strip (columns, ratio, fit, gap, rounded); text_columns (CSS column-count with container_width, columns, gap); cta_band (container_width, align, theme, rounded) - the recurring kennenlernen-cta is an instance of this block, editable per page.",
+      "acceptanceCriteria": [
+        "All five blocks appear in the inserter, render SSR, and match their reference sections",
+        "Every section_config option is a real, editor-visible ACF field of the correct type (no raw JSON textarea)",
+        "cards_grid supports a per-card sub-repeater with explicit title/text and respects columns_desktop vs columns_mobile at the correct breakpoints",
+        "cta_band renders correctly as a standalone per-page instance (kennenlernen-cta) with independent content, not a shared centralized record",
+        "text_columns produces the multi-column layout via column-count matching the reference"
+      ],
+      "blockedBy": "Tracer bullet: Hero block end-to-end with Actions deploy to staging",
+      "labels": [
+        "blocks",
+        "acf",
+        "content-migration"
+      ]
+    },
+    {
+      "title": "Structured content blocks II (timeline, pricing table, accordion, steps, link tiles)",
+      "whatToBuild": "Port the remaining structured components as SSR ACF Blocks with idiomatic WP structure. timeline_header + timeline_item (container_width, text_width, align, emphasis, year eyebrow); pricing_table as the Abo table with a 3-row tier repeater (name, shares, persons, price, sharecost, work) and work_suffix - NOT 18 flat tierN_ fields - with PersonIcons rendered as an SSR icon-repeat in PHP; accordion as a single block with an items sub-repeater so consecutive items group natively (as /gemuese groups four <details> in one wrapper); steps as a step repeater max 4 with render-time numbering; link_tiles as a tile repeater max 4 (title, text, href, emoji icon) that renders a <div> instead of an <a> when href is empty (kundenportal case).",
+      "acceptanceCriteria": [
+        "timeline, pricing_table, accordion, steps, and link_tiles blocks render SSR and match their reference sections",
+        "pricing_table stores exactly three tiers in an ACF repeater (name/shares/persons/price/sharecost/work) and renders the person icons via PHP, matching the Abo table pixel-for-pixel",
+        "The accordion block groups multiple items in one wrapper (matching /gemuese) rather than emitting a separate section per item",
+        "steps numbers items at render time (not stored) and caps at 4; link_tiles caps at 4",
+        "A link_tiles tile with an empty href renders as a non-clickable <div>, preserving the kundenportal behavior"
+      ],
+      "blockedBy": "Tracer bullet: Hero block end-to-end with Actions deploy to staging",
+      "labels": [
+        "blocks",
+        "acf",
+        "content-migration"
+      ]
+    },
+    {
+      "title": "Events & news CPTs with events-feed and group-cards blocks",
+      "whatToBuild": "Replace the ProcessWire event pages and the events/groups client fetches with a git-registered content model + SSR blocks. Register an event Custom Post Type (in the mu-plugin) with ACF fields for date, event_summary (WYSIWYG), card_image, event_signup_notes, and past/upcoming status; reimplement api-events.php's upcoming/past split and cardImage logic as a WP_Query meta date query, and the admin Rueckblick/convert-to-recap action as a status/meta toggle. Register a group CPT (or ACF repeater) and news (posts or CPT). Build the events_feed ACF Block rendering the event CPT SSR via WP_Query with ACF fields variant (standard/banner) + limit, covering both the /aktuelles and /kundenportal (banner) uses in one block. Build the group_cards block rendering the group CPT SSR (replacing the /api/content/groups client fetch). CKEditor fields become ACF WYSIWYG.",
+      "acceptanceCriteria": [
+        "event CPT is registered in git with ACF fields (date, summary, card_image, signup_notes, status) and field groups written to acf-json/",
+        "events_feed block renders upcoming and past events split correctly via a WP_Query meta date query, in both standard and banner variants, matching the /aktuelles and /kundenportal references",
+        "The Rueckblick action moves an upcoming event to past/recap state via a status or meta toggle",
+        "group_cards block renders group entries SSR with no client-side fetch to an external API",
+        "A seeded event and group entry render on staging matching the reference layout"
+      ],
+      "blockedBy": "Tracer bullet: Hero block end-to-end with Actions deploy to staging",
+      "labels": [
+        "blocks",
+        "cpt",
+        "events",
+        "acf"
+      ]
+    },
+    {
+      "title": "Interactive blocks (maps, pricing calculator, seasonal calendar, schnuppertage, gallery)",
+      "whatToBuild": "Re-author the genuinely interactive components as SSR-shell ACF Blocks plus enqueued view scripts built by the theme's Vite/esbuild pipeline (the only place a JS build is needed). depot_map and geisshof_map: SSR container + map JS (Leaflet), with location data moved into an ACF repeater / wp_localize_script so editors own it (was code-owned depotLocations). pricing_calculator: enqueued JS that computes and hands the chosen Abo tier to the membership form via shared state/query param; tier data from ACF or PHP-localized. saisonkalender: SSR grid + light JS, calendar data in ACF/PHP. schnuppertage: SSR editorial fields (list_label, items, closing) plus the live Naechste-Termine list + signup-modal JS. gallery: SSR gallery from an ACF gallery/CPT. Each block's static shell renders without JS; interactivity is progressive enhancement.",
+      "acceptanceCriteria": [
+        "depot_map and geisshof_map render a map with markers from editor-editable location data (ACF), matching the reference maps",
+        "pricing_calculator computes tier selection client-side and exposes the chosen tier to the membership form (verified by the tier arriving pre-selected)",
+        "saisonkalender renders the seasonal grid SSR (readable with JS disabled) with the reference layout",
+        "schnuppertage renders its editorial SSR fields plus a working Naechste-Termine list and signup modal",
+        "gallery renders SSR from an ACF gallery source matching the reference",
+        "All interactive view scripts are produced by the theme build in CI and shipped via rsync (no runtime npm on the server)"
+      ],
+      "blockedBy": "Tracer bullet: Hero block end-to-end with Actions deploy to staging",
+      "labels": [
+        "blocks",
+        "interactive",
+        "js-build",
+        "acf"
+      ]
+    },
+    {
+      "title": "Forms, Turnstile, double-opt-in and SMTP delivery",
+      "whatToBuild": "Reproduce all five forms as git-tracked custom handlers in the mu-plugin (REST or admin-post) to preserve exact UX/validation with no forms-plugin lock-in, each re-verifying Cloudflare Turnstile server-side and sending via the existing Novatrend SMTP (mail.bioco.ch:465) through WP Mail SMTP configured from .env (avoiding the old export-ordering bug). Build the ACF form blocks (SSR shell + enqueued form JS) for contact_form, subscribe_form (newsletter with double-opt-in), visit_day_form (Name/E-Mail/Telefon/Datum/Personen/Anmerkungen), waiting_list_form (Interesse-an select), and the multi-step membership_form (the heaviest; keep as a compiled JS app talking to a custom REST endpoint, receiving the pricing_calculator tier selection). Implement the double-opt-in confirmation landing (the /doi-confirm route equivalent) that validates the token and activates the subscription. Reuse the Turnstile site/secret keys as WP env keys.",
+      "acceptanceCriteria": [
+        "All five forms render their blocks, validate client + server side, and reject submissions failing server-side Turnstile verification",
+        "A successful submission delivers email via mail.bioco.ch:465 SMTP configured from .env (verified by received mail); no is not configured error occurs",
+        "subscribe_form triggers a double-opt-in email; visiting the confirmation link on the /doi-confirm equivalent validates the token and activates the subscription",
+        "membership_form runs its multi-step flow and receives the tier pre-selected by pricing_calculator, submitting to its REST endpoint",
+        "Turnstile and SMTP secrets are read from .env only and never appear in tracked files or client JS beyond the public site key",
+        "All form handlers live in the git-tracked mu-plugin (no proprietary forms-plugin storing config in the DB)"
+      ],
+      "blockedBy": "Interactive blocks (maps, pricing calculator, seasonal calendar, schnuppertage, gallery)",
+      "labels": [
+        "forms",
+        "security",
+        "acf",
+        "interactive"
+      ]
+    },
+    {
+      "title": "Page authoring and content migration to pixel parity",
+      "whatToBuild": "Assemble the blocks, CPTs, and forms into the real ~20 pages, hand-authored in Gutenberg for guaranteed pixel parity against the Slice 1 reference set. home becomes the static front page (hero fields as page-level ACF or top-of-list Hero block, plus SSR chrome for Beitraege/Kommende Events/Schnuppertage). Content pages (solawi, gemuese, mitmachen, standorte-depots, aktuelles, wir) as block lists; form/calculator pages (kontakt, bioco-werden, anmeldung, newsletter, warteliste, tag-der-offenen-tuer) with their form blocks; anmeldung uses a minimal-header/no-footer page template; anmeldung-danke uses the steps block with a mailto button preserved; kundenportal uses link_tiles + events_feed banner; datenschutz/impressum/statuten as rich_text (statuten PDF buttons -> Media Library uploads). Preserve all deep-link anchors via Gutenberg anchor/HTML-id. Script the events/news import from the still-running live /api/content/events and /api/content/aktuelles endpoints into the new CPTs (or WXR).",
+      "acceptanceCriteria": [
+        "Every one of the ~20 routes exists as a WP page/CPT on staging and visually matches its Slice 1 reference screenshot at mobile and desktop",
+        "The home static front page renders the hero plus the Beitraege / Kommende Events / Schnuppertage chrome matching the reference",
+        "anmeldung renders with the minimal-header/no-footer template; anmeldung-danke's mailto button and statuten's PDF-download buttons work",
+        "All scroll-target anchors (e.g. kontakt-formular, depot E-02, #anmelden) resolve to the correct in-page element",
+        "Events and news are imported into the event/news content model from the live endpoints and appear in the events_feed/aktuelles listings",
+        "Each kennenlernen-cta instance carries its own per-page content"
+      ],
+      "blockedBy": "Layout blocks (rich text, media+text, banner, media grid, video), Structured content blocks I (intro, cards, gallery strip, text columns, CTA band), Structured content blocks II (timeline, pricing table, accordion, steps, link tiles), Events & news CPTs with events-feed and group-cards blocks, Interactive blocks (maps, pricing calculator, seasonal calendar, schnuppertage, gallery), Forms, Turnstile, double-opt-in and SMTP delivery",
+      "labels": [
+        "content-migration",
+        "pixel-parity"
+      ]
+    },
+    {
+      "title": "SEO metadata, redirect map, Matomo and security hardening",
+      "whatToBuild": "Make the WP site externally equivalent to the current site for search, inbound links, and analytics, and lock down the new PHP attack surface. Port page seo.title/seo.description into an SEO layer (Yoast/RankMath or ACF SEO fields), with pages lacking seo inheriting the site default title as today; generate sitemap + robots. Port every redirect from the Slice 1 inventory (all 14, including /wp-content/uploads/2017/07/1704_Gemueseabo.pdf -> /abos and /home/home -> /) into a code-based redirect map in the mu-plugin or .htaccess. Add the Matomo tracking snippet to the theme (Matomo stays Apache-served at /matomo, unchanged). Harden per ID-9: DISALLOW_FILE_MODS + DISALLOW_FILE_EDIT, protect wp-login.php (2FA / limit-login / gate), least-privilege bioco_wp DB user, uploads/ deny PHP execution, HTTPS-only admin, Dependabot/Renovate on composer.lock, scheduled mysqldump backups reusing the existing ~/backups pattern.",
+      "acceptanceCriteria": [
+        "Each page emits the correct title/meta description (from its seed seo, or the site default where absent), and a valid sitemap.xml + robots.txt are served",
+        "All 14 redirects resolve with the correct permanent status, verified end-to-end including the legacy /wp-content/uploads/2017/07 PDF rule and /home/home -> /",
+        "Matomo records a pageview from the WP frontend with /matomo still Apache-served",
+        "DISALLOW_FILE_MODS/EDIT are enforced (no plugin/theme editor in admin), uploads reject PHP execution, and the DB user has least privilege",
+        "Dependabot/Renovate watches composer.lock and a scheduled mysqldump of bioco_wp is configured"
+      ],
+      "blockedBy": "Page authoring and content migration to pixel parity",
+      "labels": [
+        "seo",
+        "security",
+        "redirects",
+        "analytics"
+      ]
+    },
+    {
+      "title": "Production cutover with instant rollback",
+      "whatToBuild": "Make WordPress authoritative on bioco.ch via a single reversible switch, keeping full rollback safety. Provision the production bioco_wp DB + user; deploy main -> production via deploy.yml. Flip /home/bioco/public_html/.htaccess: remove the RewriteRule ^(.*)$ http://127.0.0.1:49154/$1 [P,L] proxy and point the docroot at Bedrock web/ (keeping /matomo served by Apache). Deliberately keep next-server running on :49154 and cms.bioco.ch (ProcessWire) alive so restoring the old .htaccess is an instant rollback. Run post-cutover smoke checks mirroring deploy.sh (external curl --resolve bioco.ch:443:193.33.128.160, PHP-fatal/white-screen body check, wp option get home, spot-check redirects + a form + Matomo). Only after WP has fully and durably owned content: decommission Next (next-server, start.sh, healthcheck watchdog cron, sharp restore) and ProcessWire.",
+      "acceptanceCriteria": [
+        "Production bioco_wp DB is provisioned and main deploys cleanly to production via GitHub Actions",
+        "After the .htaccess docroot flip, external https://bioco.ch (curl --resolve to 193.33.128.160) serves the WordPress site with no PHP fatal / white screen and correct home URL",
+        "Restoring the previous .htaccess immediately returns traffic to the Next.js site on :49154 (rollback verified in a dry run), and next-server + cms.bioco.ch remain running during the retention window",
+        "Post-cutover smoke checks pass: a sampled set of redirects resolve, one form delivers mail, and Matomo records a pageview on the production domain",
+        "A written decommission checklist exists for removing next-server/start.sh/healthcheck cron/sharp and ProcessWire, to be executed only after a defined WP-authoritative retention period"
+      ],
+      "blockedBy": "Page authoring and content migration to pixel parity, SEO metadata, redirect map, Matomo and security hardening",
+      "labels": [
+        "cutover",
+        "infra",
+        "deploy"
+      ]
+    }
+  ]
+}
