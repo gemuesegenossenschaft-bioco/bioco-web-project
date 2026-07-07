@@ -53,6 +53,7 @@ select:focus-visible,
   --spacing-xl: 48px;
   --spacing-2xl: 64px;
   --page-max-width: 1400px;
+  --content-max-width: 1160px;
   --page-inline-padding: clamp(16px, 6vw, 96px);
   --mobile-nav-height: 60px;
   --cms-h1-color: #1a1a1a;
@@ -144,7 +145,7 @@ body {
 }
 
 .cms-page-wir .cms-split {
-  max-width: 1160px;
+  max-width: var(--content-max-width);
   margin-inline: auto;
 }
 
