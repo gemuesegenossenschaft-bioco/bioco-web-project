@@ -1,0 +1,6 @@
+/.env
+/web/wp
+/web/app/plugins
+/web/app/uploads
+/web/app/mu-plugins/bedrock-autoloader.php
+/vendor

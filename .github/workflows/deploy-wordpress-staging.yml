@@ -1,0 +1,95 @@
+name: Deploy WordPress to staging
+
+# Builds the Bedrock WordPress project off-server (mirroring the Next.js
+# build-locally-then-rsync pattern) and deploys it to staging.bioco.ch on
+# every push to the `wordpress` branch. Epic #73 (slice W4 authors the real
+# pipeline; this is the skeleton).
+#
+# REQUIRED before this can succeed (server/admin one-time setup, see
+# wordpress/README.md): the staging.bioco.ch subdomain with docroot at
+# .../web, a bioco_wp MySQL DB + least-privilege user, and these repo
+# secrets:
+#   STAGING_SSH_HOST   e.g. 193.33.128.160
+#   STAGING_SSH_USER   e.g. bioco
+#   STAGING_SSH_KEY    private deploy key authorized on that account
+#   STAGING_DEPLOY_PATH remote path to the Bedrock project root
+#   ACF_PRO_KEY        Advanced Custom Fields Pro license key (Composer auth)
+# Until those exist the job no-ops with a clear message instead of failing.
+
+on:
+  push:
+    branches: [wordpress]
+    paths: ['wordpress/**', '.github/workflows/deploy-wordpress-staging.yml']
+  workflow_dispatch:
+
+concurrency:
+  group: wp-staging-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: wordpress
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard — require staging secrets
+        id: guard
+        run: |
+          if [ -z "${{ secrets.STAGING_SSH_HOST }}" ] || [ -z "${{ secrets.STAGING_SSH_KEY }}" ]; then
+            echo "::warning::Staging secrets not configured yet — skipping deploy. See wordpress/README.md."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up PHP
+        if: steps.guard.outputs.ready == 'true'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: Composer auth (ACF Pro)
+        if: steps.guard.outputs.ready == 'true'
+        run: composer config --global --auth http-basic.connect.advancedcustomfields.com "${{ secrets.ACF_PRO_KEY }}" "https://staging.bioco.ch"
+
+      - name: Install (no dev)
+        if: steps.guard.outputs.ready == 'true'
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      - name: Deploy over rsync (SSH)
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          HOST: ${{ secrets.STAGING_SSH_HOST }}
+          USER: ${{ secrets.STAGING_SSH_USER }}
+          DEST: ${{ secrets.STAGING_DEPLOY_PATH }}
+        run: |
+          install -m 600 /dev/stdin "$HOME/deploy_key" <<< "$SSH_KEY"
+          RSYNC_SSH="ssh -i $HOME/deploy_key -o StrictHostKeyChecking=accept-new"
+          # Never delete uploads or clobber the server .env; core+vendor+theme are shipped.
+          rsync -avz --delete -e "$RSYNC_SSH" \
+            --exclude='.env' \
+            --exclude='web/app/uploads/' \
+            --exclude='.git/' \
+            ./ "$USER@$HOST:$DEST/"
+
+      - name: Post-deploy — cache flush + smoke check
+        if: steps.guard.outputs.ready == 'true'
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          HOST: ${{ secrets.STAGING_SSH_HOST }}
+          USER: ${{ secrets.STAGING_SSH_USER }}
+          DEST: ${{ secrets.STAGING_DEPLOY_PATH }}
+        run: |
+          ssh -i "$HOME/deploy_key" -o StrictHostKeyChecking=accept-new "$USER@$HOST" \
+            "cd '$DEST' && (php -r 'opcache_reset();' || true) && (wp cache flush --path=web/wp || true)"
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://staging.bioco.ch/ || echo 000)
+          echo "staging.bioco.ch → HTTP $code"
+          case "$code" in 200|301|302) echo "OK";; *) echo "::error::staging returned $code"; exit 1;; esac

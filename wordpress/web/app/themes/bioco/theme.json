@@ -1,0 +1,82 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 2,
+  "_comment": "bioco block theme tokens. Values mirror the CURRENT live site (post Phase-0 coherence, epic #72) for pixel parity. NOTE: the brand-green VALUE decision (live #2e7d32 vs logo #39A933) and radius 12/18/24 vs 6/12/18 are DEFERRED to design sign-off — see epic #72 'out of scope'. Font is DM Sans (the real rendered font; the old --font tokens misnamed it Inter).",
+  "settings": {
+    "appearanceTools": true,
+    "layout": { "contentSize": "1160px", "wideSize": "1400px" },
+    "color": {
+      "defaultPalette": false,
+      "defaultGradients": false,
+      "custom": true,
+      "palette": [
+        { "slug": "bioco-green", "name": "Grün (Marke)", "color": "#2e7d32" },
+        { "slug": "bioco-green-dark", "name": "Grün dunkel", "color": "#1b5e20" },
+        { "slug": "bioco-carrot", "name": "Karotte", "color": "#F29200" },
+        { "slug": "bioco-beet", "name": "Rande", "color": "#87213D" },
+        { "slug": "bioco-bg", "name": "Hintergrund", "color": "#F6F9F5" },
+        { "slug": "bioco-surface", "name": "Fläche", "color": "#FFFFFF" },
+        { "slug": "bioco-text", "name": "Text", "color": "#1F2A1B" },
+        { "slug": "bioco-text-muted", "name": "Text gedämpft", "color": "#4A4A4A" },
+        { "slug": "bioco-border", "name": "Rahmen", "color": "#E1E4E8" }
+      ]
+    },
+    "typography": {
+      "fluid": true,
+      "customFontSize": false,
+      "fontFamilies": [
+        {
+          "slug": "body",
+          "name": "DM Sans",
+          "fontFamily": "'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif",
+          "fontFace": [
+            {
+              "fontFamily": "DM Sans",
+              "fontWeight": "400 700",
+              "fontStyle": "normal",
+              "fontStretch": "normal",
+              "src": ["file:./assets/fonts/dmsans-variable.woff2"]
+            }
+          ]
+        }
+      ],
+      "fontSizes": [
+        { "slug": "sm", "name": "Klein", "size": "0.875rem" },
+        { "slug": "base", "name": "Basis", "size": "1rem" },
+        { "slug": "md", "name": "Mittel", "size": "1.125rem" },
+        { "slug": "lg", "name": "Gross", "size": "1.25rem" },
+        { "slug": "xl", "name": "XL", "size": "1.5rem" },
+        { "slug": "2xl", "name": "2XL", "size": "2rem" },
+        { "slug": "3xl", "name": "3XL", "size": "2.5rem" }
+      ]
+    },
+    "spacing": {
+      "defaultSpacingSizes": false,
+      "spacingSizes": [
+        { "slug": "20", "name": "8", "size": "8px" },
+        { "slug": "30", "name": "16", "size": "16px" },
+        { "slug": "40", "name": "24", "size": "24px" },
+        { "slug": "50", "name": "32", "size": "32px" },
+        { "slug": "60", "name": "48", "size": "48px" },
+        { "slug": "70", "name": "64", "size": "64px" },
+        { "slug": "80", "name": "96", "size": "96px" }
+      ]
+    },
+    "custom": {
+      "radius": { "sm": "12px", "md": "18px", "lg": "24px", "pill": "999px" },
+      "shadow": {
+        "sm": "0 1px 3px rgba(31,42,27,0.08)",
+        "md": "0 4px 12px rgba(31,42,27,0.12)",
+        "lg": "0 8px 24px rgba(31,42,27,0.16)"
+      }
+    }
+  },
+  "styles": {
+    "color": { "background": "var(--wp--preset--color--bioco-bg)", "text": "var(--wp--preset--color--bioco-text)" },
+    "typography": { "fontFamily": "var(--wp--preset--font-family--body)", "fontSize": "var(--wp--preset--font-size--base)", "lineHeight": "1.6" },
+    "elements": {
+      "heading": { "typography": { "fontFamily": "var(--wp--preset--font-family--body)", "fontWeight": "700" } },
+      "link": { "color": { "text": "var(--wp--preset--color--bioco-green)" } }
+    }
+  }
+}
