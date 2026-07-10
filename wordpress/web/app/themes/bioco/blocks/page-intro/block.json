@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/page-intro",
+  "title": "Seiten-Einstieg",
+  "description": "Einleitender Textblock einer Seite mit konfigurierbarer Container- und Textbreite sowie Ausrichtung.",
+  "category": "bioco",
+  "icon": "admin-page",
+  "keywords": ["intro", "einstieg", "einleitung"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

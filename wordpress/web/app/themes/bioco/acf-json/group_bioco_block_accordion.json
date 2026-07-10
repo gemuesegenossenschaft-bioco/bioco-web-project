@@ -1,0 +1,88 @@
+{
+    "key": "group_bioco_block_accordion",
+    "title": "Akkordeon Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_accordion_items",
+            "label": "Einträge",
+            "name": "items",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Alle Einträge teilen sich einen gemeinsamen Akkordeon-Rahmen (vgl. /gemuese).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 0,
+            "collapsed": "field_bioco_accordion_item_title",
+            "button_label": "Eintrag hinzufügen",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_accordion_item_title",
+                    "label": "Titel (Summary)",
+                    "name": "title",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_accordion_item_body",
+                    "label": "Inhalt",
+                    "name": "body",
+                    "aria-label": "",
+                    "type": "wysiwyg",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "tabs": "all",
+                    "toolbar": "full",
+                    "media_upload": 0,
+                    "delay": 0
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/accordion"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Akkordeon-Block (W7 structured blocks, Issue #94). Ersetzt accordion_item aus dem Next.js SectionRenderer: statt eines details/summary-Elements pro Block gruppiert dieser Block alle Einträge über ein Sub-Repeater (Titel, WYSIWYG-Inhalt) in einem gemeinsamen .demeter-accordion-Rahmen.",
+    "show_in_rest": 0,
+    "modified": 1783728000
+}

@@ -1,0 +1,155 @@
+{
+    "key": "group_bioco_block_text_columns",
+    "title": "Textspalten Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_text_columns_content_clone",
+            "label": "Inhalt",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_eyebrow",
+                "field_bioco_section_title",
+                "field_bioco_section_text"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_text_columns_buttons_clone",
+            "label": "Buttons",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_buttons"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_text_columns_container_width",
+            "label": "Container-Breite",
+            "name": "container_width",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "md": "M",
+                "lg": "L",
+                "xl": "XL",
+                "full": "Voll"
+            },
+            "default_value": "lg",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_text_columns_columns",
+            "label": "Spalten",
+            "name": "columns",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Anzahl CSS-Textspalten auf Desktop-Breite; auf Mobilgeräten immer einspaltig.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "1": "1",
+                "2": "2",
+                "3": "3",
+                "4": "4"
+            },
+            "default_value": "2",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_text_columns_gap",
+            "label": "Abstand",
+            "name": "gap",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "34",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "sm": "S",
+                "md": "M",
+                "lg": "L",
+                "xl": "XL"
+            },
+            "default_value": "lg",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/text-columns"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Textspalten-Block (W6 layout blocks, Issue #93). Entspricht TextColumnsBlock im Next.js SectionRenderer (CSS column-count auf dem Textfeld). Inhalt und Buttons klonen aus Section Common (group_bioco_section_common); Container-Breite/Spalten/Abstand sind blockeigene Felder.",
+    "show_in_rest": 0,
+    "modified": 1783728000
+}

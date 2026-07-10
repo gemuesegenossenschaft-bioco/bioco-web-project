@@ -1,0 +1,147 @@
+{
+    "key": "group_bioco_block_link_tiles",
+    "title": "Portal-Kacheln Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_link_tiles_title_clone",
+            "label": "Titel",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_title"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_link_tiles_tiles",
+            "label": "Kacheln",
+            "name": "tiles",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Maximal 4 Kacheln. Kacheln ohne Link (URL) werden ohne <a>-Tag als reines Kachel-Element gerendert (vgl. /kundenportal).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 4,
+            "collapsed": "field_bioco_link_tiles_tile_title",
+            "button_label": "Kachel hinzufügen",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_link_tiles_tile_title",
+                    "label": "Titel",
+                    "name": "title",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_link_tiles_tile_text",
+                    "label": "Text",
+                    "name": "text",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_link_tiles_tile_href",
+                    "label": "Link (URL)",
+                    "name": "href",
+                    "aria-label": "",
+                    "type": "url",
+                    "instructions": "Leer lassen für eine nicht-klickbare Kachel.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_bioco_link_tiles_tile_icon",
+                    "label": "Symbol (Emoji)",
+                    "name": "icon",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "Optionales Emoji-Symbol über dem Titel.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "🔗",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/link-tiles"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Portal-Kacheln-Block (W7 structured blocks, Issue #94). Entspricht LinkTilesBlock im Next.js SectionRenderer: Titel klont aus Section Common (group_bioco_section_common), Kacheln sind ein Sub-Repeater (Titel, Text, Link, Emoji-Symbol) mit maximal 4 Zeilen.",
+    "show_in_rest": 0,
+    "modified": 1783728000
+}

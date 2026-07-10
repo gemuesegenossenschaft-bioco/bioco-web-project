@@ -1,0 +1,261 @@
+{
+    "key": "group_bioco_block_pricing_table",
+    "title": "Preis-Tabelle Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_pricing_table_content_clone",
+            "label": "Inhalt",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_eyebrow",
+                "field_bioco_section_title",
+                "field_bioco_section_text"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_pricing_table_buttons_clone",
+            "label": "Buttons",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_buttons"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_pricing_table_container_width",
+            "label": "Container-Breite",
+            "name": "container_width",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "lg": "L",
+                "xl": "XL",
+                "full": "Voll"
+            },
+            "default_value": "xl",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_pricing_table_work_suffix",
+            "label": "Mitarbeit-Zusatz",
+            "name": "work_suffix",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Zusatztext unter der Mitarbeit-Angabe jeder Stufe, z. B. \"à 2 Stunden\".",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "à 2 Stunden",
+            "maxlength": "",
+            "placeholder": "à 2 Stunden",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_table_tiers",
+            "label": "Stufen",
+            "name": "tiers",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Maximal 3 Stufen (z. B. Halb, Standard, Doppel).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 3,
+            "collapsed": "field_bioco_pricing_table_tier_name",
+            "button_label": "Stufe hinzufügen",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_pricing_table_tier_name",
+                    "label": "Name",
+                    "name": "name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "50",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_pricing_table_tier_shares",
+                    "label": "Anteile",
+                    "name": "shares",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "50",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "z. B. 1 Anteilsschein",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_pricing_table_tier_persons",
+                    "label": "Personen",
+                    "name": "persons",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "Anzahl Personen-Icons in der Tabelle.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "33",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": 1,
+                    "min": 1,
+                    "max": 8,
+                    "step": 1,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_bioco_pricing_table_tier_price",
+                    "label": "Jahrespreis",
+                    "name": "price",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "33",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "z. B. CHF 750.-",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_pricing_table_tier_sharecost",
+                    "label": "Anteilsscheine Kosten",
+                    "name": "sharecost",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "34",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "z. B. CHF 250.-",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_pricing_table_tier_work",
+                    "label": "Mitarbeit pro Jahr",
+                    "name": "work",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "z. B. 10 Arbeitseinsätze",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/pricing-table"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Preis-Tabelle-Block (W7 structured blocks, Issue #94). Entspricht PricingTableBlock im Next.js SectionRenderer, jedoch als echtes Stufen-Repeater (Name, Anteile, Personen, Preis, Anteilskosten, Mitarbeit) statt 18 flacher Felder. Personen-Icons werden serverseitig per PHP-Schleife gerendert (vgl. components/PersonIcons.tsx). Inhalt und Buttons klonen aus Section Common (group_bioco_section_common).",
+    "show_in_rest": 0,
+    "modified": 1783728000
+}

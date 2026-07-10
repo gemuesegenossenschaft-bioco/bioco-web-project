@@ -417,3 +417,483 @@
   height: 100%;
   border: 0;
 }
+
+/**
+ * W6 layout blocks (page-intro, cards-grid, gallery-strip, text-columns,
+ * cta-band; issue #93). None of these five have a matching CSS class in the
+ * Next.js frontend/app/globals.css — RegisteredSectionComponents.tsx styles
+ * them entirely with inline style objects. The pixel values below are
+ * ported literally from that file's helper functions (containerMaxWidth,
+ * contentWidth, gapSize, radiusSize, ratioValue) via data-* attribute
+ * selectors, but the cms-* class names follow this theme's own W5
+ * convention (cms-section, cms-split, cms-media-grid, …) since there is no
+ * Next.js class name to reuse here.
+ */
+
+/* container-width variants, shared by page-intro/text-columns/cta-band */
+.cms-page-intro[data-container='sm'],
+.cms-text-columns[data-container='sm'] { max-width: 640px; }
+.cms-page-intro[data-container='md'],
+.cms-cta-band[data-container='md'],
+.cms-text-columns[data-container='md'],
+.cms-timeline[data-container='md'] { max-width: 820px; }
+.cms-page-intro[data-container='lg'],
+.cms-cta-band[data-container='lg'],
+.cms-text-columns[data-container='lg'],
+.cms-timeline[data-container='lg'] { max-width: 1040px; }
+.cms-page-intro[data-container='xl'],
+.cms-cta-band[data-container='xl'],
+.cms-text-columns[data-container='xl'],
+.cms-timeline[data-container='xl'] { max-width: 1280px; }
+.cms-page-intro[data-container='full'],
+.cms-cta-band[data-container='full'],
+.cms-text-columns[data-container='full'] { max-width: 100%; }
+
+.cms-page-intro,
+.cms-cta-band,
+.cms-text-columns,
+.cms-timeline {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* page-intro block */
+.cms-page-intro[data-align='center'] {
+  text-align: center;
+}
+
+.cms-page-intro-inner[data-text-width='narrow'] { max-width: 42rem; }
+.cms-page-intro-inner[data-text-width='normal'] { max-width: 58rem; }
+.cms-page-intro-inner[data-text-width='wide'] { max-width: 74rem; }
+
+.cms-page-intro[data-align='center'] .cms-page-intro-inner {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* cards-grid block */
+.cms-cards-grid-items {
+  display: grid;
+  grid-template-columns: repeat(var(--bioco-cards-grid-columns-mobile, 1), minmax(0, 1fr));
+}
+
+.cms-cards-grid-items[data-columns-mobile='1'] { --bioco-cards-grid-columns-mobile: 1; }
+.cms-cards-grid-items[data-columns-mobile='2'] { --bioco-cards-grid-columns-mobile: 2; }
+.cms-cards-grid-items[data-gap='sm'] { gap: 16px; }
+.cms-cards-grid-items[data-gap='md'] { gap: 24px; }
+.cms-cards-grid-items[data-gap='lg'] { gap: 32px; }
+.cms-cards-grid-items[data-gap='xl'] { gap: 48px; }
+
+@media (min-width: 768px) {
+  .cms-cards-grid-items[data-columns-desktop='2'] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cms-cards-grid-items[data-columns-desktop='3'] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cms-cards-grid-items[data-columns-desktop='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.cms-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.cms-card--plain { background: transparent; padding: 0; }
+.cms-card--soft { background: #f5f2e9; padding: 14px; }
+.cms-card--outlined { background: var(--wp--preset--color--bioco-surface); border: 1px solid var(--wp--preset--color--bioco-border); padding: 14px; }
+
+.cms-card-media {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--wp--preset--color--bioco-border);
+}
+
+.cms-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cms-card[data-media-ratio='1:1'] .cms-card-media { aspect-ratio: 1 / 1; }
+.cms-card[data-media-ratio='4:3'] .cms-card-media { aspect-ratio: 4 / 3; }
+.cms-card[data-media-ratio='3:4'] .cms-card-media { aspect-ratio: 3 / 4; }
+.cms-card[data-media-fit='cover'] .cms-card-media img { object-fit: cover; }
+.cms-card[data-media-fit='contain'] .cms-card-media img { object-fit: contain; }
+
+.cms-card[data-rounded='none'] .cms-card-media { border-radius: 0; }
+.cms-card[data-rounded='sm'] .cms-card-media { border-radius: 8px; }
+.cms-card[data-rounded='md'] .cms-card-media { border-radius: 16px; }
+.cms-card[data-rounded='lg'] .cms-card-media { border-radius: 24px; }
+.cms-card[data-rounded='xl'] .cms-card-media { border-radius: 32px; }
+
+.cms-card-title {
+  font-size: 1.2rem;
+  margin: 14px 0 0;
+}
+
+.cms-card-text {
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin: 6px 0 0;
+}
+
+/* gallery-strip block */
+.cms-gallery-strip-items {
+  display: grid;
+  grid-template-columns: repeat(var(--bioco-gallery-strip-columns-mobile, 1), minmax(0, 1fr));
+}
+
+.cms-gallery-strip-items[data-columns-mobile='1'] { --bioco-gallery-strip-columns-mobile: 1; }
+.cms-gallery-strip-items[data-columns-mobile='2'] { --bioco-gallery-strip-columns-mobile: 2; }
+.cms-gallery-strip-items[data-gap='sm'] { gap: 16px; }
+.cms-gallery-strip-items[data-gap='md'] { gap: 24px; }
+.cms-gallery-strip-items[data-gap='lg'] { gap: 32px; }
+.cms-gallery-strip-items[data-gap='xl'] { gap: 48px; }
+
+@media (min-width: 768px) {
+  .cms-gallery-strip-items[data-columns-desktop='2'] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cms-gallery-strip-items[data-columns-desktop='3'] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cms-gallery-strip-items[data-columns-desktop='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.cms-gallery-strip-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--wp--preset--color--bioco-border);
+}
+
+.cms-gallery-strip-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cms-gallery-strip-items[data-media-ratio='1:1'] .cms-gallery-strip-frame { aspect-ratio: 1 / 1; }
+.cms-gallery-strip-items[data-media-ratio='4:3'] .cms-gallery-strip-frame { aspect-ratio: 4 / 3; }
+.cms-gallery-strip-items[data-media-ratio='16:9'] .cms-gallery-strip-frame { aspect-ratio: 16 / 9; }
+.cms-gallery-strip-items[data-media-fit='cover'] .cms-gallery-strip-frame img { object-fit: cover; }
+.cms-gallery-strip-items[data-media-fit='contain'] .cms-gallery-strip-frame img { object-fit: contain; }
+
+.cms-gallery-strip-items[data-rounded='none'] .cms-gallery-strip-frame { border-radius: 0; }
+.cms-gallery-strip-items[data-rounded='sm'] .cms-gallery-strip-frame { border-radius: 8px; }
+.cms-gallery-strip-items[data-rounded='md'] .cms-gallery-strip-frame { border-radius: 16px; }
+.cms-gallery-strip-items[data-rounded='lg'] .cms-gallery-strip-frame { border-radius: 24px; }
+.cms-gallery-strip-items[data-rounded='xl'] .cms-gallery-strip-frame { border-radius: 32px; }
+
+/* text-columns block */
+.cms-text-columns-body {
+  column-count: 1;
+}
+
+@media (min-width: 768px) {
+  .cms-text-columns-body[data-columns='1'] { column-count: 1; }
+  .cms-text-columns-body[data-columns='2'] { column-count: 2; }
+  .cms-text-columns-body[data-columns='3'] { column-count: 3; }
+  .cms-text-columns-body[data-columns='4'] { column-count: 4; }
+}
+
+.cms-text-columns-body[data-gap='sm'] { column-gap: 16px; }
+.cms-text-columns-body[data-gap='md'] { column-gap: 24px; }
+.cms-text-columns-body[data-gap='lg'] { column-gap: 32px; }
+.cms-text-columns-body[data-gap='xl'] { column-gap: 48px; }
+
+/* cta-band block */
+.cms-cta-band-inner {
+  padding: 32px;
+}
+
+.cms-cta-band-inner[data-align='left'] { text-align: left; }
+.cms-cta-band-inner[data-align='center'] { text-align: center; }
+
+.cms-cta-band-inner[data-theme='light'] { background: var(--wp--preset--color--bioco-surface); color: var(--wp--preset--color--bioco-text); }
+.cms-cta-band-inner[data-theme='soft'] { background: #f5f2e9; color: var(--wp--preset--color--bioco-text); }
+.cms-cta-band-inner[data-theme='accent'] { background: var(--wp--preset--color--bioco-carrot); color: #fff7ed; }
+.cms-cta-band-inner[data-theme='dark'] { background: #111827; color: #f8fafc; }
+
+.cms-cta-band-inner[data-rounded='none'] { border-radius: 0; }
+.cms-cta-band-inner[data-rounded='sm'] { border-radius: 8px; }
+.cms-cta-band-inner[data-rounded='md'] { border-radius: 16px; }
+.cms-cta-band-inner[data-rounded='lg'] { border-radius: 24px; }
+.cms-cta-band-inner[data-rounded='xl'] { border-radius: 32px; }
+
+.cms-cta-band-actions {
+  justify-content: flex-start;
+}
+
+.cms-cta-band-inner[data-align='center'] .cms-cta-band-actions {
+  justify-content: center;
+}
+
+/**
+ * W7 structured blocks (timeline, pricing-table, accordion, steps,
+ * link-tiles; issue #94). pricing-table, demeter-accordion,
+ * next-steps/step-item/step-number and portal-gateway/portal-icon/
+ * portal-tile class names and rule bodies below are ported from the actual
+ * Next.js frontend/app/globals.css rules (adapted to theme.json custom
+ * properties). timeline has no Next.js CSS to reuse (TimelineHeaderBlock/
+ * TimelineItemBlock render via inline styles) so it follows the cms-*
+ * convention like the W6 blocks above.
+ */
+
+/* timeline block */
+.cms-timeline-header[data-align='center'] {
+  text-align: center;
+}
+
+.cms-timeline-header[data-text-width='narrow'] { max-width: 42rem; }
+.cms-timeline-header[data-text-width='normal'] { max-width: 58rem; }
+.cms-timeline-header[data-text-width='wide'] { max-width: 74rem; }
+
+.cms-timeline-header[data-align='center'] {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cms-timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.cms-timeline-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: var(--wp--preset--spacing--40);
+  align-items: start;
+}
+
+.cms-timeline-badge {
+  display: inline-flex;
+  padding: 10px 14px;
+  border-radius: var(--wp--custom--radius--pill);
+  background: #111827;
+  color: #fff;
+  font-weight: 700;
+}
+
+.cms-timeline-item[data-emphasis='highlight'] .cms-timeline-badge {
+  background: #8ab272;
+}
+
+.cms-timeline-item-content {
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--wp--preset--color--bioco-border);
+}
+
+.cms-timeline-item-content h3 {
+  margin-top: 0;
+}
+
+/* pricing-table block (ported from Next.js .pricing-table rules) */
+.pricing-table {
+  margin: var(--wp--preset--spacing--40) 0;
+  overflow-x: auto;
+}
+
+.pricing-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--md);
+  overflow: visible;
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.pricing-table th {
+  font-weight: 500;
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+  text-align: left;
+}
+
+.pricing-table td {
+  font-weight: 700;
+  padding: var(--wp--preset--spacing--40);
+  vertical-align: middle;
+}
+
+.pricing-table td:first-child {
+  min-width: 120px;
+}
+
+.pricing-table tr:hover {
+  background: rgba(46, 125, 50, 0.1);
+}
+
+.cms-pricing-table-shares,
+.cms-pricing-table-work-suffix {
+  font-size: 0.75rem;
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-top: 4px;
+}
+
+.person-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.person-icons-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.person-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .pricing-table {
+    font-size: 0.875rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pricing-table th,
+  .pricing-table td {
+    padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .pricing-table td:first-child {
+    min-width: 100px;
+    max-width: 140px;
+    white-space: normal;
+  }
+}
+
+/* accordion block (ported from Next.js .demeter-accordion rules) */
+.demeter-accordion {
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.demeter-accordion details {
+  font-weight: 700;
+  margin-bottom: var(--wp--preset--spacing--30);
+  border-radius: var(--wp--custom--radius--md);
+  overflow: visible;
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.demeter-accordion summary {
+  padding: var(--wp--preset--spacing--40);
+  background: var(--wp--preset--color--bioco-bg);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--wp--preset--color--bioco-text);
+  list-style: none;
+  transition: all 0.2s ease;
+}
+
+.demeter-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.demeter-accordion summary::before {
+  content: '+';
+  display: inline-block;
+  margin-right: var(--wp--preset--spacing--20);
+  font-weight: 700;
+  color: var(--wp--preset--color--bioco-green);
+}
+
+.demeter-accordion details[open] summary::before {
+  content: '\2212';
+}
+
+.demeter-accordion summary:hover {
+  background: var(--wp--preset--color--bioco-border);
+}
+
+.demeter-accordion details[open] summary {
+  border-bottom: 1px solid var(--wp--preset--color--bioco-border);
+}
+
+.demeter-accordion details > div {
+  padding: var(--wp--preset--spacing--40);
+  margin: 0;
+  background: var(--wp--preset--color--bioco-surface);
+}
+
+/* steps block (ported from Next.js .next-steps rules) */
+.next-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.step-item {
+  display: flex;
+  gap: var(--wp--preset--spacing--40);
+  align-items: flex-start;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--wp--custom--radius--pill);
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.step-item h3 {
+  margin-top: 0;
+  margin-bottom: var(--wp--preset--spacing--20);
+  font-size: 1.125rem;
+}
+
+.step-item p {
+  margin: 0;
+}
+
+/* link-tiles block (ported class names, new rules: no Next.js CSS exists
+   for portal-gateway/portal-icon/portal-tile — RegisteredSectionComponents.tsx
+   renders them via inline styles only) */
+.portal-gateway {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.portal-tile {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--md);
+  box-shadow: var(--wp--custom--shadow--sm);
+  padding: var(--wp--preset--spacing--40);
+  transition: all 0.2s ease;
+}
+
+a.portal-tile:hover {
+  box-shadow: var(--wp--custom--shadow--md);
+  transform: translateY(-1px);
+}
+
+.portal-icon {
+  font-size: 2rem;
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.portal-tile h3 {
+  margin: 0 0 var(--wp--preset--spacing--20);
+}
+
+.portal-tile p {
+  margin: 0;
+  color: var(--wp--preset--color--bioco-text-muted);
+}

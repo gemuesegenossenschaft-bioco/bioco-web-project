@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/cta-band",
+  "title": "CTA-Band",
+  "description": "Breiter Call-to-Action-Block mit Titel, Text und bis zu zwei Buttons. Eigenständig pro Seite einsetzbar.",
+  "category": "bioco",
+  "icon": "megaphone",
+  "keywords": ["cta", "aufruf", "call to action", "band"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

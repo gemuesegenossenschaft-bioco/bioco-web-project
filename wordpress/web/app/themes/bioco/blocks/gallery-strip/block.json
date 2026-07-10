@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/gallery-strip",
+  "title": "Galerie-Streifen",
+  "description": "Einfaches Bildraster aus der Galerie mit konfigurierbaren Spalten, Ratio und Abstand.",
+  "category": "bioco",
+  "icon": "format-gallery",
+  "keywords": ["galerie", "streifen", "bilder"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

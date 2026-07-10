@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/timeline",
+  "title": "Zeitleiste",
+  "description": "Zeitleiste mit optionalem Kopftext und beliebig vielen Einträgen (Jahr, Titel, Text).",
+  "category": "bioco",
+  "icon": "clock",
+  "keywords": ["timeline", "zeitleiste", "geschichte", "chronik"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

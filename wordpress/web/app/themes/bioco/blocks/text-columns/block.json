@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/text-columns",
+  "title": "Textspalten",
+  "description": "Mehrspaltiger Fliesstext (CSS-Spalten) für Mission, Geschichte und ähnliche Inhalte.",
+  "category": "bioco",
+  "icon": "columns",
+  "keywords": ["text", "spalten", "columns"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}
