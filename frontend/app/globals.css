@@ -59,14 +59,14 @@ select:focus-visible,
   --cms-h1-color: #1a1a1a;
   --cms-h1-font-size-mobile: calc(1.375rem + 1.5vw);
   --cms-h1-font-size-desktop: 2.5rem;
-  --cms-h1-line-height: 1.2;
-  --cms-h1-font-weight: 700;
+  --cms-h1-line-height: var(--line-height-tight);
+  --cms-h1-font-weight: var(--font-weight-heading);
   --cms-h1-letter-spacing: 0em;
   --cms-h2-color: #1a1a1a;
   --cms-h2-font-size-mobile: calc(1.125rem + 0.7vw);
   --cms-h2-font-size-desktop: 1.75rem;
-  --cms-h2-line-height: 1.2;
-  --cms-h2-font-weight: 700;
+  --cms-h2-line-height: var(--line-height-tight);
+  --cms-h2-font-weight: var(--font-weight-heading);
   --cms-h2-letter-spacing: 0em;
   
   /* Sketchy border SVG patterns - very pronounced hand-drawn style */
@@ -115,15 +115,69 @@ select:focus-visible,
   --color-error: #dc3545;
   --color-error-dark: #721c24;
   --color-error-soft: #f8d7da;
+
+  /* Typography tokens -- D5 type-scale layer (GH #79). Every value below
+     equals a literal that already renders somewhere in this file; the only
+     value change is the Inter->DM Sans truth fix (D5 also fixes the unused
+     Tailwind fontFamily.heading/body config, which never loaded Inter). */
+  --font-heading: 'DM Sans', sans-serif;
+  --font-body: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-sm2: 0.9rem;
+  --font-size-sm3: 0.85rem;
+  --font-size-base: 1rem;
+  --font-size-md: 1.125rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 2rem;
+  --font-size-3xl: 2.5rem;
+
+  --font-weight-body: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-heading: 700;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.5;
+  --line-height-body: 1.6;
+
+  /* One-off / protected type sizes: CMS h3, and the hero-title / hero-headline
+     responsive ladders. Each names its own current literal instead of the
+     shared scale above, so folding the scale later can't shift these
+     relationships or breakpoint ladders. */
+  --cms-h3-font-size-mobile: calc(1.3rem + 0.6vw);
+  --cms-h3-font-size-desktop: 1.75rem;
+  --cms-h1-font-size-mobile-override: 2rem;
+  --cms-h2-font-size-mobile-override: 1.5rem;
+
+  --font-size-hero-title: clamp(2rem, 3vw + 1rem, 2.6rem);
+  --font-size-hero-title-sm: 2rem;
+  --font-size-hero-title-md: 4rem;
+  --font-size-hero-title-lg: 4.5rem;
+  --font-size-hero-title-sm-2: 2.5rem;
+
+  --font-size-hero-headline: clamp(2rem, 5vw, 4rem);
+  --font-size-hero-headline-sm: 2rem;
+  --font-size-hero-headline-2: clamp(1.75rem, calc(3.5vw + 0.25rem), 2.5rem);
+  --font-size-hero-headline-2-sm: clamp(1.75rem, 4vw, 2.25rem);
+  --font-size-hero-title-secondary: clamp(1.25rem, calc(2.5vw + 0.25rem), 1.65rem);
+  --font-size-hero-title-secondary-sm: clamp(1.375rem, 3.5vw, 1.75rem);
+
+  --font-size-home-section-title: clamp(1.75rem, 4vw, 2.5rem);
+  --font-size-home-block-heading: clamp(1.4rem, 3vw, 1.9rem);
+  --font-size-text-body-lead: 1.05rem;
+  --font-size-logo-accent: 1.4rem;
 }
 
 body {
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-  font-weight: 400;
-  line-height: 1.6;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
   color: var(--text-primary);
   background: var(--bg-secondary);
-  font-size: 16px;
+  font-size: var(--font-size-base);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   position: relative;
@@ -142,7 +196,7 @@ body {
 }
 
 .cms-section-eyebrow {
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm2);
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-tertiary);
@@ -285,16 +339,16 @@ body {
 
 /* Typography */
 h1, h2 {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
   line-height: var(--cms-h2-line-height, 1.2);
   margin: 0 0 var(--spacing-sm);
   color: var(--text-primary, #1a1a1a);
 }
 
 h3, h4, h5, h6 {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
-  line-height: 1.2;
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
   margin: 0 0 var(--spacing-sm);
   color: var(--text-primary);
 }
@@ -328,18 +382,18 @@ h2 {
 }
 
 h3 {
-  font-size: calc(1.3rem + 0.6vw);
+  font-size: var(--cms-h3-font-size-mobile);
 }
 
 @media (min-width: 1200px) {
   h3 {
-    font-size: 1.75rem;
+    font-size: var(--cms-h3-font-size-desktop);
   }
 }
 
 p {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
   margin: 0 0 var(--spacing-sm);
   color: var(--text-secondary);
 }
@@ -430,8 +484,8 @@ p {
 }
 
 .bento-card {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
   position: relative;
   display: flex;
   flex-direction: column;
@@ -643,14 +697,14 @@ p {
   background-color: rgba(33, 37, 41, 0.03);
   border-bottom: none;
   border-radius: var(--radius-md) var(--radius-md) 0 0;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
 }
 
 .card-header h3 {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
-  font-size: 1.25rem;
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-lg);
   margin: 0;
   padding: 0;
   color: var(--text-primary);
@@ -664,9 +718,9 @@ p {
 }
 
 .card-header h4.card-title {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
-  font-size: 1rem;
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
   margin: 0.5rem 0 0 0;
   padding: 0;
   color: var(--text-primary);
@@ -729,13 +783,13 @@ p {
 .card-title,
 h4.card-title {
   margin-bottom: 0.5rem;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-medium);
   color: var(--text-primary);
 }
 
 .card-body .card-title {
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
   margin-bottom: 0.5rem;
   color: var(--text-primary);
 }
@@ -743,8 +797,8 @@ h4.card-title {
 .card-subtitle {
   margin-top: -0.25rem;
   margin-bottom: 0;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
   color: var(--text-secondary);
 }
 
@@ -783,8 +837,8 @@ h4.card-title {
   background-color: var(--bg-primary);
   border: 1px solid var(--color-charcoal);
   border-top: 0;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
 }
 
 .list-group-item:first-child {
@@ -838,10 +892,10 @@ h4.card-title {
   display: flex;
   align-items: center;
   padding: 12px 16px;
-  font-size: 1rem;
-  font-weight: 700;
-  font-family: 'DM Sans', sans-serif;
-  line-height: 1.5;
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-heading);
+  font-family: var(--font-body);
+  line-height: var(--line-height-snug);
   color: var(--text-primary);
   text-align: center;
   white-space: nowrap;
@@ -912,8 +966,8 @@ h4.card-title {
   border: 2px solid transparent;
   transform-origin: 0 0;
   transition: opacity 0.1s ease-in-out, transform 0.1s ease-in-out;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   color: var(--text-secondary);
 }
 
@@ -933,8 +987,8 @@ h4.card-title {
   background-color: rgba(33, 37, 41, 0.03);
   border-top: 1px solid var(--color-charcoal);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
 }
 
 /* Colored card variants with bioco colors */
@@ -1116,18 +1170,18 @@ button,
 .btn,
 .btn-primary,
 .btn-secondary {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   display: inline-block;
   padding: 12px 24px;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   text-align: center;
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
   text-decoration: none;
   cursor: pointer;
   border: 2px solid;
-  line-height: 1.5;
+  line-height: var(--line-height-snug);
   position: relative;
   overflow: visible;
   box-shadow: var(--shadow-sm);
@@ -1208,18 +1262,18 @@ button.btn-orange:hover {
 /* Form submit buttons - match primary button style */
 input[type="submit"].cta-button,
 .cta-button {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   display: inline-block;
   padding: 12px 24px;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   text-align: center;
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
   text-decoration: none;
   cursor: pointer;
   border: 2px solid;
-  line-height: 1.5;
+  line-height: var(--line-height-snug);
   position: relative;
   overflow: visible;
   box-shadow: var(--shadow-sm);
@@ -1271,10 +1325,10 @@ a:hover {
 .logo {
   display: flex;
   align-items: center;
-  font-size: 2rem;
-  font-weight: 500;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-medium);
   line-height: 1;
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-heading);
 }
 
 .logo-b {
@@ -1291,14 +1345,14 @@ a:hover {
 }
 
 .carrot-leaves {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--bioco-green);
   line-height: 0.5;
   transform: translateY(-2px);
 }
 
 .carrot-body {
-  font-size: 1.4rem;
+  font-size: var(--font-size-logo-accent);
   color: var(--bioco-orange);
   line-height: 0.8;
 }
@@ -1322,14 +1376,14 @@ a:hover {
 }
 
 .beet-leaves {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--bioco-green);
   line-height: 0.5;
   transform: translateY(-2px);
 }
 
 .beet-body {
-  font-size: 1.4rem;
+  font-size: var(--font-size-logo-accent);
   color: var(--bioco-beet);
   line-height: 0.8;
 }
@@ -1377,7 +1431,7 @@ a:hover {
   display: flex;
   align-items: center;
   padding: 4px 12px;
-  font-weight: 400;
+  font-weight: var(--font-weight-body);
   font-size: 0.8125rem;
   color: var(--text-primary); /* Black text */
   text-decoration: none;
@@ -1387,7 +1441,7 @@ a:hover {
 .utility-nav a:hover {
   color: var(--bioco-green) !important; /* Green text on hover */
   background: color-mix(in srgb, var(--color-brand) 10%, transparent) !important; /* Light green background */
-  font-weight: 700; /* Bold text on hover */
+  font-weight: var(--font-weight-heading); /* Bold text on hover */
   text-decoration: none;
   border-radius: 6px; /* Rounded corners */
   transform: translateY(-1px); /* Slight lift effect */
@@ -1397,7 +1451,7 @@ a:hover {
 
 .utility-nav a.active {
   color: var(--bioco-green);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 @media (min-width: 768px) {
@@ -1636,8 +1690,8 @@ a:hover {
   align-items: center;
   padding: 8px 16px;
   border-radius: var(--radius-sm);
-  font-weight: 500;
-  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   text-decoration: none;
   transition: all 0.2s ease;
@@ -1647,7 +1701,7 @@ a:hover {
 .secondary-nav a:hover {
   color: white !important; /* White text on hover */
   background: var(--bioco-green) !important; /* Green background on hover */
-  font-weight: 700; /* Bold text on hover */
+  font-weight: var(--font-weight-heading); /* Bold text on hover */
   text-decoration: none;
   transform: translateY(-1px); /* Slight lift effect */
   box-shadow: 0 2px 8px color-mix(in srgb, var(--color-brand) 30%, transparent); /* Subtle shadow for depth */
@@ -1658,7 +1712,7 @@ a:hover {
 .primary-nav a.active,
 .secondary-nav a.active {
   color: var(--bioco-green);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   background: var(--bg-primary);
 }
 
@@ -1669,7 +1723,7 @@ a:hover {
   color: white;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   padding: 8px 16px;
   border-radius: var(--radius-sm);
   position: relative;
@@ -1683,7 +1737,7 @@ a:hover {
   background: var(--bioco-green) !important; /* Green background on hover */
   border-color: var(--bioco-green) !important; /* Green border on hover */
   color: white !important; /* White text on hover */
-  font-weight: 700; /* Bold text on hover */
+  font-weight: var(--font-weight-heading); /* Bold text on hover */
   transform: translateY(-2px) scale(1.05); /* Lift and slight scale */
   box-shadow: 0 4px 12px color-mix(in srgb, var(--color-brand) 40%, transparent); /* More prominent shadow */
   transition: all 0.2s ease;
@@ -1893,13 +1947,13 @@ header .header-nav-container .beet-leaves {
 }
 
 .mobile-menu-toggle {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   background: transparent;
   border: none;
   padding: 8px;
   cursor: pointer;
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
   display: block;
   transition: all 0.2s ease;
   box-shadow: none;
@@ -2047,8 +2101,8 @@ header .header-nav-container .beet-leaves {
 }
 
 .mobile-menu {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   background: white !important;
   color: var(--text-primary) !important;
   border: none;
@@ -2113,8 +2167,8 @@ header .header-nav-container .beet-leaves {
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary) !important;
   text-decoration: none;
-  font-weight: 500;
-  font-size: 1rem;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-base);
   transition: all 0.2s ease;
   width: 100%;
   background: white;
@@ -2135,7 +2189,7 @@ header .header-nav-container .beet-leaves {
   color: white;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   text-align: center;
   justify-content: center;
   margin: 16px clamp(16px, 5vw, 72px);
@@ -2283,7 +2337,7 @@ header .header-nav-container .beet-leaves {
 .mobile-menu-close {
   background: transparent;
   border: none;
-  font-size: 32px;
+  font-size: var(--font-size-2xl);
   color: var(--text-primary);
   cursor: pointer;
   padding: 8px;
@@ -2332,7 +2386,7 @@ header .header-nav-container .beet-leaves {
   display: block;
   padding: 10px 16px;
   border-radius: var(--radius-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--text-primary);
   transition: all 0.2s ease;
   text-decoration: none;
@@ -2353,7 +2407,7 @@ header .header-nav-container .beet-leaves {
 
 .mobile-menu .header-nav a.nav-active {
   color: white !important;
-  font-weight: 700 !important;
+  font-weight: var(--font-weight-heading) !important;
   background: var(--bioco-green) !important;
   border-bottom: 2px solid var(--bioco-green-dark) !important;
 }
@@ -2371,7 +2425,7 @@ header .header-nav-container .beet-leaves {
 
 .header-nav a.nav-active {
   color: white !important;
-  font-weight: 700 !important;
+  font-weight: var(--font-weight-heading) !important;
   background: color-mix(in srgb, var(--color-brand) 15%, transparent) !important;
   border-bottom: 2px solid var(--bioco-green-dark) !important;
 }
@@ -2383,7 +2437,7 @@ header .header-nav-container .beet-leaves {
 
 .nav-link-orange {
   color: var(--bioco-orange) !important;
-  font-weight: 600 !important;
+  font-weight: var(--font-weight-semibold) !important;
 }
 
 .nav-link-orange:hover {
@@ -2394,7 +2448,7 @@ header .header-nav-container .beet-leaves {
 .header-nav .btn {
   margin: 0;
   padding: 8px 16px;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   white-space: nowrap;
   border-color: rgba(255, 255, 255, 0.5);
   color: white;
@@ -2476,9 +2530,9 @@ header .header-nav-container .beet-leaves {
 }
 
 .hero-subtitle {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-family: var(--font-body);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.5px;
   color: var(--text-secondary);
@@ -2486,17 +2540,17 @@ header .header-nav-container .beet-leaves {
 }
 
 .hero-title {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(2rem, 3vw + 1rem, 2.6rem);
-  font-weight: 500;
-  line-height: 1.2;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-hero-title);
+  font-weight: var(--font-weight-medium);
+  line-height: var(--line-height-tight);
   letter-spacing: -0.015em;
   margin-bottom: calc(var(--spacing-md) / 3);
   color: var(--text-primary);
 }
 
 .hero-title-secondary {
-  font-weight: 400;
+  font-weight: var(--font-weight-body);
   color: var(--text-secondary);
 }
 
@@ -2570,7 +2624,7 @@ header .header-nav-container .beet-leaves {
   }
 
   .hero-title {
-    font-size: 2rem;
+    font-size: var(--font-size-hero-title-sm);
   }
 
   .hero-buttons {
@@ -2648,8 +2702,8 @@ header .header-nav-container .beet-leaves {
 
 /* Events Banner */
 .events-banner {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   background: linear-gradient(135deg, color-mix(in srgb, var(--color-brand) 10%, transparent) 0%, color-mix(in srgb, var(--color-brand-soft) 5%, transparent) 100%);
   border: 2px solid color-mix(in srgb, var(--color-brand) 30%, transparent);
   padding: var(--spacing-lg);
@@ -2707,7 +2761,7 @@ header .header-nav-container .beet-leaves {
 
 .pea-bullet {
   margin: var(--spacing-xs) 0;
-  line-height: 1.5;
+  line-height: var(--line-height-snug);
 }
 
 /* Global bullet styling - Normal bullet points */
@@ -2735,8 +2789,8 @@ main ul:not(.pea-bullet-list) li,
 .form-group label {
   display: block;
   margin-bottom: 8px;
-  font-weight: 500;
-  font-size: 0.875rem;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
   color: var(--text-primary);
 }
 
@@ -2745,15 +2799,15 @@ main ul:not(.pea-bullet-list) li,
 }
 
 .recommended-badge {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   display: inline-block;
   background: var(--bioco-orange);
   color: white;
   padding: 4px 12px;
   border: 2px solid var(--color-carrot-strong);
   border-radius: var(--radius-sm);
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   transform: rotate(10deg);
   transform-origin: center;
   box-shadow: var(--shadow-sm);
@@ -2771,14 +2825,14 @@ input[type="search"],
 textarea,
 select,
 .form-control {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   border: 2px solid var(--color-charcoal);
   padding: 12px 16px;
   background: var(--bg-primary);
   width: 100%;
   margin: 4px 0;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
@@ -2829,20 +2883,20 @@ select:focus,
   display: block;
   width: 100%;
   margin-top: 0.25rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--color-success);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
 }
 
 .invalid-feedback {
   display: block;
   width: 100%;
   margin-top: 0.25rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--color-error);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
 }
 
 .is-invalid-group {
@@ -2867,20 +2921,20 @@ select:focus,
 .form-label {
   display: inline-block;
   margin-bottom: 0.5rem;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   color: var(--text-primary);
 }
 
 .form-control-lg {
   padding: 0.5rem 1rem;
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
   border-radius: var(--radius-md);
 }
 
 .form-control-sm {
   padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   border-radius: var(--radius-sm);
 }
 
@@ -2910,8 +2964,8 @@ input[type="checkbox"]:checked::after {
   left: 50%;
   transform: translate(-50%, -50%);
   color: white;
-  font-weight: 700;
-  font-size: 14px;
+  font-weight: var(--font-weight-heading);
+  font-size: var(--font-size-sm);
 }
 
 input[type="radio"] {
@@ -2931,8 +2985,8 @@ input[type="radio"]:checked::after {
 }
 
 .form-success {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   background: var(--color-success-soft);
   border: 2px solid var(--color-success);
   color: var(--color-success-dark);
@@ -2943,8 +2997,8 @@ input[type="radio"]:checked::after {
 }
 
 .form-error {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   background: var(--color-error-soft);
   border: 2px solid var(--color-error);
   color: var(--color-error-dark);
@@ -2956,8 +3010,8 @@ input[type="radio"]:checked::after {
 
 /* Footer */
 footer {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   border-top: 2px solid var(--color-charcoal);
   background: var(--bg-secondary);
   margin-top: var(--spacing-xl);
@@ -2988,7 +3042,7 @@ footer li {
 footer a {
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   transition: color 0.2s ease;
 }
 
@@ -3006,14 +3060,14 @@ footer a:hover {
 }
 
 .footer-column h3 {
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
   margin-bottom: var(--spacing-sm);
   color: var(--text-primary);
 }
 
 .footer-column p {
   margin-bottom: var(--spacing-xs);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 .social-links {
@@ -3034,7 +3088,7 @@ footer a:hover {
 }
 
 .footer-partners h3 {
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
   margin-bottom: var(--spacing-md);
   color: var(--text-primary);
 }
@@ -3046,11 +3100,11 @@ footer a:hover {
 }
 
 .partner-link {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 400;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-body);
   display: inline-block;
   color: var(--text-primary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   text-decoration: none;
   transition: all 0.2s ease;
 }
@@ -3078,13 +3132,13 @@ footer a:hover {
 }
 
 .kalender-tab {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-xs) var(--spacing-sm);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -3113,8 +3167,8 @@ footer a:hover {
 }
 
 .kalender-mobile-stepper-btn {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   border: 1px solid var(--border-color);
   background: var(--bg-secondary);
   color: var(--text-primary);
@@ -3129,8 +3183,8 @@ footer a:hover {
 }
 
 .kalender-mobile-stepper-current {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   color: var(--text-primary);
 }
 
@@ -3139,9 +3193,9 @@ footer a:hover {
   width: 100%;
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
+  font-size: var(--font-size-base);
   background: var(--bg-secondary);
   border: 2px solid var(--color-charcoal);
   border-radius: var(--radius-md);
@@ -3169,9 +3223,9 @@ footer a:hover {
   padding: 0;
   margin: 0;
   color: var(--text-secondary);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1rem;
-  line-height: 1.6;
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-body);
 }
 
 .vegetable-list li.empty {
@@ -3202,13 +3256,13 @@ footer a:hover {
 }
 
 .gallery-filter {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-xs) var(--spacing-md);
   background: var(--bg-secondary);
   border: 2px solid var(--color-charcoal);
   border-radius: var(--radius-md);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -3233,9 +3287,9 @@ footer a:hover {
   width: 100%;
   padding: var(--spacing-sm);
   margin-bottom: var(--spacing-md);
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
-  font-size: 1rem;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
+  font-size: var(--font-size-base);
   background: var(--bg-secondary);
   border: 2px solid var(--color-charcoal);
   border-radius: var(--radius-md);
@@ -3275,8 +3329,8 @@ footer a:hover {
 }
 
 .demeter-accordion details {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   margin-bottom: var(--spacing-sm);
   border: none;
   border-radius: var(--radius-md);
@@ -3288,7 +3342,7 @@ footer a:hover {
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   cursor: pointer;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   list-style: none;
   transition: all 0.2s ease;
@@ -3302,7 +3356,7 @@ footer a:hover {
   content: '+';
   display: inline-block;
   margin-right: var(--spacing-xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   color: var(--bioco-green);
 }
 
@@ -3333,8 +3387,8 @@ footer a:hover {
 }
 
 .team-card {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
@@ -3376,18 +3430,18 @@ footer a:hover {
 
 .team-placeholder {
   color: var(--text-tertiary);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 .team-card h3 {
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
   margin-bottom: var(--spacing-xs);
   color: var(--text-primary);
 }
 
 .team-card p {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 /* Mission Values */
@@ -3399,8 +3453,8 @@ footer a:hover {
 }
 
 .mission-item {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
@@ -3409,7 +3463,7 @@ footer a:hover {
 }
 
 .mission-item h3 {
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
   margin-bottom: var(--spacing-xs);
   color: var(--text-primary);
 }
@@ -3460,8 +3514,8 @@ footer a:hover {
 .timeline-year {
   flex-shrink: 0;
   width: 80px;
-  font-weight: 700;
-  font-size: 1.125rem;
+  font-weight: var(--font-weight-heading);
+  font-size: var(--font-size-md);
   color: var(--bioco-green);
 }
 
@@ -3470,14 +3524,14 @@ footer a:hover {
 }
 
 .timeline-content h3 {
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
   margin-bottom: var(--spacing-xs);
   color: var(--text-primary);
 }
 
 .timeline-content p {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 /* Button Groups */
@@ -3511,9 +3565,9 @@ footer a:hover {
 .aktuelles-item h3 {
   color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
-  font-size: 1rem;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
 }
 
 .aktuelles-item p {
@@ -3534,13 +3588,13 @@ footer a:hover {
 }
 
 .tab-button {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-sm) var(--spacing-md);
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
@@ -3555,7 +3609,7 @@ footer a:hover {
   color: var(--bioco-green);
   border-bottom-color: var(--bioco-green);
   border-bottom-width: 3px;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   background: var(--bg-secondary);
 }
 
@@ -3649,9 +3703,9 @@ footer a:hover {
 .event-item h3 {
   color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
-  font-size: 1rem;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-size: var(--font-size-base);
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-semibold);
 }
 
 .event-item p {
@@ -3744,25 +3798,25 @@ footer a:hover {
 }
 
 .past-event-date {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm3);
   color: var(--text-secondary);
   margin-bottom: 4px;
 }
 
 .past-event-title {
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   margin-bottom: 4px;
 }
 
 .past-event-location {
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm2);
   color: var(--text-secondary);
   margin-bottom: 8px;
 }
 
 .past-event-cta {
   color: var(--bioco-green);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .event-media-grid {
@@ -3780,7 +3834,7 @@ footer a:hover {
 }
 
 .event-media-grid figcaption {
-  font-size: 0.85rem;
+  font-size: var(--font-size-sm3);
   color: var(--text-secondary);
 }
 
@@ -3793,8 +3847,8 @@ footer a:hover {
 }
 
 .procedure-step {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-md);
@@ -3818,8 +3872,8 @@ footer a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-heading);
 }
 
 .step-content {
@@ -3828,14 +3882,14 @@ footer a:hover {
 
 .step-content h3 {
   margin: 0 0 var(--spacing-xs) 0;
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
   color: var(--text-primary);
 }
 
 .step-content p {
   margin: 0;
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .step-content a {
@@ -3921,20 +3975,20 @@ footer a:hover {
 
 .location-address-section h4,
 .location-route-section h4 {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-medium);
   color: var(--bioco-green);
   margin-bottom: var(--spacing-md);
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
 }
 
 .location-addresses h4,
 .location-directions h4 {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
+  font-family: var(--font-heading);
+  font-weight: var(--font-weight-medium);
   color: var(--bioco-green);
   margin-bottom: var(--spacing-md);
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
 }
 
 .address-list,
@@ -3971,13 +4025,13 @@ footer a:hover {
   display: block;
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 .address-item p {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.9rem;
+  font-size: var(--font-size-sm2);
 }
 
 .direction-item {
@@ -3999,8 +4053,8 @@ footer a:hover {
 }
 
 .pricing-table table {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
@@ -4012,8 +4066,8 @@ footer a:hover {
 }
 
 .pricing-table th {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-medium);
   background: var(--bioco-green);
   color: white;
   padding: var(--spacing-sm) var(--spacing-md);
@@ -4022,8 +4076,8 @@ footer a:hover {
 }
 
 .pricing-table td {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-md) var(--spacing-md);
   border-bottom: none;
   vertical-align: middle;
@@ -4054,11 +4108,11 @@ footer a:hover {
 
 .pricing-table .total-row td {
   padding: var(--spacing-md);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .total-amount {
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
   color: var(--bioco-green);
 }
 
@@ -4068,14 +4122,14 @@ footer a:hover {
 }
 
 .btn-add-share {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--bioco-green);
   color: white;
   border: 2px solid var(--bioco-green);
   border-radius: var(--radius-sm);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
@@ -4087,14 +4141,14 @@ footer a:hover {
 }
 
 .btn-remove-share {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--text-secondary);
   color: white;
   border: 2px solid var(--text-secondary);
   border-radius: var(--radius-sm);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   cursor: pointer;
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
@@ -4113,8 +4167,8 @@ footer a:hover {
 }
 
 .share-buttons-label {
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -4137,8 +4191,8 @@ footer a:hover {
 }
 
 .abo-button {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-md);
   background: color-mix(in srgb, var(--color-brand) 10%, transparent);
   border: none;
@@ -4146,7 +4200,7 @@ footer a:hover {
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   position: relative;
   overflow: visible;
   box-shadow: var(--shadow-sm);
@@ -4168,8 +4222,8 @@ footer a:hover {
 .abo-button .price {
   display: block;
   margin-top: var(--spacing-xs);
-  font-size: 0.75rem;
-  font-weight: 400;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-body);
   opacity: 0.9;
 }
 
@@ -4178,7 +4232,7 @@ footer a:hover {
 }
 
 .text-sm {
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
 }
 
 /* Membership Form Styles */
@@ -4224,7 +4278,7 @@ footer a:hover {
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
   position: absolute;
   top: 0;
   left: 0;
@@ -4241,7 +4295,7 @@ footer a:hover {
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 0.75rem;
+  font-size: var(--font-size-xs);
 }
 
 .progress-fill {
@@ -4253,9 +4307,9 @@ footer a:hover {
 
 .progress-text {
   text-align: center;
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .form-layout {
@@ -4279,7 +4333,7 @@ footer a:hover {
 
 .form-step h3 {
   margin-bottom: var(--spacing-lg);
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
 }
 
 .form-navigation {
@@ -4295,7 +4349,7 @@ footer a:hover {
 .form-navigation .btn {
   min-width: 140px;
   padding: 14px 28px;
-  font-size: 1rem;
+  font-size: var(--font-size-base);
 }
 
 .form-navigation .btn-secondary {
@@ -4309,7 +4363,7 @@ footer a:hover {
 .form-link {
   color: var(--bioco-green) !important;
   text-decoration: underline !important;
-  font-weight: 600 !important;
+  font-weight: var(--font-weight-semibold) !important;
   cursor: pointer !important;
   transition: color 0.2s ease;
 }
@@ -4328,8 +4382,8 @@ footer a:hover {
 }
 
 .commitment-item {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
@@ -4354,7 +4408,7 @@ footer a:hover {
 .commitment-item h3 {
   margin-top: 0;
   color: var(--text-primary);
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
 }
 
 .commitment-item ul {
@@ -4390,14 +4444,14 @@ footer a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
+  font-weight: var(--font-weight-heading);
+  font-size: var(--font-size-base);
 }
 
 .step-item h3 {
   margin-top: 0;
   margin-bottom: var(--spacing-xs);
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
 }
 
 .step-item p {
@@ -4413,8 +4467,8 @@ footer a:hover {
 }
 
 .faq-item {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-md);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
@@ -4425,7 +4479,7 @@ footer a:hover {
 .faq-item h3 {
   margin-top: 0;
   margin-bottom: var(--spacing-sm);
-  font-size: 1.125rem;
+  font-size: var(--font-size-md);
   color: var(--text-primary);
 }
 
@@ -4447,8 +4501,8 @@ footer a:hover {
   color: white;
   border: none;
   cursor: help;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-heading);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4463,8 +4517,8 @@ footer a:hover {
 }
 
 .info-tooltip-content {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   position: absolute;
   bottom: 100%;
   left: 50%;
@@ -4475,7 +4529,7 @@ footer a:hover {
   color: white;
   border: 2px solid rgba(0, 0, 0, 0.3);
   border-radius: var(--radius-sm);
-  font-size: 0.875rem;
+  font-size: var(--font-size-sm);
   line-height: 1.4;
   white-space: nowrap;
   max-width: 250px;
@@ -4504,8 +4558,8 @@ footer a:hover {
 }
 
 .document-item {
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
+  font-family: var(--font-body);
+  font-weight: var(--font-weight-heading);
   padding: var(--spacing-lg);
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
@@ -4519,13 +4573,13 @@ footer a:hover {
 .document-item h3 {
   margin-bottom: var(--spacing-sm);
   color: var(--text-primary);
-  font-size: 1.25rem;
+  font-size: var(--font-size-lg);
 }
 
 .document-item p {
   margin-bottom: var(--spacing-md);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
   flex: 1;
 }
 
@@ -4642,7 +4696,7 @@ footer a:hover {
 
   .header-nav a {
     padding: 8px 16px;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     white-space: nowrap;
   }
 
@@ -4666,7 +4720,7 @@ footer a:hover {
   }
 
   .hero-title {
-    font-size: 4rem;
+    font-size: var(--font-size-hero-title-md);
   }
 
   .hero-buttons {
@@ -4833,7 +4887,7 @@ footer a:hover {
   }
 
   .hero-title {
-    font-size: 4.5rem;
+    font-size: var(--font-size-hero-title-lg);
   }
 
   .main-content {
@@ -4908,38 +4962,38 @@ footer a:hover {
   }
 
   h1 {
-    font-size: 2rem;
+    font-size: var(--cms-h1-font-size-mobile-override);
   }
 
   h2 {
-    font-size: 1.5rem;
+    font-size: var(--cms-h2-font-size-mobile-override);
   }
 
   .hero-title {
-    font-size: 2.5rem;
+    font-size: var(--font-size-hero-title-sm-2);
   }
 
   /* Better readability for pricing table on mobile */
   .pricing-table {
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   .pricing-table table {
     min-width: 100%;
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
   }
 
   .pricing-table th {
     padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     white-space: nowrap;
   }
 
   .pricing-table td {
     padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: 0.875rem;
+    font-size: var(--font-size-sm);
     white-space: nowrap;
   }
 
@@ -4951,12 +5005,12 @@ footer a:hover {
 
   .pricing-table .total-row td {
     padding: var(--spacing-sm);
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     white-space: nowrap;
   }
 
   .total-amount {
-    font-size: 1.125rem;
+    font-size: var(--font-size-md);
   }
 
   .share-buttons-container {
@@ -4964,7 +5018,7 @@ footer a:hover {
   }
 
   .share-buttons-label {
-    font-size: 0.75rem;
+    font-size: var(--font-size-xs);
     margin-bottom: var(--spacing-xs);
   }
 
@@ -4984,7 +5038,7 @@ footer a:hover {
   textarea,
   select,
   .form-control {
-    font-size: 16px; /* Prevents zoom on iOS */
+    font-size: var(--font-size-base); /* Prevents zoom on iOS */
     padding: 10px 12px;
     width: 100%;
     max-width: 100%;
@@ -5110,8 +5164,8 @@ footer a:hover {
   }
 
   #C-01 .pricing-table td:first-child {
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-heading);
     color: var(--bioco-green);
     margin-bottom: var(--spacing-sm);
     padding-bottom: var(--spacing-xs);
@@ -5123,7 +5177,7 @@ footer a:hover {
   }
 
   #C-01 .pricing-table td:nth-child(3) {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     position: relative;
     padding-left: 0;
   }
@@ -5131,13 +5185,13 @@ footer a:hover {
   #C-01 .pricing-table td:nth-child(3)::before {
     content: "Jährlicher Abobeitrag: ";
     display: block;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: var(--bioco-green);
     margin-bottom: 4px;
   }
   
   #C-01 .pricing-table td:nth-child(4) {
-    font-size: 1rem;
+    font-size: var(--font-size-base);
     position: relative;
     padding-left: 0;
   }
@@ -5145,7 +5199,7 @@ footer a:hover {
   #C-01 .pricing-table td:nth-child(4)::before {
     content: "Einmaliger Anteilsschein: ";
     display: block;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     color: var(--bioco-green);
     margin-bottom: 4px;
   }
@@ -5200,7 +5254,7 @@ footer a:hover {
 
   .pricing-calculator .pricing-table td:before {
     content: attr(data-label);
-    font-weight: 700;
+    font-weight: var(--font-weight-heading);
     color: var(--bioco-green);
     position: absolute;
     left: 0;
@@ -5244,7 +5298,7 @@ footer a:hover {
   }
 
   .pricing-calculator .pricing-table .total-row td:first-child {
-    font-size: 1.125rem;
+    font-size: var(--font-size-md);
     margin-bottom: var(--spacing-xs);
   }
 
@@ -5353,12 +5407,12 @@ footer a:hover {
 }
 
 .hero-headline {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(2rem, 5vw, 4rem);
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-hero-headline);
+  font-weight: var(--font-weight-heading);
   color: white;
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-  line-height: 1.2;
+  line-height: var(--line-height-tight);
   margin: 0;
 }
 
@@ -5440,7 +5494,7 @@ footer a:hover {
 .navbar-overlay .secondary-nav:not(.nav-scrolled) a:hover {
   color: white !important;
   background: var(--bioco-green) !important;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   text-shadow: none !important;
   border-radius: 8px;
   transform: translateY(-1px);
@@ -5493,7 +5547,7 @@ footer a:hover {
 .navbar-overlay .secondary-nav.nav-scrolled a:hover {
   color: white !important;
   background: var(--bioco-green) !important;
-  font-weight: 700;
+  font-weight: var(--font-weight-heading);
   border-radius: 8px;
   transform: translateY(-1px);
   box-shadow: 0 2px 8px color-mix(in srgb, var(--color-brand) 30%, transparent);
@@ -5589,17 +5643,17 @@ footer a:hover {
 }
 
 .home-section-title {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(1.75rem, 4vw, 2.5rem);
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-home-section-title);
+  font-weight: var(--font-weight-heading);
   color: var(--text-primary);
   margin-bottom: var(--spacing-md);
   line-height: 1.3;
 }
 
 .home-text-content {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1.125rem;
+  font-family: var(--font-body);
+  font-size: var(--font-size-md);
   line-height: 1.7;
   color: var(--text-primary);
 }
@@ -5763,22 +5817,22 @@ footer a:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1.25rem;
+  font-weight: var(--font-weight-heading);
+  font-size: var(--font-size-lg);
 }
 
 .step-content h3 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   color: var(--text-primary);
   margin-bottom: var(--spacing-xs);
 }
 
 .step-content p {
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
   color: var(--text-secondary);
-  line-height: 1.6;
+  line-height: var(--line-height-body);
 }
 
 .step-content a {
@@ -5815,7 +5869,7 @@ footer a:hover {
   }
 
   .hero-headline {
-    font-size: 2rem;
+    font-size: var(--font-size-hero-headline-sm);
   }
 
   .wobbly-card {
@@ -5882,17 +5936,17 @@ footer a:hover {
 }
 
 .hero-headline {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(1.75rem, calc(3.5vw + 0.25rem), 2.5rem); /* Increased by ~4pt */
-  font-weight: 700;
+  font-family: var(--font-heading);
+  font-size: var(--font-size-hero-headline-2); /* Increased by ~4pt */
+  font-weight: var(--font-weight-heading);
   color: white;
   margin: 0;
   line-height: 1.3;
 }
 
 .hero-title-secondary {
-  font-size: clamp(1.25rem, calc(2.5vw + 0.25rem), 1.65rem); /* Increased by ~4pt */
-  font-weight: 400;
+  font-size: var(--font-size-hero-title-secondary); /* Increased by ~4pt */
+  font-weight: var(--font-weight-body);
   display: block;
   margin-top: 0.5em;
   color: white;
@@ -6108,8 +6162,8 @@ footer a:hover {
 }
 
 .home-block h2 {
-  font-family: 'DM Sans', sans-serif;
-  font-size: clamp(1.4rem, 3vw, 1.9rem); /* Smaller than h1 */
+  font-family: var(--font-heading);
+  font-size: var(--font-size-home-block-heading); /* Smaller than h1 */
   margin-bottom: 12px;
   color: var(--text-primary);
 }
@@ -6117,7 +6171,7 @@ footer a:hover {
 .text-body {
   color: var(--text-secondary);
   line-height: 1.7;
-  font-size: 1.05rem;
+  font-size: var(--font-size-text-body-lead);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -6231,13 +6285,13 @@ footer a:hover {
   }
   
   .hero-headline {
-    font-size: clamp(1.75rem, 4vw, 2.25rem); /* Increased by 4pt (0.25rem) */
+    font-size: var(--font-size-hero-headline-2-sm); /* Increased by 4pt (0.25rem) */
     color: white !important; /* White text on mobile */
     text-align: left; /* Left aligned on mobile */
   }
 
   .hero-title-secondary {
-    font-size: clamp(1.375rem, 3.5vw, 1.75rem); /* Increased by 4pt (0.25rem) */
+    font-size: var(--font-size-hero-title-secondary-sm); /* Increased by 4pt (0.25rem) */
     color: white !important; /* White text on mobile */
     text-align: left; /* Left aligned on mobile */
   }
@@ -6352,8 +6406,8 @@ footer a:hover {
 
 /* Eyebrow styling enhancement */
 .cms-section-eyebrow {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--color-utility-green);
@@ -6486,7 +6540,7 @@ footer a:hover {
 .page-header-eyebrow {
   margin: 0 0 var(--spacing-xs);
   color: var(--text-secondary);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 .page-header-title {
   margin: 0 0 var(--spacing-md);

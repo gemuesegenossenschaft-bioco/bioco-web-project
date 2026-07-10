@@ -25,8 +25,8 @@ module.exports = {
         'bioco-lg': '18px',
       },
       fontFamily: {
-        'heading': ['Inter', 'system-ui', 'sans-serif'],
-        'body': ['Inter', 'system-ui', 'sans-serif'],
+        'heading': ['DM Sans', 'sans-serif'],
+        'body': ['DM Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
     },
   },
