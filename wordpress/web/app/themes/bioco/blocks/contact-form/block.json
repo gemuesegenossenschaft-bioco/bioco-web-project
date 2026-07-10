@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/contact-form",
+  "title": "Kontaktformular",
+  "description": "Kontaktformular mit Turnstile-Captcha (W10, Issue #97). Sendet an das Formular-Postfach.",
+  "category": "bioco",
+  "icon": "email",
+  "keywords": ["kontakt", "formular", "form", "contact"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "viewScript": "file:./view.js",
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

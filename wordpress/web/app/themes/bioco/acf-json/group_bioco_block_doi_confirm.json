@@ -1,0 +1,24 @@
+{
+    "key": "group_bioco_block_doi_confirm",
+    "title": "Newsletter-Bestätigung Block (Bioco)",
+    "fields": [],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/doi-confirm"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Kein editierbarer Inhalt (W10, Issue #97): render.php liest ?token= aus der Query-String und ruft bioco_forms_doi_confirm_token() direkt auf (kein REST-Roundtrip). Für /newsletter-bestaetigen/ platzieren.",
+    "show_in_rest": 0,
+    "modified": 1783728000
+}

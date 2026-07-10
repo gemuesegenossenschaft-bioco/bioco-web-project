@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/membership-form",
+  "title": "Mitgliedschaft-Anmeldung",
+  "description": "Anmeldeformular für die Mitgliedschaft (W10, Issue #97). Single-page Variante der mehrstufigen Referenz — siehe render.php-Kommentar für die Deferral-Begründung.",
+  "category": "bioco",
+  "icon": "id-alt",
+  "keywords": ["mitgliedschaft", "membership", "abo", "anmeldung", "formular"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "viewScript": "file:./view.js",
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

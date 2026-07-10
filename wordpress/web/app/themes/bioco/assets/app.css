@@ -1585,3 +1585,183 @@ a.portal-tile:hover {
   text-align: center;
   color: var(--wp--preset--color--bioco-text-muted);
 }
+
+/* Form blocks (W10, issue #97): contact/subscribe/visit-day/waiting-list/
+   event-signup/membership + the doi-confirm result block. Class names
+   (.form-group, .form-error, .form-success, .checkbox-group,
+   .radio-group, .commitment-checklist, .form-step, .form-row) are kept
+   identical to .wp-refs/*.tsx + globals.css so this CSS drops in
+   almost unchanged during W11. */
+
+.bioco-form {
+  max-width: 640px;
+}
+
+.form-group {
+  margin-bottom: var(--wp--preset--spacing--40);
+}
+
+.form-group label,
+.form-group > label {
+  display: block;
+  margin-bottom: var(--wp--preset--spacing--20);
+  font-weight: 600;
+  color: var(--wp--preset--color--bioco-text);
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px var(--wp--preset--spacing--30);
+  font-family: var(--wp--preset--font-family--body);
+  font-size: var(--wp--preset--font-size--base);
+  color: var(--wp--preset--color--bioco-text);
+  background: var(--wp--preset--color--bioco-surface);
+  border: 1px solid var(--wp--preset--color--bioco-border);
+  border-radius: var(--wp--custom--radius--sm);
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--wp--preset--color--bioco-green);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-hint {
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin: 0 0 var(--wp--preset--spacing--20);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--wp--preset--spacing--30);
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checkbox-group,
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+}
+
+.checkbox-option,
+.radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--wp--preset--spacing--20);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.checkbox-option input,
+.radio-option input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.commitment-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--30);
+  margin: var(--wp--preset--spacing--30) 0;
+}
+
+.commitment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--wp--preset--spacing--30);
+  padding: var(--wp--preset--spacing--30);
+  background: var(--wp--preset--color--bioco-bg);
+  border-radius: var(--wp--custom--radius--md);
+  cursor: pointer;
+}
+
+.commitment-item input {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.commitment-item h4 {
+  margin: 0 0 var(--wp--preset--spacing--20);
+}
+
+.commitment-item p {
+  margin: 0;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.form-step {
+  margin-bottom: var(--wp--preset--spacing--60);
+}
+
+.form-step h3 {
+  margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.form-navigation {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--wp--preset--spacing--30);
+}
+
+.cf-turnstile {
+  margin: var(--wp--preset--spacing--20) 0;
+}
+
+.form-message {
+  margin-bottom: var(--wp--preset--spacing--40);
+  padding: var(--wp--preset--spacing--30);
+}
+
+.form-message.form-error,
+.invalid-feedback {
+  background: rgba(135, 33, 61, 0.08);
+  color: var(--wp--preset--color--bioco-beet);
+}
+
+.form-message.form-success {
+  background: rgba(46, 125, 50, 0.08);
+  color: var(--wp--preset--color--bioco-green-dark);
+}
+
+.invalid-feedback {
+  padding: var(--wp--preset--spacing--20);
+  border-radius: var(--wp--custom--radius--sm);
+  font-size: var(--wp--preset--font-size--sm);
+  margin-top: var(--wp--preset--spacing--20);
+}
+
+/* doi-confirm block (W10, issue #97) — mirrors .wp-refs/page.tsx's
+   DOIConfirmContent bento-card/card-header/card-body result states. */
+.bioco-doi-confirm {
+  max-width: 640px;
+}
+
+.bioco-doi-confirm-success .card-header {
+  background-color: rgba(46, 125, 50, 0.08);
+}
+
+.bioco-doi-confirm-error .card-header {
+  background-color: rgba(135, 33, 61, 0.08);
+}

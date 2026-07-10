@@ -1,0 +1,48 @@
+{
+    "key": "group_bioco_block_event_signup_form",
+    "title": "Event-Anmeldung Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_event_signup_form_content_clone",
+            "label": "Inhalt (optional)",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "Optionale Überschrift/Einleitung über dem Formular. Ohne Titel wird auf einer Event-Einzelseite automatisch \"Anmeldung für: {Veranstaltungstitel}\" angezeigt.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_title",
+                "field_bioco_section_text"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/event-signup-form"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Event-Anmeldung-Block (W10, Issue #97). Titel/Text klonen aus Section Common; die Formularfelder selbst sind statisch (render.php), Event-ID/-Titel werden auf 'event'-Einzelseiten automatisch befüllt. POST /wp-json/bioco/v1/event-signup (bioco-forms mu-plugin).",
+    "show_in_rest": 0,
+    "modified": 1783728000
+}

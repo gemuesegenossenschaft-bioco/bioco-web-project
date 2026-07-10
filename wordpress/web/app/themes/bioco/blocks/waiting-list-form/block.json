@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/waiting-list-form",
+  "title": "Warteliste-Anmeldung",
+  "description": "Anmeldeformular für die Warteliste (W10, Issue #97).",
+  "category": "bioco",
+  "icon": "clock",
+  "keywords": ["warteliste", "waiting list", "formular"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "viewScript": "file:./view.js",
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

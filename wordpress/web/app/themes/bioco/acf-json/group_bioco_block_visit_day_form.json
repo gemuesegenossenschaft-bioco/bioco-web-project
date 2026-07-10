@@ -1,0 +1,48 @@
+{
+    "key": "group_bioco_block_visit_day_form",
+    "title": "Schnuppertag-Anmeldung Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_visit_day_form_content_clone",
+            "label": "Inhalt (optional)",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "Optionale Überschrift/Einleitung über dem Formular.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_title",
+                "field_bioco_section_text"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/visit-day-form"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Schnuppertag-Anmeldung-Block (W10, Issue #97). Titel/Text klonen aus Section Common für eine optionale Einleitung; die Formularfelder selbst sind statisch (render.php) und werden vom bioco-forms mu-plugin (POST /wp-json/bioco/v1/visit-day) verarbeitet.",
+    "show_in_rest": 0,
+    "modified": 1783728000
+}

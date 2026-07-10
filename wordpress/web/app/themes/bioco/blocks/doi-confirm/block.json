@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/doi-confirm",
+  "title": "Newsletter-Bestätigung",
+  "description": "Zeigt das Ergebnis eines Double-Opt-in-Bestätigungslinks (?token=...) an (W10, Issue #97). Für /newsletter-bestaetigen/ gedacht.",
+  "category": "bioco",
+  "icon": "yes-alt",
+  "keywords": ["newsletter", "bestätigung", "double-opt-in", "doi"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true,
+    "html": false
+  }
+}
