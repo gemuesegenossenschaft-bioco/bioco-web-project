@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { AktuellesItem } from './AktuellesData'
 import { EventSignupForm } from './EventSignupForm'
+import { Modal } from '@/components/ui/Modal'
 
 interface ItemDetailModalProps {
   item: AktuellesItem | null
@@ -31,102 +32,44 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
   }
 
   return (
-    <>
-      {/* Overlay */}
-      <div
-        onClick={onClose}
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 3000,
-          backdropFilter: 'blur(4px)'
-        }}
-      />
-      
-      {/* Modal */}
-      <div
-        style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: 'white',
-          borderRadius: '16px',
-          maxWidth: '600px',
-          width: '90%',
-          maxHeight: '90vh',
-          overflow: 'auto',
-          zIndex: 3001,
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Sticky Navigation Bar */}
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      variant="item-detail"
+      header={
+        <Link href="/" onClick={onClose}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/bioco-logo.png"
+            alt="biocò Logo"
+            style={{ height: 'auto', width: 'auto', maxHeight: '36px' }}
+          />
+        </Link>
+      }
+    >
+      {/* Header */}
+      <div style={{
+        padding: '24px',
+        borderBottom: '1px solid var(--border-color)'
+      }}>
         <div style={{
-          position: 'sticky',
-          top: 0,
-          background: 'white',
-          borderBottom: '1px solid var(--border-color)',
-          padding: '12px 24px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          zIndex: 10
+          fontSize: '0.875rem',
+          color: 'var(--text-secondary)',
+          marginBottom: '8px'
         }}>
-          <Link href="/" onClick={onClose}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/bioco-logo.png"
-              alt="biocò Logo"
-              style={{ height: 'auto', width: 'auto', maxHeight: '36px' }}
-            />
-          </Link>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'transparent',
-              border: 'none',
-              fontSize: '1.5rem',
-              cursor: 'pointer',
-              padding: '4px 8px',
-              color: 'var(--text-secondary)',
-              lineHeight: 1,
-              width: '36px',
-              flexShrink: 0
-            }}
-            aria-label="Schließen"
-          >
-            ×
-          </button>
+          {item.date}
         </div>
-
-        {/* Header */}
-        <div style={{
-          padding: '24px',
-          borderBottom: '1px solid var(--border-color)'
+        <h2 style={{
+          margin: 0,
+          fontSize: '1.5rem',
+          color: 'var(--text-primary)'
         }}>
-          <div style={{ 
-            fontSize: '0.875rem', 
-            color: 'var(--text-secondary)',
-            marginBottom: '8px'
-          }}>
-            {item.date}
-          </div>
-          <h2 style={{ 
-            margin: 0, 
-            fontSize: '1.5rem',
-            color: 'var(--text-primary)'
-          }}>
-            {item.title}
-          </h2>
-        </div>
+          {item.title}
+        </h2>
+      </div>
 
-        {/* Content */}
-        <div style={{ padding: '24px' }}>
+      {/* Content */}
+      <div style={{ padding: '24px' }}>
           {(item.fullDescription || item.description) && (
             <div
               style={{
@@ -207,8 +150,7 @@ export function ItemDetailModal({ item, isOpen, onClose }: ItemDetailModalProps)
             </div>
           )}
         </div>
-      </div>
-    </>
+    </Modal>
   )
 }
 

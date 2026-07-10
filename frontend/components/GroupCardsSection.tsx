@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 import { useGroupCards } from '@/hooks/useGroupCards'
+import { Card } from '@/components/ui/Card'
 
 /**
  * CMS-driven group cards grid (Mitmachen "Gruppen & Gemeinschaft").
@@ -19,7 +20,9 @@ export function GroupCardsSection() {
       marginBottom: '32px'
     }}>
       {groups.map((group) => (
-        <div
+        <Card
+          as="div"
+          variant="soft"
           key={group.id}
           style={{
             background: 'var(--bg-primary, #fff)',
@@ -58,7 +61,7 @@ export function GroupCardsSection() {
               />
             ) : null}
           </div>
-        </div>
+        </Card>
       ))}
     </div>
   )

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { CaptchaField } from './forms/CaptchaField'
 import { Button } from '@/components/ui/Button'
+import { FormField, TextInput, TextArea } from '@/components/ui/FormField'
 
 interface EventSignupFormProps {
   eventTitle: string
@@ -82,85 +83,47 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
     <form onSubmit={handleSubmit} style={{ padding: 'var(--space-5)' }}>
       <h3 style={{ marginBottom: 'var(--space-4)' }}>Anmeldung für: {eventTitle}</h3>
 
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <label htmlFor="name" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
-          Name *
-        </label>
-        <input
+      <FormField variant="inline" label="Name *" htmlFor="name">
+        <TextInput
+          variant="compact"
           type="text"
           id="name"
           required
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          style={{
-            width: '100%',
-            padding: 'var(--space-3)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '8px',
-            fontSize: '1rem',
-          }}
         />
-      </div>
+      </FormField>
 
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <label htmlFor="email" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
-          E-Mail *
-        </label>
-        <input
+      <FormField variant="inline" label="E-Mail *" htmlFor="email">
+        <TextInput
+          variant="compact"
           type="email"
           id="email"
           required
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-          style={{
-            width: '100%',
-            padding: 'var(--space-3)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '8px',
-            fontSize: '1rem',
-          }}
         />
-      </div>
+      </FormField>
 
-      <div style={{ marginBottom: 'var(--space-4)' }}>
-        <label htmlFor="phone" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
-          Telefon (optional)
-        </label>
-        <input
+      <FormField variant="inline" label="Telefon (optional)" htmlFor="phone">
+        <TextInput
+          variant="compact"
           type="tel"
           id="phone"
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          style={{
-            width: '100%',
-            padding: 'var(--space-3)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '8px',
-            fontSize: '1rem',
-          }}
         />
-      </div>
+      </FormField>
 
-      <div style={{ marginBottom: 'var(--space-5)' }}>
-        <label htmlFor="notes" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
-          Bemerkungen (optional)
-        </label>
-        <textarea
+      <FormField variant="inline" spacing="var(--space-5)" label="Bemerkungen (optional)" htmlFor="notes">
+        <TextArea
+          variant="compact"
           id="notes"
           rows={4}
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          style={{
-            width: '100%',
-            padding: 'var(--space-3)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '8px',
-            fontSize: '1rem',
-            fontFamily: 'inherit',
-            resize: 'vertical',
-          }}
         />
-      </div>
+      </FormField>
 
       <CaptchaField token={captchaToken} onTokenChange={setCaptchaToken} resetKey={captchaResetKey} />
 

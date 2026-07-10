@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { trackEvent } from '../MatomoScript'
 import { CaptchaField } from './CaptchaField'
 import { Button } from '@/components/ui/Button'
+import { FormField, TextInput, TextArea, SelectField, Checkbox } from '@/components/ui/FormField'
 
 export function WaitingListForm() {
   const [formData, setFormData] = useState({
@@ -75,9 +76,8 @@ export function WaitingListForm() {
         </div>
       )}
 
-      <div className="form-group">
-        <label htmlFor="waiting_name">Name *</label>
-        <input
+      <FormField label="Name *" htmlFor="waiting_name">
+        <TextInput
           type="text"
           id="waiting_name"
           name="name"
@@ -85,11 +85,10 @@ export function WaitingListForm() {
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="waiting_email">E-Mail *</label>
-        <input
+      <FormField label="E-Mail *" htmlFor="waiting_email">
+        <TextInput
           type="email"
           id="waiting_email"
           name="email"
@@ -97,11 +96,10 @@ export function WaitingListForm() {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="waiting_phone">Telefon *</label>
-        <input
+      <FormField label="Telefon *" htmlFor="waiting_phone">
+        <TextInput
           type="tel"
           id="waiting_phone"
           name="phone"
@@ -109,11 +107,10 @@ export function WaitingListForm() {
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="waiting_interest">Interesse an *</label>
-        <select
+      <FormField label="Interesse an *" htmlFor="waiting_interest">
+        <SelectField
           id="waiting_interest"
           name="interest"
           required
@@ -124,32 +121,26 @@ export function WaitingListForm() {
           <option value="program1">Programm 1</option>
           <option value="program2">Programm 2</option>
           <option value="program3">Programm 3</option>
-        </select>
-      </div>
+        </SelectField>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="waiting_notes">Anmerkungen</label>
-        <textarea
+      <FormField label="Anmerkungen" htmlFor="waiting_notes">
+        <TextArea
           id="waiting_notes"
           name="notes"
           rows={4}
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label>
-          <input
-            type="checkbox"
-            name="privacy_accept"
-            required
-            checked={formData.privacy_accept}
-            onChange={(e) => setFormData({ ...formData, privacy_accept: e.target.checked })}
-          />
-          Ich akzeptiere die Datenschutzbestimmungen *
-        </label>
-      </div>
+      <Checkbox
+        name="privacy_accept"
+        required
+        checked={formData.privacy_accept}
+        onChange={(e) => setFormData({ ...formData, privacy_accept: e.target.checked })}
+        label="Ich akzeptiere die Datenschutzbestimmungen *"
+      />
 
       <CaptchaField
         token={captchaToken}

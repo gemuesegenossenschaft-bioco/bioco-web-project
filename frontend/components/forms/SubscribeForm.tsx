@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { trackEvent } from '../MatomoScript'
 import { Button } from '@/components/ui/Button'
+import { FormField, TextInput, Checkbox } from '@/components/ui/FormField'
 
 export function SubscribeForm() {
   const [formData, setFormData] = useState({
@@ -60,9 +61,8 @@ export function SubscribeForm() {
         </div>
       )}
 
-      <div className="form-group">
-        <label htmlFor="subscribe_email">E-Mail-Adresse *</label>
-        <input
+      <FormField label="E-Mail-Adresse *" htmlFor="subscribe_email">
+        <TextInput
           type="email"
           id="subscribe_email"
           name="email"
@@ -70,31 +70,25 @@ export function SubscribeForm() {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="subscribe_name">Name (optional)</label>
-        <input
+      <FormField label="Name (optional)" htmlFor="subscribe_name">
+        <TextInput
           type="text"
           id="subscribe_name"
           name="name"
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label>
-          <input
-            type="checkbox"
-            name="privacy_accept"
-            required
-            checked={formData.privacy_accept}
-            onChange={(e) => setFormData({ ...formData, privacy_accept: e.target.checked })}
-          />
-          Ich akzeptiere die Datenschutzbestimmungen *
-        </label>
-      </div>
+      <Checkbox
+        name="privacy_accept"
+        required
+        checked={formData.privacy_accept}
+        onChange={(e) => setFormData({ ...formData, privacy_accept: e.target.checked })}
+        label="Ich akzeptiere die Datenschutzbestimmungen *"
+      />
 
       <Button
         as="input"

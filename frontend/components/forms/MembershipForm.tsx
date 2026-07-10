@@ -6,6 +6,8 @@ import { trackEvent } from '../MatomoScript'
 import { InfoTooltip } from '../InfoTooltip'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
+import { FormField, TextInput, SelectField } from '@/components/ui/FormField'
+import { Card } from '@/components/ui/Card'
 
 type AboType = 'halb' | 'standard' | 'doppel' | 'none'
 type PaymentType = 'quarterly' | 'yearly'
@@ -441,12 +443,12 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
               <div className="form-step">
                 <h3>Persönliche Daten</h3>
                 <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="firstName">Vorname *</label>
-                    <input
+                  <FormField label="Vorname *" htmlFor="firstName" error={fieldErrors.firstName}>
+                    <TextInput
+                      variant="bootstrap"
+                      invalid={!!fieldErrors.firstName}
                       type="text"
                       id="firstName"
-                      className={`form-control ${fieldErrors.firstName ? 'is-invalid' : ''}`}
                       required
                       value={formData.firstName}
                       onChange={(e) => {
@@ -458,16 +460,13 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                         }
                       }}
                     />
-                    {fieldErrors.firstName && (
-                      <div className="invalid-feedback">{fieldErrors.firstName}</div>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="lastName">Name *</label>
-                    <input
+                  </FormField>
+                  <FormField label="Name *" htmlFor="lastName" error={fieldErrors.lastName}>
+                    <TextInput
+                      variant="bootstrap"
+                      invalid={!!fieldErrors.lastName}
                       type="text"
                       id="lastName"
-                      className={`form-control ${fieldErrors.lastName ? 'is-invalid' : ''}`}
                       required
                       value={formData.lastName}
                       onChange={(e) => {
@@ -479,17 +478,14 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                         }
                       }}
                     />
-                    {fieldErrors.lastName && (
-                      <div className="invalid-feedback">{fieldErrors.lastName}</div>
-                    )}
-                  </div>
+                  </FormField>
                 </div>
-                <div className="form-group">
-                  <label htmlFor="address">Adresse *</label>
-                  <input
+                <FormField label="Adresse *" htmlFor="address" error={fieldErrors.address}>
+                  <TextInput
+                    variant="bootstrap"
+                    invalid={!!fieldErrors.address}
                     type="text"
                     id="address"
-                    className={`form-control ${fieldErrors.address ? 'is-invalid' : ''}`}
                     required
                     value={formData.address}
                     onChange={(e) => {
@@ -501,17 +497,14 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                       }
                     }}
                   />
-                  {fieldErrors.address && (
-                    <div className="invalid-feedback">{fieldErrors.address}</div>
-                  )}
-                </div>
+                </FormField>
                 <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="zip">PLZ *</label>
-                    <input
+                  <FormField label="PLZ *" htmlFor="zip" error={fieldErrors.zip}>
+                    <TextInput
+                      variant="bootstrap"
+                      invalid={!!fieldErrors.zip}
                       type="text"
                       id="zip"
-                      className={`form-control ${fieldErrors.zip ? 'is-invalid' : ''}`}
                       required
                       value={formData.zip}
                       onChange={(e) => {
@@ -523,16 +516,13 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                         }
                       }}
                     />
-                    {fieldErrors.zip && (
-                      <div className="invalid-feedback">{fieldErrors.zip}</div>
-                    )}
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="city">Ort *</label>
-                    <input
+                  </FormField>
+                  <FormField label="Ort *" htmlFor="city" error={fieldErrors.city}>
+                    <TextInput
+                      variant="bootstrap"
+                      invalid={!!fieldErrors.city}
                       type="text"
                       id="city"
-                      className={`form-control ${fieldErrors.city ? 'is-invalid' : ''}`}
                       required
                       value={formData.city}
                       onChange={(e) => {
@@ -544,28 +534,24 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                         }
                       }}
                     />
-                    {fieldErrors.city && (
-                      <div className="invalid-feedback">{fieldErrors.city}</div>
-                    )}
-                  </div>
+                  </FormField>
                 </div>
                 <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="phone">Telefon</label>
-                    <input
+                  <FormField label="Telefon" htmlFor="phone">
+                    <TextInput
+                      variant="bootstrap"
                       type="tel"
                       id="phone"
-                      className="form-control"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="email">E-Mail *</label>
-                    <input
+                  </FormField>
+                  <FormField label="E-Mail *" htmlFor="email" error={fieldErrors.email}>
+                    <TextInput
+                      variant="bootstrap"
+                      invalid={!!fieldErrors.email}
                       type="email"
                       id="email"
-                      className={`form-control ${fieldErrors.email ? 'is-invalid' : ''}`}
                       required
                       value={formData.email}
                       onChange={(e) => {
@@ -577,10 +563,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                         }
                       }}
                     />
-                    {fieldErrors.email && (
-                      <div className="invalid-feedback">{fieldErrors.email}</div>
-                    )}
-                  </div>
+                  </FormField>
                 </div>
               </div>
             )}
@@ -629,9 +612,10 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                       Standorte ansehen →
                     </Link>
                   </p>
-                  <select
+                  <SelectField
+                    variant="bootstrap"
+                    invalid={!!fieldErrors.depot}
                     id="depot"
-                    className={`form-control ${fieldErrors.depot ? 'is-invalid' : ''}`}
                     required
                     value={formData.depot}
                     onChange={(e) => {
@@ -647,7 +631,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
                     {DEPOTS.map(depot => (
                       <option key={depot} value={depot}>{depot}</option>
                     ))}
-                  </select>
+                  </SelectField>
                   {fieldErrors.depot && (
                     <div className="invalid-feedback">{fieldErrors.depot}</div>
                   )}
@@ -974,7 +958,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
 
         {/* Sticky Summary */}
         <div className="form-summary">
-          <div className="summary-card">
+          <Card as="div" variant="plain" className="summary-card">
             <h4>Zusammenfassung</h4>
             <div className="summary-content-compact">
               {formData.membershipType === 'abo' && formData.aboType !== 'none' ? (
@@ -988,7 +972,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
               )}
               <p className="summary-total-text"><strong>Gesamt:</strong> CHF {totals.totalPrice.toLocaleString('de-CH')}.-</p>
             </div>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

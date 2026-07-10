@@ -5,6 +5,7 @@ import type { AktuellesItem } from './AktuellesData'
 import { filterSchnuppertage } from './AktuellesData'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import { EventSignupForm } from './EventSignupForm'
+import { Modal } from '@/components/ui/Modal'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
 import { getResolvedComponentConfig } from '@/lib/componentRegistry'
 import type { ContentSection, SectionConfigObject } from '@/lib/processwire-types'
@@ -145,101 +146,44 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
 
       {/* Modal */}
       {isModalOpen && selectedEvent && (
-        <>
-          {/* Overlay */}
-          <div
-            onClick={closeModal}
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0, 0, 0, 0.5)',
-              zIndex: 1000,
-              backdropFilter: 'blur(4px)'
-            }}
-          />
-
-          {/* Modal Content */}
-          <div
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              background: 'white',
-              borderRadius: '16px',
-              maxWidth: '500px',
-              width: '90%',
-              maxHeight: '90vh',
-              overflow: 'auto',
-              zIndex: 1001,
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
+        <Modal
+          open={isModalOpen}
+          onClose={closeModal}
+          variant="schnuppertage"
+          header={
+            <div>
+              <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                {selectedEvent.date}
+              </div>
+              <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{selectedEvent.title}</h3>
+            </div>
+          }
+        >
+          {/* Event Details */}
+          <div style={{ padding: 'var(--space-4) var(--space-5)', borderBottom: '1px solid var(--border-color)' }}>
             <div style={{
-              position: 'sticky',
-              top: 0,
-              background: 'white',
-              borderBottom: '1px solid var(--border-color)',
-              padding: 'var(--space-4) var(--space-5)',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              zIndex: 10
+              padding: 'var(--space-3) var(--space-4)',
+              background: 'var(--bg-secondary)',
+              borderRadius: '8px',
+              fontSize: '0.95rem'
             }}>
+              <div style={{ marginBottom: 'var(--space-1)' }}>
+                <strong>Ort:</strong> Geisshof, Geisslistrasse, 5412 Gebenstorf
+              </div>
               <div>
-                <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                  {selectedEvent.date}
-                </div>
-                <h3 style={{ margin: 0, fontSize: '1.25rem' }}>{selectedEvent.title}</h3>
-              </div>
-              <button
-                onClick={closeModal}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  fontSize: '1.5rem',
-                  cursor: 'pointer',
-                  padding: 'var(--space-1) var(--space-2)',
-                  color: 'var(--text-secondary)',
-                  lineHeight: 1
-                }}
-                aria-label="Schließen"
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Event Details */}
-            <div style={{ padding: 'var(--space-4) var(--space-5)', borderBottom: '1px solid var(--border-color)' }}>
-              <div style={{
-                padding: 'var(--space-3) var(--space-4)',
-                background: 'var(--bg-secondary)',
-                borderRadius: '8px',
-                fontSize: '0.95rem'
-              }}>
-                <div style={{ marginBottom: 'var(--space-1)' }}>
-                  <strong>Ort:</strong> Geisshof, Geisslistrasse, 5412 Gebenstorf
-                </div>
-                <div>
-                  <strong>Zeit:</strong> {selectedEvent.timeLabel || '14:00 - 17:00 Uhr'}
-                </div>
+                <strong>Zeit:</strong> {selectedEvent.timeLabel || '14:00 - 17:00 Uhr'}
               </div>
             </div>
-
-            {/* Signup Form */}
-            <EventSignupForm
-              eventTitle={selectedEvent.title}
-              eventId={selectedEvent.id}
-              onSuccess={handleSignupSuccess}
-              onCancel={closeModal}
-            />
           </div>
-        </>
+
+          {/* Signup Form */}
+          <EventSignupForm
+            eventTitle={selectedEvent.title}
+            eventId={selectedEvent.id}
+            onSuccess={handleSignupSuccess}
+            onCancel={closeModal}
+          />
+        </Modal>
       )}
     </>
   )

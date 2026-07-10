@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { trackEvent } from '../MatomoScript'
 import { CaptchaField } from './CaptchaField'
 import { Button } from '@/components/ui/Button'
+import { FormField, TextInput, TextArea } from '@/components/ui/FormField'
 
 export function ContactForm() {
   const [formData, setFormData] = useState({
@@ -81,9 +82,8 @@ export function ContactForm() {
         </div>
       )}
 
-      <div className="form-group">
-        <label htmlFor="contact_name">Name *</label>
-        <input
+      <FormField label="Name *" htmlFor="contact_name">
+        <TextInput
           type="text"
           id="contact_name"
           name="name"
@@ -91,11 +91,10 @@ export function ContactForm() {
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="contact_email">E-Mail *</label>
-        <input
+      <FormField label="E-Mail *" htmlFor="contact_email">
+        <TextInput
           type="email"
           id="contact_email"
           name="email"
@@ -103,22 +102,20 @@ export function ContactForm() {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="contact_phone">Telefon</label>
-        <input
+      <FormField label="Telefon" htmlFor="contact_phone">
+        <TextInput
           type="tel"
           id="contact_phone"
           name="phone"
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="contact_subject">Betreff *</label>
-        <input
+      <FormField label="Betreff *" htmlFor="contact_subject">
+        <TextInput
           type="text"
           id="contact_subject"
           name="subject"
@@ -126,11 +123,10 @@ export function ContactForm() {
           value={formData.subject}
           onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="contact_message">Nachricht *</label>
-        <textarea
+      <FormField label="Nachricht *" htmlFor="contact_message">
+        <TextArea
           id="contact_message"
           name="message"
           required
@@ -138,7 +134,7 @@ export function ContactForm() {
           value={formData.message}
           onChange={(e) => setFormData({ ...formData, message: e.target.value })}
         />
-      </div>
+      </FormField>
 
       <CaptchaField
         token={captchaToken}

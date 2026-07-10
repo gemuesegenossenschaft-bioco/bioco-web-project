@@ -216,6 +216,24 @@ select:focus-visible,
   --font-size-home-block-heading: clamp(1.4rem, 3vw, 1.9rem);
   --font-size-text-body-lead: 1.05rem;
   --font-size-logo-accent: 1.4rem;
+
+  /* D10 (GH #84): input tokens. Aliases of existing tokens/values (no new
+     raw duplicates, per the D1 no-duplicate gate) — these back .form-control
+     and the bare input/textarea/select selectors below at their current
+     rendered values. */
+  --input-radius: var(--radius-md);
+  --input-pad: var(--space-3) var(--space-4);
+  --input-border: 2px solid var(--color-charcoal);
+  /* EventSignupForm's distinct compact treatment (was inline style, same
+     literal values, now class-driven — see .form-control-compact). */
+  --input-compact-radius: 8px;
+  --input-compact-pad: var(--space-3);
+  --input-compact-border: 1px solid var(--border-color);
+
+  /* D11 (GH #85): card tokens. Alias .bento-card's current radius/shadow
+     (no new raw duplicates, per the D1 no-duplicate gate). */
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-md);
 }
 
 body {
@@ -2834,13 +2852,13 @@ select,
 .form-control {
   font-family: var(--font-body);
   font-weight: var(--font-weight-heading);
-  border: 2px solid var(--color-charcoal);
-  padding: var(--space-3) var(--space-4);
+  border: var(--input-border);
+  padding: var(--input-pad);
   background: var(--bg-primary);
   width: 100%;
   margin: var(--space-1) 0;
   font-size: var(--font-size-base);
-  border-radius: var(--radius-md);
+  border-radius: var(--input-radius);
   transition: all 0.2s ease;
   box-shadow: var(--shadow-sm);
   box-sizing: border-box;
@@ -2943,6 +2961,23 @@ select:focus,
   padding: 0.25rem 0.5rem;
   font-size: var(--font-size-sm);
   border-radius: var(--radius-sm);
+}
+
+/* D10 (GH #84): EventSignupForm's compact input treatment, extracted from
+   inline styles verbatim. Selector specificity (element + class) matches
+   the bare input[type=...]/textarea rule above and is declared after it, so
+   these values win the cascade exactly as the inline style attribute did. */
+input.form-control-compact,
+textarea.form-control-compact {
+  padding: var(--input-compact-pad);
+  border: var(--input-compact-border);
+  border-radius: var(--input-compact-radius);
+  font-size: 1rem;
+}
+
+textarea.form-control-compact {
+  font-family: inherit;
+  resize: vertical;
 }
 
 input[type="checkbox"],

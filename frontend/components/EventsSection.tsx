@@ -7,6 +7,7 @@ import { ItemDetailModal } from './ItemDetailModal'
 import Image from 'next/image'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
 import { Button } from '@/components/ui/Button'
+import { Card } from '@/components/ui/Card'
 
 interface EventsSectionProps {
   limit?: number
@@ -32,7 +33,7 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
 
   return (
     <>
-      <section className="bento-card events-card bento-card-fullwidth">
+      <Card as="section" variant="bento" className="events-card bento-card-fullwidth">
         <div className="plant-pattern"></div>
         <div className="card-header">
           <h3>Nächste Events</h3>
@@ -63,10 +64,10 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
             </Button>
           )}
         </div>
-      </section>
+      </Card>
 
       {past.length > 0 && (
-        <section className="bento-card past-events-card">
+        <Card as="section" variant="bento" className="past-events-card">
           <div className="card-header">
             <h3>Vergangene Events & Eindrücke</h3>
             <p style={{ marginTop: '4px', color: 'var(--text-secondary)' }}>
@@ -76,7 +77,9 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
           <div className="card-body past-events-grid">
             {past.slice(0, 4).map((item, index) => {
               return (
-                <button
+                <Card
+                  as="button"
+                  variant="plain"
                   key={item.id || index}
                   className="past-event-tile"
                   onClick={() => handleItemClick(item)}
@@ -94,11 +97,11 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
                     )}
                     <span className="past-event-cta">Rückblick ansehen →</span>
                   </div>
-                </button>
+                </Card>
               )
             })}
           </div>
-        </section>
+        </Card>
       )}
 
       {selectedItem && (

@@ -4,6 +4,7 @@ import { CTA } from '@/components/CTA'
 import { PersonIcons } from '@/components/PersonIcons'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
 import { SectionHeading } from '@/components/ui/SectionHeading'
+import { Card } from '@/components/ui/Card'
 import { getResolvedComponentConfig } from '@/lib/componentRegistry'
 import type { ContentMedia, ContentSection, SectionConfigObject } from '@/lib/processwire-types'
 
@@ -321,13 +322,13 @@ export function LinkTilesBlock({ section, visualEditor = false }: RegisteredComp
             </>
           )
           return tile.href ? (
-            <a key={`${section.id}-tile-${index}`} className="portal-tile" href={tile.href}>
+            <Card as="a" variant="plain" key={`${section.id}-tile-${index}`} className="portal-tile" href={tile.href}>
               {inner}
-            </a>
+            </Card>
           ) : (
-            <div key={`${section.id}-tile-${index}`} className="portal-tile">
+            <Card as="div" variant="plain" key={`${section.id}-tile-${index}`} className="portal-tile">
               {inner}
-            </div>
+            </Card>
           )
         })}
       </div>
@@ -408,12 +409,12 @@ export function CardsGridBlock({ section, visualEditor = false }: RegisteredComp
           const cardBg = cardStyle === 'soft' ? '#f5f2e9' : '#fff'
           const cardBorder = cardStyle === 'outlined' ? '1px solid #d6d0c3' : 'none'
           return (
-            <article key={`${section.id}-card-${index}`} style={{ background: cardBg, border: cardBorder, borderRadius: radius, overflow: 'hidden', padding: cardStyle === 'plain' ? 0 : '14px' }}>
+            <Card as="article" variant={cardStyle as 'soft' | 'outlined' | 'plain'} key={`${section.id}-card-${index}`} style={{ background: cardBg, border: cardBorder, borderRadius: radius, overflow: 'hidden', padding: cardStyle === 'plain' ? 0 : '14px' }}>
               <div {...getVeFieldAttrs(visualEditor, section.id, 'media', 'media', false, { targetField: 'section_images' })} style={{ position: 'relative', width: '100%', aspectRatio, minHeight: aspectRatio ? undefined : '280px', borderRadius: radius, overflow: 'hidden', background: '#e5e7eb' }}>
                 <Image src={item.url} alt={item.alt || title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: fit as 'cover' | 'contain' }} />
               </div>
-              <h3 style={{ fontSize: '1.2rem', margin: cardStyle === 'plain' ? '14px 0 0' : '14px 0 0' }}>{title}</h3>
-            </article>
+              <h3 style={{ fontSize: '1.2rem', margin: '14px 0 0' }}>{title}</h3>
+            </Card>
           )
         })}
       </div>

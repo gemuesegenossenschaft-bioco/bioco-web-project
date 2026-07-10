@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { trackEvent } from '../MatomoScript'
 import { CaptchaField } from './CaptchaField'
 import { Button } from '@/components/ui/Button'
+import { FormField, TextInput, TextArea, Checkbox } from '@/components/ui/FormField'
 
 export function VisitDayForm() {
   const [formData, setFormData] = useState({
@@ -76,9 +77,8 @@ export function VisitDayForm() {
         </div>
       )}
 
-      <div className="form-group">
-        <label htmlFor="visit_name">Name *</label>
-        <input
+      <FormField label="Name *" htmlFor="visit_name">
+        <TextInput
           type="text"
           id="visit_name"
           name="name"
@@ -86,11 +86,10 @@ export function VisitDayForm() {
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="visit_email">E-Mail *</label>
-        <input
+      <FormField label="E-Mail *" htmlFor="visit_email">
+        <TextInput
           type="email"
           id="visit_email"
           name="email"
@@ -98,11 +97,10 @@ export function VisitDayForm() {
           value={formData.email}
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="visit_phone">Telefon *</label>
-        <input
+      <FormField label="Telefon *" htmlFor="visit_phone">
+        <TextInput
           type="tel"
           id="visit_phone"
           name="phone"
@@ -110,11 +108,10 @@ export function VisitDayForm() {
           value={formData.phone}
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="visit_date">Gewünschtes Datum *</label>
-        <input
+      <FormField label="Gewünschtes Datum *" htmlFor="visit_date">
+        <TextInput
           type="date"
           id="visit_date"
           name="visit_date"
@@ -122,11 +119,10 @@ export function VisitDayForm() {
           value={formData.visit_date}
           onChange={(e) => setFormData({ ...formData, visit_date: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="visit_participants">Anzahl Personen *</label>
-        <input
+      <FormField label="Anzahl Personen *" htmlFor="visit_participants">
+        <TextInput
           type="number"
           id="visit_participants"
           name="participants"
@@ -135,31 +131,25 @@ export function VisitDayForm() {
           value={formData.participants}
           onChange={(e) => setFormData({ ...formData, participants: parseInt(e.target.value, 10) })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label htmlFor="visit_notes">Anmerkungen</label>
-        <textarea
+      <FormField label="Anmerkungen" htmlFor="visit_notes">
+        <TextArea
           id="visit_notes"
           name="notes"
           rows={4}
           value={formData.notes}
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
         />
-      </div>
+      </FormField>
 
-      <div className="form-group">
-        <label>
-          <input
-            type="checkbox"
-            name="privacy_accept"
-            required
-            checked={formData.privacy_accept}
-            onChange={(e) => setFormData({ ...formData, privacy_accept: e.target.checked })}
-          />
-          Ich akzeptiere die Datenschutzbestimmungen *
-        </label>
-      </div>
+      <Checkbox
+        name="privacy_accept"
+        required
+        checked={formData.privacy_accept}
+        onChange={(e) => setFormData({ ...formData, privacy_accept: e.target.checked })}
+        label="Ich akzeptiere die Datenschutzbestimmungen *"
+      />
 
       <CaptchaField
         token={captchaToken}
