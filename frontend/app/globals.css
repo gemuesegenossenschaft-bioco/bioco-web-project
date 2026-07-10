@@ -234,6 +234,32 @@ select:focus-visible,
      (no new raw duplicates, per the D1 no-duplicate gate). */
   --card-radius: var(--radius-lg);
   --card-shadow: var(--shadow-md);
+
+  /* D13 (GH #87): RegisteredSectionComponents + Visual Editor de-hardcode.
+     Each value below equals a literal that previously appeared as inline
+     hex in RegisteredSectionComponents.tsx, SectionHeading.tsx (its
+     factored-out block-heading styles) or InlineVisualEditorRuntime.tsx
+     (no value changes, per the D1 no-duplicate gate). Neutral "swatch"
+     names are reused verbatim wherever the same literal recurs, even
+     across differing CSS properties (e.g. --color-fog backs both a media
+     placeholder background and dark-panel text). */
+  --color-graphite: #4b5563;
+  --color-steel: #5f6b7a;
+  --color-fog: #e5e7eb;
+  --color-linen: #f5f2e9;
+  --color-tan: #d6d0c3;
+  --color-sage: #8ab272;
+  --color-sage-pale: #d5dfcf;
+  --color-onyx: #111827;
+  --color-amber: #d97706;
+  --color-frost: #f8fafc;
+  --color-ivory: #fff7ed;
+  --color-haze: #94a3b8;
+  --color-storm: #334155;
+  --color-midnight: #0f172a;
+  /* Shared block-wrapper vertical margin: 20 * the 4px base unit from the
+     D6 scale above (no --space-* step currently equals 80px). */
+  --space-20: 80px;
 }
 
 body {

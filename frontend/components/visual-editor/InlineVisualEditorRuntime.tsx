@@ -542,7 +542,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           border: 1px solid rgba(74, 124, 89, 0.6);
           border-radius: 12px;
           box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
-          color: #e5e7eb;
+          color: var(--color-fog);
           min-width: 280px;
           padding: 12px;
         }
@@ -554,17 +554,17 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           text-transform: uppercase;
         }
         .ve-inline-panel p {
-          color: #94a3b8;
+          color: var(--color-haze);
           font-size: 12px;
           margin-top: 8px;
         }
         .ve-inline-panel input,
         .ve-inline-panel select,
         .ve-inline-panel button {
-          background: #111827;
-          border: 1px solid #334155;
+          background: var(--color-onyx);
+          border: 1px solid var(--color-storm);
           border-radius: 8px;
-          color: #e5e7eb;
+          color: var(--color-fog);
           font: inherit;
           padding: 8px 10px;
           width: 100%;
@@ -609,7 +609,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           margin-top: 12px;
         }
         .ve-inline-config-grid label {
-          color: #94a3b8;
+          color: var(--color-haze);
           display: block;
           font-size: 11px;
           font-weight: 700;
@@ -618,8 +618,8 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
           text-transform: uppercase;
         }
         .ve-inline-text-editor {
-          background: #0f172a;
-          border: 1px solid #334155;
+          background: var(--color-midnight);
+          border: 1px solid var(--color-storm);
           border-radius: 8px;
           min-height: 42px;
           outline: none;
@@ -658,7 +658,7 @@ export function InlineVisualEditorRuntime({ enabled, sections }: InlineVisualEdi
         .ve-inline-spinner {
           animation: ve-spin 0.9s linear infinite;
           border: 4px solid rgba(148, 163, 184, 0.25);
-          border-top-color: #8ab272;
+          border-top-color: var(--color-sage);
           border-radius: 999px;
           height: 44px;
           margin: 0 auto 14px;

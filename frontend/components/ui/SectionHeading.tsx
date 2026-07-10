@@ -11,11 +11,11 @@ interface SectionHeadingProps {
   headingAlreadyInText: boolean
 }
 
-// RegisteredSectionComponents' historical inline styles. Values equal to an
-// existing globals.css token reference that token; the rest have no matching
-// token and stay as the literal that already renders today.
+// RegisteredSectionComponents' historical inline styles, now routed through
+// the D13 (GH #87) design tokens (--color-steel equals the literal that
+// rendered here before).
 const BLOCK_EYEBROW_STYLE: CSSProperties = {
-  color: '#5f6b7a',
+  color: 'var(--color-steel)',
   fontSize: '0.95rem',
   marginBottom: '10px',
   fontWeight: 'var(--font-weight-semibold)',

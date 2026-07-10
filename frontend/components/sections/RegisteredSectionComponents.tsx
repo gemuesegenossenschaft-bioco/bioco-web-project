@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { CTA } from '@/components/CTA'
 import { PersonIcons } from '@/components/PersonIcons'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
@@ -96,6 +96,17 @@ function flexAlign(align: string): CSSProperties['alignItems'] {
   return 'center'
 }
 
+// Shared block-wrapper: every structured component's top-level <section> used
+// the same repeated inline `margin: '0 auto 80px'` (now --space-20). Centralizing
+// it here keeps the DOM/computed styles identical while removing the duplication.
+function BlockWrapper({ maxWidth, textAlign, children }: { maxWidth: string; textAlign?: CSSProperties['textAlign']; children: ReactNode }) {
+  return (
+    <section style={{ margin: '0 auto var(--space-20)', maxWidth, textAlign }}>
+      {children}
+    </section>
+  )
+}
+
 function renderButtons(section: ContentSection, visualEditor = false) {
   if (!section.buttons?.length) return null
   return (
@@ -145,7 +156,7 @@ function renderImageFrame(section: ContentSection, visualEditor = false, targetF
         minHeight: aspectRatio ? undefined : '360px',
         overflow: 'hidden',
         borderRadius: radius,
-        background: '#e5e7eb',
+        background: 'var(--color-fog)',
       }}
     >
       <Image src={media.url} alt={media.alt || section.title} fill sizes="(max-width: 768px) 100vw, 50vw" style={{ objectFit: fit as 'cover' | 'contain' }} />
@@ -178,9 +189,9 @@ export function PricingTableBlock({ section, visualEditor = false }: RegisteredC
   })
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <BlockWrapper maxWidth={maxWidth}>
       {renderHeader(section, visualEditor)}
-      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75, marginBottom: '24px' })}
+      {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.06rem', lineHeight: 1.75, marginBottom: '24px' })}
       <div
         className="pricing-table"
         {...getVeFieldAttrs(visualEditor, section.id, 'component', 'structured', false)}
@@ -225,7 +236,7 @@ export function PricingTableBlock({ section, visualEditor = false }: RegisteredC
         </table>
       </div>
       {renderButtons(section, visualEditor)}
-    </section>
+    </BlockWrapper>
   )
 }
 
@@ -265,9 +276,9 @@ export function StepsBlock({ section, visualEditor = false }: RegisteredComponen
   }
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <BlockWrapper maxWidth={maxWidth}>
       {renderHeader(section, visualEditor)}
-      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75 })}
+      {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.06rem', lineHeight: 1.75 })}
       <div
         className="next-steps"
         style={{ marginTop: '32px' }}
@@ -283,7 +294,7 @@ export function StepsBlock({ section, visualEditor = false }: RegisteredComponen
           </div>
         ))}
       </div>
-    </section>
+    </BlockWrapper>
   )
 }
 
@@ -306,9 +317,9 @@ export function LinkTilesBlock({ section, visualEditor = false }: RegisteredComp
   }
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <BlockWrapper maxWidth={maxWidth}>
       {renderHeader(section, visualEditor)}
-      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75 })}
+      {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.06rem', lineHeight: 1.75 })}
       <div
         className="portal-gateway"
         {...getVeFieldAttrs(visualEditor, section.id, 'component', 'structured', false)}
@@ -332,7 +343,7 @@ export function LinkTilesBlock({ section, visualEditor = false }: RegisteredComp
           )
         })}
       </div>
-    </section>
+    </BlockWrapper>
   )
 }
 
@@ -343,13 +354,13 @@ export function PageIntroBlock({ section, visualEditor = false }: RegisteredComp
   const textAlign = alignment(configValue(config, 'align', 'left'))
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth, textAlign }}>
+    <BlockWrapper maxWidth={maxWidth} textAlign={textAlign}>
       <div style={{ margin: textAlign === 'center' ? '0 auto' : '0', maxWidth: textMaxWidth }}>
         {renderHeader(section, visualEditor)}
-        {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75 })}
+        {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.06rem', lineHeight: 1.75 })}
         {renderButtons(section, visualEditor)}
       </div>
-    </section>
+    </BlockWrapper>
   )
 }
 
@@ -373,18 +384,18 @@ export function MediaTextBlock({ section, visualEditor = false }: RegisteredComp
   const textNode = (
     <div style={{ flex: '1 1 0%', minWidth: '280px' }}>
       {renderHeader(section, visualEditor)}
-      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75 })}
+      {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.06rem', lineHeight: 1.75 })}
       {renderButtons(section, visualEditor)}
     </div>
   )
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <BlockWrapper maxWidth={maxWidth}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap, alignItems }}>
         {mediaSide === 'right' ? textNode : mediaNode}
         {mediaSide === 'right' ? mediaNode : textNode}
       </div>
-    </section>
+    </BlockWrapper>
   )
 }
 
@@ -400,17 +411,17 @@ export function CardsGridBlock({ section, visualEditor = false }: RegisteredComp
   const mediaItems = getSectionMedia(section)
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <BlockWrapper maxWidth={maxWidth}>
       {renderHeader(section, visualEditor)}
-      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.03rem', lineHeight: 1.72, marginBottom: '24px' })}
+      {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.03rem', lineHeight: 1.72, marginBottom: '24px' })}
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.max(1, columnsDesktop)}, minmax(0, 1fr))`, gap }}>
         {mediaItems.map((item, index) => {
           const title = (item.alt || '').split(/[|,–-]/)[0]?.trim() || `Karte ${index + 1}`
-          const cardBg = cardStyle === 'soft' ? '#f5f2e9' : '#fff'
-          const cardBorder = cardStyle === 'outlined' ? '1px solid #d6d0c3' : 'none'
+          const cardBg = cardStyle === 'soft' ? 'var(--color-linen)' : 'var(--bg-primary)'
+          const cardBorder = cardStyle === 'outlined' ? '1px solid var(--color-tan)' : 'none'
           return (
             <Card as="article" variant={cardStyle as 'soft' | 'outlined' | 'plain'} key={`${section.id}-card-${index}`} style={{ background: cardBg, border: cardBorder, borderRadius: radius, overflow: 'hidden', padding: cardStyle === 'plain' ? 0 : '14px' }}>
-              <div {...getVeFieldAttrs(visualEditor, section.id, 'media', 'media', false, { targetField: 'section_images' })} style={{ position: 'relative', width: '100%', aspectRatio, minHeight: aspectRatio ? undefined : '280px', borderRadius: radius, overflow: 'hidden', background: '#e5e7eb' }}>
+              <div {...getVeFieldAttrs(visualEditor, section.id, 'media', 'media', false, { targetField: 'section_images' })} style={{ position: 'relative', width: '100%', aspectRatio, minHeight: aspectRatio ? undefined : '280px', borderRadius: radius, overflow: 'hidden', background: 'var(--color-fog)' }}>
                 <Image src={item.url} alt={item.alt || title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: fit as 'cover' | 'contain' }} />
               </div>
               <h3 style={{ fontSize: '1.2rem', margin: '14px 0 0' }}>{title}</h3>
@@ -418,7 +429,7 @@ export function CardsGridBlock({ section, visualEditor = false }: RegisteredComp
           )
         })}
       </div>
-    </section>
+    </BlockWrapper>
   )
 }
 
@@ -433,18 +444,18 @@ export function GalleryStripBlock({ section, visualEditor = false }: RegisteredC
   const mediaItems = getSectionMedia(section)
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <BlockWrapper maxWidth={maxWidth}>
       {renderHeader(section, visualEditor)}
-      {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.03rem', lineHeight: 1.72, marginBottom: '24px' })}
+      {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.03rem', lineHeight: 1.72, marginBottom: '24px' })}
       <div {...getVeFieldAttrs(visualEditor, section.id, 'media', 'media', false, { targetField: 'section_images' })} style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.max(1, columnsDesktop)}, minmax(0, 1fr))`, gap }}>
         {mediaItems.map((item, index) => (
-          <div key={`${section.id}-gallery-${index}`} style={{ position: 'relative', width: '100%', aspectRatio, minHeight: aspectRatio ? undefined : '280px', borderRadius: radius, overflow: 'hidden', background: '#e5e7eb' }}>
+          <div key={`${section.id}-gallery-${index}`} style={{ position: 'relative', width: '100%', aspectRatio, minHeight: aspectRatio ? undefined : '280px', borderRadius: radius, overflow: 'hidden', background: 'var(--color-fog)' }}>
             <Image src={item.url} alt={item.alt || section.title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: fit as 'cover' | 'contain' }} />
           </div>
         ))}
       </div>
       {renderButtons(section, visualEditor)}
-    </section>
+    </BlockWrapper>
   )
 }
 
@@ -455,17 +466,17 @@ export function TextColumnsBlock({ section, visualEditor = false }: RegisteredCo
   const gap = gapSize(configValue(config, 'gap', 'lg'))
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <BlockWrapper maxWidth={maxWidth}>
       {renderHeader(section, visualEditor)}
       {section.text ? (
         <div
           {...getVeFieldAttrs(visualEditor, section.id, 'text', 'richtext', true)}
-          style={{ color: '#4b5563', fontSize: '1.03rem', lineHeight: 1.8, columnCount: columnsDesktop, columnGap: gap }}
+          style={{ color: 'var(--color-graphite)', fontSize: '1.03rem', lineHeight: 1.8, columnCount: columnsDesktop, columnGap: gap }}
           dangerouslySetInnerHTML={{ __html: section.text }}
         />
       ) : null}
       {renderButtons(section, visualEditor)}
-    </section>
+    </BlockWrapper>
   )
 }
 
@@ -479,7 +490,7 @@ export function TimelineHeaderBlock({ section, visualEditor = false }: Registere
     <section style={{ margin: '0 auto 40px', maxWidth, textAlign }}>
       <div style={{ margin: textAlign === 'center' ? '0 auto' : '0', maxWidth: textMaxWidth }}>
         {renderHeader(section, visualEditor)}
-        {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.03rem', lineHeight: 1.75 })}
+        {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.03rem', lineHeight: 1.75 })}
       </div>
     </section>
   )
@@ -489,19 +500,19 @@ export function TimelineItemBlock({ section, visualEditor = false }: RegisteredC
   const config = getConfig(section)
   const maxWidth = containerMaxWidth(configValue(config, 'containerWidth', 'lg'))
   const emphasis = configValue(config, 'emphasis', 'normal')
-  const badgeBg = emphasis === 'highlight' ? '#8ab272' : '#111827'
+  const badgeBg = emphasis === 'highlight' ? 'var(--color-sage)' : 'var(--color-onyx)'
 
   return (
     <section style={{ margin: '0 auto 28px', maxWidth }}>
       <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr', gap: '24px', alignItems: 'start' }}>
         <div>
-          <div {...getVeFieldAttrs(visualEditor, section.id, 'eyebrow', 'text', true)} style={{ display: 'inline-flex', padding: '10px 14px', borderRadius: '999px', background: badgeBg, color: '#fff', fontWeight: 700 }}>
+          <div {...getVeFieldAttrs(visualEditor, section.id, 'eyebrow', 'text', true)} style={{ display: 'inline-flex', padding: '10px 14px', borderRadius: '999px', background: badgeBg, color: 'var(--bg-primary)', fontWeight: 700 }}>
             {section.eyebrow || '•'}
           </div>
         </div>
-        <div style={{ padding: '0 0 0 20px', borderLeft: '2px solid #d5dfcf' }}>
+        <div style={{ padding: '0 0 0 20px', borderLeft: '2px solid var(--color-sage-pale)' }}>
           {renderHeader({ ...section, eyebrow: '' }, visualEditor)}
-          {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.02rem', lineHeight: 1.75 })}
+          {renderText(section, visualEditor, { color: 'var(--color-graphite)', fontSize: '1.02rem', lineHeight: 1.75 })}
           {renderButtons(section, visualEditor)}
         </div>
       </div>
@@ -517,16 +528,16 @@ export function CtaBandBlock({ section, visualEditor = false }: RegisteredCompon
   const radius = radiusSize(configValue(config, 'rounded', 'xl'))
 
   const background = theme === 'dark'
-    ? '#111827'
+    ? 'var(--color-onyx)'
     : theme === 'accent'
-      ? '#d97706'
+      ? 'var(--color-amber)'
       : theme === 'light'
-        ? '#ffffff'
-        : '#f5f2e9'
-  const color = theme === 'dark' ? '#f8fafc' : theme === 'accent' ? '#fff7ed' : '#111827'
+        ? 'var(--bg-primary)'
+        : 'var(--color-linen)'
+  const color = theme === 'dark' ? 'var(--color-frost)' : theme === 'accent' ? 'var(--color-ivory)' : 'var(--color-onyx)'
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <BlockWrapper maxWidth={maxWidth}>
       <div style={{ background, color, borderRadius: radius, padding: '32px', textAlign: alignment(align) }}>
         {renderHeader(section, visualEditor)}
         {renderText(section, visualEditor, { color: 'inherit', fontSize: '1.03rem', lineHeight: 1.75 })}
@@ -534,6 +545,6 @@ export function CtaBandBlock({ section, visualEditor = false }: RegisteredCompon
           {renderButtons(section, visualEditor)}
         </div>
       </div>
-    </section>
+    </BlockWrapper>
   )
 }
