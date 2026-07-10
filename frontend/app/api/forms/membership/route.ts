@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendFormEmail } from '@/lib/email'
-import { validateMembership } from '@/lib/membership'
+import { buildIntranetSignupPayload, validateMembership } from '@/lib/membership'
+import { forwardToIntranet } from '@/lib/intranetSignup'
 
 export async function POST(request: NextRequest) {
   try {
@@ -19,7 +20,26 @@ export async function POST(request: NextRequest) {
       data: body,
     })
 
-    return NextResponse.json({ success: true })
+    const responseBody: { success: true; forwarded?: boolean } = { success: true }
+
+    // D.2b — best-effort forward to intranet.bioco.ch (system of record). This
+    // must never fail the user's submission: the email above (#50 fallback)
+    // already guarantees the signup isn't lost.
+    if (process.env.INTRANET_SIGNUP_URL) {
+      try {
+        const intranetPayload = buildIntranetSignupPayload(body)
+        const result = await forwardToIntranet(intranetPayload)
+        responseBody.forwarded = result.ok
+        if (!result.ok) {
+          console.error('Intranet forward failed:', result.error || result.errors)
+        }
+      } catch (forwardError) {
+        console.error('Intranet forward threw:', forwardError)
+        responseBody.forwarded = false
+      }
+    }
+
+    return NextResponse.json(responseBody)
   } catch (error: any) {
     console.error('Membership form error:', error)
 

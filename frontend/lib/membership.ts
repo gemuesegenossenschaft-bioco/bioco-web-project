@@ -5,6 +5,20 @@ export interface MembershipInput {
   address?: string
   zip?: string
   city?: string
+  phone?: string
+  membershipType?: string
+  aboType?: string
+  additionalShares?: number
+  sharesOnly?: number
+  depot?: string
+  paymentType?: string
+  preferredDays?: string[]
+  preferredTimes?: string[]
+  activityAreas?: string[]
+  otherActivity?: string
+  zusatzabos?: string[]
+  weitereProdukte?: string
+  commitmentAccepted?: boolean[]
   privacyAccept?: boolean
   [k: string]: any
 }
@@ -33,4 +47,96 @@ export function validateMembership(data: MembershipInput): MembershipValidation 
   }
 
   return { ok: Object.keys(errors).length === 0, errors }
+}
+
+// D.2a — bioco.ch MembershipForm -> intranet.bioco.ch/my/signup/ (Django) field mapping.
+//
+// PROVISIONAL: the intranet's actual field names are unconfirmed. The signup page
+// 403s for unauthenticated requests, so these names are inferred from the PRD
+// mapping table (docs/prd-signup-integration.md) and not yet verified against a
+// logged-in enumeration of the real Django form. Centralized here so that once
+// the real names are confirmed, only this const needs to change.
+export const INTRANET_FIELD_NAMES = {
+  firstName: 'first_name',
+  lastName: 'last_name',
+  email: 'email',
+  phone: 'phone',
+  street: 'street',
+  postalCode: 'postal_code',
+  city: 'city',
+  membershipType: 'membership_type',
+  abo: 'abo',
+  shares: 'shares',
+  depot: 'depot',
+  paymentInterval: 'payment_interval',
+  terms: 'terms',
+  notes: 'notes',
+} as const
+
+// Required share count per abo tier, mirrored from ABO_CONFIG in
+// components/forms/MembershipForm.tsx (kept minimal here — only the share
+// counts, not prices — since that's all the intranet payload needs).
+const REQUIRED_SHARES_BY_ABO_TYPE: Record<string, number> = {
+  halb: 1,
+  standard: 2,
+  doppel: 4,
+  none: 0,
+}
+
+function totalShares(data: MembershipInput): number {
+  if (data.membershipType === 'shares-only') {
+    return data.sharesOnly ?? 0
+  }
+  const required = REQUIRED_SHARES_BY_ABO_TYPE[data.aboType ?? ''] ?? 0
+  return required + (data.additionalShares ?? 0)
+}
+
+function buildNotes(data: MembershipInput): string {
+  const lines: string[] = []
+
+  if (data.preferredDays?.length) {
+    lines.push(`Bevorzugte Tage: ${data.preferredDays.join(', ')}`)
+  }
+  if (data.preferredTimes?.length) {
+    lines.push(`Bevorzugte Zeiten: ${data.preferredTimes.join(', ')}`)
+  }
+  if (data.activityAreas?.length) {
+    lines.push(`Tätigkeitsbereiche: ${data.activityAreas.join(', ')}`)
+  }
+  if (data.otherActivity?.trim()) {
+    lines.push(`Andere Tätigkeit: ${data.otherActivity.trim()}`)
+  }
+  if (data.zusatzabos?.length) {
+    lines.push(`Zusatzabos: ${data.zusatzabos.join(', ')}`)
+  }
+  if (data.weitereProdukte?.trim()) {
+    lines.push(`Weitere Produkte: ${data.weitereProdukte.trim()}`)
+  }
+
+  return lines.join('\n')
+}
+
+// Pure mapping only — see lib/intranetSignup.ts for the adapter that sends this.
+export function buildIntranetSignupPayload(data: MembershipInput): Record<string, string> {
+  const commitmentAccepted = Array.isArray(data.commitmentAccepted)
+    ? data.commitmentAccepted.every(Boolean)
+    : false
+  const terms = commitmentAccepted && data.privacyAccept === true
+
+  return {
+    [INTRANET_FIELD_NAMES.firstName]: data.firstName ?? '',
+    [INTRANET_FIELD_NAMES.lastName]: data.lastName ?? '',
+    [INTRANET_FIELD_NAMES.email]: data.email ?? '',
+    [INTRANET_FIELD_NAMES.phone]: data.phone ?? '',
+    [INTRANET_FIELD_NAMES.street]: data.address ?? '',
+    [INTRANET_FIELD_NAMES.postalCode]: data.zip ?? '',
+    [INTRANET_FIELD_NAMES.city]: data.city ?? '',
+    [INTRANET_FIELD_NAMES.membershipType]: data.membershipType ?? '',
+    [INTRANET_FIELD_NAMES.abo]: data.aboType ?? '',
+    [INTRANET_FIELD_NAMES.shares]: String(totalShares(data)),
+    [INTRANET_FIELD_NAMES.depot]: data.depot ?? '',
+    [INTRANET_FIELD_NAMES.paymentInterval]: data.paymentType ?? '',
+    [INTRANET_FIELD_NAMES.terms]: terms ? 'on' : '',
+    [INTRANET_FIELD_NAMES.notes]: buildNotes(data),
+  }
 }
