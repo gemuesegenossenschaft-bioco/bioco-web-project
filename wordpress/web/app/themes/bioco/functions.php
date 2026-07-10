@@ -33,9 +33,25 @@ add_filter('acf/settings/load_json', function ($paths) {
 });
 
 /**
- * Section blocks get registered here (W4 tracer bullet onwards):
- *   register_block_type(get_template_directory() . '/blocks/hero');
- * Kept empty until the tracer-bullet slice lands.
+ * Custom "bioco" block category — groups all bespoke section/ACF blocks
+ * together in the inserter instead of falling under "Theme"/"Formatting".
+ */
+add_filter('block_categories_all', function (array $categories) {
+    return array_merge(
+        [
+            [
+                'slug' => 'bioco',
+                'title' => __('biocò', 'bioco'),
+                'icon' => 'admin-site-alt3',
+            ],
+        ],
+        $categories
+    );
+});
+
+/**
+ * Section blocks: every block.json found one level under blocks/ is
+ * auto-registered here (W4 tracer bullet onwards).
  */
 add_action('init', function () {
     $blocks_dir = get_template_directory() . '/blocks';

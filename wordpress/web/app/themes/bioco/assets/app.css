@@ -1,0 +1,223 @@
+/**
+ * Bespoke component CSS layered on theme.json tokens (see functions.php).
+ *
+ * Hero block (W4 tracer bullet, issue #91). Class names are kept identical
+ * to the current Next.js frontend/components/Hero.tsx + globals.css rules
+ * so the ported CSS can drop in almost unchanged during W11.
+ */
+
+.hero {
+  background: var(--wp--preset--color--bioco-bg);
+  padding: var(--wp--preset--spacing--50) 0 0 0;
+  margin-top: calc(var(--wp--preset--spacing--60) / 2);
+  margin-bottom: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+.hero-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--wp--preset--spacing--40);
+  width: 100%;
+  max-width: var(--wp--style--global--wide-size, 1400px);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 6vw, 96px);
+}
+
+.bento-card {
+  border-radius: var(--wp--custom--radius--md);
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.hero-image-card {
+  min-height: 500px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.hero-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  overflow: hidden;
+}
+
+.hero-image-container img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-text-card {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wp--preset--color--bioco-surface);
+}
+
+.hero-content {
+  width: 100%;
+  padding: var(--wp--preset--spacing--60);
+}
+
+.hero-text {
+  width: 100%;
+  max-width: 360px;
+  padding-left: var(--wp--preset--spacing--40);
+}
+
+.hero-subtitle {
+  font-family: var(--wp--preset--font-family--body);
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.hero-title {
+  font-family: var(--wp--preset--font-family--body);
+  /* No fixed theme.json font-size token matches the live clamp; kept literal
+     until the green/radius design sign-off referenced in theme.json lands. */
+  font-size: clamp(2rem, 3vw + 1rem, 2.6rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin-bottom: calc(var(--wp--preset--spacing--40) / 3);
+  color: var(--wp--preset--color--bioco-text);
+}
+
+.hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--50);
+  margin-bottom: var(--wp--preset--spacing--60);
+  width: 100%;
+}
+
+.hero-buttons .btn {
+  width: 100%;
+  text-align: center;
+}
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-orange {
+  font-family: var(--wp--preset--font-family--body);
+  font-weight: 700;
+  display: inline-block;
+  padding: 12px var(--wp--preset--spacing--40);
+  font-size: var(--wp--preset--font-size--base);
+  text-align: center;
+  border-radius: var(--wp--custom--radius--md);
+  transition: all 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid;
+  line-height: 1.5;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.btn-primary {
+  background: var(--wp--preset--color--bioco-green);
+  color: #ffffff;
+  border-color: var(--wp--preset--color--bioco-green);
+}
+
+.btn-primary:hover {
+  background: var(--wp--preset--color--bioco-green-dark);
+  border-color: var(--wp--preset--color--bioco-green-dark);
+  box-shadow: var(--wp--custom--shadow--md);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--wp--preset--color--bioco-surface);
+  color: var(--wp--preset--color--bioco-green);
+  border-color: var(--wp--preset--color--bioco-green);
+}
+
+.btn-secondary:hover {
+  color: var(--wp--preset--color--bioco-green-dark);
+  border-color: var(--wp--preset--color--bioco-green-dark);
+  box-shadow: var(--wp--custom--shadow--md);
+  transform: translateY(-1px);
+}
+
+.btn-orange {
+  background: var(--wp--preset--color--bioco-carrot);
+  color: #ffffff;
+  border-color: var(--wp--preset--color--bioco-carrot);
+}
+
+.btn-orange:hover {
+  /* No "carrot dark" token exists yet; matches the current hardcoded hover shade. */
+  background: #e88200;
+  border-color: #e88200;
+  box-shadow: var(--wp--custom--shadow--md);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1023px) {
+  .hero {
+    padding: var(--wp--preset--spacing--50) 0;
+  }
+
+  .hero-container {
+    padding: 0 var(--wp--preset--spacing--40);
+  }
+}
+
+@media (max-width: 767px) {
+  .hero {
+    padding: var(--wp--preset--spacing--50) 0 0 0;
+    margin-top: 120px;
+    margin-bottom: 0;
+  }
+
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: var(--wp--preset--spacing--40);
+    padding: 0 var(--wp--preset--spacing--20);
+  }
+
+  .hero-image-card {
+    min-height: 300px;
+    order: 1;
+  }
+
+  .hero-image-container {
+    min-height: 300px;
+  }
+
+  .hero-text-card {
+    order: 2;
+    min-height: auto;
+    text-align: center;
+  }
+
+  .hero-text {
+    max-width: 100%;
+    padding-left: 0;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-buttons {
+    align-items: center;
+  }
+
+  .hero-buttons .btn {
+    max-width: 260px;
+  }
+}
