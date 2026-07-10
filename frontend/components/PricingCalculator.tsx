@@ -29,7 +29,7 @@ export function PricingCalculator({ onStartForm }: PricingCalculatorProps) {
 
   return (
     <div className="pricing-calculator">
-      <div className="abo-selector" style={{ marginBottom: '24px' }}>
+      <div className="abo-selector" style={{ marginBottom: 'var(--space-5)' }}>
         <div className="abo-buttons">
           <button
             type="button"
@@ -97,10 +97,10 @@ export function PricingCalculator({ onStartForm }: PricingCalculatorProps) {
               <tr>
                 <td>
                   {aboData.name}
-                  <span className="payment-type-label" style={{ display: 'block', marginTop: '4px' }}>
+                  <span className="payment-type-label" style={{ display: 'block', marginTop: 'var(--space-1)' }}>
                     <strong style={{ color: 'var(--bioco-green)', fontSize: '0.875rem' }}>Jährlicher Beitrag</strong>
                   </span>
-                  <span className="mitarbeit-info" style={{ display: 'block', marginTop: '8px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  <span className="mitarbeit-info" style={{ display: 'block', marginTop: 'var(--space-2)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                     <strong>Mitarbeit pro Jahr:</strong> {aboData.arbeitseinsaetze} Arbeitseinsätze à 2 Stunden
                   </span>
                 </td>
@@ -113,16 +113,16 @@ export function PricingCalculator({ onStartForm }: PricingCalculatorProps) {
             <tr>
               <td>
                 Anteilsscheine
-                <span className="payment-type-label" style={{ display: 'block', marginTop: '4px' }}>
+                <span className="payment-type-label" style={{ display: 'block', marginTop: 'var(--space-1)' }}>
                   <strong style={{ color: 'var(--bioco-beet)', fontSize: '0.875rem' }}>Einmalige Zahlung</strong>
                 </span>
                 {selectedAbo !== 'kein' && requiredShares > 0 && (
-                  <span className="text-sm" style={{ display: 'block', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                  <span className="text-sm" style={{ display: 'block', color: 'var(--text-secondary)', marginTop: 'var(--space-1)' }}>
                     ({requiredShares} erforderlich{additionalShares > 0 && ` + ${additionalShares} zusätzlich`})
                   </span>
                 )}
                 {selectedAbo === 'kein' && (
-                  <span className="text-sm" style={{ display: 'block', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                  <span className="text-sm" style={{ display: 'block', color: 'var(--text-secondary)', marginTop: 'var(--space-1)' }}>
                     (ohne Gemüsekorb)
                   </span>
                 )}
@@ -169,7 +169,7 @@ export function PricingCalculator({ onStartForm }: PricingCalculatorProps) {
       </div>
 
       {selectedAbo === 'kein' && additionalShares === 0 && (
-        <div style={{ marginTop: '16px', padding: '16px', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
+        <div style={{ marginTop: 'var(--space-4)', padding: 'var(--space-4)', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
           <p style={{ margin: 0, fontSize: '0.875rem' }}>
             <strong>💡 Info:</strong> Du kannst Anteilsscheine auch ohne Gemüsekorb erwerben. 
             Genossenschafter/innen haben Vorrang auf der Warteliste für einen Gemüsekorb.
@@ -178,15 +178,15 @@ export function PricingCalculator({ onStartForm }: PricingCalculatorProps) {
       )}
 
       {(selectedAbo !== 'kein' || additionalShares > 0) && (
-        <div style={{ marginTop: '24px', textAlign: 'center' }}>
+        <div style={{ marginTop: 'var(--space-5)', textAlign: 'center' }}>
           <Link
             href={`/anmeldung?abo=${selectedAbo === 'kein' ? 'kein' : selectedAbo}&shares=${totalShares}&additional=${additionalShares}`}
             className="btn btn-primary"
-            style={{ display: 'inline-block', fontSize: '1.125rem', padding: '16px 32px' }}
+            style={{ display: 'inline-block', fontSize: '1.125rem', padding: 'var(--space-4) var(--space-6)' }}
           >
             Jetzt mitmachen!
           </Link>
-          <p style={{ marginTop: '12px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+          <p style={{ marginTop: 'var(--space-3)', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
             Deine Auswahl wird automatisch ins Anmeldeformular übernommen
           </p>
         </div>

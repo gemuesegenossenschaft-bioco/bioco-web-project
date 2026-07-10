@@ -50,20 +50,20 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
     <>
       <Header />
       <main className="main-content">
-        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(48px, 8vw, 96px) clamp(16px, 6vw, 96px)' }}>
-          <section id="G-01" style={{ marginBottom: 'clamp(24px, 4vw, 48px)' }}>
+        <div style={{ maxWidth: '1400px', margin: '0 auto', padding: 'clamp(var(--space-7), 8vw, var(--space-9)) clamp(var(--space-4), 6vw, var(--space-9))' }}>
+          <section id="G-01" style={{ marginBottom: 'clamp(var(--space-5), 4vw, var(--space-7))' }}>
             {introSection && !hasHeadingHtml(introSection.text) && introSection.title && (
-              <h1 style={{ fontSize: '2.5rem', margin: '0 0 16px 0' }}>
+              <h1 style={{ fontSize: '2.5rem', margin: '0 0 var(--space-4) 0' }}>
                 {introSection.title}
               </h1>
             )}
             {introSection?.text && (
-              <div 
-                style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}
+              <div
+                style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: 'var(--space-5)' }}
                 dangerouslySetInnerHTML={{ __html: introSection.text }}
               />
             )}
-            <div style={{ marginTop: '24px' }}>
+            <div style={{ marginTop: 'var(--space-5)' }}>
               <h2>Beiträge</h2>
               <div className="aktuelles-list">
                 {allAktuellesItems.map((item, index) => (
@@ -81,9 +81,9 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
             </div>
           </section>
 
-          <section id="G-02" style={{ marginBottom: 'clamp(24px, 4vw, 48px)' }}>
+          <section id="G-02" style={{ marginBottom: 'clamp(var(--space-5), 4vw, var(--space-7))' }}>
             <h2>Events</h2>
-            <div style={{ marginTop: '16px' }}>
+            <div style={{ marginTop: 'var(--space-4)' }}>
               <h3>Kommende Events</h3>
               {eventsLoading ? (
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
@@ -107,7 +107,7 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
               )}
             </div>
 
-            <div style={{ marginTop: '32px' }}>
+            <div style={{ marginTop: 'var(--space-6)' }}>
               <h3>Schnuppertage</h3>
               {eventsLoading ? (
                 <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
@@ -168,18 +168,18 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
 
           {/* CMS section 'kennenlernen-cta' - Am Ende */}
           {kennenlernenSection && (
-            <section id="B-06" style={{ marginBottom: 'clamp(48px, 8vw, 96px)' }}>
+            <section id="B-06" style={{ marginBottom: 'clamp(var(--space-7), 8vw, var(--space-9))' }}>
               {!hasHeadingHtml(kennenlernenSection.text) && (
                 <h2>{kennenlernenSection.title}</h2>
               )}
               {kennenlernenSection.text && (
                 <div
-                  style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '24px' }}
+                  style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: 'var(--space-5)' }}
                   dangerouslySetInnerHTML={{ __html: kennenlernenSection.text }}
                 />
               )}
               {kennenlernenSection.buttons?.length ? (
-                <div style={{ marginTop: '16px', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+                <div style={{ marginTop: 'var(--space-4)', display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
                   {kennenlernenSection.buttons.map((btn, i) => (
                     <CTA
                       key={i}

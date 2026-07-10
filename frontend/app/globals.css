@@ -22,6 +22,36 @@ select:focus-visible,
 }
 
 :root {
+  /* D6 deferred off-grid magic numbers (GH #80): intentionally NOT re-expressed
+     as tokens (each is a one-off value, not part of the 4/8/12/16/24/32/48/64/96
+     scale below). Left as raw px so no visual value changes; catalogued for a
+     future slice to decide whether to fold in or keep bespoke.
+     - 200px, 120px, 80px, 140px: .duck-runway margin
+     - 14px: .torn-image-frame padding
+     - 2px: .input-group > :not(:first-child) margin-left (negative, border overlap)
+     - 2px: .logo-carrot margin; .logo-beet margin
+     - 20px: body:not([data-pathname="/"]) .primary-nav-logo margin-top
+     - 10px: body:not([data-pathname="/"]) .primary-nav-logo margin-left (negative)
+     - 72px: .main-content (mobile) padding calc(); .mobile-header-actions padding;
+       .mobile-nav-list a padding; .mobile-nav-cta margin; .mobile-menu-header padding;
+       .hero-bleed padding; .hero-bleed (mobile) padding
+     - 120px: .hero (mobile) margin-top
+     - 20px: .hero + .main-content padding-top
+     - 150px: .main-content padding (desktop, tablet media query, mobile media query)
+     - 100px: .main-content padding-top
+     - 20px: global bullet list padding-left
+     - 14px, 28px: .form-navigation .btn padding
+     - 6px: .saisonkalender .kalender-tabs padding-bottom
+     - 14px: .saisonkalender .kalender-tabs margin-bottom
+     - 10px, 14px: .kalender-tab padding
+     - 100px: .pricing-calculator .pricing-table td padding-left
+     - 50px, 46px: .home-container padding (calc reduction)
+     - 80px: .home-container (mobile) padding-top (calc reduction)
+     - 20px, 28px: .wavy-card padding
+     - 20px: .hero-bleed (mobile) padding (third value)
+     - 24px: .hero-headline-block margin-top (negative)
+     - 2px: .discussion/tab-style margin-bottom (negative, x2 occurrences) */
+
   /* Bioco Colors */
   --bioco-green: #2e7d32;
   --bioco-green-light: #4caf50;
@@ -46,12 +76,29 @@ select:focus-visible,
   --radius-sm: 12px;
   --radius-md: 18px;
   --radius-lg: 24px;
-  --spacing-xs: 8px;
-  --spacing-sm: 16px;
-  --spacing-md: 24px;
-  --spacing-lg: 32px;
-  --spacing-xl: 48px;
-  --spacing-2xl: 64px;
+  /* D6 spacing scale (GH #80): 4px-based --space-1..9. Legacy --spacing-xs..2xl
+     alias onto these steps via var() so nothing referencing legacy names changes
+     value. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --spacing-xs: var(--space-2);
+  --spacing-sm: var(--space-4);
+  --spacing-md: var(--space-5);
+  --spacing-lg: var(--space-6);
+  --spacing-xl: var(--space-7);
+  --spacing-2xl: var(--space-8);
+  /* D7 section vertical-rhythm tokens (GH #81): each carries the PRESENT value
+     of the context it names, not a harmonized value. */
+  --section-gap: clamp(32px, 6vw, 96px); /* .cms-sections outer vertical padding */
+  --section-gap-sm: clamp(32px, 6vw, 80px); /* .cms-section item margin-bottom */
+  --section-gap-home: var(--space-8); /* .home-main-content vertical padding (64px) */
   --page-max-width: 1400px;
   --content-max-width: 1160px;
   --page-inline-padding: clamp(16px, 6vw, 96px);
@@ -188,11 +235,11 @@ body {
 .cms-sections {
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: clamp(32px, 6vw, 96px) var(--page-inline-padding);
+  padding: var(--section-gap) var(--page-inline-padding);
 }
 
 .cms-section {
-  margin-bottom: clamp(32px, 6vw, 80px);
+  margin-bottom: var(--section-gap-sm);
 }
 
 .cms-section-eyebrow {
@@ -200,7 +247,7 @@ body {
   letter-spacing: 0.02em;
   text-transform: uppercase;
   color: var(--text-tertiary);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .cms-section-text {
@@ -276,7 +323,7 @@ body {
 .cms-banner {
   background: var(--bg-primary);
   border-radius: var(--radius-lg);
-  padding: clamp(24px, 4vw, 48px);
+  padding: clamp(var(--space-5), 4vw, var(--space-7));
   box-shadow: var(--shadow-sm);
 }
 
@@ -891,7 +938,7 @@ h4.card-title {
 .input-group-text {
   display: flex;
   align-items: center;
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-heading);
   font-family: var(--font-body);
@@ -1173,7 +1220,7 @@ button,
   font-family: var(--font-body);
   font-weight: var(--font-weight-heading);
   display: inline-block;
-  padding: 12px 24px;
+  padding: var(--space-3) var(--space-5);
   font-size: var(--font-size-base);
   text-align: center;
   border-radius: var(--radius-md);
@@ -1265,7 +1312,7 @@ input[type="submit"].cta-button,
   font-family: var(--font-body);
   font-weight: var(--font-weight-heading);
   display: inline-block;
-  padding: 12px 24px;
+  padding: var(--space-3) var(--space-5);
   font-size: var(--font-size-base);
   text-align: center;
   border-radius: var(--radius-md);
@@ -1407,7 +1454,7 @@ a:hover {
   max-width: var(--page-max-width); /* Match content max-width for alignment */
   width: 100%;
   margin: 0 auto; /* Center the container */
-  padding: 0 clamp(16px, 6vw, 96px); /* Match content horizontal padding exactly - ESSENTIAL for alignment */
+  padding: 0 clamp(var(--space-4), 6vw, var(--space-9)); /* Match content horizontal padding exactly - ESSENTIAL for alignment */
   display: flex;
   align-items: center;
   justify-content: flex-end; /* Right align nav items */
@@ -1430,7 +1477,7 @@ a:hover {
 .utility-nav a {
   display: flex;
   align-items: center;
-  padding: 4px 12px;
+  padding: var(--space-1) var(--space-3);
   font-weight: var(--font-weight-body);
   font-size: 0.8125rem;
   color: var(--text-primary); /* Black text */
@@ -1472,7 +1519,7 @@ a:hover {
   background: var(--bg-secondary);
   border-bottom: 1px solid var(--border-color);
   padding: calc(var(--spacing-xs) * 0.5) 0; /* Reduce padding by 50% - close to border */
-  margin-top: clamp(32px, 6vw, 64px); /* Increased spacing from top on sub pages */
+  margin-top: clamp(var(--space-6), 6vw, var(--space-8)); /* Increased spacing from top on sub pages */
   position: sticky; /* Sticky on desktop */
   top: 0;
   left: 0;
@@ -1492,7 +1539,7 @@ a:hover {
     top: 0 !important;
     background: var(--bg-secondary) !important; /* White background */
     border-bottom: 1px solid var(--border-color) !important; /* Divider line */
-    margin-top: clamp(32px, 6vw, 64px) !important;
+    margin-top: clamp(var(--space-6), 6vw, var(--space-8)) !important;
   }
 }
 
@@ -1688,7 +1735,7 @@ a:hover {
 .secondary-nav a {
   display: flex;
   align-items: center;
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
@@ -1724,7 +1771,7 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-weight: var(--font-weight-semibold);
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-sm);
   position: relative;
   z-index: 1;
@@ -1755,11 +1802,11 @@ header {
 @media (max-width: 767px) {
   .primary-nav-container,
   .secondary-nav-container {
-    padding: 0 clamp(16px, 6vw, 96px); /* Keep same padding as desktop for alignment */
+    padding: 0 clamp(var(--space-4), 6vw, var(--space-9)); /* Keep same padding as desktop for alignment */
   }
-  
+
   .main-content {
-    padding: calc(var(--spacing-lg) + 72px) 0 8px 0 !important;
+    padding: calc(var(--spacing-lg) + 72px) 0 var(--space-2) 0 !important;
     max-width: 100%;
     width: 100%;
     margin: 0;
@@ -1878,7 +1925,7 @@ header .header-nav-container .beet-leaves {
   top: 0;
   right: 0;
   z-index: 1200; /* Higher than navbar to ensure clickability */
-  padding: 8px clamp(16px, 5vw, 72px);
+  padding: var(--space-2) clamp(var(--space-4), 5vw, 72px);
   pointer-events: auto;
 }
 
@@ -1951,7 +1998,7 @@ header .header-nav-container .beet-leaves {
   font-weight: var(--font-weight-heading);
   background: transparent;
   border: none;
-  padding: 8px;
+  padding: var(--space-2);
   cursor: pointer;
   font-size: var(--font-size-lg);
   display: block;
@@ -2135,7 +2182,7 @@ header .header-nav-container .beet-leaves {
 }
 
 .mobile-menu-primary-section {
-  padding-top: clamp(24px, 6vw, 48px);
+  padding-top: clamp(var(--space-5), 6vw, var(--space-7));
   padding-bottom: var(--spacing-md);
   border-bottom: 2px solid var(--border-color);
 }
@@ -2163,7 +2210,7 @@ header .header-nav-container .beet-leaves {
 .mobile-nav-list a {
   display: flex;
   align-items: center;
-  padding: 16px clamp(16px, 5vw, 72px);
+  padding: var(--space-4) clamp(var(--space-4), 5vw, 72px);
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary) !important;
   text-decoration: none;
@@ -2192,9 +2239,9 @@ header .header-nav-container .beet-leaves {
   font-weight: var(--font-weight-semibold);
   text-align: center;
   justify-content: center;
-  margin: 16px clamp(16px, 5vw, 72px);
+  margin: var(--space-4) clamp(var(--space-4), 5vw, 72px);
   width: calc(100% - 2 * clamp(16px, 5vw, 72px));
-  padding: 12px 24px;
+  padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-md);
   position: relative;
   z-index: 1;
@@ -2285,9 +2332,9 @@ header .header-nav-container .beet-leaves {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px clamp(16px, 5vw, 72px);
+  padding: var(--space-4) clamp(var(--space-4), 5vw, 72px);
   border-bottom: 2px solid var(--border-color);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
   position: sticky;
   top: 0;
   background: white;
@@ -2340,7 +2387,7 @@ header .header-nav-container .beet-leaves {
   font-size: var(--font-size-2xl);
   color: var(--text-primary);
   cursor: pointer;
-  padding: 8px;
+  padding: var(--space-2);
   line-height: 1;
   width: 40px;
   height: 40px;
@@ -2384,7 +2431,7 @@ header .header-nav-container .beet-leaves {
 
 .header-nav a {
   display: block;
-  padding: 10px 16px;
+  padding: 10px var(--space-4);
   border-radius: var(--radius-sm);
   font-weight: var(--font-weight-medium);
   color: var(--text-primary);
@@ -2447,7 +2494,7 @@ header .header-nav-container .beet-leaves {
 
 .header-nav .btn {
   margin: 0;
-  padding: 8px 16px;
+  padding: var(--space-2) var(--space-4);
   font-size: var(--font-size-sm);
   white-space: nowrap;
   border-color: rgba(255, 255, 255, 0.5);
@@ -2638,7 +2685,7 @@ header .header-nav-container .beet-leaves {
 
 /* Main Content */
 .main-content {
-  padding: 12px 150px; /* Reduced vertical spacing by 75% (was 48px, now 12px) */
+  padding: var(--space-3) 150px; /* Reduced vertical spacing by 75% (was 48px, now 12px) */
   padding-top: 100px; /* Account for header */
   max-width: 100%;
   width: 100%;
@@ -2676,7 +2723,7 @@ header .header-nav-container .beet-leaves {
 }
 
 .content li {
-  margin: 8px 0;
+  margin: var(--space-2) 0;
   color: var(--text-secondary);
 }
 
@@ -2747,7 +2794,7 @@ header .header-nav-container .beet-leaves {
 }
 
 .events-banner li {
-  margin: 12px 0;
+  margin: var(--space-3) 0;
   color: var(--text-secondary);
 }
 
@@ -2778,7 +2825,7 @@ main ul:not(.pea-bullet-list) li,
 .content ul:not(.pea-bullet-list) li {
   position: relative;
   padding-left: 0;
-  margin: 8px 0;
+  margin: var(--space-2) 0;
 }
 
 /* Forms */
@@ -2788,7 +2835,7 @@ main ul:not(.pea-bullet-list) li,
 
 .form-group label {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
   font-weight: var(--font-weight-medium);
   font-size: var(--font-size-sm);
   color: var(--text-primary);
@@ -2804,7 +2851,7 @@ main ul:not(.pea-bullet-list) li,
   display: inline-block;
   background: var(--bioco-orange);
   color: white;
-  padding: 4px 12px;
+  padding: var(--space-1) var(--space-3);
   border: 2px solid var(--color-carrot-strong);
   border-radius: var(--radius-sm);
   font-size: var(--font-size-xs);
@@ -2812,7 +2859,7 @@ main ul:not(.pea-bullet-list) li,
   transform-origin: center;
   box-shadow: var(--shadow-sm);
   vertical-align: middle;
-  margin-left: 8px;
+  margin-left: var(--space-2);
 }
 
 input[type="text"],
@@ -2828,10 +2875,10 @@ select,
   font-family: var(--font-body);
   font-weight: var(--font-weight-heading);
   border: 2px solid var(--color-charcoal);
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   background: var(--bg-primary);
   width: 100%;
-  margin: 4px 0;
+  margin: var(--space-1) 0;
   font-size: var(--font-size-base);
   border-radius: var(--radius-md);
   transition: all 0.2s ease;
@@ -2902,7 +2949,7 @@ select:focus,
 .is-invalid-group {
   border: 2px solid var(--color-error);
   border-radius: var(--radius-md);
-  padding: 8px;
+  padding: var(--space-2);
   background-color: color-mix(in srgb, var(--color-error) 5%, transparent);
 }
 
@@ -2947,7 +2994,7 @@ input[type="radio"] {
   cursor: pointer;
   appearance: none;
   position: relative;
-  margin-right: 8px;
+  margin-right: var(--space-2);
   box-shadow: var(--shadow-sm);
 }
 
@@ -3024,7 +3071,7 @@ footer {
   max-width: var(--page-max-width); /* Match nav container max-width */
   width: 100%;
   margin: 0 auto;
-  padding: 0 clamp(16px, 6vw, 96px); /* Match logo/nav container left padding */
+  padding: 0 clamp(var(--space-4), 6vw, var(--space-9)); /* Match logo/nav container left padding */
   box-sizing: border-box;
 }
 
@@ -3036,7 +3083,7 @@ footer ul {
 
 footer li {
   display: block;
-  margin: 8px 0;
+  margin: var(--space-2) 0;
 }
 
 footer a {
@@ -3401,7 +3448,7 @@ footer a:hover {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
 }
 
 .team-card-gardener {
@@ -3800,18 +3847,18 @@ footer a:hover {
 .past-event-date {
   font-size: var(--font-size-sm3);
   color: var(--text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .past-event-title {
   font-weight: var(--font-weight-semibold);
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .past-event-location {
   font-size: var(--font-size-sm2);
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
 }
 
 .past-event-cta {
@@ -4506,7 +4553,7 @@ footer a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: 4px;
+  margin-left: var(--space-1);
   vertical-align: middle;
   transition: all 0.2s ease;
 }
@@ -4523,7 +4570,7 @@ footer a:hover {
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-bottom: 8px;
+  margin-bottom: var(--space-2);
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--text-primary);
   color: white;
@@ -4695,7 +4742,7 @@ footer a:hover {
   }
 
   .header-nav a {
-    padding: 8px 16px;
+    padding: var(--space-2) var(--space-4);
     font-size: var(--font-size-sm);
     white-space: nowrap;
   }
@@ -4729,7 +4776,7 @@ footer a:hover {
   }
 
   .main-content {
-    padding: 12px 150px; /* Reduced vertical spacing by 75% */
+    padding: var(--space-3) 150px; /* Reduced vertical spacing by 75% */
     max-width: 100%;
     width: 100%;
   }
@@ -4958,7 +5005,7 @@ footer a:hover {
   .btn-secondary {
     width: 100%;
     display: block;
-    margin: 12px 0;
+    margin: var(--space-3) 0;
   }
 
   h1 {
@@ -5039,7 +5086,7 @@ footer a:hover {
   select,
   .form-control {
     font-size: var(--font-size-base); /* Prevents zoom on iOS */
-    padding: 10px 12px;
+    padding: 10px var(--space-3);
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -5060,7 +5107,7 @@ footer a:hover {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: var(--space-3);
   }
 
   .saisonkalender .kalender-tabs {
@@ -5187,9 +5234,9 @@ footer a:hover {
     display: block;
     font-weight: var(--font-weight-semibold);
     color: var(--bioco-green);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
   }
-  
+
   #C-01 .pricing-table td:nth-child(4) {
     font-size: var(--font-size-base);
     position: relative;
@@ -5201,7 +5248,7 @@ footer a:hover {
     display: block;
     font-weight: var(--font-weight-semibold);
     color: var(--bioco-green);
-    margin-bottom: 4px;
+    margin-bottom: var(--space-1);
   }
 
   #C-01 .pricing-table td:nth-child(5) {
@@ -5466,7 +5513,7 @@ footer a:hover {
   z-index: 50;
   pointer-events: none;
   background: transparent;
-  padding: 0 clamp(16px, 6vw, 96px);
+  padding: 0 clamp(var(--space-4), 6vw, var(--space-9));
 }
 
 .navbar-overlay .primary-nav,
@@ -5610,7 +5657,7 @@ footer a:hover {
 .home-main-content {
   position: relative;
   background: var(--bg-secondary);
-  padding: var(--spacing-2xl) clamp(var(--spacing-md), 8vw, 120px);
+  padding: var(--section-gap-home) clamp(var(--spacing-md), 8vw, 120px);
   z-index: 2;
 }
 
@@ -5906,10 +5953,10 @@ footer a:hover {
   width: 100%;
   max-width: var(--page-max-width);
   margin: 0 auto;
-  margin-top: clamp(16px, 3vw, 32px); /* Decreased space by half between secondary nav and hero image */
+  margin-top: clamp(var(--space-4), 3vw, var(--space-6)); /* Decreased space by half between secondary nav and hero image */
   height: clamp(50vh, 65vh, 70vh);
   min-height: 420px;
-  padding: clamp(24px, 4vw, 48px) clamp(16px, 5vw, 72px) 0;
+  padding: clamp(var(--space-5), 4vw, var(--space-7)) clamp(var(--space-4), 5vw, 72px) 0;
 }
 
 .hero-bg {
@@ -5958,9 +6005,9 @@ footer a:hover {
   width: 100%;
   max-width: var(--page-max-width);
   margin: 0 auto;
-  margin-top: clamp(16px, 3vw, 32px);
-  padding: 0 clamp(16px, 6vw, 96px);
-  padding-bottom: clamp(8px, 1.5vw, 16px);
+  margin-top: clamp(var(--space-4), 3vw, var(--space-6));
+  padding: 0 clamp(var(--space-4), 6vw, var(--space-9));
+  padding-bottom: clamp(var(--space-2), 1.5vw, var(--space-4));
   z-index: 4;
 }
 
@@ -6012,12 +6059,12 @@ footer a:hover {
   background: var(--bg-secondary);
   max-width: var(--page-max-width);
   margin: 0 auto;
-  padding: clamp(0px, calc(8vw - 50px), 46px) clamp(16px, 6vw, 96px) clamp(32px, 6vw, 64px); /* Reduced top padding by 50px */
+  padding: clamp(0px, calc(8vw - 50px), 46px) clamp(var(--space-4), 6vw, var(--space-9)) clamp(var(--space-6), 6vw, var(--space-8)); /* Reduced top padding by 50px */
 }
 
 @media (max-width: 767px) {
   .home-container {
-    padding-top: clamp(0px, calc(8vw - 80px), 16px) !important; /* Reduced by 50px more on mobile (total 80px reduction) */
+    padding-top: clamp(0px, calc(8vw - 80px), var(--space-4)) !important; /* Reduced by 50px more on mobile (total 80px reduction) */
   }
 }
 
@@ -6068,8 +6115,8 @@ footer a:hover {
   gap: clamp(24px, 6vw, 48px);
   width: 100%;
   max-width: var(--page-max-width);
-  margin: clamp(48px, 8vw, 96px) auto;
-  padding: 0 clamp(16px, 6vw, 96px);
+  margin: clamp(var(--space-7), 8vw, var(--space-9)) auto;
+  padding: 0 clamp(var(--space-4), 6vw, var(--space-9));
 }
 
 .two-column-text {
@@ -6164,7 +6211,7 @@ footer a:hover {
 .home-block h2 {
   font-family: var(--font-heading);
   font-size: var(--font-size-home-block-heading); /* Smaller than h1 */
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
   color: var(--text-primary);
 }
 
@@ -6246,7 +6293,7 @@ footer a:hover {
   .hero-bleed {
     min-height: auto;
     height: auto;
-    padding: clamp(24px, 4vw, 48px) clamp(16px, 5vw, 72px) clamp(20px, 4vw, 32px);
+    padding: clamp(var(--space-5), 4vw, var(--space-7)) clamp(var(--space-4), 5vw, 72px) clamp(20px, 4vw, var(--space-6));
     display: flex;
     flex-direction: column; /* Stack image and text vertically */
   }
@@ -6298,7 +6345,7 @@ footer a:hover {
   
   .hero-headline-block {
     margin-top: -24px;
-    padding-top: 32px;
+    padding-top: var(--space-6);
   }
 }
 
@@ -6525,7 +6572,7 @@ footer a:hover {
   }
 
   body[data-pathname="/"] .hero-bleed {
-    padding-top: calc(clamp(24px, 4vw, 48px) + var(--mobile-nav-height)) !important;
+    padding-top: calc(clamp(var(--space-5), 4vw, var(--space-7)) + var(--mobile-nav-height)) !important;
   }
 }
 

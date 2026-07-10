@@ -68,7 +68,7 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
         {section?.text ? (
           <div
             className="cms-section-text"
-            style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}
+            style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: 'var(--space-4)' }}
             {...getVeFieldAttrs(visualEditor, sectionId, 'text', 'richtext', true)}
             dangerouslySetInnerHTML={{ __html: section.text }}
           />
@@ -80,19 +80,19 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
           <div
             style={{
               background: 'var(--bg-secondary)',
-              padding: '24px',
+              padding: 'var(--space-5)',
               borderRadius: '12px',
-              marginBottom: '24px',
+              marginBottom: 'var(--space-5)',
             }}
             {...getVeFieldAttrs(visualEditor, sectionId, 'component', 'structured', false)}
           >
             {listLabel ? (
-              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: 'var(--space-4)' }}>
                 <strong>{listLabel}</strong>
               </p>
             ) : null}
             {listItems.length > 0 ? (
-              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: '16px', paddingLeft: '20px' }}>
+              <ul style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)', marginBottom: 'var(--space-4)', paddingLeft: '20px' }}>
                 {listItems.map((item, idx) => (
                   <li key={idx}>{item}</li>
                 ))}
@@ -107,7 +107,7 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
         ) : null}
 
         {/* Compact date list — live from useEventsFeed (code-owned, functional) */}
-        <h4 style={{ fontSize: '1.1rem', marginBottom: '16px', color: 'var(--text-primary)' }}>
+        <h4 style={{ fontSize: '1.1rem', marginBottom: 'var(--space-4)', color: 'var(--text-primary)' }}>
           Nächste Termine
         </h4>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -116,7 +116,7 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
               key={item.id || idx}
               style={{
                 background: 'rgba(var(--bioco-green-rgb), 0.15)',
-                padding: '16px 20px',
+                padding: 'var(--space-4) 20px',
                 borderRadius: '12px',
                 display: 'flex',
                 flexWrap: 'wrap',
@@ -185,7 +185,7 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
               top: 0,
               background: 'white',
               borderBottom: '1px solid var(--border-color)',
-              padding: '16px 24px',
+              padding: 'var(--space-4) var(--space-5)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
@@ -204,7 +204,7 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
                   border: 'none',
                   fontSize: '1.5rem',
                   cursor: 'pointer',
-                  padding: '4px 8px',
+                  padding: 'var(--space-1) var(--space-2)',
                   color: 'var(--text-secondary)',
                   lineHeight: 1
                 }}
@@ -215,14 +215,14 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
             </div>
 
             {/* Event Details */}
-            <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)' }}>
+            <div style={{ padding: 'var(--space-4) var(--space-5)', borderBottom: '1px solid var(--border-color)' }}>
               <div style={{
-                padding: '12px 16px',
+                padding: 'var(--space-3) var(--space-4)',
                 background: 'var(--bg-secondary)',
                 borderRadius: '8px',
                 fontSize: '0.95rem'
               }}>
-                <div style={{ marginBottom: '4px' }}>
+                <div style={{ marginBottom: 'var(--space-1)' }}>
                   <strong>Ort:</strong> Geisshof, Geisslistrasse, 5412 Gebenstorf
                 </div>
                 <div>

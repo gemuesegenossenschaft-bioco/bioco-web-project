@@ -70,19 +70,19 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
 
   if (submitStatus === 'success') {
     return (
-      <div style={{ padding: '24px', textAlign: 'center' }}>
-        <h3 style={{ color: 'var(--bioco-green)', marginBottom: '16px' }}>Anmeldung erfolgreich!</h3>
+      <div style={{ padding: 'var(--space-5)', textAlign: 'center' }}>
+        <h3 style={{ color: 'var(--bioco-green)', marginBottom: 'var(--space-4)' }}>Anmeldung erfolgreich!</h3>
         <p>Vielen Dank für deine Anmeldung. Wir melden uns bei dir.</p>
       </div>
     )
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ padding: '24px' }}>
-      <h3 style={{ marginBottom: '16px' }}>Anmeldung für: {eventTitle}</h3>
+    <form onSubmit={handleSubmit} style={{ padding: 'var(--space-5)' }}>
+      <h3 style={{ marginBottom: 'var(--space-4)' }}>Anmeldung für: {eventTitle}</h3>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label htmlFor="name" style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
+      <div style={{ marginBottom: 'var(--space-4)' }}>
+        <label htmlFor="name" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
           Name *
         </label>
         <input
@@ -93,7 +93,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           style={{
             width: '100%',
-            padding: '12px',
+            padding: 'var(--space-3)',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
             fontSize: '1rem',
@@ -101,8 +101,8 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
         />
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label htmlFor="email" style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
+      <div style={{ marginBottom: 'var(--space-4)' }}>
+        <label htmlFor="email" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
           E-Mail *
         </label>
         <input
@@ -113,7 +113,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           style={{
             width: '100%',
-            padding: '12px',
+            padding: 'var(--space-3)',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
             fontSize: '1rem',
@@ -121,8 +121,8 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
         />
       </div>
 
-      <div style={{ marginBottom: '16px' }}>
-        <label htmlFor="phone" style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
+      <div style={{ marginBottom: 'var(--space-4)' }}>
+        <label htmlFor="phone" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
           Telefon (optional)
         </label>
         <input
@@ -132,7 +132,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
           onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
           style={{
             width: '100%',
-            padding: '12px',
+            padding: 'var(--space-3)',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
             fontSize: '1rem',
@@ -140,8 +140,8 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
         />
       </div>
 
-      <div style={{ marginBottom: '24px' }}>
-        <label htmlFor="notes" style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>
+      <div style={{ marginBottom: 'var(--space-5)' }}>
+        <label htmlFor="notes" style={{ display: 'block', marginBottom: 'var(--space-2)', fontWeight: 600 }}>
           Bemerkungen (optional)
         </label>
         <textarea
@@ -151,7 +151,7 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
           onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
           style={{
             width: '100%',
-            padding: '12px',
+            padding: 'var(--space-3)',
             border: '1px solid var(--border-color)',
             borderRadius: '8px',
             fontSize: '1rem',
@@ -166,8 +166,8 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
       {submitStatus === 'error' && (
         <div
           style={{
-            padding: '12px',
-            marginBottom: '16px',
+            padding: 'var(--space-3)',
+            marginBottom: 'var(--space-4)',
             background: 'var(--bioco-beet-50)',
             color: 'var(--bioco-beet)',
             borderRadius: '8px',
