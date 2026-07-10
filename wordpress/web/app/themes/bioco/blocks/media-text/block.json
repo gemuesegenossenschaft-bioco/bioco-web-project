@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/media-text",
+  "title": "Bild & Text",
+  "description": "Zweispaltiger Block mit Bild und Text; Bildposition (links/rechts) wählbar.",
+  "category": "bioco",
+  "icon": "align-pull-left",
+  "keywords": ["bild", "text", "split", "zweispaltig"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

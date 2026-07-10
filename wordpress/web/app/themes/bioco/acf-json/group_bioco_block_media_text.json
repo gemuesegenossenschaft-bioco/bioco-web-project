@@ -1,0 +1,208 @@
+{
+    "key": "group_bioco_block_media_text",
+    "title": "Bild & Text Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_media_text_media_side",
+            "label": "Bildposition",
+            "name": "media_side",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Auf Desktop-Breite; auf Mobilgeräten steht das Bild immer oben.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "left": "Links",
+                "right": "Rechts"
+            },
+            "default_value": "left",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_media_text_media_clone",
+            "label": "Bild",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_image",
+                "field_bioco_section_image_alt"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_media_text_image_overlay",
+            "label": "Bild-Overlay",
+            "name": "image_overlay",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Farbiger Ton über dem Bild, z. B. für bessere Lesbarkeit.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "none": "Keine",
+                "dark": "Dunkel",
+                "green": "Grün",
+                "orange": "Orange"
+            },
+            "default_value": "none",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_media_text_image_brightness",
+            "label": "Bild-Helligkeit",
+            "name": "image_brightness",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "CSS-Filter brightness(). 1 = unverändert.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": 1,
+            "min": 0,
+            "max": 2,
+            "step": 0.1,
+            "placeholder": "1"
+        },
+        {
+            "key": "field_bioco_media_text_image_contrast",
+            "label": "Bild-Kontrast",
+            "name": "image_contrast",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "CSS-Filter contrast(). 1 = unverändert.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": 1,
+            "min": 0,
+            "max": 2,
+            "step": 0.1,
+            "placeholder": "1"
+        },
+        {
+            "key": "field_bioco_media_text_image_saturate",
+            "label": "Bild-Sättigung",
+            "name": "image_saturate",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "CSS-Filter saturate(). 1 = unverändert.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "34",
+                "class": "",
+                "id": ""
+            },
+            "default_value": 1,
+            "min": 0,
+            "max": 2,
+            "step": 0.1,
+            "placeholder": "1"
+        },
+        {
+            "key": "field_bioco_media_text_content_clone",
+            "label": "Inhalt",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_eyebrow",
+                "field_bioco_section_title",
+                "field_bioco_section_text"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_media_text_buttons_clone",
+            "label": "Buttons",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_buttons"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/media-text"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Bild-&-Text-Block (W5 layout blocks, Issue #92). Ersetzt split_media_text / split_text_media aus dem Next.js SectionRenderer durch einen einzigen Block mit Bildpositions-Auswahl. Bild und Inhalt klonen aus Section Common (group_bioco_section_common); Overlay/Helligkeit/Kontrast/Sättigung sind blockeigene Felder.",
+    "show_in_rest": 0,
+    "modified": 1783641600
+}

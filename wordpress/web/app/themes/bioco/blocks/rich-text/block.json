@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/rich-text",
+  "title": "Rich Text",
+  "description": "Textblock mit optionalem Eyebrow, Titel, formatiertem Text und Buttons.",
+  "category": "bioco",
+  "icon": "editor-alignleft",
+  "keywords": ["text", "rich text", "absatz"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

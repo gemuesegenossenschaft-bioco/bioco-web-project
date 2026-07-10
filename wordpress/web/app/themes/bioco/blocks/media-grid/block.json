@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/media-grid",
+  "title": "Bildergalerie",
+  "description": "Rasterlayout für mehrere Bilder mit optionalem Text darüber.",
+  "category": "bioco",
+  "icon": "grid-view",
+  "keywords": ["galerie", "bilder", "raster", "grid"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

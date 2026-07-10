@@ -221,3 +221,199 @@
     max-width: 260px;
   }
 }
+
+/**
+ * W5 layout blocks (rich-text, media-text, banner, media-grid, video-embed;
+ * issue #92). Class names on cms-section / cms-split / cms-banner /
+ * cms-media-grid / cms-video-frame etc. are kept identical to the Next.js
+ * frontend/components/sections/SectionRenderer.tsx + globals.css rules so
+ * this CSS can be ported almost unchanged during W11. cms-banner-media,
+ * cms-banner-overlay-* and the cms-media-frame img rule below are new —
+ * Next's BannerSection has no image layer, and next/image's "fill" prop
+ * generates absolute-positioned img styles inline that a plain <img> here
+ * needs from CSS instead.
+ */
+
+.cms-section {
+  margin-bottom: clamp(32px, 6vw, 80px);
+}
+
+.cms-section-eyebrow {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.cms-section-text {
+  color: var(--wp--preset--color--bioco-text-muted);
+  line-height: 1.7;
+}
+
+.cms-section-caption {
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.cms-section-actions {
+  margin-top: var(--wp--preset--spacing--30);
+  display: flex;
+  gap: var(--wp--preset--spacing--30);
+  flex-wrap: wrap;
+}
+
+/* media-text block */
+.cms-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(24px, 4vw, 64px);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .cms-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cms-split-media.is-last {
+    order: 2;
+  }
+  .cms-split-content {
+    order: 1;
+  }
+}
+
+.cms-media-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--wp--custom--radius--lg);
+  overflow: hidden;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.cms-media-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Image overlays shared by media-text (applied to .cms-split-media) */
+.image-overlay-dark,
+.image-overlay-green,
+.image-overlay-orange {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-overlay-dark::after,
+.image-overlay-green::after,
+.image-overlay-orange::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.image-overlay-dark::after {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.image-overlay-green::after {
+  background: rgba(46, 125, 50, 0.3);
+}
+
+.image-overlay-orange::after {
+  background: rgba(242, 146, 0, 0.3);
+}
+
+/* banner block */
+.cms-banner {
+  position: relative;
+  overflow: hidden;
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--lg);
+  padding: clamp(24px, 4vw, 48px);
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.cms-banner-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.cms-banner-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cms-banner-overlay-dark::after,
+.cms-banner-overlay-green::after,
+.cms-banner-overlay-orange::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cms-banner-overlay-dark::after {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.cms-banner-overlay-green::after {
+  background: rgba(46, 125, 50, 0.35);
+}
+
+.cms-banner-overlay-orange::after {
+  background: rgba(242, 146, 0, 0.35);
+}
+
+.cms-banner-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.cms-banner--media .cms-banner-inner,
+.cms-banner--media .cms-section-eyebrow,
+.cms-banner--media .cms-section-text,
+.cms-banner--media h1,
+.cms-banner--media h2,
+.cms-banner--media h3 {
+  color: #ffffff;
+}
+
+/* media-grid block */
+.cms-media-grid {
+  display: grid;
+  gap: var(--wp--preset--spacing--40);
+}
+
+.cms-media-grid-items {
+  display: grid;
+  gap: var(--wp--preset--spacing--40);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* video-embed block */
+.cms-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--wp--custom--radius--lg);
+  overflow: hidden;
+  background: #000;
+  margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.cms-video-frame iframe,
+.cms-video-frame video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}

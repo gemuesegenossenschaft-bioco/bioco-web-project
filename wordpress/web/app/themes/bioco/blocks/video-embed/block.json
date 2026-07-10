@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/video-embed",
+  "title": "Video",
+  "description": "Eingebettetes Video über eine URL (z. B. YouTube, Vimeo) via WordPress oEmbed.",
+  "category": "bioco",
+  "icon": "video-alt3",
+  "keywords": ["video", "embed", "youtube", "vimeo"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

@@ -60,3 +60,53 @@ add_action('init', function () {
         register_block_type(dirname($block_json));
     }
 });
+
+/**
+ * Shared block render helpers (W5 layout blocks, issue #92).
+ * Kept in one place so every block's render.php sanitizes and
+ * detects headings identically.
+ */
+
+// Mirrors the Next.js SectionRenderer hasHeadingHtml() check: suppress the
+// separate block title when the WYSIWYG text already contains its own h1-h6.
+function bioco_text_has_heading_html($html) {
+    return (bool) preg_match('/<h[1-6]\b[^>]*>/i', (string) $html);
+}
+
+// wp_kses_post allowlist trimmed to the tags actually used across bioco's
+// rich text fields (matches the sanitization already applied on the current site).
+function bioco_kses_rich_text($html) {
+    $allowed = [
+        'a' => ['href' => true, 'target' => true, 'rel' => true, 'class' => true],
+        'strong' => [],
+        'em' => [],
+        'ul' => [],
+        'ol' => [],
+        'li' => [],
+        'h2' => [],
+        'h3' => [],
+        'h4' => [],
+        'details' => [],
+        'summary' => [],
+        'br' => [],
+        'p' => ['class' => true, 'style' => true],
+    ];
+    return wp_kses((string) $html, $allowed);
+}
+
+// Builds a CSS filter string from optional brightness/contrast/saturate
+// numbers, matching SectionRenderer's getImageFilterStyle(): only non-null
+// values that differ from the 1 (no-op) default are included.
+function bioco_image_filter_style($brightness, $contrast, $saturate) {
+    $parts = [];
+    if ($brightness !== null && $brightness !== '' && (float) $brightness !== 1.0) {
+        $parts[] = 'brightness(' . (float) $brightness . ')';
+    }
+    if ($contrast !== null && $contrast !== '' && (float) $contrast !== 1.0) {
+        $parts[] = 'contrast(' . (float) $contrast . ')';
+    }
+    if ($saturate !== null && $saturate !== '' && (float) $saturate !== 1.0) {
+        $parts[] = 'saturate(' . (float) $saturate . ')';
+    }
+    return $parts ? 'filter: ' . implode(' ', $parts) . ';' : '';
+}

@@ -1,0 +1,108 @@
+{
+    "key": "group_bioco_block_video_embed",
+    "title": "Video Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_video_embed_video_url",
+            "label": "Video-URL",
+            "name": "video_url",
+            "aria-label": "",
+            "type": "url",
+            "instructions": "Beliebiger von WordPress unterstützter oEmbed-Anbieter, z. B. YouTube oder Vimeo.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "placeholder": "https://www.youtube.com/watch?v=…"
+        },
+        {
+            "key": "field_bioco_video_embed_video_title",
+            "label": "Video-Bildunterschrift",
+            "name": "video_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Kurze Bildunterschrift über dem Video (optional).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_video_embed_content_clone",
+            "label": "Inhalt",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_eyebrow",
+                "field_bioco_section_title",
+                "field_bioco_section_text"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_video_embed_buttons_clone",
+            "label": "Buttons",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_buttons"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/video-embed"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Video-Block (W5 layout blocks, Issue #92). Entspricht dem video_embed-Layout des Next.js SectionRenderer, gerendert über wp_oembed_get() statt eigener YouTube/Vimeo-URL-Auswertung. Inhalt und Buttons klonen aus Section Common (group_bioco_section_common); Video-URL und Bildunterschrift sind blockeigene Felder.",
+    "show_in_rest": 0,
+    "modified": 1783641600
+}
