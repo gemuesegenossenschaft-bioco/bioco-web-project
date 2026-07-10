@@ -41,7 +41,7 @@ export default function GlobalError({
           fontFamily: "'DM Sans', sans-serif",
           textAlign: 'center',
         }}>
-          <h1 style={{ fontSize: '4rem', color: '#F29200', margin: 0 }}>Fehler</h1>
+          <h1 style={{ fontSize: '4rem', color: 'var(--color-carrot-logo, #F29200)', margin: 0 }}>Fehler</h1>
           <p style={{ fontSize: '1.25rem', color: '#333', margin: '1rem 0 2rem' }}>
             {isRefreshing ? 'Website wird aktualisiert…' : 'Etwas ist schiefgelaufen.'}
           </p>
@@ -51,7 +51,7 @@ export default function GlobalError({
               disabled={isRefreshing}
               style={{
                 padding: '0.75rem 1.5rem',
-                background: '#F29200',
+                background: 'var(--color-carrot-logo, #F29200)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '25px',
@@ -68,8 +68,8 @@ export default function GlobalError({
               style={{
                 padding: '0.75rem 1.5rem',
                 background: 'white',
-                color: '#F29200',
-                border: '2px solid #F29200',
+                color: 'var(--color-carrot-logo, #F29200)',
+                border: '2px solid var(--color-carrot-logo, #F29200)',
                 borderRadius: '25px',
                 fontSize: '1rem',
                 fontWeight: 700,

@@ -76,7 +76,7 @@ export default function NotFound() {
         .error-code {
           font-size: 8rem;
           font-weight: 700;
-          color: #F29200;
+          color: var(--color-carrot-logo, #F29200);
           margin: 0;
           line-height: 1;
           text-shadow: 3px 3px 0px rgba(0,0,0,0.1);
@@ -134,13 +134,13 @@ export default function NotFound() {
         }
 
         .duck-body {
-          fill: #F29200;
+          fill: var(--color-carrot-logo, #F29200);
           stroke: #E88200;
           stroke-width: 2;
         }
 
         .duck-head {
-          fill: #F29200;
+          fill: var(--color-carrot-logo, #F29200);
           stroke: #E88200;
           stroke-width: 2;
           transition: transform 0.3s ease;
@@ -182,7 +182,7 @@ export default function NotFound() {
           border-radius: 25px;
           padding: 0.5rem;
           box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-          border: 3px solid #F29200;
+          border: 3px solid var(--color-carrot-logo, #F29200);
         }
 
         .search-input {
@@ -196,7 +196,7 @@ export default function NotFound() {
         }
 
         .search-button {
-          background: #F29200;
+          background: var(--color-carrot-logo, #F29200);
           color: white;
           border: none;
           border-radius: 20px;
@@ -234,17 +234,17 @@ export default function NotFound() {
           display: inline-block;
           padding: 0.75rem 1.5rem;
           background: white;
-          color: #F29200;
+          color: var(--color-carrot-logo, #F29200);
           text-decoration: none;
           border-radius: 20px;
-          border: 2px solid #F29200;
+          border: 2px solid var(--color-carrot-logo, #F29200);
           font-weight: 700;
           transition: all 0.2s;
           box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .popular-page-link:hover {
-          background: #F29200;
+          background: var(--color-carrot-logo, #F29200);
           color: white;
           transform: translateY(-2px);
           box-shadow: 0 4px 8px rgba(0,0,0,0.15);
@@ -254,7 +254,7 @@ export default function NotFound() {
           margin-top: 2rem;
           display: inline-block;
           padding: 1rem 2rem;
-          background: #F29200;
+          background: var(--color-carrot-logo, #F29200);
           color: white;
           text-decoration: none;
           border-radius: 25px;
