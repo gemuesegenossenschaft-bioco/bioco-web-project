@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { trackEvent } from '../MatomoScript'
 import { InfoTooltip } from '../InfoTooltip'
 import Link from 'next/link'
+import { Button } from '@/components/ui/Button'
 
 type AboType = 'halb' | 'standard' | 'doppel' | 'none'
 type PaymentType = 'quarterly' | 'yearly'
@@ -942,30 +943,30 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
             {/* Navigation Buttons */}
             <div className="form-navigation">
               {currentStep > 0 && (
-                <button
+                <Button
                   type="button"
-                  className="btn btn-secondary"
+                  variant="secondary"
                   onClick={handlePrevious}
                 >
                   Zurück
-                </button>
+                </Button>
               )}
               {currentStep < 5 ? (
-                <button
+                <Button
                   type="button"
-                  className="btn btn-primary"
+                  variant="primary"
                   onClick={handleNext}
                 >
                   Weiter
-                </button>
+                </Button>
               ) : (
-                <button
+                <Button
                   type="submit"
-                  className="btn btn-primary"
+                  variant="primary"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? 'Wird gesendet...' : 'Anmeldung einreichen'}
-                </button>
+                </Button>
               )}
             </div>
           </form>

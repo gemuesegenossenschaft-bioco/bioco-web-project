@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { trackEvent } from '../MatomoScript'
+import { Button } from '@/components/ui/Button'
 
 export function SubscribeForm() {
   const [formData, setFormData] = useState({
@@ -95,10 +96,10 @@ export function SubscribeForm() {
         </label>
       </div>
 
-      <input
-        type="submit"
+      <Button
+        as="input"
+        variant="primary"
         value={isSubmitting ? 'Wird gesendet...' : 'Abonnieren'}
-        className="cta-button"
         disabled={isSubmitting}
       />
     </form>

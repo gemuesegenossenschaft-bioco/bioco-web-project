@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/Button'
 
 interface CTAProps {
   text: string
@@ -19,7 +20,6 @@ function scrollToElement(id: string) {
 
 export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
   const router = useRouter()
-  const className = `${variant === 'primary' ? 'btn btn-primary' : 'btn btn-secondary'} btn-organic`
 
   const isExternal = href.startsWith('http://') || href.startsWith('https://')
   const isFile = /\.(pdf|doc|docx|xls|xlsx|zip)$/i.test(href)
@@ -60,12 +60,13 @@ export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
   }
   
   return (
-    <button
+    <Button
       type="button"
-      className={className}
+      variant={variant}
+      organic
       onClick={handleClick}
     >
       {text}
-    </button>
+    </Button>
   )
 }

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { trackEvent } from '../MatomoScript'
 import { CaptchaField } from './CaptchaField'
+import { Button } from '@/components/ui/Button'
 
 export function VisitDayForm() {
   const [formData, setFormData] = useState({
@@ -166,10 +167,10 @@ export function VisitDayForm() {
         resetKey={captchaResetKey}
       />
 
-      <input
-        type="submit"
+      <Button
+        as="input"
+        variant="primary"
         value={isSubmitting ? 'Wird gesendet...' : 'Anmelden'}
-        className="cta-button"
         disabled={isSubmitting || !captchaToken}
       />
     </form>

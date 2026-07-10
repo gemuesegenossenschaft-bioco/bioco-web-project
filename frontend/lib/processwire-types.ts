@@ -1,9 +1,11 @@
 /**
  * ProcessWire API Response Types
- * 
+ *
  * Type definitions for the unified CMS API endpoints.
  * All types match the JSON structure returned by site/templates/api.php
  */
+
+import type { ButtonVariant } from '@/components/ui/Button'
 
 // ============================================================================
 // SEO Types
@@ -77,7 +79,7 @@ export interface HeroResponse {
 export interface ContentButton {
   text: string;
   href: string;
-  variant: 'primary' | 'secondary' | string;
+  variant: ButtonVariant;
 }
 
 export interface ContentMedia {

@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import { CTA } from '@/components/CTA'
 import { PersonIcons } from '@/components/PersonIcons'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { getResolvedComponentConfig } from '@/lib/componentRegistry'
 import type { ContentMedia, ContentSection, SectionConfigObject } from '@/lib/processwire-types'
 
@@ -110,18 +111,12 @@ function renderButtons(section: ContentSection, visualEditor = false) {
 function renderHeader(section: ContentSection, visualEditor = false) {
   const headingAlreadyInText = hasHeadingHtml(section.text)
   return (
-    <>
-      {section.eyebrow ? (
-        <p style={{ color: '#5f6b7a', fontSize: '0.95rem', marginBottom: '10px', fontWeight: 600 }} {...getVeFieldAttrs(visualEditor, section.id, 'eyebrow', 'text', true)}>
-          {section.eyebrow}
-        </p>
-      ) : null}
-      {section.title && !headingAlreadyInText ? (
-        <h2 style={{ fontSize: 'clamp(2rem, 3vw, 3.6rem)', lineHeight: 1.05, margin: '0 0 18px 0' }} {...getVeFieldAttrs(visualEditor, section.id, 'title', 'text', true)}>
-          {section.title}
-        </h2>
-      ) : null}
-    </>
+    <SectionHeading
+      section={section}
+      visualEditor={visualEditor}
+      variant="block"
+      headingAlreadyInText={headingAlreadyInText}
+    />
   )
 }
 

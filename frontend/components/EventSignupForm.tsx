@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { CaptchaField } from './forms/CaptchaField'
+import { Button } from '@/components/ui/Button'
 
 interface EventSignupFormProps {
   eventTitle: string
@@ -179,13 +180,13 @@ export function EventSignupForm({ eventTitle, eventId, onSuccess, onCancel }: Ev
 
       <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
         {onCancel && (
-          <button type="button" onClick={onCancel} className="btn btn-secondary" disabled={isSubmitting}>
+          <Button type="button" onClick={onCancel} variant="secondary" disabled={isSubmitting}>
             Abbrechen
-          </button>
+          </Button>
         )}
-        <button type="submit" className="btn btn-primary" disabled={isSubmitting || !captchaToken}>
+        <Button type="submit" variant="primary" disabled={isSubmitting || !captchaToken}>
           {isSubmitting ? 'Wird gesendet...' : 'Anmelden'}
-        </button>
+        </Button>
       </div>
     </form>
   )

@@ -242,14 +242,6 @@ body {
   margin-bottom: var(--section-gap-sm);
 }
 
-.cms-section-eyebrow {
-  font-size: var(--font-size-sm2);
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--text-tertiary);
-  margin-bottom: var(--space-2);
-}
-
 .cms-section-text {
   color: var(--text-secondary);
   line-height: 1.7;
@@ -1302,38 +1294,6 @@ button.btn-orange:hover {
   background: var(--color-carrot-strong) !important;
   border-color: var(--color-carrot-strong) !important;
   color: var(--color-surface) !important;
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
-
-/* Form submit buttons - match primary button style */
-input[type="submit"].cta-button,
-.cta-button {
-  font-family: var(--font-body);
-  font-weight: var(--font-weight-heading);
-  display: inline-block;
-  padding: var(--space-3) var(--space-5);
-  font-size: var(--font-size-base);
-  text-align: center;
-  border-radius: var(--radius-md);
-  transition: all 0.2s ease;
-  text-decoration: none;
-  cursor: pointer;
-  border: 2px solid;
-  line-height: var(--line-height-snug);
-  position: relative;
-  overflow: visible;
-  box-shadow: var(--shadow-sm);
-  background: var(--bioco-green);
-  color: var(--color-surface);
-  border-color: var(--bioco-green);
-}
-
-input[type="submit"].cta-button:hover,
-.cta-button:hover {
-  background: var(--bioco-green-dark);
-  color: var(--color-surface);
-  border-color: var(--bioco-green-dark);
   box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }

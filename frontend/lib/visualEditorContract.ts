@@ -1,4 +1,5 @@
 import { getResolvedComponentConfig } from '@/lib/componentRegistry'
+import type { ButtonVariant } from '@/components/ui/Button'
 import type { ContentButton, ContentMedia, ContentSection, SectionConfigObject, SectionConfigValue } from '@/lib/processwire-types'
 
 type DraftContentSection = ContentSection & {
@@ -62,7 +63,7 @@ function normalizeButtons(buttons: unknown): ContentButton[] {
     .map((button, index) => ({
       text: asString((button as Partial<ContentButton> | null)?.text),
       href: asString((button as Partial<ContentButton> | null)?.href),
-      variant: asString((button as Partial<ContentButton> | null)?.variant, index === 0 ? 'primary' : 'secondary'),
+      variant: asString((button as Partial<ContentButton> | null)?.variant, index === 0 ? 'primary' : 'secondary') as ButtonVariant,
     }))
     .filter((button) => button.text.trim() || button.href.trim())
 }
@@ -218,7 +219,7 @@ export function applyVisualEditorFieldChange(section: ContentSection, change: Vi
     case 'button_href':
       return setButton(section, change.buttonIndex || 0, { href: asString(change.value) })
     case 'button_variant':
-      return setButton(section, change.buttonIndex || 0, { variant: asString(change.value, (change.buttonIndex || 0) === 0 ? 'primary' : 'secondary') })
+      return setButton(section, change.buttonIndex || 0, { variant: asString(change.value, (change.buttonIndex || 0) === 0 ? 'primary' : 'secondary') as ButtonVariant })
     default:
       return section
   }

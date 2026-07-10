@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { CTA } from '@/components/CTA'
 import { getVeFieldAttrs } from '@/components/visual-editor/fieldAttrs'
+import { SectionHeading } from '@/components/ui/SectionHeading'
 import { renderRegisteredComponent } from '@/lib/componentRenderers'
 import type { ContentSection, ContentMedia } from '@/lib/processwire-types'
 
@@ -69,16 +70,12 @@ function getVideoEmbedUrl(url: string): string {
 function SectionHeader({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   const headingAlreadyInText = hasHeadingHtml(section.text)
   return (
-    <>
-      {section.eyebrow ? (
-        <p className="cms-section-eyebrow" {...getVeFieldAttrs(visualEditor, section.id, 'eyebrow', 'text', true)}>
-          {section.eyebrow}
-        </p>
-      ) : null}
-      {section.title && !headingAlreadyInText ? (
-        <h2 {...getVeFieldAttrs(visualEditor, section.id, 'title', 'text', true)}>{section.title}</h2>
-      ) : null}
-    </>
+    <SectionHeading
+      section={section}
+      visualEditor={visualEditor}
+      variant="renderer"
+      headingAlreadyInText={headingAlreadyInText}
+    />
   )
 }
 

@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { AktuellesItem } from './AktuellesData'
 import { AktuellesItemComponent } from './AktuellesItem'
 import { ItemDetailModal } from './ItemDetailModal'
-import Link from 'next/link'
 import Image from 'next/image'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
+import { Button } from '@/components/ui/Button'
 
 interface EventsSectionProps {
   limit?: number
@@ -58,9 +58,9 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
             </div>
           )}
           {showAllButton && (
-            <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
+            <Button as="a" href="/aktuelles" variant="primary" style={{ marginTop: '16px', display: 'inline-block' }}>
               Alle Events ansehen
-            </Link>
+            </Button>
           )}
         </div>
       </section>

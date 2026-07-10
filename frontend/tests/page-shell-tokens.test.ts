@@ -16,7 +16,7 @@ const layoutSource = read('app/layout.tsx')
 const cssImportPattern = /import\s+(?:[^'"]+\s+from\s+)?['"]([^'"]+\.css)['"]/g
 
 const getLayoutCssImports = () => {
-  const imports = [...layoutSource.matchAll(cssImportPattern)].map((match) => match[1])
+  const imports = Array.from(layoutSource.matchAll(cssImportPattern)).map((match) => match[1])
 
   return imports.map((specifier) => {
     const resolved = specifier.startsWith('.')
@@ -54,7 +54,7 @@ const getImportedCssSpecifiers = () => {
   return walkSourceFiles(frontendRoot).flatMap((file) => {
     const source = readFileSync(file, 'utf8')
 
-    return [...source.matchAll(cssImportPattern)].map((match) => ({
+    return Array.from(source.matchAll(cssImportPattern)).map((match) => ({
       sourcePath: toRepoPath(file),
       specifier: match[1],
     }))
@@ -67,7 +67,7 @@ const tokenDefinitionPattern =
   /(--(?:color|radius|shadow|space|spacing|font|page|section|card|input)[A-Za-z0-9_-]*)\s*:/g
 
 const findDesignTokenDefinitions = (source: string) => {
-  return [...stripCssComments(source).matchAll(tokenDefinitionPattern)].map((match) => match[1])
+  return Array.from(stripCssComments(source).matchAll(tokenDefinitionPattern)).map((match) => match[1])
 }
 
 const findDuplicateDesignTokens = (source: string) => {
@@ -77,7 +77,7 @@ const findDuplicateDesignTokens = (source: string) => {
     counts.set(token, (counts.get(token) || 0) + 1)
   }
 
-  return [...counts.entries()]
+  return Array.from(counts.entries())
     .filter(([, count]) => count > 1)
     .map(([token, count]) => ({ token, count }))
 }

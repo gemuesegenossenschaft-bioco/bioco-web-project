@@ -1,7 +1,7 @@
-import Link from 'next/link'
 import Image from 'next/image'
 
 import { ReactNode } from 'react'
+import { Button } from '@/components/ui/Button'
 
 interface HeroProps {
   title: ReactNode
@@ -24,12 +24,12 @@ export function Hero({ title, subtitle, image }: HeroProps) {
               )}
               <h1 className="hero-title">{title}</h1>
               <div className="hero-buttons">
-                <Link href="/gemuese" className="btn btn-primary">
+                <Button as="a" href="/gemuese" variant="primary">
                   Welche Gemüse haben Saison
-                </Link>
-                <Link href="/wir" className="btn btn-secondary">
+                </Button>
+                <Button as="a" href="/wir" variant="secondary">
                   Lerne uns kennen
-                </Link>
+                </Button>
               </div>
             </div>
           </div>
