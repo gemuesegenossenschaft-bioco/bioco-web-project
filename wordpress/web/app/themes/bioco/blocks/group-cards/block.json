@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/group-cards",
+  "title": "Gruppen-Karten",
+  "description": "Kartenraster aus der Gruppe-CPT (Mitmachen \"Gruppen & Gemeinschaft\").",
+  "category": "bioco",
+  "icon": "groups",
+  "keywords": ["gruppen", "gemeinschaft", "mitmachen"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

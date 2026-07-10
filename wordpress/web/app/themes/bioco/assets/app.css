@@ -897,3 +897,691 @@ a.portal-tile:hover {
   margin: 0;
   color: var(--wp--preset--color--bioco-text-muted);
 }
+
+/* Card structure primitives (card-header/card-body/bento-card-fullwidth,
+   btn-organic) — not yet ported when .bento-card landed as a W4 tracer
+   bullet; added now because events-feed (W8) needs them. Ported from
+   globals.css, trimmed to what these blocks actually use. */
+.card-header {
+  padding: 12px 16px;
+  margin-bottom: 0;
+  background-color: rgba(31, 42, 27, 0.03);
+  border-radius: var(--wp--custom--radius--md) var(--wp--custom--radius--md) 0 0;
+  font-weight: 600;
+}
+
+.card-header h3 {
+  font-weight: 600;
+  font-size: var(--wp--preset--font-size--lg);
+  margin: 0;
+  padding: 0;
+  color: var(--wp--preset--color--bioco-text);
+}
+
+.card-body {
+  flex: 1 1 auto;
+  padding: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.bento-card > .card-header ~ *:not(.card-body):not(.card-footer) {
+  padding: 0;
+}
+
+.bento-card-fullwidth {
+  grid-column: 1 / -1;
+}
+
+.btn-organic {
+  border-radius: 28px 22px 26px 18px;
+  box-shadow: var(--wp--custom--shadow--md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-organic:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--wp--custom--shadow--lg);
+}
+
+.btn-secondary.btn-organic {
+  background: #fff;
+  color: var(--wp--preset--color--bioco-green);
+  border: none;
+}
+
+.btn-secondary.btn-organic:hover {
+  background: var(--wp--preset--color--bioco-bg);
+  color: var(--wp--preset--color--bioco-green-dark);
+}
+
+/* events-feed block (W8 content model, issue #95). Class names ported from
+   globals.css/EventsSection.tsx/EventsBanner.tsx. */
+.events-banner {
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(46, 125, 50, 0.05) 100%);
+  border: 2px solid rgba(46, 125, 50, 0.3);
+  padding: var(--wp--preset--spacing--50);
+  margin: var(--wp--preset--spacing--50) 0;
+  border-radius: var(--wp--custom--radius--lg);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.events-banner h2 {
+  margin-bottom: var(--wp--preset--spacing--30);
+  color: var(--wp--preset--color--bioco-green);
+}
+
+.events-card {
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(46, 125, 50, 0.05) 100%);
+  border: none;
+}
+
+.events-card .card-header {
+  background: rgba(46, 125, 50, 0.15);
+}
+
+.events-card .card-header h3 {
+  color: var(--wp--preset--color--bioco-green-dark);
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+  margin: var(--wp--preset--spacing--40) 0;
+}
+
+.event-item {
+  background: rgba(46, 125, 50, 0.1);
+  border-radius: var(--wp--custom--radius--md);
+  padding: var(--wp--preset--spacing--40);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.event-item-with-image {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr);
+  align-items: stretch;
+  gap: var(--wp--preset--spacing--40);
+}
+
+.event-item h3 {
+  color: var(--wp--preset--color--bioco-text);
+  margin-bottom: var(--wp--preset--spacing--20);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.event-item p {
+  margin: 4px 0;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.event-card-image {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  border-radius: var(--wp--custom--radius--sm);
+  background: var(--wp--preset--color--bioco-bg);
+}
+
+.event-card-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .event-item-with-image {
+    grid-template-columns: 1fr;
+  }
+
+  .event-item-with-image .event-card-image {
+    aspect-ratio: 4 / 3;
+    min-height: 0;
+    margin-bottom: var(--wp--preset--spacing--30);
+  }
+}
+
+@media (min-width: 769px) {
+  .event-item-with-image .event-card-image {
+    aspect-ratio: auto;
+    height: 100%;
+    margin-bottom: 0;
+  }
+}
+
+.past-events-card {
+  background: #fff;
+  border: none;
+  margin-top: var(--wp--preset--spacing--50);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.past-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--wp--preset--spacing--40);
+}
+
+.past-event-tile {
+  border: 1px solid var(--wp--preset--color--bioco-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.past-event-tile:hover {
+  box-shadow: var(--wp--custom--shadow--lg);
+  transform: translateY(-2px);
+}
+
+.past-event-media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--wp--preset--color--bioco-bg);
+}
+
+.past-event-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.past-event-meta {
+  padding: 0 var(--wp--preset--spacing--40) var(--wp--preset--spacing--40) var(--wp--preset--spacing--40);
+}
+
+.past-event-date {
+  font-size: 0.8125rem;
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-bottom: 4px;
+}
+
+.past-event-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.past-event-cta {
+  color: var(--wp--preset--color--bioco-green);
+  font-weight: 600;
+}
+
+/* group-cards block (W8 content model, issue #95). GroupCardsSection.tsx
+   has no class names (inline styles only) — these are new, matching those
+   inline style values (see portal-tile above for the same precedent). */
+.cms-group-cards-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--wp--preset--spacing--40);
+}
+
+.cms-group-card {
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--lg);
+  overflow: hidden;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.cms-group-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.15), rgba(46, 125, 50, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cms-group-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cms-group-card-media-fallback {
+  font-size: 3rem;
+  opacity: 0.6;
+}
+
+.cms-group-card-body {
+  padding: var(--wp--preset--spacing--40);
+}
+
+.cms-group-card-title {
+  font-size: 1.25rem;
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.cms-group-card-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.cms-group-card-contact {
+  margin-top: var(--wp--preset--spacing--20);
+  font-size: 0.875rem;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+/* depot-map / geisshof-map blocks (W9 interactive blocks, issue #96). */
+.cms-map-intro {
+  margin-bottom: var(--wp--preset--spacing--30);
+  padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--40);
+  background-color: var(--wp--preset--color--bioco-bg);
+  border-radius: var(--wp--custom--radius--sm);
+  text-align: center;
+}
+
+.cms-map-intro p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.map-container {
+  width: 100%;
+  min-height: 300px;
+  max-height: 300px;
+  margin-top: var(--wp--preset--spacing--40);
+  margin-bottom: var(--wp--preset--spacing--40);
+  border-radius: var(--wp--custom--radius--md);
+  overflow: hidden;
+  border: 2px solid var(--wp--preset--color--bioco-text);
+  box-shadow: var(--wp--custom--shadow--sm);
+  background: var(--wp--preset--color--bioco-bg);
+}
+
+.map-wrapper {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  max-height: 300px;
+}
+
+.location-info-box {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.location-addresses {
+  background: var(--wp--preset--color--bioco-bg);
+  border-radius: var(--wp--custom--radius--md);
+  padding: var(--wp--preset--spacing--40);
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.location-addresses h4 {
+  font-weight: 500;
+  color: var(--wp--preset--color--bioco-green);
+  margin-bottom: var(--wp--preset--spacing--40);
+  font-size: var(--wp--preset--font-size--lg);
+}
+
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--40);
+}
+
+@media (min-width: 768px) {
+  .location-addresses .address-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--wp--preset--spacing--50);
+  }
+}
+
+.address-item {
+  padding: var(--wp--preset--spacing--30);
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--md);
+}
+
+.address-item strong {
+  display: block;
+  color: var(--wp--preset--color--bioco-text);
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.address-item p {
+  margin: 0;
+  color: var(--wp--preset--color--bioco-text-muted);
+  font-size: 0.9rem;
+}
+
+/* pricing-calculator block (W9 interactive blocks, issue #96). .pricing-table
+   itself already exists (ported with the pricing-table block, W7); these are
+   the calculator-only additions on top of it. */
+.pricing-calculator {
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.pricing-calculator .pricing-table tr {
+  background: rgba(46, 125, 50, 0.1);
+}
+
+.abo-selector {
+  margin-top: var(--wp--preset--spacing--50);
+}
+
+.abo-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--wp--preset--spacing--30);
+}
+
+@media (min-width: 640px) {
+  .abo-buttons {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.abo-button {
+  padding: var(--wp--preset--spacing--40);
+  background: rgba(46, 125, 50, 0.1);
+  border: none;
+  border-radius: var(--wp--custom--radius--md);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  position: relative;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.abo-button:hover {
+  background: var(--wp--preset--color--bioco-bg);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.abo-button.active {
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.abo-button .price {
+  display: block;
+  margin-top: var(--wp--preset--spacing--20);
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.abo-button.active .price {
+  opacity: 1;
+}
+
+.recommended-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--wp--preset--color--bioco-carrot);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: var(--wp--custom--radius--pill);
+}
+
+.btn-add-share,
+.btn-remove-share {
+  padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+  color: #fff;
+  border: none;
+  border-radius: var(--wp--custom--radius--sm);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.btn-add-share {
+  background: var(--wp--preset--color--bioco-green);
+}
+
+.btn-add-share:hover {
+  background: var(--wp--preset--color--bioco-green-dark);
+}
+
+.btn-remove-share {
+  background: var(--wp--preset--color--bioco-text-muted);
+}
+
+.btn-remove-share:hover {
+  background: var(--wp--preset--color--bioco-text);
+}
+
+.share-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+  align-items: flex-start;
+}
+
+.share-buttons-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--wp--preset--color--bioco-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.share-buttons {
+  display: flex;
+  gap: var(--wp--preset--spacing--20);
+  align-items: center;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+/* saisonkalender block (W9 interactive blocks, issue #96). New classes: the
+   data model (per-vegetable months multi-select) renders as a static grid,
+   not the tab-per-month UI from Saisonkalender.tsx/.kalender-tab*. */
+.cms-saisonkalender-grid {
+  margin-top: var(--wp--preset--spacing--40);
+  overflow-x: auto;
+}
+
+.cms-saisonkalender-grid table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--md);
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.cms-saisonkalender-grid th,
+.cms-saisonkalender-grid td {
+  padding: 10px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--wp--preset--color--bioco-border);
+}
+
+.cms-saisonkalender-grid th:first-child,
+.cms-saisonkalender-grid td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+
+.cms-saisonkalender-grid th {
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  font-weight: 500;
+}
+
+.cms-saisonkalender-grid tr:last-child td {
+  border-bottom: none;
+}
+
+.cms-saisonkalender-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--wp--preset--color--bioco-green);
+}
+
+/* schnuppertage block (W9 interactive blocks, issue #96). New classes
+   matching the inline-style structure of SchnuppertageSection.tsx. */
+.cms-schnuppertage-info-box {
+  background: var(--wp--preset--color--bioco-bg);
+  padding: var(--wp--preset--spacing--40);
+  border-radius: var(--wp--custom--radius--md);
+  margin-bottom: var(--wp--preset--spacing--40);
+}
+
+.cms-schnuppertage-list-label,
+.cms-schnuppertage-items,
+.cms-schnuppertage-closing {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.cms-schnuppertage-list-label {
+  margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.cms-schnuppertage-items {
+  margin: 0 0 var(--wp--preset--spacing--30);
+  padding-left: 20px;
+}
+
+.cms-schnuppertage-closing p {
+  margin: 0;
+}
+
+.cms-schnuppertage-termine-heading {
+  font-size: 1.1rem;
+  margin-bottom: var(--wp--preset--spacing--30);
+  color: var(--wp--preset--color--bioco-text);
+}
+
+.cms-schnuppertage-termine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+}
+
+.cms-schnuppertage-termin {
+  background: rgba(46, 125, 50, 0.15);
+  padding: 16px 20px;
+  border-radius: var(--wp--custom--radius--md);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wp--preset--spacing--20);
+}
+
+.cms-schnuppertage-termin-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cms-schnuppertage-termin-meta strong {
+  color: var(--wp--preset--color--bioco-green-dark);
+  font-size: 1.05rem;
+}
+
+.cms-schnuppertage-termin-meta span {
+  color: var(--wp--preset--color--bioco-text-muted);
+  font-size: 0.95rem;
+}
+
+/* gallery block (W9 interactive blocks, issue #96). Ported from Gallery.tsx
+   class names. */
+.gallery-container {
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.gallery-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wp--preset--spacing--20);
+  margin-bottom: var(--wp--preset--spacing--60);
+}
+
+.gallery-filter {
+  padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--40);
+  background: var(--wp--preset--color--bioco-bg);
+  border: 2px solid var(--wp--preset--color--bioco-text);
+  border-radius: var(--wp--custom--radius--md);
+  font-size: 0.875rem;
+  color: var(--wp--preset--color--bioco-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.gallery-filter:hover {
+  border-color: var(--wp--preset--color--bioco-green);
+  color: var(--wp--preset--color--bioco-green);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.gallery-filter.active {
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  border-color: var(--wp--preset--color--bioco-green);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.gallery-select {
+  display: none;
+  width: 100%;
+  padding: var(--wp--preset--spacing--30);
+  margin-bottom: var(--wp--preset--spacing--40);
+  font-size: 1rem;
+  background: var(--wp--preset--color--bioco-bg);
+  border: 2px solid var(--wp--preset--color--bioco-text);
+  border-radius: var(--wp--custom--radius--md);
+  color: var(--wp--preset--color--bioco-text-muted);
+  cursor: pointer;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+@media (max-width: 640px) {
+  .gallery-filters { display: none; }
+  .gallery-select { display: block; }
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--wp--preset--spacing--50);
+}
+
+.gallery-item {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--wp--custom--radius--md);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.gallery-placeholder {
+  padding: var(--wp--preset--spacing--60);
+  text-align: center;
+  color: var(--wp--preset--color--bioco-text-muted);
+}

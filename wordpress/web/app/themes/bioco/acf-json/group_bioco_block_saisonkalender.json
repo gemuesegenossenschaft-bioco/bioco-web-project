@@ -1,0 +1,104 @@
+{
+    "key": "group_bioco_block_saisonkalender",
+    "title": "Saisonkalender Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_saisonkalender_vegetables",
+            "label": "Gemüse",
+            "name": "vegetables",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Leer lassen, um eine kleine Beispielauswahl (siehe render.php) zu verwenden.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Gemüse hinzufügen",
+            "rows_per_page": 30,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_saisonkalender_vegetable_name",
+                    "label": "Name",
+                    "name": "name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_saisonkalender_vegetable_months",
+                    "label": "Monate",
+                    "name": "months",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "70",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "1": "Januar",
+                        "2": "Februar",
+                        "3": "März",
+                        "4": "April",
+                        "5": "Mai",
+                        "6": "Juni",
+                        "7": "Juli",
+                        "8": "August",
+                        "9": "September",
+                        "10": "Oktober",
+                        "11": "November",
+                        "12": "Dezember"
+                    },
+                    "default_value": [],
+                    "return_format": "value",
+                    "multiple": 1,
+                    "allow_null": 0,
+                    "ui": 1,
+                    "ajax": 0,
+                    "placeholder": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/saisonkalender"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Saisonkalender-Block (W9 interactive blocks, Issue #96). Ersetzt die tab-basierte pro-Monat-Liste aus Saisonkalender.tsx (SEASONAL_DATA) durch ein pro-Gemüse-Monate-Mehrfachauswahl-Schema, das sich als statisches SSR-Raster (Gemüse × Monate) rendert, ohne Tab-JS.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

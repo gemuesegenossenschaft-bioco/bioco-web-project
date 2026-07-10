@@ -1,0 +1,171 @@
+{
+    "key": "group_bioco_block_schnuppertage",
+    "title": "Schnuppertage Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_schnuppertage_content_clone",
+            "label": "Inhalt",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_title",
+                "field_bioco_section_text"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_schnuppertage_list_label",
+            "label": "Listen-Label",
+            "name": "list_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Fettgedruckte Zeile über der \"Was dich erwartet\"-Liste.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Was dich erwartet:",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_schnuppertage_items",
+            "label": "Punkte",
+            "name": "items",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Maximal 7 Punkte.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 7,
+            "collapsed": "",
+            "button_label": "Punkt hinzufügen",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_schnuppertage_item_text",
+                    "label": "Text",
+                    "name": "text",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
+        },
+        {
+            "key": "field_bioco_schnuppertage_closing",
+            "label": "Schlusstext",
+            "name": "closing",
+            "aria-label": "",
+            "type": "wysiwyg",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "basic",
+            "media_upload": 0,
+            "delay": 0
+        },
+        {
+            "key": "field_bioco_schnuppertage_signup_anchor",
+            "label": "Anmelde-Anker",
+            "name": "signup_anchor",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Ziel des \"Jetzt anmelden\"-Buttons. Das eigentliche Anmeldeformular/Modal folgt in W10 (Formulare) — bis dahin verlinkt der Button nur auf diesen Anker.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "#anmeldung",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_schnuppertage_limit",
+            "label": "Maximale Anzahl Termine",
+            "name": "limit",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "default_value": 3,
+            "min": 1,
+            "max": 10,
+            "step": 1,
+            "placeholder": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/schnuppertage"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Schnuppertage-Block (W9 interactive blocks, Issue #96). Editorial (title/text/list_label/items/closing) mirrors SchnuppertageSection.tsx's section_config-driven fields (list_label/item1..7/closing); die Nächste-Termine-Liste rendert live per bioco_query_events('upcoming', $limit, 'schnuppertag') — derselbe Helper wie bioco/events-feed.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

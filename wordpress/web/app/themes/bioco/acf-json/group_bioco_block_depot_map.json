@@ -1,0 +1,148 @@
+{
+    "key": "group_bioco_block_depot_map",
+    "title": "Depot-Karte Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_depot_map_intro",
+            "label": "Hinweistext",
+            "name": "intro",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Abholzeiten: Dienstag und Freitag, ab 16:00 Uhr",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_depot_map_locations",
+            "label": "Standorte",
+            "name": "locations",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Leer lassen, um die Standard-Depotliste (siehe render.php) zu verwenden.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 0,
+            "collapsed": "field_bioco_depot_map_location_name",
+            "button_label": "Standort hinzufügen",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_depot_map_location_name",
+                    "label": "Name",
+                    "name": "name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_depot_map_location_lat",
+                    "label": "Breitengrad (lat)",
+                    "name": "lat",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "20",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "min": "",
+                    "max": "",
+                    "step": "0.000001",
+                    "placeholder": "47.4734"
+                },
+                {
+                    "key": "field_bioco_depot_map_location_lng",
+                    "label": "Längengrad (lng)",
+                    "name": "lng",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "20",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "min": "",
+                    "max": "",
+                    "step": "0.000001",
+                    "placeholder": "8.3089"
+                },
+                {
+                    "key": "field_bioco_depot_map_location_description",
+                    "label": "Beschreibung",
+                    "name": "description",
+                    "aria-label": "",
+                    "type": "textarea",
+                    "instructions": "Adresse, Abholtag, Kontakt/Website und Hinweise als Freitext.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "rows": 3,
+                    "placeholder": "",
+                    "new_lines": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/depot-map"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Depot-Karte-Block (W9 interactive blocks, Issue #96). Vereinfachtes Schema (name/lat/lng/description) statt der vollen DepotLocation-Form aus DepotMap.tsx (day/contact/website/notes/hideAddress werden als Freitext in description gepflegt). Leere Standorte fallen in render.php auf die neun bestehenden Depots zurück.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

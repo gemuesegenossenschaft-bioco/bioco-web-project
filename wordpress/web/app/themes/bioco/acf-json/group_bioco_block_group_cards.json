@@ -1,0 +1,45 @@
+{
+    "key": "group_bioco_block_group_cards",
+    "title": "Gruppen-Karten Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_group_cards_limit",
+            "label": "Maximale Anzahl",
+            "name": "limit",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Leer lassen bzw. -1 für alle Gruppen.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": -1,
+            "min": -1,
+            "max": 50,
+            "step": 1,
+            "placeholder": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/group-cards"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Gruppen-Karten-Block (W8 content model, Issue #95). Keine eigenen Inhaltsfelder — die Karten kommen aus der Gruppe-CPT (group_text/group_image/group_contact) per WP_Query.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

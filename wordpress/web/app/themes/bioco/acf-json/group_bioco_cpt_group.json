@@ -1,0 +1,90 @@
+{
+    "key": "group_bioco_cpt_group",
+    "title": "Gruppe Felder (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_group_text",
+            "label": "Text",
+            "name": "group_text",
+            "aria-label": "",
+            "type": "wysiwyg",
+            "instructions": "Kurzbeschreibung der Gruppe (Mitmachen \"Gruppen & Gemeinschaft\").",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "basic",
+            "media_upload": 0,
+            "delay": 0
+        },
+        {
+            "key": "field_bioco_group_image",
+            "label": "Bild",
+            "name": "group_image",
+            "aria-label": "",
+            "type": "image",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "library": "all",
+            "min_width": "",
+            "min_height": "",
+            "min_size": "",
+            "max_width": "",
+            "max_height": "",
+            "max_size": "",
+            "mime_types": "",
+            "preview_size": "medium"
+        },
+        {
+            "key": "field_bioco_group_contact",
+            "label": "Kontakt",
+            "name": "group_contact",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Optionale Kontaktperson oder -adresse für diese Gruppe.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "bioco_group"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für die Gruppe-CPT (W8 content model, Issue #95). Mirrors the current GroupCardsSection.tsx shape (title = post title, text, image, contact); rendered SSR by the bioco/group-cards block.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

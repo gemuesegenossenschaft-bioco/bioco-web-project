@@ -1,0 +1,100 @@
+{
+    "key": "group_bioco_block_gallery",
+    "title": "Galerie Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_gallery_items",
+            "label": "Bilder",
+            "name": "items",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Ein Bild + Kategorie pro Zeile, statt eines reinen ACF-Galerie-Felds — die Kategorie treibt die Filterbuttons und lässt sich mit einem plain gallery-Feld nicht pro Bild speichern.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 0,
+            "collapsed": "field_bioco_gallery_item_image",
+            "button_label": "Bild hinzufügen",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_gallery_item_image",
+                    "label": "Bild",
+                    "name": "image",
+                    "aria-label": "",
+                    "type": "image",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "60",
+                        "class": "",
+                        "id": ""
+                    },
+                    "return_format": "array",
+                    "library": "all",
+                    "min_width": "",
+                    "min_height": "",
+                    "min_size": "",
+                    "max_width": "",
+                    "max_height": "",
+                    "max_size": "",
+                    "mime_types": "",
+                    "preview_size": "medium"
+                },
+                {
+                    "key": "field_bioco_gallery_item_category",
+                    "label": "Kategorie",
+                    "name": "category",
+                    "aria-label": "",
+                    "type": "select",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    },
+                    "choices": {
+                        "koerbe": "Körbe",
+                        "feld": "Feld",
+                        "portraits": "Portraits"
+                    },
+                    "default_value": "feld",
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "ui": 1,
+                    "ajax": 0,
+                    "placeholder": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/gallery"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Galerie-Block (W9 interactive blocks, Issue #96). Filter-Buttons/Auswahl (view.js) und \"Mehr sehen\"-Umschalter mirrors Gallery.tsx; die Lightbox/Klick-zum-Vergrössern-Funktion ist auf später (nach W11) verschoben.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/schnuppertage",
+  "title": "Schnuppertage",
+  "description": "Editorialer \"Was dich erwartet\"-Block plus die nächsten Schnuppertag-Termine aus der Veranstaltung-CPT.",
+  "category": "bioco",
+  "icon": "groups",
+  "keywords": ["schnuppertag", "mitmachen", "termine"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

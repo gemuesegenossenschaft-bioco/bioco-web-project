@@ -1,0 +1,22 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/events-feed",
+  "title": "Events-Feed",
+  "description": "Bevorstehende (und vergangene) Veranstaltungen aus der Veranstaltung-CPT, als Standard-Karte oder kompaktes Banner.",
+  "category": "bioco",
+  "icon": "calendar-alt",
+  "keywords": ["events", "veranstaltungen", "aktuelles", "termine"],
+  "textdomain": "bioco",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "align": false,
+    "mode": false,
+    "jsx": false,
+    "customClassName": true
+  }
+}

@@ -1,0 +1,99 @@
+{
+    "key": "group_bioco_block_events_feed",
+    "title": "Events-Feed Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_events_feed_variant",
+            "label": "Variante",
+            "name": "variant",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Standard: grosse Karte mit Rückblick-Raster darunter (vgl. EventsSection.tsx). Banner: kompaktes Band ohne Rückblick (vgl. EventsBanner.tsx).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "standard": "Standard",
+                "banner": "Banner"
+            },
+            "default_value": "standard",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_events_feed_limit",
+            "label": "Maximale Anzahl",
+            "name": "limit",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "Anzahl bevorstehender Veranstaltungen.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": 3,
+            "min": 1,
+            "max": 20,
+            "step": 1,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_events_feed_title",
+            "label": "Titel (nur Banner)",
+            "name": "title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Überschrift der Banner-Variante. Die Standard-Variante nutzt einen festen Titel (\"Nächste Events\").",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_bioco_events_feed_variant",
+                        "operator": "==",
+                        "value": "banner"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "34",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Nächste Events",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/events-feed"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Events-Feed-Block (W8 content model, Issue #95). Liest die Veranstaltung-CPT per WP_Query (event_status/event_date), keine eigenen Inhaltsfelder — die Daten kommen aus den Veranstaltungs-Beiträgen selbst.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

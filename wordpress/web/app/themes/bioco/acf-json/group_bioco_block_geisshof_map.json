@@ -1,0 +1,128 @@
+{
+    "key": "group_bioco_block_geisshof_map",
+    "title": "Geisshof-Karte Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_geisshof_map_locations",
+            "label": "Standorte",
+            "name": "locations",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Leer lassen, um den Standard-Standort (Geisshof) zu verwenden.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 0,
+            "collapsed": "field_bioco_geisshof_map_location_name",
+            "button_label": "Standort hinzufügen",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_geisshof_map_location_name",
+                    "label": "Name",
+                    "name": "name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_geisshof_map_location_lat",
+                    "label": "Breitengrad (lat)",
+                    "name": "lat",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "20",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "min": "",
+                    "max": "",
+                    "step": "0.000001",
+                    "placeholder": "47.4741684"
+                },
+                {
+                    "key": "field_bioco_geisshof_map_location_lng",
+                    "label": "Längengrad (lng)",
+                    "name": "lng",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "20",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "min": "",
+                    "max": "",
+                    "step": "0.000001",
+                    "placeholder": "8.2456318"
+                },
+                {
+                    "key": "field_bioco_geisshof_map_location_description",
+                    "label": "Beschreibung",
+                    "name": "description",
+                    "aria-label": "",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "rows": 3,
+                    "placeholder": "",
+                    "new_lines": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/geisshof-map"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Geisshof-Karte-Block (W9 interactive blocks, Issue #96). Gleiche vereinfachte (name/lat/lng/description) Standort-Form wie group_bioco_block_depot_map, standardmässig ein Eintrag (Geisshof).",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

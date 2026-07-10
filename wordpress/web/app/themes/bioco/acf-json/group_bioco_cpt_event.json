@@ -1,0 +1,160 @@
+{
+    "key": "group_bioco_cpt_event",
+    "title": "Veranstaltung Felder (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_event_date",
+            "label": "Datum & Zeit",
+            "name": "event_date",
+            "aria-label": "",
+            "type": "date_time_picker",
+            "instructions": "Startdatum und -zeit der Veranstaltung. Bestimmt die Bevorstehend/Vergangen-Sortierung im Events-Feed-Block.",
+            "required": 1,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "display_format": "d.m.Y H:i",
+            "return_format": "Y-m-d H:i:s",
+            "first_day": 1
+        },
+        {
+            "key": "field_bioco_event_status",
+            "label": "Status",
+            "name": "event_status",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Rückblick-Umschalter: auf \"Vergangen\" stellen, um eine Veranstaltung in den Rückblick-Bereich zu verschieben.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "upcoming": "Bevorstehend",
+                "past": "Vergangen"
+            },
+            "default_value": "upcoming",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_event_type",
+            "label": "Veranstaltungstyp",
+            "name": "event_type",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "\"Schnuppertag\" erscheint in der Nächste-Termine-Liste des Schnuppertage-Blocks.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "general": "Allgemein",
+                "schnuppertag": "Schnuppertag"
+            },
+            "default_value": "general",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_event_summary",
+            "label": "Zusammenfassung",
+            "name": "event_summary",
+            "aria-label": "",
+            "type": "wysiwyg",
+            "instructions": "Kurzbeschreibung für Karten/Listen. Der Titel-Beitragsinhalt (editor) trägt die volle Beschreibung.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "basic",
+            "media_upload": 0,
+            "delay": 0
+        },
+        {
+            "key": "field_bioco_event_card_image",
+            "label": "Kartenbild",
+            "name": "card_image",
+            "aria-label": "",
+            "type": "image",
+            "instructions": "Bild für Raster-/Rückblick-Kacheln. Fällt auf das Beitragsbild zurück, falls leer.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "return_format": "array",
+            "library": "all",
+            "min_width": "",
+            "min_height": "",
+            "min_size": "",
+            "max_width": "",
+            "max_height": "",
+            "max_size": "",
+            "mime_types": "",
+            "preview_size": "medium"
+        },
+        {
+            "key": "field_bioco_event_signup_notes",
+            "label": "Anmeldung Hinweise",
+            "name": "event_signup_notes",
+            "aria-label": "",
+            "type": "wysiwyg",
+            "instructions": "Zusatztext über/unter dem Anmeldeformular. Das Formular selbst folgt in W10.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "",
+            "tabs": "all",
+            "toolbar": "basic",
+            "media_upload": 0,
+            "delay": 0
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "event"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für die Veranstaltung-CPT (W8 content model, Issue #95). event_date treibt die Bevorstehend/Vergangen-Sortierung im bioco/events-feed-Block; event_status ist der manuelle Rückblick-Umschalter; event_type markiert Schnuppertage für den bioco/schnuppertage-Block.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}

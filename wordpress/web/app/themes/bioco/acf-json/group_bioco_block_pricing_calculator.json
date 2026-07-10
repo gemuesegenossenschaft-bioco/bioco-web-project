@@ -1,0 +1,232 @@
+{
+    "key": "group_bioco_block_pricing_calculator",
+    "title": "Preis-Rechner Block (Bioco)",
+    "fields": [
+        {
+            "key": "field_bioco_pricing_calculator_content_clone",
+            "label": "Inhalt",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_eyebrow",
+                "field_bioco_section_title",
+                "field_bioco_section_text"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_pricing_calculator_share_price",
+            "label": "Preis pro Anteilsschein (CHF)",
+            "name": "share_price",
+            "aria-label": "",
+            "type": "number",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "default_value": 250,
+            "min": 0,
+            "max": "",
+            "step": 1,
+            "placeholder": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_work_suffix",
+            "label": "Mitarbeit-Zusatz",
+            "name": "work_suffix",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "35",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Arbeitseinsätze à 2 Stunden",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_signup_url",
+            "label": "Anmelde-URL",
+            "name": "signup_url",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Ziel des \"Jetzt mitmachen\"-Buttons. Erhält ?abo=&shares=&additional= als Query-Parameter (das eigentliche Anmeldeformular folgt in W10).",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "40",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "/mitmachen",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_tiers",
+            "label": "Abo-Stufen",
+            "name": "tiers",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "Maximal 3 Stufen. Eine vierte Option (\"Kein Abo\", nur Anteilsscheine) wird automatisch ergänzt. Leer lassen, um die aktuellen Live-Preise (Halb/Standard/Doppel) zu verwenden.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 3,
+            "collapsed": "field_bioco_pricing_calculator_tier_name",
+            "button_label": "Stufe hinzufügen",
+            "rows_per_page": 20,
+            "sub_fields": [
+                {
+                    "key": "field_bioco_pricing_calculator_tier_name",
+                    "label": "Name",
+                    "name": "name",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "34",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "z. B. Halb (1 Person)",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_pricing_calculator_tier_price",
+                    "label": "Jahrespreis (CHF)",
+                    "name": "price",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "22",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": 0,
+                    "min": 0,
+                    "max": "",
+                    "step": 1,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_bioco_pricing_calculator_tier_shares",
+                    "label": "Anteilsscheine erforderlich",
+                    "name": "shares",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "22",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": 1,
+                    "min": 0,
+                    "max": "",
+                    "step": 1,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_bioco_pricing_calculator_tier_work",
+                    "label": "Arbeitseinsätze pro Jahr",
+                    "name": "work",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "22",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": 0,
+                    "min": 0,
+                    "max": "",
+                    "step": 1,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_bioco_pricing_calculator_tier_recommended",
+                    "label": "Empfohlen",
+                    "name": "recommended",
+                    "aria-label": "",
+                    "type": "true_false",
+                    "instructions": "Zeigt das \"Empfohlen\"-Abzeichen auf dieser Stufe.",
+                    "required": 0,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "message": "",
+                    "default_value": 0,
+                    "ui": 1,
+                    "ui_on_text": "",
+                    "ui_off_text": ""
+                }
+            ]
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "block",
+                "operator": "==",
+                "value": "bioco/pricing-calculator"
+            }
+        ]
+    ],
+    "menu_order": 0,
+    "position": "normal",
+    "style": "default",
+    "label_placement": "top",
+    "instruction_placement": "label",
+    "hide_on_screen": "",
+    "active": true,
+    "description": "Felder für den Preis-Rechner-Block (W9 interactive blocks, Issue #96). Eigenes numerisches Stufen-Repeater statt eines Clones von field_bioco_pricing_table_tiers: die Preis-Tabelle-Felder (price/sharecost) sind Freitext (\"CHF 750.-\") und für die Live-Berechnung in view.js ungeeignet, daher price/shares/work hier als number-Felder. Inhalt klont weiterhin aus Section Common.",
+    "show_in_rest": 0,
+    "modified": 1783814400
+}
