@@ -1,0 +1,119 @@
+# Generated for GitHub #101 (pre-move / "before" state).
+# Data matches scripts/conformance.sh's documented extraction logic exactly
+# (block.json "name", acf-json "key", "^function bioco_*" defs, --wp--* var
+# refs in *.css/*.php minus theme.json-defined set, render.php/view.js counts)
+# — produced via the equivalent individual grep/jq calls because this
+# session's sandboxed shell does not permit invoking `bash <script>`,
+# `xargs ... jq`, or for/while loops directly (all denied outright). The
+# script itself is unmodified aside from the extraction-logic fixes this
+# dry run surfaced (see conformance.sh comments + PORTING/HARDCASES notes).
+# Re-run `scripts/conformance.sh > scripts/manifest-before.txt` in a normal
+# shell to regenerate mechanically; content below should be identical.
+## A-BLOCK-NAMES
+bioco/accordion	web/app/themes/bioco/blocks/accordion/block.json
+bioco/banner	web/app/themes/bioco/blocks/banner/block.json
+bioco/cards-grid	web/app/themes/bioco/blocks/cards-grid/block.json
+bioco/contact-form	web/app/themes/bioco/blocks/contact-form/block.json
+bioco/cta-band	web/app/themes/bioco/blocks/cta-band/block.json
+bioco/depot-map	web/app/themes/bioco/blocks/depot-map/block.json
+bioco/doi-confirm	web/app/themes/bioco/blocks/doi-confirm/block.json
+bioco/event-signup-form	web/app/themes/bioco/blocks/event-signup-form/block.json
+bioco/events-feed	web/app/themes/bioco/blocks/events-feed/block.json
+bioco/gallery	web/app/themes/bioco/blocks/gallery/block.json
+bioco/gallery-strip	web/app/themes/bioco/blocks/gallery-strip/block.json
+bioco/geisshof-map	web/app/themes/bioco/blocks/geisshof-map/block.json
+bioco/group-cards	web/app/themes/bioco/blocks/group-cards/block.json
+bioco/hero	web/app/themes/bioco/blocks/hero/block.json
+bioco/link-tiles	web/app/themes/bioco/blocks/link-tiles/block.json
+bioco/media-grid	web/app/themes/bioco/blocks/media-grid/block.json
+bioco/media-text	web/app/themes/bioco/blocks/media-text/block.json
+bioco/membership-form	web/app/themes/bioco/blocks/membership-form/block.json
+bioco/page-intro	web/app/themes/bioco/blocks/page-intro/block.json
+bioco/pricing-calculator	web/app/themes/bioco/blocks/pricing-calculator/block.json
+bioco/pricing-table	web/app/themes/bioco/blocks/pricing-table/block.json
+bioco/rich-text	web/app/themes/bioco/blocks/rich-text/block.json
+bioco/saisonkalender	web/app/themes/bioco/blocks/saisonkalender/block.json
+bioco/schnuppertage	web/app/themes/bioco/blocks/schnuppertage/block.json
+bioco/steps	web/app/themes/bioco/blocks/steps/block.json
+bioco/subscribe-form	web/app/themes/bioco/blocks/subscribe-form/block.json
+bioco/text-columns	web/app/themes/bioco/blocks/text-columns/block.json
+bioco/timeline	web/app/themes/bioco/blocks/timeline/block.json
+bioco/video-embed	web/app/themes/bioco/blocks/video-embed/block.json
+bioco/visit-day-form	web/app/themes/bioco/blocks/visit-day-form/block.json
+bioco/waiting-list-form	web/app/themes/bioco/blocks/waiting-list-form/block.json
+## B-ACF-GROUP-KEYS
+group_bioco_block_accordion	web/app/themes/bioco/acf-json/group_bioco_block_accordion.json
+group_bioco_block_banner	web/app/themes/bioco/acf-json/group_bioco_block_banner.json
+group_bioco_block_cards_grid	web/app/themes/bioco/acf-json/group_bioco_block_cards_grid.json
+group_bioco_block_contact_form	web/app/themes/bioco/acf-json/group_bioco_block_contact_form.json
+group_bioco_block_cta_band	web/app/themes/bioco/acf-json/group_bioco_block_cta_band.json
+group_bioco_block_depot_map	web/app/themes/bioco/acf-json/group_bioco_block_depot_map.json
+group_bioco_block_doi_confirm	web/app/themes/bioco/acf-json/group_bioco_block_doi_confirm.json
+group_bioco_block_event_signup_form	web/app/themes/bioco/acf-json/group_bioco_block_event_signup_form.json
+group_bioco_block_events_feed	web/app/themes/bioco/acf-json/group_bioco_block_events_feed.json
+group_bioco_block_gallery	web/app/themes/bioco/acf-json/group_bioco_block_gallery.json
+group_bioco_block_gallery_strip	web/app/themes/bioco/acf-json/group_bioco_block_gallery_strip.json
+group_bioco_block_geisshof_map	web/app/themes/bioco/acf-json/group_bioco_block_geisshof_map.json
+group_bioco_block_group_cards	web/app/themes/bioco/acf-json/group_bioco_block_group_cards.json
+group_bioco_block_hero	web/app/themes/bioco/acf-json/group_bioco_block_hero.json
+group_bioco_block_link_tiles	web/app/themes/bioco/acf-json/group_bioco_block_link_tiles.json
+group_bioco_block_media_grid	web/app/themes/bioco/acf-json/group_bioco_block_media_grid.json
+group_bioco_block_media_text	web/app/themes/bioco/acf-json/group_bioco_block_media_text.json
+group_bioco_block_membership_form	web/app/themes/bioco/acf-json/group_bioco_block_membership_form.json
+group_bioco_block_page_intro	web/app/themes/bioco/acf-json/group_bioco_block_page_intro.json
+group_bioco_block_pricing_calculator	web/app/themes/bioco/acf-json/group_bioco_block_pricing_calculator.json
+group_bioco_block_pricing_table	web/app/themes/bioco/acf-json/group_bioco_block_pricing_table.json
+group_bioco_block_rich_text	web/app/themes/bioco/acf-json/group_bioco_block_rich_text.json
+group_bioco_block_saisonkalender	web/app/themes/bioco/acf-json/group_bioco_block_saisonkalender.json
+group_bioco_block_schnuppertage	web/app/themes/bioco/acf-json/group_bioco_block_schnuppertage.json
+group_bioco_block_steps	web/app/themes/bioco/acf-json/group_bioco_block_steps.json
+group_bioco_block_subscribe_form	web/app/themes/bioco/acf-json/group_bioco_block_subscribe_form.json
+group_bioco_block_text_columns	web/app/themes/bioco/acf-json/group_bioco_block_text_columns.json
+group_bioco_block_timeline	web/app/themes/bioco/acf-json/group_bioco_block_timeline.json
+group_bioco_block_video_embed	web/app/themes/bioco/acf-json/group_bioco_block_video_embed.json
+group_bioco_block_visit_day_form	web/app/themes/bioco/acf-json/group_bioco_block_visit_day_form.json
+group_bioco_block_waiting_list_form	web/app/themes/bioco/acf-json/group_bioco_block_waiting_list_form.json
+group_bioco_cpt_event	web/app/themes/bioco/acf-json/group_bioco_cpt_event.json
+group_bioco_cpt_group	web/app/themes/bioco/acf-json/group_bioco_cpt_group.json
+group_bioco_section_common	web/app/themes/bioco/acf-json/group_bioco_section_common.json
+## C-BIOCO-FUNCTIONS
+bioco_event_card_image	web/app/themes/bioco/functions.php:137
+bioco_event_date_parts	web/app/themes/bioco/functions.php:154
+bioco_forms_build_intranet_payload	web/app/mu-plugins/bioco-forms/bioco-forms.php:309
+bioco_forms_client_ip	web/app/mu-plugins/bioco-forms/bioco-forms.php:62
+bioco_forms_doi_confirm_token	web/app/mu-plugins/bioco-forms/bioco-forms.php:221
+bioco_forms_doi_create_token	web/app/mu-plugins/bioco-forms/bioco-forms.php:164
+bioco_forms_doi_on_confirm	web/app/mu-plugins/bioco-forms/bioco-forms.php:178
+bioco_forms_doi_transient_key	web/app/mu-plugins/bioco-forms/bioco-forms.php:160
+bioco_forms_extract_csrf_cookie	web/app/mu-plugins/bioco-forms/bioco-forms.php:347
+bioco_forms_extract_django_field_errors	web/app/mu-plugins/bioco-forms/bioco-forms.php:374
+bioco_forms_extract_hidden_csrf_token	web/app/mu-plugins/bioco-forms/bioco-forms.php:361
+bioco_forms_forward_to_intranet	web/app/mu-plugins/bioco-forms/bioco-forms.php:395
+bioco_forms_handle_contact	web/app/mu-plugins/bioco-forms/bioco-forms.php:505
+bioco_forms_handle_doi_confirm	web/app/mu-plugins/bioco-forms/bioco-forms.php:801
+bioco_forms_handle_event_signup	web/app/mu-plugins/bioco-forms/bioco-forms.php:671
+bioco_forms_handle_membership	web/app/mu-plugins/bioco-forms/bioco-forms.php:720
+bioco_forms_handle_subscribe	web/app/mu-plugins/bioco-forms/bioco-forms.php:543
+bioco_forms_handle_visit_day	web/app/mu-plugins/bioco-forms/bioco-forms.php:586
+bioco_forms_handle_waiting_list	web/app/mu-plugins/bioco-forms/bioco-forms.php:627
+bioco_forms_json_body	web/app/mu-plugins/bioco-forms/bioco-forms.php:145
+bioco_forms_lines	web/app/mu-plugins/bioco-forms/bioco-forms.php:121
+bioco_forms_localize_block	web/app/mu-plugins/bioco-forms/bioco-forms.php:135
+bioco_forms_membership_notes	web/app/mu-plugins/bioco-forms/bioco-forms.php:282
+bioco_forms_membership_total_shares	web/app/mu-plugins/bioco-forms/bioco-forms.php:269
+bioco_forms_recipient	web/app/mu-plugins/bioco-forms/bioco-forms.php:57
+bioco_forms_send_mail	web/app/mu-plugins/bioco-forms/bioco-forms.php:113
+bioco_forms_validate_membership	web/app/mu-plugins/bioco-forms/bioco-forms.php:247
+bioco_forms_verify_turnstile	web/app/mu-plugins/bioco-forms/bioco-forms.php:77
+bioco_forms_view_script_handle	web/app/mu-plugins/bioco-forms/bioco-forms.php:129
+bioco_image_filter_style	web/app/themes/bioco/functions.php:265
+bioco_kses_rich_text	web/app/themes/bioco/functions.php:78
+bioco_query_events	web/app/themes/bioco/functions.php:107
+bioco_render_events_list	web/app/themes/bioco/functions.php:168
+bioco_render_map_block	web/app/themes/bioco/functions.php:211
+bioco_render_person_icons	web/app/themes/bioco/blocks/pricing-table/render.php:34
+bioco_text_has_heading_html	web/app/themes/bioco/functions.php:72
+## D-UNDEFINED-WP-VARS
+## E-RENDER-VIEW-COUNTS
+render.php	31
+view.js	10

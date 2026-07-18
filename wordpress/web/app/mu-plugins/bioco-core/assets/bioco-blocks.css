@@ -1,0 +1,1778 @@
+/**
+ * Block-scoped CSS, moved out of the bioco theme's assets/app.css (#101) so
+ * blocks render identically under any active theme. References the design
+ * token custom properties (colors, spacing, radius, shadow) defined in
+ * bioco-tokens.css (enqueued as a hard dependency of this file — see
+ * bioco-core.php — so it always loads first).
+ *
+ * Tracer bullet (hero, rich-text, events-feed) — moved 2025, #101. Includes
+ * shared block-base CSS these three blocks depend on even though it isn't
+ * scoped to any one of them (HARDCASES.md Hard Case 6): .btn*/.bento-card
+ * (needed by hero), .cms-section* (needed by rich-text), and
+ * .card-header/.card-body/.bento-card-fullwidth (needed by events-feed,
+ * originally defined alongside the not-yet-migrated link-tiles block).
+ * These rules still also exist in the theme's app.css until the fleet move
+ * empties it out — harmless duplication in the meantime (same values).
+ */
+
+.hero {
+  background: var(--wp--preset--color--bioco-bg);
+  padding: var(--wp--preset--spacing--50) 0 0 0;
+  margin-top: calc(var(--wp--preset--spacing--60) / 2);
+  margin-bottom: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
+.hero-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--wp--preset--spacing--40);
+  width: 100%;
+  max-width: var(--wp--style--global--wide-size, 1400px);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 6vw, 96px);
+}
+
+.bento-card {
+  border-radius: var(--wp--custom--radius--md);
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.hero-image-card {
+  min-height: 500px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.hero-image-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 500px;
+  overflow: hidden;
+}
+
+.hero-image-container img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-text-card {
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--wp--preset--color--bioco-surface);
+}
+
+.hero-content {
+  width: 100%;
+  padding: var(--wp--preset--spacing--60);
+}
+
+.hero-text {
+  width: 100%;
+  max-width: 360px;
+  padding-left: var(--wp--preset--spacing--40);
+}
+
+.hero-subtitle {
+  font-family: var(--wp--preset--font-family--body);
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.hero-title {
+  font-family: var(--wp--preset--font-family--body);
+  /* No fixed theme.json font-size token matches the live clamp; kept literal
+     until the green/radius design sign-off referenced in theme.json lands. */
+  font-size: clamp(2rem, 3vw + 1rem, 2.6rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin-bottom: calc(var(--wp--preset--spacing--40) / 3);
+  color: var(--wp--preset--color--bioco-text);
+}
+
+.hero-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--50);
+  margin-bottom: var(--wp--preset--spacing--60);
+  width: 100%;
+}
+
+.hero-buttons .btn {
+  width: 100%;
+  text-align: center;
+}
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-orange {
+  font-family: var(--wp--preset--font-family--body);
+  font-weight: 700;
+  display: inline-block;
+  padding: 12px var(--wp--preset--spacing--40);
+  font-size: var(--wp--preset--font-size--base);
+  text-align: center;
+  border-radius: var(--wp--custom--radius--md);
+  transition: all 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+  border: 2px solid;
+  line-height: 1.5;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.btn-primary {
+  background: var(--wp--preset--color--bioco-green);
+  color: #ffffff;
+  border-color: var(--wp--preset--color--bioco-green);
+}
+
+.btn-primary:hover {
+  background: var(--wp--preset--color--bioco-green-dark);
+  border-color: var(--wp--preset--color--bioco-green-dark);
+  box-shadow: var(--wp--custom--shadow--md);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: var(--wp--preset--color--bioco-surface);
+  color: var(--wp--preset--color--bioco-green);
+  border-color: var(--wp--preset--color--bioco-green);
+}
+
+.btn-secondary:hover {
+  color: var(--wp--preset--color--bioco-green-dark);
+  border-color: var(--wp--preset--color--bioco-green-dark);
+  box-shadow: var(--wp--custom--shadow--md);
+  transform: translateY(-1px);
+}
+
+.btn-orange {
+  background: var(--wp--preset--color--bioco-carrot);
+  color: #ffffff;
+  border-color: var(--wp--preset--color--bioco-carrot);
+}
+
+.btn-orange:hover {
+  /* No "carrot dark" token exists yet; matches the current hardcoded hover shade. */
+  background: #e88200;
+  border-color: #e88200;
+  box-shadow: var(--wp--custom--shadow--md);
+  transform: translateY(-1px);
+}
+
+@media (max-width: 1023px) {
+  .hero {
+    padding: var(--wp--preset--spacing--50) 0;
+  }
+
+  .hero-container {
+    padding: 0 var(--wp--preset--spacing--40);
+  }
+}
+
+@media (max-width: 767px) {
+  .hero {
+    padding: var(--wp--preset--spacing--50) 0 0 0;
+    margin-top: 120px;
+    margin-bottom: 0;
+  }
+
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: var(--wp--preset--spacing--40);
+    padding: 0 var(--wp--preset--spacing--20);
+  }
+
+  .hero-image-card {
+    min-height: 300px;
+    order: 1;
+  }
+
+  .hero-image-container {
+    min-height: 300px;
+  }
+
+  .hero-text-card {
+    order: 2;
+    min-height: auto;
+    text-align: center;
+  }
+
+  .hero-text {
+    max-width: 100%;
+    padding-left: 0;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-buttons {
+    align-items: center;
+  }
+
+  .hero-buttons .btn {
+    max-width: 260px;
+  }
+}
+
+/**
+ * Shared "section" chrome (cms-section*), used by rich-text and every other
+ * layout block (media-text, banner, media-grid, video-embed, etc. — see
+ * HARDCASES.md Hard Case 6). Class names kept identical to the Next.js
+ * frontend/components/sections/SectionRenderer.tsx + globals.css rules.
+ */
+
+.cms-section {
+  margin-bottom: clamp(32px, 6vw, 80px);
+}
+
+.cms-section-eyebrow {
+  font-size: var(--wp--preset--font-size--sm);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.cms-section-text {
+  color: var(--wp--preset--color--bioco-text-muted);
+  line-height: 1.7;
+}
+
+.cms-section-caption {
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.cms-section-actions {
+  margin-top: var(--wp--preset--spacing--30);
+  display: flex;
+  gap: var(--wp--preset--spacing--30);
+  flex-wrap: wrap;
+}
+
+/**
+ * Shared card structure primitives (card-header/card-body/bento-card-fullwidth),
+ * used by hero, events-feed, doi-confirm and group-cards (Hard Case 6).
+ * Ported from globals.css, trimmed to what these blocks actually use.
+ */
+.card-header {
+  padding: 12px 16px;
+  margin-bottom: 0;
+  background-color: rgba(31, 42, 27, 0.03);
+  border-radius: var(--wp--custom--radius--md) var(--wp--custom--radius--md) 0 0;
+  font-weight: 600;
+}
+
+.card-header h3 {
+  font-weight: 600;
+  font-size: var(--wp--preset--font-size--lg);
+  margin: 0;
+  padding: 0;
+  color: var(--wp--preset--color--bioco-text);
+}
+
+.card-body {
+  flex: 1 1 auto;
+  padding: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.bento-card > .card-header ~ *:not(.card-body):not(.card-footer) {
+  padding: 0;
+}
+
+.bento-card-fullwidth {
+  grid-column: 1 / -1;
+}
+
+/* events-feed block (W8 content model, issue #95). Class names ported from
+   globals.css/EventsSection.tsx/EventsBanner.tsx. */
+.events-banner {
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(46, 125, 50, 0.05) 100%);
+  border: 2px solid rgba(46, 125, 50, 0.3);
+  padding: var(--wp--preset--spacing--50);
+  margin: var(--wp--preset--spacing--50) 0;
+  border-radius: var(--wp--custom--radius--lg);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.events-banner h2 {
+  margin-bottom: var(--wp--preset--spacing--30);
+  color: var(--wp--preset--color--bioco-green);
+}
+
+.events-card {
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.1) 0%, rgba(46, 125, 50, 0.05) 100%);
+  border: none;
+}
+
+.events-card .card-header {
+  background: rgba(46, 125, 50, 0.15);
+}
+
+.events-card .card-header h3 {
+  color: var(--wp--preset--color--bioco-green-dark);
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+  margin: var(--wp--preset--spacing--40) 0;
+}
+
+.event-item {
+  background: rgba(46, 125, 50, 0.1);
+  border-radius: var(--wp--custom--radius--md);
+  padding: var(--wp--preset--spacing--40);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.event-item-with-image {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr);
+  align-items: stretch;
+  gap: var(--wp--preset--spacing--40);
+}
+
+.event-item h3 {
+  color: var(--wp--preset--color--bioco-text);
+  margin-bottom: var(--wp--preset--spacing--20);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.event-item p {
+  margin: 4px 0;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.event-card-image {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
+  overflow: hidden;
+  border-radius: var(--wp--custom--radius--sm);
+  background: var(--wp--preset--color--bioco-bg);
+}
+
+.event-card-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .event-item-with-image {
+    grid-template-columns: 1fr;
+  }
+
+  .event-item-with-image .event-card-image {
+    aspect-ratio: 4 / 3;
+    min-height: 0;
+    margin-bottom: var(--wp--preset--spacing--30);
+  }
+}
+
+@media (min-width: 769px) {
+  .event-item-with-image .event-card-image {
+    aspect-ratio: auto;
+    height: 100%;
+    margin-bottom: 0;
+  }
+}
+
+.past-events-card {
+  background: #fff;
+  border: none;
+  margin-top: var(--wp--preset--spacing--50);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.past-events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--wp--preset--spacing--40);
+}
+
+.past-event-tile {
+  border: 1px solid var(--wp--preset--color--bioco-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+  color: inherit;
+  text-decoration: none;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.past-event-tile:hover {
+  box-shadow: var(--wp--custom--shadow--lg);
+  transform: translateY(-2px);
+}
+
+.past-event-media {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--wp--preset--color--bioco-bg);
+}
+
+.past-event-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.past-event-meta {
+  padding: 0 var(--wp--preset--spacing--40) var(--wp--preset--spacing--40) var(--wp--preset--spacing--40);
+}
+
+.past-event-date {
+  font-size: 0.8125rem;
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-bottom: 4px;
+}
+
+.past-event-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.past-event-cta {
+  color: var(--wp--preset--color--bioco-green);
+  font-weight: 600;
+}
+
+/**
+ * Fleet move (#101): every remaining block's CSS, moved wholesale from the
+ * theme's assets/app.css in the same order it appeared there. File/rule
+ * bodies are unchanged from the original — only the enqueue location moved.
+ */
+
+/* media-text block */
+.cms-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(24px, 4vw, 64px);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .cms-split {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cms-split-media.is-last {
+    order: 2;
+  }
+  .cms-split-content {
+    order: 1;
+  }
+}
+
+.cms-media-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--wp--custom--radius--lg);
+  overflow: hidden;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.cms-media-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Image overlays shared by media-text (applied to .cms-split-media) */
+.image-overlay-dark,
+.image-overlay-green,
+.image-overlay-orange {
+  position: relative;
+  overflow: hidden;
+}
+
+.image-overlay-dark::after,
+.image-overlay-green::after,
+.image-overlay-orange::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.image-overlay-dark::after {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.image-overlay-green::after {
+  background: rgba(46, 125, 50, 0.3);
+}
+
+.image-overlay-orange::after {
+  background: rgba(242, 146, 0, 0.3);
+}
+
+/* banner block */
+.cms-banner {
+  position: relative;
+  overflow: hidden;
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--lg);
+  padding: clamp(24px, 4vw, 48px);
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.cms-banner-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.cms-banner-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cms-banner-overlay-dark::after,
+.cms-banner-overlay-green::after,
+.cms-banner-overlay-orange::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.cms-banner-overlay-dark::after {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.cms-banner-overlay-green::after {
+  background: rgba(46, 125, 50, 0.35);
+}
+
+.cms-banner-overlay-orange::after {
+  background: rgba(242, 146, 0, 0.35);
+}
+
+.cms-banner-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.cms-banner--media .cms-banner-inner,
+.cms-banner--media .cms-section-eyebrow,
+.cms-banner--media .cms-section-text,
+.cms-banner--media h1,
+.cms-banner--media h2,
+.cms-banner--media h3 {
+  color: #ffffff;
+}
+
+/* media-grid block */
+.cms-media-grid {
+  display: grid;
+  gap: var(--wp--preset--spacing--40);
+}
+
+.cms-media-grid-items {
+  display: grid;
+  gap: var(--wp--preset--spacing--40);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* video-embed block */
+.cms-video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--wp--custom--radius--lg);
+  overflow: hidden;
+  background: #000;
+  margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.cms-video-frame iframe,
+.cms-video-frame video {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/**
+ * W6 layout blocks (page-intro, cards-grid, gallery-strip, text-columns,
+ * cta-band; issue #93). None of these five have a matching CSS class in the
+ * Next.js frontend/app/globals.css — RegisteredSectionComponents.tsx styles
+ * them entirely with inline style objects. The pixel values below are
+ * ported literally from that file's helper functions (containerMaxWidth,
+ * contentWidth, gapSize, radiusSize, ratioValue) via data-* attribute
+ * selectors, but the cms-* class names follow this theme's own W5
+ * convention (cms-section, cms-split, cms-media-grid, …) since there is no
+ * Next.js class name to reuse here.
+ */
+
+/* container-width variants, shared by page-intro/text-columns/cta-band */
+.cms-page-intro[data-container='sm'],
+.cms-text-columns[data-container='sm'] { max-width: 640px; }
+.cms-page-intro[data-container='md'],
+.cms-cta-band[data-container='md'],
+.cms-text-columns[data-container='md'],
+.cms-timeline[data-container='md'] { max-width: 820px; }
+.cms-page-intro[data-container='lg'],
+.cms-cta-band[data-container='lg'],
+.cms-text-columns[data-container='lg'],
+.cms-timeline[data-container='lg'] { max-width: 1040px; }
+.cms-page-intro[data-container='xl'],
+.cms-cta-band[data-container='xl'],
+.cms-text-columns[data-container='xl'],
+.cms-timeline[data-container='xl'] { max-width: 1280px; }
+.cms-page-intro[data-container='full'],
+.cms-cta-band[data-container='full'],
+.cms-text-columns[data-container='full'] { max-width: 100%; }
+
+.cms-page-intro,
+.cms-cta-band,
+.cms-text-columns,
+.cms-timeline {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* page-intro block */
+.cms-page-intro[data-align='center'] {
+  text-align: center;
+}
+
+.cms-page-intro-inner[data-text-width='narrow'] { max-width: 42rem; }
+.cms-page-intro-inner[data-text-width='normal'] { max-width: 58rem; }
+.cms-page-intro-inner[data-text-width='wide'] { max-width: 74rem; }
+
+.cms-page-intro[data-align='center'] .cms-page-intro-inner {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* cards-grid block */
+.cms-cards-grid-items {
+  display: grid;
+  grid-template-columns: repeat(var(--bioco-cards-grid-columns-mobile, 1), minmax(0, 1fr));
+}
+
+.cms-cards-grid-items[data-columns-mobile='1'] { --bioco-cards-grid-columns-mobile: 1; }
+.cms-cards-grid-items[data-columns-mobile='2'] { --bioco-cards-grid-columns-mobile: 2; }
+.cms-cards-grid-items[data-gap='sm'] { gap: 16px; }
+.cms-cards-grid-items[data-gap='md'] { gap: 24px; }
+.cms-cards-grid-items[data-gap='lg'] { gap: 32px; }
+.cms-cards-grid-items[data-gap='xl'] { gap: 48px; }
+
+@media (min-width: 768px) {
+  .cms-cards-grid-items[data-columns-desktop='2'] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cms-cards-grid-items[data-columns-desktop='3'] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cms-cards-grid-items[data-columns-desktop='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.cms-card {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.cms-card--plain { background: transparent; padding: 0; }
+.cms-card--soft { background: #f5f2e9; padding: 14px; }
+.cms-card--outlined { background: var(--wp--preset--color--bioco-surface); border: 1px solid var(--wp--preset--color--bioco-border); padding: 14px; }
+
+.cms-card-media {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--wp--preset--color--bioco-border);
+}
+
+.cms-card-media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cms-card[data-media-ratio='1:1'] .cms-card-media { aspect-ratio: 1 / 1; }
+.cms-card[data-media-ratio='4:3'] .cms-card-media { aspect-ratio: 4 / 3; }
+.cms-card[data-media-ratio='3:4'] .cms-card-media { aspect-ratio: 3 / 4; }
+.cms-card[data-media-fit='cover'] .cms-card-media img { object-fit: cover; }
+.cms-card[data-media-fit='contain'] .cms-card-media img { object-fit: contain; }
+
+.cms-card[data-rounded='none'] .cms-card-media { border-radius: 0; }
+.cms-card[data-rounded='sm'] .cms-card-media { border-radius: 8px; }
+.cms-card[data-rounded='md'] .cms-card-media { border-radius: 16px; }
+.cms-card[data-rounded='lg'] .cms-card-media { border-radius: 24px; }
+.cms-card[data-rounded='xl'] .cms-card-media { border-radius: 32px; }
+
+.cms-card-title {
+  font-size: 1.2rem;
+  margin: 14px 0 0;
+}
+
+.cms-card-text {
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin: 6px 0 0;
+}
+
+/* gallery-strip block */
+.cms-gallery-strip-items {
+  display: grid;
+  grid-template-columns: repeat(var(--bioco-gallery-strip-columns-mobile, 1), minmax(0, 1fr));
+}
+
+.cms-gallery-strip-items[data-columns-mobile='1'] { --bioco-gallery-strip-columns-mobile: 1; }
+.cms-gallery-strip-items[data-columns-mobile='2'] { --bioco-gallery-strip-columns-mobile: 2; }
+.cms-gallery-strip-items[data-gap='sm'] { gap: 16px; }
+.cms-gallery-strip-items[data-gap='md'] { gap: 24px; }
+.cms-gallery-strip-items[data-gap='lg'] { gap: 32px; }
+.cms-gallery-strip-items[data-gap='xl'] { gap: 48px; }
+
+@media (min-width: 768px) {
+  .cms-gallery-strip-items[data-columns-desktop='2'] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cms-gallery-strip-items[data-columns-desktop='3'] { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cms-gallery-strip-items[data-columns-desktop='4'] { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+.cms-gallery-strip-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--wp--preset--color--bioco-border);
+}
+
+.cms-gallery-strip-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.cms-gallery-strip-items[data-media-ratio='1:1'] .cms-gallery-strip-frame { aspect-ratio: 1 / 1; }
+.cms-gallery-strip-items[data-media-ratio='4:3'] .cms-gallery-strip-frame { aspect-ratio: 4 / 3; }
+.cms-gallery-strip-items[data-media-ratio='16:9'] .cms-gallery-strip-frame { aspect-ratio: 16 / 9; }
+.cms-gallery-strip-items[data-media-fit='cover'] .cms-gallery-strip-frame img { object-fit: cover; }
+.cms-gallery-strip-items[data-media-fit='contain'] .cms-gallery-strip-frame img { object-fit: contain; }
+
+.cms-gallery-strip-items[data-rounded='none'] .cms-gallery-strip-frame { border-radius: 0; }
+.cms-gallery-strip-items[data-rounded='sm'] .cms-gallery-strip-frame { border-radius: 8px; }
+.cms-gallery-strip-items[data-rounded='md'] .cms-gallery-strip-frame { border-radius: 16px; }
+.cms-gallery-strip-items[data-rounded='lg'] .cms-gallery-strip-frame { border-radius: 24px; }
+.cms-gallery-strip-items[data-rounded='xl'] .cms-gallery-strip-frame { border-radius: 32px; }
+
+/* text-columns block */
+.cms-text-columns-body {
+  column-count: 1;
+}
+
+@media (min-width: 768px) {
+  .cms-text-columns-body[data-columns='1'] { column-count: 1; }
+  .cms-text-columns-body[data-columns='2'] { column-count: 2; }
+  .cms-text-columns-body[data-columns='3'] { column-count: 3; }
+  .cms-text-columns-body[data-columns='4'] { column-count: 4; }
+}
+
+.cms-text-columns-body[data-gap='sm'] { column-gap: 16px; }
+.cms-text-columns-body[data-gap='md'] { column-gap: 24px; }
+.cms-text-columns-body[data-gap='lg'] { column-gap: 32px; }
+.cms-text-columns-body[data-gap='xl'] { column-gap: 48px; }
+
+/* cta-band block */
+.cms-cta-band-inner {
+  padding: 32px;
+}
+
+.cms-cta-band-inner[data-align='left'] { text-align: left; }
+.cms-cta-band-inner[data-align='center'] { text-align: center; }
+
+.cms-cta-band-inner[data-theme='light'] { background: var(--wp--preset--color--bioco-surface); color: var(--wp--preset--color--bioco-text); }
+.cms-cta-band-inner[data-theme='soft'] { background: #f5f2e9; color: var(--wp--preset--color--bioco-text); }
+.cms-cta-band-inner[data-theme='accent'] { background: var(--wp--preset--color--bioco-carrot); color: #fff7ed; }
+.cms-cta-band-inner[data-theme='dark'] { background: #111827; color: #f8fafc; }
+
+.cms-cta-band-inner[data-rounded='none'] { border-radius: 0; }
+.cms-cta-band-inner[data-rounded='sm'] { border-radius: 8px; }
+.cms-cta-band-inner[data-rounded='md'] { border-radius: 16px; }
+.cms-cta-band-inner[data-rounded='lg'] { border-radius: 24px; }
+.cms-cta-band-inner[data-rounded='xl'] { border-radius: 32px; }
+
+.cms-cta-band-actions {
+  justify-content: flex-start;
+}
+
+.cms-cta-band-inner[data-align='center'] .cms-cta-band-actions {
+  justify-content: center;
+}
+
+/**
+ * W7 structured blocks (timeline, pricing-table, accordion, steps,
+ * link-tiles; issue #94). pricing-table, demeter-accordion,
+ * next-steps/step-item/step-number and portal-gateway/portal-icon/
+ * portal-tile class names and rule bodies below are ported from the actual
+ * Next.js frontend/app/globals.css rules (adapted to theme.json custom
+ * properties). timeline has no Next.js CSS to reuse (TimelineHeaderBlock/
+ * TimelineItemBlock render via inline styles) so it follows the cms-*
+ * convention like the W6 blocks above.
+ */
+
+/* timeline block */
+.cms-timeline-header[data-align='center'] {
+  text-align: center;
+}
+
+.cms-timeline-header[data-text-width='narrow'] { max-width: 42rem; }
+.cms-timeline-header[data-text-width='normal'] { max-width: 58rem; }
+.cms-timeline-header[data-text-width='wide'] { max-width: 74rem; }
+
+.cms-timeline-header[data-align='center'] {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cms-timeline-items {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.cms-timeline-item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: var(--wp--preset--spacing--40);
+  align-items: start;
+}
+
+.cms-timeline-badge {
+  display: inline-flex;
+  padding: 10px 14px;
+  border-radius: var(--wp--custom--radius--pill);
+  background: #111827;
+  color: #fff;
+  font-weight: 700;
+}
+
+.cms-timeline-item[data-emphasis='highlight'] .cms-timeline-badge {
+  background: #8ab272;
+}
+
+.cms-timeline-item-content {
+  padding: 0 0 0 20px;
+  border-left: 2px solid var(--wp--preset--color--bioco-border);
+}
+
+.cms-timeline-item-content h3 {
+  margin-top: 0;
+}
+
+/* pricing-table block (ported from Next.js .pricing-table rules) */
+.pricing-table {
+  margin: var(--wp--preset--spacing--40) 0;
+  overflow-x: auto;
+}
+
+.pricing-table table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--md);
+  overflow: visible;
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.pricing-table th {
+  font-weight: 500;
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+  text-align: left;
+}
+
+.pricing-table td {
+  font-weight: 700;
+  padding: var(--wp--preset--spacing--40);
+  vertical-align: middle;
+}
+
+.pricing-table td:first-child {
+  min-width: 120px;
+}
+
+.pricing-table tr:hover {
+  background: rgba(46, 125, 50, 0.1);
+}
+
+.cms-pricing-table-shares,
+.cms-pricing-table-work-suffix {
+  font-size: 0.75rem;
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin-top: 4px;
+}
+
+.person-icons {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+}
+
+.person-icons-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.person-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 767px) {
+  .pricing-table {
+    font-size: 0.875rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .pricing-table th,
+  .pricing-table td {
+    padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .pricing-table td:first-child {
+    min-width: 100px;
+    max-width: 140px;
+    white-space: normal;
+  }
+}
+
+/* accordion block (ported from Next.js .demeter-accordion rules) */
+.demeter-accordion {
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.demeter-accordion details {
+  font-weight: 700;
+  margin-bottom: var(--wp--preset--spacing--30);
+  border-radius: var(--wp--custom--radius--md);
+  overflow: visible;
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.demeter-accordion summary {
+  padding: var(--wp--preset--spacing--40);
+  background: var(--wp--preset--color--bioco-bg);
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--wp--preset--color--bioco-text);
+  list-style: none;
+  transition: all 0.2s ease;
+}
+
+.demeter-accordion summary::-webkit-details-marker {
+  display: none;
+}
+
+.demeter-accordion summary::before {
+  content: '+';
+  display: inline-block;
+  margin-right: var(--wp--preset--spacing--20);
+  font-weight: 700;
+  color: var(--wp--preset--color--bioco-green);
+}
+
+.demeter-accordion details[open] summary::before {
+  content: '\2212';
+}
+
+.demeter-accordion summary:hover {
+  background: var(--wp--preset--color--bioco-border);
+}
+
+.demeter-accordion details[open] summary {
+  border-bottom: 1px solid var(--wp--preset--color--bioco-border);
+}
+
+.demeter-accordion details > div {
+  padding: var(--wp--preset--spacing--40);
+  margin: 0;
+  background: var(--wp--preset--color--bioco-surface);
+}
+
+/* steps block (ported from Next.js .next-steps rules) */
+.next-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.step-item {
+  display: flex;
+  gap: var(--wp--preset--spacing--40);
+  align-items: flex-start;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--wp--custom--radius--pill);
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.step-item h3 {
+  margin-top: 0;
+  margin-bottom: var(--wp--preset--spacing--20);
+  font-size: 1.125rem;
+}
+
+.step-item p {
+  margin: 0;
+}
+
+/* link-tiles block (ported class names, new rules: no Next.js CSS exists
+   for portal-gateway/portal-icon/portal-tile — RegisteredSectionComponents.tsx
+   renders them via inline styles only) */
+.portal-gateway {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.portal-tile {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--md);
+  box-shadow: var(--wp--custom--shadow--sm);
+  padding: var(--wp--preset--spacing--40);
+  transition: all 0.2s ease;
+}
+
+a.portal-tile:hover {
+  box-shadow: var(--wp--custom--shadow--md);
+  transform: translateY(-1px);
+}
+
+.portal-icon {
+  font-size: 2rem;
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.portal-tile h3 {
+  margin: 0 0 var(--wp--preset--spacing--20);
+}
+
+.portal-tile p {
+  margin: 0;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.btn-organic {
+  border-radius: 28px 22px 26px 18px;
+  box-shadow: var(--wp--custom--shadow--md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-organic:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--wp--custom--shadow--lg);
+}
+
+.btn-secondary.btn-organic {
+  background: #fff;
+  color: var(--wp--preset--color--bioco-green);
+  border: none;
+}
+
+.btn-secondary.btn-organic:hover {
+  background: var(--wp--preset--color--bioco-bg);
+  color: var(--wp--preset--color--bioco-green-dark);
+}
+
+/* group-cards block (W8 content model, issue #95). GroupCardsSection.tsx
+   has no class names (inline styles only) — these are new, matching those
+   inline style values (see portal-tile above for the same precedent). */
+.cms-group-cards-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--wp--preset--spacing--40);
+}
+
+.cms-group-card {
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--lg);
+  overflow: hidden;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.cms-group-card-media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(135deg, rgba(46, 125, 50, 0.15), rgba(46, 125, 50, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cms-group-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cms-group-card-media-fallback {
+  font-size: 3rem;
+  opacity: 0.6;
+}
+
+.cms-group-card-body {
+  padding: var(--wp--preset--spacing--40);
+}
+
+.cms-group-card-title {
+  font-size: 1.25rem;
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.cms-group-card-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.cms-group-card-contact {
+  margin-top: var(--wp--preset--spacing--20);
+  font-size: 0.875rem;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+/* depot-map / geisshof-map blocks (W9 interactive blocks, issue #96). */
+.cms-map-intro {
+  margin-bottom: var(--wp--preset--spacing--30);
+  padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--40);
+  background-color: var(--wp--preset--color--bioco-bg);
+  border-radius: var(--wp--custom--radius--sm);
+  text-align: center;
+}
+
+.cms-map-intro p {
+  margin: 0;
+  font-weight: 600;
+}
+
+.map-container {
+  width: 100%;
+  min-height: 300px;
+  max-height: 300px;
+  margin-top: var(--wp--preset--spacing--40);
+  margin-bottom: var(--wp--preset--spacing--40);
+  border-radius: var(--wp--custom--radius--md);
+  overflow: hidden;
+  border: 2px solid var(--wp--preset--color--bioco-text);
+  box-shadow: var(--wp--custom--shadow--sm);
+  background: var(--wp--preset--color--bioco-bg);
+}
+
+.map-wrapper {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  max-height: 300px;
+}
+
+.location-info-box {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--wp--preset--spacing--40);
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.location-addresses {
+  background: var(--wp--preset--color--bioco-bg);
+  border-radius: var(--wp--custom--radius--md);
+  padding: var(--wp--preset--spacing--40);
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.location-addresses h4 {
+  font-weight: 500;
+  color: var(--wp--preset--color--bioco-green);
+  margin-bottom: var(--wp--preset--spacing--40);
+  font-size: var(--wp--preset--font-size--lg);
+}
+
+.address-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--40);
+}
+
+@media (min-width: 768px) {
+  .location-addresses .address-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--wp--preset--spacing--50);
+  }
+}
+
+.address-item {
+  padding: var(--wp--preset--spacing--30);
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--md);
+}
+
+.address-item strong {
+  display: block;
+  color: var(--wp--preset--color--bioco-text);
+  margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.address-item p {
+  margin: 0;
+  color: var(--wp--preset--color--bioco-text-muted);
+  font-size: 0.9rem;
+}
+
+/* pricing-calculator block (W9 interactive blocks, issue #96). .pricing-table
+   itself already exists (ported with the pricing-table block, W7); these are
+   the calculator-only additions on top of it. */
+.pricing-calculator {
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.pricing-calculator .pricing-table tr {
+  background: rgba(46, 125, 50, 0.1);
+}
+
+.abo-selector {
+  margin-top: var(--wp--preset--spacing--50);
+}
+
+.abo-buttons {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--wp--preset--spacing--30);
+}
+
+@media (min-width: 640px) {
+  .abo-buttons {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.abo-button {
+  padding: var(--wp--preset--spacing--40);
+  background: rgba(46, 125, 50, 0.1);
+  border: none;
+  border-radius: var(--wp--custom--radius--md);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.875rem;
+  position: relative;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.abo-button:hover {
+  background: var(--wp--preset--color--bioco-bg);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.abo-button.active {
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.abo-button .price {
+  display: block;
+  margin-top: var(--wp--preset--spacing--20);
+  font-size: 0.75rem;
+  opacity: 0.9;
+}
+
+.abo-button.active .price {
+  opacity: 1;
+}
+
+.recommended-badge {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--wp--preset--color--bioco-carrot);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: var(--wp--custom--radius--pill);
+}
+
+.btn-add-share,
+.btn-remove-share {
+  padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--30);
+  color: #fff;
+  border: none;
+  border-radius: var(--wp--custom--radius--sm);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.btn-add-share {
+  background: var(--wp--preset--color--bioco-green);
+}
+
+.btn-add-share:hover {
+  background: var(--wp--preset--color--bioco-green-dark);
+}
+
+.btn-remove-share {
+  background: var(--wp--preset--color--bioco-text-muted);
+}
+
+.btn-remove-share:hover {
+  background: var(--wp--preset--color--bioco-text);
+}
+
+.share-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+  align-items: flex-start;
+}
+
+.share-buttons-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--wp--preset--color--bioco-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.share-buttons {
+  display: flex;
+  gap: var(--wp--preset--spacing--20);
+  align-items: center;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+/* saisonkalender block (W9 interactive blocks, issue #96). New classes: the
+   data model (per-vegetable months multi-select) renders as a static grid,
+   not the tab-per-month UI from Saisonkalender.tsx/.kalender-tab*. */
+.cms-saisonkalender-grid {
+  margin-top: var(--wp--preset--spacing--40);
+  overflow-x: auto;
+}
+
+.cms-saisonkalender-grid table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--wp--preset--color--bioco-surface);
+  border-radius: var(--wp--custom--radius--md);
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.cms-saisonkalender-grid th,
+.cms-saisonkalender-grid td {
+  padding: 10px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--wp--preset--color--bioco-border);
+}
+
+.cms-saisonkalender-grid th:first-child,
+.cms-saisonkalender-grid td:first-child {
+  text-align: left;
+  font-weight: 600;
+}
+
+.cms-saisonkalender-grid th {
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  font-weight: 500;
+}
+
+.cms-saisonkalender-grid tr:last-child td {
+  border-bottom: none;
+}
+
+.cms-saisonkalender-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--wp--preset--color--bioco-green);
+}
+
+/* schnuppertage block (W9 interactive blocks, issue #96). New classes
+   matching the inline-style structure of SchnuppertageSection.tsx. */
+.cms-schnuppertage-info-box {
+  background: var(--wp--preset--color--bioco-bg);
+  padding: var(--wp--preset--spacing--40);
+  border-radius: var(--wp--custom--radius--md);
+  margin-bottom: var(--wp--preset--spacing--40);
+}
+
+.cms-schnuppertage-list-label,
+.cms-schnuppertage-items,
+.cms-schnuppertage-closing {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.cms-schnuppertage-list-label {
+  margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.cms-schnuppertage-items {
+  margin: 0 0 var(--wp--preset--spacing--30);
+  padding-left: 20px;
+}
+
+.cms-schnuppertage-closing p {
+  margin: 0;
+}
+
+.cms-schnuppertage-termine-heading {
+  font-size: 1.1rem;
+  margin-bottom: var(--wp--preset--spacing--30);
+  color: var(--wp--preset--color--bioco-text);
+}
+
+.cms-schnuppertage-termine {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+}
+
+.cms-schnuppertage-termin {
+  background: rgba(46, 125, 50, 0.15);
+  padding: 16px 20px;
+  border-radius: var(--wp--custom--radius--md);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wp--preset--spacing--20);
+}
+
+.cms-schnuppertage-termin-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cms-schnuppertage-termin-meta strong {
+  color: var(--wp--preset--color--bioco-green-dark);
+  font-size: 1.05rem;
+}
+
+.cms-schnuppertage-termin-meta span {
+  color: var(--wp--preset--color--bioco-text-muted);
+  font-size: 0.95rem;
+}
+
+/* gallery block (W9 interactive blocks, issue #96). Ported from Gallery.tsx
+   class names. */
+.gallery-container {
+  margin-top: var(--wp--preset--spacing--40);
+}
+
+.gallery-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--wp--preset--spacing--20);
+  margin-bottom: var(--wp--preset--spacing--60);
+}
+
+.gallery-filter {
+  padding: var(--wp--preset--spacing--20) var(--wp--preset--spacing--40);
+  background: var(--wp--preset--color--bioco-bg);
+  border: 2px solid var(--wp--preset--color--bioco-text);
+  border-radius: var(--wp--custom--radius--md);
+  font-size: 0.875rem;
+  color: var(--wp--preset--color--bioco-text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+.gallery-filter:hover {
+  border-color: var(--wp--preset--color--bioco-green);
+  color: var(--wp--preset--color--bioco-green);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.gallery-filter.active {
+  background: var(--wp--preset--color--bioco-green);
+  color: #fff;
+  border-color: var(--wp--preset--color--bioco-green);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.gallery-select {
+  display: none;
+  width: 100%;
+  padding: var(--wp--preset--spacing--30);
+  margin-bottom: var(--wp--preset--spacing--40);
+  font-size: 1rem;
+  background: var(--wp--preset--color--bioco-bg);
+  border: 2px solid var(--wp--preset--color--bioco-text);
+  border-radius: var(--wp--custom--radius--md);
+  color: var(--wp--preset--color--bioco-text-muted);
+  cursor: pointer;
+  box-shadow: var(--wp--custom--shadow--sm);
+}
+
+@media (max-width: 640px) {
+  .gallery-filters { display: none; }
+  .gallery-select { display: block; }
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--wp--preset--spacing--50);
+}
+
+.gallery-item {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--wp--custom--radius--md);
+  box-shadow: var(--wp--custom--shadow--md);
+}
+
+.gallery-placeholder {
+  padding: var(--wp--preset--spacing--60);
+  text-align: center;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+/* Form blocks (W10, issue #97): contact/subscribe/visit-day/waiting-list/
+   event-signup/membership + the doi-confirm result block. Class names
+   (.form-group, .form-error, .form-success, .checkbox-group,
+   .radio-group, .commitment-checklist, .form-step, .form-row) are kept
+   identical to .wp-refs/*.tsx + globals.css so this CSS drops in
+   almost unchanged during W11. */
+
+.bioco-form {
+  max-width: 640px;
+}
+
+.form-group {
+  margin-bottom: var(--wp--preset--spacing--40);
+}
+
+.form-group label,
+.form-group > label {
+  display: block;
+  margin-bottom: var(--wp--preset--spacing--20);
+  font-weight: 600;
+  color: var(--wp--preset--color--bioco-text);
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"],
+.form-group input[type="tel"],
+.form-group input[type="date"],
+.form-group input[type="number"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px var(--wp--preset--spacing--30);
+  font-family: var(--wp--preset--font-family--body);
+  font-size: var(--wp--preset--font-size--base);
+  color: var(--wp--preset--color--bioco-text);
+  background: var(--wp--preset--color--bioco-surface);
+  border: 1px solid var(--wp--preset--color--bioco-border);
+  border-radius: var(--wp--custom--radius--sm);
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--wp--preset--color--bioco-green);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.15);
+}
+
+.form-group textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-hint {
+  font-size: var(--wp--preset--font-size--sm);
+  color: var(--wp--preset--color--bioco-text-muted);
+  margin: 0 0 var(--wp--preset--spacing--20);
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--wp--preset--spacing--30);
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checkbox-group,
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--20);
+}
+
+.checkbox-option,
+.radio-option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--wp--preset--spacing--20);
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.checkbox-option input,
+.radio-option input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.commitment-checklist {
+  display: flex;
+  flex-direction: column;
+  gap: var(--wp--preset--spacing--30);
+  margin: var(--wp--preset--spacing--30) 0;
+}
+
+.commitment-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--wp--preset--spacing--30);
+  padding: var(--wp--preset--spacing--30);
+  background: var(--wp--preset--color--bioco-bg);
+  border-radius: var(--wp--custom--radius--md);
+  cursor: pointer;
+}
+
+.commitment-item input {
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.commitment-item h4 {
+  margin: 0 0 var(--wp--preset--spacing--20);
+}
+
+.commitment-item p {
+  margin: 0;
+  color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.form-step {
+  margin-bottom: var(--wp--preset--spacing--60);
+}
+
+.form-step h3 {
+  margin-bottom: var(--wp--preset--spacing--30);
+}
+
+.form-navigation {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--wp--preset--spacing--30);
+}
+
+.cf-turnstile {
+  margin: var(--wp--preset--spacing--20) 0;
+}
+
+.form-message {
+  margin-bottom: var(--wp--preset--spacing--40);
+  padding: var(--wp--preset--spacing--30);
+}
+
+.form-message.form-error,
+.invalid-feedback {
+  background: rgba(135, 33, 61, 0.08);
+  color: var(--wp--preset--color--bioco-beet);
+}
+
+.form-message.form-success {
+  background: rgba(46, 125, 50, 0.08);
+  color: var(--wp--preset--color--bioco-green-dark);
+}
+
+.invalid-feedback {
+  padding: var(--wp--preset--spacing--20);
+  border-radius: var(--wp--custom--radius--sm);
+  font-size: var(--wp--preset--font-size--sm);
+  margin-top: var(--wp--preset--spacing--20);
+}
+
+/* doi-confirm block (W10, issue #97) — mirrors .wp-refs/page.tsx's
+   DOIConfirmContent bento-card/card-header/card-body result states. */
+.bioco-doi-confirm {
+  max-width: 640px;
+}
+
+.bioco-doi-confirm-success .card-header {
+  background-color: rgba(46, 125, 50, 0.08);
+}
+
+.bioco-doi-confirm-error .card-header {
+  background-color: rgba(135, 33, 61, 0.08);
+}

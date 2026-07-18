@@ -1,20 +1,47 @@
 # bioco WordPress (Bedrock) — `wordpress` branch → staging.bioco.ch
 
-Self-hosted WordPress rebuild of bioco.ch: **Bedrock** + a native **block theme** + **ACF Blocks** (git-versioned via ACF Local JSON) + **theme.json** design tokens. Lives on the `wordpress` branch and deploys to **staging.bioco.ch**. Full plan: `../docs/prd-wordpress-migration.md` and epic **#73**. This is the skeleton (slices W2/W3); real blocks land from W4 onward.
+> **Inbetriebnahme:** Schritt-für-Schritt-Anleitung für staging.bioco.ch inkl. Divi-Lizenz und manuellem Inhalts-Import: [`RUNBOOK-STAGING-DIVI.md`](RUNBOOK-STAGING-DIVI.md). Architektur-Umbau (Theme austauschbar): [`PORTING-THEME-SWAP.md`](PORTING-THEME-SWAP.md) + [`HARDCASES.md`](HARDCASES.md) (#101).
+
+
+Self-hosted WordPress rebuild of bioco.ch: **Bedrock** + theme-agnostic mu-plugins for blocks/ACF/
+content/forms + a **Divi 5** presentation theme + **theme.json**-derived design tokens. Lives on the
+`wordpress` branch and deploys to **staging.bioco.ch**. Full plan: `../docs/prd-wordpress-migration.md`,
+epic **#73**, and **#101** (theme-agnostic restructure — see `PORTING-THEME-SWAP.md` /
+`HARDCASES.md`).
 
 > The `main` branch keeps the current Next.js + ProcessWire site untouched. Production cutover (`.htaccess` docroot flip) is a deliberate later step (W13) with instant rollback.
 
 ## Layout
 ```
 wordpress/
-├── composer.json          # WP core + plugins via Composer (core & plugins gitignored)
-├── config/                # Bedrock config (secrets via .env, server/CI only)
-├── web/                   # docroot (point the vhost here)
-│   ├── wp/                # WP core (Composer-managed, gitignored)
-│   └── app/               # wp-content: themes + mu-plugins in git; plugins/uploads gitignored
-│       └── themes/bioco/  # the block theme (theme.json tokens, blocks/, acf-json/)
-└── .env.example           # copy to .env on the server; never commit real .env
+├── PORTING-THEME-SWAP.md        # #101: theme -> plugin porting pattern catalogue
+├── HARDCASES.md                 # #101: non-mechanical porting cases
+├── composer.json                # WP core + plugins via Composer (core & plugins gitignored)
+├── config/                      # Bedrock config (secrets via .env, server/CI only)
+├── web/                         # docroot (point the vhost here)
+│   ├── wp/                      # WP core (Composer-managed, gitignored)
+│   └── app/                     # wp-content: themes + mu-plugins in git; plugins/uploads gitignored
+│       ├── mu-plugins/
+│       │   ├── bioco-core/      # theme-agnostic blocks + ACF + shared helpers + block CSS (#101)
+│       │   ├── bioco-content/   # CPTs (event, bioco_group)
+│       │   └── bioco-forms/     # form REST handlers, Turnstile, DOI, mail
+│       └── themes/
+│           ├── bioco/           # fallback/reference block theme (theme.json token source only)
+│           ├── bioco-divi/      # active theme: thin Divi 5 child (presentation only)
+│           └── Divi/            # gitignored — licensed, installed via wp-admin, see bioco-divi/README.md
+└── .env.example                 # copy to .env on the server; never commit real .env
 ```
+
+## Theme architecture (#101)
+
+Blocks, ACF field groups, shared render helpers, and block CSS are **theme-agnostic** — they live in
+the `bioco-core` mu-plugin and work under any active theme. The active presentation theme is
+`bioco-divi` (Divi 5, licensed separately — see `web/app/themes/bioco-divi/README.md` for the manual
+install steps). The original `bioco` block theme is kept as a fallback/reference (see its own
+`README.md`) and remains fully functional on its own if Divi is ever deactivated. See
+`PORTING-THEME-SWAP.md` for the porting patterns and `HARDCASES.md` for the non-mechanical cases
+(most notably: design tokens are duplicated as static CSS in `bioco-core/assets/bioco-tokens.css`
+since Divi has no `theme.json` to generate them).
 
 ## Local dev
 ```bash
@@ -34,7 +61,12 @@ Pushing to the `wordpress` branch runs `.github/workflows/deploy-wordpress-stagi
 4. Generate salts and the server `.env` (`WP_ENV=staging`, `WP_HOME=https://staging.bioco.ch`, SMTP + Turnstile keys reused from the current stack).
 
 ## Design tokens
-`web/app/themes/bioco/theme.json` mirrors the **current live** site values for pixel parity (post Phase-0 coherence, epic #72). Two value decisions are deliberately **deferred to design sign-off** (they change pixels): brand green (live `#2e7d32` vs logo `#39A933`) and the radius scale (`12/18/24` vs `6/12/18`). The real font is **DM Sans** (self-hosted `assets/fonts/dmsans-variable.woff2`), not Inter.
+`web/app/themes/bioco/theme.json` mirrors the **current live** site values for pixel parity (post Phase-0 coherence, epic #72) and remains the canonical source of these values. Two value decisions are deliberately **deferred to design sign-off** (they change pixels): brand green (live `#2e7d32` vs logo `#39A933`) and the radius scale (`12/18/24` vs `6/12/18`). The real font is **DM Sans** (self-hosted `assets/fonts/dmsans-variable.woff2`), not Inter.
+
+`web/app/mu-plugins/bioco-core/assets/bioco-tokens.css` duplicates these same values as static
+`--wp--*` CSS custom properties (#101, `HARDCASES.md` Hard Case 1) — required because Divi has no
+`theme.json` to generate them the way the block theme does. If a token value ever changes, update
+both files.
 
 ## Status
 - [x] W2 Bedrock skeleton (this)

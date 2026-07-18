@@ -2,7 +2,7 @@
   "name": "gemuesegenossenschaft-bioco/bioco-wordpress",
   "type": "project",
   "license": "proprietary",
-  "description": "bioco.ch — self-hosted WordPress (Bedrock + native block theme + ACF Blocks). Deploys to staging.bioco.ch from the `wordpress` branch. See docs/prd-wordpress-migration.md and epic #73.",
+  "description": "bioco.ch — self-hosted WordPress (Bedrock + theme-agnostic mu-plugins for blocks/ACF/content/forms + Divi 5 presentation theme). Deploys to staging.bioco.ch from the `wordpress` branch. See docs/prd-wordpress-migration.md, epic #73, and #101 (theme-agnostic restructure: PORTING-THEME-SWAP.md / HARDCASES.md). Divi is a licensed theme, installed separately via wp-admin (see web/app/themes/bioco-divi/README.md) — never committed to this repo.",
   "repositories": [
     { "type": "composer", "url": "https://wpackagist.org", "only": ["wpackagist-plugin/*", "wpackagist-theme/*"] },
     { "type": "composer", "url": "https://connect.advancedcustomfields.com" }

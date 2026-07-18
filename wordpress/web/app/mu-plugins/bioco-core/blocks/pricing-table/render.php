@@ -30,29 +30,6 @@ if (!empty($block['className'])) {
 }
 
 $heading_already_in_text = bioco_text_has_heading_html($text);
-
-function bioco_render_person_icons($count) {
-    $count = max(0, (int) $count);
-    if (!$count) return;
-    $icons_per_row = $count === 4 ? 2 : $count;
-    $rows = $count === 4 ? 2 : 1;
-    echo '<div class="person-icons">';
-    for ($row = 0; $row < $rows; $row++) {
-        echo '<div class="person-icons-row">';
-        for ($col = 0; $col < $icons_per_row; $col++) {
-            $icon_number = $row * $icons_per_row + $col;
-            if ($icon_number >= $count) continue;
-            ?>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="person-icon">
-                <circle cx="12" cy="8" r="4" fill="var(--wp--preset--color--bioco-green)" stroke="var(--wp--preset--color--bioco-green-dark)" stroke-width="1"/>
-                <path d="M6 20C6 16 8 14 12 14C16 14 18 16 18 20" stroke="var(--wp--preset--color--bioco-green)" stroke-width="2" stroke-linecap="round" fill="none"/>
-            </svg>
-            <?php
-        }
-        echo '</div>';
-    }
-    echo '</div>';
-}
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>" data-container="<?php echo esc_attr($container_width); ?>">
     <?php if ($eyebrow) : ?>

@@ -1,0 +1,61 @@
+/**
+ * Static --wp--* custom properties, extracted 1:1 from
+ * web/app/themes/bioco/theme.json (see HARDCASES.md Hard Case 1).
+ *
+ * WordPress core only generates these as real CSS custom properties when the
+ * ACTIVE theme's theme.json declares them. Divi (a classic theme) has no
+ * matching theme.json, so under Divi this file is the ONLY source of these
+ * values. Under the bioco block theme it duplicates values WP core already
+ * generates — harmless, since the values are identical.
+ *
+ * Do not hand-edit values here without also updating theme.json — they must
+ * stay 1:1. scripts/conformance.sh's undefined-vars check treats this file
+ * (plus theme.json) as the defined-vars source of truth.
+ */
+
+:root {
+  /* settings.color.palette[].slug -> --wp--preset--color--{slug} */
+  --wp--preset--color--bioco-green: #2e7d32;
+  --wp--preset--color--bioco-green-dark: #1b5e20;
+  --wp--preset--color--bioco-carrot: #F29200;
+  --wp--preset--color--bioco-beet: #87213D;
+  --wp--preset--color--bioco-bg: #F6F9F5;
+  --wp--preset--color--bioco-surface: #FFFFFF;
+  --wp--preset--color--bioco-text: #1F2A1B;
+  --wp--preset--color--bioco-text-muted: #4A4A4A;
+  --wp--preset--color--bioco-border: #E1E4E8;
+
+  /* settings.typography.fontFamilies[].slug -> --wp--preset--font-family--{slug} */
+  --wp--preset--font-family--body: 'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+
+  /* settings.typography.fontSizes[].slug -> --wp--preset--font-size--{slug} */
+  --wp--preset--font-size--sm: 0.875rem;
+  --wp--preset--font-size--base: 1rem;
+  --wp--preset--font-size--md: 1.125rem;
+  --wp--preset--font-size--lg: 1.25rem;
+  --wp--preset--font-size--xl: 1.5rem;
+  --wp--preset--font-size--2xl: 2rem;
+  --wp--preset--font-size--3xl: 2.5rem;
+
+  /* settings.spacing.spacingSizes[].slug -> --wp--preset--spacing--{slug} */
+  --wp--preset--spacing--20: 8px;
+  --wp--preset--spacing--30: 16px;
+  --wp--preset--spacing--40: 24px;
+  --wp--preset--spacing--50: 32px;
+  --wp--preset--spacing--60: 48px;
+  --wp--preset--spacing--70: 64px;
+  --wp--preset--spacing--80: 96px;
+
+  /* settings.custom.{radius,shadow} (nested) -> --wp--custom--{key}--{subkey} */
+  --wp--custom--radius--sm: 12px;
+  --wp--custom--radius--md: 18px;
+  --wp--custom--radius--lg: 24px;
+  --wp--custom--radius--pill: 999px;
+  --wp--custom--shadow--sm: 0 1px 3px rgba(31,42,27,0.08);
+  --wp--custom--shadow--md: 0 4px 12px rgba(31,42,27,0.12);
+  --wp--custom--shadow--lg: 0 8px 24px rgba(31,42,27,0.16);
+
+  /* settings.layout -> --wp--style--global--{content,wide}-size */
+  --wp--style--global--content-size: 1160px;
+  --wp--style--global--wide-size: 1400px;
+}
