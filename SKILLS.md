@@ -23,3 +23,11 @@ Check server health: Node.js process, port, logs, external HTTP status.
 **Usage:** `/server-status`
 
 **Skill file:** `.claude/skills/server-status.md`
+
+## /bunny
+
+Porting/migration methodology (codebase, CMS, theme, framework): porting guide first, adversarial reviews, conformance suite gate, all-at-once cutover. Extracted from Bun's Zig-to-Rust rewrite.
+
+**Usage:** `/bunny`
+
+**Skill file:** `.claude/skills/bunny/SKILL.md`
