@@ -36,6 +36,17 @@ const EXCLUDED_BASENAMES = new Set([
   'PersonIcons.tsx',
   'PlantIllustration.tsx',
   'PeaBullet.tsx',
+  // Error boundaries render WITHOUT the root layout, so app/globals.css (and
+  // therefore every CSS custom property) is unavailable to them — see the
+  // stale-deployment recovery path. Literals are the only thing that works
+  // here, which is also why D4 gave their brand colors `var(--x, #hex)`
+  // fallbacks rather than bare tokens.
+  'error.tsx',
+  'global-error.tsx',
+  'not-found.tsx',
+  // Email HTML: mail clients do not support CSS custom properties, so the
+  // templates must inline literal colors.
+  'email.ts',
 ])
 
 // Pre-existing raw-hex literals outside D13's scope (GH #87 only tokenizes
@@ -54,10 +65,23 @@ const DEFERRED: Record<string, string[]> = {
   // in HomeClient.tsx and VisualEditorWrapper.tsx.
   'components/HomeClient.tsx': ['#fff', '#4a7c59'],
   'components/sections/VisualEditorWrapper.tsx': ['#fff', '#4a7c59'],
+  // Runtime defaults for the CMS-configurable heading custom properties: this
+  // code BUILDS the `:root{--cms-h1-color:…}` string, so the fallback for an
+  // unset CMS value has to be a literal — a var() reference here would be
+  // self-referential.
+  'app/layout.tsx': ['#1a1a1a', '#1a1a1a'],
 }
 
-const sourceFileExtensions = new Set(['.tsx'])
-const ignoredDirs = new Set(['.next', 'coverage', 'node_modules', 'playwright-report', 'test-results'])
+const sourceFileExtensions = new Set(['.tsx', '.ts'])
+const ignoredDirs = new Set([
+  '.next',
+  'coverage',
+  'node_modules',
+  'playwright-report',
+  'test-results',
+  'tests',
+  'visual-editor-shell',
+])
 
 function walkComponents(dir: string): string[] {
   return readdirSync(dir).flatMap((entry) => {
@@ -70,7 +94,15 @@ function walkComponents(dir: string): string[] {
   })
 }
 
-const componentFiles = walkComponents(path.resolve(frontendRoot, 'components'))
+// Walk components/, app/ and lib/ — the guard is cited as *the* token-discipline
+// gate for frontend/** (.coderabbit.yaml), so scanning only components/ left
+// app/ and lib/ unguarded. Anything genuinely allowed there is keyed in
+// DEFERRED below, so new literals still fail.
+const componentFiles = [
+  ...walkComponents(path.resolve(frontendRoot, 'components')),
+  ...walkComponents(path.resolve(frontendRoot, 'app')),
+  ...walkComponents(path.resolve(frontendRoot, 'lib')),
+]
 
 // Multiset-subtracts the DEFERRED literals for this file from what was
 // actually found, so only *new* or *additional* hex literals are reported.
