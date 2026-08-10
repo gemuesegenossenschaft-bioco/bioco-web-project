@@ -1,0 +1,74 @@
+# CodeRabbit-Konfiguration für bioco-web-project
+# Wird aktiv, sobald die CodeRabbit GitHub App auf der Organisation
+# gemuesegenossenschaft-bioco installiert und für dieses Repo freigegeben ist:
+# https://github.com/apps/coderabbitai
+#
+# Bis dahin passiert nichts (die Datei ist harmlos). Aus der Entwicklungs-Sandbox
+# ist die CodeRabbit-API per Egress-Policy gesperrt (403 CONNECT) — die App auf
+# GitHub-Seite ist daher der vorgesehene Weg.
+language: de-DE
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  # Nur echte Quellen reviewen. Generierte/gevendorte Artefakte kosten
+  # Review-Budget ohne Nutzen.
+  path_filters:
+    - "!**/package-lock.json"
+    - "!**/composer.lock"
+    - "!site/templates/visual-editor-app.js"   # esbuild-Bundle (committetes Deploy-Artefakt)
+    - "!frontend/.next/**"
+    - "!wordpress/web/wp/**"                   # WordPress-Core (Composer-verwaltet)
+    - "!wordpress/web/app/plugins/**"          # Fremd-Plugins (Composer-verwaltet)
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+
+  path_instructions:
+    - path: "frontend/**"
+      instructions: >-
+        Next.js 14 App Router, headless gegen ProcessWire. Die Projektregeln in
+        CLAUDE.md sind verbindlich: Caching-/Revalidate-Vertrag (middleware.ts nur
+        Security-Header, Framing-Header ausschliesslich in next.config.js),
+        cmsClient.ts nutzt next.revalidate + Cache-Tags inkl. "cms". Inhalte sind
+        CMS-getrieben — hartkodierter deutscher Inhaltstext oder Fallback-Inhalt in
+        page.tsx/Komponenten ist ein Fehler (Ausnahme: /doi-confirm sowie
+        UI-Zustands-Strings wie Lade-/Leer-Zustände und Formular-Labels).
+        Design-Tokens: keine neuen Roh-Hex-Farben, Grössen oder Abstände — die
+        Tokens in app/globals.css :root sind die einzige Quelle (Wächtertest
+        tests/no-raw-hex.test.ts).
+    - path: "site/**"
+      instructions: >-
+        ProcessWire (PHP 8.2). api.php ist der einzige API-Router; content-save ist
+        sectionPwId-first. Visual-Editor-Constraints aus CLAUDE.md beachten:
+        ob_end_clean/exit in visual-editor.php, kein has_field-Selector (statt
+        dessen wire('templates') + hasField), Origin-Validierung im
+        postMessage-Protokoll. Keine Secrets in getrackten Dateien — alles über
+        getenv().
+    - path: "wordpress/**"
+      instructions: >-
+        Bedrock + Block-Theme + ACF Blocks. Kernregel (#101): das Theme ist
+        austauschbar — Inhalte, Blöcke, Felder und Formulare leben in den
+        mu-plugins bioco-core/bioco-content/bioco-forms, NICHT im Theme. Kein
+        Zugriff aus mu-plugins auf get_template_directory()/get_stylesheet_directory().
+        Divi ist lizenzpflichtig und wird nie eingecheckt. Ausgaben immer escapen
+        (esc_html/esc_url/esc_attr, wp_kses für Rich-Text). Secrets nur via getenv().
+    - path: "**/*.test.ts"
+      instructions: >-
+        Tests sind der Paritäts-Wächter dieses Projekts (Zero-Visual-Change-Umbau).
+        Prüfe, ob ein Test wirklich fehlschlagen KANN — vacuous oder tautologische
+        Assertions sind ein Befund.
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - main
+      - wordpress
+
+chat:
+  auto_reply: true
