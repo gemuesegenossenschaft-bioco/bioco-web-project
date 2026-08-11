@@ -23,9 +23,15 @@
 
 ### 1.2 ACF Pro is replaced by Secure Custom Fields — no purchase
 
-**Secure Custom Fields (SCF)** is WordPress.org's official fork of ACF, maintained by Automattic.
-Version 6.9.5 (7 Aug 2026) ships Repeater, Flexible Content, Options Pages, Gallery, Clone and ACF
-Blocks V3 — the whole Pro feature set, GPL, free.
+**Secure Custom Fields (SCF)** is WordPress.org's official fork of ACF, published under "By
+WordPress.org" and **community-maintained** via the `WordPress/secure-custom-fields` repository. (It is
+not an Automattic product — an earlier draft of this handoff said so and was wrong.) Version 6.9.5
+(7 Aug 2026) ships Repeater, Flexible Content, Options Pages, Gallery, Clone and ACF Blocks V3 — the
+whole Pro feature set, GPL, free.
+
+Being community-maintained rather than vendor-backed is worth weighing: it is the reason it is free,
+and also the reason its release cadence is not contractually anyone's problem. For this project that
+trade is fine — we depend on four ACF calls and a `block.json` key, not on a support relationship.
 
 The port's ACF surface is small enough to make this a drop-in rather than a rewrite:
 
@@ -202,7 +208,15 @@ do not touch `intranet.bioco.ch`.
    overwritten. **Read the dry-run report row by row** — a clean exit code is necessary but the rows are
    the actual evidence.
    *Acceptance:* `wp bioco verify` matches every field; 19 pages in wp-admin.
-6. **Live services (#97):** submit all five forms plus the membership route and DOI confirmation;
+6. **Frontend render gate — `wp bioco verify` is not enough.** It compares stored block data in
+   `post_content`; it never renders anything. The blank-page failure mode above passes `verify`
+   cleanly, because the data is fine and only the render is missing. Before staging sign-off, fetch
+   every one of the 19 pages over HTTP and assert non-empty rendered block markup — at minimum
+   `/abos` and `/wir` plus one page per block type (`timeline`, `depot-map`, `pricing-table`,
+   `gallery-strip`, `cards-grid`, a form).
+   *Acceptance:* all 19 return 200, none renders an empty `<main>`, and the nine depot locations are
+   present in the `/standorte-depots` HTML.
+7. **Live services (#97):** submit all five forms plus the membership route and DOI confirmation;
    confirm SMTP delivery and Turnstile verification.
 
    > Watch the half-configured Turnstile case: a missing **site** key while the **secret** is set makes
