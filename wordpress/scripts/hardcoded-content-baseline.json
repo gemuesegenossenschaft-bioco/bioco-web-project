@@ -1,0 +1,20 @@
+{
+    "web/app/mu-plugins/bioco-core/blocks/doi-confirm/render.php:hardcoded-prose": 4,
+    "web/app/mu-plugins/bioco-core/blocks/event-signup-form/render.php:hardcoded-prose": 1,
+    "web/app/mu-plugins/bioco-core/blocks/events-feed/render.php:fallback-content": 1,
+    "web/app/mu-plugins/bioco-core/blocks/events-feed/render.php:hardcoded-prose": 6,
+    "web/app/mu-plugins/bioco-core/blocks/gallery/render.php:hardcoded-prose": 3,
+    "web/app/mu-plugins/bioco-core/blocks/group-cards/render.php:hardcoded-prose": 1,
+    "web/app/mu-plugins/bioco-core/blocks/media-text/render.php:fallback-content": 1,
+    "web/app/mu-plugins/bioco-core/blocks/membership-form/render.php:hardcoded-prose": 28,
+    "web/app/mu-plugins/bioco-core/blocks/page-intro/render.php:fallback-content": 1,
+    "web/app/mu-plugins/bioco-core/blocks/pricing-calculator/render.php:fallback-content": 2,
+    "web/app/mu-plugins/bioco-core/blocks/pricing-calculator/render.php:hardcoded-prose": 7,
+    "web/app/mu-plugins/bioco-core/blocks/saisonkalender/render.php:hardcoded-prose": 1,
+    "web/app/mu-plugins/bioco-core/blocks/schnuppertage/render.php:fallback-content": 1,
+    "web/app/mu-plugins/bioco-core/blocks/schnuppertage/render.php:hardcoded-prose": 3,
+    "web/app/mu-plugins/bioco-core/blocks/timeline/render.php:fallback-content": 1,
+    "web/app/mu-plugins/bioco-core/blocks/visit-day-form/render.php:hardcoded-prose": 2,
+    "web/app/mu-plugins/bioco-core/blocks/waiting-list-form/render.php:hardcoded-prose": 2,
+    "web/app/mu-plugins/bioco-core/includes/helpers.php:hardcoded-prose": 3
+}
