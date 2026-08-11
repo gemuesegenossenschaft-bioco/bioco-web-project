@@ -101,7 +101,7 @@ function bioco_import_apply_config_fields(array &$values, array &$warnings, arra
     $config = is_array($section['section_config'] ?? null) ? $section['section_config'] : [];
     foreach ($config as $seedKey => $value) {
         if (!array_key_exists($seedKey, $fieldMap)) {
-            $warnings[] = "section_config.{$seedKey} has no matching field in bioco/{$block}; value was not imported.";
+            $warnings[] = "section_config.{$seedKey} hat kein passendes Feld in bioco/{$block} — Wert wurde nicht importiert.";
             continue;
         }
         if ($fieldMap[$seedKey] !== null) $values[$fieldMap[$seedKey]] = $value;
@@ -111,7 +111,7 @@ function bioco_import_apply_config_fields(array &$values, array &$warnings, arra
 function bioco_import_warn_unmapped_seed_fields(array &$warnings, array $section, array $fieldNames, $block) {
     foreach ($fieldNames as $fieldName) {
         if (!array_key_exists($fieldName, $section) || $section[$fieldName] === '' || $section[$fieldName] === []) continue;
-        $warnings[] = "Seed field '{$fieldName}' has no matching field in bioco/{$block}; value was not imported.";
+        $warnings[] = "Seed-Feld '{$fieldName}' hat kein passendes Feld in bioco/{$block} — Wert wurde nicht importiert.";
     }
 }
 
@@ -531,7 +531,7 @@ function bioco_import_plan_timeline_group(array $sectionGroup) {
             }
             $row['text'] = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($bodyText), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
             if ($sourceText !== strip_tags($sourceText)) {
-                $warnings[] = "Section {$sid}: section_text HTML formatting cannot be represented by timeline.items.text and was flattened.";
+                $warnings[] = "Section {$sid}: HTML-Formatierung aus section_text laesst sich in timeline.items.text nicht abbilden und wurde zu Fliesstext geglaettet.";
             }
         }
 
@@ -543,10 +543,10 @@ function bioco_import_plan_timeline_group(array $sectionGroup) {
                 if (!array_key_exists('container_width', $values)) {
                     $values['container_width'] = $value;
                 } elseif ((string) $values['container_width'] !== (string) $value) {
-                    $warnings[] = "Section {$sid}: section_config.containerWidth differs from the grouped timeline container and was not imported.";
+                    $warnings[] = "Section {$sid}: section_config.containerWidth weicht vom Container der gruppierten Zeitleiste ab und wurde nicht importiert.";
                 }
             } else {
-                $warnings[] = "Section {$sid}: section_config.{$seedKey} has no matching timeline item field; value was not imported.";
+                $warnings[] = "Section {$sid}: section_config.{$seedKey} hat kein passendes Feld an der Zeitleisten-Zeile — Wert wurde nicht importiert.";
             }
         }
         bioco_import_warn_unmapped_seed_fields($warnings, $section, ['buttons', 'image_url', 'image_alt'], 'timeline');

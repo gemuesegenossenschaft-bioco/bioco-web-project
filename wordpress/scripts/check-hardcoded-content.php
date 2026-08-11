@@ -208,7 +208,13 @@ foreach ($acfFiles as $file) {
     $walkFields = function ($fields, $path = '') use (&$walkFields, &$violations, &$allowedDefaults, $findDefaultContent, $raw, $rel) {
         foreach ($fields as $field) {
             if (!is_array($field)) continue;
-            $name = (string) ($field['name'] ?? $field['key'] ?? '?');
+            // Clone fields carry "name": "" — a set-but-empty value, which ??
+            // does NOT fall through. Without the explicit empty check the path
+            // degenerates to "group..sub" and the content heuristic receives an
+            // empty field name.
+            $name = (string) ($field['name'] ?? '');
+            if ($name === '') $name = (string) ($field['key'] ?? '');
+            if ($name === '') $name = '?';
             $fieldPath = $path === '' ? $name : $path . '.' . $name;
             if (array_key_exists('default_value', $field) && $field['default_value'] !== '' && $field['default_value'] !== [] && $field['default_value'] !== null) {
                 $keyNeedle = '"key": ' . json_encode((string) ($field['key'] ?? ''), JSON_UNESCAPED_UNICODE);
@@ -230,7 +236,9 @@ foreach ($acfFiles as $file) {
             if (is_array($field['sub_fields'] ?? null)) $walkFields($field['sub_fields'], $fieldPath);
             foreach (($field['layouts'] ?? []) as $layout) {
                 if (!is_array($layout)) continue;
-                $layoutName = (string) ($layout['name'] ?? $layout['key'] ?? 'layout');
+                $layoutName = (string) ($layout['name'] ?? '');
+                if ($layoutName === '') $layoutName = (string) ($layout['key'] ?? '');
+                if ($layoutName === '') $layoutName = 'layout';
                 if (is_array($layout['sub_fields'] ?? null)) $walkFields($layout['sub_fields'], $fieldPath . '.' . $layoutName);
             }
         }
