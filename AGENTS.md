@@ -8,6 +8,17 @@
 - The CMS->git `internal-docs-mirror` was removed; do not reintroduce it. docs.bioco.ch is the single source of truth.
 - Many `app/*/page.tsx` are still hardcoded JSX, not CMS-driven. `/abos` is the converted reference. CMS/VE edits to a hardcoded page do nothing until it renders via `SectionRenderer`.
 
+## HARD CONSTRAINT: no hardcoded content, no fallback content
+
+Non-negotiable, every agent, every branch. **Content never lives in code.** Full rationale in `CLAUDE.md`.
+
+1. No German prose, heading, label, button text, price or editorial copy in `.tsx`/`.php`/`.js`. If a human would reword it without a developer, it is content and belongs in the CMS.
+2. No fallback content: no `get_field('x') ?: 'Text'`, no `title || 'Nächste Events'`, no placeholder copy in a render template. A missing value renders nothing, never invented text — a fallback looks correct, so nobody notices the field was never filled.
+3. After the WordPress migration: WordPress elements exclusively. ACF field / block attribute / CPT entry / menu item, editable in wp-admin.
+4. Only exception, presentation defaults (`gap`, `rounded`, `columns_desktop`): allowed, but as the ACF field's `default_value`, not as a `?:` in PHP.
+5. Enforce mechanically: `frontend/tests/no-raw-hex.test.ts`, `wordpress/scripts/check-hardcoded-content.php`, `wordpress/scripts/check-seed-plan.php`. A violation must fail a gate, not depend on review.
+6. When unsure whether something is content or code, treat it as content and make it a field.
+
 ## Deploy Agent
 
 Deploys frontend and/or CMS to Novatrend cPanel.

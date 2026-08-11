@@ -10,6 +10,17 @@ Swiss organic vegetable cooperative. Headless CMS: ProcessWire (PHP). Frontend: 
 - The old `internal-docs-mirror` workflow + `internal-docs/` mirror were removed. Do not reintroduce a CMS->git docs mirror; docs.bioco.ch is the single source of truth. Dormant PW `/internal-docs/` plumbing remains but is unused.
 - **Content is CMS-driven only where converted.** `/abos` renders from `content_sections` (reference). Many other `app/*/page.tsx` are still hardcoded JSX: editing them in the CMS/Visual Editor changes nothing until the page is converted to `SectionRenderer`. When "CMS edits don't show", check the page is not hardcoded before suspecting revalidation.
 
+## HARD CONSTRAINT: no hardcoded content, no fallback content
+
+Non-negotiable, applies to every agent and every branch. **Content never lives in code.**
+
+- **No hardcoded content.** No German prose, heading, label, button text, list item, price, address, or editorial copy written into `.tsx`, `.php`, or `.js`. If a human would want to reword it without a developer, it is content and belongs in the CMS.
+- **No fallback content.** No `get_field('x') ?: 'Some text'`, no `title || 'Nächste Events'`, no "example list applies if the field is empty", no placeholder copy shipped in a render template. A missing value must render nothing (or an editable empty state), never invented text. Fallbacks are worse than absence: they look correct, so nobody notices the field was never filled.
+- **After the WordPress migration, WordPress elements exclusively.** Every piece of content is an ACF field / block attribute / CPT entry / menu item, editable in wp-admin. Not a PHP constant, not a `default_value` hidden in code, not a template literal.
+- **Presentation defaults are not content** and are the only exception: `columns_desktop`, `gap`, `rounded`, `media_fit` and similar layout knobs may carry a default — but express it as the ACF field's `default_value` (a WordPress element the editor can see and change), not as a `?:` in PHP.
+- Enforcement is mechanical, not by memory: `frontend/tests/no-raw-hex.test.ts` for design tokens, `wordpress/scripts/check-hardcoded-content.php` for block templates, `wordpress/scripts/check-seed-plan.php` for seed coverage. Adding a violation must fail a gate, not rely on review.
+- Escape hatch, deliberately narrow: pure UI mechanics with no editorial meaning (`aria-label`, `type="submit"`, a CSS class name) are code. When unsure, treat it as content and make it a field.
+
 ## Architecture
 
 Single Novatrend cPanel server (193.33.128.160):
