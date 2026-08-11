@@ -15,8 +15,15 @@ $eyebrow = get_field('eyebrow');
 $title = get_field('title');
 $text = get_field('text');
 $share_price = (int) (get_field('share_price') ?: 250);
-$work_suffix = get_field('work_suffix') ?: 'Arbeitseinsätze à 2 Stunden';
-$signup_url = get_field('signup_url') ?: '/mitmachen';
+$work_suffix = get_field('work_suffix');
+$signup_url = get_field('signup_url');
+$shares_only_label = get_field('shares_only_label');
+$annual_contribution_label = get_field('annual_contribution_label');
+$work_label = get_field('work_label');
+$one_time_payment_label = get_field('one_time_payment_label');
+$additional_shares_label = get_field('additional_shares_label');
+$cta_label = get_field('cta_label');
+$cta_note = get_field('cta_note');
 $tiers = get_field('tiers');
 
 if (empty($tiers)) {
@@ -95,7 +102,7 @@ $grand_total = $first_price + $shares_total;
                     data-tier-work="0"
                 >
                     Kein Abo<br />
-                    <span class="price">Nur Anteilsscheine</span>
+<?php if ($shares_only_label) : ?>                    <span class="price"><?php echo esc_html($shares_only_label); ?></span><?php endif; ?>
                 </button>
             </div>
         </div>
@@ -116,10 +123,10 @@ $grand_total = $first_price + $shares_total;
                         <td>
                             <span data-pc-field="abo-name"><?php echo esc_html($first_tier['name']); ?></span>
                             <span class="payment-type-label" style="display: block; margin-top: 4px;">
-                                <strong style="color: var(--wp--preset--color--bioco-green); font-size: 0.875rem;">Jährlicher Beitrag</strong>
+<?php if ($annual_contribution_label) : ?>                                <strong style="color: var(--wp--preset--color--bioco-green); font-size: 0.875rem;"><?php echo esc_html($annual_contribution_label); ?></strong><?php endif; ?>
                             </span>
                             <span class="mitarbeit-info" style="display: block; margin-top: 8px; font-size: 0.875rem; color: var(--wp--preset--color--bioco-text-muted);">
-                                <strong>Mitarbeit pro Jahr:</strong> <span data-pc-field="abo-work"><?php echo esc_html($first_work); ?></span> <?php echo esc_html($work_suffix); ?>
+<?php if ($work_label) : ?>                                <strong><?php echo esc_html($work_label); ?></strong><?php endif; ?> <span data-pc-field="abo-work"><?php echo esc_html($first_work); ?></span> <?php echo esc_html($work_suffix); ?>
                             </span>
                         </td>
                         <td>1</td>
@@ -131,7 +138,7 @@ $grand_total = $first_price + $shares_total;
                         <td>
                             Anteilsscheine
                             <span class="payment-type-label" style="display: block; margin-top: 4px;">
-                                <strong style="color: var(--wp--preset--color--bioco-beet); font-size: 0.875rem;">Einmalige Zahlung</strong>
+<?php if ($one_time_payment_label) : ?>                                <strong style="color: var(--wp--preset--color--bioco-beet); font-size: 0.875rem;"><?php echo esc_html($one_time_payment_label); ?></strong><?php endif; ?>
                             </span>
                             <span class="text-sm" data-pc-field="shares-note" style="display: block; color: var(--wp--preset--color--bioco-text-muted); margin-top: 4px;">
                                 (<span data-pc-field="shares-required"><?php echo esc_html($first_shares); ?></span> erforderlich)
@@ -142,7 +149,7 @@ $grand_total = $first_price + $shares_total;
                         <td><strong>CHF <span data-pc-field="shares-total"><?php echo esc_html(number_format_i18n($shares_total)); ?></span>.-</strong></td>
                         <td>
                             <div class="share-buttons-container">
-                                <div class="share-buttons-label"><strong>Zusätzliche Anteilsscheine hinzufügen:</strong></div>
+<?php if ($additional_shares_label) : ?>                                <div class="share-buttons-label"><strong><?php echo esc_html($additional_shares_label); ?></strong></div><?php endif; ?>
                                 <div class="share-buttons">
                                     <button type="button" class="btn-remove-share" data-pc-action="remove-share" aria-label="Ein Anteilsschein entfernen" title="Ein Anteilsschein entfernen" style="display: none;">-1</button>
                                     <button type="button" class="btn-add-share" data-pc-action="add-share" aria-label="Ein zusätzlicher Anteilsschein hinzufügen" title="Ein zusätzlicher Anteilsschein hinzufügen">+1</button>
@@ -165,13 +172,13 @@ $grand_total = $first_price + $shares_total;
         </div>
 
         <div class="pc-actions" data-pc-role="cta-block" style="margin-top: 24px; text-align: center;">
-            <a
+<?php if ($signup_url && $cta_label) : ?>            <a
                 class="btn btn-primary"
                 data-pc-field="cta"
                 href="<?php echo esc_url(add_query_arg(['abo' => $first_slug, 'shares' => $first_shares, 'additional' => 0], $signup_url)); ?>"
                 style="display: inline-block; font-size: 1.125rem; padding: 16px 32px;"
-            >Jetzt mitmachen!</a>
-            <p style="margin-top: 12px; font-size: 0.875rem; color: var(--wp--preset--color--bioco-text-muted);">Deine Auswahl wird automatisch ins Anmeldeformular übernommen</p>
+            ><?php echo esc_html($cta_label); ?></a><?php endif; ?>
+<?php if ($cta_note) : ?>            <p style="margin-top: 12px; font-size: 0.875rem; color: var(--wp--preset--color--bioco-text-muted);"><?php echo esc_html($cta_note); ?></p><?php endif; ?>
         </div>
     </div>
 </section>

@@ -76,6 +76,66 @@
                     "placeholder": ""
                 }
             ]
+        },
+        {
+            "key": "field_bioco_gallery_show_more_label",
+            "label": "Text des Mehr-anzeigen-Buttons",
+            "name": "show_more_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Mehr sehen",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_gallery_loading_title",
+            "label": "Titel ohne Bilder",
+            "name": "loading_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Galerie-Bilder werden geladen…",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_gallery_loading_text",
+            "label": "Text ohne Bilder",
+            "name": "loading_text",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Die Galerie wird in Kürze mit Bildern gefüllt.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [
@@ -96,5 +156,5 @@
     "active": true,
     "description": "Felder für den Galerie-Block (W9 interactive blocks, Issue #96). Filter-Buttons/Auswahl (view.js) und \"Mehr sehen\"-Umschalter mirrors Gallery.tsx; die Lightbox/Klick-zum-Vergrössern-Funktion ist auf später (nach W11) verschoben.",
     "show_in_rest": 0,
-    "modified": 1783814400
+    "modified": 1786406400
 }

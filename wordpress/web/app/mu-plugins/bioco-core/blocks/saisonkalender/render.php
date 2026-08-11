@@ -13,6 +13,7 @@ if (!defined('ABSPATH')) exit;
 $months = [1 => 'Jan', 2 => 'Feb', 3 => 'Mär', 4 => 'Apr', 5 => 'Mai', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Dez'];
 
 $vegetables = get_field('vegetables');
+$empty_message = get_field('empty_message');
 
 // Small curated subset derived from Saisonkalender.tsx's SEASONAL_DATA,
 // documented here so a fresh install isn't blank. Not the full ~50-vegetable
@@ -67,6 +68,6 @@ if (!empty($block['className'])) {
             </table>
         </div>
     <?php else : ?>
-        <p style="color: var(--wp--preset--color--bioco-text-muted);">Noch kein Saisonkalender hinterlegt.</p>
+<?php if ($empty_message) : ?>        <p style="color: var(--wp--preset--color--bioco-text-muted);"><?php echo esc_html($empty_message); ?></p><?php endif; ?>
     <?php endif; ?>
 </section>

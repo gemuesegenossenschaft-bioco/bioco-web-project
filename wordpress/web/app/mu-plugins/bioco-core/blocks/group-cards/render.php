@@ -11,6 +11,7 @@
 if (!defined('ABSPATH')) exit;
 
 $limit = (int) (get_field('limit') ?: -1);
+$empty_message = get_field('empty_message');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'group-cards';
 $class_name = 'cms-section cms-group-cards';
@@ -54,6 +55,6 @@ $groups_query = new WP_Query([
             <?php endwhile; wp_reset_postdata(); ?>
         </div>
     <?php else : ?>
-        <p style="color: var(--wp--preset--color--bioco-text-muted);">Aktuell sind keine Gruppen eingetragen.</p>
+<?php if ($empty_message) : ?>        <p style="color: var(--wp--preset--color--bioco-text-muted);"><?php echo esc_html($empty_message); ?></p><?php endif; ?>
     <?php endif; ?>
 </section>

@@ -147,6 +147,66 @@
             "max": 10,
             "step": 1,
             "placeholder": ""
+        },
+        {
+            "key": "field_bioco_schnuppertage_schedule_title",
+            "label": "Titel über den Terminen",
+            "name": "schedule_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Nächste Termine",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_schnuppertage_signup_label",
+            "label": "Text des Anmeldebuttons",
+            "name": "signup_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "33",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Jetzt anmelden",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_schnuppertage_empty_message",
+            "label": "Hinweis ohne Termine",
+            "name": "empty_message",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "34",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Aktuell sind keine Schnuppertage geplant.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [
@@ -167,5 +227,5 @@
     "active": true,
     "description": "Felder für den Schnuppertage-Block (W9 interactive blocks, Issue #96). Editorial (title/text/list_label/items/closing) mirrors SchnuppertageSection.tsx's section_config-driven fields (list_label/item1..7/closing); die Nächste-Termine-Liste rendert live per bioco_query_events('upcoming', $limit, 'schnuppertag') — derselbe Helper wie bioco/events-feed.",
     "show_in_rest": 0,
-    "modified": 1783814400
+    "modified": 1786406400
 }

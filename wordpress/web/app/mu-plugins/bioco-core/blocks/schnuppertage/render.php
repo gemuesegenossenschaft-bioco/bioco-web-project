@@ -16,8 +16,11 @@ $text = get_field('text');
 $list_label = get_field('list_label');
 $items = get_field('items');
 $closing = get_field('closing');
-$signup_anchor = get_field('signup_anchor') ?: '#anmeldung';
+$signup_anchor = get_field('signup_anchor');
 $limit = (int) (get_field('limit') ?: 3);
+$schedule_title = get_field('schedule_title');
+$signup_label = get_field('signup_label');
+$empty_message = get_field('empty_message');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'schnuppertage';
 $class_name = 'cms-section cms-schnuppertage';
@@ -58,7 +61,7 @@ $termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag');
         </div>
     <?php endif; ?>
 
-    <h4 class="cms-schnuppertage-termine-heading">Nächste Termine</h4>
+<?php if ($schedule_title) : ?>    <h4 class="cms-schnuppertage-termine-heading"><?php echo esc_html($schedule_title); ?></h4><?php endif; ?>
     <div class="cms-schnuppertage-termine">
         <?php if ($termine_query->have_posts()) : ?>
             <?php while ($termine_query->have_posts()) :
@@ -74,11 +77,11 @@ $termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag');
                             <?php if ($date_parts['timeLabel']) : ?> · <?php echo esc_html($date_parts['timeLabel']); ?><?php endif; ?>
                         </span>
                     </div>
-                    <a href="<?php echo esc_url($signup_anchor); ?>" class="btn btn-primary btn-organic">Jetzt anmelden</a>
+<?php if ($signup_anchor && $signup_label) : ?>                    <a href="<?php echo esc_url($signup_anchor); ?>" class="btn btn-primary btn-organic"><?php echo esc_html($signup_label); ?></a><?php endif; ?>
                 </div>
             <?php endwhile; wp_reset_postdata(); ?>
         <?php else : ?>
-            <p style="color: var(--wp--preset--color--bioco-text-muted);">Aktuell sind keine Schnuppertage geplant.</p>
+<?php if ($empty_message) : ?>            <p style="color: var(--wp--preset--color--bioco-text-muted);"><?php echo esc_html($empty_message); ?></p><?php endif; ?>
         <?php endif; ?>
     </div>
 </section>

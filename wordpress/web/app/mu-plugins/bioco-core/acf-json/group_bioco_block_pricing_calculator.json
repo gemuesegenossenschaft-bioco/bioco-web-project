@@ -87,6 +87,146 @@
             "append": ""
         },
         {
+            "key": "field_bioco_pricing_calculator_shares_only_label",
+            "label": "Hinweis bei Abo ohne Korb",
+            "name": "shares_only_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Nur Anteilsscheine",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_annual_contribution_label",
+            "label": "Bezeichnung Jahresbeitrag",
+            "name": "annual_contribution_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Jährlicher Beitrag",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_work_label",
+            "label": "Bezeichnung Mitarbeit",
+            "name": "work_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Mitarbeit pro Jahr:",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_one_time_payment_label",
+            "label": "Bezeichnung Einmalzahlung",
+            "name": "one_time_payment_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Einmalige Zahlung",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_additional_shares_label",
+            "label": "Bezeichnung zusätzliche Anteilsscheine",
+            "name": "additional_shares_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Zusätzliche Anteilsscheine hinzufügen:",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_cta_label",
+            "label": "Text des Anmeldebuttons",
+            "name": "cta_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Jetzt mitmachen!",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_cta_note",
+            "label": "Hinweis unter dem Anmeldebutton",
+            "name": "cta_note",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Deine Auswahl wird automatisch ins Anmeldeformular übernommen",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
             "key": "field_bioco_pricing_calculator_tiers",
             "label": "Abo-Stufen",
             "name": "tiers",
@@ -228,5 +368,5 @@
     "active": true,
     "description": "Felder für den Preis-Rechner-Block (W9 interactive blocks, Issue #96). Eigenes numerisches Stufen-Repeater statt eines Clones von field_bioco_pricing_table_tiers: die Preis-Tabelle-Felder (price/sharecost) sind Freitext (\"CHF 750.-\") und für die Live-Berechnung in view.js ungeeignet, daher price/shares/work hier als number-Felder. Inhalt klont weiterhin aus Section Common.",
     "show_in_rest": 0,
-    "modified": 1783814400
+    "modified": 1786406400
 }

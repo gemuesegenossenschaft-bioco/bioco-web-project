@@ -50,11 +50,11 @@
         },
         {
             "key": "field_bioco_events_feed_title",
-            "label": "Titel (nur Banner)",
+            "label": "Banner-Titel",
             "name": "title",
             "aria-label": "",
             "type": "text",
-            "instructions": "Überschrift der Banner-Variante. Die Standard-Variante nutzt einen festen Titel (\"Nächste Events\").",
+            "instructions": "Überschrift der Banner-Variante.",
             "required": 0,
             "conditional_logic": [
                 [
@@ -71,6 +71,174 @@
                 "id": ""
             },
             "default_value": "Nächste Events",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_events_feed_banner_link_label",
+            "label": "Banner-Linktext",
+            "name": "banner_link_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_bioco_events_feed_variant",
+                        "operator": "==",
+                        "value": "banner"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Alle Events ansehen →",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_events_feed_standard_title",
+            "label": "Titel der Standardansicht",
+            "name": "standard_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_bioco_events_feed_variant",
+                        "operator": "==",
+                        "value": "standard"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Nächste Events",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_events_feed_standard_link_label",
+            "label": "Linktext der Standardansicht",
+            "name": "standard_link_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_bioco_events_feed_variant",
+                        "operator": "==",
+                        "value": "standard"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Alle Events ansehen",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_events_feed_past_title",
+            "label": "Rückblick-Titel",
+            "name": "past_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_bioco_events_feed_variant",
+                        "operator": "==",
+                        "value": "standard"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Vergangene Events & Eindrücke",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_events_feed_past_description",
+            "label": "Rückblick-Beschreibung",
+            "name": "past_description",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_bioco_events_feed_variant",
+                        "operator": "==",
+                        "value": "standard"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Rückblicke mit Fotos und Videos aus unserer Community.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_events_feed_past_link_label",
+            "label": "Rückblick-Linktext",
+            "name": "past_link_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": [
+                [
+                    {
+                        "field": "field_bioco_events_feed_variant",
+                        "operator": "==",
+                        "value": "standard"
+                    }
+                ]
+            ],
+            "wrapper": {
+                "width": "50",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Rückblick ansehen →",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -95,5 +263,5 @@
     "active": true,
     "description": "Felder für den Events-Feed-Block (W8 content model, Issue #95). Liest die Veranstaltung-CPT per WP_Query (event_status/event_date), keine eigenen Inhaltsfelder — die Daten kommen aus den Veranstaltungs-Beiträgen selbst.",
     "show_in_rest": 0,
-    "modified": 1783814400
+    "modified": 1786406400
 }

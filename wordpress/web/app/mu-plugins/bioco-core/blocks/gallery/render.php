@@ -12,6 +12,9 @@
 if (!defined('ABSPATH')) exit;
 
 $items = get_field('items');
+$show_more_label = get_field('show_more_label');
+$loading_title = get_field('loading_title');
+$loading_text = get_field('loading_text');
 
 $filters = [
     'all' => 'Alles',
@@ -53,13 +56,13 @@ if (!empty($block['className'])) {
             </div>
             <?php if (count($items) > 4) : ?>
                 <div style="margin-top: var(--wp--preset--spacing--40); text-align: center;">
-                    <button type="button" class="btn btn-secondary" data-gallery-toggle>Mehr sehen</button>
+<?php if ($show_more_label) : ?>                    <button type="button" class="btn btn-secondary" data-gallery-toggle><?php echo esc_html($show_more_label); ?></button><?php endif; ?>
                 </div>
             <?php endif; ?>
         <?php else : ?>
             <div class="gallery-placeholder">
-                <p>Galerie-Bilder werden geladen…</p>
-                <p style="font-size: 0.875rem; color: var(--wp--preset--color--bioco-text-muted);">Die Galerie wird in Kürze mit Bildern gefüllt.</p>
+<?php if ($loading_title) : ?>                <p><?php echo esc_html($loading_title); ?></p><?php endif; ?>
+<?php if ($loading_text) : ?>                <p style="font-size: 0.875rem; color: var(--wp--preset--color--bioco-text-muted);"><?php echo esc_html($loading_text); ?></p><?php endif; ?>
             </div>
         <?php endif; ?>
     </div>

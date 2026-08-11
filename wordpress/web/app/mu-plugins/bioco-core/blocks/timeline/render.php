@@ -15,7 +15,7 @@ $title = get_field('title');
 $text = get_field('text');
 $items = get_field('items');
 $container_width = get_field('container_width') ?: 'lg';
-$text_width = get_field('text_width') ?: 'normal';
+$text_width = get_field('text_width');
 $align = get_field('align') ?: 'left';
 
 if ($is_preview && !$title && !$text && empty($items)) {

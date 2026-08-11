@@ -104,6 +104,11 @@ function bioco_import_acf_unmatched_fields(array $values, array $fields) {
  * Values without a matching field are skipped here (the caller is expected
  * to have already reported them via bioco_import_acf_unmatched_fields()).
  *
+ * Fields the plan does NOT supply are still written out with their own
+ * default_value (scalars only, never repeaters) — see the comment in the loop
+ * for why omitting them would render as a missing heading rather than as a
+ * default.
+ *
  * Repeaters use ACF's documented row-index programmatic format:
  *   data.{name}            = row count
  *   data._{name}           = repeater field key
@@ -114,7 +119,35 @@ function bioco_import_acf_block_data(array $values, array $fields) {
     $data = [];
     foreach ($fields as $field) {
         $name = $field['name'] ?? '';
-        if ($name === '' || !array_key_exists($name, $values)) continue;
+        if ($name === '') continue;
+
+        if (!array_key_exists($name, $values)) {
+            // The plan does not supply this field. Write the field's own
+            // default_value into the block data anyway, rather than omitting the
+            // key and trusting ACF to substitute the default at render time.
+            //
+            // Why: an ACF block keeps its values in the serialized block
+            // attributes. A key absent there has no value on THIS block
+            // instance, and whether get_field() then falls back to
+            // default_value is ACF-internal behaviour we would be relying on
+            // invisibly. Because the render templates deliberately carry no
+            // content fallbacks (CLAUDE.md: no fallback content), an unresolved
+            // default does not degrade to placeholder text — it renders as a
+            // MISSING heading or link, silently, on a live page.
+            //
+            // Writing it explicitly makes the output deterministic and keeps the
+            // string editable in wp-admin, which is the entire point of moving
+            // it out of the template. Repeaters are skipped: their "default" is
+            // row structure rather than a scalar, and every repeater the
+            // importer cares about is filled from the seed.
+            if (($field['type'] ?? '') === 'repeater') continue;
+            $default = $field['default_value'] ?? null;
+            if ($default === null || $default === '' || is_array($default)) continue;
+            $data[$name] = $default;
+            $data['_' . $name] = $field['key'];
+            continue;
+        }
+
         $value = $values[$name];
 
         if (($field['type'] ?? '') === 'repeater') {

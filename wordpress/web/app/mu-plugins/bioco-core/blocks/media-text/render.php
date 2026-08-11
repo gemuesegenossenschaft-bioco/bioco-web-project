@@ -8,7 +8,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-$media_side = get_field('media_side') ?: 'left';
+$media_side = get_field('media_side');
 $image = get_field('image');
 $image_alt_override = get_field('image_alt');
 $image_overlay = get_field('image_overlay');

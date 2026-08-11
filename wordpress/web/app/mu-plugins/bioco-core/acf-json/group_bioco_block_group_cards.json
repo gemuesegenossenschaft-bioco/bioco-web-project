@@ -21,6 +21,26 @@
             "max": 50,
             "step": 1,
             "placeholder": ""
+        },
+        {
+            "key": "field_bioco_group_cards_empty_message",
+            "label": "Hinweis ohne Gruppen",
+            "name": "empty_message",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "67",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Aktuell sind keine Gruppen eingetragen.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [
@@ -41,5 +61,5 @@
     "active": true,
     "description": "Felder für den Gruppen-Karten-Block (W8 content model, Issue #95). Keine eigenen Inhaltsfelder — die Karten kommen aus der Gruppe-CPT (group_text/group_image/group_contact) per WP_Query.",
     "show_in_rest": 0,
-    "modified": 1783814400
+    "modified": 1786406400
 }
