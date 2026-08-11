@@ -22,6 +22,7 @@ export type ForwardToIntranetResult = {
 
 type ForwardToIntranetOptions = {
   fetchImpl?: typeof fetch
+  timeoutMs?: number
 }
 
 function extractCsrfCookie(headers: Headers): string | null {
@@ -66,10 +67,26 @@ function extractDjangoFieldErrors(html: string): Record<string, string> {
   return errors
 }
 
-function withTimeout<T>(run: (signal: AbortSignal) => Promise<T>): Promise<T> {
+function withTimeout<T>(run: (signal: AbortSignal) => Promise<T>, timeoutMs: number): Promise<T> {
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
   return run(controller.signal).finally(() => clearTimeout(timeout))
+}
+
+// Wraps fetch AND the body read in the same timeout budget — a stalled
+// response body (fetch settles but .text() never resolves) must also abort,
+// not just a stalled connection.
+function fetchText(
+  fetchImpl: typeof fetch,
+  url: string,
+  init: RequestInit,
+  timeoutMs: number
+): Promise<{ status: number; headers: Headers; text: string }> {
+  return withTimeout(async (signal) => {
+    const response = await fetchImpl(url, { ...init, signal })
+    const text = await response.text()
+    return { status: response.status, headers: response.headers, text }
+  }, timeoutMs)
 }
 
 export async function forwardToIntranet(
@@ -82,15 +99,13 @@ export async function forwardToIntranet(
   }
 
   const fetchImpl = opts.fetchImpl ?? fetch
+  const timeoutMs = opts.timeoutMs ?? REQUEST_TIMEOUT_MS
 
   try {
-    const primeResponse = await withTimeout((signal) =>
-      fetchImpl(url, { method: 'GET', redirect: 'manual', signal })
-    )
+    const prime = await fetchText(fetchImpl, url, { method: 'GET', redirect: 'manual' }, timeoutMs)
 
-    const csrfToken = extractCsrfCookie(primeResponse.headers)
-    const primeBody = await primeResponse.text()
-    const csrfMiddlewareToken = extractHiddenCsrfToken(primeBody)
+    const csrfToken = extractCsrfCookie(prime.headers)
+    const csrfMiddlewareToken = extractHiddenCsrfToken(prime.text)
 
     if (!csrfToken || !csrfMiddlewareToken) {
       return { ok: false, error: 'csrf_prime_failed' }
@@ -101,8 +116,10 @@ export async function forwardToIntranet(
       csrfmiddlewaretoken: csrfMiddlewareToken,
     })
 
-    const forwardResponse = await withTimeout((signal) =>
-      fetchImpl(url, {
+    const forward = await fetchText(
+      fetchImpl,
+      url,
+      {
         method: 'POST',
         redirect: 'manual',
         headers: {
@@ -111,24 +128,23 @@ export async function forwardToIntranet(
           Referer: url,
         },
         body: body.toString(),
-        signal,
-      })
+      },
+      timeoutMs
     )
 
-    if (forwardResponse.status >= 300 && forwardResponse.status < 400) {
-      return { ok: true, status: forwardResponse.status }
+    if (forward.status >= 300 && forward.status < 400) {
+      return { ok: true, status: forward.status }
     }
 
-    if (forwardResponse.status >= 200 && forwardResponse.status < 300) {
-      const text = await forwardResponse.text()
-      const errors = extractDjangoFieldErrors(text)
+    if (forward.status >= 200 && forward.status < 300) {
+      const errors = extractDjangoFieldErrors(forward.text)
       if (Object.keys(errors).length > 0) {
-        return { ok: false, status: forwardResponse.status, errors }
+        return { ok: false, status: forward.status, errors }
       }
-      return { ok: true, status: forwardResponse.status }
+      return { ok: true, status: forward.status }
     }
 
-    return { ok: false, status: forwardResponse.status, error: `unexpected_status_${forwardResponse.status}` }
+    return { ok: false, status: forward.status, error: `unexpected_status_${forward.status}` }
   } catch (error: any) {
     return { ok: false, error: error?.message || 'network_error' }
   }

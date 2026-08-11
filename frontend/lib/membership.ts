@@ -28,6 +28,20 @@ export interface MembershipValidation {
   errors: Record<string, string>
 }
 
+// Number of items in the commitment checklist (Statuten-/Betriebsreglement
+// acknowledgement) rendered by components/forms/MembershipForm.tsx. Single
+// source of truth — both the form and validateMembership/buildIntranetSignupPayload
+// derive from this constant.
+export const COMMITMENT_ITEM_COUNT = 4
+
+function isCommitmentAcknowledgementComplete(commitmentAccepted?: boolean[]): boolean {
+  return (
+    Array.isArray(commitmentAccepted) &&
+    commitmentAccepted.length === COMMITMENT_ITEM_COUNT &&
+    commitmentAccepted.every(Boolean)
+  )
+}
+
 export function validateMembership(data: MembershipInput): MembershipValidation {
   const errors: Record<string, string> = {}
   const requiredFields = ['firstName', 'lastName', 'email', 'address', 'zip', 'city'] as const
@@ -36,6 +50,10 @@ export function validateMembership(data: MembershipInput): MembershipValidation 
     if (typeof data[field] !== 'string' || !data[field].trim()) {
       errors[field] = 'Dieses Feld ist erforderlich.'
     }
+  }
+
+  if (!isCommitmentAcknowledgementComplete(data.commitmentAccepted)) {
+    errors.commitment = 'Bitte bestätige alle Punkte, bevor du fortfährst.'
   }
 
   if (data.privacyAccept !== true) {
@@ -118,10 +136,7 @@ function buildNotes(data: MembershipInput): string {
 
 // Pure mapping only — see lib/intranetSignup.ts for the adapter that sends this.
 export function buildIntranetSignupPayload(data: MembershipInput): Record<string, string> {
-  const commitmentAccepted = Array.isArray(data.commitmentAccepted)
-    ? data.commitmentAccepted.every(Boolean)
-    : false
-  const terms = commitmentAccepted && data.privacyAccept === true
+  const terms = isCommitmentAcknowledgementComplete(data.commitmentAccepted) && data.privacyAccept === true
 
   return {
     [INTRANET_FIELD_NAMES.firstName]: data.firstName ?? '',

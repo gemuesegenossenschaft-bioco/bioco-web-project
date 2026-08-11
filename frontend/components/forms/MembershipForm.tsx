@@ -8,6 +8,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 import { FormField, TextInput, SelectField } from '@/components/ui/FormField'
 import { Card } from '@/components/ui/Card'
+import { COMMITMENT_ITEM_COUNT } from '@/lib/membership'
 
 type AboType = 'halb' | 'standard' | 'doppel' | 'none'
 type PaymentType = 'quarterly' | 'yearly'
@@ -142,7 +143,7 @@ export function MembershipForm({ initialData }: MembershipFormProps) {
     otherActivity: '',
     zusatzabos: [],
     weitereProdukte: '',
-    commitmentAccepted: [false, false, false, false], // 4 commitment items
+    commitmentAccepted: Array(COMMITMENT_ITEM_COUNT).fill(false),
     privacyAccept: false,
   })
 

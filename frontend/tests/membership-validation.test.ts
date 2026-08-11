@@ -10,6 +10,7 @@ const valid = {
   address: 'Dorfstrasse 1',
   zip: '5236',
   city: 'Gebenstorf',
+  commitmentAccepted: [true, true, true, true],
   privacyAccept: true,
 }
 
@@ -33,6 +34,20 @@ describe('validateMembership (D.1)', () => {
     const r = validateMembership({ ...valid, privacyAccept: false })
     expect(r.ok).toBe(false)
     expect(r.errors.privacyAccept).toBeTruthy()
+  })
+
+  it('requires the commitment acknowledgement (Statuten-/Betriebsreglement)', () => {
+    const missing = validateMembership({ ...valid, commitmentAccepted: undefined })
+    expect(missing.ok).toBe(false)
+    expect(missing.errors.commitment).toBeTruthy()
+
+    const incomplete = validateMembership({ ...valid, commitmentAccepted: [true, true, false, true] })
+    expect(incomplete.ok).toBe(false)
+    expect(incomplete.errors.commitment).toBeTruthy()
+
+    const empty = validateMembership({ ...valid, commitmentAccepted: [] })
+    expect(empty.ok).toBe(false)
+    expect(empty.errors.commitment).toBeTruthy()
   })
 
   it('rejects a malformed email', () => {

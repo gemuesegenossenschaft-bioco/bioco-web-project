@@ -83,15 +83,6 @@ const findDuplicateDesignTokens = (source: string) => {
 }
 
 const duplicateDesignTokens = findDuplicateDesignTokens(loadedCss)
-const duplicateTokenTest = duplicateDesignTokens.length > 0 ? it.skip : it
-
-if (duplicateDesignTokens.length > 0) {
-  it.todo(
-    `D2 removes duplicate loaded design token definitions: ${duplicateDesignTokens
-      .map(({ token, count }) => `${token} (${count})`)
-      .join(', ')}`
-  )
-}
 
 const countDefs = (name: string) =>
   (loadedCss.match(new RegExp(`--${name}\\s*:`, 'g')) || []).length
@@ -109,7 +100,7 @@ describe('page-shell tokens (C.1)', () => {
     ).toEqual([])
   })
 
-  duplicateTokenTest('defines each loaded design custom-property token at most once', () => {
+  it('defines each loaded design custom-property token at most once', () => {
     expect(duplicateDesignTokens).toEqual([])
   })
 

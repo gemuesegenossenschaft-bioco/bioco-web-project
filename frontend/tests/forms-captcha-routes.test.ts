@@ -10,6 +10,7 @@ vi.mock('@/lib/turnstile', () => ({
 
 import { sendFormEmail } from '@/lib/email'
 import { verifyTurnstileToken } from '@/lib/turnstile'
+import { resetRateLimits } from '@/lib/rateLimit'
 
 const captchaProtectedRouteSpecs = [
   {
@@ -65,6 +66,7 @@ const captchaFreeRouteSpecs = [
       address: 'Street 1',
       zip: '8000',
       city: 'Zurich',
+      commitmentAccepted: [true, true, true, true],
       privacyAccept: true,
     },
   },
@@ -73,6 +75,7 @@ const captchaFreeRouteSpecs = [
 describe('form routes captcha enforcement', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    resetRateLimits()
   })
 
   it('returns 400 when captcha missing', async () => {

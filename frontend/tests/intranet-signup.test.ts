@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { INTRANET_FIELD_NAMES, buildIntranetSignupPayload } from '@/lib/membership'
+import { INTRANET_FIELD_NAMES, buildIntranetSignupPayload, validateMembership } from '@/lib/membership'
 import { forwardToIntranet } from '@/lib/intranetSignup'
 
 // D.2a — full MembershipForm fixture, as submitted by
@@ -87,6 +87,52 @@ describe('buildIntranetSignupPayload (D.2a contract test)', () => {
     expect(missingPrivacy[INTRANET_FIELD_NAMES.terms]).toBe('')
   })
 
+  // Regression: `[].every(Boolean) === true`, so omitting commitmentAccepted
+  // (or sending it as an empty/short array) must NOT be treated as acceptance —
+  // that would falsely assert to the intranet that the Statuten-/
+  // Betriebsreglement acknowledgement was given.
+  it('does not set terms=on when commitmentAccepted is omitted entirely', () => {
+    const { commitmentAccepted, ...withoutCommitment } = fullMembershipFixture
+    const payload = buildIntranetSignupPayload(withoutCommitment)
+
+    expect(payload[INTRANET_FIELD_NAMES.terms]).toBe('')
+
+    const validation = validateMembership(withoutCommitment)
+    expect(validation.ok).toBe(false)
+    expect(validation.errors.commitment).toBeTruthy()
+  })
+
+  it('does not set terms=on when commitmentAccepted is a partially-true array', () => {
+    const payload = buildIntranetSignupPayload({
+      ...fullMembershipFixture,
+      commitmentAccepted: [true, true, true, false],
+    })
+
+    expect(payload[INTRANET_FIELD_NAMES.terms]).toBe('')
+
+    const validation = validateMembership({
+      ...fullMembershipFixture,
+      commitmentAccepted: [true, true, true, false],
+    })
+    expect(validation.ok).toBe(false)
+    expect(validation.errors.commitment).toBeTruthy()
+  })
+
+  it('sets terms=on when commitmentAccepted is complete and privacy is accepted', () => {
+    const payload = buildIntranetSignupPayload({
+      ...fullMembershipFixture,
+      commitmentAccepted: [true, true, true, true],
+    })
+
+    expect(payload[INTRANET_FIELD_NAMES.terms]).toBe('on')
+
+    const validation = validateMembership({
+      ...fullMembershipFixture,
+      commitmentAccepted: [true, true, true, true],
+    })
+    expect(validation.errors.commitment).toBeUndefined()
+  })
+
   it('serializes extras (preferredDays/-Times, activityAreas, zusatzabos, free text) into notes', () => {
     const payload = buildIntranetSignupPayload(fullMembershipFixture)
     const notes = payload[INTRANET_FIELD_NAMES.notes]
@@ -139,6 +185,25 @@ function mockPrimeResponse(html: string, setCookie: string): Response {
       getSetCookie: () => [setCookie],
     },
     text: async () => html,
+  } as unknown as Response
+}
+
+// Simulates a response whose headers/status arrive promptly but whose body
+// never resolves (a stalled stream) — .text() only settles if the request's
+// AbortSignal fires, mirroring real fetch's abort-during-body-read behavior.
+function mockHangingBodyResponse(status: number, signal?: AbortSignal): Response {
+  return {
+    status,
+    headers: {
+      get: () => null,
+      getSetCookie: () => [],
+    },
+    text: () =>
+      new Promise<string>((_, reject) => {
+        signal?.addEventListener('abort', () => {
+          reject(new DOMException('The operation was aborted.', 'AbortError'))
+        })
+      }),
   } as unknown as Response
 }
 
@@ -215,6 +280,24 @@ describe('forwardToIntranet (D.2b adapter)', () => {
     ).resolves.toMatchObject({ ok: false })
   })
 
+  it('returns ok:false within the timeout budget when a response body never resolves', async () => {
+    const fetchImpl = makeMockFetch((url, init) => {
+      if (!init || init.method === 'GET') {
+        return mockPrimeResponse(primeHtml('tok'), 'csrftoken=cookie-abc; Path=/')
+      }
+      // POST resolves immediately with a status, but the body stream stalls —
+      // without the fix this hangs forever instead of respecting the timeout.
+      return mockHangingBodyResponse(200, init.signal as AbortSignal | undefined)
+    })
+
+    const result = await forwardToIntranet(
+      { first_name: 'Anna' },
+      { fetchImpl: fetchImpl as unknown as typeof fetch, timeoutMs: 25 }
+    )
+
+    expect(result.ok).toBe(false)
+  })
+
   it('returns ok:false without a fetch attempt when INTRANET_SIGNUP_URL is unset', async () => {
     delete process.env.INTRANET_SIGNUP_URL
     const fetchImpl = makeMockFetch(() => new Response(null, { status: 200 }))
@@ -243,6 +326,7 @@ describe('membership route + intranet forward wiring', () => {
     address: 'Dorfstrasse 1',
     zip: '5236',
     city: 'Gebenstorf',
+    commitmentAccepted: [true, true, true, true],
     privacyAccept: true,
   }
 

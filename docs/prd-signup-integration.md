@@ -2,7 +2,7 @@
 
 > **Status:** Entwurf zur Diskussion · **Bezug:** Issue #74, Epic #50 (Track D) · **Zielsystem:** bioco.ch (Next.js, später WordPress) · **Grundsatz:** Das Intranet (`intranet.bioco.ch`, Django) bleibt System-of-Record und wird NICHT verändert.
 
-**TL;DR (English):** Make `bioco.ch/bioco-werden` the on-brand front door for membership signup while the Django intranet at `intranet.bioco.ch/my/signup/` stays the unchanged system of record. The public site already renders the fields (`MembershipForm`); we submit them through a server-side bioco.ch adapter (`/api/forms/membership`) that reproduces a browser's behaviour against the intranet form — first `GET` the intranet page to obtain the `csrftoken` cookie plus the hidden `csrfmiddlewaretoken`, then `POST` the mapped fields with both. Turnstile is verified on the bioco.ch side; if the intranet's CSRF/session/captcha makes a direct forward unreliable, we fall back to the notify/forward adapter from #50. No intranet code changes.
+**TL;DR (English):** Make `bioco.ch/bioco-werden` the on-brand front door for membership signup while the Django intranet at `intranet.bioco.ch/my/signup/` stays the unchanged system of record. The public site already renders the fields (`MembershipForm`); we submit them through a server-side bioco.ch adapter (`/api/forms/membership`) that reproduces a browser's behaviour against the intranet form — first `GET` the intranet page to obtain the `csrftoken` cookie plus the hidden `csrfmiddlewaretoken`, then `POST` the mapped fields with both. This route intentionally has no Turnstile check (product decision, see Implementation Decisions — an open decision on rate-limiting/captcha for this specific endpoint is noted below); if the intranet's CSRF/session/captcha makes a direct forward unreliable, we fall back to the notify/forward adapter from #50. No intranet code changes.
 
 ---
 
@@ -52,9 +52,14 @@ Kein Intranet-Change — nur Automatisierung des Browserverhaltens. Wenn CSRF/Se
 
 Das Mapping lebt als reine Funktion in `frontend/lib/membership.ts` (baut auf D.1-Validierung auf), damit es unit-testbar ist.
 
-**Turnstile:** Der bereits vorhandene serverseitige Turnstile-Check läuft VOR dem Forward; ohne gültiges Token kein Forward.
+**Turnstile:** `/api/forms/membership` hat **keinen** Captcha-Check — das war eine bewusste Produktentscheidung (Commit `bcdc215`), gepinnt durch `frontend/tests/forms-without-captcha-ui.test.tsx` ("does not render or require captcha on the bioco-werden final step"). Die anderen vier Formular-Routen (`contact`, `visit`, `waiting-list`, `event-signup`) verifizieren Turnstile serverseitig; diese Route bewusst nicht.
 
-**Fehlerbehandlung & Idempotenz:** Netzwerk-/CSRF-Fehler → 502 mit generischer DE-Meldung + Log; doppelte Absendungen durch ein kurzlebiges Idempotenz-Token (Formular-Nonce) abfangen, damit ein Doppelklick nicht zwei Intranet-Einträge erzeugt.
+> **Offener Entscheid:** Der Endpunkt ist unauthentifiziert und leitet Anmeldungen jetzt direkt ins System-of-Record (Intranet) weiter. Optionen, über die das Team noch entscheiden muss:
+> (a) Status quo (kein Schutz auf dieser Route),
+> (b) serverseitiges Rate-Limit auf `/api/forms/membership`,
+> (c) Turnstile nur beim finalen Submit-Schritt von `bioco-werden` (nicht auf den vorherigen Schritten).
+
+**Fehlerbehandlung & Idempotenz:** Netzwerk-/CSRF-Fehler → 502 mit generischer DE-Meldung + Log. **Noch nicht implementiert:** das geplante kurzlebige Idempotenz-Token (Formular-Nonce), das doppelte Absendungen (z. B. Doppelklick) vor doppelten Intranet-Einträgen schützen soll — im aktuellen Code existiert keine Nonce. Offener Follow-up.
 
 **Fallback (#50):** Schlägt der direkte Forward strukturell fehl (CSRF-Rotation, Session-Zwang, Captcha im Intranet), schaltet der Adapter auf Notify/Forward um (Speichern + E-Mail an die zuständige Adresse), ohne die Frontend-UX zu ändern.
 

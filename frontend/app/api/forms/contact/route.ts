@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { sendFormEmail } from '@/lib/email'
 import { verifyTurnstileToken } from '@/lib/turnstile'
+import { RATE_LIMITS, RATE_LIMIT_ERROR_MESSAGE, checkRateLimit, rateLimitKeyFromRequest } from '@/lib/rateLimit'
 
 const CAPTCHA_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.'
 
@@ -11,6 +12,14 @@ function getClientIp(request: NextRequest): string | null {
 }
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit(rateLimitKeyFromRequest(request, 'contact'), RATE_LIMITS.contact)
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, error: RATE_LIMIT_ERROR_MESSAGE },
+      { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } }
+    )
+  }
+
   try {
     const body = await request.json()
     const captcha = await verifyTurnstileToken(body.captchaToken, getClientIp(request))

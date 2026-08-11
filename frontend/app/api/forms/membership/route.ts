@@ -2,8 +2,17 @@ import { NextRequest, NextResponse } from 'next/server'
 import { sendFormEmail } from '@/lib/email'
 import { buildIntranetSignupPayload, validateMembership } from '@/lib/membership'
 import { forwardToIntranet } from '@/lib/intranetSignup'
+import { RATE_LIMITS, RATE_LIMIT_ERROR_MESSAGE, checkRateLimit, rateLimitKeyFromRequest } from '@/lib/rateLimit'
 
 export async function POST(request: NextRequest) {
+  const rateLimit = checkRateLimit(rateLimitKeyFromRequest(request, 'membership'), RATE_LIMITS.membership)
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, error: RATE_LIMIT_ERROR_MESSAGE },
+      { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfterSeconds) } }
+    )
+  }
+
   try {
     const body = await request.json()
 
