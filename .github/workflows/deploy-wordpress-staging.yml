@@ -75,9 +75,17 @@ jobs:
           install -m 600 /dev/stdin "$HOME/deploy_key" <<< "$SSH_KEY"
           RSYNC_SSH="ssh -i $HOME/deploy_key -o StrictHostKeyChecking=accept-new"
           # Never delete uploads or clobber the server .env; core+vendor+theme are shipped.
+          #
+          # web/app/themes/Divi MUST be excluded. Divi is licensed, therefore
+          # gitignored, therefore absent from this rsync SOURCE — so with
+          # --delete and no exclusion rsync would remove the separately
+          # installed parent theme from the server on every deploy, leaving
+          # bioco-divi with no parent to load. The same reasoning applies to any
+          # other out-of-repo theme or plugin installed via wp-admin.
           rsync -avz --delete -e "$RSYNC_SSH" \
             --exclude='.env' \
             --exclude='web/app/uploads/' \
+            --exclude='web/app/themes/Divi/' \
             --exclude='.git/' \
             ./ "$USER@$HOST:$DEST/"
 

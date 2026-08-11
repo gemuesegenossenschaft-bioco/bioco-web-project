@@ -44,6 +44,24 @@ function bioco_import_stringify_for_report($value) {
     return is_array($value) ? (string) wp_json_encode($value) : (string) $value;
 }
 
+// Normalises scalars to strings but preserves array STRUCTURE, so nested values
+// stay comparable. Casting an array with (string) yields the literal "Array":
+// two completely different galleries, repeaters or button lists compared that
+// way would always look equal, and PHP would additionally emit an
+// array-to-string conversion warning. Since most block content is now
+// repeater-shaped, that flat cast would make `wp bioco verify` report a clean
+// run for content it never actually checked — worse than having no verifier.
+function bioco_import_normalize_for_compare($value) {
+    if (!is_array($value)) {
+        return (string) $value;
+    }
+    $normalized = [];
+    foreach ($value as $key => $item) {
+        $normalized[$key] = bioco_import_normalize_for_compare($item);
+    }
+    return $normalized;
+}
+
 function bioco_import_verify_data_map($slug, $sectionLabel, array $expected, array $actual, array &$report) {
     foreach ($expected as $key => $expectedValue) {
         if (!array_key_exists($key, $actual)) {
@@ -51,9 +69,10 @@ function bioco_import_verify_data_map($slug, $sectionLabel, array $expected, arr
             continue;
         }
         $actualValue = $actual[$key];
-        // ACF/JSON round-tripping can turn "3" into 3 etc.; compare as
-        // strings so type wobble alone never reports a false mismatch.
-        if ((string) $expectedValue === (string) $actualValue) {
+        // ACF/JSON round-tripping can turn "3" into 3 etc.; normalise scalars to
+        // strings so type wobble alone never reports a false mismatch. Done
+        // recursively — see bioco_import_normalize_for_compare().
+        if (bioco_import_normalize_for_compare($expectedValue) === bioco_import_normalize_for_compare($actualValue)) {
             bioco_import_report_row($report, $slug, $sectionLabel, $key, 'verify-match', 'Übereinstimmung.');
             continue;
         }
