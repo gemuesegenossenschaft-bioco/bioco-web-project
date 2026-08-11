@@ -1,0 +1,51 @@
+{
+  "path": "/statuten/",
+  "slug": "statuten",
+  "template": "basic-page",
+  "title": "Statuten",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_text": "<h1>Statuten</h1><p>Die Statuten der Gemüsegenossenschaft biocò regeln die Struktur und Organisation der Genossenschaft.</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "downloads",
+      "section_text": "<h3>Dokumente zum Download</h3>",
+      "section_layout": "rich_text",
+      "buttons": [
+        { "text": "Statuten (PDF)", "href": "/statuten/13-11-15_Statuten_bioco.pdf", "variant": "secondary" },
+        { "text": "Reglement (PDF)", "href": "/statuten/2212_Betriebsreglement.pdf", "variant": "secondary" }
+      ]
+    },
+    {
+      "section_id": "ueber-die-genossenschaft",
+      "section_title": "Über die Genossenschaft",
+      "section_text": "<p>Die Gemüsegenossenschaft biocò ist eine Genossenschaft nach schweizerischem Recht. Sie wurde 2014 gegründet und betreibt solidarische Landwirtschaft (Community Supported Agriculture) auf dem Geisshof in Gebenstorf.</p><p>Die Genossenschaft basiert auf dem Prinzip der Solidarität: Mitglieder teilen sich Arbeit und Ertrag gemeinsam. Jede(r) Genossenschafter/in bringt sich aktiv ein und trägt zur Gemeinschaft bei.</p>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "mitgliedschaft",
+      "section_title": "Mitgliedschaft",
+      "section_text": "<p>Um Mitglied zu werden, benötigst du Anteilsscheine der Genossenschaft (CHF 250 pro Anteil). Die Anzahl der erforderlichen Anteile hängt vom gewählten Gemüsekorb ab:</p><ul><li>Halb Gemüsekorb: 1 Anteil</li><li>Standard Gemüsekorb: 2 Anteile</li><li>Doppel Gemüsekorb: 4 Anteile</li></ul>",
+      "section_layout": "rich_text",
+      "buttons": [
+        { "text": "Jetzt Mitglied werden", "href": "/mitmachen", "variant": "primary" }
+      ]
+    },
+    {
+      "section_id": "weitere-informationen",
+      "section_title": "Weitere Informationen",
+      "section_text": "<p>Für weitere Fragen zu den Statuten oder der Genossenschaft, kontaktiere uns unter <a href=\"mailto:info@bioco.ch\">info@bioco.ch</a> oder nutze das <a href=\"/kontakt\">Kontaktformular</a>.</p>",
+      "section_layout": "rich_text"
+    }
+  ],
+  "conversion_notes": [
+    "h1 lives in intro section_text (page renders a real <h1>Statuten</h1> today; SectionRenderer would emit h2 for section_title, so the h1 must stay in the HTML).",
+    "'Dokumente zum Download' is an <h3> today — kept in section_text (no section_title) to preserve the heading level.",
+    "The two PDF links currently render as <a class=\"btn btn-secondary btn-organic\" target=\"_blank\" rel=\"noopener noreferrer\">; as buttons the CTA component renders 'btn btn-secondary btn-organic' and opens .pdf hrefs in a new tab via window.open — classes and behavior match.",
+    "'Jetzt Mitglied werden' is today a next/link with class 'btn btn-primary' (WITHOUT btn-organic); the CTA component adds btn-organic — minor class/border-radius difference after conversion.",
+    "The downloads block sits in an inline-styled box (background var(--bg-secondary), border-radius 12px) — this visual container is not representable in the schema; content is preserved.",
+    "Page exports no metadata — 'seo' omitted; the layout default <title> applies today."
+  ]
+}

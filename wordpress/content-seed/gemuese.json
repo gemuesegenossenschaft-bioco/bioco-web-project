@@ -1,0 +1,72 @@
+{
+  "path": "/gemuese/",
+  "slug": "gemuese",
+  "template": "basic-page",
+  "title": "Unser Gemüse",
+  "seo": {
+    "title": "Saisonales Demeter Gemüse | Welche Gemüse haben gerade Saison | biocò",
+    "description": "Entdecke unser saisonales Bio-Gemüse in Demeter-Qualität. Frisch vom Geisshof in Gebenstorf für die Region Baden-Brugg."
+  },
+  "sections": [
+    {
+      "section_id": "saisonkalender",
+      "section_title": "Saisonkalender",
+      "section_text": "<p>Wann ist welches Gemüse verfügbar? Entdecke unsere saisonale Vielfalt.</p>",
+      "section_component": "saisonkalender"
+    },
+    {
+      "section_id": "demeter",
+      "section_layout": "rich_text",
+      "section_text": "<h2>Demeter-Qualität</h2><h3>Warum Demeter?</h3><p>Demeter ist die höchste Qualitätsstufe im biologischen Landbau. Als Demeter-zertifizierter Betrieb gehen wir über die Anforderungen von Bio Suisse hinaus und arbeiten nach den strengsten biologisch-dynamischen Richtlinien.</p><p>Unser Gemüse wächst auf dem Geisshof in Gebenstorf im Rahmen unserer <a href=\"/solawi\">solidarischen Landwirtschaft (Solawi)</a> – direkt aus der Region Baden-Brugg.</p>"
+    },
+    {
+      "section_id": "demeter-accordion-biodynamisch",
+      "section_title": "Biologisch-dynamische Landwirtschaft",
+      "section_component": "accordion_item",
+      "section_text": "<p>Die biologisch-dynamische Landwirtschaft betrachtet den Hof als lebendigen Organismus. Wir arbeiten mit speziellen Präparaten, die die Bodenfruchtbarkeit und Pflanzengesundheit fördern. Der Mond- und Planetenrhythmus wird in die Anbauplanung einbezogen.</p>"
+    },
+    {
+      "section_id": "demeter-accordion-synthetische-mittel",
+      "section_title": "Kein Einsatz von synthetischen Mitteln",
+      "section_component": "accordion_item",
+      "section_text": "<p>Wir verzichten vollständig auf synthetische Dünger, Pestizide und Herbizide. Stattdessen setzen wir auf natürliche Methoden zur Bodenpflege, Schädlingsbekämpfung und Pflanzenstärkung.</p>"
+    },
+    {
+      "section_id": "demeter-accordion-kreislaufwirtschaft",
+      "section_title": "Kreislaufwirtschaft",
+      "section_component": "accordion_item",
+      "section_text": "<p>Auf dem Geisshof betreiben wir eine geschlossene Kreislaufwirtschaft. Kompost, Gründüngung und Fruchtfolgen sorgen für gesunde Böden und nachhaltige Erträge.</p>"
+    },
+    {
+      "section_id": "demeter-accordion-biodiversitaet",
+      "section_title": "Biodiversität",
+      "section_component": "accordion_item",
+      "section_text": "<p>Wir fördern die Artenvielfalt durch Hecken, Blumenstreifen und vielfältige Fruchtfolgen. Dies schafft Lebensraum für Nützlinge und trägt zu einem gesunden Ökosystem bei.</p>"
+    },
+    {
+      "section_id": "demeter-link",
+      "section_layout": "rich_text",
+      "section_text": "<p><a href=\"https://www.demeter.ch\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"btn btn-secondary btn-organic\">Mehr über Demeter erfahren →</a></p>"
+    },
+    {
+      "section_id": "kennenlernen-cta",
+      "section_title": "Möchtest du uns kennenlernen?",
+      "section_layout": "rich_text",
+      "section_text": "<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
+      "buttons": [
+        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
+        { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }
+      ]
+    }
+  ],
+  "conversion_notes": [
+    "NICHT SEEDEN: Die Section 'intro' existiert bereits im CMS (Seite lädt getPageSectionsWithSeo('gemuese') und rendert introSection). Der Code-Fallback dafür wäre h1 'Unser Gemüse' + <p>Unser saisonales Demeter-Gemüse wächst in der Region Baden-Brugg. Hier erfährst du, welche Gemüsesorten gerade Saison haben und in deinem Gemüsekorb landen.</p> – er greift nur, wenn das CMS-Intro fehlt.",
+    "NICHT SEEDEN: Die Section 'B-02' ('Was wir anbauen', Galerie) ist bereits CMS-getrieben inkl. Bilder (anbauenSection.images). Code-Fallbacks (h2 'Was wir anbauen', <p>Einblicke in unsere Ernte, den Anbau und die Gemeinschaft</p>, Empty-State 'Keine Bilder im CMS gefunden.') bleiben code-owned.",
+    "F.1b-verify: Die Komponente 'accordion_item' IST inzwischen in site/templates/component-registry.json registriert (AccordionItemBlock in frontend/components/sections/RegisteredSectionComponents.tsx, rendert <details><summary>{section_title}</summary><div>{section_text}</div></details>) — die frühere Notiz 'noch NICHT registriert' war veraltet. ABER: AccordionItemBlock wickelt heute JEDES Item in eine eigene <section class=\"demeter-accordion\">, während die Seite heute alle vier <details> in EINEM <div class=\"demeter-accordion\"> gruppiert; die Gruppierung muss beim Umbau geprüft werden.",
+    "Der externe Demeter-Link rendert heute NACH den vier Accordions (innerhalb derselben <section id=\"B-05\">). Um die Reihenfolge byte-genau zu erhalten, ist er als eigene Section 'demeter-link' hinter den Accordions geführt statt als Button der 'demeter'-Section. Es ist heute ein <a target=\"_blank\" rel=\"noopener noreferrer\" class=\"btn btn-secondary btn-organic\"> (kein CTA.tsx-Button); das Inline-Style display:inline-block ist presentational und code-owned.",
+    "Saisonkalender: h2 + Einleitungsabsatz stehen heute in derselben <section id=\"B-04\"> wie die <Saisonkalender/>-Komponente; als Titel/Text des Component-Wrappers geseedet. Die Kalenderdaten selbst bleiben code-owned (frontend/components/Saisonkalender.tsx).",
+    "Heutige DOM-Section-IDs: B-04 (Saisonkalender), B-05 (Demeter), B-02 (Galerie), B-06 (Kennenlernen) – relevant für Deep-Links/Anker.",
+    "SEO: Die Seite hat generateMetadata() mit CMS-Vorrang; das Seed enthält die hardcodierten FALLBACK_METADATA (title/description). keywords/openGraph sind im Seed-Schema nicht abbildbar.",
+    "F.1b-verify: Section 'demeter' — section_title 'Demeter-Qualität' entfernt und als <h2> an den Anfang von section_text verschoben: SectionRenderer unterdrückt section_title, sobald section_text eine Überschrift enthält (hasHeadingHtml), und der Text enthält <h3>Warum Demeter?</h3>; mit section_title wäre die h2 nach der Migration verschwunden (gleiche Konvention wie datenschutz.json)."
+  ]
+}

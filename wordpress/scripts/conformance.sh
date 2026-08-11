@@ -150,3 +150,21 @@ render_count=$(find web/app -type f -name 'render.php' | wc -l | tr -d ' ')
 view_count=$(find web/app -type f -name 'view.js' | wc -l | tr -d ' ')
 printf 'render.php\t%s\n' "$render_count"
 printf 'view.js\t%s\n' "$view_count"
+
+# ---------------------------------------------------------------------------
+# (f) seed -> block plan coverage
+# ---------------------------------------------------------------------------
+# Emits the per-block plan counts so a mapping change shows up as a manifest
+# diff, not just as a pass/fail. check-seed-plan.php is the authoritative gate
+# (it also asserts every referenced block dir and ACF group file exists); this
+# only records its shape. Run from the wordpress/ directory, same as the rest.
+echo "## F-SEED-PLAN"
+if php scripts/check-seed-plan.php > /tmp/bioco-seed-plan.$$ 2>&1; then
+  sed -n '/^Verwendete Bloecke:/,/^$/p' /tmp/bioco-seed-plan.$$ | sed '1d;/^$/d' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+/\t/'
+  grep -E '^Geplante Bloecke:' /tmp/bioco-seed-plan.$$ | tr -d ' '
+  printf 'gate\tOK\n'
+else
+  printf 'gate\tFAIL\n'
+  grep -E '^  - ' /tmp/bioco-seed-plan.$$ || true
+fi
+rm -f /tmp/bioco-seed-plan.$$

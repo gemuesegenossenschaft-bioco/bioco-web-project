@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: bioco Content
- * Description: Registers the 'event' and 'bioco_group' CPTs (W8, issue #95). ACF field groups for both live as Local JSON in the theme's acf-json/ directory, next to the block field groups.
+ * Description: Registers the 'event' and 'bioco_group' CPTs (W8, issue #95). Their ACF Local JSON lives in bioco-core/acf-json/ so fields remain available independently of the active theme.
  * Author: bioco
  */
 

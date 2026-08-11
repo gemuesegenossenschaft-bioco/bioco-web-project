@@ -14,6 +14,7 @@ name: Deploy WordPress to staging
 #   STAGING_SSH_KEY    private deploy key authorized on that account
 #   STAGING_DEPLOY_PATH remote path to the Bedrock project root
 #   ACF_PRO_KEY        Advanced Custom Fields Pro license key (Composer auth)
+#   STAGING_OPCACHE_TOKEN shared secret for the temporary HTTP OPcache reset
 # Until those exist the job no-ops with a clear message instead of failing.
 
 on:
@@ -87,9 +88,44 @@ jobs:
           HOST: ${{ secrets.STAGING_SSH_HOST }}
           USER: ${{ secrets.STAGING_SSH_USER }}
           DEST: ${{ secrets.STAGING_DEPLOY_PATH }}
+          OPCACHE_TOKEN: ${{ secrets.STAGING_OPCACHE_TOKEN }}
         run: |
           ssh -i "$HOME/deploy_key" -o StrictHostKeyChecking=accept-new "$USER@$HOST" \
-            "cd '$DEST' && (php -r 'opcache_reset();' || true) && (wp cache flush --path=web/wp || true)"
+            "cd '$DEST' && (wp cache flush --path=web/wp || true)"
+
+          # CLI opcache_reset() only resets the short-lived CLI process, not Apache/PHP-FPM.
+          if [ -z "$OPCACHE_TOKEN" ]; then
+            echo "::warning::STAGING_OPCACHE_TOKEN is not configured — skipping HTTP OPcache reset."
+          else
+            RESET_FILE="bioco-opcache-reset-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.php"
+            TOKEN_HASH=$(printf '%s' "$OPCACHE_TOKEN" | sha256sum | awk '{print $1}')
+            cat > "$RUNNER_TEMP/opcache-reset.php" <<'PHP'
+          <?php
+          header('Content-Type: text/plain; charset=UTF-8');
+          $provided = $_SERVER['HTTP_X_BIOCO_OPCACHE_TOKEN'] ?? '';
+          if (!hash_equals('__TOKEN_HASH__', hash('sha256', (string) $provided))) {
+              http_response_code(403);
+              exit('Forbidden');
+          }
+          $reset = function_exists('opcache_reset') && opcache_reset();
+          http_response_code($reset ? 200 : 500);
+          echo $reset ? 'OPcache reset' : 'OPcache reset failed';
+          PHP
+            sed -i "s/__TOKEN_HASH__/$TOKEN_HASH/" "$RUNNER_TEMP/opcache-reset.php"
+            cleanup_opcache_file() {
+              ssh -i "$HOME/deploy_key" -o StrictHostKeyChecking=accept-new "$USER@$HOST" \
+                "rm -f '$DEST/web/$RESET_FILE'" || true
+            }
+            trap cleanup_opcache_file EXIT
+            scp -i "$HOME/deploy_key" -o StrictHostKeyChecking=accept-new \
+              "$RUNNER_TEMP/opcache-reset.php" "$USER@$HOST:$DEST/web/$RESET_FILE"
+            curl --fail --silent --show-error \
+              -H "X-Bioco-Opcache-Token: $OPCACHE_TOKEN" \
+              "https://staging.bioco.ch/$RESET_FILE"
+            echo
+            cleanup_opcache_file
+            trap - EXIT
+          fi
           code=$(curl -s -o /dev/null -w '%{http_code}' https://staging.bioco.ch/ || echo 000)
           echo "staging.bioco.ch → HTTP $code"
           case "$code" in 200|301|302) echo "OK";; *) echo "::error::staging returned $code"; exit 1;; esac

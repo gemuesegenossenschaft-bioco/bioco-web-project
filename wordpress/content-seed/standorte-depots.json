@@ -1,0 +1,61 @@
+{
+  "path": "/standorte-depots/",
+  "slug": "standorte-depots",
+  "template": "basic-page",
+  "title": "Unsere Standorte & Depots",
+  "seo": {
+    "title": "Standorte & Depots Baden-Brugg | Gemüse abholen | biocò",
+    "description": "Gemüseabholung in Baden, Brugg und Umgebung. Finde dein Depot für frisches Bio-Gemüse aus solidarischer Landwirtschaft vom Geisshof Gebenstorf."
+  },
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_text": "<h1>Unsere Standorte & Depots</h1><p>Wir unterscheiden zwei Arten von Standorten:</p><ul><li><strong>Geisshof:</strong> Hier bauen wir unser Gemüse an und arbeiten gemeinsam.</li><li><strong>Depots:</strong> Hier stehen die Gemüsekörbe jeweils dienstags oder freitags zur Abholung bereit.</li></ul>"
+    },
+    {
+      "section_id": "anfahrt-geisshof",
+      "section_layout": "rich_text",
+      "section_text": "<h2>Anfahrt zum Geisshof</h2><p>Der Geisshof ist unser Bio Bauernhof in Gebenstorf im Aargau, wo wir Bio-Gemüse in Demeter-Qualität anbauen. Zentral gelegen zwischen Baden und Brugg kannst du hier auch direkt vorbeikommen und die solidarische Landwirtschaft kennenlernen.</p><h4>Anreise & Parken</h4><p><strong>Bitte komm wenn möglich mit dem Velo oder Bus!</strong></p><p>Falls du mit dem Auto kommst:</p><ul><li>Bitte <strong>nicht auf den Hof hinauffahren</strong></li><li>Parkiere unten an der Strasse</li><li>Halte den <strong>Wendeplatz zwingend frei</strong> (für landwirtschaftliche Fahrzeuge)</li></ul><p>Danke für deine Rücksichtnahme!</p>"
+    },
+    {
+      "section_id": "geisshof-map",
+      "section_component": "geisshof_map"
+    },
+    {
+      "section_id": "depots",
+      "section_title": "Depot-Standorte für Gemüseabholung",
+      "section_layout": "rich_text",
+      "section_text": "<p>Hier findest du alle Depot-Standorte, an denen du dein Gemüse abholen kannst. Wähle das Depot, das für dich am besten gelegen ist.</p>"
+    },
+    {
+      "section_id": "depot-map",
+      "section_component": "depot_map"
+    },
+    {
+      "section_id": "depot-details",
+      "section_layout": "rich_text",
+      "section_text": "<h3>Depot Baden</h3><p><strong>Gemüse abholen Baden:</strong> Das Depot Baden befindet sich zentral in der Stadt und ist ideal für alle, die in Baden und Umgebung wohnen.</p><h3>Depot Brugg</h3><p><strong>Gemüse abholen Brugg:</strong> Unser Depot Brugg bietet eine bequeme Abholmöglichkeit für Mitglieder aus Brugg und der umliegenden Region.</p><h3>Depot Gebenstorf</h3><p>Direkt beim Geisshof könnt ihr euer Gemüse in Gebenstorf abholen - ideal für alle, die den Hof besuchen möchten.</p><h3>Depot Wettingen</h3><p>Das Depot Wettingen ermöglicht eine einfache Abholung für Mitglieder aus Wettingen und der näheren Umgebung.</p><p><strong>Abholzeiten:</strong> Dienstag und Freitag, ab 16:00 Uhr</p>"
+    },
+    {
+      "section_id": "kennenlernen-cta",
+      "section_title": "Möchtest du uns kennenlernen?",
+      "section_layout": "rich_text",
+      "section_text": "<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
+      "buttons": [
+        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
+        { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }
+      ]
+    }
+  ],
+  "conversion_notes": [
+    "DepotMap.tsx enthält die depotLocations-Daten (Namen, Adressen, Hinweise, Koordinaten), die auf der Karte gerendert werden – diese bleiben code-owned; hier ist nur der Seitenfliesstext geseedet.",
+    "Die Depots-Section hat heute die DOM-ID 'E-02' und ist das Scroll-Ziel von CTA.tsx für href '/standorte-depots' ('Zu uns finden'-Buttons springen hierhin). Beim Umbau muss ein äquivalenter Anker erhalten bleiben. Weitere DOM-ID heute: E-01 (Anfahrt), B-06 (Kennenlernen).",
+    "Der 'Anreise & Parken'-Block ist heute eine gestylte Hinweisbox (var(--bg-secondary), abgerundet) mit <h4>-Überschrift in Grün; 'Danke für deine Rücksichtnahme!' rendert kursiv in 0.9rem. Markup byte-genau übernommen, Box-/Kursiv-Styling ist code-owned.",
+    "Der letzte Absatz von 'depot-details' ('Abholzeiten: …') rendert heute kursiv – Styling code-owned.",
+    "In 'Depot Gebenstorf' steht heute ein einfacher Bindestrich ('abholen - ideal'), kein Gedankenstrich – byte-genau übernommen.",
+    "Die Seite ist heute komplett hardcodiert (kein getPageSections-Aufruf, kein VisualEditorPageSwitch).",
+    "metadata.keywords und metadata.openGraph existieren im Code, sind im Seed-Schema nicht abbildbar.",
+    "F.1b-verify: Section 'anfahrt-geisshof' — section_title 'Anfahrt zum Geisshof' entfernt und als <h2> an den Anfang von section_text verschoben: der Text enthält die <h4>Anreise & Parken</h4>-Überschrift, und SectionRenderer unterdrückt section_title, sobald section_text eine Überschrift enthält (hasHeadingHtml) — mit section_title wäre die h2 nach der Migration verschwunden (gleiche Konvention wie datenschutz.json)."
+  ]
+}

@@ -40,6 +40,38 @@ function bioco_kses_rich_text($html) {
     return wp_kses((string) $html, $allowed);
 }
 
+function bioco_kses_oembed_html($html) {
+    $allowed = [
+        'iframe' => [
+            'src' => true,
+            'width' => true,
+            'height' => true,
+            'title' => true,
+            'frameborder' => true,
+            'allow' => true,
+            'allowfullscreen' => true,
+            'loading' => true,
+            'referrerpolicy' => true,
+            'style' => true,
+            'class' => true,
+        ],
+        'blockquote' => [
+            'cite' => true,
+            'class' => true,
+            'style' => true,
+            'data-instgrm-captioned' => true,
+            'data-instgrm-permalink' => true,
+            'data-instgrm-version' => true,
+            'data-video-id' => true,
+        ],
+        'p' => ['class' => true, 'style' => true, 'lang' => true, 'dir' => true],
+        'a' => ['href' => true, 'title' => true, 'target' => true, 'rel' => true, 'class' => true],
+        'div' => ['class' => true, 'style' => true, 'lang' => true, 'dir' => true],
+        'span' => ['class' => true, 'style' => true, 'lang' => true, 'dir' => true],
+    ];
+    return wp_kses((string) $html, $allowed);
+}
+
 function bioco_render_person_icons($count) {
     $count = max(0, (int) $count);
     if (!$count) return;

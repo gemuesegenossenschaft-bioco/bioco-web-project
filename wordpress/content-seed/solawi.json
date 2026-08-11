@@ -1,0 +1,74 @@
+{
+  "path": "/solawi/",
+  "slug": "solawi",
+  "template": "basic-page",
+  "title": "Solidarische Landwirtschaft",
+  "seo": {
+    "title": "Was ist Solidarische Landwirtschaft (SoLaWi)? | biocò",
+    "description": "Solidarische Landwirtschaft (Solawi/SoLaWi): Gemeinsam Verantwortung tragen für regionales Bio-Gemüse. Erfahre mehr über unser Konzept auf dem Geisshof."
+  },
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_text": "<h1>Solidarische Landwirtschaft</h1><p>Eine Solawi – Solidarische Landwirtschaft – ist eine gemeinschaftliche Form des Wirtschaftens, bei der Verbraucherinnen und Produzentinnen eine Partnerschaft eingehen. Die Mitglieder tragen gemeinsam die Kosten der landwirtschaftlichen Produktion und erhalten im Gegenzug einen regelmässigen Anteil an frischem Bio-Gemüse aus lokalem Anbau.</p><p>Statt anonym einzukaufen, entsteht eine direkte, verlässliche Verbindung zu dem Hof, der uns ernährt.</p>"
+    },
+    {
+      "section_id": "was-ist-solawi",
+      "section_title": "Was ist Solawi? – Definition",
+      "section_layout": "rich_text",
+      "section_text": "<p>In einer Solawi tragen alle Beteiligten die Verantwortung für die Lebensmittelproduktion gemeinsam. Die Mitglieder finanzieren nicht einzelne Produkte, sondern unterstützen den landwirtschaftlichen Betrieb als Ganzes – mit ihren Beiträgen und oft auch mit ihrer Zeit. Im Gegenzug teilen sie die Ernte: was auf dem Feld wächst, landet direkt im gemeinsamen Gemüsekorb.</p><p>Solidarische Landwirtschaft lebt von <strong>Vertrauen</strong>, <strong>Transparenz</strong> und<strong> Gemeinschaft</strong>. Statt anonymer Märkte stehen Menschen und Beziehungen im Zentrum: Mitglieder wissen, wer ihr Gemüse anbaut – und der Hof weiss, für wen er arbeitet.</p>"
+    },
+    {
+      "section_id": "wie-funktioniert",
+      "section_layout": "rich_text",
+      "section_text": "<h2>Wie funktioniert Solidarische Landwirtschaft?</h2><h3>1. Gemeinsame Finanzierung</h3><p>Zu Beginn des Jahres kalkuliert der Betrieb die voraussichtlichen Kosten (Saatgut, Arbeitskräfte, Maschinen, etc.). Diese Kosten werden auf alle Mitglieder aufgeteilt. Jedes Mitglied bezahlt einen jährlichen Beitrag und erwirbt damit einen oder mehrere Anteile.</p><h3>2. Wöchentliche Ernte-Anteile</h3><p>Im Gegenzug erhalten die Mitglieder wöchentlich ihren Anteil am Ernteertrag. Was gerade auf dem Feld wächst und reif ist, landet im Gemüsekorb – saisonal, frisch und vielfältig.</p><h3>3. Mitarbeit und Teilhabe</h3><p>Ein zentrales Element der Solawi ist die <strong>Mitarbeit</strong>. Mitglieder helfen bei Feldarbeiten, der Ernte oder der Logistik. Durch diese Beteiligung entsteht eine direkte Verbindung zur Landwirtschaft und ein tiefes Verständnis für die Arbeit, die hinter unserem Essen steckt.</p><h3>4. Teilen von Risiko und Ertrag</h3><p>In der Solawi tragen alle gemeinsam das Risiko: Hagelt es die Tomaten weg oder gibt es eine besonders gute Karottenernte? Alle Mitglieder profitieren oder verzichten gemeinsam. Diese Solidarität unterscheidet die Solawi fundamental vom klassischen Einkauf im Supermarkt.</p>"
+    },
+    {
+      "section_id": "warum-solawi",
+      "section_layout": "rich_text",
+      "section_text": "<h2>Warum Solawi? – Vorteile für Mitglieder & Umwelt</h2><h3>Vorteile für Konsument:innen</h3><ul><li><strong>Frisches, regionales Gemüse:</strong> Kurze Wege vom Feld zum Teller, maximale Frische</li><li><strong>Transparenz:</strong> Du weisst genau, wo und wie dein Gemüse angebaut wird</li><li><strong>Saisonalität erleben:</strong> Entdecke die Vielfalt saisonaler Gemüsesorten</li><li><strong>Mitbestimmung:</strong> Mitglieder haben Mitspracherecht in der Genossenschaft</li><li><strong>Gemeinschaft:</strong> Gemeinsam gärtnern, feiern und lernen</li></ul><h3>Vorteile für Produzent:innen</h3><ul><li><strong>Planungssicherheit:</strong> Finanzierung ist zu Jahresbeginn gesichert</li><li><strong>Unabhängigkeit:</strong> Keine Abhängigkeit von Grossverteilern oder Marktpreisen</li><li><strong>Direkter Kontakt:</strong> Persönlicher Austausch mit den Konsument:innen</li><li><strong>Ökologischer Anbau:</strong> Fokus auf Nachhaltigkeit statt Gewinnmaximierung</li></ul><h3>Vorteile für die Umwelt</h3><ul><li><strong>Biologischer Anbau:</strong> Keine synthetischen Pestizide oder Dünger</li><li><strong>Biodiversität:</strong> Förderung der Artenvielfalt durch vielfältige Fruchtfolgen</li><li><strong>Kurze Transportwege:</strong> Regionale Versorgung statt globaler Lieferketten</li><li><strong>Ressourcenschonung:</strong> Kreislaufwirtschaft und nachhaltige Bodenpflege</li></ul>"
+    },
+    {
+      "section_id": "solawi-bei-bioco",
+      "section_title": "Solidarische Landwirtschaft bei biocò",
+      "section_layout": "rich_text",
+      "section_text": "<p>Auch bei bioco leben wir dieses Prinzip: Unsere Solawi ist Teil des Geisshofs in Gebenstorf AG, der nach strengen biologisch-dynamischen Grundsätzen arbeitet. Das bedeutet geschlossene Kreisläufe, schonende Bodenbewirtschaftung und Gemüse, das wirklich aus der Region kommt.</p><p>Mit deinem Anteil und deiner Mitarbeit unterstützt du nicht nur den Anbau hochwertiger Demeter-Gemüsekisten, sondern auch eine Landwirtschaft, die sozial, ökologisch und langfristig tragfähig ist. Als lokale Gemüsegenossenschaft im Aargau leben wir Transparenz, Beteiligung und echte Nähe.</p><p>Bei bioco bist du nicht nur Abnehmer*in, sondern Teil des Ganzen: Als Mitglied hilfst du bei der Feldarbeit mit, erlebst die Jahreszeiten auf dem Acker und siehst, wie echtes Bio-Gemüse aus solidarischer Landwirtschaft entsteht.</p><p><strong>So funktioniert unsere Solawi in der Praxis:</strong></p><ul><li><strong>Jahresbeitrag:</strong> Mitglieder bezahlen zu Jahresbeginn ihren Anteil (je nach Korbgrösse CHF 750 – CHF 2'350)</li><li><strong>Wöchentlicher Gemüsekorb:</strong> Fast jede Woche könnt ihr euren Anteil in einem der <a href=\"/standorte-depots\">Depots in Baden, Brugg oder Gebenstorf</a> abholen</li><li><strong>Mitarbeit:</strong> Je nach Abo-Grösse arbeitet ihr 10–40 Halbtage pro Jahr auf dem Feld mit (<a href=\"/mitmachen\">mehr zu Mitarbeit</a>)</li><li><strong>Demeter-Qualität:</strong> Unser Gemüse erfüllt die strengsten Bio-Standards (<a href=\"/gemuese\">mehr zu unserem Gemüse</a>)</li><li><strong>Genossenschaftsmodell:</strong> Alle Mitglieder sind Teil der Genossenschaft und können bei Entscheidungen mitbestimmen</li></ul><p>Als Teil von bioco wirst du zudem Mitglied einer lebendigen, offenen Gemeinschaft rund um den einzigartig gelegenen Geisshof. Wir treffen uns zu Anlässen wie Open-Air-Kino auf dem Hof, Fondue über dem Feuer, Kräutergruppen-Treffen oder gemütlichen Nachmittagen am Gemeinschaftsplatz. Natur, Tiere, Sandkasten, eine aktive Eltern-Kind-Gruppe sowie gemeinsame Einsätze mit frisch gekochtem Essen machen unsere Solawi zu einem Ort, an dem man sich schnell zuhause fühlt.</p>",
+      "buttons": [
+        { "text": "Jetzt Mitglied werden", "href": "/mitmachen", "variant": "primary" }
+      ]
+    },
+    {
+      "section_id": "faq",
+      "section_layout": "rich_text",
+      "section_text": "<h2>Häufige Fragen zu Solawi</h2><h3>Was bedeutet Solawi?</h3><p>Solawi ist die Abkürzung für \"Solidarische Landwirtschaft\". Auch die Schreibweise \"SoLaWi\" ist verbreitet. International spricht man von \"Community Supported Agriculture\" (CSA).</p><h3>Wie unterscheidet sich Solawi vom Abo-Gemüse?</h3><p>Bei einem klassischen Gemüseabo kauft man eine Dienstleistung: X Gemüse für Y Franken. Bei der Solawi finanziert man gemeinsam einen Betrieb und teilt Risiko und Ertrag. Zudem ist die Mitarbeit und das Genossenschaftsmodell zentral für das Solawi-Konzept.</p><h3>Muss ich zwingend mitarbeiten?</h3><p>Bei biocò ist Mitarbeit Teil des Konzepts. Je nach Abo-Grösse arbeitet ihr 10–40 Halbtage pro Jahr mit. Die Mitarbeit ist zentral für das Verständnis und die Verbindung zur Landwirtschaft.</p><h3>Was passiert bei Ernteausfällen?</h3><p>Bei der Solawi tragen alle das Risiko gemeinsam. Gibt es weniger Ernte (z.B. durch Hagel), gibt es auch weniger im Gemüsekorb. Umgekehrt profitieren alle von einer besonders guten Saison. Diese Solidarität ist das Herzstück der Solawi.</p><h3>Kann ich selbst entscheiden, welches Gemüse ich bekomme?</h3><p>Nein, bei der Solawi richtet sich der Gemüsekorb nach dem, was gerade Saison hat und auf dem Feld wächst. Das ist ein wesentlicher Teil des Konzepts: Du lernst, saisonal zu kochen und schätzt die Vielfalt der Jahreszeiten.</p><h3>Wie kann ich mitmachen?</h3><p>Informiere dich über unsere <a href=\"/abos\">Abo-Modelle</a>, besuche einen unserer <a href=\"/aktuelles\">Schnuppertage</a> oder<a href=\"/kontakt\"> kontaktiere uns direkt</a>. Wir freuen uns auf dich!</p>"
+    },
+    {
+      "section_id": "mehr-ueber-bioco",
+      "section_title": "Mehr über biocò",
+      "section_layout": "rich_text",
+      "section_text": "<p>Erfahre mehr über unsere Gemüsegenossenschaft:</p><ul><li><a href=\"/wir\">Über uns – Team & Geschichte</a></li><li><a href=\"/gemuese\">Unser saisonales Gemüse</a></li><li><a href=\"/abos\">Abo-Modelle & Preise</a></li><li><a href=\"/standorte-depots\">Depots & Standorte</a></li><li><a href=\"/mitmachen\">Mitmachen & Mitglied werden</a></li></ul>"
+    },
+    {
+      "section_id": "kennenlernen-cta",
+      "section_title": "Bereit für solidarische Landwirtschaft?",
+      "section_layout": "rich_text",
+      "section_text": "<p>Werde Teil unserer Solawi-Gemeinschaft und erlebe, wie solidarische Landwirtschaft in der Praxis funktioniert. Wir freuen uns auf dich!</p>",
+      "buttons": [
+        { "text": "Jetzt Mitglied werden", "href": "/mitmachen", "variant": "primary" },
+        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "secondary" }
+      ]
+    }
+  ],
+  "conversion_notes": [
+    "Die Seite lädt heute bereits eine CMS-Section 'intro' (getPageSections('solawi')); wenn sie existiert, rendert sie statt des Fallbacks. Die 'intro'-Section hier ist der HARDCODIERTE FALLBACK (h1 'Solidarische Landwirtschaft' + zwei Absätze), der heute rendert, solange kein CMS-Intro vorhanden ist. Vor der Migration prüfen, ob in PW schon ein 'intro' existiert; falls ja, gewinnt dessen Inhalt.",
+    "Die h1 der Seite steht als <h1> im section_text der ersten Section, exakt wie das Fallback-Rendering (h1 nur, wenn der Intro-Text keine Überschrift enthält).",
+    "In 'was-ist-solawi' ist der zweite Absatz byte-genau 'und<strong> Gemeinschaft</strong>' (kein Leerzeichen vor <strong>, Leerzeichen INNERHALB des <strong>) – so kollabiert JSX den Zeilenumbruch der Quelle; der Browser zeigt 'und Gemeinschaft' korrekt an.",
+    "In der FAQ-Antwort 'Wie kann ich mitmachen?' ist es byte-genau 'oder<a href=\"/kontakt\"> kontaktiere uns direkt</a>' – Leerzeichen im Linktext, nicht davor (JSX-Whitespace-Kollaps).",
+    "Der Button 'Jetzt Mitglied werden' in 'solawi-bei-bioco' ist heute eine CTA.tsx-Komponente (rendert <button> mit router.push) – als buttons-Array abgebildet.",
+    "Die Schlusssection heisst auf dieser Seite 'Bereit für solidarische Landwirtschaft?' (nicht der übliche 'Möchtest du uns kennenlernen?'-Block); gemäss Konvention trotzdem section_id 'kennenlernen-cta', Inhalt exakt wie heute gerendert.",
+    "metadata.keywords und metadata.openGraph existieren im Code, sind aber im Seed-Schema nicht abbildbar und bleiben vorerst code-owned.",
+    "Alle Blöcke ausser dem Intro sind heute reine Hardcodes ohne CMS-Abgleich; die Seite prüft nur die 'intro'-Section.",
+    "F.1b-verify: Sections 'wie-funktioniert', 'warum-solawi' und 'faq' — section_title entfernt und als <h2> an den Anfang von section_text verschoben: die Texte enthalten <h3>-Unterüberschriften, und SectionRenderer unterdrückt section_title, sobald section_text eine Überschrift enthält (hasHeadingHtml) — mit section_title wären die drei h2 nach der Migration verschwunden (gleiche Konvention wie datenschutz.json)."
+  ]
+}

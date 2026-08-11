@@ -65,7 +65,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
         <p class="cms-section-caption"><?php echo esc_html($video_title); ?></p>
     <?php endif; ?>
     <div class="cms-video-frame">
-        <?php echo $embed_html; ?>
+        <?php echo bioco_kses_oembed_html($embed_html); ?>
     </div>
     <?php if ($text) : ?>
         <div class="cms-section-text"><?php echo bioco_kses_rich_text($text); ?></div>

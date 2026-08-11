@@ -1,0 +1,145 @@
+<?php
+/**
+ * Standalone seed-to-block conformance gate. Runs WITHOUT WordPress.
+ * ============================================================================
+ * The importer's weakest link is the mapping layer: a seed section whose
+ * layout/component key is not mapped, a plan item naming a block directory
+ * that does not exist, or an ACF group key with a typo. On a live site all
+ * three fail quietly — the page just renders without that section — and the
+ * only way to notice is a human comparing 20 pages by eye.
+ *
+ * `includes/seeds.php` and `includes/section-map.php` are deliberately free of
+ * WordPress calls, so the whole seed -> plan pipeline can be exercised here
+ * with nothing but the PHP CLI, and every referenced block + field group can be
+ * checked against what bioco-core actually ships.
+ *
+ * Usage:  php wordpress/scripts/check-seed-plan.php
+ * Exit:   0 = all seeds fully mapped and every reference resolves
+ *         1 = at least one failure (printed above the summary)
+ */
+
+define('ABSPATH', __DIR__);
+
+$root = dirname(__DIR__);
+$importDir = $root . '/web/app/mu-plugins/bioco-import';
+$coreDir = $root . '/web/app/mu-plugins/bioco-core';
+$seedDir = $root . '/content-seed';
+
+require_once $importDir . '/includes/seeds.php';
+require_once $importDir . '/includes/section-map.php';
+
+$failures = [];
+$skips = [];
+$blocksUsed = [];
+$sectionsPlanned = 0;
+
+try {
+    $seeds = bioco_import_load_seeds($seedDir);
+} catch (RuntimeException $e) {
+    fwrite(STDERR, "FAIL: Seeds konnten nicht geladen werden: " . $e->getMessage() . "\n");
+    exit(1);
+}
+
+printf("%d Seed-Dateien geladen aus %s\n\n", count($seeds), $seedDir);
+
+foreach ($seeds as $seed) {
+    $slug = $seed['slug'];
+    $plan = bioco_import_build_page_plan($seed);
+
+    // Every section must be accounted for exactly once: the plan's section_ids
+    // (union across items) must equal the seed's section ids. A section that
+    // silently falls out of the plan is the failure mode this catches.
+    $seedIds = array_map(function ($s) { return (string) $s['section_id']; }, $seed['sections']);
+    $plannedIds = [];
+    foreach ($plan as $item) {
+        foreach ($item['section_ids'] as $sid) $plannedIds[$sid] = true;
+    }
+    $missing = array_values(array_diff($seedIds, array_keys($plannedIds)));
+    if ($missing) {
+        $failures[] = sprintf('%s: Sections ohne Plan-Eintrag: %s', $slug, implode(', ', $missing));
+    }
+
+    foreach ($plan as $item) {
+        if ($item['type'] === 'skip') {
+            $skips[] = sprintf('%s / %s: %s', $slug, implode('+', $item['section_ids']), $item['reason']);
+            continue;
+        }
+        $sectionsPlanned++;
+
+        $block = $item['block'];
+        $group = $item['acf_group'];
+        $blocksUsed[$block] = ($blocksUsed[$block] ?? 0) + 1;
+
+        // The block directory must exist and its block.json must be valid,
+        // because that is what bioco-core registers and what the serialized
+        // block comment name is derived from.
+        $blockJsonPath = $coreDir . '/blocks/' . $block . '/block.json';
+        if (!is_file($blockJsonPath)) {
+            $failures[] = sprintf('%s: Block-Verzeichnis fehlt: blocks/%s/block.json', $slug, $block);
+        } else {
+            $decoded = json_decode((string) file_get_contents($blockJsonPath), true);
+            if (!is_array($decoded)) {
+                $failures[] = sprintf('%s: blocks/%s/block.json ist kein gueltiges JSON', $slug, $block);
+            } elseif (empty($decoded['name'])) {
+                $failures[] = sprintf('%s: blocks/%s/block.json hat kein "name"-Feld', $slug, $block);
+            }
+        }
+
+        // The ACF field group the plan writes into must actually ship, or every
+        // value lands under a field key that WordPress will not recognise.
+        $groupPath = $coreDir . '/acf-json/' . $group . '.json';
+        if (!is_file($groupPath)) {
+            $failures[] = sprintf('%s: ACF-Feldgruppe fehlt: acf-json/%s.json (Block %s)', $slug, $group, $block);
+        } else {
+            $decodedGroup = json_decode((string) file_get_contents($groupPath), true);
+            if (!is_array($decodedGroup) || ($decodedGroup['key'] ?? '') !== $group) {
+                $failures[] = sprintf(
+                    '%s: acf-json/%s.json hat nicht den erwarteten key "%s" (gefunden: "%s")',
+                    $slug, $group, $group, is_array($decodedGroup) ? ($decodedGroup['key'] ?? '') : 'ungueltiges JSON'
+                );
+            }
+        }
+
+        if (!empty($item['warnings'])) {
+            foreach ($item['warnings'] as $w) {
+                printf("  WARN  %-22s %-18s %s\n", $slug, $block, $w);
+            }
+        }
+    }
+}
+
+echo "\nVerwendete Bloecke:\n";
+ksort($blocksUsed);
+foreach ($blocksUsed as $block => $count) {
+    printf("  %-22s %d\n", $block, $count);
+}
+
+// The current 17 seeds map completely: ZERO sections are skipped. Pinning this
+// at 0 turns the gate from "roughly covered" into a real door lock — any newly
+// unmapped layout/component fails the build instead of quietly landing in a
+// list nobody reads. Raise this only with a note saying which section and why.
+$EXPECTED_MAX_SKIPS = 0;
+
+echo "\nManuell nachzubauende Sections (skip): " . count($skips) . "\n";
+foreach ($skips as $s) {
+    echo "  SKIP  " . $s . "\n";
+}
+if (count($skips) > $EXPECTED_MAX_SKIPS) {
+    $failures[] = sprintf(
+        'Mehr uebersprungene Sections als erwartet (%d > %d). Entweder einen Block/Mapping ergaenzen '
+        . 'oder EXPECTED_MAX_SKIPS in dieser Datei bewusst anheben.',
+        count($skips), $EXPECTED_MAX_SKIPS
+    );
+}
+
+printf("\nGeplante Bloecke: %d, Seiten: %d\n", $sectionsPlanned, count($seeds));
+
+if ($failures) {
+    echo "\n" . str_repeat('=', 70) . "\nFEHLER (" . count($failures) . "):\n";
+    foreach ($failures as $f) echo "  - " . $f . "\n";
+    echo "SEED_PLAN_CHECK: FAIL\n";
+    exit(1);
+}
+
+echo "\nSEED_PLAN_CHECK: OK — jede Section ist geplant, jeder Block und jede ACF-Gruppe existiert.\n";
+exit(0);

@@ -1,0 +1,44 @@
+{
+  "path": "/kundenportal/",
+  "slug": "kundenportal",
+  "template": "basic-page",
+  "title": "Kundenportal",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_text": "<h1>Kundenportal</h1>",
+      "section_layout": "rich_text"
+    },
+    {
+      "section_id": "gateway",
+      "section_title": "Gateway",
+      "section_component": "link_tiles",
+      "section_config": {
+        "tile1_title": "Mitglieder-Portal",
+        "tile1_text": "Extern",
+        "tile1_href": "",
+        "tile1_icon": "🦆",
+        "tile2_title": "Einsatzplanung",
+        "tile2_text": "Extern",
+        "tile2_href": "",
+        "tile2_icon": "🦆"
+      }
+    },
+    {
+      "section_id": "events",
+      "section_component": "events_feed",
+      "section_config": {
+        "variant": "banner",
+        "limit": 3
+      }
+    }
+  ],
+  "conversion_notes": [
+    "h1 lives in intro section_text. 'Gateway' is an <h2> today and maps to the gateway section's section_title (SectionRenderer emits h2; the section has no section_text, so the title is not suppressed).",
+    "'link_tiles' is NOT yet registered in site/templates/component-registry.json / frontend/lib/componentRenderers.tsx — it must be added during conversion. Today the tiles are plain <div class=\"portal-tile\"> elements with NO links (hrefs are empty strings in the config), both use the 🦆 emoji as .portal-icon, tile titles render as <h3> and 'Extern' as <p>.",
+    "The current section element carries id=\"I-01\" (bento-grid anchor) — not representable in the schema.",
+    "Events block: the page currently renders EventsBanner (frontend/components/EventsBanner.tsx) with useEventsFeed(3) — hence section_config.limit = 3. EventsBanner renders its own <h2>Nächste Events</h2>, loading text 'Events werden geladen…', empty state 'Aktuell keine Events geplant.' and the footer link 'Alle Events ansehen →' (to /aktuelles); these texts live in the component and are NOT duplicated in the seed (no section_title, to avoid a duplicate heading).",
+    "RESOLVED (F.4): the events_feed renderer now supports section_config.variant — 'banner' renders EventsBanner (frontend/components/EventsBanner.tsx, today's kundenportal markup, limit wired through), while the default 'standard' keeps EventsSection. This section uses {\"variant\": \"banner\", \"limit\": 3} to preserve today's exact rendering.",
+    "Page exports no metadata — 'seo' omitted; the layout default <title> applies today."
+  ]
+}
