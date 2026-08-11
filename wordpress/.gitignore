@@ -1,4 +1,5 @@
 /.env
+/wordpress-debug.log
 /web/wp
 /web/app/plugins
 /web/app/uploads

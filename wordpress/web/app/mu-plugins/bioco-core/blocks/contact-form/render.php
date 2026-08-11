@@ -10,6 +10,9 @@ if (!defined('ABSPATH')) exit;
 
 $title = get_field('title');
 $text = get_field('text');
+$phone_label = get_field('phone_label');
+$submit_label = get_field('submit_label');
+$submitting_label = get_field('submitting_label');
 
 bioco_forms_localize_block('bioco/contact-form', 'biocoContactFormConfig', 'contact');
 
@@ -43,7 +46,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
         </div>
 
         <div class="form-group">
-            <label for="contact_phone">Telefon</label>
+            <?php if ($phone_label) : ?><label for="contact_phone"><?php echo esc_html($phone_label); ?></label><?php endif; ?>
             <input type="tel" id="contact_phone" name="phone">
         </div>
 
@@ -61,6 +64,6 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
             <div class="cf-turnstile" data-form-captcha></div>
         </div>
 
-        <button type="submit" class="btn btn-primary btn-organic" data-submit-label="Absenden" data-submitting-label="Wird gesendet …">Absenden</button>
+        <button type="submit" class="btn btn-primary btn-organic" data-submit-label="<?php echo esc_attr($submit_label); ?>" data-submitting-label="<?php echo esc_attr($submitting_label); ?>"><?php echo esc_html($submit_label); ?></button>
     </form>
 </section>

@@ -16,6 +16,8 @@
 if (!defined('ABSPATH')) exit;
 
 $title = get_field('title');
+$submit_label = get_field('submit_label');
+$submitting_label = get_field('submitting_label');
 $text = get_field('text');
 
 bioco_forms_localize_block('bioco/subscribe-form', 'biocoSubscribeFormConfig', 'subscribe');
@@ -60,6 +62,6 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
             <div class="cf-turnstile" data-form-captcha></div>
         </div>
 
-        <button type="submit" class="btn btn-primary" data-submit-label="Abonnieren" data-submitting-label="Wird gesendet …">Abonnieren</button>
+        <button type="submit" class="btn btn-primary" data-submit-label="<?php echo esc_attr($submit_label); ?>" data-submitting-label="<?php echo esc_attr($submitting_label); ?>"><?php echo esc_html($submit_label); ?></button>
     </form>
 </section>

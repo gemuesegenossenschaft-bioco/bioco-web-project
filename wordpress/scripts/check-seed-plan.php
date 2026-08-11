@@ -54,9 +54,17 @@ foreach ($seeds as $seed) {
     foreach ($plan as $item) {
         foreach ($item['section_ids'] as $sid) $plannedIds[$sid] = true;
     }
-    $missing = array_values(array_diff($seedIds, array_keys($plannedIds)));
-    if ($missing) {
-        $failures[] = sprintf('%s: Sections ohne Plan-Eintrag: %s', $slug, implode(', ', $missing));
+    $seedIdCounts = array_count_values($seedIds);
+    $plannedIdCounts = array_count_values(array_keys($plannedIds));
+    ksort($seedIdCounts);
+    ksort($plannedIdCounts);
+    if ($seedIdCounts !== $plannedIdCounts) {
+        $failures[] = sprintf(
+            '%s: Section-ID-Haeufigkeiten stimmen nicht (Seed: %s; Plan: %s)',
+            $slug,
+            json_encode($seedIdCounts, JSON_UNESCAPED_SLASHES),
+            json_encode($plannedIdCounts, JSON_UNESCAPED_SLASHES)
+        );
     }
 
     foreach ($plan as $item) {
@@ -80,8 +88,14 @@ foreach ($seeds as $seed) {
             $decoded = json_decode((string) file_get_contents($blockJsonPath), true);
             if (!is_array($decoded)) {
                 $failures[] = sprintf('%s: blocks/%s/block.json ist kein gueltiges JSON', $slug, $block);
-            } elseif (empty($decoded['name'])) {
-                $failures[] = sprintf('%s: blocks/%s/block.json hat kein "name"-Feld', $slug, $block);
+            } elseif (($decoded['name'] ?? '') !== 'bioco/' . $block) {
+                $failures[] = sprintf(
+                    '%s: blocks/%s/block.json hat name "%s" statt "bioco/%s"',
+                    $slug,
+                    $block,
+                    $decoded['name'] ?? '',
+                    $block
+                );
             }
         }
 

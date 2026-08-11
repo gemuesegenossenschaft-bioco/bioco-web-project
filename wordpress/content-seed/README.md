@@ -1,11 +1,14 @@
 # Content-Seed: Kanonischer Seiteninhalt für die CMS-Migration
 
 Diese JSON-Dateien enthalten den **exakten** Inhalt, der bisher hart im
-Next.js-Frontend kodiert war. Sie sind die einzige Quelle für:
+Next.js-Frontend kodiert war. Der aktuelle WordPress-Importer liest sie mit
+`wp bioco import` ein und prüft das Ergebnis mit `wp bioco verify`. Sie sind die
+einzige Quelle für:
 
-1. die idempotente ProcessWire-Migration (`cms/migrations/`), die daraus
-   `content_sections` auf den jeweiligen Seiten anlegt bzw. aktualisiert,
-2. die Paritäts-Tests im Frontend (`frontend/tests/content-seed-*.test.ts`),
+1. den idempotenten WordPress-Import in native Blöcke, ACF-Felder und Seiten,
+2. die WordPress-Verifikation der importierten Blockdaten,
+3. die frühere ProcessWire-Migration (`cms/migrations/`),
+4. die Paritäts-Tests im Frontend (`frontend/tests/content-seed-*.test.ts`),
    die sicherstellen, dass bei der Umstellung kein Inhalt verändert wurde.
 
 **Inhalt darf hier nur geändert werden, wenn sich der Website-Text bewusst

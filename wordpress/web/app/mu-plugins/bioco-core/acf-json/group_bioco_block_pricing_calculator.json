@@ -571,6 +571,26 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_total_label",
+            "label": "Spaltentitel Total",
+            "name": "total_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Titel der Summenspalte in der Kostenaufstellung.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Total",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [

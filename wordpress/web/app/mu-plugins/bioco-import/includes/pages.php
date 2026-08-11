@@ -90,9 +90,7 @@ function bioco_import_seo_plugin_meta_keys() {
     if (defined('RANK_MATH_VERSION')) {
         return ['title' => 'rank_math_title', 'description' => 'rank_math_description', 'plugin' => 'Rank Math'];
     }
-    if (defined('AIOSEO_VERSION')) {
-        return ['title' => '_aioseo_title', 'description' => '_aioseo_description', 'plugin' => 'All in One SEO'];
-    }
+    // AIOSEO has no supported public post-meta contract here; omit the fake integration.
     return null;
 }
 
@@ -104,7 +102,7 @@ function bioco_import_seed_seo($slug, $post, array $seed, $mode, $force, array &
 
     $plugin = bioco_import_seo_plugin_meta_keys();
     if (!$plugin) {
-        bioco_import_report_row($report, $slug, '(seo)', '', 'info', 'SEO-Daten im Seed vorhanden, aber kein unterstütztes SEO-Plugin (Yoast SEO / Rank Math / All in One SEO) aktiv — Titel/Beschreibung nicht importiert.');
+        bioco_import_report_row($report, $slug, '(seo)', '', 'info', 'SEO-Daten im Seed vorhanden, aber kein unterstütztes SEO-Plugin (Yoast SEO / Rank Math) aktiv — Titel/Beschreibung nicht importiert.');
         return;
     }
 

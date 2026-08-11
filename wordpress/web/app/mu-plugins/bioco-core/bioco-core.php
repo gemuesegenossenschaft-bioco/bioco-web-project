@@ -18,7 +18,12 @@ require_once BIOCO_CORE_DIR . '/includes/helpers.php';
  */
 add_filter('acf/settings/save_json', fn() => BIOCO_CORE_DIR . '/acf-json');
 add_filter('acf/settings/load_json', function ($paths) {
-    return [BIOCO_CORE_DIR . '/acf-json'];
+    $theme_root = trailingslashit(wp_normalize_path(WP_CONTENT_DIR . '/themes'));
+    $paths = array_values(array_filter((array) $paths, function ($path) use ($theme_root) {
+        return strpos(trailingslashit(wp_normalize_path($path)), $theme_root) !== 0;
+    }));
+    $paths[] = BIOCO_CORE_DIR . '/acf-json';
+    return array_values(array_unique($paths));
 });
 
 /**

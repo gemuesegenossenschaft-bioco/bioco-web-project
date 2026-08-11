@@ -16,12 +16,18 @@ $show_more_label = get_field('show_more_label');
 $loading_title = get_field('loading_title');
 $loading_text = get_field('loading_text');
 
-$filters = [
-    'all' => 'Alles',
-    'koerbe' => 'Körbe',
-    'feld' => 'Feld',
-    'portraits' => 'Portraits',
-];
+// Filter labels come from the ACF repeater field_bioco_gallery_filters, whose
+// default rows carry today's wording. Flattened to slug => label so the two
+// loops further down stay unchanged. The slug itself is mechanical (view.js
+// matches it against each item's category), only the label is editorial.
+$filters = [];
+foreach ((array) get_field('filters') as $filter_row) {
+    if (!is_array($filter_row)) continue;
+    $filter_slug = isset($filter_row['key']) ? (string) $filter_row['key'] : '';
+    $filter_text = isset($filter_row['label']) ? (string) $filter_row['label'] : '';
+    if ($filter_slug === '' || $filter_text === '') continue;
+    $filters[$filter_slug] = $filter_text;
+}
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'gallery';
 $class_name = 'cms-section cms-gallery';

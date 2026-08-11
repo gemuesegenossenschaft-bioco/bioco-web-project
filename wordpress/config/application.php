@@ -14,7 +14,19 @@ $webroot_dir = $root_dir . '/web';
 if (file_exists($root_dir . '/.env')) {
     $dotenv = Dotenv\Dotenv::createUnsafeImmutable($root_dir);
     $dotenv->load();
-    $dotenv->required(['WP_HOME', 'WP_SITEURL', 'DB_NAME', 'DB_USER', 'DB_PASSWORD']);
+}
+
+$required_env = [
+    'WP_HOME', 'WP_SITEURL', 'DB_NAME', 'DB_USER', 'DB_PASSWORD',
+    'AUTH_KEY', 'SECURE_AUTH_KEY', 'LOGGED_IN_KEY', 'NONCE_KEY',
+    'AUTH_SALT', 'SECURE_AUTH_SALT', 'LOGGED_IN_SALT', 'NONCE_SALT',
+];
+$missing_env = array_values(array_filter($required_env, function ($name) {
+    $value = env($name);
+    return $value === null || $value === '';
+}));
+if ($missing_env) {
+    throw new RuntimeException('Missing required environment variables: ' . implode(', ', $missing_env));
 }
 
 define('WP_ENV', env('WP_ENV') ?: 'production');

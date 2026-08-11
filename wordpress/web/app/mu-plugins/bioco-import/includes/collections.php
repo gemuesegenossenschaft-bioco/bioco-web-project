@@ -46,13 +46,13 @@ function bioco_import_fetch_json_source($source) {
 
 // event_date is stored return_format 'Y-m-d H:i:s' — parse whatever the
 // export gives us (ISO-8601 from api-events.php's date() output) and
-// reformat as a local wall-clock string (not UTC-shifted; the source is
-// already a wall-clock time, not an instant).
+// reformat in the WordPress timezone. The source is already wall-clock
+// time, not an instant, so the stored value must follow the site's clock.
 function bioco_import_event_field_plan(array $item) {
     $plan = [];
     if (!empty($item['startDate'])) {
         $ts = strtotime((string) $item['startDate']);
-        if ($ts) $plan['event_date'] = date('Y-m-d H:i:s', $ts);
+        if ($ts) $plan['event_date'] = wp_date('Y-m-d H:i:s', $ts, wp_timezone());
     }
     if (!empty($item['status']) && in_array($item['status'], ['upcoming', 'past'], true)) {
         $plan['event_status'] = $item['status'];

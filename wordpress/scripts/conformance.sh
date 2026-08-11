@@ -21,6 +21,14 @@
 
 set -euo pipefail
 
+TEMP_FILES=()
+cleanup() {
+  if ((${#TEMP_FILES[@]})); then
+    rm -f "${TEMP_FILES[@]}"
+  fi
+}
+trap cleanup EXIT
+
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
@@ -50,13 +58,14 @@ command -v php >/dev/null 2>&1 && HAVE_PHP=1
 # Informational only: php -l over every touched PHP file (stderr, not manifest)
 # ---------------------------------------------------------------------------
 if [[ "$HAVE_PHP" == "1" ]]; then
+  PHP_LINT_ERROR_FILE=$(mktemp)
+  TEMP_FILES+=("$PHP_LINT_ERROR_FILE")
   while IFS= read -r -d '' f; do
-    php -l "$f" >/dev/null 2>/tmp/conformance-php-lint-err || {
+    php -l "$f" >/dev/null 2>"$PHP_LINT_ERROR_FILE" || {
       echo "PHP SYNTAX ERROR: $f" >&2
-      cat /tmp/conformance-php-lint-err >&2
+      cat "$PHP_LINT_ERROR_FILE" >&2
     }
   done < <(find web/app -type f -name '*.php' -print0)
-  rm -f /tmp/conformance-php-lint-err
 fi
 
 # ---------------------------------------------------------------------------
@@ -102,7 +111,7 @@ find web/app \( -path '*/themes/*' -o -path '*/mu-plugins/*' \) -type f -name '*
 echo "## D-UNDEFINED-WP-VARS"
 
 DEFINED_VARS_FILE=$(mktemp)
-trap 'rm -f "$DEFINED_VARS_FILE"' EXIT
+TEMP_FILES+=("$DEFINED_VARS_FILE")
 
 # Defined-by-theme.json (the canonical token source, extracted the same way
 # bioco-tokens.css was derived — see HARDCASES.md Hard Case 1).
@@ -126,6 +135,7 @@ done < <(find web/app -type f -name 'bioco-tokens.css' -print0)
 sort -u -o "$DEFINED_VARS_FILE" "$DEFINED_VARS_FILE"
 
 REFERENCED_VARS_FILE=$(mktemp)
+TEMP_FILES+=("$REFERENCED_VARS_FILE")
 # Scan *.css AND *.php (not just render.php): shared helper functions such as
 # bioco_render_events_list()/bioco_render_map_block() echo inline
 # style="...var(--wp--...)" strings too, and once moved they live in
@@ -140,7 +150,6 @@ find web/app -type f \( -name '*.css' -o -name '*.php' \) ! -name 'bioco-tokens.
 comm -23 "$REFERENCED_VARS_FILE" "$DEFINED_VARS_FILE" | while read -r v; do
   [[ -n "$v" ]] && printf '%s\t(undefined)\n' "$v"
 done
-rm -f "$REFERENCED_VARS_FILE"
 
 # ---------------------------------------------------------------------------
 # (e) render.php / view.js counts
@@ -159,12 +168,13 @@ printf 'view.js\t%s\n' "$view_count"
 # (it also asserts every referenced block dir and ACF group file exists); this
 # only records its shape. Run from the wordpress/ directory, same as the rest.
 echo "## F-SEED-PLAN"
-if php scripts/check-seed-plan.php > /tmp/bioco-seed-plan.$$ 2>&1; then
-  sed -n '/^Verwendete Bloecke:/,/^$/p' /tmp/bioco-seed-plan.$$ | sed '1d;/^$/d' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+/\t/'
-  grep -E '^Geplante Bloecke:' /tmp/bioco-seed-plan.$$ | tr -d ' '
+SEED_PLAN_FILE=$(mktemp)
+TEMP_FILES+=("$SEED_PLAN_FILE")
+if php scripts/check-seed-plan.php > "$SEED_PLAN_FILE" 2>&1; then
+  sed -n '/^Verwendete Bloecke:/,/^$/p' "$SEED_PLAN_FILE" | sed '1d;/^$/d' | sed -E 's/^[[:space:]]+//; s/[[:space:]]+/\t/'
+  grep -E '^Geplante Bloecke:' "$SEED_PLAN_FILE" | tr -d ' '
   printf 'gate\tOK\n'
 else
   printf 'gate\tFAIL\n'
-  grep -E '^  - ' /tmp/bioco-seed-plan.$$ || true
+  grep -E '^  - ' "$SEED_PLAN_FILE" || true
 fi
-rm -f /tmp/bioco-seed-plan.$$

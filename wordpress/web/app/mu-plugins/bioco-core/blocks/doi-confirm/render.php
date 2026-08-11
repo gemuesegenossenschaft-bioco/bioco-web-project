@@ -23,6 +23,12 @@ $home_link_label = get_field('home_link_label');
 
 $token = isset($_GET['token']) ? sanitize_text_field(wp_unslash($_GET['token'])) : '';
 
+if ($token && !$is_preview) {
+    // Token-specific confirmation results must never be reused for another visitor by a page cache.
+    if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
+    nocache_headers();
+}
+
 if ($is_preview) {
     $result = ['success' => true, 'form_type' => 'subscribe', 'error' => ''];
 } elseif ($token) {

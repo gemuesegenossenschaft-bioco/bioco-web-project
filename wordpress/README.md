@@ -52,9 +52,11 @@ cp .env.example .env   # fill DB + salts (https://roots.io/salts.html)
 ```
 
 ## Deploy to staging
-Pushing to the `wordpress` branch runs `.github/workflows/deploy-wordpress-staging.yml`: build off-server → rsync to the box (uploads never deleted, `.env` never shipped) → OPcache flush + smoke check.
+The primary staging path is the existing Softaculous WordPress installation plus `scripts/deploy-wp-code.sh`; follow `RUNBOOK-SOFTACULOUS.md`. It deploys only repository-owned code into `wp-content/` and leaves WordPress core, the database, uploads, and admin access under Softaculous control.
 
-**One-time server/admin setup required before the first successful deploy:**
+Bedrock plus `.github/workflows/deploy-wordpress-staging.yml` remains the alternative/CI path: build off-server → rsync to the box (uploads never deleted, `.env` never shipped) → OPcache flush + smoke check.
+
+**One-time Bedrock server/admin setup required before the first workflow deploy:**
 1. Create the `staging.bioco.ch` subdomain with docroot at the Bedrock `web/` directory.
 2. Create a `bioco_wp` MySQL DB + a least-privilege user; put credentials in the server-side `.env`.
 3. Add the repo secrets: `STAGING_SSH_HOST`, `STAGING_SSH_USER`, `STAGING_SSH_KEY`, `STAGING_DEPLOY_PATH`, `ACF_PRO_KEY`. Until they exist the workflow no-ops with a warning instead of failing.

@@ -41,6 +41,16 @@ $PRESENTATION_KEYS = [
 // Attribute values and mechanics that carry no editorial meaning.
 $MECHANICAL = '/^(submit|button|text|email|tel|number|checkbox|radio|hidden|post|get|on|off|true|false|none|auto|cover|contain|lazy|eager|_blank|_self|nofollow|noopener)$/i';
 
+$looksLikeContent = function ($literal) use ($MECHANICAL) {
+    $text = trim(html_entity_decode(strip_tags((string) $literal), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    if ($text === '' || preg_match($MECHANICAL, $text)) return false;
+    if (preg_match('/^(?:https?:|mailto:|tel:|\/|#|--wp--)/i', $text)) return false;
+    if (preg_match('/^[a-z0-9_-]+$/', $text)) return false;
+    if (preg_match('/^[A-Z0-9_:-]+$/', $text)) return false;
+    if (preg_match('/[ÄÖÜäöüß]/u', $text)) return true;
+    return (bool) preg_match('/^\p{Lu}\p{Ll}{2,}(?:[\s.,:;!?()–—-]+\p{L}{2,})*$/u', $text);
+};
+
 $violations = [];
 $allowedDefaults = [];
 
@@ -81,20 +91,59 @@ foreach ($files as $file) {
             }
         }
 
-        // ---- (B) hardcoded German prose in markup ---------------------------
-        // Text between tags, at least two words, containing a German letter or
-        // a lowercase run — enough to be prose rather than a slug or number.
-        if (preg_match_all('/>([^<>{}$?=]{8,120})</u', $line, $m, PREG_SET_ORDER)) {
+        // ---- (B) hardcoded German content in markup --------------------------
+        // Include clear single-word labels, not only multi-word prose.
+        if (preg_match_all('/>([^<>{}$?=]{2,120})</u', $line, $m, PREG_SET_ORDER)) {
             foreach ($m as $hit) {
                 $text = trim($hit[1]);
                 if ($text === '') continue;
-                if (!preg_match('/\p{L}{2,}\s+\p{L}{2,}/u', $text)) continue; // needs 2+ words
                 if (preg_match('/^[\s\d.,:;|\/+\-()]*$/u', $text)) continue;
                 if (strpos($text, 'php') !== false) continue;
+                if (!$looksLikeContent($text)) continue;
                 $violations[] = [
                     'file' => $rel,
                     'line' => $lineNo,
                     'kind' => 'hardcoded-prose',
+                    'detail' => mb_substr(preg_replace('/\s+/u', ' ', $text), 0, 80),
+                ];
+            }
+        }
+
+        // ---- (C) content literals assigned into PHP variables/arrays --------
+        // Catch labels and rows assembled before markup, including one-word
+        // German content such as category names.
+        if (preg_match_all('/(?:=>|\$[A-Za-z_][A-Za-z0-9_]*\s*=)\s*([\'\"])(.*?)\1/u', $line, $m, PREG_SET_ORDER)) {
+            foreach ($m as $hit) {
+                $text = trim($hit[2]);
+                if (!$looksLikeContent($text)) continue;
+                $violations[] = [
+                    'file' => $rel,
+                    'line' => $lineNo,
+                    'kind' => 'hardcoded-php-string',
+                    'detail' => mb_substr(preg_replace('/\s+/u', ' ', $text), 0, 80),
+                ];
+            }
+        }
+        if (preg_match('/\$[A-Za-z_][A-Za-z0-9_]*\s*=\s*\[/', $line)
+            && preg_match_all('/([\'\"])(.*?)\1/u', $line, $m, PREG_SET_ORDER)) {
+            foreach ($m as $hit) {
+                $text = trim($hit[2]);
+                if (!$looksLikeContent($text)) continue;
+                $violations[] = [
+                    'file' => $rel,
+                    'line' => $lineNo,
+                    'kind' => 'hardcoded-php-string',
+                    'detail' => mb_substr(preg_replace('/\s+/u', ' ', $text), 0, 80),
+                ];
+            }
+        }
+        if (preg_match('/^\s*([\'\"])([^\'\"]*)\1\s*,?\s*$/u', $line, $hit)) {
+            $text = trim($hit[2]);
+            if ($looksLikeContent($text)) {
+                $violations[] = [
+                    'file' => $rel,
+                    'line' => $lineNo,
+                    'kind' => 'hardcoded-php-string',
                     'detail' => mb_substr(preg_replace('/\s+/u', ' ', $text), 0, 80),
                 ];
             }

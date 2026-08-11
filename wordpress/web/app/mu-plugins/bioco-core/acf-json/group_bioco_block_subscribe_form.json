@@ -24,6 +24,46 @@
             "layout": "block",
             "prefix_label": 0,
             "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_subscribe_form_submit_label",
+            "label": "Beschriftung Absende-Button",
+            "name": "submit_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Text auf dem Absende-Button.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Abonnieren",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_subscribe_form_submitting_label",
+            "label": "Beschriftung waehrend des Sendens",
+            "name": "submitting_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Text auf dem Button, solange das Formular gesendet wird.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Wird gesendet …",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [

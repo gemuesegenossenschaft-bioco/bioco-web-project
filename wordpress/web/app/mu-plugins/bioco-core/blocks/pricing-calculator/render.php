@@ -29,12 +29,16 @@ $no_subscription_label = get_field('no_subscription_label');
 $article_label = get_field('article_label');
 $quantity_label = get_field('quantity_label');
 $unit_price_label = get_field('unit_price_label');
+$total_label = get_field('total_label');
 $share_certificates_label = get_field('share_certificates_label');
 $required_label = get_field('required_label');
 $shares_only_info = get_field('shares_only_info');
 $without_basket_label = get_field('without_basket_label');
 $additional_label = get_field('additional_label');
 $tiers = get_field('tiers');
+$tiers = is_array($tiers) ? array_values(array_filter($tiers, function ($tier) {
+    return !empty($tier['name']);
+})) : [];
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'pricing-calculator';
 $class_name = 'cms-section cms-pricing-calculator';
@@ -70,7 +74,6 @@ $grand_total = $first_price + $shares_total;
             <div class="abo-buttons">
                 <?php foreach ($tiers as $index => $tier) :
                     $tier_name = $tier['name'] ?? '';
-                    if (!$tier_name) continue;
                     $tier_slug = sanitize_title($tier_name);
                     $tier_price = (int) ($tier['price'] ?? 0);
                     $tier_shares = (int) ($tier['shares'] ?? 0);
@@ -118,7 +121,7 @@ $grand_total = $first_price + $shares_total;
 <?php if ($article_label) : ?>                        <th><?php echo esc_html($article_label); ?></th><?php endif; ?>
 <?php if ($quantity_label) : ?>                        <th><?php echo esc_html($quantity_label); ?></th><?php endif; ?>
 <?php if ($unit_price_label) : ?>                        <th><?php echo esc_html($unit_price_label); ?></th><?php endif; ?>
-                        <th>Total</th>
+                        <?php if ($total_label) : ?><th><?php echo esc_html($total_label); ?></th><?php endif; ?>
                         <th></th>
                     </tr>
                 </thead>
@@ -162,7 +165,7 @@ $grand_total = $first_price + $shares_total;
                         </td>
                     </tr>
                     <tr class="total-row">
-                        <td colspan="3"><strong>Total</strong></td>
+                        <td colspan="3"><?php if ($total_label) : ?><strong><?php echo esc_html($total_label); ?></strong><?php endif; ?></td>
                         <td colspan="2"><strong class="total-amount" data-pc-field="total">CHF <?php echo esc_html(number_format_i18n($grand_total)); ?>.-</strong></td>
                     </tr>
                 </tbody>

@@ -75,7 +75,8 @@ function bioco_forms_client_ip() {
 // Fails closed: no secret configured, no token supplied, or a non-2xx /
 // non-success response all reject the submission.
 function bioco_forms_verify_turnstile($token, $remote_ip) {
-    $secret = getenv('TURNSTILE_SECRET_KEY');
+    $config = bioco_forms_turnstile_config();
+    $secret = $config['secret'];
     if (!$secret || !$token) {
         return false;
     }
@@ -130,15 +131,41 @@ function bioco_forms_view_script_handle($block_name) {
     return str_replace('/', '-', $block_name) . '-view-script';
 }
 
+function bioco_forms_turnstile_config() {
+    $site_key = (string) getenv('NEXT_PUBLIC_TURNSTILE_SITE_KEY');
+    $secret = (string) getenv('TURNSTILE_SECRET_KEY');
+
+    return [
+        'site_key' => $site_key,
+        'secret' => $secret,
+        'configured' => $site_key !== '' && $secret !== '',
+        'partial' => ($site_key === '') !== ($secret === ''),
+    ];
+}
+
+add_action('admin_notices', function () {
+    $config = bioco_forms_turnstile_config();
+    if (!$config['partial'] || !current_user_can('manage_options')) return;
+
+    $missing = $config['site_key'] === '' ? 'NEXT_PUBLIC_TURNSTILE_SITE_KEY' : 'TURNSTILE_SECRET_KEY';
+    printf(
+        '<div class="notice notice-error"><p>%s</p></div>',
+        esc_html(sprintf('bioco Forms: Turnstile is only partially configured. Set %s; public form submissions are currently blocked.', $missing))
+    );
+});
+
 // Loads the Turnstile widget script + passes the REST endpoint and site key
 // to a block's view.js. Called from each form block's render.php.
 function bioco_forms_localize_block($block_name, $object_name, $endpoint) {
-    wp_enqueue_script('bioco-cf-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
+    $config = bioco_forms_turnstile_config();
+    if ($config['configured']) {
+        wp_enqueue_script('bioco-cf-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
+    }
 
     $handle = bioco_forms_view_script_handle($block_name);
     wp_localize_script($handle, $object_name, [
         'restUrl' => esc_url_raw(rest_url('bioco/v1/' . $endpoint)),
-        'turnstileSiteKey' => (string) getenv('NEXT_PUBLIC_TURNSTILE_SITE_KEY'),
+        'turnstileSiteKey' => $config['configured'] ? $config['site_key'] : '',
     ]);
 }
 
