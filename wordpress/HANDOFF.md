@@ -1,260 +1,280 @@
 # Handoff: WordPress staging bring-up
 
-**For:** a Claude Code instance (or developer) with **server access** — SSH to the hosting, and network
-that resolves `cms.bioco.ch`. The remote session that produced this branch had neither, which is why
-the remaining work is exactly the work that touches a real machine.
+**Version 2.** Supersedes the v1 handoff written by a sandboxed session with no `ssh` and no route to
+`cms.bioco.ch`. This revision was written from a machine that has both, so the items v1 listed as
+"needs a real machine" are now either done or newly scoped with real evidence.
 
 **Read first:** `/CLAUDE.md`, `/AGENTS.md` (hard project rules), then `wordpress/RUNBOOK-SOFTACULOUS.md`
-(the operator checklist). This file explains *state, boundaries and acceptance* — the runbook has the
-click-by-click steps.
+(the operator checklist). This file explains *state, boundaries and acceptance*.
 
 ---
 
-## 1. Where things stand
+## 1. What changed since v1
+
+### 1.1 The environment questions are answered
+
+| v1 open question | Answer |
+|---|---|
+| Which host serves staging? | **One box, not two.** `193.33.128.160` *is* `cpanel07.tophost.ch`. `bioco.ch`, `cms.bioco.ch` and `staging.bioco.ch` all resolve there. The Novatrend/Tophost split in v1 §4.1 was a false distinction. |
+| Does `staging.bioco.ch` exist? | Yes, already a cPanel subdomain. It currently returns **503** — no working docroot behind it. |
+| Is WordPress installed? | Not for this project. `~/public_html/` holds the **legacy WordPress** (DB `markuss_bioco`, themes `attitude_modified` / `bioco` / `twenty*`, ACF **free**). `~/public_html/bioco_staging/` is a ProcessWire copy, not WP. |
+| ACF Pro licence? | **No longer needed.** See §1.2. |
+| Divi licence? | **None exists.** Searched every theme dir and unpacked both UpdraftPlus theme backups (2022 + 2024). Divi has never been on this account. See §1.3. |
+
+### 1.2 ACF Pro is replaced by Secure Custom Fields — no purchase
+
+**Secure Custom Fields (SCF)** is WordPress.org's official fork of ACF, maintained by Automattic.
+Version 6.9.5 (7 Aug 2026) ships Repeater, Flexible Content, Options Pages, Gallery, Clone and ACF
+Blocks V3 — the whole Pro feature set, GPL, free.
+
+The port's ACF surface is small enough to make this a drop-in rather than a rewrite:
+
+| Call | Occurrences | In SCF |
+|---|---|---|
+| `get_field()` | 268 | yes |
+| `acf_get_fields()` / `acf_get_field_group()` | 4 | yes |
+| `acf/settings/load_json` + `save_json` | 2 | yes |
+| `block.json` → `"acf": {"mode", "renderTemplate"}` | every block | yes (`acf_is_acf_block_json()`, `acf_handle_json_block_registration()`) |
+
+**The one thing still to verify on a real install:** our blocks are `apiVersion 2` with `"mode": "auto"`,
+while SCF has moved to blocks V3. `acf_rendered_block_v3()` was *added* in 6.8 alongside V2 rather than
+replacing it, so V2 should still load — but this is unproven until something renders. If blocks come
+out empty, check this before anything else.
+
+Saves ~USD 249/yr. v1 §3.2 is closed.
+
+### 1.3 Divi is not required, and is not being bought
+
+Divi was planned as *a* front-end, never *the* front-end. Invariant **#101** already forces every
+block, field, form and CPT into `bioco-core` / `bioco-content` / `bioco-forms` / `bioco-import` as
+mu-plugins, with a gate banning `get_template_directory()` / `get_stylesheet_directory()`. The theme is
+a thin shell, and the repo already ships **`wordpress/web/app/themes/bioco`** — our own free block theme
+with `theme.json`.
+
+**Decision (owner, this session): bring staging up on the free `bioco` theme first.** Divi gets bought
+only if editors turn out to want its page builder. `wordpress/web/app/themes/bioco-divi` stays in the
+repo as the alternative path — do not delete it.
+
+Divi is commercial software from Elegant Themes, downloadable only from a logged-in members account.
+Copies available anywhere else are nulled builds: a licence violation and a common malware vector. Do
+not source it that way for a live cooperative's site.
+
+### 1.4 The seed export ran, and it was the first real test
+
+v1 §4.6 could not run. It runs now, and it immediately exposed **three defects that were invisible
+while it couldn't run**. This is the pattern to expect from every remaining "first contact" step —
+treat their output as evidence, not formality.
+
+1. **Component mapping gap (fixed, PR #103).** The 17 original seeds came from hardcoded Next.js JSX
+   and carry `section_layout`. `/abos` and `/wir` were CMS-native from the start and carry
+   `section_component` in snake_case. The importer knew none of those names, although every target
+   block already existed. 20 sections silently planned as "rebuild by hand in Divi".
+2. **acf-json gate gap (surfaced, PR #103).** `check-hardcoded-content.php` scanned only block
+   templates. Editorial content sitting in ACF `default_value` passed through no gate — which is
+   exactly where the nine depot contacts were hiding.
+3. **Dropped images (open, §3.1 below).** `fetch-cms-seed.php` never writes `image_url`.
+
+---
+
+## 2. Current state
 
 | Branch | HEAD | State |
 |---|---|---|
-| `main` | `1ea9e4b` | tsc clean, 560/560 vitest, `next build` 32/32 |
-| `wordpress` | `ac61384` | 16 commits ahead of `main`. All gates green (§5) |
+| `main` | `1ea9e4b` | unchanged |
+| `wordpress` | `9c6278b` | unchanged |
+| `review/seeds-mapping-acf-defaults` | `eae00bb` | **PR #103 → `wordpress`, awaiting CodeRabbit** |
 
-The WordPress code is **complete and gated but has never run against a live WordPress** — there is no
-WP install, no MySQL and no PHP-FPM in the environment that wrote it. Everything below is verified
-statically (lint, JSON validity, ACF key uniqueness, seed→block→field-group resolution) and nothing is
-verified dynamically. **The first `wp bioco import` dry-run is the first real test.** Treat its output
-as evidence, not as a formality.
+### Gates on PR #103
 
-### What is deliberately in mu-plugins, not the theme
-Invariant **#101**: Divi must be swappable. Content, blocks, ACF fields and forms live in
-`bioco-core` / `bioco-content` / `bioco-forms` / `bioco-import`. mu-plugin code must never call
-`get_template_directory()` or `get_stylesheet_directory()` — there is a gate for that (§5).
+| Gate | Result |
+|---|---|
+| `php wordpress/scripts/check-seed-plan.php` | OK — 19 pages, 97 blocks, **0 skips** |
+| `php wordpress/scripts/check-hardcoded-content.php` | OK (templates); acf-json opt-in, red with 130 |
+| `php -l` across mu-plugins | clean |
+| `grep get_template_directory\|get_stylesheet_directory` | no hits (#101 OK) |
+| `cd wordpress && bash scripts/conformance.sh` | `gate OK` |
+| `diff wordpress/content-seed/… cms/content-seed/…` | identical (parity holds) |
+| `cd frontend && npx vitest run` | 524/524 |
+
+`npx tsc --noEmit` reports 4× TS2802 in `frontend/tests/page-shell-tokens.test.ts`. **Pre-existing** —
+PR #103 touches no `frontend/` file. v1's claim of "tsc clean" on `main` did not hold up.
 
 ---
 
-## 2. Hard constraints — do not violate these
+## 3. Open work, in order
+
+### 3.1 Images are being dropped — fix before any import
+
+**This blocks a correct import.** `section-map.php:127` sideloads `$section['image_url']`.
+`fetch-cms-seed.php` never writes that key — it writes only `image_alt`. Result: on `/wir` the CMS has
+images on 6 sections (11 files, including `hof_team` ×3 and the `geisshof` gallery ×4) and every one is
+silently dropped, while `image_alt` still gets written — alt text describing an image that is not there.
+
+The exporter *warns* about the plural `images` arrays but drops the singular `image` with no warning at
+all.
+
+Do not be misled the way this session initially was: grepping the existing 19 seeds shows `image_url`
+zero times, which looks like proof that `image_alt`-only is the contract. It proves nothing — none of
+the existing seeds happen to have images. **The importer is the contract, not the sample.**
+
+**Acceptance:** re-export both seeds; `image_url` present for all 6 `/wir` sections; the `images`
+arrays for `gallery_strip` and `cards_grid` mapped rather than warned about; seed-plan still 0 skips.
+
+### 3.2 Migrate the 130 editorial ACF defaults
+
+The recursive acf-json scan is implemented and correctly separates presentation defaults (`gap`,
+`rounded`, `columns_desktop`, `media_fit`) from editorial content. It currently finds **130 editorial
+defaults across 15 field groups**:
+
+| Group | Hits |
+|---|---|
+| `membership_form` | 38 |
+| `pricing_calculator` | 21 |
+| `waiting_list_form` | 10 |
+| `doi_confirm`, `visit_day_form` | 9 each |
+| `events_feed` | 8 |
+| `event_signup_form` | 7 |
+| `pricing_table` | 6 |
+| `gallery`, `geisshof_map`, `saisonkalender`, `schnuppertage` | 4 each |
+| `contact_form` | 3 |
+| `subscribe_form` | 2 |
+| `group_cards` | 1 |
+
+Mostly form labels — content by the project's own definition, since a human would want to reword them
+without a developer.
+
+It runs **opt-in** via `--acf-json` until they are migrated. The success message states explicitly that
+acf-json was not checked; a gate claiming more than it verifies is worse than no gate. **Do not write
+these into `hardcoded-content-baseline.json`** — it stays `{}`.
+
+The hard part: `doi_confirm`, `event_signup_form` and `gallery` have **no page seed to migrate into**.
+Those need a real content target inventing before the defaults can move.
+
+**Acceptance:** `check-hardcoded-content.php --acf-json` green, the flag deleted, the scan
+unconditional. Re-prove non-vacuity by planting a German sentence as a `default_value` and watching it
+fail.
+
+### 3.3 Depot description line breaks — review this decision
+
+The nine depot descriptions carried `\n` separating address·day / contact·website / notes. `api.php`
+strips control characters from `section_config`, so those line breaks cannot survive the seed contract.
+The parity test caught it immediately.
+
+Rather than weaken the test, the three parts are now joined with ` · `, the separator already used
+inside those same strings. No information lost, but the line structure is gone. **Flagged in PR #103 as
+worth a second opinion** — if the rendering needs real line breaks, the fix belongs in how the depot
+description is stored, not in the test.
+
+### 3.4 Bring staging up
+
+Owner has confirmed: **create a fresh staging docroot.** Do not touch `~/public_html/` (legacy WP), and
+do not touch `intranet.bioco.ch`.
+
+1. **Install WordPress** into the new docroot via Softaculous (`RUNBOOK-SOFTACULOUS.md` §1–2). PHP 8.2,
+   non-obvious admin username, German site language. `staging.bioco.ch` already resolves and currently
+   503s — point it at the new docroot.
+   *Acceptance:* wp-admin reachable; note the absolute `wp-content` path.
+2. **Plugins:** Secure Custom Fields + WP Mail SMTP.
+   *Acceptance:* `wp plugin list` shows SCF active.
+3. **Theme:** activate `bioco` (§1.3). Not Divi.
+4. **Deploy our code:**
+   ```bash
+   bash wordpress/scripts/deploy-wp-code.sh --host=<host> --user=<user> \
+        --wp-content=<docroot>/wp-content
+   ```
+   Dry-run is the default and writes nothing. Review, then re-run with `--apply`.
+
+   > **The trap this handles:** vanilla WordPress auto-loads only *files* at the top level of
+   > `wp-content/mu-plugins` and **silently ignores subdirectories**. Bedrock papers over this with its
+   > autoloader; Softaculous has none. Without `wordpress/deploy/bioco-mu-loader.php` (which the deploy
+   > script installs) the entire bioco block layer is absent and every page renders empty, with no
+   > error anywhere. If pages come out blank, check this first.
+
+   *Acceptance:* the script's own verification prints PASS for the loader, all four mu-plugins, the
+   seed count, `uploads` still present, and `wp bioco import --help`.
+5. **Import:**
+   ```bash
+   wp bioco import          # dry-run, writes nothing
+   wp bioco import --apply
+   wp bioco verify
+   ```
+   Idempotent; a second `--apply` reports "unchanged". Existing non-empty pages are skipped, never
+   overwritten. **Read the dry-run report row by row** — a clean exit code is necessary but the rows are
+   the actual evidence.
+   *Acceptance:* `wp bioco verify` matches every field; 19 pages in wp-admin.
+6. **Live services (#97):** submit all five forms plus the membership route and DOI confirmation;
+   confirm SMTP delivery and Turnstile verification.
+
+   > Watch the half-configured Turnstile case: a missing **site** key while the **secret** is set makes
+   > every form unusable — the widget never renders, so no token is produced, so verification rejects
+   > everything. Handled explicitly now, but the keys still have to be right.
+
+### 3.5 Then W12–W13
+SEO/redirects and cutover. Both depend on a working staging site. Cutover is a separate step
+(`RUNBOOK-STAGING-DIVI.md` §6) and nothing before it touches `bioco.ch`.
+
+---
+
+## 4. Hard constraints — do not violate these
 
 1. **Repo is PUBLIC.** Never commit a secret, token, password, `.env`, or licence key.
-2. **Divi is licensed. Never commit it.** `web/app/themes/Divi` is gitignored, and both deploy paths
-   exclude it from `--delete`. Do not "fix" that exclusion away.
-3. **No hardcoded content, no fallback content** (`CLAUDE.md`). An empty field renders nothing, never
-   invented text. The block templates are currently at **zero tolerance** — keep them there.
-4. **Do not modify `intranet.bioco.ch`** in any way.
-5. **Never let `--delete` reach `wp-content/uploads`, `wp-content/plugins`, WP core, or a theme we do
+2. **No hardcoded content, no fallback content** (`CLAUDE.md`). An empty field renders nothing, never
+   invented text. Block templates are at **zero tolerance** — keep them there.
+3. **Do not modify `intranet.bioco.ch`**, the legacy WordPress in `~/public_html/`, or `bioco.ch`.
+4. **Never let `--delete` reach `wp-content/uploads`, `wp-content/plugins`, WP core, or a theme we do
    not own.** Media loss on a live host is unrecoverable. `deploy-wp-code.sh` enforces this with a hard
-   allowlist — don't route around it.
+   allowlist — do not route around it.
+5. **If Divi is ever bought: never commit it.** `web/app/themes/Divi` is gitignored and both deploy
+   paths exclude it from `--delete`. The licence key goes into wp-admin only — never the repo, a
+   Markdown file, `.env`, a ticket, or a chat message.
 6. **PHP comment trap:** never write the two characters `*/` inside a PHP block comment (a glob like
-   `blocks/<star>/block.json` breaks `php -l`). This has bitten twice.
-7. Staging only. **Nothing in this handoff touches `bioco.ch`.** Cutover is a separate, later step
-   (`RUNBOOK-STAGING-DIVI.md` §6).
+   `blocks/<star>/block.json` breaks `php -l`). This has bitten three times.
+7. Staging only.
 
 ---
 
-## 3. Two decisions that belong to the repo owner
+## 5. Review workflow — hard rule
 
-Do **not** resolve these unilaterally.
+**CodeRabbit reviews before every commit and push, looped until all findings are resolved.** Owner's
+standing instruction, not a suggestion.
 
-### 3.1 Depot contact names in a public repo
-`bioco-core/acf-json/group_bioco_block_depot_map.json` — the `locations` repeater's `default_value`
-carries **nine real contact persons' names plus addresses**.
+Because CodeRabbit reviews pushed PRs (its direct API is unreachable from sandboxed environments,
+403 CONNECT), the loop runs as: branch off `wordpress` → push → open a PR against `wordpress` → resolve
+every finding → only then land it. Nothing unreviewed reaches `wordpress`.
 
-- It is **pre-existing on `main`**: `frontend/components/DepotMap.tsx:25` has hardcoded the same nine
-  contacts for a long time. The WordPress port reproduced it faithfully; it was not introduced here.
-- The data is already published on bioco.ch, so it is not secret. What changes is that a GDPR
-  erasure/correction request becomes a code deploy, and git history retains it regardless.
-- It is also *fallback content*, which the project rule forbids.
+`.coderabbit.yaml` must exist on **every** reviewed branch. A review of `wordpress` once ran with
+"Configuration used: defaults" until the file was present there, and it found the two most serious bugs
+on that branch. Copilot was also used; all 4 of its findings are fixed.
 
-Options put to the owner: (a) leave it, (b) move the depots into
-`content-seed/standorte-depots.json` so the importer writes them as real content and the ACF default
-goes away — **note this edits a parity-contract seed, see §6**, (c) drop only the contact names.
-
-**Until the owner answers, leave that file untouched.**
-
-### 3.2 ACF Pro licence
-`wp bioco import` **cannot run without ACF Pro active.** The importer resolves ACF field keys through
-ACF's own API (`acf_get_field_group()` / `acf_get_fields()`) rather than reimplementing ACF's internal
-clone-key algorithm — that was a deliberate choice, because guessing those keys silently produces
-values WordPress does not recognise. The CLI refuses up front if ACF is missing.
-
-If the cooperative does not hold an ACF Pro licence, that is a purchase and it blocks everything from
-§4.4 onward.
-
----
-
-## 4. The work, in order
-
-Each step has an acceptance check. Do not proceed past a failing one.
-
-### 4.1 Confirm the target host
-The team has hosting at more than one provider. A screenshot confirmed **Softaculous on
-`cpanel07.tophost.ch`** with *no* WordPress installed, while `CLAUDE.md` documents the Novatrend box
-(`193.33.128.160`) for the current site. **Confirm with the owner which host serves
-`staging.bioco.ch`** before deploying. Nothing here hardcodes a host — every path is a parameter.
-
-### 4.2 Softaculous install
-`RUNBOOK-SOFTACULOUS.md` §1–2. Subdomain, PHP 8.2, install into the staging docroot (**not** the live
-docroot), non-obvious admin username, German site language.
-
-> **Why Softaculous and not Bedrock:** Softaculous installs *vanilla* WordPress (`wp-content` layout,
-> no Composer, no `.env`). Our code is layout-agnostic, so Softaculous owns core/DB/admin user and we
-> ship only our own code. The Bedrock tree and `.github/workflows/deploy-wordpress-staging.yml` remain
-> as the alternative path — do not delete them.
-
-**Acceptance:** wp-admin reachable; note the absolute `wp-content` path.
-
-### 4.3 Plugins
-ACF **Pro** (see §3.2) and WP Mail SMTP. Divi is a *theme*, installed in §4.5.
-
-**Acceptance:** `wp plugin list` shows ACF Pro **active**.
-
-### 4.4 Deploy our code
-```bash
-bash wordpress/scripts/deploy-wp-code.sh --host=<host> --user=<user> \
-     --wp-content=<docroot>/wp-content
-```
-Dry-run is the default and writes nothing. Review, then re-run with `--apply`.
-
-> **The trap this handles:** vanilla WordPress auto-loads only *files* at the top level of
-> `wp-content/mu-plugins` and **silently ignores subdirectories**. Bedrock papers over this with its
-> autoloader; Softaculous has none. Without `wordpress/deploy/bioco-mu-loader.php` (which the deploy
-> script installs) the entire bioco block layer would be absent and every page would render empty —
-> with no error anywhere. If pages come out blank, check this first.
-
-**Acceptance:** the script's own post-deploy verification prints PASS for the loader, all four
-mu-plugins, the seed count, `uploads` still present, and `wp bioco import --help`.
-
-### 4.5 Divi + child theme
-Upload the Divi zip via `Design → Themes → Theme hochladen`. Activate the **child** theme
-`bioco-divi`, never `Divi` itself. Enter the licence under `Divi → Theme Options → Updates`.
-
-**The licence key goes into the WordPress database via wp-admin only** — never into the repo, a
-Markdown file, `.env`, a ticket, or a chat message. Do not ask the owner to paste it anywhere.
-
-**Acceptance:** `bioco-divi` active with `Divi` as parent; Divi update check succeeds.
-
-### 4.6 Export the two missing pages — do this BEFORE importing
-`/abos` and `/wir` are live pages with **no seed file**. Cause: the 17 seeds capture content that used
-to be hardcoded in the Next.js JSX; those two were CMS-native from the start (`/abos` is the reference
-page), so they never had hardcoded content and never got a seed. Their content exists **only in
-ProcessWire**.
-
-Skip this and the import produces a site missing two pages, with dead internal links from `/solawi`.
-
-```bash
-php wordpress/scripts/fetch-cms-seed.php --slug=abos
-php wordpress/scripts/fetch-cms-seed.php --slug=wir
-```
-Needs network to `cms.bioco.ch`. If only another machine reaches it, the error message prints the
-`curl` + `--from-file` detour. The script never invents content, refuses to overwrite an existing
-seed, and **reports** any unmapped API field instead of dropping it — if you see that warning,
-check whether content is hiding in it.
-
-**Acceptance:** `php wordpress/scripts/check-seed-plan.php` is green and reports **19 pages** (not 17).
-Commit the two new seeds.
-
-### 4.7 Import
-```bash
-wp bioco import                 # dry-run, writes nothing
-wp bioco import --apply
-wp bioco verify
-```
-Report: CLI table + `wp-content/bioco-import-log/`. Idempotent — a second `--apply` reports
-"unchanged". Existing non-empty pages are skipped, never overwritten; `--force` overrides and is
-rejected without `--apply`. Any error row exits non-zero.
-
-**Read the dry-run report properly.** This is the importer's first contact with a real WordPress; a
-clean exit code is necessary but the row-level output is the actual evidence.
-
-**Acceptance:** `wp bioco verify` reports match for every field, and 19 pages exist in wp-admin.
-
-### 4.8 Live-service verification (issue #97)
-Only now, with real credentials on the server: submit each of the five forms plus the membership route
-and DOI confirmation, and confirm SMTP delivery and Turnstile verification.
-
-> Watch for the half-configured Turnstile case: a missing **site** key while the **secret** is set
-> makes every form unusable — the widget never renders, so no token is produced, so verification
-> rejects every submission. That case is now handled explicitly, but the keys still have to be right.
-
----
-
-## 5. Gates — the definition of "green"
-
-Run from the repo root unless noted. All must pass before you push.
-
-```bash
-# WordPress
-find wordpress/web/app/mu-plugins -name '*.php' -print0 | xargs -0 -n1 php -l | grep -v 'No syntax errors' || echo PHP_LINT_CLEAN
-php wordpress/scripts/check-seed-plan.php          # SEED_PLAN_CHECK: OK — 17 pages / 75 blocks (19 after §4.6)
-php wordpress/scripts/check-hardcoded-content.php  # zero tolerance; --list to see detail
-grep -rn 'get_template_directory\|get_stylesheet_directory' wordpress/web/app/mu-plugins/ && echo VIOLATION_101 || echo OK_101
-cd wordpress && bash scripts/conformance.sh        # manifest + F-SEED-PLAN block
-bash -n wordpress/scripts/deploy-wp-code.sh
-
-# Frontend (main)
-cd frontend && npx tsc --noEmit && npx vitest run  # 560 passing
-```
-
-Two gates are **proven non-vacuous** — a planted bad block name fails `check-seed-plan.php`, and a
-planted German sentence fails `check-hardcoded-content.php`. If you extend either, re-prove it the
-same way; a gate that cannot fail is worse than no gate.
-
-`check-hardcoded-content.php` has a baseline file. It is currently `{}` = **zero tolerance**. If you
-widen the detector and new findings appear, **fix them** rather than writing them into the baseline.
-An empty baseline is the goal state, not a missing one.
+PR **#102** (`wordpress` → `main`) is **review-only, not for merge** — it collects reviews. Do not merge
+it without the owner's explicit say-so.
 
 ---
 
 ## 6. Things that will bite you
 
 - **Seeds are a parity contract.** `wordpress/content-seed/*.json` are byte-identical to
-  `cms/content-seed/*.json` and pin the ProcessWire migration *and* the Next.js parity tests. Changing
-  one changes the meaning of those tests. New seeds from §4.6 are additions, which is fine.
+  `cms/content-seed/*.json` and pin the ProcessWire migration *and* the Next.js parity tests. Change
+  one, change both, and `diff` them before pushing.
+- **`section_config` cannot hold control characters.** `api.php` strips them. Multiline text in a
+  config value will be silently mangled — see §3.3.
 - **OPcache.** After rsyncing any `.php`, PHP-FPM may serve stale bytecode. `php -r 'opcache_reset()'`
-  on the CLI does **not** affect the web process — this was a real bug in the CI workflow, now replaced
-  by an HTTP-triggered reset guarded by a secret. Symptom: your change appears to have no effect.
-- **`wp bioco verify` compares recursively.** It used to compare with `(string)`, which turns any array
+  on the CLI does **not** affect the web process. Symptom: your change appears to have no effect.
+- **`wp bioco verify` compares recursively.** It used to compare with `(string)`, turning any array
   into the literal `"Array"` — every repeater compared equal, so it reported clean runs on content it
-  never checked. If you touch that comparison, keep it recursive and keep `"3"` vs `3` matching.
+  never checked. Keep it recursive, and keep `"3"` matching `3`.
 - **The importer writes ACF `default_value` explicitly**, including repeater rows, for fields the plan
-  does not supply. This is deliberate: an ACF block stores values in its serialized attributes, and an
-  absent key would depend on ACF-internal default substitution. Because the templates carry no
-  fallbacks, an unresolved default renders as a *missing heading*, not placeholder text.
+  does not supply. Deliberate: an ACF block stores values in serialized attributes, and an absent key
+  would depend on ACF-internal default substitution. Because templates carry no fallbacks, an
+  unresolved default renders as a *missing heading*, not placeholder text.
 - **Presentation defaults vs content.** `gap`, `rounded`, `columns_desktop`, `media_fit`, `variant`,
-  `limit` may carry defaults. Words a human would reword may not — those are fields.
+  `limit` may carry defaults. Words a human would reword may not.
+- **Absence of a pattern in the samples is not evidence of the contract.** See §3.1.
 
 ---
 
-## 7. Review tooling
+## 7. Commit conventions
 
-- **CodeRabbit** is active on the org (Pro Plus) and reviews PRs to `main` and `wordpress`.
-  `.coderabbit.yaml` exists on **both** branches — it must, because a review of the `wordpress` branch
-  ran with "Configuration used: defaults" until the file was present there. It found the two most
-  serious bugs on this branch.
-- **Copilot** review was used; all 4 of its findings are fixed.
-- PR **#102** (`wordpress` → `main`) is **review-only, not for merge**. It exists to collect reviews.
-  Do not merge it without the owner's explicit say-so — the branch is meant to ship to staging first.
-- CodeRabbit's own API is unreachable from a sandboxed environment (403 CONNECT); the GitHub App is
-  the working channel.
-
----
-
-## 8. What was NOT done, and why
-
-| Item | Reason |
-|---|---|
-| Any deploy, import, or WP-CLI run | No `ssh` binary and no keys in the environment |
-| Export of `/abos` + `/wir` seeds | `cms.bioco.ch` blocked by egress policy |
-| Live SMTP / Turnstile verification (#97) | Needs the server and real credentials |
-| Remaining slices W12–W13 (SEO/redirects, cutover) | Depend on a working staging site |
-| Depot PII change | Owner decision (§3.1) |
-| `link-tiles` tag-name escaping | False positive. `$tile_tag = $tile['href'] ? 'a' : 'div'` can only ever be one of those two literals — no input reaches it. Escaping it would be noise. Re-check only if that ternary changes |
-| `/abos`, `/wir` internal links in `solawi.json` | Left as-is — inventing targets would have been fabricated content |
-
----
-
-## 9. Commit and push conventions
-
-- Develop on `wordpress`; push with `git push -u origin wordpress`. Retry network failures with
-  backoff (2s, 4s, 8s, 16s).
-- Do **not** open a PR unless asked. #102 already exists for review.
-- Commit messages in this branch are German prose explaining *why*, including what was verified and
-  what was deliberately left out. Match that — a message that only says what changed loses the
-  reasoning that makes the change reviewable.
+German prose explaining *why*, including what was verified and what was deliberately left out. A
+message that only says what changed loses the reasoning that makes it reviewable. Retry network
+failures with backoff (2s, 4s, 8s, 16s).
