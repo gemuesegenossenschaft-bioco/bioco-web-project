@@ -116,7 +116,12 @@ export function SchnuppertageSection({ section, visualEditor = false }: Schnuppe
             <div
               key={item.id || idx}
               style={{
-                background: 'rgba(var(--bioco-green-rgb), 0.15)',
+                // Dead declaration removed: --bioco-green-rgb is never defined
+                // anywhere in the repo, so rgba(var(--bioco-green-rgb), 0.15)
+                // was invalid at computed-value time and resolved to
+                // transparent. Removing it changes nothing visually; DEFINING
+                // the token would have added a green tint that has never been
+                // on the live site.
                 padding: 'var(--space-4) 20px',
                 borderRadius: '12px',
                 display: 'flex',

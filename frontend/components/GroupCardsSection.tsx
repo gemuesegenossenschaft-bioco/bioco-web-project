@@ -35,7 +35,12 @@ export function GroupCardsSection() {
             position: 'relative',
             width: '100%',
             aspectRatio: '4/3',
-            background: 'linear-gradient(135deg, rgba(var(--bioco-green-rgb), 0.15), rgba(var(--bioco-green-rgb), 0.05))',
+            // Dead declaration removed: --bioco-green-rgb is never defined
+            // anywhere in the repo, so rgba(var(--bioco-green-rgb), …) was
+            // invalid at computed-value time and the background resolved to
+            // transparent. Removing it changes nothing visually; DEFINING the
+            // token would have introduced a gradient that has never been on
+            // the live site.
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
