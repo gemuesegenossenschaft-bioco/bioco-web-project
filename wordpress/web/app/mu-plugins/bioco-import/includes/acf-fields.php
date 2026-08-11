@@ -105,9 +105,8 @@ function bioco_import_acf_unmatched_fields(array $values, array $fields) {
  * to have already reported them via bioco_import_acf_unmatched_fields()).
  *
  * Fields the plan does NOT supply are still written out with their own
- * default_value (scalars only, never repeaters) — see the comment in the loop
- * for why omitting them would render as a missing heading rather than as a
- * default.
+ * default_value — including repeater rows — see the comment in the loop for
+ * why omitting them would render as missing content rather than as a default.
  *
  * Repeaters use ACF's documented row-index programmatic format:
  *   data.{name}            = row count
@@ -135,20 +134,19 @@ function bioco_import_acf_block_data(array $values, array $fields) {
             // default does not degrade to placeholder text — it renders as a
             // MISSING heading or link, silently, on a live page.
             //
-            // Writing it explicitly makes the output deterministic and keeps the
-            // string editable in wp-admin, which is the entire point of moving
-            // it out of the template. Repeaters are skipped: their "default" is
-            // row structure rather than a scalar, and every repeater the
-            // importer cares about is filled from the seed.
-            if (($field['type'] ?? '') === 'repeater') continue;
             $default = $field['default_value'] ?? null;
-            if ($default === null || $default === '' || is_array($default)) continue;
-            $data[$name] = $default;
-            $data['_' . $name] = $field['key'];
-            continue;
+            if (($field['type'] ?? '') === 'repeater') {
+                if (!is_array($default) || empty($default)) continue;
+                $value = $default;
+            } else {
+                if ($default === null || $default === '' || is_array($default)) continue;
+                $data[$name] = $default;
+                $data['_' . $name] = $field['key'];
+                continue;
+            }
+        } else {
+            $value = $values[$name];
         }
-
-        $value = $values[$name];
 
         if (($field['type'] ?? '') === 'repeater') {
             $rows = is_array($value) ? array_values($value) : [];

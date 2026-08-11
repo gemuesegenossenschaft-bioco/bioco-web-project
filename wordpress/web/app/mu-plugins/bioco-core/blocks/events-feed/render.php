@@ -19,6 +19,7 @@ $standard_link_label = get_field('standard_link_label');
 $past_title = get_field('past_title');
 $past_description = get_field('past_description');
 $past_link_label = get_field('past_link_label');
+$empty_message = get_field('empty_message');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'events-feed';
 $class_name = 'cms-section cms-events-feed';
@@ -32,7 +33,7 @@ $upcoming_query = bioco_query_events('upcoming', $limit);
     <?php if ($variant === 'banner') : ?>
         <div class="events-banner">
 <?php if ($banner_title) : ?>            <h2><?php echo esc_html($banner_title); ?></h2><?php endif; ?>
-            <?php bioco_render_events_list($upcoming_query); ?>
+            <?php bioco_render_events_list($upcoming_query, $empty_message); ?>
 <?php if ($banner_link_label) : ?>            <p style="margin-top: var(--wp--preset--spacing--30);">
                 <a href="<?php echo esc_url(home_url('/aktuelles')); ?>"><?php echo esc_html($banner_link_label); ?></a>
             </p><?php endif; ?>
@@ -43,7 +44,7 @@ $upcoming_query = bioco_query_events('upcoming', $limit);
         <div class="bento-card events-card bento-card-fullwidth">
             <div class="card-header"><?php if ($standard_title) : ?><h3><?php echo esc_html($standard_title); ?></h3><?php endif; ?></div>
             <div class="card-body">
-                <?php bioco_render_events_list($upcoming_query); ?>
+                <?php bioco_render_events_list($upcoming_query, $empty_message); ?>
 <?php if ($standard_link_label) : ?>                <a href="<?php echo esc_url(home_url('/aktuelles')); ?>" class="btn btn-primary" style="margin-top: 16px; display: inline-block;"><?php echo esc_html($standard_link_label); ?></a><?php endif; ?>
             </div>
         </div>

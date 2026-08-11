@@ -11,6 +11,16 @@
 
 if (!defined('ABSPATH')) exit;
 
+$missing_token_message = get_field('missing_token_message');
+$success_title = get_field('success_title');
+$success_text = get_field('success_text');
+$subscribe_text = get_field('subscribe_text');
+$visit_text = get_field('visit_text');
+$waiting_list_text = get_field('waiting_list_text');
+$contact_text = get_field('contact_text');
+$error_title = get_field('error_title');
+$home_link_label = get_field('home_link_label');
+
 $token = isset($_GET['token']) ? sanitize_text_field(wp_unslash($_GET['token'])) : '';
 
 if ($is_preview) {
@@ -18,7 +28,7 @@ if ($is_preview) {
 } elseif ($token) {
     $result = bioco_forms_doi_confirm_token($token);
 } else {
-    $result = ['success' => false, 'form_type' => '', 'error' => 'Kein Bestätigungstoken angegeben.'];
+    $result = ['success' => false, 'form_type' => '', 'error' => $missing_token_message];
 }
 
 // Mirrors the per-form_type copy in .wp-refs/page.tsx's DOIConfirmContent.
@@ -27,10 +37,10 @@ if ($is_preview) {
 // so this block already matches the reference's full copy set if a future
 // slice extends DOI to more form types.
 $confirmed_copy_by_form_type = [
-    'subscribe' => 'Du erhältst ab sofort unseren Newsletter.',
-    'visit' => 'Wir haben deine Anmeldung für den Tag der offenen Tür erhalten und melden uns bald bei dir.',
-    'waiting_list' => 'Wir haben dich auf die Warteliste gesetzt und melden uns bei dir, sobald ein Platz frei wird.',
-    'contact' => 'Wir haben deine Nachricht erhalten und melden uns bald bei dir.',
+    'subscribe' => $subscribe_text,
+    'visit' => $visit_text,
+    'waiting_list' => $waiting_list_text,
+    'contact' => $contact_text,
 ];
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'newsletter-bestaetigung';
@@ -43,22 +53,22 @@ $state_class = $result['success'] ? 'bioco-doi-confirm-success' : 'bioco-doi-con
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
     <div class="bento-card bioco-doi-confirm <?php echo esc_attr($state_class); ?>">
         <?php if ($result['success']) : ?>
-            <div class="card-header">
-                <h3>Anmeldung bestätigt</h3>
-            </div>
+<?php if ($success_title) : ?>            <div class="card-header">
+                <h3><?php echo esc_html($success_title); ?></h3>
+            </div><?php endif; ?>
             <div class="card-body">
-                <p class="card-text">Vielen Dank! Deine Anmeldung wurde erfolgreich bestätigt.</p>
+<?php if ($success_text) : ?>                <p class="card-text"><?php echo esc_html($success_text); ?></p><?php endif; ?>
                 <?php if (!empty($confirmed_copy_by_form_type[$result['form_type']])) : ?>
                     <p class="card-text"><?php echo esc_html($confirmed_copy_by_form_type[$result['form_type']]); ?></p>
                 <?php endif; ?>
             </div>
         <?php else : ?>
-            <div class="card-header">
-                <h3>Bestätigung fehlgeschlagen</h3>
-            </div>
+<?php if ($error_title) : ?>            <div class="card-header">
+                <h3><?php echo esc_html($error_title); ?></h3>
+            </div><?php endif; ?>
             <div class="card-body">
-                <p class="card-text"><?php echo esc_html($result['error']); ?></p>
-                <p class="card-text"><a href="<?php echo esc_url(home_url('/')); ?>">Zurück zur Startseite</a></p>
+<?php if (!empty($result['error'])) : ?>                <p class="card-text"><?php echo esc_html($result['error']); ?></p><?php endif; ?>
+<?php if ($home_link_label) : ?>                <p class="card-text"><a href="<?php echo esc_url(home_url('/')); ?>"><?php echo esc_html($home_link_label); ?></a></p><?php endif; ?>
             </div>
         <?php endif; ?>
     </div>

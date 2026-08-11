@@ -28,17 +28,46 @@ if (!defined('ABSPATH')) exit;
 
 $title = get_field('title');
 $text = get_field('text');
+$commitment_title = get_field('commitment_title');
+$commitment_intro = get_field('commitment_intro');
+$commitments = get_field('commitments');
+$personal_title = get_field('personal_title');
+$first_name_label = get_field('first_name_label');
+$last_name_label = get_field('last_name_label');
+$address_label = get_field('address_label');
+$zip_label = get_field('zip_label');
+$city_label = get_field('city_label');
+$phone_label = get_field('phone_label');
+$email_label = get_field('email_label');
+$depot_payment_title = get_field('depot_payment_title');
+$depot_label = get_field('depot_label');
+$depot_placeholder = get_field('depot_placeholder');
+$depots = get_field('depots');
+$payment_label = get_field('payment_label');
+$payment_hint = get_field('payment_hint');
+$quarterly_label = get_field('quarterly_label');
+$annual_label = get_field('annual_label');
+$participation_title = get_field('participation_title');
+$participation_intro = get_field('participation_intro');
+$preferred_days_label = get_field('preferred_days_label');
+$preferred_days = get_field('preferred_days');
+$preferred_times_label = get_field('preferred_times_label');
+$preferred_times = get_field('preferred_times');
+$activity_areas_label = get_field('activity_areas_label');
+$activity_areas = get_field('activity_areas');
+$other_activity_label = get_field('other_activity_label');
+$additional_subscriptions_title = get_field('additional_subscriptions_title');
+$additional_subscriptions_intro = get_field('additional_subscriptions_intro');
+$additional_subscriptions = get_field('additional_subscriptions');
+$additional_products_label = get_field('additional_products_label');
+$additional_products_hint = get_field('additional_products_hint');
+$additional_products_placeholder = get_field('additional_products_placeholder');
+$confirmation_title = get_field('confirmation_title');
+$privacy_label = get_field('privacy_label');
+$submit_label = get_field('submit_label');
+$submitting_label = get_field('submitting_label');
 
 bioco_forms_localize_block('bioco/membership-form', 'biocoMembershipFormConfig', 'membership');
-
-$depots = [
-    'Depot Chrättli', 'Depot Ohne', 'Depot Anixis', 'Casa Flora', 'Depot Geisshof',
-    'Depot Kupperhaus', 'Depot Ennetbaden', 'Depot Lemonia', 'Depot Lägernstrasse',
-];
-$days = ['Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-$times = ['morgens', 'nachmittags', 'abends'];
-$activity_areas = ['Feld/Anbau', 'Logistik/Verteilung', 'Administration', 'Events/Organisation', 'Andere'];
-$zusatzabos = ['Milch', 'Fleisch', 'Käse', 'Kräutersalz'];
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'mitgliedschaft-anmeldung';
 $class_name = 'cms-section cms-membership-form';
@@ -64,112 +93,105 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
         <input type="hidden" name="additionalShares" value="0">
 
         <div class="form-step">
-            <h3>Lies das und bestätige bevor du weiterklickst</h3>
-            <p>Bevor du dich anmeldest, überprüfe bitte diese Punkte:</p>
-            <div class="commitment-checklist">
-                <label class="commitment-item">
-                    <input type="checkbox" name="commitmentAccepted[]" data-bool-array>
-                    <div>
-                        <h4>Anteile &amp; Beitrag</h4>
-                        <p>Jedes Mitglied erwirbt <strong>Anteilsscheine zu je CHF 250.- (einmalige Zahlung)</strong>. Die Anzahl der Anteile hängt von deinem gewählten Abo ab. Der <strong>Jahresbeitrag für dein Gemüse-Abo (jährlicher Beitrag) wird per 31. Januar fällig</strong> und kann quartalsweise oder jährlich bezahlt werden.</p>
-                    </div>
-                </label>
-                <label class="commitment-item">
-                    <input type="checkbox" name="commitmentAccepted[]" data-bool-array>
-                    <div>
-                        <h4>Bindung &amp; Kündigung</h4>
-                        <p>Das Gemüseabo läuft <strong>vom 1. Januar bis zum 31. Dezember</strong>. Ohne Kündigung verlängert es sich jeweils um ein Kalenderjahr. Die <strong>Kündigungsfrist beträgt zwei Monate auf Ende eines Kalenderjahres</strong>.</p>
-                    </div>
-                </label>
-                <label class="commitment-item">
-                    <input type="checkbox" name="commitmentAccepted[]" data-bool-array>
-                    <div>
-                        <h4>Mitarbeit</h4>
-                        <p>Wir sind eine Mitmach-Genossenschaft! Jedes Mitglied leistet pro Jahr <strong>10 Arbeitseinsätze à 2 Stunden (bei halbem Korb) bzw. 20 Arbeitseinsätze à 2 Stunden (bei ganzem Korb) Mitarbeit</strong>. Dies kann auf dem Feld, in der Logistik oder bei Events sein.</p>
-                    </div>
-                </label>
-                <label class="commitment-item">
-                    <input type="checkbox" name="commitmentAccepted[]" data-bool-array>
-                    <div>
-                        <h4>Wetterbedingte Ertragsschwankungen</h4>
-                        <p>Mir ist bewusst, dass es zu Ernteausfällen kommen kann und mein wöchentlicher Gemüsekorb nicht immer gleich voll sein kann.</p>
-                    </div>
-                </label>
-            </div>
+<?php if ($commitment_title) : ?>            <h3><?php echo esc_html($commitment_title); ?></h3><?php endif; ?>
+<?php if ($commitment_intro) : ?>            <p><?php echo esc_html($commitment_intro); ?></p><?php endif; ?>
+            <?php if (!empty($commitments)) : ?>
+                <div class="commitment-checklist">
+                    <?php foreach ($commitments as $commitment) :
+                        $commitment_heading = $commitment['heading'] ?? '';
+                        $commitment_text = $commitment['text'] ?? '';
+                        if (!$commitment_heading && !$commitment_text) continue;
+                    ?>
+                        <label class="commitment-item">
+                            <input type="checkbox" name="commitmentAccepted[]" data-bool-array>
+                            <div>
+<?php if ($commitment_heading) : ?>                                <h4><?php echo esc_html($commitment_heading); ?></h4><?php endif; ?>
+<?php if ($commitment_text) : ?>                                <p><?php echo bioco_kses_rich_text($commitment_text); ?></p><?php endif; ?>
+                            </div>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
 
         <div class="form-step">
-            <h3>Persönliche Daten</h3>
+            <?php if ($personal_title) : ?><h3><?php echo esc_html($personal_title); ?></h3><?php endif; ?>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="membership_first_name">Vorname *</label>
+                    <?php if ($first_name_label) : ?><label for="membership_first_name"><?php echo esc_html($first_name_label); ?></label><?php endif; ?>
                     <input type="text" id="membership_first_name" name="firstName" required>
                 </div>
                 <div class="form-group">
-                    <label for="membership_last_name">Name *</label>
+                    <?php if ($last_name_label) : ?><label for="membership_last_name"><?php echo esc_html($last_name_label); ?></label><?php endif; ?>
                     <input type="text" id="membership_last_name" name="lastName" required>
                 </div>
             </div>
             <div class="form-group">
-                <label for="membership_address">Adresse *</label>
+                <?php if ($address_label) : ?><label for="membership_address"><?php echo esc_html($address_label); ?></label><?php endif; ?>
                 <input type="text" id="membership_address" name="address" required>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="membership_zip">PLZ *</label>
+                    <?php if ($zip_label) : ?><label for="membership_zip"><?php echo esc_html($zip_label); ?></label><?php endif; ?>
                     <input type="text" id="membership_zip" name="zip" required>
                 </div>
                 <div class="form-group">
-                    <label for="membership_city">Ort *</label>
+                    <?php if ($city_label) : ?><label for="membership_city"><?php echo esc_html($city_label); ?></label><?php endif; ?>
                     <input type="text" id="membership_city" name="city" required>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label for="membership_phone">Telefon</label>
+                    <?php if ($phone_label) : ?><label for="membership_phone"><?php echo esc_html($phone_label); ?></label><?php endif; ?>
                     <input type="tel" id="membership_phone" name="phone">
                 </div>
                 <div class="form-group">
-                    <label for="membership_email">E-Mail *</label>
+                    <?php if ($email_label) : ?><label for="membership_email"><?php echo esc_html($email_label); ?></label><?php endif; ?>
                     <input type="email" id="membership_email" name="email" required>
                 </div>
             </div>
         </div>
 
         <div class="form-step">
-            <h3>Depot &amp; Zahlungsweise</h3>
+            <?php if ($depot_payment_title) : ?><h3><?php echo esc_html($depot_payment_title); ?></h3><?php endif; ?>
             <div class="form-group">
-                <label for="membership_depot">Depot-Auswahl *</label>
+                <?php if ($depot_label) : ?><label for="membership_depot"><?php echo esc_html($depot_label); ?></label><?php endif; ?>
                 <select id="membership_depot" name="depot" required>
-                    <option value="">Bitte wählen...</option>
-                    <?php foreach ($depots as $depot) : ?>
-                        <option value="<?php echo esc_attr($depot); ?>"><?php echo esc_html($depot); ?></option>
+                    <?php if ($depot_placeholder) : ?><option value=""><?php echo esc_html($depot_placeholder); ?></option><?php endif; ?>
+                    <?php foreach ((array) $depots as $depot) :
+                        $depot_option = $depot['option'] ?? '';
+                        if (!$depot_option) continue;
+                    ?>
+                        <option value="<?php echo esc_attr($depot_option); ?>"><?php echo esc_html($depot_option); ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
             <div class="form-group">
-                <label>Zahlungsweise *</label>
-                <p class="form-hint">Die erste Rechnung wird per 31. Januar fällig.</p>
+                <?php if ($payment_label) : ?><label><?php echo esc_html($payment_label); ?></label><?php endif; ?>
+                <?php if ($payment_hint) : ?><p class="form-hint"><?php echo esc_html($payment_hint); ?></p><?php endif; ?>
                 <div class="radio-group">
                     <label class="radio-option">
                         <input type="radio" name="paymentType" value="quarterly">
-                        <span>Quartalsweise (vierteljährlich)</span>
+                        <?php if ($quarterly_label) : ?><span><?php echo esc_html($quarterly_label); ?></span><?php endif; ?>
                     </label>
                     <label class="radio-option">
                         <input type="radio" name="paymentType" value="yearly" checked>
-                        <span>Ganzes Jahr (einmalig)</span>
+                        <?php if ($annual_label) : ?><span><?php echo esc_html($annual_label); ?></span><?php endif; ?>
                     </label>
                 </div>
             </div>
         </div>
 
         <div class="form-step">
-            <h3>Mitarbeit</h3>
-            <p>Jede(r) Mitglied bringt sich ein. Bitte teile uns deine Präferenzen mit:</p>
+            <?php if ($participation_title) : ?><h3><?php echo esc_html($participation_title); ?></h3><?php endif; ?>
+            <?php if ($participation_intro) : ?><p><?php echo esc_html($participation_intro); ?></p><?php endif; ?>
             <div class="form-group">
-                <label>Bevorzugte Tage</label>
+                <?php if ($preferred_days_label) : ?><label><?php echo esc_html($preferred_days_label); ?></label><?php endif; ?>
                 <div class="checkbox-group">
-                    <?php foreach ($days as $day) : ?>
+                    <?php foreach ((array) $preferred_days as $day) :
+                        $day = $day['option'] ?? '';
+                        if (!$day) continue;
+                    ?>
                         <label class="checkbox-option">
                             <input type="checkbox" name="preferredDays[]" value="<?php echo esc_attr($day); ?>">
                             <span><?php echo esc_html($day); ?></span>
@@ -178,9 +200,12 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
                 </div>
             </div>
             <div class="form-group">
-                <label>Bevorzugte Zeiten</label>
+                <?php if ($preferred_times_label) : ?><label><?php echo esc_html($preferred_times_label); ?></label><?php endif; ?>
                 <div class="checkbox-group">
-                    <?php foreach ($times as $time) : ?>
+                    <?php foreach ((array) $preferred_times as $time) :
+                        $time = $time['option'] ?? '';
+                        if (!$time) continue;
+                    ?>
                         <label class="checkbox-option">
                             <input type="checkbox" name="preferredTimes[]" value="<?php echo esc_attr($time); ?>">
                             <span><?php echo esc_html($time); ?></span>
@@ -189,9 +214,12 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
                 </div>
             </div>
             <div class="form-group">
-                <label>Tätigkeitsbereiche (Mehrfachauswahl möglich)</label>
+                <?php if ($activity_areas_label) : ?><label><?php echo esc_html($activity_areas_label); ?></label><?php endif; ?>
                 <div class="checkbox-group">
-                    <?php foreach ($activity_areas as $area) : ?>
+                    <?php foreach ((array) $activity_areas as $area) :
+                        $area = $area['option'] ?? '';
+                        if (!$area) continue;
+                    ?>
                         <label class="checkbox-option">
                             <input type="checkbox" name="activityAreas[]" value="<?php echo esc_attr($area); ?>">
                             <span><?php echo esc_html($area); ?></span>
@@ -200,17 +228,20 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
                 </div>
             </div>
             <div class="form-group">
-                <label for="membership_other_activity">Andere Tätigkeitsbereiche (bitte beschreiben)</label>
+                <?php if ($other_activity_label) : ?><label for="membership_other_activity"><?php echo esc_html($other_activity_label); ?></label><?php endif; ?>
                 <textarea id="membership_other_activity" name="otherActivity" rows="3"></textarea>
             </div>
         </div>
 
         <div class="form-step">
-            <h3>Zusatzabos</h3>
-            <p>Ich bin interessiert, zusätzlich:</p>
+            <?php if ($additional_subscriptions_title) : ?><h3><?php echo esc_html($additional_subscriptions_title); ?></h3><?php endif; ?>
+            <?php if ($additional_subscriptions_intro) : ?><p><?php echo esc_html($additional_subscriptions_intro); ?></p><?php endif; ?>
             <div class="form-group">
                 <div class="checkbox-group">
-                    <?php foreach ($zusatzabos as $product) : ?>
+                    <?php foreach ((array) $additional_subscriptions as $product) :
+                        $product = $product['option'] ?? '';
+                        if (!$product) continue;
+                    ?>
                         <label class="checkbox-option">
                             <input type="checkbox" name="zusatzabos[]" value="<?php echo esc_attr($product); ?>">
                             <span><?php echo esc_html($product); ?></span>
@@ -219,18 +250,18 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
                 </div>
             </div>
             <div class="form-group">
-                <label for="membership_weitere_produkte">Weitere Produkte von Partnern aus der Region</label>
-                <p class="form-hint">Hast du Wünsche für weitere Produkte? Teile uns deine Ideen mit:</p>
-                <textarea id="membership_weitere_produkte" name="weitereProdukte" rows="4" placeholder="z.B. Eier, Brot, Tofu, Honig..."></textarea>
+                <?php if ($additional_products_label) : ?><label for="membership_weitere_produkte"><?php echo esc_html($additional_products_label); ?></label><?php endif; ?>
+                <?php if ($additional_products_hint) : ?><p class="form-hint"><?php echo esc_html($additional_products_hint); ?></p><?php endif; ?>
+                <textarea id="membership_weitere_produkte" name="weitereProdukte" rows="4"<?php if ($additional_products_placeholder) : ?> placeholder="<?php echo esc_attr($additional_products_placeholder); ?>"<?php endif; ?>></textarea>
             </div>
         </div>
 
         <div class="form-step">
-            <h3>Bestätigung</h3>
+            <?php if ($confirmation_title) : ?><h3><?php echo esc_html($confirmation_title); ?></h3><?php endif; ?>
             <div class="form-group">
                 <label class="checkbox-option">
                     <input type="checkbox" name="privacyAccept" required>
-                    <span>Ich akzeptiere die Datenschutzbestimmungen *</span>
+                    <?php if ($privacy_label) : ?><span><?php echo esc_html($privacy_label); ?></span><?php endif; ?>
                 </label>
             </div>
             <div class="form-group">
@@ -239,7 +270,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
         </div>
 
         <div class="form-navigation">
-            <button type="submit" class="btn btn-primary" data-submit-label="Anmeldung einreichen" data-submitting-label="Wird gesendet …">Anmeldung einreichen</button>
+            <?php if ($submit_label) : ?><button type="submit" class="btn btn-primary" data-submit-label="<?php echo esc_attr($submit_label); ?>"<?php if ($submitting_label) : ?> data-submitting-label="<?php echo esc_attr($submitting_label); ?>"<?php endif; ?>><?php echo esc_html($submit_label); ?></button><?php endif; ?>
         </div>
     </form>
 </section>

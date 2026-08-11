@@ -10,12 +10,9 @@
 if (!defined('ABSPATH')) exit;
 
 $locations = get_field('locations');
-
-if (empty($locations)) {
-    $locations = [
-        ['name' => 'Geisshof', 'lat' => 47.4741684, 'lng' => 8.2456318, 'description' => 'Geisslistrasse, Gebenstorf, Schweiz'],
-    ];
-}
+$locations_heading = get_field('locations_heading');
+$route_label = get_field('route_label');
+$empty_message = get_field('empty_message');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'geisshof-map';
 $class_name = 'cms-section cms-geisshof-map';
@@ -24,5 +21,5 @@ if (!empty($block['className'])) {
 }
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
-    <?php bioco_render_map_block($locations, 47.4741684, 8.2456318, 14); ?>
+    <?php bioco_render_map_block($locations, 47.4741684, 8.2456318, 14, $locations_heading, $route_label, $empty_message); ?>
 </section>

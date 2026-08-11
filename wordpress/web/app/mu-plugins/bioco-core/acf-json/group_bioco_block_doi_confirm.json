@@ -1,7 +1,188 @@
 {
     "key": "group_bioco_block_doi_confirm",
     "title": "Newsletter-Bestätigung Block (Bioco)",
-    "fields": [],
+    "fields": [
+        {
+            "key": "field_bioco_doi_confirm_missing_token_message",
+            "label": "Fehler ohne Bestätigungslink",
+            "name": "missing_token_message",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Kein Bestätigungstoken angegeben.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_doi_confirm_success_title",
+            "label": "Titel bei Erfolg",
+            "name": "success_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Anmeldung bestätigt",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_doi_confirm_success_text",
+            "label": "Text bei Erfolg",
+            "name": "success_text",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Vielen Dank! Deine Anmeldung wurde erfolgreich bestätigt.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_doi_confirm_subscribe_text",
+            "label": "Zusatztext Newsletter",
+            "name": "subscribe_text",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Du erhältst ab sofort unseren Newsletter.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_doi_confirm_visit_text",
+            "label": "Zusatztext Besuchstag",
+            "name": "visit_text",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Wir haben deine Anmeldung für den Tag der offenen Tür erhalten und melden uns bald bei dir.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_doi_confirm_waiting_list_text",
+            "label": "Zusatztext Warteliste",
+            "name": "waiting_list_text",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Wir haben dich auf die Warteliste gesetzt und melden uns bei dir, sobald ein Platz frei wird.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_doi_confirm_contact_text",
+            "label": "Zusatztext Kontakt",
+            "name": "contact_text",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Wir haben deine Nachricht erhalten und melden uns bald bei dir.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_doi_confirm_error_title",
+            "label": "Titel bei Fehler",
+            "name": "error_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Bestätigung fehlgeschlagen",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_doi_confirm_home_link_label",
+            "label": "Linktext zur Startseite",
+            "name": "home_link_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Zurück zur Startseite",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        }
+    ],
     "location": [
         [
             {
@@ -18,7 +199,7 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Kein editierbarer Inhalt (W10, Issue #97): render.php liest ?token= aus der Query-String und ruft bioco_forms_doi_confirm_token() direkt auf (kein REST-Roundtrip). Für /newsletter-bestaetigen/ platzieren.",
+    "description": "Editierbare Texte für die Zustände der Double-Opt-in-Bestätigung. render.php liest ?token= und ruft bioco_forms_doi_confirm_token() direkt auf.",
     "show_in_rest": 0,
     "modified": 1783728000
 }

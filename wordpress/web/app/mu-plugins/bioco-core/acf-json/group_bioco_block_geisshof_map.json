@@ -8,7 +8,7 @@
             "name": "locations",
             "aria-label": "",
             "type": "repeater",
-            "instructions": "Leer lassen, um den Standard-Standort (Geisshof) zu verwenden.",
+            "instructions": "",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -103,7 +103,75 @@
                     "placeholder": "",
                     "new_lines": ""
                 }
+            ],
+            "default_value": [
+                {
+                    "name": "Geisshof",
+                    "lat": 47.4741684,
+                    "lng": 8.2456318,
+                    "description": "Geisslistrasse, Gebenstorf, Schweiz"
+                }
             ]
+        },
+        {
+            "key": "field_bioco_geisshof_map_locations_heading",
+            "label": "Titel über den Standorten",
+            "name": "locations_heading",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Standorte",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_geisshof_map_route_label",
+            "label": "Text des Routenlinks",
+            "name": "route_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Route planen →",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_geisshof_map_empty_message",
+            "label": "Hinweis ohne Standorte",
+            "name": "empty_message",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Noch keine Standorte hinterlegt.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [

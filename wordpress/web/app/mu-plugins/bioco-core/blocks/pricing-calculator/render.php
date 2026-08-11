@@ -24,15 +24,17 @@ $one_time_payment_label = get_field('one_time_payment_label');
 $additional_shares_label = get_field('additional_shares_label');
 $cta_label = get_field('cta_label');
 $cta_note = get_field('cta_note');
+$recommended_label = get_field('recommended_label');
+$no_subscription_label = get_field('no_subscription_label');
+$article_label = get_field('article_label');
+$quantity_label = get_field('quantity_label');
+$unit_price_label = get_field('unit_price_label');
+$share_certificates_label = get_field('share_certificates_label');
+$required_label = get_field('required_label');
+$shares_only_info = get_field('shares_only_info');
+$without_basket_label = get_field('without_basket_label');
+$additional_label = get_field('additional_label');
 $tiers = get_field('tiers');
-
-if (empty($tiers)) {
-    $tiers = [
-        ['name' => 'Halb (1 Person)', 'price' => 750, 'shares' => 1, 'work' => 10, 'recommended' => false],
-        ['name' => 'Standard (2-3 Personen)', 'price' => 1280, 'shares' => 2, 'work' => 20, 'recommended' => true],
-        ['name' => 'Doppel (4-6 Personen)', 'price' => 2350, 'shares' => 4, 'work' => 40, 'recommended' => false],
-    ];
-}
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'pricing-calculator';
 $class_name = 'cms-section cms-pricing-calculator';
@@ -42,11 +44,12 @@ if (!empty($block['className'])) {
 
 $heading_already_in_text = bioco_text_has_heading_html($text);
 
-$first_tier = $tiers[0];
-$first_slug = sanitize_title($first_tier['name']);
-$first_price = (int) $first_tier['price'];
-$first_shares = (int) $first_tier['shares'];
-$first_work = (int) $first_tier['work'];
+$first_tier = !empty($tiers) ? $tiers[0] : [];
+$first_name = $first_tier['name'] ?? '';
+$first_slug = sanitize_title($first_name);
+$first_price = (int) ($first_tier['price'] ?? 0);
+$first_shares = (int) ($first_tier['shares'] ?? 0);
+$first_work = (int) ($first_tier['work'] ?? 0);
 $shares_total = $first_shares * $share_price;
 $grand_total = $first_price + $shares_total;
 ?>
@@ -61,7 +64,8 @@ $grand_total = $first_price + $shares_total;
         <div class="cms-section-text"><?php echo bioco_kses_rich_text($text); ?></div>
     <?php endif; ?>
 
-    <div class="pricing-calculator" data-share-price="<?php echo esc_attr($share_price); ?>" data-signup-url="<?php echo esc_attr($signup_url); ?>" data-work-suffix="<?php echo esc_attr($work_suffix); ?>" data-additional-shares="0" data-active-tier="<?php echo esc_attr($first_slug); ?>">
+    <?php if (!empty($tiers)) : ?>
+        <div class="pricing-calculator" data-share-price="<?php echo esc_attr($share_price); ?>" data-signup-url="<?php echo esc_attr($signup_url); ?>" data-work-suffix="<?php echo esc_attr($work_suffix); ?>" data-additional-shares="0" data-active-tier="<?php echo esc_attr($first_slug); ?>" data-required-label="<?php echo esc_attr($required_label); ?>" data-without-basket-label="<?php echo esc_attr($without_basket_label); ?>" data-additional-label="<?php echo esc_attr($additional_label); ?>">
         <div class="abo-selector">
             <div class="abo-buttons">
                 <?php foreach ($tiers as $index => $tier) :
@@ -86,24 +90,24 @@ $grand_total = $first_price + $shares_total;
                     >
                         <?php echo esc_html($tier_name); ?><br />
                         <span class="price">CHF <?php echo esc_html(number_format_i18n($tier_price)); ?>.-</span>
-                        <?php if ($tier_recommended) : ?>
-                            <span class="recommended-badge" style="position: absolute; top: -8px; right: -8px;">Empfohlen</span>
+                        <?php if ($tier_recommended && $recommended_label) : ?>
+                            <span class="recommended-badge" style="position: absolute; top: -8px; right: -8px;"><?php echo esc_html($recommended_label); ?></span>
                         <?php endif; ?>
                     </button>
                 <?php endforeach; ?>
-                <button
+<?php if ($no_subscription_label) : ?>                <button
                     type="button"
                     class="abo-button"
                     data-pc-action="select-tier"
                     data-tier-slug="kein"
-                    data-tier-name="Kein Abo"
+                    data-tier-name="<?php echo esc_attr($no_subscription_label); ?>"
                     data-tier-price="0"
                     data-tier-shares="0"
                     data-tier-work="0"
                 >
-                    Kein Abo<br />
+                    <?php echo esc_html($no_subscription_label); ?><br />
 <?php if ($shares_only_label) : ?>                    <span class="price"><?php echo esc_html($shares_only_label); ?></span><?php endif; ?>
-                </button>
+                </button><?php endif; ?>
             </div>
         </div>
 
@@ -111,9 +115,9 @@ $grand_total = $first_price + $shares_total;
             <table>
                 <thead>
                     <tr>
-                        <th>Artikel</th>
-                        <th>Anzahl</th>
-                        <th>Einzelpreis</th>
+<?php if ($article_label) : ?>                        <th><?php echo esc_html($article_label); ?></th><?php endif; ?>
+<?php if ($quantity_label) : ?>                        <th><?php echo esc_html($quantity_label); ?></th><?php endif; ?>
+<?php if ($unit_price_label) : ?>                        <th><?php echo esc_html($unit_price_label); ?></th><?php endif; ?>
                         <th>Total</th>
                         <th></th>
                     </tr>
@@ -121,7 +125,7 @@ $grand_total = $first_price + $shares_total;
                 <tbody>
                     <tr data-pc-row="abo">
                         <td>
-                            <span data-pc-field="abo-name"><?php echo esc_html($first_tier['name']); ?></span>
+                            <span data-pc-field="abo-name"><?php echo esc_html($first_name); ?></span>
                             <span class="payment-type-label" style="display: block; margin-top: 4px;">
 <?php if ($annual_contribution_label) : ?>                                <strong style="color: var(--wp--preset--color--bioco-green); font-size: 0.875rem;"><?php echo esc_html($annual_contribution_label); ?></strong><?php endif; ?>
                             </span>
@@ -136,12 +140,12 @@ $grand_total = $first_price + $shares_total;
                     </tr>
                     <tr>
                         <td>
-                            Anteilsscheine
+<?php if ($share_certificates_label) : ?>                            <?php echo esc_html($share_certificates_label); ?><?php endif; ?>
                             <span class="payment-type-label" style="display: block; margin-top: 4px;">
 <?php if ($one_time_payment_label) : ?>                                <strong style="color: var(--wp--preset--color--bioco-beet); font-size: 0.875rem;"><?php echo esc_html($one_time_payment_label); ?></strong><?php endif; ?>
                             </span>
                             <span class="text-sm" data-pc-field="shares-note" style="display: block; color: var(--wp--preset--color--bioco-text-muted); margin-top: 4px;">
-                                (<span data-pc-field="shares-required"><?php echo esc_html($first_shares); ?></span> erforderlich)
+                                (<span data-pc-field="shares-required"><?php echo esc_html($first_shares); ?></span><?php if ($required_label) : ?> <?php echo esc_html($required_label); ?><?php endif; ?>)
                             </span>
                         </td>
                         <td data-pc-field="shares-count"><?php echo esc_html($first_shares); ?></td>
@@ -165,11 +169,11 @@ $grand_total = $first_price + $shares_total;
             </table>
         </div>
 
-        <div class="pc-kein-info" data-pc-role="kein-info" style="margin-top: 16px; padding: 16px; background: var(--wp--preset--color--bioco-bg); border-radius: var(--wp--custom--radius--md); display: none;">
+<?php if ($shares_only_info) : ?>        <div class="pc-kein-info" data-pc-role="kein-info" style="margin-top: 16px; padding: 16px; background: var(--wp--preset--color--bioco-bg); border-radius: var(--wp--custom--radius--md); display: none;">
             <p style="margin: 0; font-size: 0.875rem;">
-                <strong>💡 Info:</strong> Du kannst Anteilsscheine auch ohne Gemüsekorb erwerben. Genossenschafter/innen haben Vorrang auf der Warteliste für einen Gemüsekorb.
+                <?php echo bioco_kses_rich_text($shares_only_info); ?>
             </p>
-        </div>
+        </div><?php endif; ?>
 
         <div class="pc-actions" data-pc-role="cta-block" style="margin-top: 24px; text-align: center;">
 <?php if ($signup_url && $cta_label) : ?>            <a
@@ -180,5 +184,6 @@ $grand_total = $first_price + $shares_total;
             ><?php echo esc_html($cta_label); ?></a><?php endif; ?>
 <?php if ($cta_note) : ?>            <p style="margin-top: 12px; font-size: 0.875rem; color: var(--wp--preset--color--bioco-text-muted);"><?php echo esc_html($cta_note); ?></p><?php endif; ?>
         </div>
-    </div>
+        </div>
+    <?php endif; ?>
 </section>

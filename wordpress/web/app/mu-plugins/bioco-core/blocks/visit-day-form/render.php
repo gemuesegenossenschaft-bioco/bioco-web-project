@@ -12,6 +12,15 @@ if (!defined('ABSPATH')) exit;
 
 $title = get_field('title');
 $text = get_field('text');
+$name_label = get_field('name_label');
+$email_label = get_field('email_label');
+$phone_label = get_field('phone_label');
+$date_label = get_field('date_label');
+$participants_label = get_field('participants_label');
+$notes_label = get_field('notes_label');
+$privacy_label = get_field('privacy_label');
+$submit_label = get_field('submit_label');
+$submitting_label = get_field('submitting_label');
 
 bioco_forms_localize_block('bioco/visit-day-form', 'biocoVisitDayFormConfig', 'visit-day');
 
@@ -35,39 +44,39 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
 
     <form class="visit-form bioco-form" data-form="visit-day" data-config="biocoVisitDayFormConfig" novalidate>
         <div class="form-group">
-            <label for="visit_name">Name *</label>
+            <?php if ($name_label) : ?><label for="visit_name"><?php echo esc_html($name_label); ?></label><?php endif; ?>
             <input type="text" id="visit_name" name="name" required>
         </div>
 
         <div class="form-group">
-            <label for="visit_email">E-Mail *</label>
+            <?php if ($email_label) : ?><label for="visit_email"><?php echo esc_html($email_label); ?></label><?php endif; ?>
             <input type="email" id="visit_email" name="email" required>
         </div>
 
         <div class="form-group">
-            <label for="visit_phone">Telefon *</label>
+            <?php if ($phone_label) : ?><label for="visit_phone"><?php echo esc_html($phone_label); ?></label><?php endif; ?>
             <input type="tel" id="visit_phone" name="phone" required>
         </div>
 
         <div class="form-group">
-            <label for="visit_date">Gewünschtes Datum *</label>
+            <?php if ($date_label) : ?><label for="visit_date"><?php echo esc_html($date_label); ?></label><?php endif; ?>
             <input type="date" id="visit_date" name="visit_date" required>
         </div>
 
         <div class="form-group">
-            <label for="visit_participants">Anzahl Personen *</label>
+            <?php if ($participants_label) : ?><label for="visit_participants"><?php echo esc_html($participants_label); ?></label><?php endif; ?>
             <input type="number" id="visit_participants" name="participants" min="1" value="1" required>
         </div>
 
         <div class="form-group">
-            <label for="visit_notes">Anmerkungen</label>
+            <?php if ($notes_label) : ?><label for="visit_notes"><?php echo esc_html($notes_label); ?></label><?php endif; ?>
             <textarea id="visit_notes" name="notes" rows="4"></textarea>
         </div>
 
         <div class="form-group">
             <label class="checkbox-option">
                 <input type="checkbox" name="privacy_accept" required>
-                Ich akzeptiere die Datenschutzbestimmungen *
+<?php if ($privacy_label) : ?>                <?php echo esc_html($privacy_label); ?><?php endif; ?>
             </label>
         </div>
 
@@ -75,6 +84,6 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
             <div class="cf-turnstile" data-form-captcha></div>
         </div>
 
-        <button type="submit" class="btn btn-primary" data-submit-label="Anmelden" data-submitting-label="Wird gesendet …">Anmelden</button>
+        <?php if ($submit_label) : ?><button type="submit" class="btn btn-primary" data-submit-label="<?php echo esc_attr($submit_label); ?>"<?php if ($submitting_label) : ?> data-submitting-label="<?php echo esc_attr($submitting_label); ?>"<?php endif; ?>><?php echo esc_html($submit_label); ?></button><?php endif; ?>
     </form>
 </section>

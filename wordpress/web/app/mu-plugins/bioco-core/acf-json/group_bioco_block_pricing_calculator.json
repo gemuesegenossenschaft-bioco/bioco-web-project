@@ -232,7 +232,7 @@
             "name": "tiers",
             "aria-label": "",
             "type": "repeater",
-            "instructions": "Maximal 3 Stufen. Eine vierte Option (\"Kein Abo\", nur Anteilsscheine) wird automatisch ergänzt. Leer lassen, um die aktuellen Live-Preise (Halb/Standard/Doppel) zu verwenden.",
+            "instructions": "Abo-Stufen. Zeilen können hinzugefügt, entfernt und sortiert werden.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -347,7 +347,230 @@
                     "ui_on_text": "",
                     "ui_off_text": ""
                 }
+            ],
+            "default_value": [
+                {
+                    "name": "Halb (1 Person)",
+                    "price": 750,
+                    "shares": 1,
+                    "work": 10,
+                    "recommended": false
+                },
+                {
+                    "name": "Standard (2-3 Personen)",
+                    "price": 1280,
+                    "shares": 2,
+                    "work": 20,
+                    "recommended": true
+                },
+                {
+                    "name": "Doppel (4-6 Personen)",
+                    "price": 2350,
+                    "shares": 4,
+                    "work": 40,
+                    "recommended": false
+                }
             ]
+        },
+        {
+            "key": "field_bioco_pricing_calculator_recommended_label",
+            "label": "Kennzeichnung der Empfehlung",
+            "name": "recommended_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Empfohlen",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_no_subscription_label",
+            "label": "Auswahl ohne Abo",
+            "name": "no_subscription_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Kein Abo",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_article_label",
+            "label": "Spaltentitel Artikel",
+            "name": "article_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Artikel",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_quantity_label",
+            "label": "Spaltentitel Anzahl",
+            "name": "quantity_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Anzahl",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_unit_price_label",
+            "label": "Spaltentitel Einzelpreis",
+            "name": "unit_price_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Einzelpreis",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_share_certificates_label",
+            "label": "Bezeichnung Anteilsscheine",
+            "name": "share_certificates_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Anteilsscheine",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_required_label",
+            "label": "Hinweis benötigte Anzahl",
+            "name": "required_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "erforderlich",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_shares_only_info",
+            "label": "Infotext ohne Gemüseabo",
+            "name": "shares_only_info",
+            "aria-label": "",
+            "type": "textarea",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "<strong>💡 Info:</strong> Du kannst Anteilsscheine auch ohne Gemüsekorb erwerben. Genossenschafter/innen haben Vorrang auf der Warteliste für einen Gemüsekorb.",
+            "maxlength": "",
+            "rows": 4,
+            "placeholder": "",
+            "new_lines": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_without_basket_label",
+            "label": "Hinweis ohne Gemüsekorb",
+            "name": "without_basket_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "ohne Gemüsekorb",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_pricing_calculator_additional_label",
+            "label": "Hinweis zusätzliche Anteile",
+            "name": "additional_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "zusätzlich",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [

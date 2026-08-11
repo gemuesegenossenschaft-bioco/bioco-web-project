@@ -17,6 +17,9 @@
   function initCalculator(container) {
     var sharePrice = parseInt(container.getAttribute('data-share-price'), 10) || 0;
     var signupUrl = container.getAttribute('data-signup-url') || '';
+    var requiredLabel = container.getAttribute('data-required-label') || '';
+    var withoutBasketLabel = container.getAttribute('data-without-basket-label') || '';
+    var additionalLabel = container.getAttribute('data-additional-label') || '';
     var additionalShares = 0;
 
     var tierButtons = container.querySelectorAll('[data-pc-action="select-tier"]');
@@ -64,11 +67,11 @@
       var sharesNote = container.querySelector('[data-pc-field="shares-note"]');
       if (sharesNote) {
         if (slug === 'kein') {
-          sharesNote.textContent = '(ohne Gemüsekorb)';
+          sharesNote.textContent = withoutBasketLabel ? '(' + withoutBasketLabel + ')' : '';
         } else if (additionalShares > 0) {
-          sharesNote.textContent = '(' + shares + ' erforderlich + ' + additionalShares + ' zusätzlich)';
+          sharesNote.textContent = '(' + shares + (requiredLabel ? ' ' + requiredLabel : '') + ' + ' + additionalShares + (additionalLabel ? ' ' + additionalLabel : '') + ')';
         } else {
-          sharesNote.textContent = '(' + shares + ' erforderlich)';
+          sharesNote.textContent = '(' + shares + (requiredLabel ? ' ' + requiredLabel : '') + ')';
         }
       }
 

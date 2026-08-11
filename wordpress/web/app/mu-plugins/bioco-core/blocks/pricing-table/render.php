@@ -17,6 +17,11 @@ $buttons = get_field('buttons');
 $container_width = get_field('container_width') ?: 'xl';
 $work_suffix = get_field('work_suffix');
 $tiers = get_field('tiers');
+$basket_column_label = get_field('basket_column_label');
+$persons_column_label = get_field('persons_column_label');
+$annual_price_column_label = get_field('annual_price_column_label');
+$share_cost_column_label = get_field('share_cost_column_label');
+$work_column_label = get_field('work_column_label');
 
 if ($is_preview && !$title && !$text && empty($tiers)) {
     $title = __('Titel eingeben …', 'bioco');
@@ -46,11 +51,11 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
             <table>
                 <thead>
                     <tr>
-                        <th><?php esc_html_e('Gemüsekorb', 'bioco'); ?></th>
-                        <th><?php esc_html_e('Personen', 'bioco'); ?></th>
-                        <th><?php esc_html_e('Jahrespreis', 'bioco'); ?></th>
-                        <th><?php esc_html_e('Anteilsscheine Kosten', 'bioco'); ?></th>
-                        <th><?php esc_html_e('Mitarbeit pro Jahr', 'bioco'); ?></th>
+<?php if ($basket_column_label) : ?>                        <th><?php echo esc_html($basket_column_label); ?></th><?php endif; ?>
+<?php if ($persons_column_label) : ?>                        <th><?php echo esc_html($persons_column_label); ?></th><?php endif; ?>
+<?php if ($annual_price_column_label) : ?>                        <th><?php echo esc_html($annual_price_column_label); ?></th><?php endif; ?>
+<?php if ($share_cost_column_label) : ?>                        <th><?php echo esc_html($share_cost_column_label); ?></th><?php endif; ?>
+<?php if ($work_column_label) : ?>                        <th><?php echo esc_html($work_column_label); ?></th><?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>

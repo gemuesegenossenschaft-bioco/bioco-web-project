@@ -8,7 +8,7 @@
             "name": "vegetables",
             "aria-label": "",
             "type": "repeater",
-            "instructions": "Leer lassen, um eine kleine Beispielauswahl (siehe render.php) zu verwenden.",
+            "instructions": "Gemüse und Saisonmonate. Zeilen können hinzugefügt, entfernt und sortiert werden.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -79,6 +79,88 @@
                     "ajax": 0,
                     "placeholder": ""
                 }
+            ],
+            "default_value": [
+                {
+                    "name": "Rüebli",
+                    "months": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12
+                    ]
+                },
+                {
+                    "name": "Zwiebeln",
+                    "months": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12
+                    ]
+                },
+                {
+                    "name": "Kartoffeln",
+                    "months": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        9,
+                        10,
+                        11,
+                        12
+                    ]
+                },
+                {
+                    "name": "Salate",
+                    "months": [
+                        3,
+                        4,
+                        5,
+                        6,
+                        7,
+                        8,
+                        9,
+                        10,
+                        11,
+                        12
+                    ]
+                },
+                {
+                    "name": "Lauch",
+                    "months": [
+                        1,
+                        2,
+                        3,
+                        4,
+                        9,
+                        10,
+                        11,
+                        12
+                    ]
+                },
+                {
+                    "name": "Kürbis",
+                    "months": [
+                        1,
+                        10,
+                        11,
+                        12
+                    ]
+                }
             ]
         },
         {
@@ -100,6 +182,139 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_bioco_saisonkalender_vegetable_column_label",
+            "label": "Titel der Gemüse-Spalte",
+            "name": "vegetable_column_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Gemüse",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_saisonkalender_month_columns",
+            "label": "Monatsspalten",
+            "name": "month_columns",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Monat hinzufügen",
+            "rows_per_page": 20,
+            "default_value": [
+                {
+                    "number": 1,
+                    "label": "Jan"
+                },
+                {
+                    "number": 2,
+                    "label": "Feb"
+                },
+                {
+                    "number": 3,
+                    "label": "Mär"
+                },
+                {
+                    "number": 4,
+                    "label": "Apr"
+                },
+                {
+                    "number": 5,
+                    "label": "Mai"
+                },
+                {
+                    "number": 6,
+                    "label": "Jun"
+                },
+                {
+                    "number": 7,
+                    "label": "Jul"
+                },
+                {
+                    "number": 8,
+                    "label": "Aug"
+                },
+                {
+                    "number": 9,
+                    "label": "Sep"
+                },
+                {
+                    "number": 10,
+                    "label": "Okt"
+                },
+                {
+                    "number": 11,
+                    "label": "Nov"
+                },
+                {
+                    "number": 12,
+                    "label": "Dez"
+                }
+            ],
+            "sub_fields": [
+                {
+                    "key": "field_bioco_saisonkalender_month_column_number",
+                    "label": "Monatsnummer",
+                    "name": "number",
+                    "aria-label": "",
+                    "type": "number",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "30",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "min": 1,
+                    "max": 12,
+                    "step": 1,
+                    "placeholder": ""
+                },
+                {
+                    "key": "field_bioco_saisonkalender_month_column_label",
+                    "label": "Abkürzung",
+                    "name": "label",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "70",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
         }
     ],
     "location": [

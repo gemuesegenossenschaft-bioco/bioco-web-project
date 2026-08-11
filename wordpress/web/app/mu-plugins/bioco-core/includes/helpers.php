@@ -166,7 +166,7 @@ function bioco_event_date_parts($post_id) {
 // Shared by bioco/events-feed and bioco/schnuppertage render.php, which can
 // both appear more than once per page, so this must not be a render.php-local
 // function (that would fatal on the second include with "Cannot redeclare").
-function bioco_render_events_list($query) {
+function bioco_render_events_list($query, $empty_message) {
     echo '<div class="events-list">';
     if ($query->have_posts()) {
         while ($query->have_posts()) {
@@ -196,8 +196,8 @@ function bioco_render_events_list($query) {
             <?php
         }
         wp_reset_postdata();
-    } else {
-        echo '<p style="color: var(--wp--preset--color--bioco-text-muted);">Aktuell sind keine Veranstaltungen geplant.</p>';
+    } elseif ($empty_message) {
+        echo '<p style="color: var(--wp--preset--color--bioco-text-muted);">' . esc_html($empty_message) . '</p>';
     }
     echo '</div>';
 }
@@ -209,7 +209,7 @@ function bioco_render_events_list($query) {
  * always renders so the block is fully usable without any map library.
  * $locations: array of ['name'=>, 'lat'=>, 'lng'=>, 'description'=>].
  */
-function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom) {
+function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom, $locations_heading, $route_label, $empty_message) {
     $locations = is_array($locations) ? array_values(array_filter($locations, function ($l) {
         return !empty($l['name']) && isset($l['lat']) && isset($l['lng']) && $l['lat'] !== '' && $l['lng'] !== '';
     })) : [];
@@ -234,7 +234,7 @@ function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom) {
     </div>
     <div class="location-info-box">
         <div class="location-addresses">
-            <h4><?php esc_html_e('Standorte', 'bioco'); ?></h4>
+<?php if ($locations_heading) : ?>            <h4><?php echo esc_html($locations_heading); ?></h4><?php endif; ?>
             <div class="address-list">
                 <?php foreach ($locations as $location) : ?>
                     <div class="address-item">
@@ -242,17 +242,17 @@ function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom) {
                         <?php if (!empty($location['description'])) : ?>
                             <p><?php echo esc_html($location['description']); ?></p>
                         <?php endif; ?>
-                        <a
+<?php if ($route_label) : ?>                        <a
                             href="<?php echo esc_url('https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($location['lat'] . ',' . $location['lng'])); ?>"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="btn btn-secondary btn-organic"
                             style="margin-top: var(--wp--preset--spacing--20); display: inline-block;"
-                        >Route planen →</a>
+                        ><?php echo esc_html($route_label); ?></a><?php endif; ?>
                     </div>
                 <?php endforeach; ?>
-                <?php if (empty($locations)) : ?>
-                    <p style="color: var(--wp--preset--color--bioco-text-muted);">Noch keine Standorte hinterlegt.</p>
+                <?php if (empty($locations) && $empty_message) : ?>
+                    <p style="color: var(--wp--preset--color--bioco-text-muted);"><?php echo esc_html($empty_message); ?></p>
                 <?php endif; ?>
             </div>
         </div>

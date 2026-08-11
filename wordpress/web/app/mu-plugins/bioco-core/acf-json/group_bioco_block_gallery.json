@@ -136,6 +136,87 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_bioco_gallery_filters",
+            "label": "Filter",
+            "name": "filters",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Filter hinzufügen",
+            "rows_per_page": 20,
+            "default_value": [
+                {
+                    "key": "all",
+                    "label": "Alles"
+                },
+                {
+                    "key": "koerbe",
+                    "label": "Körbe"
+                },
+                {
+                    "key": "feld",
+                    "label": "Feld"
+                },
+                {
+                    "key": "portraits",
+                    "label": "Portraits"
+                }
+            ],
+            "sub_fields": [
+                {
+                    "key": "field_bioco_gallery_filter_key",
+                    "label": "Technischer Schlüssel",
+                    "name": "key",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "40",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_gallery_filter_label",
+                    "label": "Angezeigter Text",
+                    "name": "label",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "60",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
         }
     ],
     "location": [

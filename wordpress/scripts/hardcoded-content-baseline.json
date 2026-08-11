@@ -1,8 +1,1 @@
-{
-    "web/app/mu-plugins/bioco-core/blocks/doi-confirm/render.php:hardcoded-prose": 4,
-    "web/app/mu-plugins/bioco-core/blocks/event-signup-form/render.php:hardcoded-prose": 1,
-    "web/app/mu-plugins/bioco-core/blocks/membership-form/render.php:hardcoded-prose": 28,
-    "web/app/mu-plugins/bioco-core/blocks/visit-day-form/render.php:hardcoded-prose": 2,
-    "web/app/mu-plugins/bioco-core/blocks/waiting-list-form/render.php:hardcoded-prose": 2,
-    "web/app/mu-plugins/bioco-core/includes/helpers.php:hardcoded-prose": 3
-}
+[]

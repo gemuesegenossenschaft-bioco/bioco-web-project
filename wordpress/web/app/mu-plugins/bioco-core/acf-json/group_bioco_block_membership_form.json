@@ -24,6 +24,1033 @@
             "layout": "block",
             "prefix_label": 0,
             "prefix_name": 0
+        },
+        {
+            "key": "field_bioco_membership_form_commitment_title",
+            "label": "Titel der Hinweise",
+            "name": "commitment_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Lies das und bestätige bevor du weiterklickst",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_commitment_intro",
+            "label": "Einleitung der Hinweise",
+            "name": "commitment_intro",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Bevor du dich anmeldest, überprüfe bitte diese Punkte:",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_commitments",
+            "label": "Hinweise zur Mitgliedschaft",
+            "name": "commitments",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "block",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Hinweis hinzufügen",
+            "rows_per_page": 20,
+            "default_value": [
+                {
+                    "heading": "Anteile & Beitrag",
+                    "text": "Jedes Mitglied erwirbt <strong>Anteilsscheine zu je CHF 250.- (einmalige Zahlung)</strong>. Die Anzahl der Anteile hängt von deinem gewählten Abo ab. Der <strong>Jahresbeitrag für dein Gemüse-Abo (jährlicher Beitrag) wird per 31. Januar fällig</strong> und kann quartalsweise oder jährlich bezahlt werden."
+                },
+                {
+                    "heading": "Bindung & Kündigung",
+                    "text": "Das Gemüseabo läuft <strong>vom 1. Januar bis zum 31. Dezember</strong>. Ohne Kündigung verlängert es sich jeweils um ein Kalenderjahr. Die <strong>Kündigungsfrist beträgt zwei Monate auf Ende eines Kalenderjahres</strong>."
+                },
+                {
+                    "heading": "Mitarbeit",
+                    "text": "Wir sind eine Mitmach-Genossenschaft! Jedes Mitglied leistet pro Jahr <strong>10 Arbeitseinsätze à 2 Stunden (bei halbem Korb) bzw. 20 Arbeitseinsätze à 2 Stunden (bei ganzem Korb) Mitarbeit</strong>. Dies kann auf dem Feld, in der Logistik oder bei Events sein."
+                },
+                {
+                    "heading": "Wetterbedingte Ertragsschwankungen",
+                    "text": "Mir ist bewusst, dass es zu Ernteausfällen kommen kann und mein wöchentlicher Gemüsekorb nicht immer gleich voll sein kann."
+                }
+            ],
+            "sub_fields": [
+                {
+                    "key": "field_bioco_membership_form_commitment_heading",
+                    "label": "Überschrift",
+                    "name": "heading",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                },
+                {
+                    "key": "field_bioco_membership_form_commitment_text",
+                    "label": "Text",
+                    "name": "text",
+                    "aria-label": "",
+                    "type": "textarea",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "rows": 4,
+                    "placeholder": "",
+                    "new_lines": ""
+                }
+            ]
+        },
+        {
+            "key": "field_bioco_membership_form_personal_title",
+            "label": "Titel persönliche Daten",
+            "name": "personal_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Persönliche Daten",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_first_name_label",
+            "label": "Feldname Vorname",
+            "name": "first_name_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Vorname *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_last_name_label",
+            "label": "Feldname Name",
+            "name": "last_name_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Name *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_address_label",
+            "label": "Feldname Adresse",
+            "name": "address_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Adresse *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_zip_label",
+            "label": "Feldname PLZ",
+            "name": "zip_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "PLZ *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_city_label",
+            "label": "Feldname Ort",
+            "name": "city_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Ort *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_phone_label",
+            "label": "Feldname Telefon",
+            "name": "phone_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Telefon",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_email_label",
+            "label": "Feldname E-Mail",
+            "name": "email_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "E-Mail *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_depot_payment_title",
+            "label": "Titel Depot und Zahlung",
+            "name": "depot_payment_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Depot & Zahlungsweise",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_depot_label",
+            "label": "Feldname Depot",
+            "name": "depot_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Depot-Auswahl *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_depot_placeholder",
+            "label": "Auswahlhinweis Depot",
+            "name": "depot_placeholder",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Bitte wählen...",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_depots",
+            "label": "Depots",
+            "name": "depots",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Depot hinzufügen",
+            "rows_per_page": 20,
+            "default_value": [
+                {
+                    "option": "Depot Chrättli"
+                },
+                {
+                    "option": "Depot Ohne"
+                },
+                {
+                    "option": "Depot Anixis"
+                },
+                {
+                    "option": "Casa Flora"
+                },
+                {
+                    "option": "Depot Geisshof"
+                },
+                {
+                    "option": "Depot Kupperhaus"
+                },
+                {
+                    "option": "Depot Ennetbaden"
+                },
+                {
+                    "option": "Depot Lemonia"
+                },
+                {
+                    "option": "Depot Lägernstrasse"
+                }
+            ],
+            "sub_fields": [
+                {
+                    "key": "field_bioco_membership_form_depot_option",
+                    "label": "Depot",
+                    "name": "option",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
+        },
+        {
+            "key": "field_bioco_membership_form_payment_label",
+            "label": "Feldname Zahlungsweise",
+            "name": "payment_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Zahlungsweise *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_payment_hint",
+            "label": "Hinweis zur ersten Rechnung",
+            "name": "payment_hint",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Die erste Rechnung wird per 31. Januar fällig.",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_quarterly_label",
+            "label": "Auswahl quartalsweise",
+            "name": "quarterly_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Quartalsweise (vierteljährlich)",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_annual_label",
+            "label": "Auswahl ganzes Jahr",
+            "name": "annual_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Ganzes Jahr (einmalig)",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_participation_title",
+            "label": "Titel Mitarbeit",
+            "name": "participation_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Mitarbeit",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_participation_intro",
+            "label": "Einleitung Mitarbeit",
+            "name": "participation_intro",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Jede(r) Mitglied bringt sich ein. Bitte teile uns deine Präferenzen mit:",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_preferred_days_label",
+            "label": "Feldname bevorzugte Tage",
+            "name": "preferred_days_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Bevorzugte Tage",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_preferred_days",
+            "label": "Bevorzugte Tage",
+            "name": "preferred_days",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Tag hinzufügen",
+            "rows_per_page": 20,
+            "default_value": [
+                {
+                    "option": "Montag"
+                },
+                {
+                    "option": "Dienstag"
+                },
+                {
+                    "option": "Mittwoch"
+                },
+                {
+                    "option": "Donnerstag"
+                },
+                {
+                    "option": "Freitag"
+                },
+                {
+                    "option": "Samstag"
+                }
+            ],
+            "sub_fields": [
+                {
+                    "key": "field_bioco_membership_form_preferred_day_option",
+                    "label": "Tag",
+                    "name": "option",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
+        },
+        {
+            "key": "field_bioco_membership_form_preferred_times_label",
+            "label": "Feldname bevorzugte Zeiten",
+            "name": "preferred_times_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Bevorzugte Zeiten",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_preferred_times",
+            "label": "Bevorzugte Zeiten",
+            "name": "preferred_times",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Zeit hinzufügen",
+            "rows_per_page": 20,
+            "default_value": [
+                {
+                    "option": "morgens"
+                },
+                {
+                    "option": "nachmittags"
+                },
+                {
+                    "option": "abends"
+                }
+            ],
+            "sub_fields": [
+                {
+                    "key": "field_bioco_membership_form_preferred_time_option",
+                    "label": "Zeit",
+                    "name": "option",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
+        },
+        {
+            "key": "field_bioco_membership_form_activity_areas_label",
+            "label": "Feldname Tätigkeitsbereiche",
+            "name": "activity_areas_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Tätigkeitsbereiche (Mehrfachauswahl möglich)",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_activity_areas",
+            "label": "Tätigkeitsbereiche",
+            "name": "activity_areas",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Bereich hinzufügen",
+            "rows_per_page": 20,
+            "default_value": [
+                {
+                    "option": "Feld/Anbau"
+                },
+                {
+                    "option": "Logistik/Verteilung"
+                },
+                {
+                    "option": "Administration"
+                },
+                {
+                    "option": "Events/Organisation"
+                },
+                {
+                    "option": "Andere"
+                }
+            ],
+            "sub_fields": [
+                {
+                    "key": "field_bioco_membership_form_activity_area_option",
+                    "label": "Bereich",
+                    "name": "option",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
+        },
+        {
+            "key": "field_bioco_membership_form_other_activity_label",
+            "label": "Feldname andere Tätigkeiten",
+            "name": "other_activity_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Andere Tätigkeitsbereiche (bitte beschreiben)",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_additional_subscriptions_title",
+            "label": "Titel Zusatzabos",
+            "name": "additional_subscriptions_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Zusatzabos",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_additional_subscriptions_intro",
+            "label": "Einleitung Zusatzabos",
+            "name": "additional_subscriptions_intro",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Ich bin interessiert, zusätzlich:",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_additional_subscriptions",
+            "label": "Zusatzabos",
+            "name": "additional_subscriptions",
+            "aria-label": "",
+            "type": "repeater",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "layout": "table",
+            "min": 0,
+            "max": 0,
+            "collapsed": "",
+            "button_label": "Produkt hinzufügen",
+            "rows_per_page": 20,
+            "default_value": [
+                {
+                    "option": "Milch"
+                },
+                {
+                    "option": "Fleisch"
+                },
+                {
+                    "option": "Käse"
+                },
+                {
+                    "option": "Kräutersalz"
+                }
+            ],
+            "sub_fields": [
+                {
+                    "key": "field_bioco_membership_form_additional_subscription_option",
+                    "label": "Produkt",
+                    "name": "option",
+                    "aria-label": "",
+                    "type": "text",
+                    "instructions": "",
+                    "required": 1,
+                    "conditional_logic": 0,
+                    "wrapper": {
+                        "width": "",
+                        "class": "",
+                        "id": ""
+                    },
+                    "default_value": "",
+                    "maxlength": "",
+                    "placeholder": "",
+                    "prepend": "",
+                    "append": ""
+                }
+            ]
+        },
+        {
+            "key": "field_bioco_membership_form_additional_products_label",
+            "label": "Feldname weitere Produkte",
+            "name": "additional_products_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Weitere Produkte von Partnern aus der Region",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_additional_products_hint",
+            "label": "Hinweis weitere Produkte",
+            "name": "additional_products_hint",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Hast du Wünsche für weitere Produkte? Teile uns deine Ideen mit:",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_additional_products_placeholder",
+            "label": "Beispiel weitere Produkte",
+            "name": "additional_products_placeholder",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "z.B. Eier, Brot, Tofu, Honig...",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_confirmation_title",
+            "label": "Titel Bestätigung",
+            "name": "confirmation_title",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Bestätigung",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_privacy_label",
+            "label": "Datenschutz-Bestätigung",
+            "name": "privacy_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Ich akzeptiere die Datenschutzbestimmungen *",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_submit_label",
+            "label": "Text des Anmeldebuttons",
+            "name": "submit_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Anmeldung einreichen",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
+        },
+        {
+            "key": "field_bioco_membership_form_submitting_label",
+            "label": "Text während des Sendens",
+            "name": "submitting_label",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "default_value": "Wird gesendet …",
+            "maxlength": "",
+            "placeholder": "",
+            "prepend": "",
+            "append": ""
         }
     ],
     "location": [
@@ -42,7 +1069,7 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Felder für den Mitgliedschaft-Anmeldung-Block (W10, Issue #97). Titel/Text klonen aus Section Common; die Formularfelder selbst sind statisch (render.php), single-page Variante der mehrstufigen Referenz (siehe render.php-Kommentar). POST /wp-json/bioco/v1/membership (bioco-forms mu-plugin), leitet best-effort an intranet.bioco.ch weiter.",
+    "description": "Felder für den Mitgliedschaft-Anmeldung-Block (W10, Issue #97). Sämtliche sichtbaren Formulartexte und Auswahllisten sind in WordPress editierbar; Titel/Text klonen aus Section Common.",
     "show_in_rest": 0,
     "modified": 1783728000
 }

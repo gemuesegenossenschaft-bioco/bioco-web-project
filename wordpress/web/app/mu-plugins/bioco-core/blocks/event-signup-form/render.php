@@ -13,6 +13,13 @@ if (!defined('ABSPATH')) exit;
 
 $title = get_field('title');
 $text = get_field('text');
+$event_title_prefix = get_field('event_title_prefix');
+$name_label = get_field('name_label');
+$email_label = get_field('email_label');
+$phone_label = get_field('phone_label');
+$notes_label = get_field('notes_label');
+$submit_label = get_field('submit_label');
+$submitting_label = get_field('submitting_label');
 
 bioco_forms_localize_block('bioco/event-signup-form', 'biocoEventSignupFormConfig', 'event-signup');
 
@@ -35,7 +42,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
     <?php if ($title && !$heading_already_in_text) : ?>
         <h2><?php echo esc_html($title); ?></h2>
     <?php elseif ($event_title) : ?>
-        <h2>Anmeldung für: <?php echo esc_html($event_title); ?></h2>
+        <?php if ($event_title_prefix) : ?><h2><?php echo esc_html($event_title_prefix); ?> <?php echo esc_html($event_title); ?></h2><?php endif; ?>
     <?php endif; ?>
     <?php if ($text) : ?>
         <div class="cms-section-text"><?php echo bioco_kses_rich_text($text); ?></div>
@@ -48,22 +55,22 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
         <input type="hidden" name="eventTitle" value="<?php echo esc_attr($event_title); ?>">
 
         <div class="form-group">
-            <label for="event_signup_name">Name *</label>
+            <?php if ($name_label) : ?><label for="event_signup_name"><?php echo esc_html($name_label); ?></label><?php endif; ?>
             <input type="text" id="event_signup_name" name="name" required>
         </div>
 
         <div class="form-group">
-            <label for="event_signup_email">E-Mail *</label>
+            <?php if ($email_label) : ?><label for="event_signup_email"><?php echo esc_html($email_label); ?></label><?php endif; ?>
             <input type="email" id="event_signup_email" name="email" required>
         </div>
 
         <div class="form-group">
-            <label for="event_signup_phone">Telefon (optional)</label>
+            <?php if ($phone_label) : ?><label for="event_signup_phone"><?php echo esc_html($phone_label); ?></label><?php endif; ?>
             <input type="tel" id="event_signup_phone" name="phone">
         </div>
 
         <div class="form-group">
-            <label for="event_signup_notes">Bemerkungen (optional)</label>
+            <?php if ($notes_label) : ?><label for="event_signup_notes"><?php echo esc_html($notes_label); ?></label><?php endif; ?>
             <textarea id="event_signup_notes" name="notes" rows="4"></textarea>
         </div>
 
@@ -71,6 +78,6 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
             <div class="cf-turnstile" data-form-captcha></div>
         </div>
 
-        <button type="submit" class="btn btn-primary" data-submit-label="Anmelden" data-submitting-label="Wird gesendet …">Anmelden</button>
+        <?php if ($submit_label) : ?><button type="submit" class="btn btn-primary" data-submit-label="<?php echo esc_attr($submit_label); ?>"<?php if ($submitting_label) : ?> data-submitting-label="<?php echo esc_attr($submitting_label); ?>"<?php endif; ?>><?php echo esc_html($submit_label); ?></button><?php endif; ?>
     </form>
 </section>

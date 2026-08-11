@@ -110,9 +110,16 @@ foreach ($files as $file) {
 // ---------------------------------------------------------------------------
 $DEFERRED = [];
 $deferredPath = __DIR__ . '/hardcoded-content-baseline.json';
+// An EMPTY baseline ({}) is the goal state, not a missing baseline: it means
+// zero tolerance, every finding is a new violation. Distinguish the two, or the
+// gate reports "no baseline" once the backlog is actually cleared.
+$baselineExists = false;
 if (is_file($deferredPath)) {
     $decoded = json_decode((string) file_get_contents($deferredPath), true);
-    if (is_array($decoded)) $DEFERRED = $decoded;
+    if (is_array($decoded)) {
+        $DEFERRED = $decoded;
+        $baselineExists = true;
+    }
 }
 
 $counts = [];
@@ -122,7 +129,7 @@ foreach ($violations as $v) {
 }
 ksort($counts);
 
-if ($listMode || !$DEFERRED) {
+if ($listMode || !$baselineExists) {
     echo "Gefundene Treffer pro Datei/Art:\n";
     foreach ($counts as $key => $n) printf("  %-78s %d\n", $key, $n);
     printf("\nSumme: %d Treffer in %d Gruppen\n", count($violations), count($counts));
@@ -177,6 +184,11 @@ if ($failures) {
     echo "  php wordpress/scripts/check-hardcoded-content.php --list\n";
     echo "HARDCODED_CONTENT_CHECK: FAIL\n";
     exit(1);
+}
+
+if (!$DEFERRED) {
+    echo "\nHARDCODED_CONTENT_CHECK: OK — Nulltoleranz erreicht, kein hartkodierter Inhalt und kein Fallback-Inhalt in den Block-Templates.\n";
+    exit(0);
 }
 
 echo "\nHARDCODED_CONTENT_CHECK: OK — keine neuen hartkodierten Inhalte oder Fallbacks.\n";
