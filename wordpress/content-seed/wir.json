@@ -1,0 +1,297 @@
+{
+    "path": "/wir/",
+    "slug": "wir",
+    "template": "basic-page",
+    "title": "Wir",
+    "sections": [
+        {
+            "section_id": "intro",
+            "section_layout": "split_media_text",
+            "section_component": "page_intro",
+            "section_title": "Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf.",
+            "section_text": "<p>Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere solidarische Landwirtschaft prägen.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "textWidth": "normal",
+                "align": "left"
+            }
+        },
+        {
+            "section_id": "wir",
+            "section_layout": "split_media_text",
+            "section_component": "media_text",
+            "section_title": "Wir",
+            "section_text": "<h2>Wir</h2>\n\n<p>biocò ist mehr als eine Gemüsegenossenschaft. Wir sind eine Gemeinschaft von Menschen, die gemeinsam biologisches Gemüse anbauen und geniessen. Unser Ziel: frische, saisonale Lebensmittel für alle, fair und nachhaltig produziert.</p>",
+            "section_config": {
+                "containerWidth": "xl",
+                "mediaSide": "left",
+                "mediaWidth": "50",
+                "mediaRatio": "4:3",
+                "mediaFit": "cover",
+                "verticalAlign": "center",
+                "gap": "lg",
+                "rounded": "lg"
+            },
+            "image_alt": "Wir"
+        },
+        {
+            "section_id": "alle_mitglieder",
+            "section_layout": "split_media_text",
+            "section_component": "media_text",
+            "section_title": "Alle Mitglieder",
+            "section_text": "<h2>Alle Mitglieder</h2>\n\n<p>Jede(r) Genossenschafter/in bringt sich ein – ob bei der Feldarbeit, in der Logistik oder bei Events.</p>",
+            "section_config": {
+                "containerWidth": "xl",
+                "mediaSide": "left",
+                "mediaWidth": "50",
+                "mediaRatio": "4:3",
+                "mediaFit": "cover",
+                "verticalAlign": "center",
+                "gap": "lg",
+                "rounded": "lg"
+            },
+            "image_alt": "Alle Mitglieder"
+        },
+        {
+            "section_id": "betriebsgruppe",
+            "section_layout": "split_media_text",
+            "section_component": "media_text",
+            "section_title": "Betriebsgruppe (BG)",
+            "section_text": "<h2>Betriebsgruppe (BG)</h2>\n\n<p>Die Betriebsgruppe koordiniert den Anbau, die Logistik und die Organisation der Genossenschaft.</p>",
+            "section_config": {
+                "containerWidth": "xl",
+                "mediaSide": "right",
+                "mediaWidth": "50",
+                "mediaRatio": "4:3",
+                "mediaFit": "cover",
+                "verticalAlign": "center",
+                "gap": "lg",
+                "rounded": "lg"
+            },
+            "image_alt": "Betriebsgruppe (BG)"
+        },
+        {
+            "section_id": "hof_team",
+            "section_layout": "split_media_text",
+            "section_component": "cards_grid",
+            "section_title": "Hof-Team",
+            "section_text": "<h2>Hof-Team</h2>\n\n<p>Unser Hof-Team im Jahr 2026 besteht aus Matthias, Tino und Michael. Michael hat in diesem Jahr die Verantwortung für den Gemüseanbau an Matthias übergeben. Mit Tino haben wir eine versierte Fachkraft gewonnen, der den Hof hoffentlich auch in den kommenden Jahren begleitet. </p>",
+            "section_config": {
+                "containerWidth": "xl",
+                "columnsDesktop": "2",
+                "columnsMobile": "1",
+                "cardStyle": "soft",
+                "mediaRatio": "3:4",
+                "mediaFit": "cover",
+                "gap": "lg",
+                "rounded": "md"
+            },
+            "image_alt": "Hof-Team"
+        },
+        {
+            "section_id": "geisshof",
+            "section_layout": "split_media_text",
+            "section_component": "gallery_strip",
+            "section_title": "Der Geisshof",
+            "section_text": "<h2>Der Geisshof</h2>\n\n<p>Unser Hof liegt auf einem Hügel über Gebenstorf AG, umgeben von Natur. Hier bauen wir nach biologisch-dynamischen Prinzipien (Demeter) eine vielfältige Auswahl an saisonalem Gemüse an.</p>",
+            "section_config": {
+                "containerWidth": "xl",
+                "columnsDesktop": "4",
+                "columnsMobile": "1",
+                "mediaRatio": "4:3",
+                "mediaFit": "cover",
+                "gap": "lg",
+                "rounded": "lg"
+            },
+            "image_alt": "Der Geisshof",
+            "buttons": [
+                {
+                    "text": "Anfahrtsweg zum Geisshof",
+                    "href": "/standorte-depots",
+                    "variant": "primary"
+                }
+            ]
+        },
+        {
+            "section_id": "mission",
+            "section_layout": "split_media_text",
+            "section_component": "text_columns",
+            "section_title": "Solidarität",
+            "section_text": "<h3>Solidarität</h3>\n\n<p>Wir teilen Arbeit und Ertrag. Solidarische Landwirtschaft bedeutet, dass Produzentinnen und Konsumentinnen zusammenarbeiten.</p>\n\n<h3>Nachhaltigkeit</h3>\n\n<p>Wir arbeiten nach biologisch-dynamischen Prinzipien (Demeter) und fördern Biodiversität, Kreislaufwirtschaft und gesunde Böden.</p>\n\n<h3>Gemeinschaft</h3>\n\n<p>biocò lebt von der Gemeinschaft. Jede(r) bringt sich ein, lernt voneinander und gestaltet die Genossenschaft aktiv mit.</p>\n\n<h3>Regionalität</h3>\n\n<p>Unser Gemüse wächst direkt in der Region Baden-Brugg. Kurze Wege, frische Ernte, lokale Verbundenheit.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "columnsDesktop": "2",
+                "columnsMobile": "1",
+                "gap": "lg"
+            },
+            "image_alt": "Unsere Mission",
+            "buttons": [
+                {
+                    "text": "Mehr über solidarische Landwirtschaft",
+                    "href": "/solawi",
+                    "variant": "primary"
+                }
+            ]
+        },
+        {
+            "section_id": "gotti",
+            "section_layout": "split_media_text",
+            "section_component": "media_text",
+            "section_title": "Gotti-System",
+            "section_text": "<h2>Gotti-System</h2>\n\n<p>Neumitglieder werden von einem \"Gotti\" oder \"Götti\" (Paten) begleitet. Dieses System hilft neuen Mitgliedern, sich in der Genossenschaft zurechtzufinden.</p>",
+            "section_config": {
+                "containerWidth": "xl",
+                "mediaSide": "left",
+                "mediaWidth": "50",
+                "mediaRatio": "4:3",
+                "mediaFit": "cover",
+                "verticalAlign": "center",
+                "gap": "lg",
+                "rounded": "lg"
+            }
+        },
+        {
+            "section_id": "geschichte",
+            "section_layout": "split_media_text",
+            "section_component": "media_text",
+            "section_title": "Geschichte",
+            "section_text": "<h2>Geschichte</h2>\n\n<p>2014 gegründet in Gebenstorf, ist biocò über die Jahre zu einer lebendigen Genossenschaft gewachsen, die heute die Region Baden-Brugg mit frischem Demeter-Gemüse versorgt.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "columnsDesktop": "2",
+                "columnsMobile": "1",
+                "gap": "lg",
+                "cardStyle": "plain"
+            }
+        },
+        {
+            "section_id": "timeline",
+            "section_layout": "split_media_text",
+            "section_component": "timeline_header",
+            "section_title": "Timeline",
+            "section_config": {
+                "containerWidth": "lg",
+                "textWidth": "normal",
+                "align": "left"
+            }
+        },
+        {
+            "section_id": "timeline_2013",
+            "section_layout": "split_media_text",
+            "section_component": "timeline_item",
+            "section_eyebrow": "2013",
+            "section_title": "Gründung",
+            "section_text": "<h2>Gründung</h2>\n\n<p>Die Gründung von biocò fand am 15.11.2013 statt. Da war die Betriebsgruppe bereits sehr, sehr aktiv.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "emphasis": "normal"
+            }
+        },
+        {
+            "section_id": "timeline_2014",
+            "section_layout": "split_media_text",
+            "section_component": "timeline_item",
+            "section_eyebrow": "2014",
+            "section_title": "Erste Gartensaison",
+            "section_text": "<h2>Erste Gartensaison</h2>\n\n<p>War dann die erste Gartensaison und ab da gab es die ersten Depots.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "emphasis": "normal"
+            }
+        },
+        {
+            "section_id": "timeline_2016",
+            "section_layout": "split_media_text",
+            "section_component": "timeline_item",
+            "section_eyebrow": "2016",
+            "section_title": "Packraum",
+            "section_text": "<h2>Packraum</h2>\n\n<p>Der Packraum wird erstellt und in Betrieb genommen. Ein wichtiger Schritt für die Genossenschaft.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "emphasis": "normal"
+            }
+        },
+        {
+            "section_id": "timeline_2019-2023",
+            "section_layout": "split_media_text",
+            "section_component": "timeline_item",
+            "section_eyebrow": "2019-2023",
+            "section_title": "Mitgliederwachstum",
+            "section_text": "<h2>Mitgliederwachstum</h2>\n\n<p>Weiteres Wachstum der Mitgliederzahl, Optimierung der Anbauplanung und Logistik.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "emphasis": "normal"
+            }
+        },
+        {
+            "section_id": "timeline_2023",
+            "section_layout": "split_media_text",
+            "section_component": "timeline_item",
+            "section_eyebrow": "2023",
+            "section_title": "Laufenten",
+            "section_text": "<h2>Laufenten</h2>\n\n<p>Wir haben zwei Pärchen Laufenten auf dem Hof, die uns bei der Schneckenjagd unterstützen.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "emphasis": "normal"
+            }
+        },
+        {
+            "section_id": "timeline_2025",
+            "section_layout": "split_media_text",
+            "section_component": "timeline_item",
+            "section_eyebrow": "2025",
+            "section_title": "Neue Website",
+            "section_text": "<h2>Neue Website</h2>\n\n<p>Launch der neuen Website mit modernem Design und verbesserter Benutzerführung.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "emphasis": "normal"
+            }
+        },
+        {
+            "section_id": "mitmachen_cta",
+            "section_layout": "split_media_text",
+            "section_component": "cta_band",
+            "section_title": "Werde Teil unserer Gemeinschaft und unterstütze die solidarische Landwirtschaft.",
+            "section_text": "<p>Werde Teil unserer Gemeinschaft und unterstütze die solidarische Landwirtschaft.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "align": "left",
+                "theme": "soft",
+                "rounded": "xl"
+            },
+            "buttons": [
+                {
+                    "text": "Jetzt Mitglied werden",
+                    "href": "/mitmachen",
+                    "variant": "primary"
+                }
+            ]
+        },
+        {
+            "section_id": "kennenlernen_cta",
+            "section_layout": "split_media_text",
+            "section_component": "cta_band",
+            "section_title": "Es können viele Fragen auftauchen.",
+            "section_text": "<p>Es können viele Fragen auftauchen. Du hast die Möglichkeit, den Hof und uns an den Schnuppertagen kennenzulernen oder dich via Kontaktformular bei uns zu melden.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "align": "left",
+                "theme": "soft",
+                "rounded": "xl"
+            },
+            "buttons": [
+                {
+                    "text": "Nimm Kontakt auf",
+                    "href": "/kontakt",
+                    "variant": "primary"
+                },
+                {
+                    "text": "Zu uns finden",
+                    "href": "/standorte-depots",
+                    "variant": "secondary"
+                }
+            ]
+        }
+    ],
+    "conversion_notes": "Exportiert aus dem laufenden ProcessWire via https://cms.bioco.ch/api/content/sections/wir mit wordpress/scripts/fetch-cms-seed.php. Diese Seite war von Anfang an CMS-getrieben und hatte deshalb nie eine Seed-Datei (die Seeds erfassen zuvor hart kodierten JSX-Inhalt). SEO-Werte sind hier NICHT enthalten und muessen bei Bedarf aus der Seite ergaenzt werden."
+}

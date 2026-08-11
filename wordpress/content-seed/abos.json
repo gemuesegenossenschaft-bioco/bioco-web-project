@@ -1,0 +1,127 @@
+{
+    "path": "/abos/",
+    "slug": "abos",
+    "template": "basic-page",
+    "title": "Dein wöchentliches Gemüseabo",
+    "sections": [
+        {
+            "section_id": "section-1839",
+            "section_layout": "split_media_text",
+            "section_component": "page_intro",
+            "section_title": "Dein wöchentliches Gemüseabo",
+            "section_text": "<h1>Dein wöchentliches Gemüseabo</h1>\n\n<p>Wöchentlich frisches Demeter-Gemüse direkt vom Geisshof in deinen Gemüsekorb. Mit deinem Gemüseabo unterstützt du unsere <a href=\"/solawi\">solidarische Landwirtschaft (Solawi)</a> und wirst Teil unserer Gemüsegenossenschaft. Hier erfährst du alles über unsere Abo-Modelle, Preise und wie du Mitglied werden kannst.</p>"
+        },
+        {
+            "section_id": "section-1840",
+            "section_layout": "split_media_text",
+            "section_component": "pricing_table",
+            "section_title": "Gemüse-Abos",
+            "section_text": "<h2>Gemüse-Abos</h2>\n\n<p>Das Gemüseabo läuft vom 1. Januar bis zum 31. Dezember. Sofern es freie Abos gibt, gibt es auch die Möglichkeit, quartalsweise unter dem Jahr einzusteigen.</p>",
+            "section_config": {
+                "containerWidth": "xl",
+                "workSuffix": "à 2 Stunden",
+                "tier1_name": "Halb",
+                "tier1_shares": "1 Anteilsschein",
+                "tier1_persons": 1,
+                "tier1_price": "CHF 750.-",
+                "tier1_sharecost": "CHF 250.-",
+                "tier1_work": "10 Arbeitseinsätze",
+                "tier2_name": "Standard",
+                "tier2_shares": "2 Anteilsscheine",
+                "tier2_persons": 2,
+                "tier2_price": "CHF 1'280.-",
+                "tier2_sharecost": "CHF 500.-",
+                "tier2_work": "20 Arbeitseinsätze",
+                "tier3_name": "Doppel",
+                "tier3_shares": "4 Anteilsscheine",
+                "tier3_persons": 4,
+                "tier3_price": "CHF 2'350.-",
+                "tier3_sharecost": "CHF 1'000.-",
+                "tier3_work": "40 Arbeitseinsätze"
+            },
+            "buttons": [
+                {
+                    "text": "Jetzt Abo wählen",
+                    "href": "/bioco-werden",
+                    "variant": "primary"
+                }
+            ]
+        },
+        {
+            "section_id": "section-1841",
+            "section_layout": "split_media_text",
+            "section_title": "Anteilsscheine",
+            "section_text": "<h3>Anteilsscheine</h3>\n\n<p><strong>Anteilsscheine:</strong> Jeder Anteilsschein kostet CHF 250.- und ist eine Bedingung für den Bezug eines Gemüsekorbes. Du kannst zusätzliche Anteilsscheine erwerben, um die Genossenschaft stärker zu unterstützen.</p>\n\n<p><strong>💡 Tipp:</strong> Geteilte Körbe sparen CHF 110 pro Jahr und reduzieren Logistikaufwand. Wir empfehlen, Körbe zu teilen!</p>"
+        },
+        {
+            "section_id": "section-1842",
+            "section_layout": "split_media_text",
+            "section_title": "Was ist im Gemüsekorb?",
+            "section_text": "<h2>Was ist im Gemüsekorb?</h2>\n\n<p>Bestellen Sie Ihr Biogemüse direkt vom Hof: Unsere Bio Gemüse Kiste kommt wöchentlich frisch vom Geisshof. Die wöchentliche Bio Gemüse Lieferung landet in einem unserer Depots, wo Sie Ihren Gemüsekorb abholen können.</p>\n\n<ul>\n\t<li>Wöchentlicher Gemüsekorb mit saisonalem Gemüse</li>\n\t<li>Demeter-Qualität – höchste Bio-Standards</li>\n\t<li>Frisch vom Geisshof in Gebenstorf</li>\n\t<li>Abholung in einem der <a href=\"/standorte-depots\">Standorte</a> (ab 16:00 Uhr abholbereit)</li>\n</ul>\n\n<p><a href=\"/gemuese\">Mehr über unsere Ernte erfahren →</a></p>"
+        },
+        {
+            "section_id": "section-1843",
+            "section_layout": "split_media_text",
+            "section_title": "Zahlungsweise",
+            "section_text": "<h2>Zahlungsweise</h2>\n\n<p>Die erste Rechnung wird per 31. Januar fällig. Du kannst wählen:</p>\n\n<ul>\n\t<li><strong>Quartalsweise:</strong> Du bezahlst vierteljährlich</li>\n\t<li><strong>Ganzes Jahr:</strong> Du bezahlst den gesamten Jahresbeitrag einmalig</li>\n</ul>"
+        },
+        {
+            "section_id": "section-1844",
+            "section_layout": "split_media_text",
+            "section_title": "Probe-Abo",
+            "section_text": "<h2>Probe-Abo</h2>\n\n<p>Möchtest du biocò erst einmal kennenlernen? Teste unser Gemüseabo für 3 Monate.</p>\n\n<p><strong>Details:</strong></p>\n\n<ul>\n\t<li>3 Monate Gemüsekorb</li>\n\t<li>Proportionaler Anteil am Jahrespreis und an der Mitarbeit</li>\n\t<li>Flexible Umstellung auf Jahresabo möglich</li>\n</ul>",
+            "buttons": [
+                {
+                    "text": "Probe-Abo testen",
+                    "href": "/mitmachen",
+                    "variant": "primary"
+                }
+            ]
+        },
+        {
+            "section_id": "section-1845",
+            "section_layout": "split_media_text",
+            "section_title": "Anteilsscheine ohne Gemüsekorb",
+            "section_text": "<h2>Anteilsscheine ohne Gemüsekorb</h2>\n\n<p>Du möchtest biocò unterstützen, ohne ein Gemüseabo zu beziehen? Das ist möglich!</p>\n\n<p><strong>Vorteile:</strong></p>\n\n<ul>\n\t<li>Unterstützung der Genossenschaft</li>\n\t<li>Vorrang auf der Warteliste für einen Gemüsekorb</li>\n\t<li>Mitspracherecht in der Genossenschaft</li>\n</ul>\n\n<p><strong>Kosten:</strong> CHF 250.- pro Anteilsschein</p>",
+            "buttons": [
+                {
+                    "text": "Anteilsscheine erwerben",
+                    "href": "/mitmachen",
+                    "variant": "primary"
+                }
+            ]
+        },
+        {
+            "section_id": "section-1846",
+            "section_layout": "split_media_text",
+            "section_component": "events_feed",
+            "section_title": "Nächste Events",
+            "section_text": "<h2>Nächste Events</h2>"
+        },
+        {
+            "section_id": "section-1847",
+            "section_layout": "split_media_text",
+            "section_title": "Zusatz-Abos",
+            "section_text": "<h2>Zusatz-Abos</h2>\n\n<p>In Planung: Partnerangebote wie Eier, Brot, Tofu und weitere regionale Produkte.</p>\n\n<p>Diese werden in Zukunft zusätzlich zum Gemüsekorb angeboten.</p>"
+        },
+        {
+            "section_id": "section-1848",
+            "section_layout": "split_media_text",
+            "section_title": "Möchtest du uns kennenlernen?",
+            "section_text": "<h2>Möchtest du uns kennenlernen?</h2>\n\n<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
+            "buttons": [
+                {
+                    "text": "Nimm Kontakt auf",
+                    "href": "/kontakt",
+                    "variant": "primary"
+                },
+                {
+                    "text": "Zu uns finden",
+                    "href": "/standorte-depots",
+                    "variant": "secondary"
+                }
+            ]
+        }
+    ],
+    "conversion_notes": "Exportiert aus dem laufenden ProcessWire via https://cms.bioco.ch/api/content/sections/abos mit wordpress/scripts/fetch-cms-seed.php. Diese Seite war von Anfang an CMS-getrieben und hatte deshalb nie eine Seed-Datei (die Seeds erfassen zuvor hart kodierten JSX-Inhalt). SEO-Werte sind hier NICHT enthalten und muessen bei Bedarf aus der Seite ergaenzt werden."
+}

@@ -95,6 +95,26 @@ function bioco_import_config_value(array $section, $key, $default = '') {
     return array_key_exists($key, $config) && $config[$key] !== '' ? $config[$key] : $default;
 }
 
+// Maps seed config keys to verified ACF field names. A null target marks a
+// key consumed by component-specific repeater logic.
+function bioco_import_apply_config_fields(array &$values, array &$warnings, array $section, array $fieldMap, $block) {
+    $config = is_array($section['section_config'] ?? null) ? $section['section_config'] : [];
+    foreach ($config as $seedKey => $value) {
+        if (!array_key_exists($seedKey, $fieldMap)) {
+            $warnings[] = "section_config.{$seedKey} has no matching field in bioco/{$block}; value was not imported.";
+            continue;
+        }
+        if ($fieldMap[$seedKey] !== null) $values[$fieldMap[$seedKey]] = $value;
+    }
+}
+
+function bioco_import_warn_unmapped_seed_fields(array &$warnings, array $section, array $fieldNames, $block) {
+    foreach ($fieldNames as $fieldName) {
+        if (!array_key_exists($fieldName, $section) || $section[$fieldName] === '' || $section[$fieldName] === []) continue;
+        $warnings[] = "Seed field '{$fieldName}' has no matching field in bioco/{$block}; value was not imported.";
+    }
+}
+
 function bioco_import_media_text_layout_config($mediaSide) {
     return [
         'block' => 'media-text',
@@ -152,6 +172,126 @@ function bioco_import_layout_map() {
 
 function bioco_import_component_map() {
     return [
+        'page_intro' => [
+            'block' => 'page-intro',
+            'acf_group' => 'group_bioco_block_page_intro',
+            'content_clone' => ['eyebrow', 'title', 'text'],
+            'buttons' => true,
+            'auto_header' => true,
+            'config_fields' => [
+                'containerWidth' => 'container_width',
+                'textWidth' => 'text_width',
+                'align' => 'align',
+            ],
+            'unmapped_fields' => ['image_url', 'image_alt'],
+        ],
+        'pricing_table' => [
+            'block' => 'pricing-table',
+            'acf_group' => 'group_bioco_block_pricing_table',
+            'content_clone' => ['eyebrow', 'title', 'text'],
+            'buttons' => true,
+            'auto_header' => true,
+            'extra' => function (array $section, array &$values, array &$warnings) {
+                $configMap = [
+                    'containerWidth' => 'container_width',
+                    'workSuffix' => 'work_suffix',
+                ];
+                for ($n = 1; $n <= 3; $n++) {
+                    foreach (['name', 'shares', 'persons', 'price', 'sharecost', 'work'] as $field) {
+                        $configMap["tier{$n}_{$field}"] = null;
+                    }
+                }
+                bioco_import_apply_config_fields($values, $warnings, $section, $configMap, 'pricing-table');
+
+                $config = is_array($section['section_config'] ?? null) ? $section['section_config'] : [];
+                $tiers = [];
+                for ($n = 1; $n <= 3; $n++) {
+                    $row = [];
+                    foreach (['name', 'shares', 'persons', 'price', 'sharecost', 'work'] as $field) {
+                        $seedKey = "tier{$n}_{$field}";
+                        if (!array_key_exists($seedKey, $config)) continue;
+                        $row[$field] = $field === 'persons' ? (int) $config[$seedKey] : (string) $config[$seedKey];
+                    }
+                    if ($row) $tiers[] = $row;
+                }
+                if ($tiers) $values['tiers'] = $tiers;
+            },
+            'unmapped_fields' => ['image_url', 'image_alt'],
+        ],
+        'media_text' => [
+            'block' => 'media-text',
+            'acf_group' => 'group_bioco_block_media_text',
+            'content_clone' => ['eyebrow', 'title', 'text'],
+            'buttons' => true,
+            'auto_header' => true,
+            'config_fields' => ['mediaSide' => 'media_side'],
+            'extra' => function (array $section, array &$values, array &$warnings) {
+                $url = (string) ($section['image_url'] ?? '');
+                $alt = (string) ($section['image_alt'] ?? '');
+                if ($url !== '') $values['image'] = bioco_import_pending_image($url);
+                if ($alt !== '') $values['image_alt'] = $alt;
+            },
+        ],
+        'cards_grid' => [
+            'block' => 'cards-grid',
+            'acf_group' => 'group_bioco_block_cards_grid',
+            'content_clone' => ['eyebrow', 'title', 'text'],
+            'buttons' => false,
+            'auto_header' => true,
+            'config_fields' => [
+                'columnsDesktop' => 'columns_desktop',
+                'columnsMobile' => 'columns_mobile',
+                'cardStyle' => 'card_style',
+                'mediaRatio' => 'media_ratio',
+                'mediaFit' => 'media_fit',
+                'gap' => 'gap',
+                'rounded' => 'rounded',
+            ],
+            'unmapped_fields' => ['image_url', 'image_alt'],
+        ],
+        'gallery_strip' => [
+            'block' => 'gallery-strip',
+            'acf_group' => 'group_bioco_block_gallery_strip',
+            'content_clone' => ['eyebrow', 'title', 'text'],
+            'buttons' => true,
+            'auto_header' => true,
+            'config_fields' => [
+                'columnsDesktop' => 'columns_desktop',
+                'columnsMobile' => 'columns_mobile',
+                'mediaRatio' => 'media_ratio',
+                'mediaFit' => 'media_fit',
+                'gap' => 'gap',
+                'rounded' => 'rounded',
+            ],
+            'unmapped_fields' => ['image_url', 'image_alt'],
+        ],
+        'text_columns' => [
+            'block' => 'text-columns',
+            'acf_group' => 'group_bioco_block_text_columns',
+            'content_clone' => ['eyebrow', 'title', 'text'],
+            'buttons' => true,
+            'auto_header' => true,
+            'config_fields' => [
+                'containerWidth' => 'container_width',
+                'columnsDesktop' => 'columns',
+                'gap' => 'gap',
+            ],
+            'unmapped_fields' => ['image_url', 'image_alt'],
+        ],
+        'cta_band' => [
+            'block' => 'cta-band',
+            'acf_group' => 'group_bioco_block_cta_band',
+            'content_clone' => ['title', 'text'],
+            'buttons' => true,
+            'auto_header' => true,
+            'config_fields' => [
+                'containerWidth' => 'container_width',
+                'align' => 'align',
+                'theme' => 'theme',
+                'rounded' => 'rounded',
+            ],
+            'unmapped_fields' => ['image_url', 'image_alt'],
+        ],
         'contact_form' => [
             'block' => 'contact-form',
             'acf_group' => 'group_bioco_block_contact_form',
@@ -281,8 +421,13 @@ function bioco_import_component_map() {
             'content_clone' => [],
             'buttons' => false,
             'auto_header' => true,
-            // 'intro'/'locations' not part of the seed schema — leave unset,
-            // render.php's nine-depot fallback list applies.
+            'config_fields' => [
+                'intro' => 'intro',
+                'locations' => 'locations',
+                'locations_heading' => 'locations_heading',
+                'route_label' => 'route_label',
+                'empty_message' => 'empty_message',
+            ],
         ],
         'geisshof_map' => [
             'block' => 'geisshof-map',
@@ -354,6 +499,71 @@ function bioco_import_plan_accordion_group(array $sectionGroup) {
     ]];
 }
 
+// Builds one bioco/timeline block from a timeline_header followed by its
+// consecutive timeline_item sections. An item-only run is still representable.
+function bioco_import_plan_timeline_group(array $sectionGroup) {
+    $ids = array_map(function ($section) { return (string) $section['section_id']; }, $sectionGroup);
+    $warnings = [];
+    $values = [];
+    if ((string) ($sectionGroup[0]['section_component'] ?? '') === 'timeline_header') {
+        $header = array_shift($sectionGroup);
+        bioco_import_apply_common_fields($values, $warnings, $header, ['eyebrow', 'title', 'text'], false);
+        bioco_import_apply_config_fields($values, $warnings, $header, [
+            'containerWidth' => 'container_width',
+            'textWidth' => 'text_width',
+            'align' => 'align',
+        ], 'timeline');
+        bioco_import_warn_unmapped_seed_fields($warnings, $header, ['image_url', 'image_alt'], 'timeline');
+    }
+
+    $items = [];
+    foreach ($sectionGroup as $section) {
+        $sid = (string) $section['section_id'];
+        $row = [];
+        if (array_key_exists('section_eyebrow', $section)) $row['year_eyebrow'] = (string) $section['section_eyebrow'];
+        if (array_key_exists('section_title', $section)) $row['title'] = (string) $section['section_title'];
+        if (array_key_exists('section_text', $section)) {
+            $sourceText = (string) $section['section_text'];
+            $bodyText = $sourceText;
+            if (!empty($row['title']) && preg_match('/^\s*<h[1-6][^>]*>(.*?)<\/h[1-6]>\s*/is', $sourceText, $heading)) {
+                $headingText = trim(html_entity_decode(strip_tags($heading[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                if ($headingText === $row['title']) $bodyText = substr($sourceText, strlen($heading[0]));
+            }
+            $row['text'] = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($bodyText), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+            if ($sourceText !== strip_tags($sourceText)) {
+                $warnings[] = "Section {$sid}: section_text HTML formatting cannot be represented by timeline.items.text and was flattened.";
+            }
+        }
+
+        $config = is_array($section['section_config'] ?? null) ? $section['section_config'] : [];
+        foreach ($config as $seedKey => $value) {
+            if ($seedKey === 'emphasis') {
+                $row['emphasis'] = $value;
+            } elseif ($seedKey === 'containerWidth') {
+                if (!array_key_exists('container_width', $values)) {
+                    $values['container_width'] = $value;
+                } elseif ((string) $values['container_width'] !== (string) $value) {
+                    $warnings[] = "Section {$sid}: section_config.containerWidth differs from the grouped timeline container and was not imported.";
+                }
+            } else {
+                $warnings[] = "Section {$sid}: section_config.{$seedKey} has no matching timeline item field; value was not imported.";
+            }
+        }
+        bioco_import_warn_unmapped_seed_fields($warnings, $section, ['buttons', 'image_url', 'image_alt'], 'timeline');
+        $items[] = $row;
+    }
+    if ($items) $values['items'] = $items;
+
+    return [[
+        'type' => 'block',
+        'section_ids' => $ids,
+        'block' => 'timeline',
+        'acf_group' => 'group_bioco_block_timeline',
+        'values' => $values,
+        'warnings' => $warnings,
+    ]];
+}
+
 // Maps a single (non-accordion) seed section to 0-2 plan items (1 normally,
 // 2 when the header-block fallback fires, 0 only in truly unrepresentable
 // cases such as video_embed — which still reports via 'skip').
@@ -397,6 +607,12 @@ function bioco_import_plan_single_section(array $section) {
     if (empty($config['skip_common'])) {
         bioco_import_apply_common_fields($values, $warnings, $section, $contentClone, $supportsButtons, $needsHeader);
     }
+    if (isset($config['config_fields'])) {
+        bioco_import_apply_config_fields($values, $warnings, $section, $config['config_fields'], $config['block']);
+    }
+    if (isset($config['unmapped_fields'])) {
+        bioco_import_warn_unmapped_seed_fields($warnings, $section, $config['unmapped_fields'], $config['block']);
+    }
     if (isset($config['extra'])) {
         $config['extra']($section, $values, $warnings);
     }
@@ -430,7 +646,7 @@ function bioco_import_plan_single_section(array $section) {
     return $items;
 }
 
-// Full seed -> ordered plan (flattens accordion grouping + header fallback).
+// Full seed -> ordered plan (flattens grouped components + header fallback).
 function bioco_import_build_page_plan(array $seed) {
     $sections = $seed['sections'];
     $plan = [];
@@ -445,6 +661,19 @@ function bioco_import_build_page_plan(array $seed) {
                 $i++;
             }
             foreach (bioco_import_plan_accordion_group($group) as $item) $plan[] = $item;
+            continue;
+        }
+        if ($componentKey === 'timeline_header' || $componentKey === 'timeline_item') {
+            $group = [];
+            if ($componentKey === 'timeline_header') {
+                $group[] = $sections[$i];
+                $i++;
+            }
+            while ($i < $n && (string) ($sections[$i]['section_component'] ?? '') === 'timeline_item') {
+                $group[] = $sections[$i];
+                $i++;
+            }
+            foreach (bioco_import_plan_timeline_group($group) as $item) $plan[] = $item;
             continue;
         }
         foreach (bioco_import_plan_single_section($sections[$i]) as $item) $plan[] = $item;

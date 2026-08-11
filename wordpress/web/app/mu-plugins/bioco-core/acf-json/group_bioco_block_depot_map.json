@@ -16,7 +16,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Abholzeiten: Dienstag und Freitag, ab 16:00 Uhr",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -124,62 +124,7 @@
                     "new_lines": ""
                 }
             ],
-            "default_value": [
-                {
-                    "name": "Depot Chrättli",
-                    "lat": 47.4725,
-                    "lng": 8.303,
-                    "description": "Allmendstrasse 16, 5400 Baden · Dienstag\nKontakt: Corona Banky · https://www.xn--chrttli-7wa.ch/\nDas Depot befindet sich unter der Rampe rechts neben dem Quartierladen."
-                },
-                {
-                    "name": "Depot Ohne",
-                    "lat": 47.4735,
-                    "lng": 8.3075,
-                    "description": "Stadtturmstrasse 15, 5400 Baden · Dienstag\nKontakt: Tobias Kloter · https://www.ohne.ch/\nDie Körbe stehen unter den Tischen im hinteren Bereich."
-                },
-                {
-                    "name": "Depot Anixis",
-                    "lat": 47.474,
-                    "lng": 8.3085,
-                    "description": "Oberstadtstrasse 10, Galerie Anixis, 5400 Baden · Dienstag\nKontakt: Josef Lindiridi · https://anixis.ch/\nHinter der Barriere auf dem Materiallager."
-                },
-                {
-                    "name": "Casa Flora",
-                    "lat": 47.488,
-                    "lng": 8.218,
-                    "description": "Zurzacherstrasse 171, 5200 Brugg · Dienstag\nKontakt: David Müller\nIn der Nische beim hinteren Eingang des Blumengeschäfts (Zufahrt via Hauptstrasse)."
-                },
-                {
-                    "name": "Depot Geisshof",
-                    "lat": 47.4741684,
-                    "lng": 8.2456318,
-                    "description": "Geisshof, Gebenstorf · Freitag\nKontakt: Matthias Müller\nDirekt auf dem Hof."
-                },
-                {
-                    "name": "Depot Kupperhaus",
-                    "lat": 47.4843986,
-                    "lng": 8.2069493,
-                    "description": "Schulthess-Allee 4, 5200 Brugg · Freitag\nKontakt: Brigitte Perren Henneck\nUnten an der Rampe (Zufahrt rückwärts neben dem Kupperhaus)."
-                },
-                {
-                    "name": "Depot Ennetbaden",
-                    "lat": 47.4802623,
-                    "lng": 8.3191206,
-                    "description": "Geissbergstrasse 17, 5408 Ennetbaden · Freitag\nKontakt: Nils und Armelle George\nBeim Wohnhaus."
-                },
-                {
-                    "name": "Depot Lemonia",
-                    "lat": 47.4705,
-                    "lng": 8.3164,
-                    "description": "Schartenstrasse 28, 5430 Wettingen · Freitag\nKontakt: Martin Gruchow · http://lemonia.ch/\nHinter dem Haus unter dem Tisch."
-                },
-                {
-                    "name": "Depot Lägernstrasse",
-                    "lat": 47.4611864,
-                    "lng": 8.3168081,
-                    "description": "Lägernstrasse 6, 5430 Wettingen · Freitag\nKontakt: Helen Matthäus\nBeim Wohnhaus."
-                }
-            ]
+            "default_value": []
         },
         {
             "key": "field_bioco_depot_map_locations_heading",
@@ -195,7 +140,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Standorte",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -215,7 +160,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Route planen →",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -235,7 +180,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Noch keine Standorte hinterlegt.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -258,7 +203,7 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Felder für den Depot-Karte-Block (W9 interactive blocks, Issue #96). Vereinfachtes Schema (name/lat/lng/description) statt der vollen DepotLocation-Form aus DepotMap.tsx (day/contact/website/notes/hideAddress werden als Freitext in description gepflegt). Leere Standorte fallen in render.php auf die neun bestehenden Depots zurück.",
+    "description": "Felder für den Depot-Karte-Block (W9 interactive blocks, Issue #96). Vereinfachtes Schema (name/lat/lng/description) statt der vollen DepotLocation-Form aus DepotMap.tsx (day/contact/website/notes/hideAddress werden als Freitext in description gepflegt).",
     "show_in_rest": 0,
     "modified": 1783814400
 }
