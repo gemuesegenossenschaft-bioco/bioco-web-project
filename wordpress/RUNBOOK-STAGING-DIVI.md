@@ -1,5 +1,7 @@
 # Staging-Inbetriebnahme + Divi-Handbuch für `staging.bioco.ch`
 
+> **Welcher Weg gilt?** Für Staging gilt der gewählte Weg **Softaculous + `wordpress/scripts/deploy-wp-code.sh`**: [RUNBOOK-SOFTACULOUS.md](RUNBOOK-SOFTACULOUS.md). Dieses Dokument beschreibt **Bedrock + GitHub-Workflow** als Alternative und CI-Pfad; es ist nicht der primäre Staging-Ablauf.
+
 Zielgruppe: Güney für Server/Deploy, Goni für WordPress, Divi und Inhalte. Keine Secrets in GitHub oder im Repo speichern. Das Repo ist öffentlich; echte Werte gehören nur in cPanel, Server-`.env` und GitHub-Secrets.
 
 ## 1. Einmaliges Server-Setup in cPanel
@@ -325,100 +327,70 @@ Praktisch:
 - [ ] Keine alten Divi-Shortcode-Layouts importieren.
 - [ ] Inhalte so anlegen, dass Kernseiten auch ohne proprietären Shortcode-Ballast wartbar bleiben.
 
-## 4. Inhalte manuell importieren
+## 4. Inhalte skriptgesteuert importieren
 
-Die PRD geht von ca. 20 Seiten aus. Inhalte werden manuell in WordPress neu angelegt, nicht automatisch aus ProcessWire übernommen.
+Der primäre Weg ist der mitgelieferte WP-CLI-Importer. Er liest die versionierten Seed-Dateien, erzeugt die Seiten mit `bioco/*`-ACF-Blöcken und richtet Startseite, Permalinks und Hauptmenü ein. ACF Pro muss installiert und aktiv sein, weil der Importer ACF-Feldschlüssel über die ACF-API auflöst.
 
-### Seitenstruktur anlegen
+### Zuerst Probelauf
 
-In wp-admin:
+Im WordPress-Projektroot ausführen:
 
-- [ ] `Seiten` → `Erstellen`
-
-Mindestens diese Seiten/Seitentypen prüfen/anlegen:
-
-- [ ] Startseite
-- [ ] Solawi
-- [ ] Gemüse
-- [ ] Mitmachen
-- [ ] Standorte/Depots
-- [ ] Aktuelles
-- [ ] Kontakt
-- [ ] Bioco werden / Anmeldung
-- [ ] Anmeldung Danke
-- [ ] Newsletter
-- [ ] Warteliste
-- [ ] Tag der offenen Tür / Schnuppertage
-- [ ] Kundenportal
-- [ ] Datenschutz
-- [ ] Impressum
-- [ ] Statuten
-
-Die genaue Liste mit Live-Navigation und PRD abgleichen. Ziel ist URL-Parität, nicht kreative neue Slugs.
-
-### Welche bioco-Blöcke verwenden
-
-Die `bioco/*`-Blöcke funktionieren unter Divi, weil Styling, ACF-Felder und Verhalten in `bioco-core`, `bioco-content` und `bioco-forms` liegen.
-
-Verwenden:
-
-- [ ] Hero: `bioco/hero`
-- [ ] Fließtext: `bioco/rich-text`
-- [ ] Bild/Text: `bioco/media-text`
-- [ ] Banner: `bioco/banner`
-- [ ] Medienraster/Galerie: `bioco/media-grid`, `bioco/gallery`, `bioco/gallery-strip`
-- [ ] Karten/Kacheln: `bioco/cards-grid`, `bioco/link-tiles`, `bioco/group-cards`
-- [ ] CTA: `bioco/cta-band`
-- [ ] Tabellen/Rechner: `bioco/pricing-table`, `bioco/pricing-calculator`
-- [ ] Timeline/Steps/Accordion: passende `bioco/*`-Blöcke
-- [ ] Events: `bioco/events-feed`, Event-Einträge als CPT
-- [ ] Karten: `bioco/depot-map`, `bioco/geisshof-map`
-- [ ] Saisonkalender: `bioco/saisonkalender`
-- [ ] Formulare: Kontakt, Newsletter, Schnuppertag, Warteliste, Event-Anmeldung, Mitgliedschaft
-- [ ] DOI-Bestätigung: `bioco/doi-confirm`
-
-Formular-Endpunkte laufen über:
-
-```text
-/wp-json/bioco/v1/contact
-/wp-json/bioco/v1/subscribe
-/wp-json/bioco/v1/visit-day
-/wp-json/bioco/v1/waiting-list
-/wp-json/bioco/v1/event-signup
-/wp-json/bioco/v1/membership
+```bash
+wp bioco import
 ```
 
-Newsletter nutzt Double-Opt-in. Die Bestätigungsseite muss den DOI-Block enthalten.
+Ohne `--apply` ist der Befehl immer ein Dry-Run und schreibt nichts.
 
-### Events und Gruppen erfassen
+- [ ] Terminal-Ausgabe vollständig prüfen
+- [ ] HTML-Bericht unter `wp-content/bioco-import-log/` öffnen
+- [ ] Fehler und Warnungen vor dem Schreiben klären
+- [ ] Bei Bedarf einzelne Seiten testen: `wp bioco import --only=kontakt`
+- [ ] Bei Bedarf Sammlungen auslassen: `wp bioco import --skip-collections`
+- [ ] Bei Bedarf Startseite, Permalinks und Menü auslassen: `wp bioco import --skip-site-wiring`
 
-In wp-admin:
+Optionale Quellen für Events und Gruppen können als Datei oder URL übergeben werden:
 
-- [ ] `Veranstaltungen` → Events erfassen
-- [ ] Titel, Datum, Status, Typ, Zusammenfassung, Bild setzen
-- [ ] Status `Bevorstehend` oder `Vergangen` pflegen
-- [ ] Vergangene Events erscheinen als Rückblick
-- [ ] Event-URLs liegen unter `/aktuelles/<slug>`
+```bash
+wp bioco import --events-json='<DATEI-ODER-URL>' --groups-json='<DATEI-ODER-URL>'
+```
 
-Für Gruppen:
+### Import anwenden
 
-- [ ] `Gruppen` → Einträge erfassen
-- [ ] Titel, Bild, Text, Kontakt pflegen
-- [ ] `bioco/group-cards` rendert diese Einträge
+Erst nach geprüftem Dry-Run:
 
-### Menü, Startseite, Permalinks
+```bash
+wp bioco import --apply
+```
 
-In wp-admin:
+- [ ] Import ohne Fehler abschliessen
+- [ ] HTML-Bericht erneut prüfen
+- [ ] Startseite, Navigation und mehrere Inhaltsseiten im Frontend kontrollieren
 
-- [ ] `Design` → `Editor` oder `Design` → `Menüs`, je nach aktivem Theme/UI
-- [ ] Hauptnavigation nach Live-Struktur anlegen
-- [ ] Footer-Navigation prüfen
-- [ ] `Einstellungen` → `Lesen`
-- [ ] Startseite als statische Startseite setzen
-- [ ] Beitragsseite nur setzen, wenn das Content-Konzept es verlangt
-- [ ] `Einstellungen` → `Permalinks`
-- [ ] Struktur: `Beitragsname`
-- [ ] Speichern, damit Rewrite Rules neu geschrieben werden
+Der Import ist idempotent: Wiederholte Läufe führen zum gleichen Zielzustand. Die No-Clobber-Regel schützt redaktionelle Arbeit: Eine bereits nicht leere Seite oder ein bereits gepflegter Wert wird ohne `--force` gemeldet und übersprungen.
+
+`--force` ist destruktiv für bestehende redaktionelle Inhalte. Nur nach Backup, geprüftem Bericht und ausdrücklicher Freigabe verwenden; es ist ausschliesslich zusammen mit `--apply` erlaubt:
+
+```bash
+wp bioco import --apply --force
+```
+
+### Import verifizieren
+
+Nach dem schreibenden Lauf:
+
+```bash
+wp bioco verify
+```
+
+Die Verifikation ist ein reiner Lesevorgang und vergleicht den importierten Stand erneut mit den Seed-Dateien.
+
+- [ ] `wp bioco verify` ohne Fehler abschliessen
+- [ ] HTML-Bericht unter `wp-content/bioco-import-log/` prüfen
+- [ ] Bei Bedarf gezielt prüfen: `wp bioco verify --only=home`
+
+### Manueller Divi-Fallback
+
+Manuelles Authoring ist nur ein bewusst gewählter Fallback für einzelne Seiten, die frei im Divi-Builder gestaltet werden sollen. Solche Seiten zuerst nach dem normalen Import bearbeiten; der Import überschreibt ihren nicht leeren Inhalt bei späteren Läufen ohne `--force` nicht. Die manuelle Neuerfassung aller Seiten ist nicht der Standardweg.
 
 ## 5. Konformitäts-Check vor dem Umschalten
 
