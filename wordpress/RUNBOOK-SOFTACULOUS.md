@@ -153,6 +153,26 @@ Der Divi-Lizenzschlüssel gehört ausschliesslich über wp-admin in die WordPres
 
 WP-CLI-Befehle im WordPress-Root ausführen, also im Ordner direkt oberhalb von `wp-content/`.
 
+### Zuerst: die zwei fehlenden Seiten exportieren
+
+Für `/abos` und `/wir` gibt es noch keine Seed-Datei. Grund: die 17 vorhandenen Seeds halten Inhalt fest, der früher hart im Frontend stand — diese zwei Seiten waren von Anfang an CMS-getrieben, hatten also nie hart kodierten Inhalt. Ihr Inhalt liegt ausschliesslich im laufenden ProcessWire.
+
+Ohne diesen Schritt fehlen nach dem Import zwei Seiten, und die Verweise darauf aus `/solawi` zeigen ins Leere.
+
+Auf einem Rechner ausführen, der `cms.bioco.ch` erreicht:
+
+```bash
+php wordpress/scripts/fetch-cms-seed.php --slug=abos
+php wordpress/scripts/fetch-cms-seed.php --slug=wir
+```
+
+- [ ] Beide Befehle gelaufen
+- [ ] Falls die Warnung „nicht abgebildete Felder“ erscheint: prüfen, ob dort Inhalt steckt
+- [ ] `php wordpress/scripts/check-seed-plan.php` ist grün und zählt jetzt 19 Seiten statt 17
+- [ ] Die zwei neuen Dateien in `wordpress/content-seed/` committen
+
+Ist das CMS nur von einem anderen Rechner erreichbar, nennt die Fehlermeldung den Umweg über `curl` und `--from-file`.
+
 ### Import-Probelauf
 
 - [ ] ACF Pro ist aktiv
