@@ -57,32 +57,29 @@ def test_primary_navigation_contract_lives_outside_the_theme():
     ).read_text()
     intended = json.loads((
         ROOT / "wordpress/web/app/mu-plugins/bioco-core/content/navigation.json"
-    ).read_text())["items"]
+    ).read_text())
 
-    assert [item["label"] for item in intended] == [
-        "Startseite", "Solawi", "Gemüse", "Mitmachen",
-        "Standorte & Depots", "Aktuelles", "Kontakt",
+    assert [item["label"] for item in intended["primary"]] == [
+        "Wir", "Gemüse", "Mitmachen", "Abos", "Aktuelles",
     ]
-    assert all(item["label"] not in navigation_php for item in intended)
+    assert intended["cta"]["label"] == "BIOCÒ WERDEN"
+    assert all(
+        item["label"] not in navigation_php
+        for item in intended["utility"] + intended["primary"] + [intended["cta"]]
+    )
     php = r'''
     define('ABSPATH', __DIR__);
-    $serialized = null;
     function home_url($path) { return 'https://staging.example' . $path; }
-    function serialize_block($block) {
-        global $serialized;
-        $serialized = $block;
-        return 'serialized-navigation';
-    }
-    function do_blocks($markup) { return 'rendered:' . $markup; }
+    function plugins_url($path, $plugin = null) { return 'https://staging.example/wp-content/mu-plugins/bioco-core/' . $path; }
+    function esc_url($value) { return $value; }
+    function esc_attr($value) { return $value; }
+    function esc_html($value) { return $value; }
     require 'wordpress/web/app/mu-plugins/bioco-core/includes/navigation.php';
     require 'wordpress/web/app/mu-plugins/bioco-import/includes/site-wiring.php';
-    $markup = bioco_primary_navigation_markup();
     echo json_encode([
-        'items' => bioco_primary_navigation_items(),
+        'contract' => bioco_navigation_contract(),
         'import_slugs' => bioco_import_primary_nav_slugs(),
         'import_labels' => bioco_import_nav_labels(),
-        'block' => $serialized,
-        'markup' => $markup,
         'rendered' => bioco_render_primary_navigation(),
     ]);
     '''
@@ -96,23 +93,16 @@ def test_primary_navigation_contract_lives_outside_the_theme():
 
     assert header.count("<!-- wp:bioco/primary-navigation /-->") == 1
     assert "wp:navigation-link" not in header
-    assert contract["items"] == intended
-    assert contract["import_slugs"] == [item["slug"] for item in intended]
+    menu_items = intended["primary"] + [intended["cta"]]
+    assert contract["contract"] == intended
+    assert contract["import_slugs"] == [item["slug"] for item in menu_items]
     assert contract["import_labels"] == {
-        item["slug"]: item["label"] for item in intended
+        item["slug"]: item["label"] for item in menu_items
     }
-    assert contract["markup"] == "serialized-navigation"
-    assert contract["rendered"] == "rendered:serialized-navigation"
-    assert contract["block"]["blockName"] == "core/navigation"
-    assert len(contract["block"]["innerBlocks"]) == 7
-    assert contract["block"]["innerContent"] == [None] * 7
-    assert [
-        [link["attrs"]["label"], link["attrs"]["url"]]
-        for link in contract["block"]["innerBlocks"]
-    ] == [
-        [item["label"], "https://staging.example" + item["url"]]
-        for item in intended
-    ]
+    assert 'class="bioco-utility-nav"' in contract["rendered"]
+    assert 'class="bioco-primary-nav"' in contract["rendered"]
+    assert 'class="bioco-logo"' in contract["rendered"]
+    assert 'class="bioco-primary-cta"' in contract["rendered"]
 
     core = (
         ROOT / "wordpress/web/app/mu-plugins/bioco-core/bioco-core.php"

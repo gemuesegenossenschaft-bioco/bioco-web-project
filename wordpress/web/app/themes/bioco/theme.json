@@ -12,11 +12,11 @@
       "palette": [
         { "slug": "bioco-green", "name": "Grün (Marke)", "color": "#2e7d32" },
         { "slug": "bioco-green-dark", "name": "Grün dunkel", "color": "#1b5e20" },
-        { "slug": "bioco-carrot", "name": "Karotte", "color": "#F29200" },
+        { "slug": "bioco-carrot", "name": "Karotte", "color": "#FF8C00" },
         { "slug": "bioco-beet", "name": "Rande", "color": "#87213D" },
-        { "slug": "bioco-bg", "name": "Hintergrund", "color": "#F6F9F5" },
+        { "slug": "bioco-bg", "name": "Hintergrund", "color": "#F5F1E8" },
         { "slug": "bioco-surface", "name": "Fläche", "color": "#FFFFFF" },
-        { "slug": "bioco-text", "name": "Text", "color": "#1F2A1B" },
+        { "slug": "bioco-text", "name": "Text", "color": "#1A1A1A" },
         { "slug": "bioco-text-muted", "name": "Text gedämpft", "color": "#4A4A4A" },
         { "slug": "bioco-border", "name": "Rahmen", "color": "#E1E4E8" }
       ]

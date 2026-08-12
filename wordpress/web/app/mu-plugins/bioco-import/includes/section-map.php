@@ -698,6 +698,25 @@ function bioco_import_plan_single_section(array $section) {
 function bioco_import_build_page_plan(array $seed) {
     $sections = $seed['sections'];
     $plan = [];
+    $hero = is_array($seed['hero'] ?? null) ? $seed['hero'] : [];
+    $heroHeadline = (string) ($hero['hero_title'] ?? '');
+    $heroSubtitle = (string) ($hero['hero_subtitle'] ?? '');
+    $heroImage = (string) ($hero['image_url'] ?? '');
+    if ($heroHeadline !== '' || $heroSubtitle !== '' || $heroImage !== '') {
+        $heroValues = [];
+        if ($heroHeadline !== '') $heroValues['headline'] = $heroHeadline;
+        if ($heroSubtitle !== '') $heroValues['subtitle'] = $heroSubtitle;
+        if ($heroImage !== '') $heroValues['image'] = bioco_import_pending_image($heroImage);
+        if (!empty($hero['image_alt'])) $heroValues['image_alt'] = (string) $hero['image_alt'];
+        $plan[] = [
+            'type' => 'block',
+            'section_ids' => ['__hero__'],
+            'block' => 'hero',
+            'acf_group' => 'group_bioco_block_hero',
+            'values' => $heroValues,
+            'warnings' => [],
+        ];
+    }
     $i = 0;
     $n = count($sections);
     while ($i < $n) {

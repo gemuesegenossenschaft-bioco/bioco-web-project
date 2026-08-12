@@ -94,7 +94,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
                     $button_variant = $button['variant'] ?? 'primary';
                     if (!$button_text || !$button_href) continue;
                 ?>
-                    <a href="<?php echo esc_url($button_href); ?>" class="btn btn-<?php echo esc_attr($button_variant); ?>"><?php echo esc_html($button_text); ?></a>
+                    <a href="<?php echo esc_url($button_href); ?>" class="btn btn-<?php echo esc_attr($button_variant); ?> btn-organic"><?php echo esc_html($button_text); ?></a>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

@@ -1,11 +1,15 @@
 {
-  "items": [
-    {"slug": "home", "label": "Startseite", "url": "/"},
-    {"slug": "solawi", "label": "Solawi", "url": "/solawi/"},
-    {"slug": "gemuese", "label": "Gemüse", "url": "/gemuese/"},
-    {"slug": "mitmachen", "label": "Mitmachen", "url": "/mitmachen/"},
-    {"slug": "standorte-depots", "label": "Standorte & Depots", "url": "/standorte-depots/"},
-    {"slug": "aktuelles", "label": "Aktuelles", "url": "/aktuelles/"},
-    {"slug": "kontakt", "label": "Kontakt", "url": "/kontakt/"}
-  ]
+  "utility": [
+    { "slug": "standorte-depots", "label": "Standorte", "url": "/standorte-depots/" },
+    { "slug": "kontakt", "label": "Kontakt", "url": "/kontakt/" },
+    { "slug": "intranet", "label": "Intranet", "url": "https://intranet.bioco.ch/" }
+  ],
+  "primary": [
+    { "slug": "wir", "label": "Wir", "url": "/wir/" },
+    { "slug": "gemuese", "label": "Gemüse", "url": "/gemuese/" },
+    { "slug": "mitmachen", "label": "Mitmachen", "url": "/mitmachen/" },
+    { "slug": "abos", "label": "Abos", "url": "/abos/" },
+    { "slug": "aktuelles", "label": "Aktuelles", "url": "/aktuelles/" }
+  ],
+  "cta": { "slug": "bioco-werden", "label": "BIOCÒ WERDEN", "url": "/bioco-werden/" }
 }
