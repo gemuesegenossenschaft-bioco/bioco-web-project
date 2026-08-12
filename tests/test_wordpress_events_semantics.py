@@ -372,3 +372,63 @@ def test_force_reports_equal_fields_truthfully():
     # The post-level row must not claim an update that never happened.
     post_rows = [r for r in rows if not r["field"]]
     assert [r["status"] for r in post_rows] == ["ok-equal"], post_rows
+
+
+# --- 7. the second --collections-only --force run is a global no-op --------
+
+# The state left behind by the first repair run: event_date has already been
+# shifted to the planned value, and every other field/post column already
+# matches. The one remaining difference is cosmetic — the stored meta is
+# exactly the source HTML, but ACF's formatted read returns it with a trailing
+# "\n" (wpautop-style formatting). A second --force run must therefore write
+# nothing at all, not merely skip the summary.
+NEWLINE_EVENT_PHP = EVENT_PHP.replace(
+    "        'event_date' => '2026-08-14 10:00:00',",
+    "        'event_date' => '2026-08-15 18:00:00',",
+).replace(
+    "        'event_summary' => 'Fest im Garten.',",
+    "        'event_summary' => \"<p>Fest im Garten.</p>\\n\",",
+).replace(
+    "function update_field($field, $value, $postId) {",
+    """function get_post_meta($postId, $field = '', $single = false) {
+    $raw = ['event_summary' => '<p>Fest im Garten.</p>'];
+    if (!isset($raw[$field])) return $single ? '' : [];
+    return $single ? $raw[$field] : [$raw[$field]];
+}
+function update_field($field, $value, $postId) {""",
+).replace(
+    "    'description' => 'Fest im Garten.',",
+    "    'description' => '<p>Fest im Garten.</p>',",
+)
+
+
+def newline_event_force_run():
+    return run_php(NEWLINE_EVENT_PHP, {"BIOCO_TEST_TZ": "Europe/Zurich"})
+
+
+def test_trailing_newline_from_formatted_get_field_is_not_rewritten():
+    payload = newline_event_force_run()
+    written = [f for f, _ in payload["field_writes"]]
+
+    assert "event_summary" not in written, payload["field_writes"]
+
+
+def test_trailing_newline_field_is_reported_as_equal():
+    rows = newline_event_force_run()["report"]
+    by_field = {r["field"]: r["status"] for r in rows if r["field"]}
+
+    assert by_field["event_summary"] == "ok-equal", rows
+
+
+def test_second_force_run_writes_nothing_at_all():
+    payload = newline_event_force_run()
+
+    assert payload["field_writes"] == [], payload["field_writes"]
+    assert payload["post_writes"] == [], payload["post_writes"]
+
+
+def test_second_force_run_reports_no_updates():
+    rows = newline_event_force_run()["report"]
+
+    assert [r for r in rows if r["status"] == "update"] == [], rows
+    assert {r["status"] for r in rows} == {"ok-equal"}, rows
