@@ -37,9 +37,12 @@ function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false
   const scrollListeners = [];
   const scrollListenerOptions = [];
 
+  const focusWithinUtility = () =>
+    utilityEl.contains(sandbox.document.activeElement);
+
   const target = () => {
     if (mobile) return 0;
-    if (state.focusWithin) return UTILITY_HEIGHT;
+    if (focusWithinUtility()) return UTILITY_HEIGHT;
     return state.hidden ? 0 : UTILITY_HEIGHT;
   };
 
@@ -80,9 +83,21 @@ function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false
     },
   };
 
+  // Real `Node.contains` semantics: true for the node itself and for any
+  // descendant, false for anything else (including null).
+  const utilityLink = { nodeName: 'A', parentNode: null };
+  const outsideLink = { nodeName: 'A', parentNode: null };
   const utilityEl = {
-    contains: () => !!state.focusWithin,
+    nodeName: 'NAV',
+    parentNode: null,
+    contains: (node) => {
+      for (let n = node; n; n = n.parentNode) {
+        if (n === utilityEl) return true;
+      }
+      return false;
+    },
   };
+  utilityLink.parentNode = utilityEl;
 
   const shell = {
     classList,
@@ -97,6 +112,16 @@ function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false
 
   // A second, non-authoritative shell: duplicated markup further down the
   // document. Nothing may drive it — only the first match is controlled.
+  const decoyUtilityEl = {
+    nodeName: 'NAV',
+    parentNode: null,
+    contains: (node) => {
+      for (let n = node; n; n = n.parentNode) {
+        if (n === decoyUtilityEl) return true;
+      }
+      return false;
+    },
+  };
   const decoyClasses = new Set();
   const decoyChanges = [];
   const decoy = {
@@ -118,7 +143,7 @@ function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false
         return next;
       },
     },
-    querySelector: (sel) => (sel === '.bioco-utility-nav' ? { contains: () => false } : null),
+    querySelector: (sel) => (sel === '.bioco-utility-nav' ? decoyUtilityEl : null),
     offsetHeight: PRIMARY_HEIGHT + UTILITY_HEIGHT,
     getBoundingClientRect: () => ({ height: PRIMARY_HEIGHT + UTILITY_HEIGHT, top: 0 }),
   };
@@ -186,7 +211,26 @@ function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false
     for (let i = 0; i < n; i += 1) frame();
   };
 
-  return { state, userScroll, settle, frame, scrollListenerOptions, shell, decoyChanges };
+  // Move focus the way a real tab/click would: `document.activeElement` points
+  // at a concrete element, and the utility row contains it only if it is one of
+  // its own descendants.
+  const focus = (el) => {
+    sandbox.document.activeElement = el;
+  };
+
+  return {
+    state,
+    userScroll,
+    settle,
+    frame,
+    scrollListenerOptions,
+    shell,
+    decoyChanges,
+    focus,
+    utilityLink,
+    outsideLink,
+    focusWithinUtility,
+  };
 }
 
 const scenarios = {};
@@ -249,12 +293,15 @@ const scenarios = {};
 // 5. Focus inside the utility row keeps it visible while scrolling down.
 {
   const env = makeEnv();
-  env.state.focusWithin = true;
+  env.focus(env.utilityLink); // e.g. tabbing into the language switcher
   env.userScroll(700);
   env.settle(60);
   scenarios.focus_within_keeps_visible = {
     hidden: env.state.hidden,
     utility_height: env.state.utility,
+    // `contains` must answer per-node, not per-scenario.
+    contains_focused: env.focusWithinUtility(),
+    contains_outside: env.shell.querySelector('.bioco-utility-nav').contains(env.outsideLink),
   };
 }
 

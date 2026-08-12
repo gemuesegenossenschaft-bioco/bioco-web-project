@@ -68,6 +68,8 @@ def test_focus_within_utility_row_keeps_it_visible(scenarios):
     case = scenarios["focus_within_keeps_visible"]
     assert case["hidden"] is False
     assert case["utility_height"] == 70
+    assert case["contains_focused"] is True
+    assert case["contains_outside"] is False
 
 
 def test_reduced_motion_instant_collapse_is_stable(scenarios):
