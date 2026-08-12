@@ -139,6 +139,14 @@ function bioco_import_import_event_item(array $item, $mode, $force, array &$repo
         return;
     }
     if (function_exists('update_field')) {
+        $current = function_exists('get_field') ? get_field('card_image', $post->ID) : null;
+        $currentAttachmentId = is_array($current)
+            ? (int) ($current['ID'] ?? $current['id'] ?? 0)
+            : (int) $current;
+        if ($currentAttachmentId === (int) $attachmentId) {
+            bioco_import_report_row($report, $label, '', 'card_image', 'ok-equal', 'Bild bereits identisch (attachment_id=' . $attachmentId . ').');
+            return;
+        }
         update_field('card_image', $attachmentId, $post->ID);
         bioco_import_report_row($report, $label, '', 'card_image', 'update', 'Bild gesetzt (attachment_id=' . $attachmentId . ').');
     }
