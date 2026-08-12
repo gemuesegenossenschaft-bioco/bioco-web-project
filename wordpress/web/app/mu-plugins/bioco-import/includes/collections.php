@@ -82,6 +82,25 @@ function bioco_import_acf_value_equals($current, $planned) {
     return (string) $current === (string) $planned;
 }
 
+// get_field() returns the FORMATTED value: for wysiwyg/textarea fields ACF
+// applies the_content-style filters, so stored "<p>x</p>" reads back as
+// "<p>x</p>\n". Comparing only the formatted value makes every --force run
+// rewrite those fields forever. When the field exists but the formatted value
+// differs, fall back to the raw stored meta, which is what update_field()
+// would actually write.
+//
+// Only consulted when the formatted read is a present scalar: a missing field
+// ($current === null) must still be written, and non-scalar values stay
+// "different" (write-anyway), exactly as before.
+function bioco_import_acf_stored_value_equals($postId, $field, $current, $planned) {
+    if (bioco_import_acf_value_equals($current, $planned)) return true;
+    if (is_array($current) || is_object($current) || $current === null) return false;
+    if (!function_exists('get_post_meta')) return false;
+    $raw = get_post_meta($postId, $field, true);
+    if (is_array($raw) || is_object($raw) || $raw === null || $raw === '') return false;
+    return (string) $raw === (string) $planned;
+}
+
 function bioco_import_write_acf_fields($postId, array $fieldPlan, $mode, $force, $label, array &$report) {
     if (!function_exists('update_field') || !function_exists('get_field')) {
         bioco_import_report_row($report, $label, '', '', 'error', 'ACF (update_field/get_field) nicht verfügbar.');
@@ -97,7 +116,7 @@ function bioco_import_write_acf_fields($postId, array $fieldPlan, $mode, $force,
         // fields that actually differ, so re-importing a corrected export
         // shifts event_date without rewriting an identical title/body/meta
         // (and without bumping post_modified for nothing).
-        if (bioco_import_acf_value_equals($current, $value)) {
+        if (bioco_import_acf_stored_value_equals($postId, $field, $current, $value)) {
             bioco_import_report_row($report, $label, '', $field, 'ok-equal', 'Bereits identisch — nicht geschrieben.');
             continue;
         }

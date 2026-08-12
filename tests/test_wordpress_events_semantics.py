@@ -372,3 +372,131 @@ def test_force_reports_equal_fields_truthfully():
     # The post-level row must not claim an update that never happened.
     post_rows = [r for r in rows if not r["field"]]
     assert [r["status"] for r in post_rows] == ["ok-equal"], post_rows
+
+
+# --- 7. the second --collections-only --force run is a global no-op --------
+
+# The state left behind by the first repair run: event_date has already been
+# shifted to the planned value, and every other field/post column already
+# matches. The one remaining difference is cosmetic — the stored meta is
+# exactly the source HTML, but ACF's formatted read returns it with a trailing
+# "\n" (wpautop-style formatting). A second --force run must therefore write
+# nothing at all, not merely skip the summary.
+NEWLINE_EVENT_PHP = EVENT_PHP.replace(
+    "        'event_date' => '2026-08-14 10:00:00',",
+    "        'event_date' => '2026-08-15 18:00:00',",
+).replace(
+    "        'event_summary' => 'Fest im Garten.',",
+    "        'event_summary' => \"<p>Fest im Garten.</p>\\n\",",
+).replace(
+    "function update_field($field, $value, $postId) {",
+    """function get_post_meta($postId, $field = '', $single = false) {
+    $raw = ['event_summary' => '<p>Fest im Garten.</p>'];
+    if (!isset($raw[$field])) return $single ? '' : [];
+    return $single ? $raw[$field] : [$raw[$field]];
+}
+function update_field($field, $value, $postId) {""",
+).replace(
+    "    'description' => 'Fest im Garten.',",
+    "    'description' => '<p>Fest im Garten.</p>',",
+)
+
+
+def newline_event_force_run():
+    return run_php(NEWLINE_EVENT_PHP, {"BIOCO_TEST_TZ": "Europe/Zurich"})
+
+
+def test_trailing_newline_from_formatted_get_field_is_not_rewritten():
+    payload = newline_event_force_run()
+    written = [f for f, _ in payload["field_writes"]]
+
+    assert "event_summary" not in written, payload["field_writes"]
+
+
+def test_trailing_newline_field_is_reported_as_equal():
+    rows = newline_event_force_run()["report"]
+    by_field = {r["field"]: r["status"] for r in rows if r["field"]}
+
+    assert by_field["event_summary"] == "ok-equal", rows
+
+
+def test_second_force_run_writes_nothing_at_all():
+    payload = newline_event_force_run()
+
+    assert payload["field_writes"] == [], payload["field_writes"]
+    assert payload["post_writes"] == [], payload["post_writes"]
+
+
+def test_second_force_run_reports_no_updates():
+    rows = newline_event_force_run()["report"]
+
+    assert [r for r in rows if r["status"] == "update"] == [], rows
+    assert {r["status"] for r in rows} == {"ok-equal"}, rows
+
+
+# --- 8. first run with raw meta present: the fallback cannot swallow a write -
+
+# Section 6 runs without get_post_meta(), so the raw-meta fallback in
+# bioco_import_acf_stored_value_equals() short-circuits before it is reached.
+# On a real site the function always exists, so exercise the same first-run
+# state with raw meta defined: event_date's raw value still differs from the
+# planned value, so it must still be written exactly once.
+def replace_once(php, needle, replacement):
+    """Substitute an anchor that must appear exactly once in the fixture.
+
+    A silent no-op (anchor renamed) or a double substitution would leave the
+    fixture testing something other than what the test name claims.
+    """
+    assert php.count(needle) == 1, (needle, php.count(needle))
+    return php.replace(needle, replacement)
+
+
+RAW_META_EVENT_PHP = replace_once(
+    replace_once(
+        EVENT_PHP,
+        "function update_field($field, $value, $postId) {",
+        """function get_post_meta($postId, $field = '', $single = false) {
+    $GLOBALS['meta_reads'][] = $field;
+    $raw = [
+        'event_date' => '2026-08-14 10:00:00',
+        'event_status' => 'upcoming',
+        'event_type' => 'general',
+        'event_summary' => 'Fest im Garten.',
+        'card_image' => '77',
+    ];
+    if (!isset($raw[$field])) return $single ? '' : [];
+    return $single ? $raw[$field] : [$raw[$field]];
+}
+function update_field($field, $value, $postId) {""",
+    ),
+    "$GLOBALS['field_writes'] = [];",
+    "$GLOBALS['field_writes'] = [];\n$GLOBALS['meta_reads'] = [];",
+)
+RAW_META_EVENT_PHP = replace_once(
+    RAW_META_EVENT_PHP,
+    "    'field_writes' => $GLOBALS['field_writes'],",
+    "    'field_writes' => $GLOBALS['field_writes'],\n    'meta_reads' => $GLOBALS['meta_reads'],",
+)
+
+
+def raw_meta_event_force_run():
+    return run_php(RAW_META_EVENT_PHP, {"BIOCO_TEST_TZ": "Europe/Zurich"})
+
+
+def test_raw_meta_fallback_still_writes_the_shifted_event_date():
+    payload = raw_meta_event_force_run()
+
+    assert payload["field_writes"] == [["event_date", "2026-08-15 18:00:00"]]
+    assert payload["post_writes"] == []
+    # The fallback must actually have consulted the raw meta for event_date;
+    # otherwise this fixture would pass for the same reason section 6 does.
+    assert "event_date" in payload["meta_reads"], payload["meta_reads"]
+
+
+def test_raw_meta_fallback_reports_the_event_date_update():
+    rows = raw_meta_event_force_run()["report"]
+    by_field = {r["field"]: r["status"] for r in rows if r["field"]}
+
+    assert by_field["event_date"] == "update"
+    for equal_field in ("event_status", "event_type", "event_summary", "card_image"):
+        assert by_field[equal_field] == "ok-equal", (equal_field, rows)
