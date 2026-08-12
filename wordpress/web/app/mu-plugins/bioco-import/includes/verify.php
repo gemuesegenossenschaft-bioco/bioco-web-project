@@ -16,7 +16,7 @@
 
 if (!defined('ABSPATH')) exit;
 
-// section-label ("id" or "id1,id2") => ['blockName' => ..., 'data' => [...]]
+// section-label ("id" or "id1,id2") => ordered list of matching blocks.
 function bioco_import_parse_marked_blocks($content) {
     $blocks = parse_blocks((string) $content);
     $result = [];
@@ -30,7 +30,7 @@ function bioco_import_parse_marked_blocks($content) {
             continue;
         }
         if ($pendingLabel !== null) {
-            $result[$pendingLabel] = [
+            $result[$pendingLabel][] = [
                 'blockName' => (string) $block['blockName'],
                 'data' => is_array($block['attrs']['data'] ?? null) ? $block['attrs']['data'] : [],
             ];
@@ -38,6 +38,11 @@ function bioco_import_parse_marked_blocks($content) {
         }
     }
     return $result;
+}
+
+function bioco_import_take_marked_block(array &$blocks, $sectionLabel) {
+    if (empty($blocks[$sectionLabel])) return null;
+    return array_shift($blocks[$sectionLabel]);
 }
 
 function bioco_import_stringify_for_report($value) {
@@ -111,13 +116,13 @@ function bioco_import_verify_seed(array $seed, array &$report) {
             continue;
         }
 
-        if (!isset($actualBlocks[$sectionLabel])) {
+        $found = bioco_import_take_marked_block($actualBlocks, $sectionLabel);
+        if ($found === null) {
             bioco_import_report_row($report, $slug, $sectionLabel, $item['block'], 'verify-missing', 'Kein bioco:section-Marker + Block dafür in post_content gefunden.');
             continue;
         }
 
         $expectedBlockName = bioco_import_registered_block_name($item['block']);
-        $found = $actualBlocks[$sectionLabel];
         if ($found['blockName'] !== $expectedBlockName) {
             bioco_import_report_row($report, $slug, $sectionLabel, 'name', 'verify-mismatch', "Block-Name: erwartet '{$expectedBlockName}', gefunden '{$found['blockName']}'.");
             continue;
