@@ -44,3 +44,5 @@ def test_theme_font_sources_are_resolvable():
                     assert (theme_dir / source.removeprefix("file:./")).is_file()
                 else:
                     assert source.startswith("https://")
+
+    assert (theme_dir / "assets/fonts/OFL.txt").is_file()
