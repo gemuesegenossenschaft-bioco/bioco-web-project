@@ -1,8 +1,56 @@
 import subprocess
+import json
 from pathlib import Path
 
 
 ROOT = Path(__file__).parents[1]
+
+
+def test_scf_clone_companion_keys_use_registered_source_keys():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/acf-fields.php';
+    $fields = [
+        [
+            'name' => 'image',
+            'key' => 'field_synthetic_image',
+            '__key' => 'field_source_image',
+            'type' => 'image',
+        ],
+        [
+            'name' => 'gallery',
+            'key' => 'field_synthetic_gallery',
+            '__key' => 'field_source_gallery',
+            'type' => 'gallery',
+        ],
+        [
+            'name' => 'buttons',
+            'key' => 'field_synthetic_buttons',
+            '__key' => 'field_source_buttons',
+            'type' => 'repeater',
+            'sub_fields' => [
+                ['name' => 'text', 'key' => 'field_button_text', 'type' => 'text'],
+            ],
+        ],
+    ];
+    echo json_encode(bioco_import_acf_block_data([
+        'image' => 23,
+        'gallery' => [29, 30],
+        'buttons' => [['text' => 'Mehr erfahren']],
+    ], $fields));
+    '''
+    data = json.loads(subprocess.run(
+        ["php", "-r", php],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout)
+
+    assert data["_image"] == "field_source_image"
+    assert data["_gallery"] == "field_source_gallery"
+    assert data["_buttons"] == "field_source_buttons"
+    assert data["_buttons_0_text"] == "field_button_text"
 
 
 def test_scf_block_name_and_post_content_slashing():

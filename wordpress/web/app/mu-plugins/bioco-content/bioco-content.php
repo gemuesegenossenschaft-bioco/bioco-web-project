@@ -37,7 +37,7 @@ add_action('init', function () {
         'show_in_rest' => true,
         'menu_icon' => 'dashicons-calendar-alt',
         'supports' => ['title', 'editor', 'thumbnail'],
-        'has_archive' => 'aktuelles',
+        'has_archive' => false,
         'rewrite' => ['slug' => 'aktuelles', 'with_front' => false],
     ]);
 

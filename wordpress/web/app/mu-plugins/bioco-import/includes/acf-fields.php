@@ -141,7 +141,7 @@ function bioco_import_acf_block_data(array $values, array $fields) {
             } else {
                 if ($default === null || $default === '' || is_array($default)) continue;
                 $data[$name] = $default;
-                $data['_' . $name] = $field['key'];
+                $data['_' . $name] = $field['__key'] ?? $field['key'];
                 continue;
             }
         } else {
@@ -151,7 +151,7 @@ function bioco_import_acf_block_data(array $values, array $fields) {
         if (($field['type'] ?? '') === 'repeater') {
             $rows = is_array($value) ? array_values($value) : [];
             $data[$name] = count($rows);
-            $data['_' . $name] = $field['key'];
+            $data['_' . $name] = $field['__key'] ?? $field['key'];
             $subFields = is_array($field['sub_fields'] ?? null) ? $field['sub_fields'] : [];
             foreach ($rows as $i => $row) {
                 if (!is_array($row)) continue;
@@ -159,14 +159,14 @@ function bioco_import_acf_block_data(array $values, array $fields) {
                     $subName = $sub['name'] ?? '';
                     if ($subName === '' || !array_key_exists($subName, $row)) continue;
                     $data["{$name}_{$i}_{$subName}"] = $row[$subName];
-                    $data["_{$name}_{$i}_{$subName}"] = $sub['key'];
+                    $data["_{$name}_{$i}_{$subName}"] = $sub['__key'] ?? $sub['key'];
                 }
             }
             continue;
         }
 
         $data[$name] = $value;
-        $data['_' . $name] = $field['key'];
+        $data['_' . $name] = $field['__key'] ?? $field['key'];
     }
     return $data;
 }
