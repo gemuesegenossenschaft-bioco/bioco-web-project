@@ -50,6 +50,10 @@ foreach ($seeds as $seed) {
     // (union across items) must equal the seed's section ids. A section that
     // silently falls out of the plan is the failure mode this catches.
     $seedIds = array_map(function ($s) { return (string) $s['section_id']; }, $seed['sections']);
+    $hero = is_array($seed['hero'] ?? null) ? $seed['hero'] : [];
+    if ((string) ($hero['hero_title'] ?? '') !== '' || (string) ($hero['hero_subtitle'] ?? '') !== '' || (string) ($hero['image_url'] ?? '') !== '') {
+        $seedIds[] = '__hero__';
+    }
     $plannedIds = [];
     foreach ($plan as $item) {
         foreach ($item['section_ids'] as $sid) $plannedIds[$sid] = true;

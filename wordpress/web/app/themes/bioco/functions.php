@@ -16,3 +16,8 @@ add_action('after_setup_theme', function () {
     add_theme_support('editor-styles');
     load_theme_textdomain('bioco', get_template_directory() . '/languages');
 });
+
+add_action('wp_enqueue_scripts', function () {
+    $path = get_theme_file_path('assets/app.css');
+    wp_enqueue_style('bioco-theme', get_theme_file_uri('assets/app.css'), [], file_exists($path) ? (string) filemtime($path) : null);
+});

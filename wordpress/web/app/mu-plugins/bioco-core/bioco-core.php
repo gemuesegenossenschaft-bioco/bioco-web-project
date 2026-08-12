@@ -88,4 +88,8 @@ function bioco_core_enqueue_block_assets() {
     if (file_exists($blocks_path)) {
         wp_enqueue_style('bioco-blocks', plugin_dir_url(__FILE__) . 'assets/bioco-blocks.css', ['bioco-tokens'], (string) filemtime($blocks_path));
     }
+    $navigation_path = BIOCO_CORE_DIR . '/assets/bioco-navigation.js';
+    if (file_exists($navigation_path)) {
+        wp_enqueue_script('bioco-navigation', plugin_dir_url(__FILE__) . 'assets/bioco-navigation.js', [], (string) filemtime($navigation_path), true);
+    }
 }

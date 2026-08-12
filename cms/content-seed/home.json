@@ -8,8 +8,9 @@
     "description": "Gemüsegenossenschaft biocò: Frisches Demeter-Gemüse aus solidarischer Landwirtschaft. Wöchentliche Gemüsekörbe vom Geisshof in Gebenstorf."
   },
   "hero": {
-    "hero_title": "",
-    "hero_subtitle": "",
+    "hero_title": "Gemeinsam\nGemüse anbauen",
+    "hero_subtitle": "Solidarische Landwirtschaft\nin Baden",
+    "image_url": "https://cms.bioco.ch/site/assets/files/1/frontseitestartseite.jpg",
     "image_alt": "Solidarische Landwirtschaft auf dem Feld"
   },
   "sections": [
@@ -19,6 +20,7 @@
       "section_text": "<p>Bei der biocò Gemüsegenossenschaft teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <a href=\"/solawi\">solidarische Landwirtschaft</a> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den Anbau und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich in den <a href=\"/standorte-depots\">Depots in Baden, Brugg und Gebenstorf</a> abgeholt werden kann.</p>",
       "section_layout": "split_text_media",
       "section_theme": "default",
+      "image_url": "https://cms.bioco.ch/site/assets/files/1778/zusammen-arbeiten-2.1600x0.jpg",
       "image_alt": "Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg",
       "buttons": [
         { "text": "Lerne uns kennen", "href": "/wir", "variant": "primary" }
@@ -30,6 +32,7 @@
       "section_text": "<p>Seit 2014 bewirtschaften wir den <a href=\"/wir\">Geisshof in Gebenstorf</a> nach biologisch-dynamischen Prinzipien und liefern <a href=\"/gemuese\">Demeter-Gemüse</a> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <a href=\"/solawi\">solidarischer Landwirtschaft</a>, das wir gemeinsam anbauen, pflegen und ernten. Jedes Mitglied bringt sich ein, ob auf dem Feld, in der Logistik oder bei der Organisation.</p>",
       "section_layout": "split_media_text",
       "section_theme": "default",
+      "image_url": "https://cms.bioco.ch/site/assets/files/1779/gemeinsamsolidarischfrisch-1.1600x0.jpg",
       "image_alt": "Frisch geerntetes Demeter-Gemüse vom Geisshof",
       "buttons": [
         { "text": "Was gerade wächst", "href": "/gemuese", "variant": "secondary" }
@@ -51,8 +54,8 @@
     "AktuellesData.tsx enthält KEINE hartkodierten Aktuelles-Beiträge: getAktuellesItems() und getAllAktuellesItems() geben [] zurück (ebenso getFallbackEventsFeed()). Der Fallback in frontend/app/page.tsx (`cmsNews.length > 0 ? cmsNews.map(...) : getAktuellesItems()`) liefert also eine leere Liste — die Startseiten-Rubrik «Beiträge» zeigt bereits heute ausschliesslich Live-CMS-Inhalte aus /api/content/aktuelles. Es gibt keine Titel/Daten, die beim Entfernen des Fallbacks verschwinden würden; das Entfernen von getAktuellesItems() ist reine Code-Bereinigung ohne sichtbare Inhaltsänderung.",
     "Code-eigenes Chrome (NICHT als Sections seeden): Rubrik «Beiträge» (H2 «Beiträge», AktuellesItem-Karten, Button «Alle Beiträge ansehen» → /aktuelles), Rubrik «Kommende Events» (useEventsFeed, Ladetext «Events werden geladen…», Leertext «Aktuell sind keine allgemeinen Events geplant.», Button «Alle Events ansehen» → /aktuelles), Rubrik «Schnuppertage» (Leertext «Aktuell sind keine Schnuppertage geplant.») sowie Hero-Markup, Navigation, Footer und ItemDetailModal. Diese Blöcke liegen visuell zwischen den Sections «gemeinsam» und «kennenlernen» (HomeClient.tsx Zeilen ~285-358).",
     "HomeClient.tsx konsumiert per getSection() exakt die Section-IDs «willkommen», «gemeinsam» und «kennenlernen» (Zeilen 97-99); dazu kommt nur die interne Pseudo-ID «__hero__» im Visual-Editor-Modus. Alle anderen content_sections der Homepage werden generisch via SectionRenderer NACH dem Block «kennenlernen» gerendert (genericSections, Zeile 399-405).",
-    "Hero: Die Hero-Felder liegen direkt auf der PW-Home-Seite (hero_title usw. via /api/content/hero), NICHT in content_sections. Der Code-Fallback in page.tsx ist leer ({ headline: '', subtitle: '', image: null, imageAlt: '' }); hart kodiert ist nur der Alt-Text-Fallback «Solidarische Landwirtschaft auf dem Feld» (HomeClient.tsx Zeile 112). Der produktive CMS-Hero existiert bereits — der Seed füllt nur, was hart kodiert war, und darf produktive hero_title/hero_subtitle/hero_image-Inhalte nicht überschreiben (leere Strings hier = kein Überschreiben).",
-    "Bilder: Die Blöcke «willkommen» und «gemeinsam» rendern nur dann ein Bild, wenn das CMS eines liefert (sectionImage() ohne hartkodierten src-Fallback) — deshalb kein image_url im Seed. Die image_alt-Werte im Seed sind die hartkodierten Alt-Fallbacks aus HomeClient.tsx (Zeilen 236 und 249). Layout-Zuordnung nach heutiger visueller Reihenfolge: «willkommen» Text links / Bild rechts = split_text_media, «gemeinsam» Bild links / Text rechts = split_media_text, «kennenlernen» ohne Bild = rich_text.",
+    "Hero: Die Felder liegen direkt auf der PW-Home-Seite, nicht in content_sections. Der WordPress-Importer plant daraus den vorangestellten bioco/hero-Block; Text und Bild-URL sind hier als reproduzierbarer visueller Vertrag festgehalten.",
+    "Bilder: Die Blöcke «willkommen» und «gemeinsam» übernehmen ihre aktuellen CMS-Bilder über image_url, damit eine frische WordPress-Installation nicht mit leeren Medienflächen startet. Layout-Zuordnung: «willkommen» Text links / Bild rechts = split_text_media, «gemeinsam» Bild links / Text rechts = split_media_text, «kennenlernen» ohne Bild = rich_text.",
     "section_text enthält bewusst keine Überschriften-Tags: HomeClient unterdrückt das hartkodierte <h2> aus section_title, sobald section_text ein <h1>-<h6>-Tag enthält (hasHeadingHtml). Die Buttons im Seed ersetzen die hartkodierten CTA-Fallbacks 1:1 (HomeClient rendert section.buttons, sonst den Code-Fallback)."
   ]
 }
