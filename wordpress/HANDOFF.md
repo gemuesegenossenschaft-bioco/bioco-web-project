@@ -31,16 +31,21 @@ whole Pro feature set, GPL, free.
 
 Being community-maintained rather than vendor-backed is worth weighing: it is the reason it is free,
 and also the reason its release cadence is not contractually anyone's problem. For this project that
-trade is fine — we depend on four ACF calls and a `block.json` key, not on a support relationship.
+trade is fine — we depend on three ACF functions, two `acf/settings/*_json` filters and a `block.json`
+key, not on a support relationship.
 
 The port's ACF surface is small enough to make this a drop-in rather than a rewrite:
 
+Counts are executable call sites under `wordpress/web/app` (comments excluded, `wordpress/scripts/`
+and this file excluded):
+
 | Call | Occurrences | In SCF |
 |---|---|---|
-| `get_field()` | 268 | yes |
-| `acf_get_fields()` / `acf_get_field_group()` | 4 | yes |
-| `acf/settings/load_json` + `save_json` | 2 | yes |
-| `block.json` → `"acf": {"mode", "renderTemplate"}` | every block | yes (`acf_is_acf_block_json()`, `acf_handle_json_block_registration()`) |
+| `get_field()` | 269 direct calls in 33 files, no wrapper | yes |
+| `acf_get_fields()` | 1, `bioco-import/includes/acf-fields.php:65` | yes |
+| `acf_get_field_group()` | 1, `acf-fields.php:57` | yes |
+| `acf/settings/load_json` + `acf/settings/save_json` | 2 filter registrations, `bioco-core/bioco-core.php:19-20` | yes |
+| `block.json` → `"acf": {"mode", "renderTemplate"}` | 31 of 31 blocks carry both keys | yes (`acf_is_acf_block_json()`, `acf_handle_json_block_registration()`) |
 
 **The one thing still to verify on a real install:** our blocks are `apiVersion 2` with `"mode": "auto"`,
 while SCF has moved to blocks V3. `acf_rendered_block_v3()` was *added* in 6.8 alongside V2 rather than
@@ -208,14 +213,42 @@ do not touch `intranet.bioco.ch`.
    overwritten. **Read the dry-run report row by row** — a clean exit code is necessary but the rows are
    the actual evidence.
    *Acceptance:* `wp bioco verify` matches every field; 19 pages in wp-admin.
-6. **Frontend render gate — `wp bioco verify` is not enough.** It compares stored block data in
-   `post_content`; it never renders anything. The blank-page failure mode above passes `verify`
-   cleanly, because the data is fine and only the render is missing. Before staging sign-off, fetch
-   every one of the 19 pages over HTTP and assert non-empty rendered block markup — at minimum
-   `/abos` and `/wir` plus one page per block type (`timeline`, `depot-map`, `pricing-table`,
-   `gallery-strip`, `cards-grid`, a form).
-   *Acceptance:* all 19 return 200, none renders an empty `<main>`, and the nine depot locations are
-   present in the `/standorte-depots` HTML.
+6. **Frontend render gate.** `wp bioco verify` only compares stored block data in `post_content`; it
+   never renders, so the blank-page failure mode passes it cleanly. Fetch **all 19 routes twice**,
+   once public and once against the local WordPress vhost, so an app failure stays distinguishable
+   from a proxy or docroot failure:
+
+   ```
+   /  /abos/  /aktuelles/  /anmeldung/  /anmeldung-danke/  /bioco-werden/  /datenschutz/
+   /gemuese/  /impressum/  /kontakt/  /kundenportal/  /mitmachen/  /newsletter/  /solawi/
+   /standorte-depots/  /statuten/  /tag-der-offenen-tuer/  /warteliste/  /wir/
+   ```
+
+   - Public: `curl --resolve staging.bioco.ch:443:193.33.128.160 https://staging.bioco.ch<route>`
+   - Local: on the server, `curl -H "Host: staging.bioco.ch" http://127.0.0.1<route>` (the `Host`
+     header is mandatory; plain `127.0.0.1` does not resolve to the vhost).
+
+   Per route, on both hosts: HTTP 200; `<main>` non-empty after tag-stripping; route-specific block
+   markup (`class="cms-section cms-<block>"`, derived from `section_component` in
+   `wordpress/content-seed/*.json` so a seed change cannot outrun the gate; note `media_text` →
+   `cms-split`, `accordion_item` → `demeter-accordion`, `timeline_*` → one `cms-timeline`); and no
+   `Fatal error` / `Warning:` / `Notice:` / `Deprecated:` / `There has been a critical error` /
+   `Error establishing a database connection` / `__NEXT_DATA__` / `/_next/static` /
+   `x-powered-by: Next.js` / `Fehler` / `Etwas ist schiefgelaufen`. Record every route, do not stop at
+   the first failure.
+
+   Wrong-app and collision checks, neither of which touches production: `ps -eo pid,ppid,args | grep
+   "next-server" | grep -v grep` must show exactly one worker (that is `bioco.ch` on 49154 — leave it
+   running, never `pgrep -f`, it kills the SSH session), and the Next markers above must be absent on
+   all 19 staging routes. Then `ls -la` the 19 slugs inside the staging docroot: any hit is an Apache
+   file/dir shadowing the rewrite (as the stale `public_html/wir` symlink once was); remove it and
+   re-run. Confirm the docroot is neither `~/public_html/` nor `~/public_html/bioco_staging/`.
+
+   *Acceptance:* all 19 routes 200 on both hosts with non-empty `<main>`, no error or Next marker;
+   `/abos` shows `cms-pricing-table`, `/wir` shows `cms-timeline`, `cms-gallery-strip` and
+   `cms-cards-grid`, `/standorte-depots` shows `cms-depot-map` plus all nine depot names, and each of
+   the five form routes renders its `cms-*-form` with a `<form`; one `next-server`, not serving
+   staging; no docroot collisions.
 7. **Live services (#97):** submit all five forms plus the membership route and DOI confirmation;
    confirm SMTP delivery and Turnstile verification.
 

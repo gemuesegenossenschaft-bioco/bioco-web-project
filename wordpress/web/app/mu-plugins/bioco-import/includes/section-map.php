@@ -34,12 +34,18 @@ if (!defined('ABSPATH')) exit;
 // Sentinel marking a value that still needs to be resolved to a WP media
 // attachment ID (pages.php does this — it needs $mode/apply context that
 // this pure mapping layer intentionally does not have).
-function bioco_import_pending_image($url) {
-    return ['__bioco_pending_image__' => (string) $url];
+// $alt travels with the marker only where the target block has no sibling
+// alt field (gallery): the resolver then writes it onto the attachment.
+function bioco_import_pending_image($url, $alt = '') {
+    $marker = ['__bioco_pending_image__' => (string) $url];
+    if ((string) $alt !== '') $marker['__bioco_pending_image_alt__'] = (string) $alt;
+    return $marker;
 }
 
 function bioco_import_is_pending_image($value) {
-    return is_array($value) && array_key_exists('__bioco_pending_image__', $value) && count($value) === 1;
+    if (!is_array($value) || !array_key_exists('__bioco_pending_image__', $value)) return false;
+    $extra = array_diff(array_keys($value), ['__bioco_pending_image__', '__bioco_pending_image_alt__']);
+    return $extra === [];
 }
 
 // Assigns section_eyebrow/section_title/section_text into $values for
@@ -287,7 +293,7 @@ function bioco_import_component_map() {
                 }
                 foreach ($images as $image) {
                     if (is_array($image) && !empty($image['url'])) {
-                        $gallery[] = bioco_import_pending_image($image['url']);
+                        $gallery[] = bioco_import_pending_image($image['url'], (string) ($image['alt'] ?? ''));
                     }
                 }
                 if ($gallery) $values['gallery'] = $gallery;
