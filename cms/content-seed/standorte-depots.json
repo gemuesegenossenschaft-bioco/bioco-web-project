@@ -30,7 +30,69 @@
     },
     {
       "section_id": "depot-map",
-      "section_component": "depot_map"
+      "section_component": "depot_map",
+      "section_config": {
+        "intro": "Abholzeiten: Dienstag und Freitag, ab 16:00 Uhr",
+        "locations": [
+          {
+            "name": "Depot Chrättli",
+            "lat": 47.4725,
+            "lng": 8.303,
+            "description": "Allmendstrasse 16, 5400 Baden · Dienstag · Kontakt: Corona Banky · https://www.xn--chrttli-7wa.ch/ · Das Depot befindet sich unter der Rampe rechts neben dem Quartierladen."
+          },
+          {
+            "name": "Depot Ohne",
+            "lat": 47.4735,
+            "lng": 8.3075,
+            "description": "Stadtturmstrasse 15, 5400 Baden · Dienstag · Kontakt: Tobias Kloter · https://www.ohne.ch/ · Die Körbe stehen unter den Tischen im hinteren Bereich."
+          },
+          {
+            "name": "Depot Anixis",
+            "lat": 47.474,
+            "lng": 8.3085,
+            "description": "Oberstadtstrasse 10, Galerie Anixis, 5400 Baden · Dienstag · Kontakt: Josef Lindiridi · https://anixis.ch/ · Hinter der Barriere auf dem Materiallager."
+          },
+          {
+            "name": "Casa Flora",
+            "lat": 47.488,
+            "lng": 8.218,
+            "description": "Zurzacherstrasse 171, 5200 Brugg · Dienstag · Kontakt: David Müller · In der Nische beim hinteren Eingang des Blumengeschäfts (Zufahrt via Hauptstrasse)."
+          },
+          {
+            "name": "Depot Geisshof",
+            "lat": 47.4741684,
+            "lng": 8.2456318,
+            "description": "Geisshof, Gebenstorf · Freitag · Kontakt: Matthias Müller · Direkt auf dem Hof."
+          },
+          {
+            "name": "Depot Kupperhaus",
+            "lat": 47.4843986,
+            "lng": 8.2069493,
+            "description": "Schulthess-Allee 4, 5200 Brugg · Freitag · Kontakt: Brigitte Perren Henneck · Unten an der Rampe (Zufahrt rückwärts neben dem Kupperhaus)."
+          },
+          {
+            "name": "Depot Ennetbaden",
+            "lat": 47.4802623,
+            "lng": 8.3191206,
+            "description": "Geissbergstrasse 17, 5408 Ennetbaden · Freitag · Kontakt: Nils und Armelle George · Beim Wohnhaus."
+          },
+          {
+            "name": "Depot Lemonia",
+            "lat": 47.4705,
+            "lng": 8.3164,
+            "description": "Schartenstrasse 28, 5430 Wettingen · Freitag · Kontakt: Martin Gruchow · http://lemonia.ch/ · Hinter dem Haus unter dem Tisch."
+          },
+          {
+            "name": "Depot Lägernstrasse",
+            "lat": 47.4611864,
+            "lng": 8.3168081,
+            "description": "Lägernstrasse 6, 5430 Wettingen · Freitag · Kontakt: Helen Matthäus · Beim Wohnhaus."
+          }
+        ],
+        "locations_heading": "Standorte",
+        "route_label": "Route planen →",
+        "empty_message": "Noch keine Standorte hinterlegt."
+      }
     },
     {
       "section_id": "depot-details",
@@ -43,13 +105,21 @@
       "section_layout": "rich_text",
       "section_text": "<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
       "buttons": [
-        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
-        { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }
+        {
+          "text": "Nimm Kontakt auf",
+          "href": "/kontakt",
+          "variant": "primary"
+        },
+        {
+          "text": "Zu uns finden",
+          "href": "/standorte-depots",
+          "variant": "secondary"
+        }
       ]
     }
   ],
   "conversion_notes": [
-    "DepotMap.tsx enthält die depotLocations-Daten (Namen, Adressen, Hinweise, Koordinaten), die auf der Karte gerendert werden – diese bleiben code-owned; hier ist nur der Seitenfliesstext geseedet.",
+    "Die Depot-Karte trägt ihre Standorte und Beschriftungen als echten Seed-Inhalt in section_config.",
     "Die Depots-Section hat heute die DOM-ID 'E-02' und ist das Scroll-Ziel von CTA.tsx für href '/standorte-depots' ('Zu uns finden'-Buttons springen hierhin). Beim Umbau muss ein äquivalenter Anker erhalten bleiben. Weitere DOM-ID heute: E-01 (Anfahrt), B-06 (Kennenlernen).",
     "Der 'Anreise & Parken'-Block ist heute eine gestylte Hinweisbox (var(--bg-secondary), abgerundet) mit <h4>-Überschrift in Grün; 'Danke für deine Rücksichtnahme!' rendert kursiv in 0.9rem. Markup byte-genau übernommen, Box-/Kursiv-Styling ist code-owned.",
     "Der letzte Absatz von 'depot-details' ('Abholzeiten: …') rendert heute kursiv – Styling code-owned.",

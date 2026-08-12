@@ -9,6 +9,13 @@
 if (!defined('ABSPATH')) exit;
 
 $media_side = get_field('media_side');
+$container_width = get_field('container_width') ?: 'xl';
+$media_width = get_field('media_width') ?: '50';
+$media_ratio = get_field('media_ratio') ?: '4:3';
+$media_fit = get_field('media_fit') ?: 'cover';
+$vertical_align = get_field('vertical_align') ?: 'center';
+$gap = get_field('gap') ?: 'lg';
+$rounded = get_field('rounded') ?: 'lg';
 $image = get_field('image');
 $image_alt_override = get_field('image_alt');
 $image_overlay = get_field('image_overlay');
@@ -43,10 +50,24 @@ $overlay_class = $image_overlay && $image_overlay !== 'none' ? 'image-overlay-' 
 $filter_style = bioco_image_filter_style($image_brightness, $image_contrast, $image_saturate);
 $heading_already_in_text = bioco_text_has_heading_html($text);
 ?>
-<section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
+<section
+    id="<?php echo esc_attr($anchor); ?>"
+    class="<?php echo esc_attr($class_name); ?>"
+    data-container-width="<?php echo esc_attr($container_width); ?>"
+    data-media-side="<?php echo esc_attr($media_side ?: 'left'); ?>"
+    data-media-width="<?php echo esc_attr($media_width); ?>"
+    data-vertical-align="<?php echo esc_attr($vertical_align); ?>"
+    data-gap="<?php echo esc_attr($gap); ?>"
+>
     <div class="cms-split-media <?php echo esc_attr(trim($side_class . ' ' . $overlay_class)); ?>">
         <?php if ($image_url) : ?>
-            <div class="cms-media-frame" style="<?php echo esc_attr($filter_style); ?>">
+            <div
+                class="cms-media-frame"
+                data-media-ratio="<?php echo esc_attr($media_ratio); ?>"
+                data-media-fit="<?php echo esc_attr($media_fit); ?>"
+                data-rounded="<?php echo esc_attr($rounded); ?>"
+                style="<?php echo esc_attr($filter_style); ?>"
+            >
                 <img
                     src="<?php echo esc_url($image_url); ?>"
                     alt="<?php echo esc_attr($image_alt); ?>"

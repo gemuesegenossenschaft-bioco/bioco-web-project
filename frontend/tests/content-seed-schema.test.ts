@@ -17,7 +17,7 @@ import path from 'path'
 const SEED_DIR = path.resolve(__dirname, '../../cms/content-seed')
 const REGISTRY_PATH = path.resolve(__dirname, '../../site/templates/component-registry.json')
 
-const EXPECTED_SEED_COUNT = 17
+const EXPECTED_SEED_COUNT = 19
 
 // Muss dem PHP-Regex in migrate-content-freeze.php::validateSeed entsprechen.
 const SECTION_ID_PATTERN = /^[a-z0-9][a-z0-9_-]*$/

@@ -3,7 +3,7 @@
  * Door-lock gate for the project's hard constraint: NO HARDCODED CONTENT,
  * NO FALLBACK CONTENT (see CLAUDE.md / AGENTS.md).
  * ============================================================================
- * Runs without WordPress. Scans the block render templates and flags:
+ * Runs without WordPress. Scans block render templates and ACF JSON fields:
  *
  *   (A) content fallbacks   get_field('title') ?: 'Nächste Events'
  *       A missing field must render nothing, never invented text. A fallback
@@ -13,6 +13,10 @@
  *       German editorial copy written into PHP. If a human would want to
  *       reword it without a developer, it is content and belongs in an ACF
  *       field, editable in wp-admin.
+ *
+ *   (C) ACF content defaults  "default_value": "Nächste Events"
+ *       Editorial defaults are fallback content too. Nested sub-fields and
+ *       flexible-content layouts are checked recursively.
  *
  * Presentation defaults (columns_desktop ?: '3', gap ?: 'lg') are NOT content
  * and are allowed — but the value belongs in the ACF field's default_value, so
@@ -29,13 +33,26 @@
 
 $root = dirname(__DIR__);
 $blocksDir = $root . '/web/app/mu-plugins/bioco-core/blocks';
+$acfJsonDir = $root . '/web/app/mu-plugins/bioco-core/acf-json';
 $listMode = in_array('--list', $argv, true);
+
+// Staged rollout of the acf-json scan. The recursive default_value check is
+// implemented and proven non-vacuous, but 130 pre-existing editorial defaults
+// across 15 field groups (mostly form labels) still have to be migrated into
+// real seed content before it can gate. Until that migration lands, the scan
+// runs opt-in via --acf-json and is always included in --list reporting, so
+// the findings stay visible instead of being buried in the baseline.
+// Follow-up: migrate those defaults, then make this unconditional and delete
+// the flag. Do NOT write the findings into hardcoded-content-baseline.json.
+$acfJsonMode = $listMode || in_array('--acf-json', $argv, true);
 
 // Layout/style knobs: a default here is presentation, not content.
 $PRESENTATION_KEYS = [
     'columns_desktop', 'columns_mobile', 'card_style', 'media_ratio', 'media_fit',
     'gap', 'rounded', 'container_width', 'align', 'theme', 'variant', 'limit',
     'columns', 'ratio', 'overlay', 'filter', 'width', 'size', 'style', 'mode',
+    'text_width', 'media_side', 'media_width', 'vertical_align', 'image_overlay',
+    'image_brightness', 'image_contrast', 'image_saturate', 'emphasis',
 ];
 
 // Attribute values and mechanics that carry no editorial meaning.
@@ -49,6 +66,32 @@ $looksLikeContent = function ($literal) use ($MECHANICAL) {
     if (preg_match('/^[A-Z0-9_:-]+$/', $text)) return false;
     if (preg_match('/[ÄÖÜäöüß]/u', $text)) return true;
     return (bool) preg_match('/^\p{Lu}\p{Ll}{2,}(?:[\s.,:;!?()–—-]+\p{L}{2,})*$/u', $text);
+};
+
+$CONTENT_KEYS = '/(?:^|_)(?:title|heading|label|text|intro|description|message|name|address|contact|option|suffix|note|placeholder)(?:_|$)/i';
+$PRICE_KEYS = '/(?:^|_)(?:price|cost|fee|amount)(?:_|$)/i';
+
+$findDefaultContent = function ($value, $fieldName) use (&$findDefaultContent, $looksLikeContent, $CONTENT_KEYS, $PRICE_KEYS, $PRESENTATION_KEYS) {
+    if (is_array($value)) {
+        foreach ($value as $key => $item) {
+            $hit = $findDefaultContent($item, is_string($key) ? $key : $fieldName);
+            if ($hit !== null) return $hit;
+        }
+        return null;
+    }
+    if ((is_int($value) || is_float($value)) && $value != 0 && preg_match($PRICE_KEYS, $fieldName)) {
+        return (string) $value;
+    }
+    if (!is_string($value)) return null;
+
+    $text = trim(html_entity_decode(strip_tags($value), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    if ($text === '') return null;
+    if (in_array($fieldName, $PRESENTATION_KEYS, true) && preg_match('/^[a-z0-9_.:-]+$/i', $text)) return null;
+    if (preg_match('/^(?:https?:|mailto:|tel:|\/|#|--wp--)/i', $text)) return null;
+    if (preg_match($CONTENT_KEYS, $fieldName) || $looksLikeContent($text) || preg_match('/\s/u', $text)) {
+        return mb_substr(preg_replace('/\s+/u', ' ', $text), 0, 80);
+    }
+    return null;
 };
 
 $violations = [];
@@ -151,6 +194,60 @@ foreach ($files as $file) {
     }
 }
 
+$acfFiles = $acfJsonMode ? (glob($acfJsonDir . '/*.json') ?: []) : [];
+sort($acfFiles);
+foreach ($acfFiles as $file) {
+    $rel = ltrim(str_replace($root, '', $file), '/');
+    $raw = (string) file_get_contents($file);
+    $group = json_decode($raw, true);
+    if (!is_array($group)) {
+        $violations[] = ['file' => $rel, 'line' => 1, 'kind' => 'acf-json-invalid', 'detail' => 'ungueltiges JSON'];
+        continue;
+    }
+
+    $walkFields = function ($fields, $path = '') use (&$walkFields, &$violations, &$allowedDefaults, $findDefaultContent, $raw, $rel) {
+        foreach ($fields as $field) {
+            if (!is_array($field)) continue;
+            // Clone fields carry "name": "" — a set-but-empty value, which ??
+            // does NOT fall through. Without the explicit empty check the path
+            // degenerates to "group..sub" and the content heuristic receives an
+            // empty field name.
+            $name = (string) ($field['name'] ?? '');
+            if ($name === '') $name = (string) ($field['key'] ?? '');
+            if ($name === '') $name = '?';
+            $fieldPath = $path === '' ? $name : $path . '.' . $name;
+            if (array_key_exists('default_value', $field) && $field['default_value'] !== '' && $field['default_value'] !== [] && $field['default_value'] !== null) {
+                $keyNeedle = '"key": ' . json_encode((string) ($field['key'] ?? ''), JSON_UNESCAPED_UNICODE);
+                $keyOffset = strpos($raw, $keyNeedle);
+                $defaultOffset = $keyOffset === false ? false : strpos($raw, '"default_value"', $keyOffset);
+                $line = $defaultOffset === false ? 1 : substr_count(substr($raw, 0, $defaultOffset), "\n") + 1;
+                $hit = $findDefaultContent($field['default_value'], $name);
+                if ($hit !== null) {
+                    $violations[] = [
+                        'file' => $rel,
+                        'line' => $line,
+                        'kind' => 'acf-default-content',
+                        'detail' => sprintf('%s hat redaktionellen Default "%s"', $fieldPath, $hit),
+                    ];
+                } else {
+                    $allowedDefaults[] = sprintf('%s:%d  %s', $rel, $line, $fieldPath);
+                }
+            }
+            if (is_array($field['sub_fields'] ?? null)) $walkFields($field['sub_fields'], $fieldPath);
+            foreach (($field['layouts'] ?? []) as $layout) {
+                if (!is_array($layout)) continue;
+                $layoutName = (string) ($layout['name'] ?? '');
+                if ($layoutName === '') $layoutName = (string) ($layout['key'] ?? '');
+                if ($layoutName === '') $layoutName = 'layout';
+                if (is_array($layout['sub_fields'] ?? null)) $walkFields($layout['sub_fields'], $fieldPath . '.' . $layoutName);
+            }
+        }
+    };
+    $walkFields($group['fields'] ?? []);
+}
+
+$files = array_merge($files, $acfFiles);
+
 // ---------------------------------------------------------------------------
 // Deferred backlog. Keyed "file:kind" => count of known findings in that file.
 // A file may not exceed its recorded count: adding a violation fails the gate
@@ -229,14 +326,20 @@ printf("Geprueft: %d Dateien, %d Treffer in %d Gruppen (Baseline: %d Gruppen)\n"
 if ($failures) {
     echo "\n" . str_repeat('=', 70) . "\nNEUE VERSTOESSE (" . count($failures) . "):\n";
     foreach ($failures as $f) echo '  - ' . $f . "\n";
-    echo "\nInhalt gehoert in ein ACF-Feld, nicht in die render.php. Details:\n";
+    echo "\nInhalt gehoert in echte CMS-/Seed-Daten, nicht in Templates oder ACF default_value. Details:\n";
     echo "  php wordpress/scripts/check-hardcoded-content.php --list\n";
     echo "HARDCODED_CONTENT_CHECK: FAIL\n";
     exit(1);
 }
 
 if (!$DEFERRED) {
-    echo "\nHARDCODED_CONTENT_CHECK: OK — Nulltoleranz erreicht, kein hartkodierter Inhalt und kein Fallback-Inhalt in den Block-Templates.\n";
+    if ($acfJsonMode) {
+        echo "\nHARDCODED_CONTENT_CHECK: OK — Nulltoleranz erreicht, kein hartkodierter Inhalt und kein redaktioneller ACF-Default.\n";
+    } else {
+        echo "\nHARDCODED_CONTENT_CHECK: OK — Nulltoleranz in den Block-Templates erreicht.\n";
+        echo "HINWEIS: acf-json wurde NICHT geprueft. Der Scan ist implementiert, aber noch opt-in:\n";
+        echo "  php wordpress/scripts/check-hardcoded-content.php --acf-json   (aktuell rot, 130 offene Defaults)\n";
+    }
     exit(0);
 }
 

@@ -197,8 +197,11 @@ class Bioco_Import_CLI_Command {
     private function assert_acf_available() {
         if (!function_exists('acf_get_field_group') || !function_exists('acf_get_fields')) {
             WP_CLI::error(
-                'ACF (Pro) ist nicht aktiv. Der Importer loest die Feld-Keys ueber ACF selbst auf und '
-                . 'kann ohne ACF keine gueltigen Block-Daten schreiben. Zuerst: wp plugin activate advanced-custom-fields-pro'
+                'Es ist kein ACF-kompatibles Plugin aktiv. Der Importer loest die Feld-Keys ueber die '
+                . 'ACF-API selbst auf und kann sonst keine gueltigen Block-Daten schreiben. '
+                . 'Zuerst: wp plugin activate secure-custom-fields '
+                . '(Secure Custom Fields, frei und GPL, deckt Repeater/Blocks ab). '
+                . 'ACF Pro funktioniert ebenfalls: wp plugin activate advanced-custom-fields-pro'
             );
         }
     }

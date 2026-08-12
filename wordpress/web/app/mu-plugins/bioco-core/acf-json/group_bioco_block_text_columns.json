@@ -27,6 +27,29 @@
             "prefix_name": 0
         },
         {
+            "key": "field_bioco_text_columns_image_clone",
+            "label": "Bild",
+            "name": "",
+            "aria-label": "",
+            "type": "clone",
+            "instructions": "",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "",
+                "class": "",
+                "id": ""
+            },
+            "clone": [
+                "field_bioco_section_image",
+                "field_bioco_section_image_alt"
+            ],
+            "display": "seamless",
+            "layout": "block",
+            "prefix_label": 0,
+            "prefix_name": 0
+        },
+        {
             "key": "field_bioco_text_columns_buttons_clone",
             "label": "Buttons",
             "name": "",
