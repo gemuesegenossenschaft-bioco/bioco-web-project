@@ -44,15 +44,22 @@ function bioco_import_fetch_json_source($source) {
     return $data;
 }
 
-// event_date is stored return_format 'Y-m-d H:i:s' — parse whatever the
-// export gives us (ISO-8601 from api-events.php's date() output) and
-// reformat in the WordPress timezone. The source is already wall-clock
-// time, not an instant, so the stored value must follow the site's clock.
+// event_date is stored return_format 'Y-m-d H:i:s' — a NAIVE local datetime,
+// not an instant. The ISO-8601 export from api-events.php carries the source
+// offset (e.g. 2026-05-29T14:00:00+02:00); we keep the source WALL-CLOCK
+// (14:00) verbatim rather than converting it into the WordPress site
+// timezone, which silently shifted every event by the UTC offset (14:00 was
+// imported as 12:00 on a UTC-configured site).
 function bioco_import_event_field_plan(array $item) {
     $plan = [];
     if (!empty($item['startDate'])) {
-        $ts = strtotime((string) $item['startDate']);
-        if ($ts) $plan['event_date'] = wp_date('Y-m-d H:i:s', $ts, wp_timezone());
+        try {
+            $dt = new DateTimeImmutable((string) $item['startDate']);
+            $plan['event_date'] = $dt->format('Y-m-d H:i:s');
+        } catch (Exception $e) {
+            // Unparseable source date — leave event_date unset rather than
+            // writing a wrong instant.
+        }
     }
     if (!empty($item['status']) && in_array($item['status'], ['upcoming', 'past'], true)) {
         $plan['event_status'] = $item['status'];
@@ -63,6 +70,16 @@ function bioco_import_event_field_plan(array $item) {
     if (!empty($item['description'])) $plan['event_summary'] = $item['description'];
     if (!empty($item['signupNotes'])) $plan['event_signup_notes'] = $item['signupNotes'];
     return $plan;
+}
+
+// The importer only ever plans scalar ACF values (dates, statuses, text), so
+// equality is a string comparison. Arrays/objects (never planned here) are
+// treated as different, which degrades to today's write-anyway behaviour
+// rather than silently skipping a real change.
+function bioco_import_acf_value_equals($current, $planned) {
+    if (is_array($current) || is_object($current)) return false;
+    if ($current === null) return false;
+    return (string) $current === (string) $planned;
 }
 
 function bioco_import_write_acf_fields($postId, array $fieldPlan, $mode, $force, $label, array &$report) {
@@ -76,6 +93,14 @@ function bioco_import_write_acf_fields($postId, array $fieldPlan, $mode, $force,
             continue;
         }
         $current = get_field($field, $postId);
+        // Compare before writing: a --force repair run must only touch the
+        // fields that actually differ, so re-importing a corrected export
+        // shifts event_date without rewriting an identical title/body/meta
+        // (and without bumping post_modified for nothing).
+        if (bioco_import_acf_value_equals($current, $value)) {
+            bioco_import_report_row($report, $label, '', $field, 'ok-equal', 'Bereits identisch — nicht geschrieben.');
+            continue;
+        }
         if ($current !== null && $current !== '' && !$force) {
             bioco_import_report_row($report, $label, '', $field, 'skip-existing', 'Bereits gesetzt — CMS gewinnt (--force zum Überschreiben).');
             continue;
@@ -110,10 +135,19 @@ function bioco_import_import_event_item(array $item, $mode, $force, array &$repo
             bioco_import_report_row($report, $label, '', '', 'create', 'WÜRDE: Event anlegen.');
         }
     } else {
-        bioco_import_report_row($report, $label, '', '', 'ok-equal', 'Event existiert bereits (post_id=' . $post->ID . ') — Titel/Beitragsinhalt unverändert (CMS gewinnt, --force zum Überschreiben).');
-        if ($force && $mode === 'apply') {
-            wp_update_post(['ID' => $post->ID, 'post_title' => $title, 'post_content' => wp_slash($content)]);
-            bioco_import_report_row($report, $label, '', '', 'update', 'FORCE: Titel/Beitragsinhalt aktualisiert.');
+        // Compare before writing, so a --force repair run does not rewrite a
+        // title/body that already matches the export.
+        $changed = [];
+        if ((string) ($post->post_title ?? '') !== $title) $changed['post_title'] = $title;
+        if ((string) ($post->post_content ?? '') !== $content) $changed['post_content'] = wp_slash($content);
+
+        if (!$changed) {
+            bioco_import_report_row($report, $label, '', '', 'ok-equal', 'Event existiert bereits (post_id=' . $post->ID . ') — Titel/Beitragsinhalt bereits identisch.');
+        } elseif (!$force || $mode !== 'apply') {
+            bioco_import_report_row($report, $label, '', '', 'ok-equal', 'Event existiert bereits (post_id=' . $post->ID . ') — Titel/Beitragsinhalt abweichend, CMS gewinnt (--force zum Überschreiben).');
+        } else {
+            wp_update_post(['ID' => $post->ID] + $changed);
+            bioco_import_report_row($report, $label, '', '', 'update', 'FORCE: ' . implode(', ', array_keys($changed)) . ' aktualisiert.');
         }
     }
 

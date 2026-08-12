@@ -56,6 +56,9 @@ class Bioco_Import_CLI_Command {
      * [--skip-site-wiring]
      * : Startseite, Permalinks und Hauptmenue nicht setzen.
      *
+     * [--collections-only]
+     * : Nur Events/Gruppen importieren. Seiten und Site-Wiring bleiben unberührt.
+     *
      * [--no-html-report]
      * : Keinen HTML-Bericht unter wp-content/bioco-import-log/ schreiben.
      *
@@ -80,6 +83,7 @@ class Bioco_Import_CLI_Command {
         }
         $mode = $apply ? 'apply' : 'dry-run';
         $force = (bool) WP_CLI\Utils\get_flag_value($assoc_args, 'force', false);
+        $collectionsOnly = (bool) WP_CLI\Utils\get_flag_value($assoc_args, 'collections-only', false);
 
         // --force only means something when we are actually writing. Silently
         // accepting it in a dry run would teach the operator that the flag is
@@ -112,7 +116,9 @@ class Bioco_Import_CLI_Command {
 
         $report = bioco_import_report_new();
 
-        bioco_import_run($seeds, $mode, $force, $report);
+        if (!$collectionsOnly) {
+            bioco_import_run($seeds, $mode, $force, $report);
+        }
 
         if (!WP_CLI\Utils\get_flag_value($assoc_args, 'skip-collections', false)) {
             bioco_import_run_collections(
@@ -124,7 +130,7 @@ class Bioco_Import_CLI_Command {
             );
         }
 
-        if (!WP_CLI\Utils\get_flag_value($assoc_args, 'skip-site-wiring', false)) {
+        if (!$collectionsOnly && !WP_CLI\Utils\get_flag_value($assoc_args, 'skip-site-wiring', false)) {
             bioco_import_run_site_wiring($seeds, $mode, $force, $report);
         }
 

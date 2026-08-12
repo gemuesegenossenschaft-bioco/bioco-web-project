@@ -106,11 +106,23 @@ function bioco_render_person_icons($count) {
 // (mirrors api-events.php's event_status split; ordering is a WP-native choice
 // since the ProcessWire reference sorts once by event_start ascending only).
 function bioco_query_events($status, $limit, $event_type = null) {
+    // event_date is a naive local datetime, so compare it against the site's
+    // wall-clock now, not against a UTC instant.
+    $now = current_time('Y-m-d H:i:s');
     $meta_query = ['relation' => 'AND'];
 
     if ($status === 'past') {
-        $meta_query[] = ['key' => 'event_status', 'value' => 'past', 'compare' => '='];
+        // Elapsed by date, OR explicitly flagged past by an editor (the
+        // "Rückblick" flow can retire a still-future event early).
+        $meta_query[] = [
+            'relation' => 'OR',
+            ['key' => 'event_date', 'value' => $now, 'compare' => '<', 'type' => 'DATETIME'],
+            ['key' => 'event_status', 'value' => 'past', 'compare' => '='],
+        ];
     } else {
+        // Upcoming is decided by the date, not by a stale stored status —
+        // but an explicit manual event_status=past still wins.
+        $meta_query[] = ['key' => 'event_date', 'value' => $now, 'compare' => '>=', 'type' => 'DATETIME'];
         $meta_query[] = [
             'relation' => 'OR',
             ['key' => 'event_status', 'value' => 'past', 'compare' => '!='],
@@ -118,7 +130,15 @@ function bioco_query_events($status, $limit, $event_type = null) {
         ];
     }
 
-    if ($event_type) {
+    if ($event_type === 'general') {
+        // Events imported before event_type existed have no value; they are
+        // general events, not Schnuppertage.
+        $meta_query[] = [
+            'relation' => 'OR',
+            ['key' => 'event_type', 'value' => 'general', 'compare' => '='],
+            ['key' => 'event_type', 'compare' => 'NOT EXISTS'],
+        ];
+    } elseif ($event_type) {
         $meta_query[] = ['key' => 'event_type', 'value' => $event_type, 'compare' => '='];
     }
 
@@ -152,13 +172,21 @@ function bioco_event_card_image($post_id) {
 }
 
 // Formats the event_date meta (stored 'Y-m-d H:i:s') as "d.m.Y" / "H:i Uhr".
+// The stored value is naive local time, so it must be interpreted IN
+// wp_timezone() and rendered back in it — strtotime() would read it in PHP's
+// default timezone (UTC on WP) and date_i18n() would then shift the clock.
 function bioco_event_date_parts($post_id) {
     $raw = get_field('event_date', $post_id);
-    $ts = $raw ? strtotime($raw) : false;
-    if (!$ts) return ['dateLabel' => '', 'timeLabel' => ''];
+    if (!$raw) return ['dateLabel' => '', 'timeLabel' => ''];
+    try {
+        $dt = new DateTimeImmutable((string) $raw, wp_timezone());
+    } catch (Exception $e) {
+        return ['dateLabel' => '', 'timeLabel' => ''];
+    }
+    $ts = $dt->getTimestamp();
     return [
-        'dateLabel' => date_i18n('d.m.Y', $ts),
-        'timeLabel' => date_i18n('H:i', $ts) . ' Uhr',
+        'dateLabel' => wp_date('d.m.Y', $ts),
+        'timeLabel' => wp_date('H:i', $ts) . ' Uhr',
     ];
 }
 
