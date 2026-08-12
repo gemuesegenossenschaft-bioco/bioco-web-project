@@ -59,6 +59,41 @@ def test_scf_unexpanded_repeater_clone_is_resolved_for_block_serialization():
     }
 
 
+def test_scf_unexpanded_group_clone_is_resolved_for_block_serialization():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    function acf_get_field_group($key) { return ['key' => $key]; }
+    function acf_get_fields($group) {
+        if ($group['key'] === 'group_common') {
+            return [['name' => 'title', 'key' => 'field_title', 'type' => 'text']];
+        }
+        return [[
+            'name' => '',
+            'key' => 'field_common_clone',
+            'type' => 'clone',
+            'clone' => ['group_common'],
+        ]];
+    }
+    function acf_get_field($key) { return null; }
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/acf-fields.php';
+    $fields = bioco_import_acf_group_fields('group_block');
+    echo json_encode([
+        'unmatched' => bioco_import_acf_unmatched_fields(['title' => 'Hallo'], $fields),
+        'data' => bioco_import_acf_block_data(['title' => 'Hallo'], $fields),
+    ]);
+    '''
+    payload = json.loads(subprocess.run(
+        ["php", "-r", php],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout)
+
+    assert payload["unmatched"] == []
+    assert payload["data"] == {"title": "Hallo", "_title": "field_title"}
+
+
 def test_scf_clone_companion_keys_use_registered_source_keys():
     php = r'''
     define('ABSPATH', __DIR__);

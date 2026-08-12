@@ -62,6 +62,21 @@ function bioco_import_expand_unresolved_clones(array $fields) {
             $source = acf_get_field($sourceKey);
             if (is_array($source) && ($source['name'] ?? '') !== '') {
                 $resolved[] = $source;
+                continue;
+            }
+
+            if (strpos((string) $sourceKey, 'group_') === 0
+                && function_exists('acf_get_field_group')
+                && function_exists('acf_get_fields')) {
+                $sourceGroup = acf_get_field_group($sourceKey);
+                $sourceFields = $sourceGroup ? acf_get_fields($sourceGroup) : null;
+                if (is_array($sourceFields)) {
+                    foreach ($sourceFields as $sourceField) {
+                        if (is_array($sourceField) && ($sourceField['name'] ?? '') !== '') {
+                            $resolved[] = $sourceField;
+                        }
+                    }
+                }
             }
         }
 
