@@ -441,9 +441,22 @@ def test_second_force_run_reports_no_updates():
 # On a real site the function always exists, so exercise the same first-run
 # state with raw meta defined: event_date's raw value still differs from the
 # planned value, so it must still be written exactly once.
-RAW_META_EVENT_PHP = EVENT_PHP.replace(
-    "function update_field($field, $value, $postId) {",
-    """function get_post_meta($postId, $field = '', $single = false) {
+def replace_once(php, needle, replacement):
+    """Substitute an anchor that must appear exactly once in the fixture.
+
+    A silent no-op (anchor renamed) or a double substitution would leave the
+    fixture testing something other than what the test name claims.
+    """
+    assert php.count(needle) == 1, (needle, php.count(needle))
+    return php.replace(needle, replacement)
+
+
+RAW_META_EVENT_PHP = replace_once(
+    replace_once(
+        EVENT_PHP,
+        "function update_field($field, $value, $postId) {",
+        """function get_post_meta($postId, $field = '', $single = false) {
+    $GLOBALS['meta_reads'][] = $field;
     $raw = [
         'event_date' => '2026-08-14 10:00:00',
         'event_status' => 'upcoming',
@@ -455,6 +468,14 @@ RAW_META_EVENT_PHP = EVENT_PHP.replace(
     return $single ? $raw[$field] : [$raw[$field]];
 }
 function update_field($field, $value, $postId) {""",
+    ),
+    "$GLOBALS['field_writes'] = [];",
+    "$GLOBALS['field_writes'] = [];\n$GLOBALS['meta_reads'] = [];",
+)
+RAW_META_EVENT_PHP = replace_once(
+    RAW_META_EVENT_PHP,
+    "    'field_writes' => $GLOBALS['field_writes'],",
+    "    'field_writes' => $GLOBALS['field_writes'],\n    'meta_reads' => $GLOBALS['meta_reads'],",
 )
 
 
@@ -467,6 +488,9 @@ def test_raw_meta_fallback_still_writes_the_shifted_event_date():
 
     assert payload["field_writes"] == [["event_date", "2026-08-15 18:00:00"]]
     assert payload["post_writes"] == []
+    # The fallback must actually have consulted the raw meta for event_date;
+    # otherwise this fixture would pass for the same reason section 6 does.
+    assert "event_date" in payload["meta_reads"], payload["meta_reads"]
 
 
 def test_raw_meta_fallback_reports_the_event_date_update():
