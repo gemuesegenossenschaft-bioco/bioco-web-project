@@ -617,7 +617,9 @@
 .hero-shade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,.04) 45%, rgba(0,0,0,.36) 100%);
+  background:
+    linear-gradient(90deg, rgba(0,0,0,.66) 0%, rgba(0,0,0,.58) 38%, rgba(0,0,0,.12) 70%),
+    linear-gradient(180deg, rgba(0,0,0,.3) 0%, rgba(0,0,0,.04) 45%, rgba(0,0,0,.36) 100%);
 }
 
 .hero .hero-content {

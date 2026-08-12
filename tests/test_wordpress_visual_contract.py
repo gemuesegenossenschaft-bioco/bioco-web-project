@@ -12,6 +12,7 @@ APPROVED_COLORS = {
     "bioco-green": "#2e7d32",
     "bioco-green-dark": "#1b5e20",
     "bioco-carrot": "#ff8c00",
+    "bioco-beet": "#87213d",
     "bioco-bg": "#f5f1e8",
     "bioco-surface": "#ffffff",
     "bioco-text": "#1a1a1a",
@@ -99,6 +100,7 @@ def test_global_shell_exposes_approved_utility_primary_navigation_and_logo():
     navigation_js = (CORE / "assets/bioco-navigation.js").read_text()
     assert "aria-expanded" in navigation_js
     assert "aria-label" in navigation_js
+    assert "?.focus()" in navigation_js
     assert "is-open" in navigation_js
     assert ".bioco-primary-nav.is-open ul" in chrome_css
     assert "bioco-mobile-utility" in navigation_php
@@ -152,3 +154,9 @@ def test_primary_and_secondary_button_labels_have_explicit_aa_contrast():
     assert _contrast_ratio(
         APPROVED_COLORS["bioco-green"], APPROVED_COLORS["bioco-surface"]
     ) >= 4.5
+
+    hero_shade = _css_rule(css, ".hero-shade")
+    alpha = float(re.search(r"rgba\(0,0,0,\.(\d+)\)", hero_shade).group(1)) / 100
+    channel = round(255 * (1 - alpha))
+    darkest_light_image = f"#{channel:02x}{channel:02x}{channel:02x}"
+    assert _contrast_ratio("#ffffff", darkest_light_image) >= 4.5

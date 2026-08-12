@@ -12,6 +12,7 @@
       nav.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       toggle.setAttribute('aria-label', open ? 'Menü schliessen' : 'Menü öffnen');
+      if (open) nav.querySelector('#bioco-primary-menu a')?.focus();
     });
     nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
     nav.addEventListener('keydown', (event) => {

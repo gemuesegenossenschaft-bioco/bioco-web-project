@@ -21,6 +21,7 @@ def test_home_plan_starts_with_the_approved_hero():
     assert item["acf_group"] == "group_bioco_block_hero"
     assert item["values"]["headline"] == "Gemeinsam\nGemüse anbauen"
     assert item["values"]["subtitle"] == "Solidarische Landwirtschaft\nin Baden"
+    assert item["values"]["image_alt"] == "Solidarische Landwirtschaft auf dem Feld"
     assert item["values"]["image"]["__bioco_pending_image__"].endswith(
         "/frontseitestartseite.jpg"
     )
