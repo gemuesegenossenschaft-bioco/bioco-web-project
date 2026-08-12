@@ -335,7 +335,10 @@ const scenarios = {};
 {
   const env = makeEnv();
   scenarios.listener = {
-    passive: env.scrollListenerOptions.every((o) => o && o.passive === true),
+    // An empty option list must not report as passive.
+    passive:
+      env.scrollListenerOptions.length > 0 &&
+      env.scrollListenerOptions.every((o) => o && o.passive === true),
     count: env.scrollListenerOptions.length,
   };
 }
@@ -353,7 +356,9 @@ const scenarios = {};
   env.settle(60);
   scenarios.duplicate_shell = {
     listener_count: env.scrollListenerOptions.length,
-    listener_passive: env.scrollListenerOptions.every((o) => o && o.passive === true),
+    listener_passive:
+      env.scrollListenerOptions.length > 0 &&
+      env.scrollListenerOptions.every((o) => o && o.passive === true),
     hidden_after_down,
     class_changes_after_down: changes_after_down,
     hidden_after_up: env.state.hidden,
