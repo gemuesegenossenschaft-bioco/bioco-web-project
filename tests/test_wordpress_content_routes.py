@@ -30,3 +30,17 @@ def test_event_singles_keep_aktuelles_prefix_without_shadowing_page():
 
     assert event["has_archive"] is False
     assert event["rewrite"] == {"slug": "aktuelles", "with_front": False}
+
+
+def test_theme_font_sources_are_resolvable():
+    theme_dir = ROOT / "wordpress/web/app/themes/bioco"
+    theme = json.loads((theme_dir / "theme.json").read_text())
+    families = theme["settings"]["typography"]["fontFamilies"]
+
+    for family in families:
+        for face in family.get("fontFace", []):
+            for source in face.get("src", []):
+                if source.startswith("file:./"):
+                    assert (theme_dir / source.removeprefix("file:./")).is_file()
+                else:
+                    assert source.startswith("https://")

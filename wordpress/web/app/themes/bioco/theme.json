@@ -35,7 +35,7 @@
               "fontWeight": "400 700",
               "fontStyle": "normal",
               "fontStretch": "normal",
-              "src": ["file:./assets/fonts/dmsans-variable.woff2"]
+              "src": ["https://fonts.gstatic.com/s/dmsans/v17/rP2Hp2ywxg089UriCZOIHQ.woff2"]
             }
           ]
         }
