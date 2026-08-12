@@ -41,7 +41,7 @@ and this file excluded):
 
 | Call | Occurrences | In SCF |
 |---|---|---|
-| `get_field()` | 269 direct calls in 33 files, no wrapper | yes |
+| `get_field()` | 276 direct calls in 33 files, no wrapper | yes |
 | `acf_get_fields()` | 1, `bioco-import/includes/acf-fields.php:65` | yes |
 | `acf_get_field_group()` | 1, `acf-fields.php:57` | yes |
 | `acf/settings/load_json` + `acf/settings/save_json` | 2 filter registrations, `bioco-core/bioco-core.php:19-20` | yes |
@@ -63,8 +63,8 @@ a thin shell, and the repo already ships **`wordpress/web/app/themes/bioco`** �
 with `theme.json`.
 
 **Decision (owner, this session): bring staging up on the free `bioco` theme first.** Divi gets bought
-only if editors turn out to want its page builder. `wordpress/web/app/themes/bioco-divi` stays in the
-repo as the alternative path — do not delete it.
+only if editors turn out to want its page builder. The owned `bioco-divi` child-theme shell contains
+no Divi code; the licensed parent `web/app/themes/Divi` stays external and gitignored.
 
 Divi is commercial software from Elegant Themes, downloadable only from a logged-in members account.
 Copies available anywhere else are nulled builds: a licence violation and a common malware vector. Do
@@ -83,7 +83,7 @@ treat their output as evidence, not formality.
 2. **acf-json gate gap (surfaced, PR #103).** `check-hardcoded-content.php` scanned only block
    templates. Editorial content sitting in ACF `default_value` passed through no gate — which is
    exactly where the nine depot contacts were hiding.
-3. **Dropped images (open, §3.1 below).** `fetch-cms-seed.php` never writes `image_url`.
+3. **Dropped images (fixed, PR #103; §3.1 below).** Singular and plural image contracts are covered.
 
 ---
 
@@ -105,31 +105,26 @@ treat their output as evidence, not formality.
 | `grep get_template_directory\|get_stylesheet_directory` | no hits (#101 OK) |
 | `cd wordpress && bash scripts/conformance.sh` | `gate OK` |
 | `diff wordpress/content-seed/… cms/content-seed/…` | identical (parity holds) |
-| `cd frontend && npx vitest run` | 524/524 |
+| `cd frontend && npx vitest run` | 542/542 |
 
-`npx tsc --noEmit` reports 4× TS2802 in `frontend/tests/page-shell-tokens.test.ts`. **Pre-existing** —
-PR #103 touches no `frontend/` file. v1's claim of "tsc clean" on `main` did not hold up.
+`npx tsc --noEmit` still reports the four pre-existing TS2802 errors in
+`frontend/tests/page-shell-tokens.test.ts`. v1's claim of "tsc clean" on `main` did not hold up.
 
 ---
 
 ## 3. Open work, in order
 
-### 3.1 Images are being dropped — fix before any import
+### 3.1 Image import is implemented — verify the real sideload on staging
 
-**This blocks a correct import.** `section-map.php:127` sideloads `$section['image_url']`.
-`fetch-cms-seed.php` never writes that key — it writes only `image_alt`. Result: on `/wir` the CMS has
-images on 6 sections (11 files, including `hof_team` ×3 and the `geisshof` gallery ×4) and every one is
-silently dropped, while `image_alt` still gets written — alt text describing an image that is not there.
+PR #103 exports singular `image` as `image_url`, preserves plural `images` for `gallery_strip` and
+`cards_grid`, maps all six `/wir` image sections, carries gallery alt text to attachment metadata, and
+recursively resolves nested pending images. A focused pytest covers existing attachments, partial
+sideload failure with list reindexing, and a write-free second run. The 19-page seed plan remains at
+zero skips and WordPress/CMS seeds are byte-identical.
 
-The exporter *warns* about the plural `images` arrays but drops the singular `image` with no warning at
-all.
-
-Do not be misled the way this session initially was: grepping the existing 19 seeds shows `image_url`
-zero times, which looks like proof that `image_alt`-only is the contract. It proves nothing — none of
-the existing seeds happen to have images. **The importer is the contract, not the sample.**
-
-**Acceptance:** re-export both seeds; `image_url` present for all 6 `/wir` sections; the `images`
-arrays for `gallery_strip` and `cards_grid` mapped rather than warned about; seed-plan still 0 skips.
+**Remaining staging proof:** the dry-run must list every pending image; `--apply` must create or reuse
+the attachments; `wp bioco verify` and the 19-route render gate must show the images. Force or observe
+one failed sideload and confirm the importer reports it without turning a gallery list into an object.
 
 ### 3.2 Migrate the 130 editorial ACF defaults
 
@@ -182,16 +177,19 @@ Owner has confirmed: **create a fresh staging docroot.** Do not touch `~/public_
 do not touch `intranet.bioco.ch`.
 
 1. **Install WordPress** into the new docroot via Softaculous (`RUNBOOK-SOFTACULOUS.md` §1–2). PHP 8.2,
-   non-obvious admin username, German site language. `staging.bioco.ch` already resolves and currently
-   503s — point it at the new docroot.
+   non-obvious admin username, German site language. `staging.bioco.ch` already resolves to the empty,
+   isolated `/home/bioco/staging.bioco.ch` docroot and intentionally returns 403 until installation.
    *Acceptance:* wp-admin reachable; note the absolute `wp-content` path.
 2. **Plugins:** Secure Custom Fields + WP Mail SMTP.
    *Acceptance:* `wp plugin list` shows SCF active.
 3. **Theme:** activate `bioco` (§1.3). Not Divi.
 4. **Deploy our code:**
    ```bash
-   bash wordpress/scripts/deploy-wp-code.sh --host=<host> --user=<user> \
-        --wp-content=<docroot>/wp-content
+   WP_SSH_HOST="193.33.128.160"
+   WP_SSH_USER="bioco"
+   WP_CONTENT="/home/bioco/staging.bioco.ch/wp-content"
+   bash wordpress/scripts/deploy-wp-code.sh --host="$WP_SSH_HOST" --user="$WP_SSH_USER" \
+        --wp-content="$WP_CONTENT"
    ```
    Dry-run is the default and writes nothing. Review, then re-run with `--apply`.
 
@@ -224,11 +222,13 @@ do not touch `intranet.bioco.ch`.
    /standorte-depots/  /statuten/  /tag-der-offenen-tuer/  /warteliste/  /wir/
    ```
 
+   Set `ROUTE="/abos/"` (then loop over the inventory above).
+
    - Public: `curl --connect-timeout 5 --max-time 20 --resolve
-     staging.bioco.ch:443:193.33.128.160 https://staging.bioco.ch<route>`
+     staging.bioco.ch:443:193.33.128.160 "https://staging.bioco.ch${ROUTE}"`
    - Local: on the server, `curl --connect-timeout 5 --max-time 20 -H "Host: staging.bioco.ch"
-     http://127.0.0.1<route>` (the `Host` header is mandatory; plain `127.0.0.1` does not resolve to
-     the vhost).
+     "http://127.0.0.1${ROUTE}"` (the `Host` header is mandatory; plain `127.0.0.1` does not resolve
+     to the vhost).
    - A timeout counts as that route failing: record it as a failure and let the loop continue with
      the remaining routes.
 

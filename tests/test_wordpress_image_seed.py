@@ -29,7 +29,7 @@ def test_exported_images_reach_import_plan(tmp_path):
 
     php = """
     define('ABSPATH', __DIR__);
-    $ALT_META = [];
+    $ALT_META = [61 => ['_wp_attachment_image_alt' => 'Existing gallery alt']];
     $ALT_WRITES = [];
     // Distinct attachment ids per gallery url so alt writes stay attributable.
     function get_posts($args) {
@@ -66,6 +66,7 @@ def test_exported_images_reach_import_plan(tmp_path):
         'resolved' => $resolved,
         'altWrites' => $altWrites,
         'altWritesSecondPass' => $ALT_WRITES,
+        'altMeta' => $ALT_META,
     ]);
     """
     planned = subprocess.run(
@@ -80,6 +81,19 @@ def test_exported_images_reach_import_plan(tmp_path):
     plan = {item["block"]: item["values"] for item in result["plan"]}
 
     assert plan["media-text"]["image"] == {"__bioco_pending_image__": "https://cms.example.test/single.jpg"}
+    assert {key: plan["media-text"][key] for key in (
+        "container_width", "media_side", "media_width", "media_ratio",
+        "media_fit", "vertical_align", "gap", "rounded",
+    )} == {
+        "container_width": "xl",
+        "media_side": "left",
+        "media_width": "40",
+        "media_ratio": "16:9",
+        "media_fit": "contain",
+        "vertical_align": "start",
+        "gap": "sm",
+        "rounded": "none",
+    }
     assert plan["cards-grid"]["cards"][0]["image"] == {"__bioco_pending_image__": "https://cms.example.test/card-1.jpg"}
     # A gallery has no sibling alt field: the seed alt has to travel with the
     # image marker so the resolver can put it on the attachment itself, which
@@ -97,13 +111,26 @@ def test_exported_images_reach_import_plan(tmp_path):
     resolved = {item["block"]: item["values"] for item in result["resolved"]}
     assert resolved["cards-grid"]["cards"][0]["image"] == 42
     assert resolved["gallery-strip"]["gallery"] == [61, 62]
-    assert result["altWrites"] == [
-        [61, "_wp_attachment_image_alt", "Gallery one"],
-        [62, "_wp_attachment_image_alt", "Gallery two"],
-    ]
+    assert result["altWrites"] == [[62, "_wp_attachment_image_alt", "Gallery two"]]
+    assert result["altMeta"]["61"]["_wp_attachment_image_alt"] == "Existing gallery alt"
     assert result["altWritesSecondPass"] == []
     assert resolved["text-columns"]["image"] == 42
     assert not any("image_url" in warning or "image_alt" in warning for item in result["plan"] for warning in item["warnings"])
+
+    media_fields = json.loads((
+        ROOT / "wordpress/web/app/mu-plugins/bioco-core/acf-json/group_bioco_block_media_text.json"
+    ).read_text())["fields"]
+    assert {
+        "container_width", "media_width", "media_ratio", "media_fit",
+        "vertical_align", "gap", "rounded",
+    } <= {field["name"] for field in media_fields}
+
+    media_render = (
+        ROOT / "wordpress/web/app/mu-plugins/bioco-core/blocks/media-text/render.php"
+    ).read_text()
+    for field in ("container_width", "media_width", "media_ratio", "media_fit", "vertical_align", "gap", "rounded"):
+        assert f"get_field('{field}')" in media_render
+        assert f"data-{field.replace('_', '-')}" in media_render
 
     real_plan = subprocess.run(
         ["php", "wordpress/scripts/check-seed-plan.php"],

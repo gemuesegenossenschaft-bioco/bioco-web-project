@@ -3,6 +3,16 @@
     {
       "id": "single",
       "component": "media_text",
+      "config": {
+        "containerWidth": "xl",
+        "mediaSide": "left",
+        "mediaWidth": "40",
+        "mediaRatio": "16:9",
+        "mediaFit": "contain",
+        "verticalAlign": "start",
+        "gap": "sm",
+        "rounded": "none"
+      },
       "image": "https://cms.example.test/single.jpg",
       "imageAlt": "Single",
       "images": [

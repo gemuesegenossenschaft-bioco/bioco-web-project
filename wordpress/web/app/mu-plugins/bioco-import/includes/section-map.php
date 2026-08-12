@@ -230,7 +230,16 @@ function bioco_import_component_map() {
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
-            'config_fields' => ['mediaSide' => 'media_side'],
+            'config_fields' => [
+                'containerWidth' => 'container_width',
+                'mediaSide' => 'media_side',
+                'mediaWidth' => 'media_width',
+                'mediaRatio' => 'media_ratio',
+                'mediaFit' => 'media_fit',
+                'verticalAlign' => 'vertical_align',
+                'gap' => 'gap',
+                'rounded' => 'rounded',
+            ],
             'extra' => function (array $section, array &$values, array &$warnings) {
                 $url = (string) ($section['image_url'] ?? '');
                 $alt = (string) ($section['image_alt'] ?? '');
