@@ -105,6 +105,77 @@ def test_global_shell_exposes_approved_utility_primary_navigation_and_logo():
     assert ".bioco-primary-nav.is-open ul" in chrome_css
     assert "bioco-mobile-utility" in navigation_php
     assert "box-sizing: border-box" in chrome_css
+    # Logo lives inside the primary row (not the hero), utility row above it.
+    assert navigation_php.index('class="bioco-primary-nav"') < navigation_php.index(
+        'class="bioco-logo"'
+    )
+    assert navigation_php.index('class="bioco-utility-nav"') < navigation_php.index(
+        'class="bioco-primary-nav"'
+    )
+
+    # Full-colour logo: no monochrome/invert filter may survive anywhere.
+    assert "filter" not in _css_rule(chrome_css, ".bioco-logo img")
+    assert "invert(" not in chrome_css
+
+    # Stickiness must sit on the <header>, whose containing block spans the
+    # whole page. A sticky .bioco-navigation-shell would be a no-op: its
+    # parent .bioco-page-shell is exactly as tall as the navigation itself.
+    shell_rule = _css_rule(chrome_css, ".bioco-navigation-shell")
+    assert "sticky" not in shell_rule
+    assert "fixed" not in shell_rule
+    sticky_rule = _css_rule(chrome_css, "header:has(.bioco-navigation-shell)")
+    assert "position: sticky" in sticky_rule
+    assert "top: 0" in sticky_rule
+    assert ".bioco-site-header," in chrome_css
+    templates = sorted((THEME / "templates").glob("*.html"))
+    assert templates
+    assert [
+        template.name
+        for template in templates
+        if '"slug":"header","tagName":"header","className":"bioco-site-header"'
+        not in template.read_text()
+    ] == []
+
+    # The primary row stays in normal flow, so it reserves its own height and
+    # can never overlap page content on any subpage.
+    primary_rule = _css_rule(chrome_css, ".bioco-primary-nav")
+    assert "position: absolute" not in primary_rule
+    assert "position: fixed" not in primary_rule
+    assert ".home .bioco-primary-nav" not in chrome_css
+
+    # Sticky positioning breaks when an ancestor becomes a scroll container:
+    # `overflow-x: hidden` on <body> must be superseded by `clip`.
+    body_rule = _css_rule(chrome_css, "body")
+    assert body_rule.index("overflow-x: hidden") < body_rule.index("overflow-x: clip")
+
+    # Utility row: collapses on scroll down and is removed from the tab order
+    # while collapsed, restored on scroll up / at page top.
+    hidden_rule = _css_rule(
+        chrome_css, ".bioco-navigation-shell.is-utility-hidden .bioco-utility-nav"
+    )
+    assert "height: 0" in hidden_rule
+    assert "visibility: hidden" in hidden_rule
+    assert "pointer-events: none" in hidden_rule
+    assert "is-utility-hidden" in navigation_js
+    assert "addEventListener('scroll'" in navigation_js
+    assert "{ passive: true }" in navigation_js
+    assert "requestAnimationFrame" in navigation_js
+    assert "window.scrollY" in navigation_js
+    assert "anchorY" in navigation_js
+    assert "utility.contains(document.activeElement)" in navigation_js
+    assert ".bioco-navigation-shell.is-utility-hidden .bioco-utility-nav:focus-within" in chrome_css
+    assert "prefers-reduced-motion: reduce" in chrome_css
+    # Auto-hide is wired independently of the mobile toggle: the scroll
+    # listener lives in its own initialiser, after the `if (!toggle) return;`
+    # early exit of the menu loop, not inside it.
+    assert "initUtilityAutoHide" in navigation_js
+    assert navigation_js.index("addEventListener('scroll'") > navigation_js.index(
+        "const initUtilityAutoHide"
+    )
+
+    # No horizontal overflow escape hatches in the sticky chrome.
+    assert "white-space: nowrap" in _css_rule(chrome_css, ".bioco-primary-nav li a")
+    assert "overflow-x: clip" in body_rule
 
 
 def test_homepage_seed_contains_approved_hero_section_images_and_cta_labels():

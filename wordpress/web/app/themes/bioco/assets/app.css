@@ -5,7 +5,11 @@
 
 body {
   margin: 0;
+  /* `clip` contains horizontal overflow WITHOUT making <body> a scroll
+     container — `hidden` would do that and silently break the sticky
+     navigation shell. `hidden` stays as the pre-`clip` fallback. */
   overflow-x: hidden;
+  overflow-x: clip;
   background: var(--wp--preset--color--bioco-bg);
   color: var(--wp--preset--color--bioco-text);
 }
@@ -20,6 +24,21 @@ body {
   padding: 0 clamp(16px, 6vw, 96px);
 }
 
+/* Stickiness lives on the <header> element, NOT on .bioco-navigation-shell:
+   a sticky box only travels inside its containing block, and the shell's
+   parent (.bioco-page-shell) is exactly as tall as the navigation itself,
+   so sticking it there would be a no-op. The header spans the full viewport
+   width, which also gives the cream bar an edge-to-edge background while
+   content scrolls underneath. The :has() selector is a fallback in case the
+   template-part wrapper class is not emitted. */
+.bioco-site-header,
+header:has(.bioco-navigation-shell) {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--wp--preset--color--bioco-bg);
+}
+
 .bioco-navigation-shell { position: relative; }
 
 .bioco-utility-nav {
@@ -28,6 +47,38 @@ body {
   justify-content: flex-end;
   align-items: center;
   border-bottom: 1px solid var(--wp--preset--color--bioco-border);
+  overflow: hidden;
+  opacity: 1;
+  visibility: visible;
+  transition: height .22s ease, opacity .18s ease, visibility .22s;
+}
+
+.bioco-navigation-shell.is-utility-hidden .bioco-utility-nav {
+  height: 0;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.bioco-navigation-shell.is-utility-hidden .bioco-utility-nav:focus-within {
+  height: 70px;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.bioco-primary-nav .bioco-logo {
+  display: flex;
+  width: 112px;
+  height: 58px;
+  align-items: center;
+}
+
+.bioco-logo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .bioco-utility-nav ul,
@@ -47,44 +98,23 @@ body {
 }
 
 .bioco-primary-nav {
-  position: absolute;
-  top: 70px;
-  left: 0;
-  right: 0;
-  min-height: 112px;
-  padding: 22px clamp(24px, 4vw, 96px);
+  min-height: 82px;
+  padding: 16px 0;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-}
-
-.bioco-primary-nav .bioco-logo {
-  display: flex;
-  width: 112px;
-  height: 66px;
   align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--wp--preset--color--bioco-border);
 }
-
-.bioco-logo img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: brightness(0) invert(1);
-}
-
-.bioco-primary-nav ul { padding-top: 12px; }
 
 .bioco-primary-nav li a {
-  color: #fff;
+  color: var(--wp--preset--color--bioco-text);
   font-size: 1rem;
   font-weight: 500;
   white-space: nowrap;
   text-decoration: none;
-  text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
-.bioco-primary-nav li a:hover { color: #dcefdc; }
+.bioco-primary-nav li a:hover { color: var(--wp--preset--color--bioco-green); }
 
 .bioco-primary-nav .bioco-primary-cta {
   display: inline-flex;
@@ -107,19 +137,22 @@ main.wp-block-group {
 
 main.wp-block-group > .wp-block-post-content { margin: 0; }
 
+@media (prefers-reduced-motion: reduce) {
+  .bioco-utility-nav { transition: none; }
+}
+
 @media (max-width: 900px) {
   .bioco-utility-nav { display: none; }
   .bioco-page-shell,
   .bioco-page-shell.wp-block-group { padding: 0; }
   .bioco-primary-nav {
     position: relative;
-    top: 0;
-    min-height: 84px;
+    min-height: 76px;
     padding: 12px 20px;
+    align-items: center;
     background: var(--wp--preset--color--bioco-bg);
   }
-  .bioco-primary-nav .bioco-logo { width: 100px; height: 60px; }
-  .bioco-logo img { filter: none; }
+  .bioco-primary-nav .bioco-logo { width: 100px; height: 52px; }
   .bioco-primary-nav ul { display: none; }
   .bioco-primary-nav.is-open {
     align-items: flex-start;
@@ -127,7 +160,7 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
   }
   .bioco-primary-nav.is-open ul {
     position: absolute;
-    top: 84px;
+    top: 76px;
     left: 0;
     right: 0;
     display: flex;
