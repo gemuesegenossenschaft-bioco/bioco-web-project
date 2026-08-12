@@ -1,0 +1,36 @@
+{
+  "sections": [
+    {
+      "id": "single",
+      "component": "media_text",
+      "image": "https://cms.example.test/single.jpg",
+      "imageAlt": "Single",
+      "images": [
+        {"url": "https://cms.example.test/single.jpg", "alt": "Single"}
+      ]
+    },
+    {
+      "id": "cards",
+      "component": "cards_grid",
+      "images": [
+        {"url": "https://cms.example.test/card-1.jpg", "alt": "Card one"},
+        {"url": "https://cms.example.test/card-2.jpg", "alt": "Card two"}
+      ]
+    },
+    {
+      "id": "gallery",
+      "component": "gallery_strip",
+      "images": [
+        {"url": "https://cms.example.test/gallery-1.jpg", "alt": "Gallery one"},
+        {"url": "https://cms.example.test/missing.jpg", "alt": "Missing"},
+        {"url": "https://cms.example.test/gallery-2.jpg", "alt": "Gallery two"}
+      ]
+    },
+    {
+      "id": "columns",
+      "component": "text_columns",
+      "image": "https://cms.example.test/columns.jpg",
+      "imageAlt": "Columns"
+    }
+  ]
+}

@@ -247,7 +247,23 @@ function bioco_import_component_map() {
                 'gap' => 'gap',
                 'rounded' => 'rounded',
             ],
-            'unmapped_fields' => ['image_url', 'image_alt'],
+            'extra' => function (array $section, array &$values, array &$warnings) {
+                $cards = [];
+                $images = $section['images'] ?? [];
+                if (!$images && !empty($section['image_url'])) {
+                    $images = [['url' => $section['image_url'], 'alt' => $section['image_alt'] ?? '']];
+                }
+                foreach ($images as $image) {
+                    if (!is_array($image) || empty($image['url'])) continue;
+                    $alt = (string) ($image['alt'] ?? '');
+                    $cards[] = [
+                        'title' => $alt,
+                        'image' => bioco_import_pending_image($image['url']),
+                        'image_alt' => $alt,
+                    ];
+                }
+                if ($cards) $values['cards'] = $cards;
+            },
         ],
         'gallery_strip' => [
             'block' => 'gallery-strip',
@@ -263,7 +279,19 @@ function bioco_import_component_map() {
                 'gap' => 'gap',
                 'rounded' => 'rounded',
             ],
-            'unmapped_fields' => ['image_url', 'image_alt'],
+            'extra' => function (array $section, array &$values, array &$warnings) {
+                $gallery = [];
+                $images = $section['images'] ?? [];
+                if (!$images && !empty($section['image_url'])) {
+                    $images = [['url' => $section['image_url'], 'alt' => $section['image_alt'] ?? '']];
+                }
+                foreach ($images as $image) {
+                    if (is_array($image) && !empty($image['url'])) {
+                        $gallery[] = bioco_import_pending_image($image['url']);
+                    }
+                }
+                if ($gallery) $values['gallery'] = $gallery;
+            },
         ],
         'text_columns' => [
             'block' => 'text-columns',
@@ -276,7 +304,12 @@ function bioco_import_component_map() {
                 'columnsDesktop' => 'columns',
                 'gap' => 'gap',
             ],
-            'unmapped_fields' => ['image_url', 'image_alt'],
+            'extra' => function (array $section, array &$values, array &$warnings) {
+                $url = (string) ($section['image_url'] ?? '');
+                $alt = (string) ($section['image_alt'] ?? '');
+                if ($url !== '') $values['image'] = bioco_import_pending_image($url);
+                if ($alt !== '') $values['image_alt'] = $alt;
+            },
         ],
         'cta_band' => [
             'block' => 'cta-band',

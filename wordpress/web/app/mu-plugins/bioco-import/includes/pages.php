@@ -69,6 +69,13 @@ function bioco_import_resolve_attachment_for_url($url, $mode) {
 // which would otherwise get serialized as garbage ACF data.
 function bioco_import_resolve_pending_images(array &$values, $mode, array &$warnings) {
     foreach ($values as $key => $value) {
+        if (is_array($value) && !bioco_import_is_pending_image($value)) {
+            $isList = $value === [] || array_keys($value) === range(0, count($value) - 1);
+            bioco_import_resolve_pending_images($value, $mode, $warnings);
+            if ($isList) $value = array_values($value);
+            $values[$key] = $value;
+            continue;
+        }
         if (!bioco_import_is_pending_image($value)) continue;
         $url = $value['__bioco_pending_image__'];
         $attachmentId = bioco_import_resolve_attachment_for_url($url, $mode);

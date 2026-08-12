@@ -11,10 +11,14 @@ if (!defined('ABSPATH')) exit;
 $eyebrow = get_field('eyebrow');
 $title = get_field('title');
 $text = get_field('text');
+$image = get_field('image');
+$image_alt_override = get_field('image_alt');
 $buttons = get_field('buttons');
 $container_width = get_field('container_width') ?: 'lg';
 $columns = get_field('columns') ?: '2';
 $gap = get_field('gap') ?: 'lg';
+$image_url = is_array($image) ? ($image['url'] ?? '') : '';
+$image_alt = $image_alt_override ?: (is_array($image) ? ($image['alt'] ?? '') : '');
 
 if ($is_preview && !$title && !$text) {
     $title = __('Titel eingeben …', 'bioco');
@@ -38,6 +42,11 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
     <?php endif; ?>
     <?php if ($text) : ?>
         <div class="cms-section-text cms-text-columns-body" data-columns="<?php echo esc_attr($columns); ?>" data-gap="<?php echo esc_attr($gap); ?>"><?php echo bioco_kses_rich_text($text); ?></div>
+    <?php endif; ?>
+    <?php if ($image_url) : ?>
+        <div class="cms-media-frame">
+            <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr($image_alt); ?>" loading="lazy">
+        </div>
     <?php endif; ?>
     <?php if (!empty($buttons)) : ?>
         <div class="cms-section-actions">

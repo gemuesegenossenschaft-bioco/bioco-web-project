@@ -53,6 +53,7 @@ if ($slug === '' || !preg_match('/^[a-z0-9-]+$/', $slug)) {
 }
 
 $apiBase = isset($args['api']) && is_string($args['api']) ? rtrim($args['api'], '/') : 'https://cms.bioco.ch/api';
+$canonicalSource = $apiBase . '/content/sections/' . rawurlencode($slug);
 $template = isset($args['template']) && is_string($args['template']) ? $args['template'] : 'basic-page';
 $outDir = isset($args['out']) && is_string($args['out']) ? rtrim($args['out'], '/') : dirname(__DIR__) . '/content-seed';
 
@@ -68,7 +69,7 @@ if (!empty($args['from-file'])) {
     $raw = (string) file_get_contents($path);
     $source = $path;
 } else {
-    $url = $apiBase . '/content/sections/' . rawurlencode($slug);
+    $url = $canonicalSource;
     $source = $url;
     $ctx = stream_context_create(['http' => ['timeout' => 20, 'ignore_errors' => true]]);
     $raw = @file_get_contents($url, false, $ctx);
@@ -120,10 +121,12 @@ $MAP = [
     'component' => 'section_component',
     'config' => 'section_config',
     'buttons' => 'buttons',
+    'image' => 'image_url',
+    'images' => 'images',
     'imageAlt' => 'image_alt',
 ];
 // Runtime/derived keys that legitimately do not belong in a seed.
-$IGNORE = ['pwId', 'sort', 'image', 'imageData', 'media', 'video', 'anchor'];
+$IGNORE = ['pwId', 'sort', 'imageData', 'media', 'video', 'anchor'];
 
 $seedSections = [];
 $unmapped = [];
@@ -133,6 +136,7 @@ foreach ($sections as $i => $s) {
     if (!is_array($s)) continue;
     $out = [];
     foreach ($s as $k => $v) {
+        if ($k === 'images' && !in_array(($s['component'] ?? ''), ['cards_grid', 'gallery_strip'], true)) continue;
         if (in_array($k, $IGNORE, true)) continue;
         if (!isset($MAP[$k])) {
             $unmapped[$k] = ($unmapped[$k] ?? 0) + 1;
@@ -155,7 +159,7 @@ foreach ($sections as $i => $s) {
     $ordered = [];
     foreach (['section_id', 'section_layout', 'section_component', 'section_eyebrow',
               'section_title', 'section_text', 'section_theme', 'section_config',
-              'image_alt', 'buttons'] as $k) {
+              'image_url', 'image_alt', 'images', 'buttons'] as $k) {
         if (array_key_exists($k, $out)) $ordered[$k] = $out[$k];
     }
     $seedSections[] = $ordered;
@@ -174,7 +178,7 @@ $seed = [
     'template' => $template,
     'title' => $title,
     'sections' => $seedSections,
-    'conversion_notes' => 'Exportiert aus dem laufenden ProcessWire via ' . $source
+    'conversion_notes' => 'Exportiert aus dem laufenden ProcessWire via ' . $canonicalSource
         . ' mit wordpress/scripts/fetch-cms-seed.php. Diese Seite war von Anfang an CMS-getrieben und hatte deshalb '
         . 'nie eine Seed-Datei (die Seeds erfassen zuvor hart kodierten JSX-Inhalt). SEO-Werte sind hier NICHT '
         . 'enthalten und muessen bei Bedarf aus der Seite ergaenzt werden.',
