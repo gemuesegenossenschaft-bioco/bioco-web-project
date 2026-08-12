@@ -156,7 +156,12 @@ def test_primary_and_secondary_button_labels_have_explicit_aa_contrast():
     ) >= 4.5
 
     hero_shade = _css_rule(css, ".hero-shade")
-    alpha = float(re.search(r"rgba\(0,0,0,\.(\d+)\)", hero_shade).group(1)) / 100
+    alpha_match = re.search(
+        r"rgba\(\s*0\s*,\s*0\s*,\s*0\s*,\s*(0?\.\d+|1(?:\.0+)?)\s*\)",
+        hero_shade,
+    )
+    assert alpha_match, "Hero overlay must contain a valid alpha value"
+    alpha = float(alpha_match.group(1))
     channel = round(255 * (1 - alpha))
     darkest_light_image = f"#{channel:02x}{channel:02x}{channel:02x}"
     assert _contrast_ratio("#ffffff", darkest_light_image) >= 4.5
