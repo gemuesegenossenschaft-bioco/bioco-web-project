@@ -5,7 +5,7 @@
  * This is the "hard case" the import spec calls out explicitly: ACF blocks
  * store their values as a single block comment
  *
- *   <!-- wp:acf/bioco-hero {"name":"acf/bioco-hero","data":{"headline":"...",
+ *   <!-- wp:bioco/hero {"name":"bioco/hero","data":{"headline":"...",
  *        "_headline":"field_bioco_hero_headline"},"mode":"preview"} /-->
  *
  * with each value paired to a "_name" => field_key companion entry (ACF's
@@ -172,24 +172,12 @@ function bioco_import_acf_block_data(array $values, array $fields) {
 }
 
 /**
- * block.json declared name -> the name it is ACTUALLY registered/serialized
- * under. Every bioco-core block.json has apiVersion 2 + an "acf" object
- * (acf.mode/renderTemplate) instead of a hand-written edit/save script. As of
- * ACF 6.1, when register_block_type() is called via block.json metadata and
- * that metadata contains an "acf" key, ACF intercepts registration and — if
- * the declared name is not already namespaced under "acf/" — renames it to
- * "acf/" + the declared name with "/" replaced by "-". So block.json's
- * "bioco/hero" is registered (and must be serialized in post_content) as
- * "acf/bioco-hero", not "bioco/hero". We read this straight out of the
- * block.json contents rather than assuming it, so a future non-ACF bioco
- * block (no "acf" key) would correctly keep its own declared name.
+ * Return the block name declared in block.json. Secure Custom Fields 6.9.5
+ * keeps that name when register_block_type() loads the metadata, so serialized
+ * comments must use the same bioco/* name as the runtime registry.
  */
 function bioco_import_block_comment_name(array $blockJson) {
-    $name = (string) ($blockJson['name'] ?? '');
-    if (isset($blockJson['acf']) && strpos($name, 'acf/') !== 0) {
-        return 'acf/' . str_replace('/', '-', $name);
-    }
-    return $name;
+    return (string) ($blockJson['name'] ?? '');
 }
 
 // Reads + memoizes a bioco-core block.json by its directory name (e.g.
@@ -209,7 +197,7 @@ function bioco_import_block_json($blockDirName) {
 
 /**
  * Full pipeline: bioco-core block directory name + ACF field-group key +
- * values (by ACF field name) -> one serialized "<!-- wp:acf/... {...} /-->"
+ * values (by ACF field name) -> one serialized "<!-- wp:bioco/... {...} /-->"
  * block comment, or null on failure (with $warnings/$errors explaining why).
  */
 function bioco_import_serialize_acf_block($blockDirName, $acfGroupKey, array $values, array &$warnings, array &$errors) {

@@ -99,7 +99,7 @@ function bioco_import_import_event_item(array $item, $mode, $force, array &$repo
 
     if (!$post) {
         if ($mode === 'apply') {
-            $postId = wp_insert_post(['post_type' => 'event', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'post_content' => $content], true);
+            $postId = wp_insert_post(['post_type' => 'event', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug, 'post_content' => wp_slash($content)], true);
             if (is_wp_error($postId)) {
                 bioco_import_report_row($report, $label, '', '', 'error', 'Event konnte nicht angelegt werden: ' . $postId->get_error_message());
                 return;
@@ -112,7 +112,7 @@ function bioco_import_import_event_item(array $item, $mode, $force, array &$repo
     } else {
         bioco_import_report_row($report, $label, '', '', 'ok-equal', 'Event existiert bereits (post_id=' . $post->ID . ') — Titel/Beitragsinhalt unverändert (CMS gewinnt, --force zum Überschreiben).');
         if ($force && $mode === 'apply') {
-            wp_update_post(['ID' => $post->ID, 'post_title' => $title, 'post_content' => $content]);
+            wp_update_post(['ID' => $post->ID, 'post_title' => $title, 'post_content' => wp_slash($content)]);
             bioco_import_report_row($report, $label, '', '', 'update', 'FORCE: Titel/Beitragsinhalt aktualisiert.');
         }
     }

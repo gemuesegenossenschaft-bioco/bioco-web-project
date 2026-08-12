@@ -206,7 +206,7 @@ function bioco_import_page_for_seed(array $seed, $mode, $force, array &$report) 
                 'post_status' => 'publish',
                 'post_title' => (string) $seed['title'],
                 'post_name' => $slug,
-                'post_content' => $desiredContent,
+                'post_content' => wp_slash($desiredContent),
             ], true);
             if (is_wp_error($postId)) {
                 bioco_import_report_row($report, $slug, '', '', 'error', 'Seite konnte nicht angelegt werden: ' . $postId->get_error_message());
@@ -256,7 +256,7 @@ function bioco_import_page_for_seed(array $seed, $mode, $force, array &$report) 
         : 'FORCE: bestehender Inhalt überschrieben (post_id=' . $existing->ID . ').';
 
     if ($mode === 'apply') {
-        $updated = wp_update_post(['ID' => $existing->ID, 'post_content' => $desiredContent], true);
+        $updated = wp_update_post(['ID' => $existing->ID, 'post_content' => wp_slash($desiredContent)], true);
         if (is_wp_error($updated)) {
             bioco_import_report_row($report, $slug, '', '', 'error', 'Seite konnte nicht aktualisiert werden: ' . $updated->get_error_message());
             return;
