@@ -39,6 +39,56 @@
 
 if (!defined('ABSPATH')) exit;
 
+// SCF 6.9 can leave a seamless clone of a repeater unexpanded even though
+// acf_get_field() resolves the referenced source field. Expand only that
+// unprefixed seamless shape so the serializer can preserve the field instead
+// of reporting and dropping it.
+function bioco_import_expand_unresolved_clones(array $fields) {
+    $expanded = [];
+    foreach ($fields as $field) {
+        $isUnresolvedClone = ($field['type'] ?? '') === 'clone'
+            && ($field['name'] ?? '') === ''
+            && ($field['display'] ?? 'seamless') === 'seamless'
+            && empty($field['prefix_name'])
+            && function_exists('acf_get_field');
+
+        if (!$isUnresolvedClone) {
+            $expanded[] = $field;
+            continue;
+        }
+
+        $resolved = [];
+        foreach ((array) ($field['clone'] ?? []) as $sourceKey) {
+            $source = acf_get_field($sourceKey);
+            if (is_array($source) && ($source['name'] ?? '') !== '') {
+                $resolved[] = $source;
+                continue;
+            }
+
+            if (strpos((string) $sourceKey, 'group_') === 0
+                && function_exists('acf_get_field_group')
+                && function_exists('acf_get_fields')) {
+                $sourceGroup = acf_get_field_group($sourceKey);
+                $sourceFields = $sourceGroup ? acf_get_fields($sourceGroup) : null;
+                if (is_array($sourceFields)) {
+                    foreach ($sourceFields as $sourceField) {
+                        if (is_array($sourceField) && ($sourceField['name'] ?? '') !== '') {
+                            $resolved[] = $sourceField;
+                        }
+                    }
+                }
+            }
+        }
+
+        if ($resolved) {
+            array_push($expanded, ...$resolved);
+        } else {
+            $expanded[] = $field;
+        }
+    }
+    return $expanded;
+}
+
 // Fully-resolved field list for an ACF field group (clone fields already
 // expanded to their final name/key), or a WP_Error explaining why not.
 function bioco_import_acf_group_fields($group_key) {
@@ -70,7 +120,7 @@ function bioco_import_acf_group_fields($group_key) {
         );
     }
 
-    return $cache[$group_key] = $fields;
+    return $cache[$group_key] = bioco_import_expand_unresolved_clones($fields);
 }
 
 // Flat "field name" => "field key" map, top level only. Used for the

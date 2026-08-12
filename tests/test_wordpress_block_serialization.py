@@ -6,6 +6,94 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 
 
+def test_scf_unexpanded_repeater_clone_is_resolved_for_block_serialization():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    function acf_get_field_group($key) { return ['key' => $key]; }
+    function acf_get_fields($group) {
+        return [[
+            'name' => '',
+            'key' => 'field_media_buttons_clone',
+            'type' => 'clone',
+            'clone' => ['field_section_buttons'],
+        ]];
+    }
+    function acf_get_field($key) {
+        if ($key !== 'field_section_buttons') return null;
+        return [
+            'name' => 'buttons',
+            'key' => 'field_section_buttons',
+            'type' => 'repeater',
+            'sub_fields' => [[
+                'name' => 'text',
+                'key' => 'field_button_text',
+                'type' => 'text',
+            ]],
+        ];
+    }
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/acf-fields.php';
+    $fields = bioco_import_acf_group_fields('group_media');
+    echo json_encode([
+        'unmatched' => bioco_import_acf_unmatched_fields([
+            'buttons' => [['text' => 'Mehr erfahren']],
+        ], $fields),
+        'data' => bioco_import_acf_block_data([
+            'buttons' => [['text' => 'Mehr erfahren']],
+        ], $fields),
+    ]);
+    '''
+    payload = json.loads(subprocess.run(
+        ["php", "-r", php],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout)
+
+    assert payload["unmatched"] == []
+    assert payload["data"] == {
+        "buttons": 1,
+        "_buttons": "field_section_buttons",
+        "buttons_0_text": "Mehr erfahren",
+        "_buttons_0_text": "field_button_text",
+    }
+
+
+def test_scf_unexpanded_group_clone_is_resolved_for_block_serialization():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    function acf_get_field_group($key) { return ['key' => $key]; }
+    function acf_get_fields($group) {
+        if ($group['key'] === 'group_common') {
+            return [['name' => 'title', 'key' => 'field_title', 'type' => 'text']];
+        }
+        return [[
+            'name' => '',
+            'key' => 'field_common_clone',
+            'type' => 'clone',
+            'clone' => ['group_common'],
+        ]];
+    }
+    function acf_get_field($key) { return null; }
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/acf-fields.php';
+    $fields = bioco_import_acf_group_fields('group_block');
+    echo json_encode([
+        'unmatched' => bioco_import_acf_unmatched_fields(['title' => 'Hallo'], $fields),
+        'data' => bioco_import_acf_block_data(['title' => 'Hallo'], $fields),
+    ]);
+    '''
+    payload = json.loads(subprocess.run(
+        ["php", "-r", php],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout)
+
+    assert payload["unmatched"] == []
+    assert payload["data"] == {"title": "Hallo", "_title": "field_title"}
+
+
 def test_scf_clone_companion_keys_use_registered_source_keys():
     php = r'''
     define('ABSPATH', __DIR__);
