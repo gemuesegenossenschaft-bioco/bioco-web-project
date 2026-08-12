@@ -31,8 +31,8 @@ whole Pro feature set, GPL, free.
 
 Being community-maintained rather than vendor-backed is worth weighing: it is the reason it is free,
 and also the reason its release cadence is not contractually anyone's problem. For this project that
-trade is fine — we depend on three ACF functions, two `acf/settings/*_json` filters and a `block.json`
-key, not on a support relationship.
+trade is fine — we depend on three ACF functions, two `acf/settings/*_json` filters and two `block.json`
+keys (`acf.mode` and `acf.renderTemplate`), not on a support relationship.
 
 The port's ACF surface is small enough to make this a drop-in rather than a rewrite:
 
@@ -224,9 +224,13 @@ do not touch `intranet.bioco.ch`.
    /standorte-depots/  /statuten/  /tag-der-offenen-tuer/  /warteliste/  /wir/
    ```
 
-   - Public: `curl --resolve staging.bioco.ch:443:193.33.128.160 https://staging.bioco.ch<route>`
-   - Local: on the server, `curl -H "Host: staging.bioco.ch" http://127.0.0.1<route>` (the `Host`
-     header is mandatory; plain `127.0.0.1` does not resolve to the vhost).
+   - Public: `curl --connect-timeout 5 --max-time 20 --resolve
+     staging.bioco.ch:443:193.33.128.160 https://staging.bioco.ch<route>`
+   - Local: on the server, `curl --connect-timeout 5 --max-time 20 -H "Host: staging.bioco.ch"
+     http://127.0.0.1<route>` (the `Host` header is mandatory; plain `127.0.0.1` does not resolve to
+     the vhost).
+   - A timeout counts as that route failing: record it as a failure and let the loop continue with
+     the remaining routes.
 
    Per route, on both hosts: HTTP 200; `<main>` non-empty after tag-stripping; route-specific block
    markup (`class="cms-section cms-<block>"`, derived from `section_component` in
@@ -239,7 +243,9 @@ do not touch `intranet.bioco.ch`.
 
    Wrong-app and collision checks, neither of which touches production: `ps -eo pid,ppid,args | grep
    "next-server" | grep -v grep` must show exactly one worker (that is `bioco.ch` on 49154 — leave it
-   running, never `pgrep -f`, it kills the SSH session), and the Next markers above must be absent on
+   running). `pgrep -f next-server` itself is read-only and safe; the danger is piping such a broad
+   match into `kill`, or running `pkill -f next-server`, because the pattern also matches the SSH
+   command running the check and kills the session. The Next markers above must be absent on
    all 19 staging routes. Then `ls -la` the 19 slugs inside the staging docroot: any hit is an Apache
    file/dir shadowing the rewrite (as the stale `public_html/wir` symlink once was); remove it and
    re-run. Confirm the docroot is neither `~/public_html/` nor `~/public_html/bioco_staging/`.
