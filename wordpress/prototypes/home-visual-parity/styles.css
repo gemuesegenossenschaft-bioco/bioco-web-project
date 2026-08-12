@@ -584,13 +584,14 @@ a {
   transition: all 0.2s ease;
 }
 
-.btn-primary {
+.btn.btn-primary {
   background: var(--bioco-green);
   color: white;
 }
 
-.btn-primary:hover {
+.btn.btn-primary:hover {
   background: var(--bioco-green-dark);
+  color: white;
 }
 
 .btn-secondary {
