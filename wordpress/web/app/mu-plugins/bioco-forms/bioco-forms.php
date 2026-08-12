@@ -135,6 +135,11 @@ function bioco_forms_turnstile_config() {
     $site_key = (string) getenv('NEXT_PUBLIC_TURNSTILE_SITE_KEY');
     $secret = (string) getenv('TURNSTILE_SECRET_KEY');
 
+    if ($site_key === '' && $secret === '' && wp_get_environment_type() === 'staging') {
+        $site_key = '1x00000000000000000000AA';
+        $secret = '1x0000000000000000000000000000000AA';
+    }
+
     return [
         'site_key' => $site_key,
         'secret' => $secret,

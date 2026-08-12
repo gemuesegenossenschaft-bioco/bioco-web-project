@@ -6,6 +6,77 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 
 
+def test_event_card_image_second_apply_skips_equal_attachment_but_updates_changed_values():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    $CURRENT_CARD_IMAGE = null;
+    $FIELD_WRITES = [];
+
+    function sanitize_title($title) { return 'erntefest'; }
+    function wp_slash($value) { return $value; }
+    function wp_date($format, $timestamp, $timezone) { return date($format, $timestamp); }
+    function wp_timezone() { return new DateTimeZone('Europe/Zurich'); }
+    function is_wp_error($value) { return false; }
+    function get_posts($args) {
+        if ($args['post_type'] === 'event') return [(object) ['ID' => 41]];
+        if ($args['post_type'] === 'attachment') return [(object) ['ID' => 73]];
+        return [];
+    }
+    function get_field($field, $postId) {
+        global $CURRENT_CARD_IMAGE;
+        return $field === 'card_image' ? $CURRENT_CARD_IMAGE : null;
+    }
+    function update_field($field, $value, $postId) {
+        global $FIELD_WRITES;
+        $FIELD_WRITES[] = [$field, $value, $postId];
+        return true;
+    }
+
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/report.php';
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/pages.php';
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/collections.php';
+
+    $item = [
+        'title' => 'Erntefest',
+        'cardImage' => 'https://cms.example.test/event.jpg',
+    ];
+    $cases = [
+        'equal' => ['ID' => 73],
+        'different' => ['ID' => 74],
+        'missing' => null,
+    ];
+    $results = [];
+    foreach ($cases as $name => $current) {
+        $CURRENT_CARD_IMAGE = $current;
+        $FIELD_WRITES = [];
+        $report = bioco_import_report_new();
+        bioco_import_import_event_item($item, 'apply', false, $report);
+        $results[$name] = [
+            'writes' => $FIELD_WRITES,
+            'cardRows' => array_values(array_filter(
+                $report['rows'],
+                fn($row) => $row['field'] === 'card_image'
+            )),
+        ];
+    }
+    echo json_encode($results);
+    '''
+    result = json.loads(subprocess.run(
+        ["php", "-r", php],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout)
+
+    assert result["equal"]["writes"] == []
+    assert [row["status"] for row in result["equal"]["cardRows"]] == ["ok-equal"]
+    assert result["different"]["writes"] == [["card_image", 73, 41]]
+    assert [row["status"] for row in result["different"]["cardRows"]] == ["update"]
+    assert result["missing"]["writes"] == [["card_image", 73, 41]]
+    assert [row["status"] for row in result["missing"]["cardRows"]] == ["update"]
+
+
 def test_exported_images_reach_import_plan(tmp_path):
     exported = subprocess.run(
         [
