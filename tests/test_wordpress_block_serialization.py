@@ -191,4 +191,8 @@ def test_scf_block_name_and_post_content_slashing():
     collections = (
         ROOT / "wordpress/web/app/mu-plugins/bioco-import/includes/collections.php"
     ).read_text()
-    assert collections.count("'post_content' => wp_slash($content)") == 2
+    # Both event write paths slash: the insert, and the --force update (which
+    # assembles only the changed keys, so it slashes into $changed).
+    assert collections.count("'post_content' => wp_slash($content)") == 1
+    assert collections.count("$changed['post_content'] = wp_slash($content)") == 1
+    assert "'post_content' => $content" not in collections

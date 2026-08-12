@@ -8,6 +8,21 @@
 
 if (!defined('ABSPATH')) exit;
 
+function bioco_import_wire_timezone($mode, array &$report) {
+    $desired = 'Europe/Zurich';
+    $current = (string) get_option('timezone_string');
+    if ($current === $desired) {
+        bioco_import_report_row($report, '(site)', 'timezone', '', 'ok-equal', "Zeitzone bereits {$desired}.");
+        return;
+    }
+    if ($mode !== 'apply') {
+        bioco_import_report_row($report, '(site)', 'timezone', '', 'update', "WÜRDE: Zeitzone auf {$desired} setzen.");
+        return;
+    }
+    update_option('timezone_string', $desired);
+    bioco_import_report_row($report, '(site)', 'timezone', '', 'update', "Zeitzone auf {$desired} gesetzt.");
+}
+
 function bioco_import_wire_front_page(array $seeds, $mode, array &$report) {
     $home = bioco_import_find_page('home');
     if (!$home) {
@@ -129,6 +144,7 @@ function bioco_import_wire_primary_menu(array $seeds, $mode, $force, array &$rep
 // Entry point used by the CLI command. Runs after the page import so
 // bioco_import_find_page() can resolve the pages the menu links to.
 function bioco_import_run_site_wiring(array $seeds, $mode, $force, array &$report) {
+    bioco_import_wire_timezone($mode, $report);
     bioco_import_wire_front_page($seeds, $mode, $report);
     bioco_import_wire_permalinks($mode, $report);
     bioco_import_wire_primary_menu($seeds, $mode, $force, $report);

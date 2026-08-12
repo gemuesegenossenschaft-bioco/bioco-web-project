@@ -27,7 +27,7 @@ if (!empty($block['className'])) {
     $class_name .= ' ' . $block['className'];
 }
 
-$upcoming_query = bioco_query_events('upcoming', $limit);
+$upcoming_query = bioco_query_events('upcoming', $limit, 'general');
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
     <?php if ($variant === 'banner') : ?>
