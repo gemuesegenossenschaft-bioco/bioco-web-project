@@ -218,7 +218,7 @@ do not touch `intranet.bioco.ch`.
    once public and once against the local WordPress vhost, so an app failure stays distinguishable
    from a proxy or docroot failure:
 
-   ```
+   ```text
    /  /abos/  /aktuelles/  /anmeldung/  /anmeldung-danke/  /bioco-werden/  /datenschutz/
    /gemuese/  /impressum/  /kontakt/  /kundenportal/  /mitmachen/  /newsletter/  /solawi/
    /standorte-depots/  /statuten/  /tag-der-offenen-tuer/  /warteliste/  /wir/
