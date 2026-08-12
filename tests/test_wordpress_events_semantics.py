@@ -432,3 +432,47 @@ def test_second_force_run_reports_no_updates():
 
     assert [r for r in rows if r["status"] == "update"] == [], rows
     assert {r["status"] for r in rows} == {"ok-equal"}, rows
+
+
+# --- 8. first run with raw meta present: the fallback cannot swallow a write -
+
+# Section 6 runs without get_post_meta(), so the raw-meta fallback in
+# bioco_import_acf_stored_value_equals() short-circuits before it is reached.
+# On a real site the function always exists, so exercise the same first-run
+# state with raw meta defined: event_date's raw value still differs from the
+# planned value, so it must still be written exactly once.
+RAW_META_EVENT_PHP = EVENT_PHP.replace(
+    "function update_field($field, $value, $postId) {",
+    """function get_post_meta($postId, $field = '', $single = false) {
+    $raw = [
+        'event_date' => '2026-08-14 10:00:00',
+        'event_status' => 'upcoming',
+        'event_type' => 'general',
+        'event_summary' => 'Fest im Garten.',
+        'card_image' => '77',
+    ];
+    if (!isset($raw[$field])) return $single ? '' : [];
+    return $single ? $raw[$field] : [$raw[$field]];
+}
+function update_field($field, $value, $postId) {""",
+)
+
+
+def raw_meta_event_force_run():
+    return run_php(RAW_META_EVENT_PHP, {"BIOCO_TEST_TZ": "Europe/Zurich"})
+
+
+def test_raw_meta_fallback_still_writes_the_shifted_event_date():
+    payload = raw_meta_event_force_run()
+
+    assert payload["field_writes"] == [["event_date", "2026-08-15 18:00:00"]]
+    assert payload["post_writes"] == []
+
+
+def test_raw_meta_fallback_reports_the_event_date_update():
+    rows = raw_meta_event_force_run()["report"]
+    by_field = {r["field"]: r["status"] for r in rows if r["field"]}
+
+    assert by_field["event_date"] == "update"
+    for equal_field in ("event_status", "event_type", "event_summary", "card_image"):
+        assert by_field[equal_field] == "ok-equal", (equal_field, rows)
