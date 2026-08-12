@@ -174,3 +174,9 @@ Next.js 14 app router frontend.
   - `/api/revalidate` supports `path|paths|tag|tags|layout`, secret required.
 - If touching cache/revalidate behavior, update tests: `frontend/tests/revalidate-route.test.ts`, `frontend/tests/middleware.test.ts`.
 - Visual editor tests: `frontend/tests/visual-editor.test.tsx` (postMessage, inline edit selection, busy blocking, field attrs, highlight, security).
+
+## Execution Runner Contract
+
+- Use one-way implementation ladder: Kimi Code first; move to Claude Code only after genuine Kimi usage/quota exhaustion; move to Codex only after genuine Claude usage/quota exhaustion.
+- Record the quota/exhaustion evidence when advancing. Do not return to an exhausted runner during the current goal.
+- The orchestrator owns planning, verification, user communication, CodeRabbit coordination, commits, pull requests, merges, and deploys. Runners execute delegated implementation only.
