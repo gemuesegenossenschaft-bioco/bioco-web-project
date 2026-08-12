@@ -18,10 +18,9 @@
  * there — depot/paymentType/mitarbeit are not server-validated in the
  * reference either).
  *
- * membershipType/aboType/additionalShares are fixed hidden fields: the
- * reference itself notes "Always abo, no choice" / "Always standard,
- * pre-selected" / "Always 0, no choice" for a form reached from the
- * mitmachen page — this block matches that default, sharesOnly is unused.
+ * membershipType/aboType/additionalShares/sharesOnly default to the reference
+ * form's standard tier. view.js replaces them from the pricing calculator's
+ * ?abo=&shares=&additional= handoff when those parameters are present.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -91,6 +90,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
         <input type="hidden" name="membershipType" value="abo">
         <input type="hidden" name="aboType" value="standard">
         <input type="hidden" name="additionalShares" value="0">
+        <input type="hidden" name="sharesOnly" value="0">
 
         <div class="form-step">
 <?php if ($commitment_title) : ?>            <h3><?php echo esc_html($commitment_title); ?></h3><?php endif; ?>

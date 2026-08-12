@@ -295,7 +295,38 @@ function bioco_forms_validate_membership($data) {
         $errors['email'] = 'Bitte geben Sie eine gültige E-Mail-Adresse ein.';
     }
 
+    $membership_type = isset($data['membershipType']) ? $data['membershipType'] : '';
+    $abo_type = isset($data['aboType']) ? $data['aboType'] : '';
+    $additional = bioco_forms_bounded_share_count($data['additionalShares'] ?? null, 0);
+    $shares_only_value = array_key_exists('sharesOnly', $data)
+        ? $data['sharesOnly']
+        : ($membership_type === 'abo' ? 0 : null);
+    $shares_only = bioco_forms_bounded_share_count($shares_only_value, 0);
+    $valid_abo = $membership_type === 'abo'
+        && in_array($abo_type, ['halb', 'standard', 'doppel'], true)
+        && $additional !== null
+        && $shares_only === 0;
+    $valid_shares_only = $membership_type === 'shares-only'
+        && $abo_type === 'none'
+        && $additional === 0
+        && $shares_only !== null
+        && $shares_only >= 1;
+    if (!$valid_abo && !$valid_shares_only) {
+        $errors['membershipSelection'] = 'Bitte wählen Sie eine gültige Mitgliedschaft.';
+    }
+
     return ['ok' => empty($errors), 'errors' => $errors];
+}
+
+function bioco_forms_bounded_share_count($value, $minimum) {
+    if (is_int($value)) {
+        $count = $value;
+    } elseif (is_string($value) && preg_match('/^\d+$/', $value)) {
+        $count = (int) $value;
+    } else {
+        return null;
+    }
+    return $count >= $minimum && $count <= 100 ? $count : null;
 }
 
 function bioco_forms_membership_total_shares($data) {

@@ -6,15 +6,49 @@
  * in the bioco-forms mu-plugin, ported from .wp-refs/membership.ts).
  *
  * This is the single-page long-form variant — see the deferral note at the
- * top of render.php. Redirect-on-success mirrors
- * .wp-refs/MembershipForm.tsx's window.location.href = '/anmeldung/danke'.
+ * top of render.php. Redirect-on-success targets the imported WordPress
+ * thank-you page at /anmeldung-danke/.
  */
 (function () {
   'use strict';
 
   var FALLBACK_ERROR = 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.';
   var CAPTCHA_MISSING_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.';
-  var THANK_YOU_URL = '/anmeldung/danke';
+  var THANK_YOU_URL = '/anmeldung-danke/';
+
+  function nonNegativeInteger(value) {
+    if (!/^\d+$/.test(value || '')) return 0;
+    return Math.min(100, parseInt(value, 10));
+  }
+
+  function setHiddenValue(form, name, value) {
+    var input = form.querySelector('[name="' + name + '"]');
+    if (input) input.value = String(value);
+  }
+
+  function applyCalculatorSelection(form) {
+    var params = new URLSearchParams(window.location.search || '');
+    var selected = params.get('abo');
+    var aboTypes = {
+      'halb-1-person': 'halb',
+      'standard-2-3-personen': 'standard',
+      'doppel-4-6-personen': 'doppel'
+    };
+
+    if (selected === 'kein') {
+      setHiddenValue(form, 'membershipType', 'shares-only');
+      setHiddenValue(form, 'aboType', 'none');
+      setHiddenValue(form, 'additionalShares', 0);
+      setHiddenValue(form, 'sharesOnly', Math.max(1, nonNegativeInteger(params.get('shares'))));
+      return;
+    }
+
+    if (!aboTypes[selected]) return;
+    setHiddenValue(form, 'membershipType', 'abo');
+    setHiddenValue(form, 'aboType', aboTypes[selected]);
+    setHiddenValue(form, 'additionalShares', nonNegativeInteger(params.get('additional')));
+    setHiddenValue(form, 'sharesOnly', 0);
+  }
 
   function ready(fn) {
     if (document.readyState === 'loading') {
@@ -101,6 +135,8 @@
   }
 
   function initForm(form) {
+    applyCalculatorSelection(form);
+
     var configName = form.getAttribute('data-config') || 'biocoMembershipFormConfig';
     var config = window[configName] || {};
     var messageBox = form.parentNode.querySelector('.form-message');

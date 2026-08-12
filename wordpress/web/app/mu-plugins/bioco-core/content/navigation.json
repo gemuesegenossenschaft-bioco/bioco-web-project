@@ -1,0 +1,11 @@
+{
+  "items": [
+    {"slug": "home", "label": "Startseite", "url": "/"},
+    {"slug": "solawi", "label": "Solawi", "url": "/solawi/"},
+    {"slug": "gemuese", "label": "Gemüse", "url": "/gemuese/"},
+    {"slug": "mitmachen", "label": "Mitmachen", "url": "/mitmachen/"},
+    {"slug": "standorte-depots", "label": "Standorte & Depots", "url": "/standorte-depots/"},
+    {"slug": "aktuelles", "label": "Aktuelles", "url": "/aktuelles/"},
+    {"slug": "kontakt", "label": "Kontakt", "url": "/kontakt/"}
+  ]
+}

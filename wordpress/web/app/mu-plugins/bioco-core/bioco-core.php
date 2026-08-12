@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) exit;
 define('BIOCO_CORE_DIR', __DIR__);
 
 require_once BIOCO_CORE_DIR . '/includes/helpers.php';
+require_once BIOCO_CORE_DIR . '/includes/navigation.php';
 
 /**
  * ACF Local JSON — this plugin's own acf-json/ dir. The fleet move is complete,
@@ -52,6 +53,14 @@ add_filter('block_categories_all', function (array $categories) {
  * a given block only lives in one of the two at a time.
  */
 add_action('init', function () {
+    register_block_type('bioco/primary-navigation', [
+        'api_version' => 2,
+        'title' => __('biocò Primärnavigation', 'bioco'),
+        'category' => 'theme',
+        'supports' => ['html' => false],
+        'render_callback' => 'bioco_render_primary_navigation',
+    ]);
+
     $blocks_dir = BIOCO_CORE_DIR . '/blocks';
     if (!is_dir($blocks_dir)) return;
     foreach (glob($blocks_dir . '/*/block.json') as $block_json) {
