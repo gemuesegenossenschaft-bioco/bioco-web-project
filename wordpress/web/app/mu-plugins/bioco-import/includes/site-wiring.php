@@ -52,19 +52,11 @@ function bioco_import_wire_permalinks($mode, array &$report) {
 // der offenen Tür, Kundenportal, biocò werden) stay out of the primary nav,
 // same as today. Adjust this list here if the live nav changes.
 function bioco_import_primary_nav_slugs() {
-    return ['home', 'solawi', 'gemuese', 'mitmachen', 'standorte-depots', 'aktuelles', 'kontakt'];
+    return array_column(bioco_primary_navigation_items(), 'slug');
 }
 
 function bioco_import_nav_labels() {
-    return [
-        'home' => 'Startseite',
-        'solawi' => 'Solawi',
-        'gemuese' => 'Gemüse',
-        'mitmachen' => 'Mitmachen',
-        'standorte-depots' => 'Standorte & Depots',
-        'aktuelles' => 'Aktuelles',
-        'kontakt' => 'Kontakt',
-    ];
+    return array_column(bioco_primary_navigation_items(), 'label', 'slug');
 }
 
 function bioco_import_wire_primary_menu(array $seeds, $mode, $force, array &$report) {
