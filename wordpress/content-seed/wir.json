@@ -6,14 +6,15 @@
     "sections": [
         {
             "section_id": "intro",
-            "section_layout": "split_media_text",
+            "section_layout": "rich_text",
             "section_component": "page_intro",
-            "section_title": "Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf.",
+            "section_title": "Wir",
             "section_text": "<p>Seit 2014 bewirtschaften wir einen Bio Bauernhof auf dem Geisshof in Gebenstorf. Lerne unser Team, unsere Geschichte und die Werte kennen, die unsere solidarische Landwirtschaft prägen.</p>",
             "section_config": {
                 "containerWidth": "lg",
                 "textWidth": "normal",
-                "align": "left"
+                "align": "left",
+                "headingLevel": "1"
             }
         },
         {
@@ -81,10 +82,10 @@
             "section_text": "<h2>Hof-Team</h2>\n\n<p>Unser Hof-Team im Jahr 2026 besteht aus Matthias, Tino und Michael. Michael hat in diesem Jahr die Verantwortung für den Gemüseanbau an Matthias übergeben. Mit Tino haben wir eine versierte Fachkraft gewonnen, der den Hof hoffentlich auch in den kommenden Jahren begleitet. </p>",
             "section_config": {
                 "containerWidth": "xl",
-                "columnsDesktop": "2",
+                "columnsDesktop": "3",
                 "columnsMobile": "1",
                 "cardStyle": "soft",
-                "mediaRatio": "3:4",
+                "mediaRatio": "4:3",
                 "mediaFit": "cover",
                 "gap": "lg",
                 "rounded": "md"

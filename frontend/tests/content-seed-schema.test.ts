@@ -302,7 +302,7 @@ describe('content-seed schema (cms/content-seed/*.json)', () => {
       if (seed.hero !== undefined) {
         const hero = seed.hero as Record<string, unknown>
         for (const key of Object.keys(hero)) {
-          expect(['hero_title', 'hero_subtitle', 'image_alt']).toContain(key)
+          expect(['hero_title', 'hero_subtitle', 'image_url', 'image_alt']).toContain(key)
           expect(typeof hero[key]).toBe('string')
         }
       }

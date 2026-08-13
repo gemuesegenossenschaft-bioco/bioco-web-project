@@ -10,6 +10,7 @@ $eyebrow = get_field('eyebrow');
 $title = get_field('title');
 $text = get_field('text');
 $buttons = get_field('buttons');
+$style_variant = get_field('style_variant') ?: 'default';
 
 if ($is_preview && !$title && !$text) {
     $title = __('Titel eingeben …', 'bioco');
@@ -26,7 +27,7 @@ if (!empty($block['className'])) {
 // text already carries its own heading markup.
 $heading_already_in_text = bioco_text_has_heading_html($text);
 ?>
-<section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
+<section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>" data-style-variant="<?php echo esc_attr($style_variant); ?>">
     <?php if ($eyebrow) : ?>
         <p class="cms-section-eyebrow"><?php echo esc_html($eyebrow); ?></p>
     <?php endif; ?>

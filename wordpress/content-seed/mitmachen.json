@@ -11,7 +11,15 @@
     {
       "section_id": "intro",
       "section_layout": "rich_text",
-      "section_text": "<h1>Mitmachen bei biocò</h1><p>Werde Teil unserer Gemüsegenossenschaft und erlebe <a href=\"/solawi\">solidarische Landwirtschaft</a> hautnah. Hier erfährst du, wie du dich einbringen kannst und was Mitarbeit bei biocò bedeutet.</p>"
+      "section_text": "<p>Werde Teil unserer Gemüsegenossenschaft und erlebe <a href=\"/solawi\">solidarische Landwirtschaft</a> hautnah. Hier erfährst du, wie du dich einbringen kannst und was Mitarbeit bei biocò bedeutet.</p>",
+      "section_component": "page_intro",
+      "section_title": "Mitmachen bei biocò",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "mitarbeit",
@@ -50,8 +58,9 @@
     {
       "section_id": "familien",
       "section_layout": "split_media_text",
-      "image_alt": "Frisch geerntetes Demeter-Gemüse vom Geisshof",
-      "section_text": "<h2>Familien & Kinder auf dem Geisshof</h2><h3>Kinder sind willkommen</h3><p>Familien und Kinder sind sehr regelmässige Helfer auf dem Geisshof. Die Einbindung von Kindern in den Prozess des Gemüseanbaus ist ein zentraler Bestandteil der biocò-Kultur.</p><p>Auf dem Geisshof erleben Kinder hautnah, wie Gemüse wächst, gepflegt wird und geerntet wird. Sie lernen spielerisch den Kreislauf der Natur kennen und entwickeln ein tiefes Verständnis für die Herkunft ihrer Nahrung. Diese praktische Erfahrung prägt nicht nur ihr Verhältnis zu Lebensmitteln, sondern stärkt auch das Gemeinschaftsgefühl zwischen den Generationen.</p><p>Die Elki-Gruppe organisiert spezielle Aktivitäten für Familien, bei denen Kinder aktiv mithelfen können – sei es beim Säen, Jäten, Ernten oder beim gemeinsamen Verarbeiten des Gemüses. Diese gemeinsamen Erlebnisse schaffen bleibende Erinnerungen und fördern das Verständnis für nachhaltige Landwirtschaft von klein auf.</p>"
+      "image_alt": "Kinder helfen gemeinsam auf dem Geisshof bei biocò",
+      "section_text": "<h2>Familien & Kinder auf dem Geisshof</h2><h3>Kinder sind willkommen</h3><p>Familien und Kinder sind sehr regelmässige Helfer auf dem Geisshof. Die Einbindung von Kindern in den Prozess des Gemüseanbaus ist ein zentraler Bestandteil der biocò-Kultur.</p><p>Auf dem Geisshof erleben Kinder hautnah, wie Gemüse wächst, gepflegt wird und geerntet wird. Sie lernen spielerisch den Kreislauf der Natur kennen und entwickeln ein tiefes Verständnis für die Herkunft ihrer Nahrung. Diese praktische Erfahrung prägt nicht nur ihr Verhältnis zu Lebensmitteln, sondern stärkt auch das Gemeinschaftsgefühl zwischen den Generationen.</p><p>Die Elki-Gruppe organisiert spezielle Aktivitäten für Familien, bei denen Kinder aktiv mithelfen können – sei es beim Säen, Jäten, Ernten oder beim gemeinsamen Verarbeiten des Gemüses. Diese gemeinsamen Erlebnisse schaffen bleibende Erinnerungen und fördern das Verständnis für nachhaltige Landwirtschaft von klein auf.</p>",
+      "image_url": "https://cms.bioco.ch/site/assets/files/1770/bioco_kinder.jpg"
     },
     {
       "section_id": "kennenlernen-cta",
@@ -59,8 +68,16 @@
       "section_layout": "rich_text",
       "section_text": "<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
       "buttons": [
-        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
-        { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }
+        {
+          "text": "Nimm Kontakt auf",
+          "href": "/kontakt",
+          "variant": "primary"
+        },
+        {
+          "text": "Zu uns finden",
+          "href": "/standorte-depots",
+          "variant": "secondary"
+        }
       ]
     }
   ],

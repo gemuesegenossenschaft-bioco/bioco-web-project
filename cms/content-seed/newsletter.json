@@ -6,8 +6,16 @@
   "sections": [
     {
       "section_id": "intro",
-      "section_text": "<h1>Newsletter abonnieren</h1>",
-      "section_layout": "rich_text"
+      "section_text": "",
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_title": "Newsletter abonnieren",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "newsletter-formular",
@@ -15,7 +23,7 @@
     }
   ],
   "conversion_notes": [
-    "h1 lives in intro section_text. SubscribeForm renders NO heading of its own — the heading is NOT duplicated in the component section (and must not go into section_title, which would render as h2 and break the one-h1-per-page contract).",
+    "The page_intro section owns the single H1 via section_config.headingLevel=1. SubscribeForm renders NO heading of its own — the heading is NOT duplicated in the component section (and must not go into section_title, which would render as h2 and break the one-h1-per-page contract).",
     "All form labels ('E-Mail-Adresse *', 'Name (optional)', 'Ich akzeptiere die Datenschutzbestimmungen *'), the submit label 'Abonnieren'/'Wird gesendet...', and success/error messages live inside frontend/components/forms/SubscribeForm.tsx (registered component 'subscribe_form') and are intentionally not part of the seed.",
     "Page exports no metadata — 'seo' omitted; the layout default <title> applies today."
   ]

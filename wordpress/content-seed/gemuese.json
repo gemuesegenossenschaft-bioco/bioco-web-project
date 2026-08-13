@@ -9,6 +9,19 @@
   },
   "sections": [
     {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_title": "Unser Gemüse",
+      "section_text": "",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
+    },
+    {
       "section_id": "saisonkalender",
       "section_title": "Saisonkalender",
       "section_text": "<p>Wann ist welches Gemüse verfügbar? Entdecke unsere saisonale Vielfalt.</p>",
@@ -46,7 +59,9 @@
     {
       "section_id": "demeter-link",
       "section_layout": "rich_text",
-      "section_text": "<p><a href=\"https://www.demeter.ch\" target=\"_blank\" rel=\"noopener noreferrer\" class=\"btn btn-secondary btn-organic\">Mehr über Demeter erfahren →</a></p>"
+      "buttons": [
+        { "text": "Mehr über Demeter erfahren →", "href": "https://www.demeter.ch", "variant": "secondary" }
+      ]
     },
     {
       "section_id": "kennenlernen-cta",
@@ -54,8 +69,16 @@
       "section_layout": "rich_text",
       "section_text": "<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
       "buttons": [
-        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
-        { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }
+        {
+          "text": "Nimm Kontakt auf",
+          "href": "/kontakt",
+          "variant": "primary"
+        },
+        {
+          "text": "Zu uns finden",
+          "href": "/standorte-depots",
+          "variant": "secondary"
+        }
       ]
     }
   ],

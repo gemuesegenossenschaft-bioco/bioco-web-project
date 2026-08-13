@@ -49,6 +49,29 @@
             "prefix_name": 0
         },
         {
+            "key": "field_bioco_page_intro_heading_level",
+            "label": "Überschriften-Ebene",
+            "name": "heading_level",
+            "aria-label": "",
+            "type": "button_group",
+            "instructions": "H1 nur für den einmaligen Seitentitel verwenden.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": {
+                "width": "25",
+                "class": "",
+                "id": ""
+            },
+            "choices": {
+                "1": "H1 Seitentitel",
+                "2": "H2 Abschnitt"
+            },
+            "default_value": "2",
+            "return_format": "value",
+            "allow_null": 0,
+            "layout": "horizontal"
+        },
+        {
             "key": "field_bioco_page_intro_container_width",
             "label": "Container-Breite",
             "name": "container_width",
@@ -58,7 +81,7 @@
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "33",
+                "width": "25",
                 "class": "",
                 "id": ""
             },
@@ -87,7 +110,7 @@
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "33",
+                "width": "25",
                 "class": "",
                 "id": ""
             },
@@ -114,7 +137,7 @@
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
-                "width": "34",
+                "width": "25",
                 "class": "",
                 "id": ""
             },

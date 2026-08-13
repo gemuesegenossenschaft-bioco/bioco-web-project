@@ -167,6 +167,61 @@
         "type": "number",
         "min": 1,
         "max": 12
+      },
+      {
+        "key": "archiveUrl",
+        "label": "Archiv-Link",
+        "type": "text"
+      },
+      {
+        "key": "title",
+        "label": "Titel",
+        "type": "text"
+      },
+      {
+        "key": "upcomingTitle",
+        "label": "Titel kommende Events",
+        "type": "text"
+      },
+      {
+        "key": "schnuppertageTitle",
+        "label": "Titel Schnuppertage",
+        "type": "text"
+      },
+      {
+        "key": "archiveLabel",
+        "label": "Archiv-Linktext",
+        "type": "text"
+      },
+      {
+        "key": "loadingMessage",
+        "label": "Ladetext",
+        "type": "text"
+      },
+      {
+        "key": "emptyMessage",
+        "label": "Leertext",
+        "type": "text"
+      },
+      {
+        "key": "schnuppertageEmptyMessage",
+        "label": "Leertext Schnuppertage",
+        "type": "text"
+      },
+      {
+        "key": "pastTitle",
+        "label": "Titel vergangene Events",
+        "type": "text"
+      },
+      {
+        "key": "pastDescription",
+        "label": "Beschreibung vergangene Events",
+        "type": "text"
+      },
+      {
+        "key": "pastLinkLabel",
+        "label": "Linktext Rückblick",
+        "type": "text"
       }
     ],
     "notes": "Titel, Text und Buttons kommen aus dem Component-Section-Wrapper. Darstellung 'Banner' rendert EventsBanner (kompakte Liste mit 'Alle Events ansehen'-Link, wie /kundenportal); 'Standard' rendert EventsSection. 'Anzahl Einträge' begrenzt die Banner-Liste."
@@ -363,7 +418,8 @@
     "defaultConfig": {
       "containerWidth": "lg",
       "textWidth": "normal",
-      "align": "left"
+      "align": "left",
+      "headingLevel": "2"
     },
     "configSchema": [
       {
@@ -426,6 +482,26 @@
             "value": "center"
           }
         ]
+      },
+      {
+        "key": "headingLevel",
+        "label": "Überschriften-Ebene",
+        "type": "select",
+        "options": [
+          {
+            "label": "H1",
+            "value": "1"
+          },
+          {
+            "label": "H2",
+            "value": "2"
+          }
+        ]
+      },
+      {
+        "key": "emptyMessage",
+        "label": "Leertext",
+        "type": "text"
       }
     ]
   },
@@ -462,7 +538,8 @@
       "mediaFit": "cover",
       "verticalAlign": "center",
       "gap": "lg",
-      "rounded": "lg"
+      "rounded": "lg",
+      "styleVariant": "default"
     },
     "configSchema": [
       {
@@ -634,6 +711,21 @@
           {
             "label": "XL",
             "value": "xl"
+          }
+        ]
+      },
+      {
+        "key": "styleVariant",
+        "label": "Stilvariante",
+        "type": "select",
+        "options": [
+          {
+            "label": "Standard",
+            "value": "default"
+          },
+          {
+            "label": "Feature",
+            "value": "feature"
           }
         ]
       }

@@ -3,6 +3,25 @@
     "title": "Bild & Text Block (Bioco)",
     "fields": [
         {
+            "key": "field_bioco_media_text_style_variant",
+            "label": "Stilvariante",
+            "name": "style_variant",
+            "aria-label": "",
+            "type": "select",
+            "instructions": "Feature nutzt die grosszügige Startseiten-Typografie.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "choices": { "default": "Standard", "feature": "Feature" },
+            "default_value": "default",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
             "key": "field_bioco_media_text_media_side",
             "label": "Bildposition",
             "name": "media_side",

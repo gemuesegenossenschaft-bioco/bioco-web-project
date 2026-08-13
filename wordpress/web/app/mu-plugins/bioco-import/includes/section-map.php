@@ -128,6 +128,7 @@ function bioco_import_media_text_layout_config($mediaSide) {
         'content_clone' => ['eyebrow', 'title', 'text'],
         'buttons' => true,
         'auto_header' => true,
+        'config_fields' => ['styleVariant' => 'style_variant'],
         'extra' => function (array $section, array &$values, array &$warnings) use ($mediaSide) {
             $values['media_side'] = $mediaSide;
             $url = (string) ($section['image_url'] ?? '');
@@ -146,6 +147,7 @@ function bioco_import_layout_map() {
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
+            'config_fields' => ['styleVariant' => 'style_variant', 'buttonNavigation' => null],
         ],
         'split_media_text' => bioco_import_media_text_layout_config('left'),
         'split_text_media' => bioco_import_media_text_layout_config('right'),
@@ -188,6 +190,8 @@ function bioco_import_component_map() {
                 'containerWidth' => 'container_width',
                 'textWidth' => 'text_width',
                 'align' => 'align',
+                'headingLevel' => 'heading_level',
+                'emptyMessage' => null,
             ],
             'unmapped_fields' => ['image_url', 'image_alt'],
         ],
@@ -498,6 +502,22 @@ function bioco_import_component_map() {
                 if ($variant !== '') $values['variant'] = $variant;
                 $limit = bioco_import_config_value($section, 'limit', null);
                 if ($limit !== null && $limit !== '') $values['limit'] = (int) $limit;
+                $archiveUrl = (string) bioco_import_config_value($section, 'archiveUrl');
+                if ($archiveUrl !== '') $values['archive_url'] = $archiveUrl;
+                foreach ([
+                    'archiveLabel' => $variant === 'banner' ? 'banner_link_label' : 'standard_link_label',
+                    'emptyMessage' => 'empty_message',
+                    'pastTitle' => 'past_title',
+                    'pastDescription' => 'past_description',
+                    'pastLinkLabel' => 'past_link_label',
+                ] as $configKey => $fieldName) {
+                    $value = (string) bioco_import_config_value($section, $configKey);
+                    if ($value !== '') $values[$fieldName] = $value;
+                }
+                $upcomingTitle = (string) bioco_import_config_value($section, 'upcomingTitle');
+                if ($upcomingTitle !== '') $values['standard_title'] = $upcomingTitle;
+                $configuredTitle = (string) bioco_import_config_value($section, 'title');
+                if ($variant === 'banner' && $configuredTitle !== '') $values['title'] = $configuredTitle;
 
                 $title = (string) ($section['section_title'] ?? '');
                 if ($title !== '') {

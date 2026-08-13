@@ -20,6 +20,7 @@
       "section_text": "<p>Bei der biocò Gemüsegenossenschaft teilen wir nicht nur die Ernte, sondern auch die Verantwortung und die Freude an der Arbeit. Das ist <a href=\"/solawi\">solidarische Landwirtschaft</a> in der Region Baden: Produzentinnen und Konsumentinnen arbeiten Hand in Hand, gestalten gemeinsam den Anbau und erleben, wie aus einem Samen frisches Bio-Gemüse wird, das wöchentlich in den <a href=\"/standorte-depots\">Depots in Baden, Brugg und Gebenstorf</a> abgeholt werden kann.</p>",
       "section_layout": "split_text_media",
       "section_theme": "default",
+      "section_config": { "styleVariant": "feature" },
       "image_url": "https://cms.bioco.ch/site/assets/files/1778/zusammen-arbeiten-2.1600x0.jpg",
       "image_alt": "Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg",
       "buttons": [
@@ -32,6 +33,7 @@
       "section_text": "<p>Seit 2014 bewirtschaften wir den <a href=\"/wir\">Geisshof in Gebenstorf</a> nach biologisch-dynamischen Prinzipien und liefern <a href=\"/gemuese\">Demeter-Gemüse</a> in höchster Bio-Qualität. Hier wächst Woche für Woche eine vielfältige Auswahl an saisonalem Gemüse aus <a href=\"/solawi\">solidarischer Landwirtschaft</a>, das wir gemeinsam anbauen, pflegen und ernten. Jedes Mitglied bringt sich ein, ob auf dem Feld, in der Logistik oder bei der Organisation.</p>",
       "section_layout": "split_media_text",
       "section_theme": "default",
+      "section_config": { "styleVariant": "feature" },
       "image_url": "https://cms.bioco.ch/site/assets/files/1779/gemeinsamsolidarischfrisch-1.1600x0.jpg",
       "image_alt": "Frisch geerntetes Demeter-Gemüse vom Geisshof",
       "buttons": [
@@ -44,6 +46,7 @@
       "section_text": "<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
       "section_layout": "rich_text",
       "section_theme": "default",
+      "section_config": { "styleVariant": "feature" },
       "buttons": [
         { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
         { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }

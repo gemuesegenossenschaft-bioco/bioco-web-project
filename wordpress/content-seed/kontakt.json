@@ -7,17 +7,32 @@
     {
       "section_id": "intro",
       "section_layout": "rich_text",
-      "section_text": "<h1>Kontakt</h1><p>Hast du Fragen zu biocò? Wir freuen uns auf deine Nachricht! Wir melden uns in der Regel innerhalb von 2-3 Werktagen bei dir zurück.</p>"
+      "section_text": "<p>Hast du Fragen zu biocò? Wir freuen uns auf deine Nachricht! Wir melden uns in der Regel innerhalb von 2-3 Werktagen bei dir zurück.</p>",
+      "section_component": "page_intro",
+      "section_title": "Kontakt",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "intranet-box",
       "section_layout": "rich_text",
-      "section_text": "<h4>Du bist bereits Mitglied?</h4><p>Als Mitglied hast du Zugang zum Intranet, wo du alle wichtigen Informationen, Dokumente und Tools findest.</p><a href=\"/intranet\" class=\"btn btn-primary btn-organic\">Zum Intranet →</a>"
+      "section_config": { "buttonNavigation": "document" },
+      "section_text": "<h4>Du bist bereits Mitglied?</h4><p>Als Mitglied hast du Zugang zum Intranet, wo du alle wichtigen Informationen, Dokumente und Tools findest.</p>",
+      "buttons": [
+        { "text": "Zum Intranet →", "href": "/intranet", "variant": "primary" }
+      ]
     },
     {
       "section_id": "mitglied-werden-box",
       "section_layout": "rich_text",
-      "section_text": "<h4>Möchtest du Mitglied werden?</h4><p>Interessierst du dich für ein Gemüseabo oder möchtest du mehr über die Mitgliedschaft erfahren? Hier findest du alle Informationen zur Anmeldung.</p><a href=\"/bioco-werden\" class=\"btn btn-primary btn-organic\">biocò werden →</a>"
+      "section_text": "<h4>Möchtest du Mitglied werden?</h4><p>Interessierst du dich für ein Gemüseabo oder möchtest du mehr über die Mitgliedschaft erfahren? Hier findest du alle Informationen zur Anmeldung.</p>",
+      "buttons": [
+        { "text": "biocò werden →", "href": "/bioco-werden", "variant": "primary" }
+      ]
     },
     {
       "section_id": "kontakt-formular-intro",

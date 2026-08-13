@@ -6,8 +6,16 @@
   "sections": [
     {
       "section_id": "intro",
-      "section_text": "<h1>Kundenportal</h1>",
-      "section_layout": "rich_text"
+      "section_text": "",
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_title": "Kundenportal",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "gateway",
@@ -29,12 +37,17 @@
       "section_component": "events_feed",
       "section_config": {
         "variant": "banner",
-        "limit": 3
+        "limit": 3,
+        "archiveUrl": "/aktuelles",
+        "title": "Nächste Events",
+        "archiveLabel": "Alle Events ansehen →",
+        "loadingMessage": "Events werden geladen…",
+        "emptyMessage": "Aktuell keine Events geplant."
       }
     }
   ],
   "conversion_notes": [
-    "h1 lives in intro section_text. 'Gateway' is an <h2> today and maps to the gateway section's section_title (SectionRenderer emits h2; the section has no section_text, so the title is not suppressed).",
+    "The page_intro section owns the single H1 via section_config.headingLevel=1. 'Gateway' is an <h2> today and maps to the gateway section's section_title (SectionRenderer emits h2; the section has no section_text, so the title is not suppressed).",
     "'link_tiles' is NOT yet registered in site/templates/component-registry.json / frontend/lib/componentRenderers.tsx — it must be added during conversion. Today the tiles are plain <div class=\"portal-tile\"> elements with NO links (hrefs are empty strings in the config), both use the 🦆 emoji as .portal-icon, tile titles render as <h3> and 'Extern' as <p>.",
     "The current section element carries id=\"I-01\" (bento-grid anchor) — not representable in the schema.",
     "Events block: the page currently renders EventsBanner (frontend/components/EventsBanner.tsx) with useEventsFeed(3) — hence section_config.limit = 3. EventsBanner renders its own <h2>Nächste Events</h2>, loading text 'Events werden geladen…', empty state 'Aktuell keine Events geplant.' and the footer link 'Alle Events ansehen →' (to /aktuelles); these texts live in the component and are NOT duplicated in the seed (no section_title, to avoid a duplicate heading).",

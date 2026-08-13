@@ -12,8 +12,7 @@ import type { HeroContent } from '@/lib/processwire-types'
 // F.6 — homepage and /aktuelles are fully CMS-driven: the seeded sections
 // (cms/content-seed/home.json + aktuelles.json) are the ONLY content source.
 // With an empty sections response the formerly hardcoded German fallbacks
-// must not render; code-owned feed chrome (loading/empty states, feed
-// headings, 'Rückblick ansehen →') stays.
+// must not render; feed chrome is also owned by section_config.
 
 let mockSearch = ''
 let mockFeed: { upcoming: AktuellesItem[]; past: AktuellesItem[]; isLoading: boolean } = {
@@ -217,9 +216,9 @@ describe('/aktuelles parity (seed: aktuelles)', () => {
       <AktuellesClient sections={seededSections} aktuellesItems={[]} />
     )
 
-    // Intro: h1 comes from the seeded section_text '<h1>Aktuelles</h1>'
+    // Intro: h1 comes from the data-owned page_intro headingLevel contract.
     const h1s = Array.from(container.querySelectorAll('h1')).map((h) => h.textContent)
-    expect(h1s).toEqual(['Aktuelles'])
+    expect(h1s).toEqual(['Beiträge'])
 
     // Kennenlernen CTA section from the seed
     getByRole('heading', { name: 'Möchtest du uns kennenlernen?' })
@@ -243,27 +242,25 @@ describe('/aktuelles parity (seed: aktuelles)', () => {
     expect(queryByRole('button', { name: 'Zu uns finden' })).toBeNull()
   })
 
-  it('keeps the code-owned feed chrome regardless of CMS sections', () => {
-    const { getByRole, container } = render(
+  it('renders no feed chrome when CMS sections are absent', () => {
+    const { queryByRole, container } = render(
       <AktuellesClient sections={[]} aktuellesItems={[]} />
     )
-    getByRole('heading', { name: 'Beiträge' })
-    getByRole('heading', { name: 'Events' })
-    getByRole('heading', { name: 'Kommende Events' })
-    getByRole('heading', { name: 'Schnuppertage' })
+    expect(queryByRole('heading', { name: 'Beiträge' })).toBeNull()
     const text = container.textContent || ''
-    expect(text).toContain('Keine Beiträge verfügbar.')
-    expect(text).toContain('Aktuell sind keine allgemeinen Events geplant.')
-    expect(text).toContain('Aktuell sind keine Schnuppertage geplant.')
+    expect(text).not.toContain('Keine Beiträge verfügbar.')
+    expect(text).not.toContain('Aktuell sind keine allgemeinen Events geplant.')
+    expect(text).not.toContain('Aktuell sind keine Schnuppertage geplant.')
   })
 
-  it('keeps the loading state chrome while the events feed loads', () => {
+  it('uses the seeded loading state chrome while the events feed loads', () => {
     mockFeed = { upcoming: [], past: [], isLoading: true }
-    const { container } = render(<AktuellesClient sections={[]} aktuellesItems={[]} />)
+    const aktuellesSections = seedToSections(loadSeed('aktuelles'))
+    const { container } = render(<AktuellesClient sections={aktuellesSections} aktuellesItems={[]} />)
     expect(container.textContent).toContain('Events werden geladen…')
   })
 
-  it('keeps the past-events card chrome including the Rückblick CTA', () => {
+  it('uses seeded past-events chrome including the Rückblick CTA', () => {
     mockFeed = {
       upcoming: [],
       past: [
@@ -271,7 +268,8 @@ describe('/aktuelles parity (seed: aktuelles)', () => {
       ],
       isLoading: false,
     }
-    const { container, getByRole } = render(<AktuellesClient sections={[]} aktuellesItems={[]} />)
+    const aktuellesSections = seedToSections(loadSeed('aktuelles'))
+    const { container, getByRole } = render(<AktuellesClient sections={aktuellesSections} aktuellesItems={[]} />)
     getByRole('heading', { name: 'Vergangene Events' })
     expect(container.textContent).toContain('Rückblick ansehen →')
   })
@@ -292,17 +290,17 @@ describe('/aktuelles parity (seed: aktuelles)', () => {
       /\|\|\s*'Aktuelles'/
     )
 
-    // Code-owned chrome stays
+    // Feed chrome moved to section_config.
     for (const chrome of [
       'Keine Beiträge verfügbar.',
       'Events werden geladen…',
       'Aktuell sind keine allgemeinen Events geplant.',
       'Aktuell sind keine Schnuppertage geplant.',
       'Rückblick ansehen →',
-      'useEventsFeed(',
     ]) {
-      expect(src, `AktuellesClient.tsx must keep chrome "${chrome}"`).toContain(chrome)
+      expect(src, `AktuellesClient.tsx must not hardcode chrome "${chrome}"`).not.toContain(chrome)
     }
+    expect(src).toContain('useEventsFeed(')
   })
 
   it('app/aktuelles/page.tsx keeps metadata and sections fetch, drops the fallback shim', () => {

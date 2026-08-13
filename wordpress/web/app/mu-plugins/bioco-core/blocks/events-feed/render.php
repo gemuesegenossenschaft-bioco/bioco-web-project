@@ -20,6 +20,8 @@ $past_title = get_field('past_title');
 $past_description = get_field('past_description');
 $past_link_label = get_field('past_link_label');
 $empty_message = get_field('empty_message');
+$archive_url = get_field('archive_url');
+$archive_href = $archive_url ? bioco_navigation_url($archive_url) : '';
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'events-feed';
 $class_name = 'cms-section cms-events-feed';
@@ -34,8 +36,8 @@ $upcoming_query = bioco_query_events('upcoming', $limit, 'general');
         <div class="events-banner">
 <?php if ($banner_title) : ?>            <h2><?php echo esc_html($banner_title); ?></h2><?php endif; ?>
             <?php bioco_render_events_list($upcoming_query, $empty_message); ?>
-<?php if ($banner_link_label) : ?>            <p style="margin-top: var(--wp--preset--spacing--30);">
-                <a href="<?php echo esc_url(home_url('/aktuelles')); ?>"><?php echo esc_html($banner_link_label); ?></a>
+<?php if ($banner_link_label && $archive_href) : ?>            <p class="events-feed-archive-link">
+                <a href="<?php echo esc_url($archive_href); ?>"><?php echo esc_html($banner_link_label); ?></a>
             </p><?php endif; ?>
         </div>
     <?php else :
@@ -45,7 +47,7 @@ $upcoming_query = bioco_query_events('upcoming', $limit, 'general');
             <div class="card-header"><?php if ($standard_title) : ?><h3><?php echo esc_html($standard_title); ?></h3><?php endif; ?></div>
             <div class="card-body">
                 <?php bioco_render_events_list($upcoming_query, $empty_message); ?>
-<?php if ($standard_link_label) : ?>                <a href="<?php echo esc_url(home_url('/aktuelles')); ?>" class="btn btn-primary" style="margin-top: 16px; display: inline-block;"><?php echo esc_html($standard_link_label); ?></a><?php endif; ?>
+<?php if ($standard_link_label && $archive_href) : ?>                <a href="<?php echo esc_url($archive_href); ?>" class="btn btn-primary events-feed-archive-link"><?php echo esc_html($standard_link_label); ?></a><?php endif; ?>
             </div>
         </div>
         <?php if ($past_query->have_posts()) : ?>

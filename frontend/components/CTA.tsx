@@ -1,12 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { safeDocumentHref, safeSitePath } from '@/lib/safeHref'
 
 interface CTAProps {
   text: string
   href: string
   variant?: 'primary' | 'secondary'
   onClick?: () => void
+  navigation?: 'client' | 'document'
 }
 
 function scrollToElement(id: string) {
@@ -17,12 +19,32 @@ function scrollToElement(id: string) {
   }
 }
 
-export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
+export function CTA({ text, href, variant = 'primary', onClick, navigation = 'client' }: CTAProps) {
   const router = useRouter()
   const className = `${variant === 'primary' ? 'btn btn-primary' : 'btn btn-secondary'} btn-organic`
+  const normalizedHref = href.trim()
+  const schemeProbe = normalizedHref.replace(/[\u0000-\u0020]+/g, '')
 
-  const isExternal = href.startsWith('http://') || href.startsWith('https://')
-  const isFile = /\.(pdf|doc|docx|xls|xlsx|zip)$/i.test(href)
+  const isFile = /\.(pdf|doc|docx|xls|xlsx|zip)$/i.test(normalizedHref)
+  const explicitScheme = schemeProbe.match(/^([a-z][a-z0-9+.-]*):/i)?.[1]?.toLowerCase()
+  const isExternal = explicitScheme === 'http' || explicitScheme === 'https'
+  const isAllowedProtocolLink = explicitScheme === 'mailto' || explicitScheme === 'tel'
+  const isUnsafeProtocolLink = Boolean(explicitScheme && !['http', 'https', 'mailto', 'tel'].includes(explicitScheme))
+  const documentHref = safeDocumentHref(href)
+  const isAnchor = href.startsWith('#') && !/[\s\u0000-\u001f\u007f\\]/u.test(href)
+  const isUnsafeInternalPath = !explicitScheme && !isAnchor && !safeSitePath(href)
+
+  if (isUnsafeProtocolLink || isUnsafeInternalPath || ((navigation === 'document' || isExternal || isAllowedProtocolLink) && !documentHref)) {
+    return <button type="button" className={className} disabled>{text}</button>
+  }
+
+  if (isAllowedProtocolLink || navigation === 'document') {
+    return <a className={className} href={documentHref} onClick={onClick}>{text}</a>
+  }
+
+  if (isExternal) {
+    return <a className={className} href={documentHref} target="_blank" rel="noopener noreferrer" onClick={onClick}>{text}</a>
+  }
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -30,32 +52,19 @@ export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
       onClick()
     }
 
-    if (isExternal || isFile) {
-      window.open(href, '_blank', 'noopener,noreferrer')
+    if (isFile) {
+      window.open(normalizedHref, '_blank', 'noopener,noreferrer')
       return
     }
 
-    if (href.startsWith('#')) {
-      scrollToElement(href.substring(1))
+    if (isAnchor) {
+      scrollToElement(normalizedHref.substring(1))
       return
     }
 
-    // Scroll targets are CMS section ids (SectionRenderer renders each
-    // section wrapper with id={section.id}).
-    let scrollTarget: string | null = null
-    if (href === '/kontakt') {
-      scrollTarget = 'kontakt-formular-intro'
-    } else if (href === '/standorte-depots') {
-      scrollTarget = 'depots'
-    }
-
-    router.push(href)
+    router.push(normalizedHref)
     setTimeout(() => {
-      if (scrollTarget) {
-        scrollToElement(scrollTarget)
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }, 100)
   }
   

@@ -5,13 +5,13 @@
     const close = () => {
       nav.classList.remove('is-open');
       toggle.setAttribute('aria-expanded', 'false');
-      toggle.setAttribute('aria-label', 'Menü öffnen');
+      toggle.setAttribute('aria-label', toggle.dataset.openLabel);
     };
     toggle.addEventListener('click', () => {
       const open = !nav.classList.contains('is-open');
       nav.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-      toggle.setAttribute('aria-label', open ? 'Menü schliessen' : 'Menü öffnen');
+      toggle.setAttribute('aria-label', open ? toggle.dataset.closeLabel : toggle.dataset.openLabel);
       if (open) nav.querySelector('#bioco-primary-menu a')?.focus();
     });
     nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));

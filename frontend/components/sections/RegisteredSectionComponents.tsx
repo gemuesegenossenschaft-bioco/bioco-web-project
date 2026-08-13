@@ -96,19 +96,21 @@ function flexAlign(align: string): CSSProperties['alignItems'] {
 
 function renderButtons(section: ContentSection, visualEditor = false) {
   if (!section.buttons?.length) return null
+  const navigation = section.config?.buttonNavigation === 'document' ? 'document' : 'client'
   return (
     <div className="cms-section-actions" style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '24px' }}>
       {section.buttons.map((btn, i) => (
         <span key={`${section.id}-btn-${i}`} {...getVeFieldAttrs(visualEditor, section.id, 'button', 'button', true, { buttonIndex: i })}>
-          <CTA text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+          <CTA text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} navigation={navigation} />
         </span>
       ))}
     </div>
   )
 }
 
-function renderHeader(section: ContentSection, visualEditor = false) {
+function renderHeader(section: ContentSection, visualEditor = false, headingLevel = '2') {
   const headingAlreadyInText = hasHeadingHtml(section.text)
+  const Heading = headingLevel === '1' ? 'h1' : 'h2'
   return (
     <>
       {section.eyebrow ? (
@@ -117,9 +119,9 @@ function renderHeader(section: ContentSection, visualEditor = false) {
         </p>
       ) : null}
       {section.title && !headingAlreadyInText ? (
-        <h2 style={{ fontSize: 'clamp(2rem, 3vw, 3.6rem)', lineHeight: 1.05, margin: '0 0 18px 0' }} {...getVeFieldAttrs(visualEditor, section.id, 'title', 'text', true)}>
+        <Heading style={{ fontSize: 'clamp(2rem, 3vw, 3.6rem)', lineHeight: 1.05, margin: '0 0 18px 0' }} {...getVeFieldAttrs(visualEditor, section.id, 'title', 'text', true)}>
           {section.title}
-        </h2>
+        </Heading>
       ) : null}
     </>
   )
@@ -342,6 +344,7 @@ export function LinkTilesBlock({ section, visualEditor = false }: RegisteredComp
 
 export function PageIntroBlock({ section, visualEditor = false }: RegisteredComponentProps) {
   const config = getConfig(section)
+  const headingLevel = configValue(config, 'headingLevel', '2')
   const maxWidth = containerMaxWidth(configValue(config, 'containerWidth', 'lg'))
   const textMaxWidth = contentWidth(configValue(config, 'textWidth', 'normal'))
   const textAlign = alignment(configValue(config, 'align', 'left'))
@@ -349,7 +352,7 @@ export function PageIntroBlock({ section, visualEditor = false }: RegisteredComp
   return (
     <section style={{ margin: '0 auto 80px', maxWidth, textAlign }}>
       <div style={{ margin: textAlign === 'center' ? '0 auto' : '0', maxWidth: textMaxWidth }}>
-        {renderHeader(section, visualEditor)}
+        {renderHeader(section, visualEditor, headingLevel)}
         {renderText(section, visualEditor, { color: '#4b5563', fontSize: '1.06rem', lineHeight: 1.75 })}
         {renderButtons(section, visualEditor)}
       </div>
@@ -359,6 +362,7 @@ export function PageIntroBlock({ section, visualEditor = false }: RegisteredComp
 
 export function MediaTextBlock({ section, visualEditor = false }: RegisteredComponentProps) {
   const config = getConfig(section)
+  const styleVariant = configValue(config, 'styleVariant', 'default')
   const maxWidth = containerMaxWidth(configValue(config, 'containerWidth', 'xl'))
   const mediaSide = configValue(config, 'mediaSide', 'left')
   const mediaWidth = `${configValue(config, 'mediaWidth', '50')}%`
@@ -383,7 +387,7 @@ export function MediaTextBlock({ section, visualEditor = false }: RegisteredComp
   )
 
   return (
-    <section style={{ margin: '0 auto 80px', maxWidth }}>
+    <section data-style-variant={styleVariant} style={{ margin: '0 auto 80px', maxWidth }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap, alignItems }}>
         {mediaSide === 'right' ? textNode : mediaNode}
         {mediaSide === 'right' ? mediaNode : textNode}
