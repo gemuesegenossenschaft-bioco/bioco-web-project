@@ -202,6 +202,8 @@ def test_shared_visual_primitives_are_systemic():
     blocks = (CORE / "assets/bioco-blocks.css").read_text()
     shell = (THEME / "assets/app.css").read_text()
     assert ".cms-split.is-text-only" in blocks
+    desktop_media = blocks[blocks.index("@media (min-width: 900px)"):blocks.index("/* banner block */")]
+    assert ".cms-split.is-text-only { grid-template-columns: 1fr; }" in desktop_media
     assert ".btn:focus-visible" in blocks
     assert ".home .cms-" not in blocks
     assert "[data-style-variant='feature']" in blocks
