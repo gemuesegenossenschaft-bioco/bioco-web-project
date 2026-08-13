@@ -1,0 +1,48 @@
+{
+  "path": "/intranet/",
+  "slug": "intranet",
+  "template": "basic-page",
+  "title": "Intranet",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_title": "Intranet",
+      "section_text": "<p>Das Intranet von biocò ist der interne Bereich für alle Mitglieder der Genossenschaft. Hier findest du wichtige Dokumente, Informationen und Tools für die tägliche Arbeit mit biocò.</p>",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
+    },
+    {
+      "section_id": "was-findest-du",
+      "section_layout": "rich_text",
+      "section_title": "Was findest du im Intranet?",
+      "section_text": "<ul><li><strong>Verteilplan</strong> – Dienstag und Freitag Abholpläne</li><li><strong>Fahrspesen-Rückforderungsformular</strong> – Für Fahrspesen-Rückerstattungen</li><li><strong>Interne Dokumente</strong> – Alle wichtigen Unterlagen</li><li><strong>Mitgliederbereich</strong> – Persönliche Informationen und Einstellungen</li></ul>"
+    },
+    {
+      "section_id": "dokumente",
+      "section_layout": "rich_text",
+      "section_title": "Dokumente",
+      "section_text": "<ul><li><a href=\"https://cms.bioco.ch/site/assets/files/1804/gemuese_ausliefertour_dienstag_2026_04.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">Gemüse Ausliefertour Dienstag (PDF)</a></li><li><a href=\"https://cms.bioco.ch/site/assets/files/1804/gemuese_ausliefertour_freitag_2026_04.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">Gemüse Ausliefertour Freitag (PDF)</a></li><li><a href=\"https://cms.bioco.ch/site/assets/files/1804/2510_fahrspesenrueckforderung.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">Fahrspesen Rückforderungsformular (PDF)</a></li></ul>"
+    },
+    {
+      "section_id": "fragen",
+      "section_layout": "rich_text",
+      "section_title": "Fragen?",
+      "section_text": "<p>Hast du Fragen zum Intranet oder benötigst du Hilfe beim Zugang? Kontaktiere uns unter <a href=\"mailto:info@bioco.ch\">info@bioco.ch</a>.</p>",
+      "buttons": [
+        { "text": "Zum Intranet", "href": "https://intranet.bioco.ch", "variant": "primary" }
+      ]
+    }
+  ],
+  "conversion_notes": [
+    "Mirrors the live bioco.ch/intranet page. The utility navigation now points at this internal page (/intranet/) instead of deep-linking to intranet.bioco.ch, so the page can carry the document links and the access explanation before members leave the site.",
+    "The single H1 is data-owned via the page_intro section_config.headingLevel=1; every other block heading comes from section_title and renders as <h2>.",
+    "The three PDF links live in section_text because they are editorial prose links inside a list, not CTAs. The one real CTA ('Zum Intranet') uses the structured buttons array; bioco_link_target_attributes() derives target=_blank rel=noopener noreferrer from the absolute host, so no per-block or per-seed target flag is needed.",
+    "The 'Fragen?' mail contact stays an inline editorial mailto link, while the outbound member-login action uses the structured buttons array."
+  ]
+}

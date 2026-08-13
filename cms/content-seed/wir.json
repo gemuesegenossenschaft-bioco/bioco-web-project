@@ -25,7 +25,7 @@
             "section_text": "<h2>Wir</h2>\n\n<p>biocò ist mehr als eine Gemüsegenossenschaft. Wir sind eine Gemeinschaft von Menschen, die gemeinsam biologisches Gemüse anbauen und geniessen. Unser Ziel: frische, saisonale Lebensmittel für alle, fair und nachhaltig produziert.</p>",
             "section_config": {
                 "containerWidth": "xl",
-                "mediaSide": "left",
+                "mediaSide": "right",
                 "mediaWidth": "50",
                 "mediaRatio": "4:3",
                 "mediaFit": "cover",

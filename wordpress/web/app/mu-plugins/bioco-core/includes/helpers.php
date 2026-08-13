@@ -40,6 +40,27 @@ function bioco_kses_rich_text($html) {
     return wp_kses((string) $html, $allowed);
 }
 
+/**
+ * Structured button/CTA links: whether a link leaves the site is derived from
+ * the href alone, never from the block that happens to render it. An editor
+ * pasting an absolute URL (intranet.bioco.ch, a cms.bioco.ch PDF) gets a safe
+ * new-tab link automatically; internal paths, mailto:, tel: and in-page
+ * anchors are left exactly as they were.
+ */
+function bioco_link_is_external($href) {
+    $href = trim((string) $href);
+    if ($href === '' || !preg_match('#^https?://#i', $href)) return false;
+    $host = strtolower((string) parse_url($href, PHP_URL_HOST));
+    if ($host === '') return false;
+    $home = strtolower((string) parse_url(home_url('/'), PHP_URL_HOST));
+    return $home === '' || $host !== $home;
+}
+
+// Returns a ready-to-echo attribute fragment (already safe, no user data).
+function bioco_link_target_attributes($href) {
+    return bioco_link_is_external($href) ? ' target="_blank" rel="noopener noreferrer"' : '';
+}
+
 function bioco_kses_oembed_html($html) {
     $allowed = [
         'iframe' => [
