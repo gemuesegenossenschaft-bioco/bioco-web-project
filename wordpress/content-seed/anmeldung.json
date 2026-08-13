@@ -7,7 +7,15 @@
     {
       "section_id": "intro",
       "section_layout": "rich_text",
-      "section_text": "<h1>Anmeldung</h1>"
+      "section_text": "",
+      "section_component": "page_intro",
+      "section_title": "Anmeldung",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "membership-form",

@@ -6,10 +6,16 @@
     "sections": [
         {
             "section_id": "section-1839",
-            "section_layout": "split_media_text",
+            "section_layout": "rich_text",
             "section_component": "page_intro",
             "section_title": "Dein wöchentliches Gemüseabo",
-            "section_text": "<h1>Dein wöchentliches Gemüseabo</h1>\n\n<p>Wöchentlich frisches Demeter-Gemüse direkt vom Geisshof in deinen Gemüsekorb. Mit deinem Gemüseabo unterstützt du unsere <a href=\"/solawi\">solidarische Landwirtschaft (Solawi)</a> und wirst Teil unserer Gemüsegenossenschaft. Hier erfährst du alles über unsere Abo-Modelle, Preise und wie du Mitglied werden kannst.</p>"
+            "section_text": "<p>Wöchentlich frisches Demeter-Gemüse direkt vom Geisshof in deinen Gemüsekorb. Mit deinem Gemüseabo unterstützt du unsere <a href=\"/solawi\">solidarische Landwirtschaft (Solawi)</a> und wirst Teil unserer Gemüsegenossenschaft. Hier erfährst du alles über unsere Abo-Modelle, Preise und wie du Mitglied werden kannst.</p>",
+            "section_config": {
+                "containerWidth": "lg",
+                "textWidth": "wide",
+                "align": "left",
+                "headingLevel": "1"
+            }
         },
         {
             "section_id": "section-1840",
@@ -95,8 +101,16 @@
             "section_id": "section-1846",
             "section_layout": "split_media_text",
             "section_component": "events_feed",
-            "section_title": "Nächste Events",
-            "section_text": "<h2>Nächste Events</h2>"
+            "section_config": {
+                "archiveUrl": "/aktuelles",
+                "upcomingTitle": "Nächste Events",
+                "archiveLabel": "Alle Events ansehen",
+                "loadingMessage": "Events werden geladen…",
+                "emptyMessage": "Aktuell sind keine Events geplant.",
+                "pastTitle": "Vergangene Events & Eindrücke",
+                "pastDescription": "Rückblicke mit Fotos und Videos aus unserer Community.",
+                "pastLinkLabel": "Rückblick ansehen →"
+            }
         },
         {
             "section_id": "section-1847",

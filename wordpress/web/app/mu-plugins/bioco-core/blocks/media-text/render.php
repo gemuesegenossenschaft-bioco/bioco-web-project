@@ -26,6 +26,7 @@ $eyebrow = get_field('eyebrow');
 $title = get_field('title');
 $text = get_field('text');
 $buttons = get_field('buttons');
+$style_variant = get_field('style_variant') ?: 'default';
 
 if ($is_preview && !$title && !$text) {
     $title = __('Titel eingeben …', 'bioco');
@@ -40,6 +41,8 @@ if (!empty($block['className'])) {
 
 $image_url = is_array($image) ? ($image['url'] ?? '') : '';
 $image_alt = $image_alt_override ?: (is_array($image) ? ($image['alt'] ?? '') : '');
+$has_media = $image_url !== '';
+$class_name .= $has_media ? ' has-media' : ' is-text-only';
 
 // DOM order always renders media before content, matching SectionRenderer's
 // SplitSection: mobile always stacks media on top; the is-first/is-last
@@ -58,9 +61,10 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
     data-media-width="<?php echo esc_attr($media_width); ?>"
     data-vertical-align="<?php echo esc_attr($vertical_align); ?>"
     data-gap="<?php echo esc_attr($gap); ?>"
+    data-style-variant="<?php echo esc_attr($style_variant); ?>"
 >
-    <div class="cms-split-media <?php echo esc_attr(trim($side_class . ' ' . $overlay_class)); ?>">
-        <?php if ($image_url) : ?>
+    <?php if ($has_media) : ?>
+        <div class="cms-split-media <?php echo esc_attr(trim($side_class . ' ' . $overlay_class)); ?>">
             <div
                 class="cms-media-frame"
                 data-media-ratio="<?php echo esc_attr($media_ratio); ?>"
@@ -74,8 +78,8 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
                     loading="lazy"
                 />
             </div>
-        <?php endif; ?>
-    </div>
+        </div>
+    <?php endif; ?>
     <div class="cms-split-content">
         <?php if ($eyebrow) : ?>
             <p class="cms-section-eyebrow"><?php echo esc_html($eyebrow); ?></p>

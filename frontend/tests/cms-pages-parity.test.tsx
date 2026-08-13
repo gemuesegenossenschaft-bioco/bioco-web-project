@@ -31,7 +31,7 @@ vi.mock('@/hooks/useEventsFeed', () => ({
   useEventsFeed: () => ({ upcoming: [], past: [], isLoading: false }),
 }))
 vi.mock('@/components/EventsSection', () => ({
-  EventsSection: () => <div data-testid="events-section-standard" />,
+  EventsSection: ({ archiveUrl }: { archiveUrl?: string }) => <div data-testid="events-section-standard" data-archive-url={archiveUrl} />,
 }))
 // Leaflet maps inject external scripts in useEffect — mock for jsdom stability.
 vi.mock('@/components/DepotMap', () => ({ DepotMap: () => <div data-testid="depot-map" /> }))
@@ -83,11 +83,11 @@ function expectThinCmsPage(
 describe('/impressum parity (seed: impressum)', () => {
   const sections = seedToSections(loadSeed('impressum'))
 
-  it('renders all headings at their original levels (h3 intro, h2 sections, no h1)', () => {
+  it('renders one data-owned h1 followed by the original h2 sections', () => {
     const { container } = render(<SectionRenderer sections={sections} />)
-    expect(container.querySelector('h1')).toBeNull()
+    expect(Array.from(container.querySelectorAll('h1')).map((h) => h.textContent)).toEqual(['Impressum'])
     const h3s = Array.from(container.querySelectorAll('h3')).map((h) => h.textContent)
-    expect(h3s).toContain('Impressum')
+    expect(h3s).not.toContain('Impressum')
     const h2s = Array.from(container.querySelectorAll('h2')).map((h) => h.textContent)
     expect(h2s).toEqual([
       'Kontakt',
@@ -124,9 +124,9 @@ describe('/impressum parity (seed: impressum)', () => {
 describe('/datenschutz parity (seed: datenschutz)', () => {
   const sections = seedToSections(loadSeed('datenschutz'))
 
-  it('renders all numbered h2 headings, h3 subheadings and no h1', () => {
+  it('renders one data-owned h1 plus numbered h2 and h3 subheadings', () => {
     const { container } = render(<SectionRenderer sections={sections} />)
-    expect(container.querySelector('h1')).toBeNull()
+    expect(Array.from(container.querySelectorAll('h1')).map((h) => h.textContent)).toEqual(['Datenschutzerklärung'])
     const h2s = Array.from(container.querySelectorAll('h2')).map((h) => h.textContent)
     expect(h2s).toEqual([
       '1. Datenschutz auf einen Blick',
@@ -138,7 +138,6 @@ describe('/datenschutz parity (seed: datenschutz)', () => {
     ])
     const h3s = Array.from(container.querySelectorAll('h3')).map((h) => h.textContent)
     expect(h3s).toEqual([
-      'Datenschutzerklärung',
       'Allgemeine Hinweise',
       'Kontaktformular',
       'Double Opt-In (DOI)',
@@ -256,14 +255,16 @@ describe('/anmeldung/danke parity (seed: anmeldung-danke)', () => {
     expect(text).toContain('Ab Januar startet die Gemüseverteilung!')
   })
 
-  it('keeps the Fragen block with mailto CTA inside the rich text', () => {
-    const { container } = render(<SectionRenderer sections={sections} />)
+  it('keeps the Fragen block with a structured mailto CTA', () => {
+    const { container, getByRole } = render(<SectionRenderer sections={sections} />)
     const h3s = Array.from(container.querySelectorAll('h3')).map((h) => h.textContent)
     expect(h3s).toContain('Fragen?')
     expect(container.textContent).toContain('kannst du uns jederzeit kontaktieren')
-    const mailto = container.querySelector('a[href="mailto:info@bioco.ch"]')
-    expect(mailto).toBeTruthy()
-    expect(mailto?.className).toContain('btn-secondary')
+    getByRole('link', { name: 'info@bioco.ch' })
+    const fragen = sections.find((s) => s.id === 'fragen')
+    expect(fragen?.buttons).toEqual([
+      { text: 'info@bioco.ch', href: 'mailto:info@bioco.ch', variant: 'secondary' },
+    ])
   })
 
   it('renders the back-to-home CTA with href preserved in the seed', () => {
@@ -392,7 +393,13 @@ describe('/kundenportal parity (seed: kundenportal)', () => {
   it('seed requests the events feed as banner variant with limit 3', () => {
     const events = sections.find((s) => s.id === 'events')
     expect(events?.component).toBe('events_feed')
-    expect(events?.config).toEqual({ variant: 'banner', limit: 3 })
+    expect(events?.config).toMatchObject({
+      variant: 'banner',
+      limit: 3,
+      archiveUrl: '/aktuelles',
+      title: 'Nächste Events',
+      archiveLabel: 'Alle Events ansehen →',
+    })
   })
 
   it("renders the events_feed banner variant via EventsBanner (today's markup)", () => {
@@ -412,19 +419,22 @@ describe('/kundenportal parity (seed: kundenportal)', () => {
       text: '',
       layout: 'component',
       component: 'events_feed',
+      config: { archiveUrl: '/events-archive' },
     }
     const { queryByTestId, container } = render(<SectionRenderer sections={[standard]} />)
     expect(queryByTestId('events-section-standard')).toBeTruthy()
+    expect(queryByTestId('events-section-standard')).toHaveAttribute('data-archive-url', '/events-archive')
     expect(container.querySelector('.events-banner')).toBeNull()
   })
 
-  it('events_feed registry entry has German-labelled variant/limit config fields', () => {
+  it('events_feed registry owns variant, limit and archive config fields', () => {
     const entry = resolveComponentRegistryEntry('events_feed')?.entry
     expect(entry?.cmsFields).toContain('section_config')
     const schema = entry?.configSchema || []
     const variant = schema.find((f) => f.key === 'variant')
     expect(variant?.type).toBe('select')
     expect(variant?.label).toBe('Darstellung')
+    expect(schema.find((f) => f.key === 'archiveUrl')?.type).toBe('text')
     expect((variant?.options || []).map((o) => o.value)).toEqual(['standard', 'banner'])
     const limit = schema.find((f) => f.key === 'limit')
     expect(limit?.type).toBe('number')
@@ -541,9 +551,9 @@ describe('/solawi parity (seed: solawi)', () => {
 describe('/gemuese parity (seed: gemuese)', () => {
   const sections = seedToSections(loadSeed('gemuese'))
 
-  it('renders the seeded h2 sections in order (intro/B-02 stay CMS-owned, not seeded)', () => {
+  it('renders one data-owned h1 and the seeded h2 sections in order', () => {
     const { container } = render(<SectionRenderer sections={sections} />)
-    expect(container.querySelector('h1')).toBeNull()
+    expect(Array.from(container.querySelectorAll('h1')).map((h) => h.textContent)).toEqual(['Unser Gemüse'])
     const h2s = Array.from(container.querySelectorAll('h2')).map((h) => h.textContent)
     expect(h2s).toEqual(['Saisonkalender', 'Demeter-Qualität', 'Möchtest du uns kennenlernen?'])
     const h3s = Array.from(container.querySelectorAll('h3')).map((h) => h.textContent)
@@ -589,16 +599,15 @@ describe('/gemuese parity (seed: gemuese)', () => {
     }
   })
 
-  it('keeps the Demeter copy, the /solawi link and the external demeter.ch button-link', () => {
-    const { container } = render(<SectionRenderer sections={sections} />)
+  it('keeps the Demeter copy, /solawi link and structured external CTA', () => {
+    const { container, getByRole } = render(<SectionRenderer sections={sections} />)
     expect(container.textContent).toContain('höchste Qualitätsstufe im biologischen Landbau')
     expect(container.querySelector('a[href="/solawi"]')).toBeTruthy()
-    const demeterLink = container.querySelector('a[href="https://www.demeter.ch"]')
-    expect(demeterLink).toBeTruthy()
-    expect(demeterLink?.textContent).toBe('Mehr über Demeter erfahren →')
-    expect(demeterLink?.className).toBe('btn btn-secondary btn-organic')
-    expect(demeterLink?.getAttribute('target')).toBe('_blank')
-    expect(demeterLink?.getAttribute('rel')).toBe('noopener noreferrer')
+    getByRole('button', { name: 'Mehr über Demeter erfahren →' })
+    const demeter = sections.find((s) => s.id === 'demeter-link')
+    expect(demeter?.buttons).toEqual([
+      { text: 'Mehr über Demeter erfahren →', href: 'https://www.demeter.ch', variant: 'secondary' },
+    ])
   })
 
   it('renders the kennenlernen CTAs with hrefs preserved in the seed', () => {
@@ -708,7 +717,7 @@ describe('/mitmachen parity (seed: mitmachen)', () => {
     expect(text).toContain('Die Elki-Gruppe organisiert spezielle Aktivitäten für Familien')
     const familien = seed.sections.find((s) => s.section_id === 'familien')
     expect(familien?.section_layout).toBe('split_media_text')
-    expect(familien?.image_alt).toBe('Frisch geerntetes Demeter-Gemüse vom Geisshof')
+    expect(familien?.image_alt).toBe('Kinder helfen gemeinsam auf dem Geisshof bei biocò')
 
     getByRole('button', { name: 'Nimm Kontakt auf' })
     getByRole('button', { name: 'Zu uns finden' })
@@ -776,13 +785,9 @@ describe('/standorte-depots parity (seed: standorte-depots)', () => {
     expect(text).toContain('Danke für deine Rücksichtnahme!')
   })
 
-  it('keeps the depots anchor: section wrapper gets the section id and CTA scrolls to it', () => {
+  it('keeps the depots anchor on the rendered section', () => {
     const { container } = render(<SectionRenderer sections={sections} />)
-    // "Zu uns finden" buttons from other pages scroll here (was DOM id E-02)
     expect(container.querySelector('#depots')).toBeTruthy()
-    const ctaSrc = readFileSync(path.resolve(__dirname, '..', 'components', 'CTA.tsx'), 'utf8')
-    expect(ctaSrc).toContain("scrollTarget = 'depots'")
-    expect(ctaSrc).not.toContain("'E-02'")
   })
 
   it('renders the kennenlernen CTAs with hrefs preserved in the seed', () => {
@@ -829,26 +834,18 @@ describe('/kontakt parity (seed: kontakt)', () => {
     expect(h4s).toEqual(['Du bist bereits Mitglied?', 'Möchtest du Mitglied werden?', 'Allgemeine Anfragen'])
   })
 
-  it('keeps the intranet and bioco-werden box CTAs as real anchor links (not CTA buttons)', () => {
-    const { container } = render(<SectionRenderer sections={sections} />)
-    // /intranet is served by Apache outside the Next app — must be a hard <a>
-    const intranet = container.querySelector('a[href="/intranet"]')
-    expect(intranet).toBeTruthy()
-    expect(intranet?.textContent).toBe('Zum Intranet →')
-    expect(intranet?.className).toBe('btn btn-primary btn-organic')
-    const werden = container.querySelector('a[href="/bioco-werden"]')
-    expect(werden).toBeTruthy()
-    expect(werden?.textContent).toBe('biocò werden →')
-    expect(werden?.className).toBe('btn btn-primary btn-organic')
+  it('keeps the intranet and bioco-werden CTAs as structured buttons', () => {
+    const { getByRole } = render(<SectionRenderer sections={sections} />)
+    getByRole('link', { name: 'Zum Intranet →' })
+    getByRole('button', { name: 'biocò werden →' })
+    expect(sections.find((s) => s.id === 'intranet-box')?.buttons?.[0].href).toBe('/intranet')
+    expect(sections.find((s) => s.id === 'intranet-box')?.config?.buttonNavigation).toBe('document')
+    expect(sections.find((s) => s.id === 'mitglied-werden-box')?.buttons?.[0].href).toBe('/bioco-werden')
   })
 
-  it('keeps the contact form anchor: section id rendered and CTA scrolls to it', () => {
+  it('keeps the contact form anchor on the rendered section', () => {
     const { container } = render(<SectionRenderer sections={sections} />)
-    // "Nimm Kontakt auf" buttons from other pages scroll here (was #kontakt-formular)
     expect(container.querySelector('#kontakt-formular-intro')).toBeTruthy()
-    const ctaSrc = readFileSync(path.resolve(__dirname, '..', 'components', 'CTA.tsx'), 'utf8')
-    expect(ctaSrc).toContain("scrollTarget = 'kontakt-formular-intro'")
-    expect(ctaSrc).not.toContain("'kontakt-formular'\n")
   })
 
   it('renders the real contact form', () => {

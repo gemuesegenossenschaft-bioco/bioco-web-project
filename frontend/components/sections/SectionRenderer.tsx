@@ -95,11 +95,12 @@ function SectionText({ section, visualEditor }: { section: ContentSection; visua
 
 function SectionButtons({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
   if (!section.buttons || section.buttons.length === 0) return null
+  const navigation = section.config?.buttonNavigation === 'document' ? 'document' : 'client'
   return (
     <div className="cms-section-actions">
       {section.buttons.map((btn, i) => (
         <span key={`${section.id}-btn-${i}`} {...getVeFieldAttrs(visualEditor, section.id, 'button', 'button', true, { buttonIndex: i })}>
-          <CTA text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} />
+          <CTA text={btn.text} href={btn.href} variant={btn.variant as 'primary' | 'secondary'} navigation={navigation} />
         </span>
       ))}
     </div>
@@ -118,9 +119,10 @@ function SplitSection({
   imageSizes: string
 }) {
   const media = getSectionMedia(section)
+  const styleVariant = String(section.config?.styleVariant || 'default')
   const overlayClass = section.imageOverlay && section.imageOverlay !== 'none' ? `image-overlay-${section.imageOverlay}` : ''
   return (
-    <section className="cms-section cms-split">
+    <section className="cms-section cms-split" data-style-variant={styleVariant}>
       <div
         className={`cms-split-media ${mediaFirst ? 'is-first' : 'is-last'} ${overlayClass}`}
         {...getVeFieldAttrs(visualEditor, section.id, 'media', 'media', false, { targetField: 'section_image' })}
@@ -204,8 +206,9 @@ function VideoSection({ section, visualEditor }: { section: ContentSection; visu
 }
 
 function RichTextSection({ section, visualEditor }: { section: ContentSection; visualEditor: boolean }) {
+  const styleVariant = String(section.config?.styleVariant || 'default')
   return (
-    <section className="cms-section cms-rich-text">
+    <section className="cms-section cms-rich-text" data-style-variant={styleVariant}>
       <SectionHeader section={section} visualEditor={visualEditor} />
       <SectionText section={section} visualEditor={visualEditor} />
       <SectionButtons section={section} visualEditor={visualEditor} />

@@ -6,8 +6,16 @@
   "sections": [
     {
       "section_id": "intro",
-      "section_text": "<h1>Vielen Dank für deine Anmeldung!</h1><p>Wir prüfen deine Anmeldung. In der Zwischenzeit kannst du unseren Mitgliederbereich schon anschauen. Klicke dafür oben rechts auf die Ente.</p>",
-      "section_layout": "rich_text"
+      "section_text": "<p>Wir prüfen deine Anmeldung. In der Zwischenzeit kannst du unseren Mitgliederbereich schon anschauen. Klicke dafür oben rechts auf die Ente.</p>",
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_title": "Vielen Dank für deine Anmeldung!",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "naechste-schritte",
@@ -23,19 +31,26 @@
     },
     {
       "section_id": "fragen",
-      "section_text": "<h3>Fragen?</h3><p>Bei Fragen zur Anmeldung oder zu biocò kannst du uns jederzeit kontaktieren:</p><p><a href=\"mailto:info@bioco.ch\" class=\"btn btn-secondary\" style=\"display: inline-block; margin-top: 8px\">info@bioco.ch</a></p>",
-      "section_layout": "rich_text"
+      "section_text": "<h3>Fragen?</h3><p>Bei Fragen zur Anmeldung oder zu biocò kannst du uns jederzeit kontaktieren:</p>",
+      "section_layout": "rich_text",
+      "buttons": [
+        { "text": "info@bioco.ch", "href": "mailto:info@bioco.ch", "variant": "secondary" }
+      ]
     },
     {
       "section_id": "zurueck-cta",
       "section_layout": "rich_text",
       "buttons": [
-        { "text": "Zurück zur Startseite", "href": "/", "variant": "primary" }
+        {
+          "text": "Zurück zur Startseite",
+          "href": "/",
+          "variant": "primary"
+        }
       ]
     }
   ],
   "conversion_notes": [
-    "h1 lives in intro section_text.",
+    "The page_intro section owns the single H1 via section_config.headingLevel=1.",
     "The intro paragraph currently has inline styling (font-size 1.125rem, margin-bottom 24px) — styling is not representable in the schema; text is preserved as a plain <p>.",
     "'steps' is registered (StepsBlock in frontend/components/sections/RegisteredSectionComponents.tsx + component-registry.json, working tree as of this seed) and renders the same .next-steps/.step-item/.step-number markup with <h3> step titles as the current page. Config keys are flat and match the registry schema: step1_title/step1_text/step2_*/step3_* (step4_* unused). The step numbers 1-3 are rendered by the component, not stored as content. There is no card heading above the steps today, hence no section_title.",
     "Fragen? block: the mailto button is kept as an inline <a href=\"mailto:info@bioco.ch\" class=\"btn btn-secondary\" style=\"display: inline-block; margin-top: 8px\"> in section_text instead of the buttons array, because CTA.tsx pushes non-http(s)/non-file hrefs through next/navigation router.push, which would break mailto:. The migration/CMS richtext field must NOT strip class/style attributes here.",

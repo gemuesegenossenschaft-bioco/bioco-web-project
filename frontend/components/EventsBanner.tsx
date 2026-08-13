@@ -6,20 +6,30 @@ import { AktuellesItem } from './AktuellesData'
 import { AktuellesItemComponent } from './AktuellesItem'
 import { ItemDetailModal } from './ItemDetailModal'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
+import { safeSitePath } from '@/lib/safeHref'
 
 interface EventsBannerProps {
   title?: string
   showTitle?: boolean
   variant?: 'default' | 'embedded'
   limit?: number
+  archiveUrl?: string
+  archiveLabel?: string
+  loadingMessage?: string
+  emptyMessage?: string
 }
 
 export function EventsBanner({
-  title = 'Nächste Events',
+  title = '',
   showTitle = true,
   variant = 'default',
   limit = 3,
+  archiveUrl = '',
+  archiveLabel = '',
+  loadingMessage = '',
+  emptyMessage = '',
 }: EventsBannerProps) {
+  const archiveHref = safeSitePath(archiveUrl)
   const { upcoming: eventItems, isLoading, error } = useEventsFeed(limit)
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -42,7 +52,7 @@ export function EventsBanner({
       <section className={containerClassName}>
         {showTitle && <h2>{title}</h2>}
         {isLoading ? (
-          <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+          loadingMessage ? <p style={{ color: 'var(--text-secondary)' }}>{loadingMessage}</p> : null
         ) : (
           <div className="events-list">
             {eventItems.map((item, index) => (
@@ -53,16 +63,16 @@ export function EventsBanner({
                 onClick={handleItemClick}
               />
             ))}
-            {eventItems.length === 0 && (
+            {eventItems.length === 0 && emptyMessage && (
               <p style={{ color: 'var(--text-secondary)' }}>
-                Aktuell keine Events geplant.
+                {emptyMessage}
               </p>
             )}
           </div>
         )}
-        <p style={{ marginTop: 'var(--spacing-md)' }}>
-          <Link href="/aktuelles">Alle Events ansehen →</Link>
-        </p>
+        {archiveHref && archiveLabel ? <p style={{ marginTop: 'var(--spacing-md)' }}>
+          <Link href={archiveHref}>{archiveLabel}</Link>
+        </p> : null}
       </section>
       <ItemDetailModal 
         item={selectedItem} 

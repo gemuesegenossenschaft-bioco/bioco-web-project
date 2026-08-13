@@ -11,7 +11,15 @@
     {
       "section_id": "intro",
       "section_layout": "rich_text",
-      "section_text": "<h1>Unsere Standorte & Depots</h1><p>Wir unterscheiden zwei Arten von Standorten:</p><ul><li><strong>Geisshof:</strong> Hier bauen wir unser Gemüse an und arbeiten gemeinsam.</li><li><strong>Depots:</strong> Hier stehen die Gemüsekörbe jeweils dienstags oder freitags zur Abholung bereit.</li></ul>"
+      "section_text": "<p>Wir unterscheiden zwei Arten von Standorten:</p><ul><li><strong>Geisshof:</strong> Hier bauen wir unser Gemüse an und arbeiten gemeinsam.</li><li><strong>Depots:</strong> Hier stehen die Gemüsekörbe jeweils dienstags oder freitags zur Abholung bereit.</li></ul>",
+      "section_component": "page_intro",
+      "section_title": "Unsere Standorte & Depots",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "anfahrt-geisshof",

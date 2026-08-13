@@ -9,19 +9,32 @@
   },
   "sections": [
     {
-      "section_id": "intro",
-      "section_layout": "rich_text",
-      "section_text": "<h1>Aktuelles</h1>"
-    },
-    {
       "section_id": "beitraege",
       "section_title": "Beiträge",
-      "section_layout": "rich_text"
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1",
+        "emptyMessage": "Keine Beiträge verfügbar."
+      }
     },
     {
       "section_id": "events-feed",
-      "section_title": "Events",
-      "section_component": "events_feed"
+      "section_component": "events_feed",
+      "section_config": {
+        "archiveUrl": "/aktuelles",
+        "title": "Events",
+        "upcomingTitle": "Kommende Events",
+        "schnuppertageTitle": "Schnuppertage",
+        "loadingMessage": "Events werden geladen…",
+        "emptyMessage": "Aktuell sind keine allgemeinen Events geplant.",
+        "schnuppertageEmptyMessage": "Aktuell sind keine Schnuppertage geplant.",
+        "pastTitle": "Vergangene Events",
+        "pastLinkLabel": "Rückblick ansehen →"
+      }
     },
     {
       "section_id": "kennenlernen-cta",
@@ -29,14 +42,22 @@
       "section_layout": "rich_text",
       "section_text": "<p>Es können viele Fragen auftauchen, die wir auf dieser Website nicht allesamt beantworten können. Du hast die Möglichkeit, den Hof und uns an den regulären Schnuppertagen kennenzulernen. Oder du kannst dich via Kontaktformular bei uns melden und wir beantworten deine Fragen persönlich.</p>",
       "buttons": [
-        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
-        { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }
+        {
+          "text": "Nimm Kontakt auf",
+          "href": "/kontakt",
+          "variant": "primary"
+        },
+        {
+          "text": "Zu uns finden",
+          "href": "/standorte-depots",
+          "variant": "secondary"
+        }
       ]
     }
   ],
   "conversion_notes": [
-    "Intro-Fallback: Es gibt heute KEINEN hardcodierten Intro-Absatz – nur die Fallback-h1 'Aktuelles'. AktuellesClient rendert eine CMS-Section 'intro' bevorzugt (title ersetzt die h1, text rendert darunter); das Seed enthält nur die Fallback-h1.",
-    "'Beiträge' (h2) ist hardcodiert in AktuellesClient.tsx; die Liste darunter ist ein Live-Feed (getAktuelles → /api/content/aktuelles, Code-Fallback getAktuellesItems() liefert []). Es gibt noch KEINE registrierte Komponente für die Beitragsliste – die Section hier trägt nur die Überschrift; die Überschrift kann alternativ code-owned Chrome des künftigen Feed-Blocks bleiben. Empty-State 'Keine Beiträge verfügbar.' ist code-owned.",
+    "Der datengetriebene page_intro rendert 'Beiträge' als einzige H1; die redundante kleine Überschrift 'Aktuelles' wurde gemäss Designfreigabe entfernt.",
+    "Die Beitragsliste darunter bleibt ein Live-Feed. Empty-State 'Keine Beiträge verfügbar.' ist code-owned.",
     "'Events' (h2) mit den Unterüberschriften 'Kommende Events' (h3) und 'Schnuppertage' (h3) sowie 'Vergangene Events' (h3, nur bei vorhandenen Past-Events) sind hardcodiertes Chrome in AktuellesClient.tsx; die Listen kommen live aus useEventsFeed (/api/content/events). Als section_component 'events_feed' platziert. Diese Überschriften dürfen code-owned Chrome bleiben, wenn sie zum Feed-Baustein gehören.",
     "Weiteres code-owned Feed-Chrome (byte-genaue Strings): 'Events werden geladen…', 'Aktuell sind keine allgemeinen Events geplant.', 'Aktuell sind keine Schnuppertage geplant.', 'Rückblick ansehen →' (Kachel-CTA der vergangenen Events).",
     "ACHTUNG: Das Registry-Ziel von 'events_feed' ist frontend/components/EventsSection.tsx – AktuellesClient rendert den Feed heute aber inline (eigene Grids, Modals via ItemDetailModal, Past-Events-Karte). Der Umbau muss klären, ob EventsSection den heutigen AktuellesClient-Output abdeckt oder AktuellesClient der Feed-Renderer bleibt.",

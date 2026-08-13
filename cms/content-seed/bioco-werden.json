@@ -11,7 +11,15 @@
     {
       "section_id": "intro",
       "section_layout": "rich_text",
-      "section_text": "<h1>biocò werden</h1><p>Wähle dein Gemüseabo und werde Teil unserer Gemüsegenossenschaft. Deine Auswahl wird automatisch ins Anmeldeformular übernommen.</p>"
+      "section_text": "<p>Wähle dein Gemüseabo und werde Teil unserer Gemüsegenossenschaft. Deine Auswahl wird automatisch ins Anmeldeformular übernommen.</p>",
+      "section_component": "page_intro",
+      "section_title": "biocò werden",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "pricing-calculator",

@@ -7,13 +7,23 @@ import { ItemDetailModal } from './ItemDetailModal'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useEventsFeed } from '@/hooks/useEventsFeed'
+import { safeSitePath } from '@/lib/safeHref'
 
 interface EventsSectionProps {
   limit?: number
   showAllButton?: boolean
+  archiveUrl?: string
+  upcomingTitle?: string
+  archiveLabel?: string
+  loadingMessage?: string
+  emptyMessage?: string
+  pastTitle?: string
+  pastDescription?: string
+  pastLinkLabel?: string
 }
 
-export function EventsSection({ limit, showAllButton = true }: EventsSectionProps) {
+export function EventsSection({ limit, showAllButton = true, archiveUrl = '', upcomingTitle = '', archiveLabel = '', loadingMessage = '', emptyMessage = '', pastTitle = '', pastDescription = '', pastLinkLabel = '' }: EventsSectionProps) {
+  const archiveHref = safeSitePath(archiveUrl)
   const [selectedItem, setSelectedItem] = useState<AktuellesItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
@@ -35,11 +45,11 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
       <section className="bento-card events-card bento-card-fullwidth">
         <div className="plant-pattern"></div>
         <div className="card-header">
-          <h3>Nächste Events</h3>
+          {upcomingTitle ? <h3>{upcomingTitle}</h3> : null}
         </div>
         <div className="card-body">
           {isLoading && displayItems.length === 0 ? (
-            <p style={{ color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+            loadingMessage ? <p style={{ color: 'var(--text-secondary)' }}>{loadingMessage}</p> : null
           ) : (
             <div className="events-list">
               {displayItems.map((item, index) => (
@@ -50,16 +60,16 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
                   onClick={handleItemClick}
                 />
               ))}
-              {displayItems.length === 0 && (
+              {displayItems.length === 0 && emptyMessage && (
                 <p style={{ color: 'var(--text-secondary)' }}>
-                  Aktuell sind keine Events geplant.
+                  {emptyMessage}
                 </p>
               )}
             </div>
           )}
-          {showAllButton && (
-            <Link href="/aktuelles" className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
-              Alle Events ansehen
+          {showAllButton && archiveHref && archiveLabel && (
+            <Link href={archiveHref} className="btn btn-primary" style={{ marginTop: '16px', display: 'inline-block' }}>
+              {archiveLabel}
             </Link>
           )}
         </div>
@@ -68,10 +78,8 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
       {past.length > 0 && (
         <section className="bento-card past-events-card">
           <div className="card-header">
-            <h3>Vergangene Events & Eindrücke</h3>
-            <p style={{ marginTop: '4px', color: 'var(--text-secondary)' }}>
-              Rückblicke mit Fotos und Videos aus unserer Community.
-            </p>
+            {pastTitle ? <h3>{pastTitle}</h3> : null}
+            {pastDescription ? <p style={{ marginTop: '4px', color: 'var(--text-secondary)' }}>{pastDescription}</p> : null}
           </div>
           <div className="card-body past-events-grid">
             {past.slice(0, 4).map((item, index) => {
@@ -92,7 +100,7 @@ export function EventsSection({ limit, showAllButton = true }: EventsSectionProp
                     {item.location && (
                       <p className="past-event-location">{item.location}</p>
                     )}
-                    <span className="past-event-cta">Rückblick ansehen →</span>
+                    {pastLinkLabel ? <span className="past-event-cta">{pastLinkLabel}</span> : null}
                   </div>
                 </button>
               )

@@ -59,11 +59,28 @@ export const componentRenderers: Record<string, ComponentRenderer> = {
     // config.variant 'banner' preserves the former hardcoded /kundenportal
     // rendering (EventsBanner); default 'standard' keeps EventsSection.
     const config = getResolvedComponentConfig(section.component, section.config)
+    const archiveUrl = String(config.archiveUrl || '')
     if (String(config.variant || 'standard') === 'banner') {
       const limit = Number(config.limit)
-      return <EventsBanner limit={Number.isFinite(limit) && limit > 0 ? limit : 3} />
+      return <EventsBanner
+        limit={Number.isFinite(limit) && limit > 0 ? limit : 3}
+        archiveUrl={archiveUrl}
+        title={String(config.title || '')}
+        archiveLabel={String(config.archiveLabel || '')}
+        loadingMessage={String(config.loadingMessage || '')}
+        emptyMessage={String(config.emptyMessage || '')}
+      />
     }
-    return <EventsSection />
+    return <EventsSection
+      archiveUrl={archiveUrl}
+      upcomingTitle={String(config.upcomingTitle || '')}
+      archiveLabel={String(config.archiveLabel || '')}
+      loadingMessage={String(config.loadingMessage || '')}
+      emptyMessage={String(config.emptyMessage || '')}
+      pastTitle={String(config.pastTitle || '')}
+      pastDescription={String(config.pastDescription || '')}
+      pastLinkLabel={String(config.pastLinkLabel || '')}
+    />
   },
   schnuppertage: (section, visualEditor) => <SchnuppertageSection section={section} visualEditor={visualEditor} />,
   group_cards: () => <GroupCardsSection />,

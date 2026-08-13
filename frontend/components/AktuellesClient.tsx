@@ -43,7 +43,9 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
   const pastItems = past
   
   // CMS-owned content sections (seeded from cms/content-seed/aktuelles.json)
-  const introSection = sections?.find(s => s.id === 'intro')
+  const introSection = sections?.find(s => s.component === 'page_intro')
+  const eventsSection = sections?.find(s => s.component === 'events_feed')
+  const eventConfig = eventsSection?.config || {}
   const kennenlernenSection = sections?.find(s => s.id === 'kennenlernen-cta')
 
   return (
@@ -64,7 +66,6 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
               />
             )}
             <div style={{ marginTop: '24px' }}>
-              <h2>Beiträge</h2>
               <div className="aktuelles-list">
                 {allAktuellesItems.map((item, index) => (
                   <AktuellesItemComponent 
@@ -75,18 +76,18 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                     />
                   ))}
                 {allAktuellesItems.length === 0 && (
-                  <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Keine Beiträge verfügbar.</p>
+                  introSection?.config?.emptyMessage ? <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>{String(introSection.config.emptyMessage)}</p> : null
                 )}
               </div>
             </div>
           </section>
 
           <section id="G-02" style={{ marginBottom: 'clamp(24px, 4vw, 48px)' }}>
-            <h2>Events</h2>
+            {eventConfig.title ? <h2>{String(eventConfig.title)}</h2> : null}
             <div style={{ marginTop: '16px' }}>
-              <h3>Kommende Events</h3>
+              {eventConfig.upcomingTitle ? <h3>{String(eventConfig.upcomingTitle)}</h3> : null}
               {eventsLoading ? (
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+                eventConfig.loadingMessage ? <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>{String(eventConfig.loadingMessage)}</p> : null
               ) : (
                 <>
                   {upcomingGeneralItems.length > 0 ? (
@@ -101,16 +102,16 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                       ))}
                     </div>
                   ) : (
-                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine allgemeinen Events geplant.</p>
+                    eventConfig.emptyMessage ? <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>{String(eventConfig.emptyMessage)}</p> : null
                   )}
                 </>
               )}
             </div>
 
             <div style={{ marginTop: '32px' }}>
-              <h3>Schnuppertage</h3>
+              {eventConfig.schnuppertageTitle ? <h3>{String(eventConfig.schnuppertageTitle)}</h3> : null}
               {eventsLoading ? (
-                <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Events werden geladen…</p>
+                eventConfig.loadingMessage ? <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>{String(eventConfig.loadingMessage)}</p> : null
               ) : (
                 <>
                   {upcomingSchnuppertagItems.length > 0 ? (
@@ -125,7 +126,7 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                       ))}
                     </div>
                   ) : (
-                    <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>Aktuell sind keine Schnuppertage geplant.</p>
+                    eventConfig.schnuppertageEmptyMessage ? <p style={{ fontSize: '1.05rem', lineHeight: '1.7', color: 'var(--text-secondary)' }}>{String(eventConfig.schnuppertageEmptyMessage)}</p> : null
                   )}
                 </>
               )}
@@ -135,7 +136,7 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
           {past.length > 0 && (
             <section id="G-03" className="bento-card past-events-card">
               <div className="card-header">
-                <h3>Vergangene Events</h3>
+                {eventConfig.pastTitle ? <h3>{String(eventConfig.pastTitle)}</h3> : null}
               </div>
               <div className="card-body past-events-grid">
                 {pastItems.map((item, index) => (
@@ -158,7 +159,7 @@ export function AktuellesClient({ sections, aktuellesItems }: AktuellesClientPro
                       <div className="past-event-meta">
                         <p className="past-event-date">{item.date}</p>
                         <p className="past-event-title">{item.title}</p>
-                        <span className="past-event-cta">Rückblick ansehen →</span>
+                      {eventConfig.pastLinkLabel ? <span className="past-event-cta">{String(eventConfig.pastLinkLabel)}</span> : null}
                       </div>
                     </button>
                   ))}

@@ -53,6 +53,7 @@ $PRESENTATION_KEYS = [
     'columns', 'ratio', 'overlay', 'filter', 'width', 'size', 'style', 'mode',
     'text_width', 'media_side', 'media_width', 'vertical_align', 'image_overlay',
     'image_brightness', 'image_contrast', 'image_saturate', 'emphasis',
+    'heading_level', 'style_variant',
 ];
 
 // Attribute values and mechanics that carry no editorial meaning.

@@ -14,6 +14,8 @@ $buttons = get_field('buttons');
 $container_width = get_field('container_width') ?: 'lg';
 $text_width = get_field('text_width');
 $align = get_field('align') ?: 'left';
+$heading_level = (string) (get_field('heading_level') ?: '2');
+$heading_level = in_array($heading_level, ['1', '2'], true) ? $heading_level : '2';
 
 if ($is_preview && !$title && !$text) {
     $title = __('Titel eingeben …', 'bioco');
@@ -34,7 +36,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
             <p class="cms-section-eyebrow"><?php echo esc_html($eyebrow); ?></p>
         <?php endif; ?>
         <?php if ($title && !$heading_already_in_text) : ?>
-            <h2><?php echo esc_html($title); ?></h2>
+            <<?php echo $heading_level === '1' ? 'h1' : 'h2'; ?>><?php echo esc_html($title); ?></<?php echo $heading_level === '1' ? 'h1' : 'h2'; ?>>
         <?php endif; ?>
         <?php if ($text) : ?>
             <div class="cms-section-text"><?php echo bioco_kses_rich_text($text); ?></div>

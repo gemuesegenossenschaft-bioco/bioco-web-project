@@ -11,7 +11,15 @@
     {
       "section_id": "intro",
       "section_layout": "rich_text",
-      "section_text": "<h1>Solidarische Landwirtschaft</h1><p>Eine Solawi – Solidarische Landwirtschaft – ist eine gemeinschaftliche Form des Wirtschaftens, bei der Verbraucherinnen und Produzentinnen eine Partnerschaft eingehen. Die Mitglieder tragen gemeinsam die Kosten der landwirtschaftlichen Produktion und erhalten im Gegenzug einen regelmässigen Anteil an frischem Bio-Gemüse aus lokalem Anbau.</p><p>Statt anonym einzukaufen, entsteht eine direkte, verlässliche Verbindung zu dem Hof, der uns ernährt.</p>"
+      "section_text": "<p>Eine Solawi – Solidarische Landwirtschaft – ist eine gemeinschaftliche Form des Wirtschaftens, bei der Verbraucherinnen und Produzentinnen eine Partnerschaft eingehen. Die Mitglieder tragen gemeinsam die Kosten der landwirtschaftlichen Produktion und erhalten im Gegenzug einen regelmässigen Anteil an frischem Bio-Gemüse aus lokalem Anbau.</p><p>Statt anonym einzukaufen, entsteht eine direkte, verlässliche Verbindung zu dem Hof, der uns ernährt.</p>",
+      "section_component": "page_intro",
+      "section_title": "Solidarische Landwirtschaft",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "was-ist-solawi",
@@ -35,7 +43,11 @@
       "section_layout": "rich_text",
       "section_text": "<p>Auch bei bioco leben wir dieses Prinzip: Unsere Solawi ist Teil des Geisshofs in Gebenstorf AG, der nach strengen biologisch-dynamischen Grundsätzen arbeitet. Das bedeutet geschlossene Kreisläufe, schonende Bodenbewirtschaftung und Gemüse, das wirklich aus der Region kommt.</p><p>Mit deinem Anteil und deiner Mitarbeit unterstützt du nicht nur den Anbau hochwertiger Demeter-Gemüsekisten, sondern auch eine Landwirtschaft, die sozial, ökologisch und langfristig tragfähig ist. Als lokale Gemüsegenossenschaft im Aargau leben wir Transparenz, Beteiligung und echte Nähe.</p><p>Bei bioco bist du nicht nur Abnehmer*in, sondern Teil des Ganzen: Als Mitglied hilfst du bei der Feldarbeit mit, erlebst die Jahreszeiten auf dem Acker und siehst, wie echtes Bio-Gemüse aus solidarischer Landwirtschaft entsteht.</p><p><strong>So funktioniert unsere Solawi in der Praxis:</strong></p><ul><li><strong>Jahresbeitrag:</strong> Mitglieder bezahlen zu Jahresbeginn ihren Anteil (je nach Korbgrösse CHF 750 – CHF 2'350)</li><li><strong>Wöchentlicher Gemüsekorb:</strong> Fast jede Woche könnt ihr euren Anteil in einem der <a href=\"/standorte-depots\">Depots in Baden, Brugg oder Gebenstorf</a> abholen</li><li><strong>Mitarbeit:</strong> Je nach Abo-Grösse arbeitet ihr 10–40 Halbtage pro Jahr auf dem Feld mit (<a href=\"/mitmachen\">mehr zu Mitarbeit</a>)</li><li><strong>Demeter-Qualität:</strong> Unser Gemüse erfüllt die strengsten Bio-Standards (<a href=\"/gemuese\">mehr zu unserem Gemüse</a>)</li><li><strong>Genossenschaftsmodell:</strong> Alle Mitglieder sind Teil der Genossenschaft und können bei Entscheidungen mitbestimmen</li></ul><p>Als Teil von bioco wirst du zudem Mitglied einer lebendigen, offenen Gemeinschaft rund um den einzigartig gelegenen Geisshof. Wir treffen uns zu Anlässen wie Open-Air-Kino auf dem Hof, Fondue über dem Feuer, Kräutergruppen-Treffen oder gemütlichen Nachmittagen am Gemeinschaftsplatz. Natur, Tiere, Sandkasten, eine aktive Eltern-Kind-Gruppe sowie gemeinsame Einsätze mit frisch gekochtem Essen machen unsere Solawi zu einem Ort, an dem man sich schnell zuhause fühlt.</p>",
       "buttons": [
-        { "text": "Jetzt Mitglied werden", "href": "/mitmachen", "variant": "primary" }
+        {
+          "text": "Jetzt Mitglied werden",
+          "href": "/mitmachen",
+          "variant": "primary"
+        }
       ]
     },
     {
@@ -55,8 +67,16 @@
       "section_layout": "rich_text",
       "section_text": "<p>Werde Teil unserer Solawi-Gemeinschaft und erlebe, wie solidarische Landwirtschaft in der Praxis funktioniert. Wir freuen uns auf dich!</p>",
       "buttons": [
-        { "text": "Jetzt Mitglied werden", "href": "/mitmachen", "variant": "primary" },
-        { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "secondary" }
+        {
+          "text": "Jetzt Mitglied werden",
+          "href": "/mitmachen",
+          "variant": "primary"
+        },
+        {
+          "text": "Nimm Kontakt auf",
+          "href": "/kontakt",
+          "variant": "secondary"
+        }
       ]
     }
   ],

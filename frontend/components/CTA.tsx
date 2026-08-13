@@ -7,6 +7,7 @@ interface CTAProps {
   href: string
   variant?: 'primary' | 'secondary'
   onClick?: () => void
+  navigation?: 'client' | 'document'
 }
 
 function scrollToElement(id: string) {
@@ -17,12 +18,25 @@ function scrollToElement(id: string) {
   }
 }
 
-export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
+export function CTA({ text, href, variant = 'primary', onClick, navigation = 'client' }: CTAProps) {
   const router = useRouter()
   const className = `${variant === 'primary' ? 'btn btn-primary' : 'btn btn-secondary'} btn-organic`
+  const normalizedHref = href.trim()
+  const schemeProbe = normalizedHref.replace(/[\u0000-\u0020]+/g, '')
 
-  const isExternal = href.startsWith('http://') || href.startsWith('https://')
-  const isFile = /\.(pdf|doc|docx|xls|xlsx|zip)$/i.test(href)
+  const isExternal = normalizedHref.startsWith('http://') || normalizedHref.startsWith('https://')
+  const isFile = /\.(pdf|doc|docx|xls|xlsx|zip)$/i.test(normalizedHref)
+  const explicitScheme = schemeProbe.match(/^([a-z][a-z0-9+.-]*):/i)?.[1]?.toLowerCase()
+  const isAllowedProtocolLink = explicitScheme === 'mailto' || explicitScheme === 'tel'
+  const isUnsafeProtocolLink = Boolean(explicitScheme && !['http', 'https', 'mailto', 'tel'].includes(explicitScheme))
+
+  if (isUnsafeProtocolLink) {
+    return <button type="button" className={className} disabled>{text}</button>
+  }
+
+  if (isAllowedProtocolLink || navigation === 'document') {
+    return <a className={className} href={normalizedHref} onClick={onClick}>{text}</a>
+  }
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
@@ -31,31 +45,18 @@ export function CTA({ text, href, variant = 'primary', onClick }: CTAProps) {
     }
 
     if (isExternal || isFile) {
-      window.open(href, '_blank', 'noopener,noreferrer')
+      window.open(normalizedHref, '_blank', 'noopener,noreferrer')
       return
     }
 
-    if (href.startsWith('#')) {
-      scrollToElement(href.substring(1))
+    if (normalizedHref.startsWith('#')) {
+      scrollToElement(normalizedHref.substring(1))
       return
     }
 
-    // Scroll targets are CMS section ids (SectionRenderer renders each
-    // section wrapper with id={section.id}).
-    let scrollTarget: string | null = null
-    if (href === '/kontakt') {
-      scrollTarget = 'kontakt-formular-intro'
-    } else if (href === '/standorte-depots') {
-      scrollTarget = 'depots'
-    }
-
-    router.push(href)
+    router.push(normalizedHref)
     setTimeout(() => {
-      if (scrollTarget) {
-        scrollToElement(scrollTarget)
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-      }
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }, 100)
   }
   

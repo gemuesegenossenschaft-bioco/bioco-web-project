@@ -60,6 +60,13 @@ add_action('init', function () {
         'supports' => ['html' => false],
         'render_callback' => 'bioco_render_primary_navigation',
     ]);
+    register_block_type('bioco/site-footer', [
+        'api_version' => 2,
+        'title' => __('biocò Fusszeile', 'bioco'),
+        'category' => 'theme',
+        'supports' => ['html' => false],
+        'render_callback' => 'bioco_render_site_footer',
+    ]);
 
     $blocks_dir = BIOCO_CORE_DIR . '/blocks';
     if (!is_dir($blocks_dir)) return;

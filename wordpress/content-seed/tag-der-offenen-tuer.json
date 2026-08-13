@@ -6,8 +6,16 @@
   "sections": [
     {
       "section_id": "intro",
-      "section_text": "<h1>Tag der offenen Tür - Anmeldung</h1>",
-      "section_layout": "rich_text"
+      "section_text": "",
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_title": "Tag der offenen Tür - Anmeldung",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
     },
     {
       "section_id": "anmeldung-formular",
@@ -15,7 +23,7 @@
     }
   ],
   "conversion_notes": [
-    "h1 lives in intro section_text — exact wording 'Tag der offenen Tür - Anmeldung' (plain hyphen-minus with spaces, not an en dash). VisitDayForm renders NO heading of its own — the heading is NOT duplicated in the component section.",
+    "The page_intro section owns the single H1 via section_config.headingLevel=1; VisitDayForm renders no duplicate heading.",
     "All form labels ('Name *', 'E-Mail *', 'Telefon *', 'Gewünschtes Datum *', 'Anzahl Personen *', 'Anmerkungen', privacy checkbox), captcha, submit label 'Anmelden'/'Wird gesendet...', and success/error messages live inside frontend/components/forms/VisitDayForm.tsx (registered component 'visit_day_form') and are intentionally not part of the seed.",
     "Page exports no metadata — 'seo' omitted; the layout default <title> applies today."
   ]

@@ -1,4 +1,13 @@
 {
+  "site": {
+    "logo": "assets/bioco-logo.png",
+    "logoAlt": "biocò",
+    "homeLabel": "biocò Startseite",
+    "utilityLabel": "Hilfsnavigation",
+    "primaryLabel": "Hauptnavigation",
+    "menuOpenLabel": "Menü öffnen",
+    "menuCloseLabel": "Menü schliessen"
+  },
   "utility": [
     { "slug": "standorte-depots", "label": "Standorte", "url": "/standorte-depots/" },
     { "slug": "kontakt", "label": "Kontakt", "url": "/kontakt/" },
@@ -11,5 +20,17 @@
     { "slug": "abos", "label": "Abos", "url": "/abos/" },
     { "slug": "aktuelles", "label": "Aktuelles", "url": "/aktuelles/" }
   ],
-  "cta": { "slug": "bioco-werden", "label": "BIOCÒ WERDEN", "url": "/bioco-werden/" }
+  "cta": { "slug": "bioco-werden", "label": "BIOCÒ WERDEN", "url": "/bioco-werden/" },
+  "legal": [
+    { "slug": "datenschutz", "label": "Datenschutz", "url": "/datenschutz/" },
+    { "slug": "impressum", "label": "Impressum", "url": "/impressum/" },
+    { "slug": "statuten", "label": "Statuten", "url": "/statuten/" }
+  ],
+  "footer": {
+    "slogan": "Gemeinsam Gemüse anbauen.",
+    "primaryLabel": "Seiten",
+    "utilityLabel": "Kontakt und Zugang",
+    "legalLabel": "Rechtliches",
+    "copyright": "Gemüsegenossenschaft biocò"
+  }
 }

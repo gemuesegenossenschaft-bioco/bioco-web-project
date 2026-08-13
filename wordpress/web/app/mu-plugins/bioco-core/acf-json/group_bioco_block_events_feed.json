@@ -49,6 +49,19 @@
             "placeholder": ""
         },
         {
+            "key": "field_bioco_events_feed_archive_url",
+            "label": "Archiv-Link",
+            "name": "archive_url",
+            "aria-label": "",
+            "type": "text",
+            "instructions": "Ziel der Links zu allen Veranstaltungen.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": { "width": "34", "class": "", "id": "" },
+            "default_value": "",
+            "placeholder": "/aktuelles"
+        },
+        {
             "key": "field_bioco_events_feed_title",
             "label": "Banner-Titel",
             "name": "title",
