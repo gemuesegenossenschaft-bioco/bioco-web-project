@@ -30,11 +30,11 @@ export function CTA({ text, href, variant = 'primary', onClick, navigation = 'cl
   const isExternal = explicitScheme === 'http' || explicitScheme === 'https'
   const isAllowedProtocolLink = explicitScheme === 'mailto' || explicitScheme === 'tel'
   const isUnsafeProtocolLink = Boolean(explicitScheme && !['http', 'https', 'mailto', 'tel'].includes(explicitScheme))
-  const documentHref = safeDocumentHref(normalizedHref)
-  const isAnchor = normalizedHref.startsWith('#') && !/[\u0000-\u0020\\]/.test(normalizedHref)
-  const isUnsafeInternalPath = !explicitScheme && !isAnchor && !safeSitePath(normalizedHref)
+  const documentHref = safeDocumentHref(href)
+  const isAnchor = href.startsWith('#') && !/[\s\u0000-\u001f\u007f\\]/u.test(href)
+  const isUnsafeInternalPath = !explicitScheme && !isAnchor && !safeSitePath(href)
 
-  if (isUnsafeProtocolLink || isUnsafeInternalPath || ((navigation === 'document' || isExternal) && !documentHref)) {
+  if (isUnsafeProtocolLink || isUnsafeInternalPath || ((navigation === 'document' || isExternal || isAllowedProtocolLink) && !documentHref)) {
     return <button type="button" className={className} disabled>{text}</button>
   }
 

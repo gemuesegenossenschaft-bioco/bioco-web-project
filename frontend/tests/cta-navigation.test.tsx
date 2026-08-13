@@ -23,11 +23,19 @@ describe('CTA navigation safety', () => {
     expect(screen.getByRole('link', { name: 'Demeter' })).toHaveAttribute('rel', 'noopener noreferrer')
   })
 
-  it.each(['//evil.example', '/unsafe\\path', ' /path with spaces '])(
+  it.each(['//evil.example', '/unsafe\\path', ' /kontakt', '/kontakt ', '/kontakt\u00a0'])(
     'rejects unsafe document target %s',
     (href) => {
       render(<CTA text="Dokument" href={href} navigation="document" />)
       expect(screen.getByRole('button', { name: 'Dokument' })).toBeDisabled()
+    },
+  )
+
+  it.each([' #kontakt', '#kontakt ', ' mailto:info@bioco.ch'])(
+    'rejects whitespace around non-path target %s',
+    (href) => {
+      render(<CTA text="Unsicher" href={href} />)
+      expect(screen.getByRole('button', { name: 'Unsicher' })).toBeDisabled()
     },
   )
 
