@@ -47,7 +47,7 @@ $image_alt = $image_alt_override ?: (is_array($image) ? ($image['alt'] ?? '') : 
                         $button_variant = $button['variant'] ?? 'primary';
                         if (!$button_text || !$button_href) continue;
                     ?>
-                        <a href="<?php echo esc_url($button_href); ?>" class="btn btn-<?php echo esc_attr($button_variant); ?> btn-organic"><?php echo esc_html($button_text); ?></a>
+                        <a href="<?php echo esc_url($button_href); ?>"<?php echo bioco_link_target_attributes($button_href); ?> class="btn btn-<?php echo esc_attr($button_variant); ?> btn-organic"><?php echo esc_html($button_text); ?></a>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>

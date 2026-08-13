@@ -7,7 +7,7 @@ routes=(
   / /abos/ /aktuelles/ /anmeldung/ /anmeldung-danke/ /bioco-werden/
   /datenschutz/ /gemuese/ /impressum/ /kontakt/ /kundenportal/ /mitmachen/
   /newsletter/ /solawi/ /standorte-depots/ /statuten/ /tag-der-offenen-tuer/
-  /warteliste/ /wir/
+  /warteliste/ /wir/ /intranet/
 )
 
 response=$(mktemp "${TMPDIR:-/tmp}/bioco-wp-render.XXXXXX")

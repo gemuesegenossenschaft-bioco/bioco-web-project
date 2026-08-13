@@ -9,6 +9,12 @@ CORE = ROOT / "wordpress/web/app/mu-plugins/bioco-core"
 THEME = ROOT / "wordpress/web/app/themes/bioco"
 
 
+def _css_rule(css, selector):
+    match = re.search(rf"{re.escape(selector)}\s*\{{(?P<body>[^}}]+)\}}", css)
+    assert match, f"missing CSS rule: {selector}"
+    return match.group("body")
+
+
 def run_php(source):
     return subprocess.run(
         ["php", "-r", source], cwd=ROOT, text=True, capture_output=True, check=True
@@ -196,6 +202,127 @@ def test_navigation_footer_and_editorial_media_contracts():
         "https://example.org/path",
         "", "", "", "", "",
     ]
+
+
+def test_section_outer_frames_share_a_single_content_max():
+    """The shared .cms-section wrapper provides one outer frame. Explicit
+    data-container variants keep their semantic widths and are centred within
+    it. Inner text max-widths stay untouched. No route-specific tweaks."""
+    blocks = (CORE / "assets/bioco-blocks.css").read_text()
+    shell = (THEME / "assets/app.css").read_text()
+
+    section_rule = _css_rule(blocks, ".cms-section")
+    assert "max-width: var(--wp--style--global--content-size, 1160px)" in section_rule
+    assert "--bioco-section-offset: max(0px, calc((100% - var(--wp--style--global--content-size, 1160px)) / 2))" in section_rule
+    assert "width: calc(100% - var(--bioco-section-offset))" in section_rule
+    assert "margin-left: var(--bioco-section-offset)" in section_rule
+    assert "margin-right: 0" in section_rule
+
+    split_rule = _css_rule(blocks, ".cms-split")
+    assert "margin-left: var(--bioco-section-offset)" in split_rule
+    assert "margin-right: 0" in split_rule
+
+    # Split variants must keep their explicit widths and be centred.
+    split_frames = {
+        ".cms-split[data-container-width='sm']": "640px",
+        ".cms-split[data-container-width='md']": "820px",
+        ".cms-split[data-container-width='lg']": "1040px",
+        ".cms-split[data-container-width='xl']": "1280px",
+        ".cms-split[data-container-width='full']": "100%",
+    }
+    for selector, width in split_frames.items():
+        rule = _css_rule(blocks, selector)
+        assert f"max-width: {width}" in rule, selector
+
+    # Grouped container variants must keep their explicit widths (semantic
+    # controls, not flattened to a single value).
+    grouped_rules = [
+        ".cms-page-intro[data-container='sm'],\n.cms-text-columns[data-container='sm'] { max-width: 640px; }",
+        ".cms-page-intro[data-container='md'],\n.cms-cta-band[data-container='md'],\n.cms-text-columns[data-container='md'],\n.cms-timeline[data-container='md'] { max-width: 820px; }",
+        ".cms-page-intro[data-container='lg'],\n.cms-cta-band[data-container='lg'],\n.cms-text-columns[data-container='lg'],\n.cms-timeline[data-container='lg'] { max-width: 1040px; }",
+        ".cms-page-intro[data-container='xl'],\n.cms-cta-band[data-container='xl'],\n.cms-text-columns[data-container='xl'],\n.cms-timeline[data-container='xl'] { max-width: 1280px; }",
+        ".cms-page-intro[data-container='full'],\n.cms-cta-band[data-container='full'],\n.cms-text-columns[data-container='full'] { max-width: 100%; }",
+    ]
+    for rule in grouped_rules:
+        assert rule in blocks, rule
+
+    # Narrower editorial frames keep the common left edge rather than being
+    # independently centred and drifting away from surrounding sections.
+    assert ".cms-page-intro,\n.cms-cta-band,\n.cms-text-columns,\n.cms-timeline {\n  margin-right: 0;\n}" in blocks
+
+    # Inner text widths must remain intentionally narrower than the outer frame.
+    assert "max-width: 74rem" in _css_rule(
+        blocks, ".cms-page-intro-inner[data-text-width='wide']"
+    )
+    assert "max-width: 74rem" in _css_rule(
+        blocks, ".cms-split.is-text-only .cms-split-content"
+    )
+
+    # No page/route-specific selectors are allowed to tweak alignment.
+    assert ".home .cms-" not in blocks
+    assert ".mitmachen .cms-" not in blocks
+    assert re.search(r"\.(page|single|archive|category)-\w+\s+\.cms-", blocks) is None
+    assert re.search(r"\.(page|single|archive|category)-\w+\s+\.cms-", shell) is None
+
+
+def test_primary_nav_cta_is_green_white_organic_and_interactive():
+    shell = (THEME / "assets/app.css").read_text()
+
+    cta = _css_rule(shell, ".bioco-primary-nav .bioco-primary-cta")
+    assert "--bioco-nav-cta-background:" in cta
+    assert "var(--wp--preset--color--bioco-green)" in cta
+    assert "color: #fff" in cta or "color: #ffffff" in cta
+    assert "clip-path:" not in cta
+    cta_paint = _css_rule(shell, ".bioco-primary-nav .bioco-primary-cta::before")
+    assert "clip-path:" in cta_paint
+    assert "background: var(--bioco-nav-cta-background)" in cta_paint
+
+    hover = _css_rule(shell, ".bioco-primary-nav .bioco-primary-cta:hover")
+    assert "--bioco-nav-cta-background: var(--wp--preset--color--bioco-green-dark)" in hover
+    assert "color: #fff" in hover or "color: #ffffff" in hover
+
+    focus = _css_rule(shell, ".bioco-primary-nav .bioco-primary-cta:focus-visible")
+    assert "--bioco-nav-cta-background: var(--wp--preset--color--bioco-green-dark)" in focus
+    assert "color: #fff" in focus or "color: #ffffff" in focus
+    assert "outline:" in focus
+
+    mobile = _css_rule(shell, ".bioco-primary-nav.is-open .bioco-primary-cta")
+    assert "background: transparent" in mobile
+
+
+def test_intranet_seed_page_is_a_single_h1_with_structured_blocks():
+    wp_path = ROOT / "wordpress/content-seed/intranet.json"
+    cms_path = ROOT / "cms/content-seed/intranet.json"
+    assert wp_path.exists(), "WordPress intranet seed missing"
+    assert cms_path.exists(), "CMS intranet seed mirror missing"
+
+    wp = json.loads(wp_path.read_text())
+    cms = json.loads(cms_path.read_text())
+    assert wp == cms, "wordpress/cms intranet seeds must stay identical"
+
+    assert wp["slug"] == "intranet"
+    assert wp["path"] == "/intranet/"
+    assert wp["title"] == "Intranet"
+
+    headings = [
+        section for section in wp["sections"]
+        if section.get("section_component") == "page_intro"
+        and section.get("section_config", {}).get("headingLevel") == "1"
+    ]
+    assert len(headings) == 1, "intranet must have exactly one page_intro H1"
+    assert headings[0].get("section_title") == "Intranet"
+
+    for section in wp["sections"]:
+        text = section.get("section_text", "")
+        assert "<h1" not in text.lower(), section["section_id"]
+        assert not re.search(
+            r"<a\b[^>]*class=[\"'][^\"']*\bbtn\b",
+            text,
+            re.IGNORECASE,
+        ), ("hardcoded anchor button in", section["section_id"])
+
+    # At least one section uses the structured buttons array (no editorial PHP).
+    assert any(section.get("buttons") for section in wp["sections"])
 
 
 def test_shared_visual_primitives_are_systemic():

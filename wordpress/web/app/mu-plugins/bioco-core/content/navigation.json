@@ -11,7 +11,7 @@
   "utility": [
     { "slug": "standorte-depots", "label": "Standorte", "url": "/standorte-depots/" },
     { "slug": "kontakt", "label": "Kontakt", "url": "/kontakt/" },
-    { "slug": "intranet", "label": "Intranet", "url": "https://intranet.bioco.ch/" }
+    { "slug": "intranet", "label": "Intranet", "url": "/intranet/" }
   ],
   "primary": [
     { "slug": "wir", "label": "Wir", "url": "/wir/" },
