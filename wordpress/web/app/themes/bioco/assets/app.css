@@ -128,6 +128,7 @@ header:has(.bioco-navigation-shell) {
 
 .bioco-primary-nav .bioco-primary-cta {
   --bioco-nav-cta-background: var(--wp--preset--color--bioco-green);
+
   position: relative;
   isolation: isolate;
   display: inline-flex;
@@ -152,6 +153,7 @@ header:has(.bioco-navigation-shell) {
 
 .bioco-primary-nav .bioco-primary-cta:hover {
   --bioco-nav-cta-background: var(--wp--preset--color--bioco-green-dark);
+
   color: #fff;
   transform: translateY(-1px);
   box-shadow: var(--wp--custom--shadow--md);
@@ -159,6 +161,7 @@ header:has(.bioco-navigation-shell) {
 
 .bioco-primary-nav .bioco-primary-cta:focus-visible {
   --bioco-nav-cta-background: var(--wp--preset--color--bioco-green-dark);
+
   color: #fff;
   outline: 3px solid var(--wp--preset--color--bioco-carrot);
   outline-offset: 4px;

@@ -51,7 +51,7 @@ def test_intranet_seed_mirrors_the_live_page_content():
     assert wp["path"] == "/intranet/"
     assert wp["title"] == "Intranet"
 
-    sections = {section["section_id"]: section for section in wp["sections"]}
+    section_ids = [section["section_id"] for section in wp["sections"]]
     text = " ".join(section.get("section_text", "") for section in wp["sections"])
     titles = [section.get("section_title", "") for section in wp["sections"]]
 
@@ -78,7 +78,7 @@ def test_intranet_seed_mirrors_the_live_page_content():
     assert cta["text"] == "Zum Intranet"
     assert cta["variant"] == "primary"
 
-    assert sections  # section ids are unique
+    assert len(section_ids) == len(set(section_ids)), "section ids must be unique"
 
 
 def test_seed_corpus_and_staging_gate_cover_twenty_pages():
