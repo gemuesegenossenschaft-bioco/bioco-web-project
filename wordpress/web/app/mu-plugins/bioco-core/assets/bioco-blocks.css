@@ -556,6 +556,7 @@
 @media (min-width: 900px) {
   .cms-split[data-media-side='left'] { grid-template-columns: minmax(0, var(--bioco-split-media-width, 50%)) minmax(0, 1fr); }
   .cms-split[data-media-side='right'] { grid-template-columns: minmax(0, 1fr) minmax(0, var(--bioco-split-media-width, 50%)); }
+  .cms-split.is-text-only { grid-template-columns: 1fr; }
   .cms-split-media.is-last {
     order: 2;
   }
