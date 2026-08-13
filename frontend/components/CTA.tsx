@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { safeDocumentHref, safeSitePath } from '@/lib/safeHref'
 
 interface CTAProps {
   text: string
@@ -24,18 +25,25 @@ export function CTA({ text, href, variant = 'primary', onClick, navigation = 'cl
   const normalizedHref = href.trim()
   const schemeProbe = normalizedHref.replace(/[\u0000-\u0020]+/g, '')
 
-  const isExternal = normalizedHref.startsWith('http://') || normalizedHref.startsWith('https://')
   const isFile = /\.(pdf|doc|docx|xls|xlsx|zip)$/i.test(normalizedHref)
   const explicitScheme = schemeProbe.match(/^([a-z][a-z0-9+.-]*):/i)?.[1]?.toLowerCase()
+  const isExternal = explicitScheme === 'http' || explicitScheme === 'https'
   const isAllowedProtocolLink = explicitScheme === 'mailto' || explicitScheme === 'tel'
   const isUnsafeProtocolLink = Boolean(explicitScheme && !['http', 'https', 'mailto', 'tel'].includes(explicitScheme))
+  const documentHref = safeDocumentHref(normalizedHref)
+  const isAnchor = normalizedHref.startsWith('#') && !/[\u0000-\u0020\\]/.test(normalizedHref)
+  const isUnsafeInternalPath = !explicitScheme && !isAnchor && !safeSitePath(normalizedHref)
 
-  if (isUnsafeProtocolLink) {
+  if (isUnsafeProtocolLink || isUnsafeInternalPath || ((navigation === 'document' || isExternal) && !documentHref)) {
     return <button type="button" className={className} disabled>{text}</button>
   }
 
   if (isAllowedProtocolLink || navigation === 'document') {
-    return <a className={className} href={normalizedHref} onClick={onClick}>{text}</a>
+    return <a className={className} href={documentHref} onClick={onClick}>{text}</a>
+  }
+
+  if (isExternal) {
+    return <a className={className} href={documentHref} target="_blank" rel="noopener noreferrer" onClick={onClick}>{text}</a>
   }
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -44,12 +52,12 @@ export function CTA({ text, href, variant = 'primary', onClick, navigation = 'cl
       onClick()
     }
 
-    if (isExternal || isFile) {
+    if (isFile) {
       window.open(normalizedHref, '_blank', 'noopener,noreferrer')
       return
     }
 
-    if (normalizedHref.startsWith('#')) {
+    if (isAnchor) {
       scrollToElement(normalizedHref.substring(1))
       return
     }

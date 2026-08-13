@@ -181,6 +181,22 @@ def test_navigation_footer_and_editorial_media_contracts():
     assert 'class="bioco-site-footer"' in rendered_footer
     assert all(item["label"] in rendered_footer for item in navigation["legal"])
 
+    php_urls = r'''
+    define('ABSPATH', __DIR__);
+    function home_url($path) { return 'https://staging.example' . $path; }
+    require 'wordpress/web/app/mu-plugins/bioco-core/includes/navigation.php';
+    echo json_encode(array_map('bioco_navigation_url', [
+        '/aktuelles', 'https://example.org/path', 'javascript:alert(1)',
+        'data:text/html,x', '//evil.example', "/bad\\path", "/bad path",
+    ]));
+    '''
+    urls = json.loads(run_php(php_urls))
+    assert urls == [
+        "https://staging.example/aktuelles",
+        "https://example.org/path",
+        "", "", "", "", "",
+    ]
+
 
 def test_shared_visual_primitives_are_systemic():
     blocks = (CORE / "assets/bioco-blocks.css").read_text()
@@ -189,8 +205,16 @@ def test_shared_visual_primitives_are_systemic():
     assert ".btn:focus-visible" in blocks
     assert ".home .cms-" not in blocks
     assert "[data-style-variant='feature']" in blocks
-    button_rule = blocks[blocks.index(".btn,"):blocks.index(".btn-primary {")]
+    button_rule = blocks[blocks.index(".btn,"):blocks.index(".btn:focus-visible")]
     assert "clip-path:" in button_rule
+    assert ".btn::before" in button_rule
+    assert "clip-path:" not in blocks[blocks.index(".btn,"):blocks.index(".btn::before")]
+    secondary_organic = blocks[
+        blocks.index(".btn-secondary.btn-organic {"):
+        blocks.index("/* group-cards block")
+    ]
+    assert not re.search(r"(?m)^\s*background:", secondary_organic)
+    assert "--bioco-button-background:" in secondary_organic
     assert "--bioco-frame-inline" in shell
     assert "aria-current" in shell
     events = (CORE / "blocks/events-feed/render.php").read_text()

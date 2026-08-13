@@ -217,11 +217,11 @@ def test_primary_and_secondary_button_labels_have_explicit_aa_contrast():
     secondary = _css_rule(css, ".btn-secondary")
 
     assert "color: #ffffff" in primary
-    assert "background: var(--wp--preset--color--bioco-green)" in primary
+    assert "--bioco-button-background: var(--wp--preset--color--bioco-green)" in primary
     assert _contrast_ratio("#ffffff", APPROVED_COLORS["bioco-green"]) >= 4.5
 
     assert "color: var(--wp--preset--color--bioco-green)" in secondary
-    assert "background: var(--wp--preset--color--bioco-surface)" in secondary
+    assert "--bioco-button-background: var(--wp--preset--color--bioco-surface)" in secondary
     assert _contrast_ratio(
         APPROVED_COLORS["bioco-green"], APPROVED_COLORS["bioco-surface"]
     ) >= 4.5

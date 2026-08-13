@@ -50,7 +50,7 @@ export function EventsBanner({
   return (
     <>
       <section className={containerClassName}>
-        {showTitle && <h2>{title}</h2>}
+        {showTitle && title ? <h2>{title}</h2> : null}
         {isLoading ? (
           loadingMessage ? <p style={{ color: 'var(--text-secondary)' }}>{loadingMessage}</p> : null
         ) : (

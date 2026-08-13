@@ -17,7 +17,21 @@ describe('CTA navigation safety', () => {
     expect(push).not.toHaveBeenCalled()
   })
 
-  it.each(['javascript:alert(1)', 'data:text/html,unsafe', '\njava\tscript:alert(1)'])(
+  it('renders external HTTPS navigation as a safe native link', () => {
+    render(<CTA text="Demeter" href="HTTPS://www.demeter.ch/" />)
+    expect(screen.getByRole('link', { name: 'Demeter' })).toHaveAttribute('target', '_blank')
+    expect(screen.getByRole('link', { name: 'Demeter' })).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it.each(['//evil.example', '/unsafe\\path', ' /path with spaces '])(
+    'rejects unsafe document target %s',
+    (href) => {
+      render(<CTA text="Dokument" href={href} navigation="document" />)
+      expect(screen.getByRole('button', { name: 'Dokument' })).toBeDisabled()
+    },
+  )
+
+  it.each(['javascript:alert(1)', 'data:text/html,unsafe', '\njava\tscript:alert(1)', '//evil.example', '/bad\\path'])(
     'rejects unsafe explicit scheme %s',
     (href) => {
       const open = vi.spyOn(window, 'open')

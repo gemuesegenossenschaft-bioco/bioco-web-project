@@ -82,7 +82,7 @@
   ],
   "conversion_notes": [
     "Die Seite lädt heute bereits eine CMS-Section 'intro' (getPageSections('solawi')); wenn sie existiert, rendert sie statt des Fallbacks. Die 'intro'-Section hier ist der HARDCODIERTE FALLBACK (h1 'Solidarische Landwirtschaft' + zwei Absätze), der heute rendert, solange kein CMS-Intro vorhanden ist. Vor der Migration prüfen, ob in PW schon ein 'intro' existiert; falls ja, gewinnt dessen Inhalt.",
-    "Die h1 der Seite steht als <h1> im section_text der ersten Section, exakt wie das Fallback-Rendering (h1 nur, wenn der Intro-Text keine Überschrift enthält).",
+    "Die H1 der Seite kommt aus section_title der ersten page_intro-Section mit section_config.headingLevel: 1; section_text enthält nur den Introtext.",
     "In 'was-ist-solawi' ist der zweite Absatz byte-genau 'und<strong> Gemeinschaft</strong>' (kein Leerzeichen vor <strong>, Leerzeichen INNERHALB des <strong>) – so kollabiert JSX den Zeilenumbruch der Quelle; der Browser zeigt 'und Gemeinschaft' korrekt an.",
     "In der FAQ-Antwort 'Wie kann ich mitmachen?' ist es byte-genau 'oder<a href=\"/kontakt\"> kontaktiere uns direkt</a>' – Leerzeichen im Linktext, nicht davor (JSX-Whitespace-Kollaps).",
     "Der Button 'Jetzt Mitglied werden' in 'solawi-bei-bioco' ist heute eine CTA.tsx-Komponente (rendert <button> mit router.push) – als buttons-Array abgebildet.",

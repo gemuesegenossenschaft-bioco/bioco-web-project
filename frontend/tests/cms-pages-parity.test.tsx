@@ -31,7 +31,7 @@ vi.mock('@/hooks/useEventsFeed', () => ({
   useEventsFeed: () => ({ upcoming: [], past: [], isLoading: false }),
 }))
 vi.mock('@/components/EventsSection', () => ({
-  EventsSection: ({ archiveUrl }: { archiveUrl?: string }) => <div data-testid="events-section-standard" data-archive-url={archiveUrl} />,
+  EventsSection: ({ archiveUrl, limit }: { archiveUrl?: string; limit?: number }) => <div data-testid="events-section-standard" data-archive-url={archiveUrl} data-limit={limit} />,
 }))
 // Leaflet maps inject external scripts in useEffect — mock for jsdom stability.
 vi.mock('@/components/DepotMap', () => ({ DepotMap: () => <div data-testid="depot-map" /> }))
@@ -419,11 +419,12 @@ describe('/kundenportal parity (seed: kundenportal)', () => {
       text: '',
       layout: 'component',
       component: 'events_feed',
-      config: { archiveUrl: '/events-archive' },
+      config: { archiveUrl: '/events-archive', limit: 5 },
     }
     const { queryByTestId, container } = render(<SectionRenderer sections={[standard]} />)
     expect(queryByTestId('events-section-standard')).toBeTruthy()
     expect(queryByTestId('events-section-standard')).toHaveAttribute('data-archive-url', '/events-archive')
+    expect(queryByTestId('events-section-standard')).toHaveAttribute('data-limit', '5')
     expect(container.querySelector('.events-banner')).toBeNull()
   })
 
@@ -603,7 +604,9 @@ describe('/gemuese parity (seed: gemuese)', () => {
     const { container, getByRole } = render(<SectionRenderer sections={sections} />)
     expect(container.textContent).toContain('höchste Qualitätsstufe im biologischen Landbau')
     expect(container.querySelector('a[href="/solawi"]')).toBeTruthy()
-    getByRole('button', { name: 'Mehr über Demeter erfahren →' })
+    const demeterLink = getByRole('link', { name: 'Mehr über Demeter erfahren →' })
+    expect(demeterLink).toHaveAttribute('target', '_blank')
+    expect(demeterLink).toHaveAttribute('rel', 'noopener noreferrer')
     const demeter = sections.find((s) => s.id === 'demeter-link')
     expect(demeter?.buttons).toEqual([
       { text: 'Mehr über Demeter erfahren →', href: 'https://www.demeter.ch', variant: 'secondary' },

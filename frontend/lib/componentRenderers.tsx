@@ -60,10 +60,11 @@ export const componentRenderers: Record<string, ComponentRenderer> = {
     // rendering (EventsBanner); default 'standard' keeps EventsSection.
     const config = getResolvedComponentConfig(section.component, section.config)
     const archiveUrl = String(config.archiveUrl || '')
+    const configuredLimit = Number(config.limit)
+    const limit = Number.isFinite(configuredLimit) && configuredLimit > 0 ? configuredLimit : undefined
     if (String(config.variant || 'standard') === 'banner') {
-      const limit = Number(config.limit)
       return <EventsBanner
-        limit={Number.isFinite(limit) && limit > 0 ? limit : 3}
+        limit={limit ?? 3}
         archiveUrl={archiveUrl}
         title={String(config.title || '')}
         archiveLabel={String(config.archiveLabel || '')}
@@ -72,6 +73,7 @@ export const componentRenderers: Record<string, ComponentRenderer> = {
       />
     }
     return <EventsSection
+      limit={limit}
       archiveUrl={archiveUrl}
       upcomingTitle={String(config.upcomingTitle || '')}
       archiveLabel={String(config.archiveLabel || '')}

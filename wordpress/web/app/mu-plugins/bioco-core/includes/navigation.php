@@ -28,7 +28,14 @@ function bioco_primary_navigation_items() {
 
 function bioco_navigation_url($url) {
     $url = (string) $url;
-    return preg_match('#^https?://#i', $url) ? $url : home_url($url);
+    if ($url === '' || $url !== trim($url) || preg_match('/[\\x00-\\x20\\\\]/', $url)) return '';
+    if (str_starts_with($url, '//')) return '';
+    if (preg_match('#^https?://#i', $url)) {
+        $parts = parse_url($url);
+        return is_array($parts) && !empty($parts['host']) ? $url : '';
+    }
+    if (!str_starts_with($url, '/')) return '';
+    return home_url($url);
 }
 
 function bioco_navigation_item_is_current(array $item) {
@@ -46,13 +53,15 @@ function bioco_navigation_links(array $items, $linkClass = '', $itemClass = '') 
     $markup = '';
     foreach ($items as $item) {
         if (empty($item['label']) || empty($item['url'])) continue;
+        $href = bioco_navigation_url($item['url']);
+        if ($href === '') continue;
         $current = bioco_navigation_item_is_current($item);
         $link_classes = trim($linkClass . ($current ? ' is-current' : ''));
         $class = $link_classes !== '' ? ' class="' . esc_attr($link_classes) . '"' : '';
         $item_classes = trim($itemClass . ($current ? ' is-current' : ''));
         $item_class = $item_classes !== '' ? ' class="' . esc_attr($item_classes) . '"' : '';
         $current_attr = $current ? ' aria-current="page"' : '';
-        $markup .= '<li' . $item_class . '><a' . $class . $current_attr . ' href="' . esc_url(bioco_navigation_url($item['url'])) . '">' . esc_html($item['label']) . '</a></li>';
+        $markup .= '<li' . $item_class . '><a' . $class . $current_attr . ' href="' . esc_url($href) . '">' . esc_html($item['label']) . '</a></li>';
     }
     return $markup;
 }
