@@ -13,7 +13,7 @@
  *   configEditor.ts — sidebar component-config editor
  *   strings.ts  — every German UI string
  *
- * Navigation model (CLAUDE.md): there is NO page picker. The user navigates
+ * Navigation model: there is NO page picker. The user navigates
  * the real site inside the iframe; every `ready` message carries the current
  * pathname and the shell adopts that page (or its collection panel).
  */

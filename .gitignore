@@ -38,13 +38,25 @@ __pycache__/
 # Local browser automation artifacts
 .playwright-cli/
 
-# Internal planning docs (keep local only)
+# Internal and obsolete project docs (keep local only)
+/.claude/
+/AGENTS.md
+/CLAUDE.md
+/CMS_PAGES_SETUP.md
+/CONTRIBUTING.md
 /docs/
+/HANDOFF.md
+/MATOMO_SETUP.md
+/MATOMO_SETUP_DE.md
+/ROADMAP.md
+/SKILLS.md
+/migration-novatrend-finish.md
 /migration-novatrend.md
 /seo-implementation-spec.md
 /NEXTJS_SETUP.md
 /SETUP.md
 /CMS_UX_IMPROVEMENT_PLAN.md
+/wordpress/HANDOFF.md
 
 # OS-spezifische Dateien
 .DS_Store

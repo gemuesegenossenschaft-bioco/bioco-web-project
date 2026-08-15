@@ -13,8 +13,8 @@
  * then re-run with --events-json=events.json (a file path OR an http(s) URL
  * both work). Field semantics follow site/templates/api-events.php.
  *
- * Groups have no equivalent live PW endpoint today (see CLAUDE.md's API
- * list) — --groups-json accepts a hand-authored JSON array of
+ * Groups have no equivalent live PW endpoint today. --groups-json accepts a
+ * hand-authored JSON array of
  * {title, text, image, contact} objects (or {"groups": [...]}).
  */
 

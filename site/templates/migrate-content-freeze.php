@@ -9,8 +9,7 @@
  * damit jede Seite CMS-getrieben werden kann — mit EXAKT dem heutigen Inhalt.
  *
  * WICHTIG: Dieses Skript läuft NUR innerhalb eines ProcessWire-Bootstraps.
- * Es wird per Bootstrap-Datei im CMS-Webroot eingebunden (siehe
- * docs/content-freeze-migration.md):
+ * Es wird per Bootstrap-Datei im CMS-Webroot eingebunden:
  *
  *   <?php
  *   // /home/bioco/public_html/cms/bootstrap-content-freeze.php — NACH GEBRAUCH LÖSCHEN
@@ -68,7 +67,7 @@
 
 if (!defined('PROCESSWIRE')) {
     http_response_code(500);
-    die('migrate-content-freeze.php muss über einen ProcessWire-Bootstrap eingebunden werden (siehe docs/content-freeze-migration.md).');
+    die('migrate-content-freeze.php muss über einen ProcessWire-Bootstrap eingebunden werden.');
 }
 
 if (!class_exists('ProcessWire\\BiocoContentFreezeMigration')) {

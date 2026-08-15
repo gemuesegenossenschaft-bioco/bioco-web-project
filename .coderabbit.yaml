@@ -31,8 +31,8 @@ reviews:
   path_instructions:
     - path: "frontend/**"
       instructions: >-
-        Next.js 14 App Router, headless gegen ProcessWire. Die Projektregeln in
-        CLAUDE.md sind verbindlich: Caching-/Revalidate-Vertrag (middleware.ts nur
+        Next.js 14 App Router, headless gegen ProcessWire. Verbindlich:
+        Caching-/Revalidate-Vertrag (middleware.ts nur
         Security-Header, Framing-Header ausschliesslich in next.config.js),
         cmsClient.ts nutzt next.revalidate + Cache-Tags inkl. "cms". Inhalte sind
         CMS-getrieben — hartkodierter deutscher Inhaltstext oder Fallback-Inhalt in
@@ -44,7 +44,7 @@ reviews:
     - path: "site/**"
       instructions: >-
         ProcessWire (PHP 8.2). api.php ist der einzige API-Router; content-save ist
-        sectionPwId-first. Visual-Editor-Constraints aus CLAUDE.md beachten:
+        sectionPwId-first. Verbindliche Visual-Editor-Constraints:
         ob_end_clean/exit in visual-editor.php, kein has_field-Selector (statt
         dessen wire('templates') + hasField), Origin-Validierung im
         postMessage-Protokoll. Keine Secrets in getrackten Dateien — alles über
