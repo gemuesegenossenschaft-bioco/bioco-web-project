@@ -2,8 +2,8 @@
  * In-process sliding-window rate limiter.
  *
  * This app runs as a single `next-server` standalone process on the Novatrend
- * box (see CLAUDE.md: "exactly one next-server should run", enforced by the
- * health-check watchdog / deploy checks). That makes a plain in-memory Map a
+ * box. The health-check watchdog and deploy checks enforce that invariant.
+ * That makes a plain in-memory Map a
  * legitimate limiter for this deployment, but it comes with two honest
  * caveats callers must accept:
  *

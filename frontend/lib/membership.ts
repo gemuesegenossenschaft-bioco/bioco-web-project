@@ -70,9 +70,9 @@ export function validateMembership(data: MembershipInput): MembershipValidation 
 // D.2a — bioco.ch MembershipForm -> intranet.bioco.ch/my/signup/ (Django) field mapping.
 //
 // PROVISIONAL: the intranet's actual field names are unconfirmed. The signup page
-// 403s for unauthenticated requests, so these names are inferred from the PRD
-// mapping table (docs/prd-signup-integration.md) and not yet verified against a
-// logged-in enumeration of the real Django form. Centralized here so that once
+// 403s for unauthenticated requests, so these names are inferred from the
+// migration mapping and not yet verified against a logged-in enumeration of
+// the real Django form. Centralized here so that once
 // the real names are confirmed, only this const needs to change.
 export const INTRANET_FIELD_NAMES = {
   firstName: 'first_name',
