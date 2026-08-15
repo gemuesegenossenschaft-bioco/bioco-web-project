@@ -2,7 +2,6 @@ import json
 import subprocess
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[1]
 
 
@@ -26,6 +25,7 @@ def test_export_aborts_before_print_or_write_when_fields_are_unmapped(tmp_path):
             cwd=ROOT,
             text=True,
             capture_output=True,
+            check=False,
         )
 
         assert result.returncode == 1
@@ -70,6 +70,7 @@ def test_export_cleans_temp_file_when_publication_fails(tmp_path):
         cwd=ROOT,
         text=True,
         capture_output=True,
+        check=False,
     )
 
     assert result.returncode == 1
