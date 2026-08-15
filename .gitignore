@@ -49,3 +49,6 @@ __pycache__/
 # OS-spezifische Dateien
 .DS_Store
 Thumbs.db
+
+# Lokale Test-Artefakte (Playwright-Screenshots, Vergleichslaeufe)
+/frontend/output/
