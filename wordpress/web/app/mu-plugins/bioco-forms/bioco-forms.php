@@ -248,8 +248,7 @@ function bioco_forms_doi_on_confirm($form_type, $data) {
     bioco_forms_send_mail(bioco_forms_recipient(), 'Neuer Newsletter-Abonnent bestätigt', bioco_forms_lines($lines));
 }
 
-// Shared by the REST POST /bioco/v1/doi-confirm route and the bioco/doi-confirm
-// block's server-side render (the block calls this directly, no REST round-trip).
+// Used by the bioco/doi-confirm block's nonce-protected server-side POST flow.
 function bioco_forms_doi_confirm_token($token) {
     $token = is_string($token) ? sanitize_text_field($token) : '';
 
@@ -549,12 +548,6 @@ add_action('rest_api_init', function () {
     register_rest_route('bioco/v1', '/membership', [
         'methods' => 'POST',
         'callback' => 'bioco_forms_handle_membership',
-        'permission_callback' => '__return_true',
-    ]);
-
-    register_rest_route('bioco/v1', '/doi-confirm', [
-        'methods' => 'POST',
-        'callback' => 'bioco_forms_handle_doi_confirm',
         'permission_callback' => '__return_true',
     ]);
 });
@@ -859,11 +852,4 @@ function bioco_forms_handle_membership(WP_REST_Request $request) {
     }
 
     return new WP_REST_Response($response_body, 200);
-}
-
-function bioco_forms_handle_doi_confirm(WP_REST_Request $request) {
-    $token = $request->get_param('token');
-    $result = bioco_forms_doi_confirm_token($token);
-    $status = $result['success'] ? 200 : 400;
-    return new WP_REST_Response($result, $status);
 }

@@ -212,9 +212,20 @@ if (is_file($outFile)) {
     fwrite(STDERR, "FEHLER: {$outFile} existiert bereits. Vorhandene Seeds sind der Paritaets-Vertrag und werden nicht ueberschrieben.\n");
     exit(1);
 }
-$written = file_put_contents($outFile, $json, LOCK_EX);
-if ($written === false) {
+$tempFile = tempnam($outDir, '.bioco-seed-');
+if ($tempFile === false) {
     fwrite(STDERR, "FEHLER: {$outFile} konnte nicht geschrieben werden.\n");
+    exit(1);
+}
+$written = file_put_contents($tempFile, $json, LOCK_EX);
+if ($written !== strlen($json)) {
+    @unlink($tempFile);
+    fwrite(STDERR, "FEHLER: {$outFile} konnte nicht geschrieben werden.\n");
+    exit(1);
+}
+if (!@rename($tempFile, $outFile)) {
+    @unlink($tempFile);
+    fwrite(STDERR, "FEHLER: {$outFile} konnte nicht veroeffentlicht werden.\n");
     exit(1);
 }
 echo "\nGeschrieben: {$outFile}\n";

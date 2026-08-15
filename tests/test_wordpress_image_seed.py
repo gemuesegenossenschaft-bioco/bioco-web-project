@@ -34,6 +34,28 @@ def test_export_aborts_before_print_or_write_when_fields_are_unmapped(tmp_path):
         assert not (tmp_path / "unmapped-fixture.json").exists()
 
 
+def test_export_publishes_a_complete_seed_without_leaving_temp_files(tmp_path):
+    result = subprocess.run(
+        [
+            "php",
+            "wordpress/scripts/fetch-cms-seed.php",
+            "--slug=atomic-fixture",
+            f"--from-file={ROOT / 'tests/fixtures/wordpress-sections-with-images.json'}",
+            f"--out={tmp_path}",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    seed_path = tmp_path / "atomic-fixture.json"
+    seed = json.loads(seed_path.read_text())
+    assert seed["slug"] == "atomic-fixture"
+    assert "Geschrieben:" in result.stdout
+    assert list(tmp_path.glob(".bioco-seed-*")) == []
+
+
 def test_event_card_image_second_apply_skips_equal_attachment_but_updates_changed_values():
     php = r'''
     define('ABSPATH', __DIR__);

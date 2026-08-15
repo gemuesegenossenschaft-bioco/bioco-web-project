@@ -7,6 +7,36 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 
 
+def test_doi_confirmation_has_no_public_rest_route():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    $ACTIONS = [];
+    $ROUTES = [];
+
+    function add_action($hook, $callback) { $GLOBALS['ACTIONS'][$hook][] = $callback; }
+    function register_rest_route($namespace, $route, $args) {
+        $GLOBALS['ROUTES'][] = $namespace . $route;
+    }
+
+    require 'wordpress/web/app/mu-plugins/bioco-forms/bioco-forms.php';
+    foreach ($ACTIONS['rest_api_init'] as $callback) {
+        $callback();
+    }
+    echo json_encode($ROUTES);
+    '''
+    routes = json.loads(
+        subprocess.run(
+            ["php", "-r", php],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=True,
+        ).stdout
+    )
+
+    assert "bioco/v1/doi-confirm" not in routes
+
+
 def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
     php = r'''
     define('ABSPATH', __DIR__);
@@ -53,12 +83,12 @@ def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
 
     assert results["valid_field_keys"] is True
     assert results["valid_names"] is True
-    assert results["empty"] != True
-    assert results["missing_all"] != True
-    assert results["duplicate"] != True
-    assert results["unsupported"] != True
-    assert results["non_canonical"] != True
-    assert results["invalid_row"] != True
+    assert results["empty"] is not True
+    assert results["missing_all"] is not True
+    assert results["duplicate"] is not True
+    assert results["unsupported"] is not True
+    assert results["non_canonical"] is not True
+    assert results["invalid_row"] is not True
 
 
 def test_doi_get_never_consumes_and_post_requires_a_valid_nonce():

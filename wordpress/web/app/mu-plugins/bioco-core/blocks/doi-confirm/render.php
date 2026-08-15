@@ -18,8 +18,8 @@
 if (!defined('ABSPATH')) exit;
 
 $missing_token_message = get_field('missing_token_message');
-$confirmation_prompt = get_field('confirmation_prompt');
-$confirmation_button_label = get_field('confirmation_button_label');
+$confirmation_prompt = __('Bitte bestätige deine Anmeldung.', 'bioco');
+$confirmation_button_label = __('Anmeldung bestätigen', 'bioco');
 $success_title = get_field('success_title');
 $success_text = get_field('success_text');
 $subscribe_text = get_field('subscribe_text');
@@ -44,10 +44,6 @@ if ($has_token && !$is_preview) {
     if (!defined('DONOTCACHEPAGE')) define('DONOTCACHEPAGE', true);
     nocache_headers();
 }
-
-// Runtime safety fallbacks — translated generic text only if the ACF field is empty.
-$confirmation_prompt = $confirmation_prompt ?: __('Bitte bestätige deine Anmeldung.', 'bioco');
-$confirmation_button_label = $confirmation_button_label ?: __('Anmeldung bestätigen', 'bioco');
 
 $result = null;
 $show_form = false;
