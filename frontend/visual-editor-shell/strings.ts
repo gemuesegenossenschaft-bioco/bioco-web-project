@@ -5,8 +5,8 @@
  *
  * Strings that belonged exclusively to removed features are NOT here:
  * - page picker ("Seite suchen...", "Keine passende Seite gefunden.", the
- *   "n / m" counter) — the picker is gone by design (CLAUDE.md: iframe
- *   navigation drives pages).
+ *   "n / m" counter) — the picker is gone by design because iframe navigation
+ *   drives pages.
  * - server-side draft layer ("Server-Entwurf wiederhergestellt.",
  *   "Server-Entwurf veraltet und verworfen.", "Entwurf konnte nicht
  *   gespeichert werden") — draft persistence is sessionStorage-only now.

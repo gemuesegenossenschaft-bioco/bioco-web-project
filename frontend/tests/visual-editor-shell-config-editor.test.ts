@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { renderComponentConfigEditor } from '../visual-editor-shell/configEditor'
 
 // G.2 — sidebar component-config editor. Supports the four registry
-// configSchema field types (select, range, text, number) per CLAUDE.md.
+// configSchema field types: select, range, text, number.
 
 const schema = [
   {

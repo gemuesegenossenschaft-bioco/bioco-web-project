@@ -8,8 +8,8 @@
 //   3. Interpret 302 (or any 2xx without field errors) as success; a 200
 //      re-render with Django `errorlist` markup as field errors.
 //
-// This never changes intranet.bioco.ch — see docs/prd-signup-integration.md.
-// Field/error markup assumptions are PROVISIONAL (see lib/membership.ts).
+// This never changes intranet.bioco.ch. Field/error markup assumptions are
+// PROVISIONAL (see lib/membership.ts).
 
 const REQUEST_TIMEOUT_MS = 5000
 

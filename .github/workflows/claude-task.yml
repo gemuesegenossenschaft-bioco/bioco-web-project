@@ -2,7 +2,7 @@ name: Claude Task (manual)
 
 # Fire-and-forget automation: start a one-off Claude task from the Actions
 # tab with a free-text prompt (e.g. "run the frontend test suite and fix
-# any failures", "update ROADMAP.md checkboxes from merged PRs"). Uses the
+# any failures", "summarize open issues and merged PRs"). Uses the
 # same repo-scoped credentials as claude.yml. Requires ANTHROPIC_API_KEY.
 on:
   workflow_dispatch:
