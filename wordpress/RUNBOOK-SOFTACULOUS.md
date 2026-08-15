@@ -58,18 +58,16 @@ Softaculous besitzt und aktualisiert WordPress-Core. Der bioco-Deploy darf weder
 
 ## 3. Erforderliche Plugins installieren
 
-### ACF Pro — zwingende Voraussetzung
+### Secure Custom Fields — ersetzt ACF Pro
 
-**ACF Pro ist eine bezahlte Lizenz und eine harte Voraussetzung.** Der Importer löst ACF-Feldschlüssel über die ACF-eigene API auf und kann ohne aktives ACF Pro nicht laufen.
+**Kein ACF-Pro-Kauf nötig.** Staging läuft auf **Secure Custom Fields (SCF)**, dem GPL-Fork von ACF auf wordpress.org. SCF liefert Repeater, Flexible Content, Options Pages, Gallery, Clone und ACF Blocks, also genau die Funktionen, die der Importer und die Blöcke brauchen. Begründung und geprüfte Aufrufliste: `HANDOFF.md` §1.2.
 
-- [ ] ACF-Pro-Zip aus dem offiziellen ACF-Konto herunterladen
-- [ ] In wp-admin `Plugins` → `Installieren` → `Plugin hochladen` öffnen
-- [ ] ACF-Pro-Zip hochladen
-- [ ] `Advanced Custom Fields PRO` aktivieren
-- [ ] Lizenz ausschliesslich über die dafür vorgesehene WordPress-/ACF-Oberfläche hinterlegen
-- [ ] Unter `Plugins` prüfen, dass ACF Pro aktiv ist
+- [ ] `Plugins` → `Installieren` öffnen
+- [ ] Nach `Secure Custom Fields` suchen
+- [ ] Plugin installieren und aktivieren
+- [ ] Unter `Plugins` prüfen, dass SCF aktiv ist (Staging: Version 6.9.5)
 
-ACF Pro wird nicht aus diesem öffentlichen Repo deployt und seine Lizenz gehört niemals in eine Datei im Repo.
+**ACF und ACF Pro dürfen nicht gleichzeitig aktiv sein.** SCF deaktiviert passende ACF-Installationen selbst, und der Importer soll gegen genau ein Feld-Plugin laufen. Wer eine ACF-Pro-Lizenz besitzt, entscheidet sich für eine der beiden Seiten. Eine ACF-Lizenz gehört niemals in eine Datei im Repo.
 
 ### WP Mail SMTP
 
@@ -127,6 +125,22 @@ wordpress/scripts/deploy-wp-code.sh --apply
 
 ## 5. Divi und Child Theme aktivieren
 
+### Voraussetzungen: bereits erledigt auf staging.bioco.ch
+
+Wer Divi installiert, braucht nur einen WordPress-Zugang, keinen SSH-Zugang. Der Stand auf Staging:
+
+| Voraussetzung | Stand |
+|---|---|
+| WordPress erreichbar | `https://staging.bioco.ch/`, Login unter `/wp-login.php` |
+| Rolle für den Upload | Administrator; ein zweiter Admin-Account existiert neben dem Betriebs-Account |
+| Theme-Upload technisch möglich | Dateisystem-Methode `direct`, `wp-content/themes` und `wp-content/upgrade` beschreibbar |
+| Upload-Grenze | 100 MB (`upload_max_filesize` und `post_max_size`), Divi-Zip liegt deutlich darunter |
+| Child Theme vorhanden | `bioco-divi` liegt bereits unter `wp-content/themes/` und wartet auf das Parent-Theme |
+| Suchmaschinen | Indexierung ist ausgeschaltet (`blog_public = 0`) |
+| Divi-Schutz beim Deploy | `deploy-wp-code.sh` synchronisiert nur `bioco-*`; Divi wird nie ausgeliefert und nie gelöscht |
+
+Solange Divi fehlt, bleibt das Block-Theme `bioco` aktiv und die Seite rendert vollständig. Divi ist ein Zusatz, keine Bedingung.
+
 ### Divi hochladen
 
 - [ ] Divi-Zip direkt aus dem Elegant-Themes-Konto herunterladen
@@ -140,6 +154,9 @@ wordpress/scripts/deploy-wp-code.sh --apply
 - [ ] Unter `Design` → `Themes` das Child Theme `bioco-divi` aktivieren
 - [ ] Nicht das Parent-Theme `Divi` direkt aktivieren
 - [ ] Startseite und wp-admin auf sichtbare Fehler prüfen
+- [ ] Stichprobe der Blöcke: `/abos/`, `/wir/`, `/standorte-depots/` und `/kontakt/` aufrufen und prüfen, dass Inhalt und Formular weiterhin erscheinen
+
+Rückweg, falls nach der Aktivierung etwas fehlt: unter `Design` → `Themes` wieder `bioco` aktivieren. Die Inhalte liegen in den mu-plugins und im `post_content`, nicht im Theme, gehen also nicht verloren.
 
 ### Divi-Lizenz eintragen
 
@@ -175,7 +192,7 @@ Ist das CMS nur von einem anderen Rechner erreichbar, nennt die Fehlermeldung de
 
 ### Import-Probelauf
 
-- [ ] ACF Pro ist aktiv
+- [ ] Secure Custom Fields ist aktiv, ACF bzw. ACF Pro ist **nicht** aktiv
 - [ ] `wp bioco import` ohne Schreibflag starten
 
 ```bash
@@ -233,7 +250,7 @@ Mögliche Ursachen:
 
 - [ ] `wp-content/mu-plugins/bioco-mu-loader.php` fehlt
 - [ ] Einer der vier `bioco-*`-mu-plugin-Ordner fehlt oder ist unvollständig
-- [ ] ACF Pro ist nicht installiert oder nicht aktiv
+- [ ] Secure Custom Fields ist nicht installiert oder nicht aktiv
 - [ ] Deploy erneut zuerst als Dry-Run, dann mit `--apply` ausführen
 - [ ] Unter `Plugins` → `Must-Use` kontrollieren, ob die bioco-Komponenten geladen sind
 

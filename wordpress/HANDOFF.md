@@ -173,6 +173,14 @@ description is stored, not in the test.
 
 ### 3.4 Bring staging up
 
+**Status: steps 1–6 are done.** `staging.bioco.ch` serves WordPress 7.0.4 from the isolated docroot
+`/home/bioco/staging.bioco.ch`, theme `bioco` active, Secure Custom Fields 6.9.5 and WP Mail SMTP
+active, the four `bioco-*` mu-plugins plus `bioco-mu-loader.php` deployed, content imported, and the
+routes render `cms-*` block markup. Mail goes out over `mail.bioco.ch:465`; the credentials sit in
+`wp-config.php` constants (`WPMS_*`) on the server, never in the database export and never in this
+repo. Step 7 (live forms, Turnstile, DOI) is still open and tracked in #97. The steps below stay as
+the reference for a rebuild.
+
 Owner has confirmed: **create a fresh staging docroot.** Do not touch `~/public_html/` (legacy WP), and
 do not touch `intranet.bioco.ch`.
 
