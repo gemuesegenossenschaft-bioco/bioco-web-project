@@ -67,7 +67,7 @@ Softaculous besitzt und aktualisiert WordPress-Core. Der bioco-Deploy darf weder
 - [ ] Plugin installieren und aktivieren
 - [ ] Unter `Plugins` prüfen, dass SCF aktiv ist (Staging: Version 6.9.5)
 
-ACF Pro darf zusätzlich installiert werden, wenn eine Lizenz vorliegt; beide gleichzeitig zu aktivieren ist nicht vorgesehen. Eine ACF-Lizenz gehört niemals in eine Datei im Repo.
+**ACF und ACF Pro dürfen nicht gleichzeitig aktiv sein.** SCF deaktiviert passende ACF-Installationen selbst, und der Importer soll gegen genau ein Feld-Plugin laufen. Wer eine ACF-Pro-Lizenz besitzt, entscheidet sich für eine der beiden Seiten. Eine ACF-Lizenz gehört niemals in eine Datei im Repo.
 
 ### WP Mail SMTP
 
@@ -192,7 +192,7 @@ Ist das CMS nur von einem anderen Rechner erreichbar, nennt die Fehlermeldung de
 
 ### Import-Probelauf
 
-- [ ] ACF Pro ist aktiv
+- [ ] Secure Custom Fields ist aktiv, ACF bzw. ACF Pro ist **nicht** aktiv
 - [ ] `wp bioco import` ohne Schreibflag starten
 
 ```bash
@@ -250,7 +250,7 @@ Mögliche Ursachen:
 
 - [ ] `wp-content/mu-plugins/bioco-mu-loader.php` fehlt
 - [ ] Einer der vier `bioco-*`-mu-plugin-Ordner fehlt oder ist unvollständig
-- [ ] ACF Pro ist nicht installiert oder nicht aktiv
+- [ ] Secure Custom Fields ist nicht installiert oder nicht aktiv
 - [ ] Deploy erneut zuerst als Dry-Run, dann mit `--apply` ausführen
 - [ ] Unter `Plugins` → `Must-Use` kontrollieren, ob die bioco-Komponenten geladen sind
 
