@@ -60,7 +60,7 @@ Softaculous besitzt und aktualisiert WordPress-Core. Der bioco-Deploy darf weder
 
 ### Secure Custom Fields — ersetzt ACF Pro
 
-**Kein ACF-Pro-Kauf nötig.** Staging läuft auf **Secure Custom Fields (SCF)**, dem GPL-Fork von ACF auf wordpress.org. SCF liefert Repeater, Flexible Content, Options Pages, Gallery, Clone und ACF Blocks, also genau die Funktionen, die der Importer und die Blöcke brauchen. Begründung und geprüfte Aufrufliste: `HANDOFF.md` §1.2.
+**Kein ACF-Pro-Kauf nötig.** Staging läuft auf **Secure Custom Fields (SCF)**, dem GPL-Fork von ACF auf wordpress.org. SCF liefert Repeater, Flexible Content, Options Pages, Gallery, Clone und ACF Blocks, also genau die Funktionen, die der Importer und die Blöcke brauchen.
 
 - [ ] `Plugins` → `Installieren` öffnen
 - [ ] Nach `Secure Custom Fields` suchen

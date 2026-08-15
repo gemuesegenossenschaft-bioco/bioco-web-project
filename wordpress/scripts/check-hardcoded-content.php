@@ -1,7 +1,7 @@
 <?php
 /**
  * Door-lock gate for the project's hard constraint: NO HARDCODED CONTENT,
- * NO FALLBACK CONTENT (see CLAUDE.md / AGENTS.md).
+ * NO FALLBACK CONTENT.
  * ============================================================================
  * Runs without WordPress. Scans block render templates and ACF JSON fields:
  *

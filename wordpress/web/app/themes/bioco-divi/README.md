@@ -16,6 +16,6 @@ whoever holds the license:
 4. Assign pages/templates in the Divi Theme Builder as needed.
 
 `web/app/themes/Divi` is listed in the root `.gitignore` for exactly this reason: it must never be
-committed to this **public** repo (see root `CLAUDE.md`: "This repo is PUBLIC. Never commit secrets,
-tokens, passwords"). A licensed theme .zip is not a secret in the credential sense, but it is
+committed to this **public** repo. Never commit secrets, tokens, or passwords. A licensed theme .zip
+is not a secret in the credential sense, but it is
 someone else's commercial software and redistributing it here would violate the Divi license.

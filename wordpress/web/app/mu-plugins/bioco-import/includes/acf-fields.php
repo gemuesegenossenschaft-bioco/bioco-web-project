@@ -180,7 +180,7 @@ function bioco_import_acf_block_data(array $values, array $fields) {
             // instance, and whether get_field() then falls back to
             // default_value is ACF-internal behaviour we would be relying on
             // invisibly. Because the render templates deliberately carry no
-            // content fallbacks (CLAUDE.md: no fallback content), an unresolved
+            // content fallbacks, an unresolved
             // default does not degrade to placeholder text — it renders as a
             // MISSING heading or link, silently, on a live page.
             //

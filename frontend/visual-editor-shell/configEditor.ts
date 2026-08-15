@@ -1,8 +1,8 @@
 /**
  * Sidebar component-config editor. Renders the registry configSchema of the
  * selected section's component and emits typed per-key changes
- * (field-change {field: 'config', configKey}). Supported field types per
- * CLAUDE.md: select, range, text, number.
+ * (field-change {field: 'config', configKey}). Supported field types:
+ * select, range, text, number.
  */
 
 export interface ConfigSchemaOption {
