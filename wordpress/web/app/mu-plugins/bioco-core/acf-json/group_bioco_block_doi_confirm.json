@@ -199,7 +199,7 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Editierbare Texte für die Zustände der Double-Opt-in-Bestätigung. render.php liest ?token= und ruft bioco_forms_doi_confirm_token() direkt auf.",
+    "description": "Editierbare Texte für die Zustände der Double-Opt-in-Bestätigung. render.php zeigt bei einem GET mit Token ein Bestätigungsformular an; der Token wird erst bei POST nach Nonce-Prüfung konsumiert.",
     "show_in_rest": 0,
-    "modified": 1783728000
+    "modified": 1786788000
 }

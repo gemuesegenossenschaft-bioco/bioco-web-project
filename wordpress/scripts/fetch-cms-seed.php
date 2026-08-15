@@ -186,15 +186,17 @@ $seed = [
 
 $json = json_encode($seed, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
 
+if ($unmapped) {
+    fwrite(STDERR, "FEHLER — nicht abgebildete Felder (bitte pruefen, ob dort Inhalt steckt):\n");
+    foreach ($unmapped as $k => $n) fprintf(STDERR, "  %-20s %dx\n", $k, $n);
+    fwrite(STDERR, "Diese Felder wurden NICHT in den Seed geschrieben.\n");
+    exit(1);
+}
+
 echo "Slug:      {$slug}\n";
 echo "Quelle:    {$source}\n";
 echo "Titel:     {$title}\n";
 echo "Sections:  " . count($seedSections) . "\n";
-if ($unmapped) {
-    echo "\nWARNUNG — nicht abgebildete Felder (bitte pruefen, ob dort Inhalt steckt):\n";
-    foreach ($unmapped as $k => $n) printf("  %-20s %dx\n", $k, $n);
-    echo "Diese Felder wurden NICHT in den Seed geschrieben.\n";
-}
 
 if (!empty($args['print'])) {
     echo "\n" . $json;
@@ -210,7 +212,25 @@ if (is_file($outFile)) {
     fwrite(STDERR, "FEHLER: {$outFile} existiert bereits. Vorhandene Seeds sind der Paritaets-Vertrag und werden nicht ueberschrieben.\n");
     exit(1);
 }
-file_put_contents($outFile, $json);
+$tempFile = tempnam($outDir, '.bioco-seed-');
+if ($tempFile === false) {
+    fwrite(STDERR, "FEHLER: {$outFile} konnte nicht geschrieben werden.\n");
+    exit(1);
+}
+$written = file_put_contents($tempFile, $json, LOCK_EX);
+if ($written !== strlen($json)) {
+    @unlink($tempFile);
+    fwrite(STDERR, "FEHLER: {$outFile} konnte nicht geschrieben werden.\n");
+    exit(1);
+}
+// A hard link in the same directory publishes atomically and, unlike rename(),
+// fails if another exporter created the destination after the check above.
+if (!@link($tempFile, $outFile)) {
+    @unlink($tempFile);
+    fwrite(STDERR, "FEHLER: {$outFile} konnte nicht veroeffentlicht werden.\n");
+    exit(1);
+}
+@unlink($tempFile);
 echo "\nGeschrieben: {$outFile}\n";
 echo "Jetzt pruefen: php wordpress/scripts/check-seed-plan.php\n";
 exit(0);

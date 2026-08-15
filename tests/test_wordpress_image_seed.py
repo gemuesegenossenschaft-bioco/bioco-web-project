@@ -2,8 +2,81 @@ import json
 import subprocess
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[1]
+
+
+def test_export_aborts_before_print_or_write_when_fields_are_unmapped(tmp_path):
+    payload = json.loads(
+        (ROOT / "tests/fixtures/wordpress-sections-with-images.json").read_text()
+    )
+    payload["sections"][0]["unexpectedContent"] = "must not be dropped"
+    source = tmp_path / "unmapped.json"
+    source.write_text(json.dumps(payload))
+
+    for extra_args in (["--print"], [f"--out={tmp_path}"]):
+        result = subprocess.run(
+            [
+                "php",
+                "wordpress/scripts/fetch-cms-seed.php",
+                "--slug=unmapped-fixture",
+                f"--from-file={source}",
+                *extra_args,
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+
+        assert result.returncode == 1
+        assert result.stdout == ""
+        assert "unexpectedContent" in result.stderr
+        assert not (tmp_path / "unmapped-fixture.json").exists()
+
+
+def test_export_publishes_a_complete_seed_without_leaving_temp_files(tmp_path):
+    result = subprocess.run(
+        [
+            "php",
+            "wordpress/scripts/fetch-cms-seed.php",
+            "--slug=atomic-fixture",
+            f"--from-file={ROOT / 'tests/fixtures/wordpress-sections-with-images.json'}",
+            f"--out={tmp_path}",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+
+    seed_path = tmp_path / "atomic-fixture.json"
+    seed = json.loads(seed_path.read_text())
+    assert seed["slug"] == "atomic-fixture"
+    assert "Geschrieben:" in result.stdout
+    assert list(tmp_path.glob(".bioco-seed-*")) == []
+
+
+def test_export_cleans_temp_file_when_publication_fails(tmp_path):
+    target = tmp_path / "atomic-fixture.json"
+    target.mkdir()
+    result = subprocess.run(
+        [
+            "php",
+            "wordpress/scripts/fetch-cms-seed.php",
+            "--slug=atomic-fixture",
+            f"--from-file={ROOT / 'tests/fixtures/wordpress-sections-with-images.json'}",
+            f"--out={tmp_path}",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 1
+    assert "konnte nicht veroeffentlicht werden" in result.stderr
+    assert target.is_dir()
+    assert list(tmp_path.glob(".bioco-seed-*")) == []
 
 
 def test_event_card_image_second_apply_skips_equal_attachment_but_updates_changed_values():

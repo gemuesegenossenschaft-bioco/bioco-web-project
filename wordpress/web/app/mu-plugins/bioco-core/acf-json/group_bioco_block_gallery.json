@@ -181,7 +181,7 @@
                     "label": "Technischer Schlüssel",
                     "name": "key",
                     "aria-label": "",
-                    "type": "text",
+                    "type": "select",
                     "instructions": "",
                     "required": 1,
                     "conditional_logic": 0,
@@ -190,11 +190,19 @@
                         "class": "",
                         "id": ""
                     },
-                    "default_value": "",
-                    "maxlength": "",
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": ""
+                    "choices": {
+                        "all": "Alle",
+                        "koerbe": "Körbe",
+                        "feld": "Feld",
+                        "portraits": "Portraits"
+                    },
+                    "default_value": false,
+                    "return_format": "value",
+                    "multiple": 0,
+                    "allow_null": 0,
+                    "ui": 1,
+                    "ajax": 0,
+                    "placeholder": ""
                 },
                 {
                     "key": "field_bioco_gallery_filter_label",
@@ -237,5 +245,5 @@
     "active": true,
     "description": "Felder für den Galerie-Block (W9 interactive blocks, Issue #96). Filter-Buttons/Auswahl (view.js) und \"Mehr sehen\"-Umschalter mirrors Gallery.tsx; die Lightbox/Klick-zum-Vergrössern-Funktion ist auf später (nach W11) verschoben.",
     "show_in_rest": 0,
-    "modified": 1786406400
+    "modified": 1786788000
 }

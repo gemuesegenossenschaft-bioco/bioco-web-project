@@ -35,7 +35,7 @@ if (!empty($block['className'])) {
             <table>
                 <thead>
                     <tr>
-<?php if ($vegetable_column_label) : ?>                        <th><?php echo esc_html($vegetable_column_label); ?></th><?php endif; ?>
+                        <th><?php echo esc_html($vegetable_column_label); ?></th>
                         <?php foreach ($months as $label) : ?>
                             <th><?php echo esc_html($label); ?></th>
                         <?php endforeach; ?>

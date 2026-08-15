@@ -3,7 +3,7 @@
   "apiVersion": 2,
   "name": "bioco/doi-confirm",
   "title": "Newsletter-Bestätigung",
-  "description": "Zeigt das Ergebnis eines Double-Opt-in-Bestätigungslinks (?token=...) an (W10, Issue #97). Für /newsletter-bestaetigen/ gedacht.",
+  "description": "Zeigt ein Bestätigungsformular für einen Double-Opt-in-Link (?token=...) an und konsumiert den Token erst nach POST mit gültigem Nonce (W10, Issue #97). Für /newsletter-bestaetigen/ gedacht.",
   "category": "bioco",
   "icon": "yes-alt",
   "keywords": ["newsletter", "bestätigung", "double-opt-in", "doi"],
