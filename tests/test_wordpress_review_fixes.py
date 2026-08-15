@@ -83,12 +83,17 @@ def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
 
     assert results["valid_field_keys"] is True
     assert results["valid_names"] is True
-    assert results["empty"] is not True
-    assert results["missing_all"] is not True
-    assert results["duplicate"] is not True
-    assert results["unsupported"] is not True
-    assert results["non_canonical"] is not True
-    assert results["invalid_row"] is not True
+    expected_errors = {
+        "empty": 'Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.',
+        "missing_all": 'Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.',
+        "duplicate": "Jeder Filter-Schlüssel darf nur einmal vorkommen.",
+        "unsupported": "Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.",
+        "non_canonical": "Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.",
+        "invalid_row": "Die Filterkonfiguration ist ungültig.",
+    }
+    for case, message in expected_errors.items():
+        assert isinstance(results[case], str)
+        assert message in results[case]
 
 
 def test_doi_get_never_consumes_and_post_requires_a_valid_nonce():

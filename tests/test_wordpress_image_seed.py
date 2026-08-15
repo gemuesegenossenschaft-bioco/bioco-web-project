@@ -56,6 +56,28 @@ def test_export_publishes_a_complete_seed_without_leaving_temp_files(tmp_path):
     assert list(tmp_path.glob(".bioco-seed-*")) == []
 
 
+def test_export_cleans_temp_file_when_publication_fails(tmp_path):
+    target = tmp_path / "atomic-fixture.json"
+    target.mkdir()
+    result = subprocess.run(
+        [
+            "php",
+            "wordpress/scripts/fetch-cms-seed.php",
+            "--slug=atomic-fixture",
+            f"--from-file={ROOT / 'tests/fixtures/wordpress-sections-with-images.json'}",
+            f"--out={tmp_path}",
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 1
+    assert "konnte nicht veroeffentlicht werden" in result.stderr
+    assert target.is_dir()
+    assert list(tmp_path.glob(".bioco-seed-*")) == []
+
+
 def test_event_card_image_second_apply_skips_equal_attachment_but_updates_changed_values():
     php = r'''
     define('ABSPATH', __DIR__);

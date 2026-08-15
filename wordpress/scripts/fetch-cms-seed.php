@@ -223,11 +223,14 @@ if ($written !== strlen($json)) {
     fwrite(STDERR, "FEHLER: {$outFile} konnte nicht geschrieben werden.\n");
     exit(1);
 }
-if (!@rename($tempFile, $outFile)) {
+// A hard link in the same directory publishes atomically and, unlike rename(),
+// fails if another exporter created the destination after the check above.
+if (!@link($tempFile, $outFile)) {
     @unlink($tempFile);
     fwrite(STDERR, "FEHLER: {$outFile} konnte nicht veroeffentlicht werden.\n");
     exit(1);
 }
+@unlink($tempFile);
 echo "\nGeschrieben: {$outFile}\n";
 echo "Jetzt pruefen: php wordpress/scripts/check-seed-plan.php\n";
 exit(0);
