@@ -118,10 +118,10 @@ $grand_total = $first_price + $shares_total;
             <table>
                 <thead>
                     <tr>
-<?php if ($article_label) : ?>                        <th><?php echo esc_html($article_label); ?></th><?php endif; ?>
-<?php if ($quantity_label) : ?>                        <th><?php echo esc_html($quantity_label); ?></th><?php endif; ?>
-<?php if ($unit_price_label) : ?>                        <th><?php echo esc_html($unit_price_label); ?></th><?php endif; ?>
-                        <?php if ($total_label) : ?><th><?php echo esc_html($total_label); ?></th><?php endif; ?>
+                        <th><?php echo esc_html($article_label); ?></th>
+                        <th><?php echo esc_html($quantity_label); ?></th>
+                        <th><?php echo esc_html($unit_price_label); ?></th>
+                        <th><?php echo esc_html($total_label); ?></th>
                         <th></th>
                     </tr>
                 </thead>
@@ -173,9 +173,9 @@ $grand_total = $first_price + $shares_total;
         </div>
 
 <?php if ($shares_only_info) : ?>        <div class="pc-kein-info" data-pc-role="kein-info" style="margin-top: 16px; padding: 16px; background: var(--wp--preset--color--bioco-bg); border-radius: var(--wp--custom--radius--md); display: none;">
-            <p style="margin: 0; font-size: 0.875rem;">
+            <div style="margin: 0; font-size: 0.875rem;">
                 <?php echo bioco_kses_rich_text($shares_only_info); ?>
-            </p>
+            </div>
         </div><?php endif; ?>
 
         <div class="pc-actions" data-pc-role="cta-block" style="margin-top: 24px; text-align: center;">

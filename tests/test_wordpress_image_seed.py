@@ -6,6 +6,34 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 
 
+def test_export_aborts_before_print_or_write_when_fields_are_unmapped(tmp_path):
+    payload = json.loads(
+        (ROOT / "tests/fixtures/wordpress-sections-with-images.json").read_text()
+    )
+    payload["sections"][0]["unexpectedContent"] = "must not be dropped"
+    source = tmp_path / "unmapped.json"
+    source.write_text(json.dumps(payload))
+
+    for extra_args in (["--print"], [f"--out={tmp_path}"]):
+        result = subprocess.run(
+            [
+                "php",
+                "wordpress/scripts/fetch-cms-seed.php",
+                "--slug=unmapped-fixture",
+                f"--from-file={source}",
+                *extra_args,
+            ],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+        )
+
+        assert result.returncode == 1
+        assert result.stdout == ""
+        assert "unexpectedContent" in result.stderr
+        assert not (tmp_path / "unmapped-fixture.json").exists()
+
+
 def test_event_card_image_second_apply_skips_equal_attachment_but_updates_changed_values():
     php = r'''
     define('ABSPATH', __DIR__);

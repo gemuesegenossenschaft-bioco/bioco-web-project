@@ -51,11 +51,11 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
             <table>
                 <thead>
                     <tr>
-<?php if ($basket_column_label) : ?>                        <th><?php echo esc_html($basket_column_label); ?></th><?php endif; ?>
-<?php if ($persons_column_label) : ?>                        <th><?php echo esc_html($persons_column_label); ?></th><?php endif; ?>
-<?php if ($annual_price_column_label) : ?>                        <th><?php echo esc_html($annual_price_column_label); ?></th><?php endif; ?>
-<?php if ($share_cost_column_label) : ?>                        <th><?php echo esc_html($share_cost_column_label); ?></th><?php endif; ?>
-<?php if ($work_column_label) : ?>                        <th><?php echo esc_html($work_column_label); ?></th><?php endif; ?>
+                        <th><?php echo esc_html($basket_column_label); ?></th>
+                        <th><?php echo esc_html($persons_column_label); ?></th>
+                        <th><?php echo esc_html($annual_price_column_label); ?></th>
+                        <th><?php echo esc_html($share_cost_column_label); ?></th>
+                        <th><?php echo esc_html($work_column_label); ?></th>
                     </tr>
                 </thead>
                 <tbody>

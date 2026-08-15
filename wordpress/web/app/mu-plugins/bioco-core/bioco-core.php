@@ -18,14 +18,57 @@ require_once BIOCO_CORE_DIR . '/includes/navigation.php';
  * migration-window state (see PORTING-THEME-SWAP.md pattern 3).
  */
 add_filter('acf/settings/save_json', fn() => BIOCO_CORE_DIR . '/acf-json');
-add_filter('acf/settings/load_json', function ($paths) {
-    $theme_root = trailingslashit(wp_normalize_path(WP_CONTENT_DIR . '/themes'));
-    $paths = array_values(array_filter((array) $paths, function ($path) use ($theme_root) {
-        return strpos(trailingslashit(wp_normalize_path($path)), $theme_root) !== 0;
-    }));
-    $paths[] = BIOCO_CORE_DIR . '/acf-json';
-    return array_values(array_unique($paths));
-});
+add_filter('acf/settings/load_json', fn() => [BIOCO_CORE_DIR . '/acf-json']);
+
+/**
+ * Gallery filter validation: the repeater must contain exactly one "all" row
+ * and every technical key must be unique. These invariants are enforced by the
+ * UI choices, but server-side validation guards against import/JSON-sync edge
+ * cases and keeps the filter JavaScript from receiving ambiguous configuration.
+ */
+add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($valid, $value) {
+    if ($valid !== true) {
+        return $valid;
+    }
+
+    $allowed_keys = ['all', 'koerbe', 'feld', 'portraits'];
+    if ($value === false || $value === null || $value === '') {
+        return __('Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.', 'bioco');
+    }
+    if (!is_array($value)) {
+        return __('Die Filterkonfiguration ist ungültig.', 'bioco');
+    }
+
+    $rows = array_values($value);
+    $seen = [];
+    $all_count = 0;
+
+    foreach ($rows as $row) {
+        if (!is_array($row)) {
+            return __('Die Filterkonfiguration ist ungültig.', 'bioco');
+        }
+        $raw_key = $row['field_bioco_gallery_filter_key'] ?? ($row['key'] ?? '');
+        $key = is_string($raw_key) ? $raw_key : '';
+
+        if (!in_array($key, $allowed_keys, true)) {
+            return __('Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.', 'bioco');
+        }
+        if (isset($seen[$key])) {
+            return __('Jeder Filter-Schlüssel darf nur einmal vorkommen.', 'bioco');
+        }
+        $seen[$key] = true;
+
+        if ($key === 'all') {
+            $all_count++;
+        }
+    }
+
+    if ($all_count !== 1) {
+        return __('Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.', 'bioco');
+    }
+
+    return $valid;
+}, 10, 2);
 
 /**
  * Custom "bioco" block category. Moved here in full (not duplicated in the

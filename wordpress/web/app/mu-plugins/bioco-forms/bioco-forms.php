@@ -248,7 +248,7 @@ function bioco_forms_doi_on_confirm($form_type, $data) {
     bioco_forms_send_mail(bioco_forms_recipient(), 'Neuer Newsletter-Abonnent bestätigt', bioco_forms_lines($lines));
 }
 
-// Shared by the REST GET /bioco/v1/doi-confirm route and the bioco/doi-confirm
+// Shared by the REST POST /bioco/v1/doi-confirm route and the bioco/doi-confirm
 // block's server-side render (the block calls this directly, no REST round-trip).
 function bioco_forms_doi_confirm_token($token) {
     $token = is_string($token) ? sanitize_text_field($token) : '';
@@ -553,7 +553,7 @@ add_action('rest_api_init', function () {
     ]);
 
     register_rest_route('bioco/v1', '/doi-confirm', [
-        'methods' => 'GET',
+        'methods' => 'POST',
         'callback' => 'bioco_forms_handle_doi_confirm',
         'permission_callback' => '__return_true',
     ]);
