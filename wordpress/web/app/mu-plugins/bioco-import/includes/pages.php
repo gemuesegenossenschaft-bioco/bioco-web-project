@@ -78,7 +78,7 @@ function bioco_import_resolve_attachment_for_url($url, $mode) {
 // Replaces every bioco_import_pending_image() marker in $values with a real
 // attachment ID (apply) or drops it while logging what WOULD happen
 // (dry-run / failed sideload) — never leaves the sentinel array in $values,
-// which would otherwise get serialized as garbage ACF data.
+// which would otherwise reach the native Divi composer as invalid image data.
 function bioco_import_resolve_pending_images(array &$values, $mode, array &$warnings) {
     foreach ($values as $key => $value) {
         if (is_array($value) && !bioco_import_is_pending_image($value)) {

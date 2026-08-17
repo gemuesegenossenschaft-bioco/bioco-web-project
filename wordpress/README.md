@@ -24,7 +24,8 @@ wordpress/
 │       ├── mu-plugins/
 │       │   ├── bioco-core/      # theme-agnostic blocks + ACF + shared helpers + block CSS (#101)
 │       │   ├── bioco-content/   # CPTs (event, bioco_group)
-│       │   └── bioco-forms/     # form REST handlers, Turnstile, DOI, mail
+│       │   ├── bioco-forms/     # form REST handlers, Turnstile, DOI, mail
+│       │   └── bioco-import/    # JSON seeds -> section plan -> native Divi blocks
 │       └── themes/
 │           ├── bioco/           # fallback/reference block theme (theme.json token source only)
 │           ├── bioco-divi/      # active theme: thin Divi 5 child (presentation only)
@@ -42,6 +43,13 @@ install steps). The original `bioco` block theme is kept as a fallback/reference
 `PORTING-THEME-SWAP.md` for the porting patterns and `HARDCASES.md` for the non-mechanical cases
 (most notably: design tokens are duplicated as static CSS in `bioco-core/assets/bioco-tokens.css`
 since Divi has no `theme.json` to generate them).
+
+## Content import
+
+`content-seed/*.json` and `content-seed/block-content/defaults.json` are the editorial source.
+`bioco-import` resolves them into a section plan and composes native Divi blocks. The verifier
+compares that same composed tree with stored page content. The retired ACF block serializer and
+ACF JSON default fallback are not part of the import path.
 
 ## Local dev
 ```bash

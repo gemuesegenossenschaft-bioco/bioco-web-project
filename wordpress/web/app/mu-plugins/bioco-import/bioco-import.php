@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: bioco Import
- * Description: Scripted, idempotent content importer for the WordPress migration (W11, issue #98). Replaces manual Divi page-authoring with `wp bioco import` / `wp bioco verify`. Reads wordpress/content-seed/*.json (same seeds that drove the ProcessWire content-freeze migration and the Next.js parity tests) and writes bioco/* ACF block markup into WP pages, never touching non-empty existing content unless --force.
+ * Description: Scripted, idempotent content importer for the WordPress migration (W11, issue #98). Reads wordpress/content-seed/*.json and composes native Divi blocks with `wp bioco import` / `wp bioco verify`, never touching non-empty existing content unless --force.
  * Author: bioco
  */
 
@@ -38,7 +38,6 @@ define('BIOCO_IMPORT_DEFAULT_SEED_DIR', $biocoImportSeedDir);
 unset($biocoImportSeedCandidates, $biocoImportSeedCandidate, $biocoImportSeedDir);
 
 require_once BIOCO_IMPORT_DIR . '/includes/seeds.php';
-require_once BIOCO_IMPORT_DIR . '/includes/acf-fields.php';
 require_once BIOCO_IMPORT_DIR . '/includes/section-map.php';
 require_once BIOCO_IMPORT_DIR . '/includes/report.php';
 require_once BIOCO_IMPORT_DIR . '/includes/pages.php';
