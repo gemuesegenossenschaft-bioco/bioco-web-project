@@ -89,7 +89,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "à 2 Stunden",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "à 2 Stunden",
             "prepend": "",
@@ -252,7 +252,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Gemüsekorb",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -272,7 +272,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Personen",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -292,7 +292,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Jahrespreis",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -312,7 +312,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Anteilsscheine Kosten",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -332,7 +332,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Mitarbeit pro Jahr",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",

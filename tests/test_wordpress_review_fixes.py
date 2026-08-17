@@ -124,6 +124,10 @@ def test_doi_get_never_consumes_and_post_requires_a_valid_nonce():
         ];
         return $values[$name] ?? '';
     }
+    function bioco_field($name, $default = null) {
+        $value = get_field($name);
+        return $value === null ? $default : $value;
+    }
     function sanitize_text_field($value) { return trim((string) $value); }
     function wp_unslash($value) { return $value; }
     function nocache_headers() {}

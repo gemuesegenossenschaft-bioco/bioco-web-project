@@ -39,7 +39,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Abonnieren",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -59,7 +59,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Wird gesendet …",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",

@@ -31,6 +31,8 @@
 
 if (!defined('ABSPATH')) exit;
 
+require_once __DIR__ . '/seeds.php';
+
 // Sentinel marking a value that still needs to be resolved to a WP media
 // attachment ID (pages.php does this — it needs $mode/apply context that
 // this pure mapping layer intentionally does not have).
@@ -378,6 +380,41 @@ function bioco_import_component_map() {
             'content_clone' => ['title', 'text'],
             'buttons' => false,
             'auto_header' => true,
+        ],
+        'event_signup_form' => [
+            'block' => 'event-signup-form',
+            'acf_group' => 'group_bioco_block_event_signup_form',
+            'content_clone' => ['title', 'text'],
+            'buttons' => false,
+            'auto_header' => true,
+        ],
+        'doi_confirm' => [
+            'block' => 'doi-confirm',
+            'acf_group' => 'group_bioco_block_doi_confirm',
+            'content_clone' => [],
+            'buttons' => false,
+            'auto_header' => true,
+        ],
+        'gallery' => [
+            'block' => 'gallery',
+            'acf_group' => 'group_bioco_block_gallery',
+            'content_clone' => [],
+            'buttons' => false,
+            'auto_header' => true,
+            'extra' => function (array $section, array &$values, array &$warnings) {
+                $items = [];
+                foreach (($section['images'] ?? []) as $image) {
+                    if (!is_array($image) || empty($image['url'])) continue;
+                    $items[] = [
+                        'image' => bioco_import_pending_image(
+                            $image['url'],
+                            (string) ($image['alt'] ?? '')
+                        ),
+                        'category' => (string) ($image['category'] ?? 'feld'),
+                    ];
+                }
+                if ($items) $values['items'] = $items;
+            },
         ],
         'pricing_calculator' => [
             'block' => 'pricing-calculator',
@@ -794,5 +831,25 @@ function bioco_import_build_page_plan(array $seed) {
         $i++;
     }
     if ($isHome) $addHomeChrome();
+
+    $seedDir = (string) ($seed['_bioco_seed_dir'] ?? '');
+    if ($seedDir === '' && defined('BIOCO_IMPORT_DEFAULT_SEED_DIR')) {
+        $seedDir = BIOCO_IMPORT_DEFAULT_SEED_DIR;
+    }
+    if ($seedDir === '') {
+        $checkoutSeedDir = dirname(__DIR__, 5) . '/content-seed';
+        if (is_dir($checkoutSeedDir)) $seedDir = $checkoutSeedDir;
+    }
+    if ($seedDir !== '') {
+        $blockDefaults = bioco_import_load_block_content_defaults($seedDir);
+        foreach ($plan as &$item) {
+            if (($item['type'] ?? '') !== 'block') continue;
+            $block = (string) ($item['block'] ?? '');
+            if (!isset($blockDefaults[$block])) continue;
+            $values = is_array($item['values'] ?? null) ? $item['values'] : [];
+            $item['values'] = array_replace($blockDefaults[$block], $values);
+        }
+        unset($item);
+    }
     return $plan;
 }

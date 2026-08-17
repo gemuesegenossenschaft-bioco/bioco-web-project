@@ -6,8 +6,8 @@ resolve=${BIOCO_STAGING_RESOLVE:-staging.bioco.ch:443:193.33.128.160}
 routes=(
   / /abos/ /aktuelles/ /anmeldung/ /anmeldung-danke/ /bioco-werden/
   /datenschutz/ /gemuese/ /impressum/ /kontakt/ /kundenportal/ /mitmachen/
-  /newsletter/ /solawi/ /standorte-depots/ /statuten/ /tag-der-offenen-tuer/
-  /warteliste/ /wir/ /intranet/
+  /newsletter/ /newsletter-bestaetigen/ /event-anmeldung/ /solawi/
+  /standorte-depots/ /statuten/ /tag-der-offenen-tuer/ /warteliste/ /wir/ /intranet/
 )
 
 response=$(mktemp "${TMPDIR:-/tmp}/bioco-wp-render.XXXXXX")

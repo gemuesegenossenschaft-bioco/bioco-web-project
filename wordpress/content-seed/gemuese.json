@@ -64,6 +64,39 @@
       ]
     },
     {
+      "section_id": "anbauen",
+      "section_component": "gallery",
+      "section_title": "Was wir anbauen",
+      "section_text": "<p>Einblicke in unsere Ernte, den Anbau und die Gemeinschaft.</p>",
+      "images": [
+        {
+          "url": "https://cms.bioco.ch/site/assets/files/1708/gemeinsamsolidarischfrisch.1600x0.jpg",
+          "alt": "Was wir anbauen",
+          "category": "feld"
+        },
+        {
+          "url": "https://cms.bioco.ch/site/assets/files/1708/20151021_161807.1600x0.jpg",
+          "alt": "Was wir anbauen",
+          "category": "feld"
+        },
+        {
+          "url": "https://cms.bioco.ch/site/assets/files/1708/sommer.1600x0.jpg",
+          "alt": "Was wir anbauen",
+          "category": "feld"
+        },
+        {
+          "url": "https://cms.bioco.ch/site/assets/files/1708/20151021_161807-1.1600x0.jpg",
+          "alt": "Was wir anbauen",
+          "category": "feld"
+        },
+        {
+          "url": "https://cms.bioco.ch/site/assets/files/1708/wk_salate.jpg",
+          "alt": "Was wir anbauen",
+          "category": "feld"
+        }
+      ]
+    },
+    {
       "section_id": "kennenlernen-cta",
       "section_title": "Möchtest du uns kennenlernen?",
       "section_layout": "rich_text",
@@ -84,7 +117,7 @@
   ],
   "conversion_notes": [
     "NICHT SEEDEN: Die Section 'intro' existiert bereits im CMS (Seite lädt getPageSectionsWithSeo('gemuese') und rendert introSection). Der Code-Fallback dafür wäre h1 'Unser Gemüse' + <p>Unser saisonales Demeter-Gemüse wächst in der Region Baden-Brugg. Hier erfährst du, welche Gemüsesorten gerade Saison haben und in deinem Gemüsekorb landen.</p> – er greift nur, wenn das CMS-Intro fehlt.",
-    "NICHT SEEDEN: Die Section 'B-02' ('Was wir anbauen', Galerie) ist bereits CMS-getrieben inkl. Bilder (anbauenSection.images). Code-Fallbacks (h2 'Was wir anbauen', <p>Einblicke in unsere Ernte, den Anbau und die Gemeinschaft</p>, Empty-State 'Keine Bilder im CMS gefunden.') bleiben code-owned.",
+    "Die Section 'B-02' ('Was wir anbauen', Galerie) ist als gallery-Komponente geseedet. Filter- und Lade-Texte kommen aus dem gemeinsamen Block-Inhaltsseed; die bestehenden CMS-Bilder sind nicht Teil der 130-Defaults-Migration und bleiben im Paritäts-Scope von #98.",
     "F.1b-verify: Die Komponente 'accordion_item' IST inzwischen in site/templates/component-registry.json registriert (AccordionItemBlock in frontend/components/sections/RegisteredSectionComponents.tsx, rendert <details><summary>{section_title}</summary><div>{section_text}</div></details>) — die frühere Notiz 'noch NICHT registriert' war veraltet. ABER: AccordionItemBlock wickelt heute JEDES Item in eine eigene <section class=\"demeter-accordion\">, während die Seite heute alle vier <details> in EINEM <div class=\"demeter-accordion\"> gruppiert; die Gruppierung muss beim Umbau geprüft werden.",
     "Der externe Demeter-Link rendert heute NACH den vier Accordions (innerhalb derselben <section id=\"B-05\">). Um die Reihenfolge byte-genau zu erhalten, ist er als eigene Section 'demeter-link' hinter den Accordions geführt statt als Button der 'demeter'-Section. Es ist heute ein <a target=\"_blank\" rel=\"noopener noreferrer\" class=\"btn btn-secondary btn-organic\"> (kein CTA.tsx-Button); das Inline-Style display:inline-block ist presentational und code-owned.",
     "Saisonkalender: h2 + Einleitungsabsatz stehen heute in derselben <section id=\"B-04\"> wie die <Saisonkalender/>-Komponente; als Titel/Text des Component-Wrappers geseedet. Die Kalenderdaten selbst bleiben code-owned (frontend/components/Saisonkalender.tsx).",

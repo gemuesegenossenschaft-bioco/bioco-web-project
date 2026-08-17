@@ -1,0 +1,27 @@
+{
+  "path": "/event-anmeldung/",
+  "slug": "event-anmeldung",
+  "template": "basic-page",
+  "title": "Event-Anmeldung",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_title": "Event-Anmeldung",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
+    },
+    {
+      "section_id": "event-anmeldung",
+      "section_component": "event_signup_form"
+    }
+  ],
+  "conversion_notes": [
+    "Generisches Inhaltsziel für das Event-Anmeldeformular. Auf Event-Einzelseiten ergänzt der Block automatisch Event-ID und Event-Titel; ohne Event-Kontext bleibt eine allgemeine Anmeldung möglich."
+  ]
+}

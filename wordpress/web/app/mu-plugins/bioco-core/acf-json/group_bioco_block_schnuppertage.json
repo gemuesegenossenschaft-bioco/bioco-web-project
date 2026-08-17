@@ -39,7 +39,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Was dich erwartet:",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -162,7 +162,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Nächste Termine",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -182,7 +182,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Jetzt anmelden",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -202,7 +202,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Aktuell sind keine Schnuppertage geplant.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",

@@ -17,17 +17,17 @@
 
 if (!defined('ABSPATH')) exit;
 
-$missing_token_message = get_field('missing_token_message');
+$missing_token_message = bioco_field('missing_token_message');
 $confirmation_prompt = __('Bitte bestätige deine Anmeldung.', 'bioco');
 $confirmation_button_label = __('Anmeldung bestätigen', 'bioco');
-$success_title = get_field('success_title');
-$success_text = get_field('success_text');
-$subscribe_text = get_field('subscribe_text');
-$visit_text = get_field('visit_text');
-$waiting_list_text = get_field('waiting_list_text');
-$contact_text = get_field('contact_text');
-$error_title = get_field('error_title');
-$home_link_label = get_field('home_link_label');
+$success_title = bioco_field('success_title');
+$success_text = bioco_field('success_text');
+$subscribe_text = bioco_field('subscribe_text');
+$visit_text = bioco_field('visit_text');
+$waiting_list_text = bioco_field('waiting_list_text');
+$contact_text = bioco_field('contact_text');
+$error_title = bioco_field('error_title');
+$home_link_label = bioco_field('home_link_label');
 
 $request_method = strtoupper((string) ($_SERVER['REQUEST_METHOD'] ?? 'GET'));
 $token = '';

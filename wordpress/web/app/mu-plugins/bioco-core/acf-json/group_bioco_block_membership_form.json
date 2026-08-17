@@ -39,7 +39,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Lies das und bestätige bevor du weiterklickst",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -59,7 +59,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Bevor du dich anmeldest, überprüfe bitte diese Punkte:",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -85,24 +85,7 @@
             "collapsed": "",
             "button_label": "Hinweis hinzufügen",
             "rows_per_page": 20,
-            "default_value": [
-                {
-                    "heading": "Anteile & Beitrag",
-                    "text": "Jedes Mitglied erwirbt <strong>Anteilsscheine zu je CHF 250.- (einmalige Zahlung)</strong>. Die Anzahl der Anteile hängt von deinem gewählten Abo ab. Der <strong>Jahresbeitrag für dein Gemüse-Abo (jährlicher Beitrag) wird per 31. Januar fällig</strong> und kann quartalsweise oder jährlich bezahlt werden."
-                },
-                {
-                    "heading": "Bindung & Kündigung",
-                    "text": "Das Gemüseabo läuft <strong>vom 1. Januar bis zum 31. Dezember</strong>. Ohne Kündigung verlängert es sich jeweils um ein Kalenderjahr. Die <strong>Kündigungsfrist beträgt zwei Monate auf Ende eines Kalenderjahres</strong>."
-                },
-                {
-                    "heading": "Mitarbeit",
-                    "text": "Wir sind eine Mitmach-Genossenschaft! Jedes Mitglied leistet pro Jahr <strong>10 Arbeitseinsätze à 2 Stunden (bei halbem Korb) bzw. 20 Arbeitseinsätze à 2 Stunden (bei ganzem Korb) Mitarbeit</strong>. Dies kann auf dem Feld, in der Logistik oder bei Events sein."
-                },
-                {
-                    "heading": "Wetterbedingte Ertragsschwankungen",
-                    "text": "Mir ist bewusst, dass es zu Ernteausfällen kommen kann und mein wöchentlicher Gemüsekorb nicht immer gleich voll sein kann."
-                }
-            ],
+            "default_value": [],
             "sub_fields": [
                 {
                     "key": "field_bioco_membership_form_commitment_heading",
@@ -160,7 +143,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Persönliche Daten",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -180,7 +163,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Vorname *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -200,7 +183,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Name *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -220,7 +203,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Adresse *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -240,7 +223,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "PLZ *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -260,7 +243,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Ort *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -280,7 +263,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Telefon",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -300,7 +283,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "E-Mail *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -320,7 +303,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Depot & Zahlungsweise",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -340,7 +323,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Depot-Auswahl *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -360,7 +343,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Bitte wählen...",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -386,35 +369,7 @@
             "collapsed": "",
             "button_label": "Depot hinzufügen",
             "rows_per_page": 20,
-            "default_value": [
-                {
-                    "option": "Depot Chrättli"
-                },
-                {
-                    "option": "Depot Ohne"
-                },
-                {
-                    "option": "Depot Anixis"
-                },
-                {
-                    "option": "Casa Flora"
-                },
-                {
-                    "option": "Depot Geisshof"
-                },
-                {
-                    "option": "Depot Kupperhaus"
-                },
-                {
-                    "option": "Depot Ennetbaden"
-                },
-                {
-                    "option": "Depot Lemonia"
-                },
-                {
-                    "option": "Depot Lägernstrasse"
-                }
-            ],
+            "default_value": [],
             "sub_fields": [
                 {
                     "key": "field_bioco_membership_form_depot_option",
@@ -452,7 +407,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Zahlungsweise *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -472,7 +427,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Die erste Rechnung wird per 31. Januar fällig.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -492,7 +447,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Quartalsweise (vierteljährlich)",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -512,7 +467,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Ganzes Jahr (einmalig)",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -532,7 +487,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Mitarbeit",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -552,7 +507,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Jede(r) Mitglied bringt sich ein. Bitte teile uns deine Präferenzen mit:",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -572,7 +527,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Bevorzugte Tage",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -598,26 +553,7 @@
             "collapsed": "",
             "button_label": "Tag hinzufügen",
             "rows_per_page": 20,
-            "default_value": [
-                {
-                    "option": "Montag"
-                },
-                {
-                    "option": "Dienstag"
-                },
-                {
-                    "option": "Mittwoch"
-                },
-                {
-                    "option": "Donnerstag"
-                },
-                {
-                    "option": "Freitag"
-                },
-                {
-                    "option": "Samstag"
-                }
-            ],
+            "default_value": [],
             "sub_fields": [
                 {
                     "key": "field_bioco_membership_form_preferred_day_option",
@@ -655,7 +591,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Bevorzugte Zeiten",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -681,17 +617,7 @@
             "collapsed": "",
             "button_label": "Zeit hinzufügen",
             "rows_per_page": 20,
-            "default_value": [
-                {
-                    "option": "morgens"
-                },
-                {
-                    "option": "nachmittags"
-                },
-                {
-                    "option": "abends"
-                }
-            ],
+            "default_value": [],
             "sub_fields": [
                 {
                     "key": "field_bioco_membership_form_preferred_time_option",
@@ -729,7 +655,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Tätigkeitsbereiche (Mehrfachauswahl möglich)",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -755,23 +681,7 @@
             "collapsed": "",
             "button_label": "Bereich hinzufügen",
             "rows_per_page": 20,
-            "default_value": [
-                {
-                    "option": "Feld/Anbau"
-                },
-                {
-                    "option": "Logistik/Verteilung"
-                },
-                {
-                    "option": "Administration"
-                },
-                {
-                    "option": "Events/Organisation"
-                },
-                {
-                    "option": "Andere"
-                }
-            ],
+            "default_value": [],
             "sub_fields": [
                 {
                     "key": "field_bioco_membership_form_activity_area_option",
@@ -809,7 +719,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Andere Tätigkeitsbereiche (bitte beschreiben)",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -829,7 +739,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Zusatzabos",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -849,7 +759,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Ich bin interessiert, zusätzlich:",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -875,20 +785,7 @@
             "collapsed": "",
             "button_label": "Produkt hinzufügen",
             "rows_per_page": 20,
-            "default_value": [
-                {
-                    "option": "Milch"
-                },
-                {
-                    "option": "Fleisch"
-                },
-                {
-                    "option": "Käse"
-                },
-                {
-                    "option": "Kräutersalz"
-                }
-            ],
+            "default_value": [],
             "sub_fields": [
                 {
                     "key": "field_bioco_membership_form_additional_subscription_option",
@@ -926,7 +823,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Weitere Produkte von Partnern aus der Region",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -946,7 +843,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Hast du Wünsche für weitere Produkte? Teile uns deine Ideen mit:",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -966,7 +863,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "z.B. Eier, Brot, Tofu, Honig...",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -986,7 +883,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Bestätigung",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -1006,7 +903,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Ich akzeptiere die Datenschutzbestimmungen *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -1026,7 +923,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Anmeldung einreichen",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -1046,7 +943,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Wird gesendet …",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",

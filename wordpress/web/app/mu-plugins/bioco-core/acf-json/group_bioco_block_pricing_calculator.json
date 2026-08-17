@@ -40,7 +40,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": 250,
+            "default_value": "",
             "min": 0,
             "max": "",
             "step": 1,
@@ -60,7 +60,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Arbeitseinsätze à 2 Stunden",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -72,7 +72,7 @@
             "name": "signup_url",
             "aria-label": "",
             "type": "text",
-      "instructions": "Ziel des \"Jetzt mitmachen\"-Buttons. Erhält ?abo=&shares=&additional= als Query-Parameter.",
+            "instructions": "Ziel des \"Jetzt mitmachen\"-Buttons. Erhält ?abo=&shares=&additional= als Query-Parameter.",
             "required": 0,
             "conditional_logic": 0,
             "wrapper": {
@@ -80,7 +80,7 @@
                 "class": "",
                 "id": ""
             },
-      "default_value": "/anmeldung",
+            "default_value": "/anmeldung",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -100,7 +100,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Nur Anteilsscheine",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -120,7 +120,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Jährlicher Beitrag",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -140,7 +140,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Mitarbeit pro Jahr:",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -160,7 +160,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Einmalige Zahlung",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -180,7 +180,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Zusätzliche Anteilsscheine hinzufügen:",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -200,7 +200,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Jetzt mitmachen!",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -220,7 +220,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Deine Auswahl wird automatisch ins Anmeldeformular übernommen",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -348,29 +348,7 @@
                     "ui_off_text": ""
                 }
             ],
-            "default_value": [
-                {
-                    "name": "Halb (1 Person)",
-                    "price": 750,
-                    "shares": 1,
-                    "work": 10,
-                    "recommended": false
-                },
-                {
-                    "name": "Standard (2-3 Personen)",
-                    "price": 1280,
-                    "shares": 2,
-                    "work": 20,
-                    "recommended": true
-                },
-                {
-                    "name": "Doppel (4-6 Personen)",
-                    "price": 2350,
-                    "shares": 4,
-                    "work": 40,
-                    "recommended": false
-                }
-            ]
+            "default_value": []
         },
         {
             "key": "field_bioco_pricing_calculator_recommended_label",
@@ -386,7 +364,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Empfohlen",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -406,7 +384,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Kein Abo",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -426,7 +404,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Artikel",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -446,7 +424,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Anzahl",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -466,7 +444,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Einzelpreis",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -486,7 +464,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Anteilsscheine",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -506,7 +484,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "erforderlich",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -526,7 +504,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "<strong>💡 Info:</strong> Du kannst Anteilsscheine auch ohne Gemüsekorb erwerben. Genossenschafter/innen haben Vorrang auf der Warteliste für einen Gemüsekorb.",
+            "default_value": "",
             "maxlength": "",
             "rows": 4,
             "placeholder": "",
@@ -546,7 +524,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "ohne Gemüsekorb",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -566,7 +544,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "zusätzlich",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -586,7 +564,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Total",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",

@@ -104,14 +104,7 @@
                     "new_lines": ""
                 }
             ],
-            "default_value": [
-                {
-                    "name": "Geisshof",
-                    "lat": 47.4741684,
-                    "lng": 8.2456318,
-                    "description": "Geisslistrasse, Gebenstorf, Schweiz"
-                }
-            ]
+            "default_value": []
         },
         {
             "key": "field_bioco_geisshof_map_locations_heading",
@@ -127,7 +120,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Standorte",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -147,7 +140,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Route planen →",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -167,7 +160,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Noch keine Standorte hinterlegt.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",

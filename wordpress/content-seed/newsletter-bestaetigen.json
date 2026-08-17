@@ -1,0 +1,27 @@
+{
+  "path": "/newsletter-bestaetigen/",
+  "slug": "newsletter-bestaetigen",
+  "template": "basic-page",
+  "title": "Newsletter-Anmeldung bestätigen",
+  "sections": [
+    {
+      "section_id": "intro",
+      "section_layout": "rich_text",
+      "section_component": "page_intro",
+      "section_title": "Newsletter-Anmeldung bestätigen",
+      "section_config": {
+        "containerWidth": "lg",
+        "textWidth": "wide",
+        "align": "left",
+        "headingLevel": "1"
+      }
+    },
+    {
+      "section_id": "newsletter-bestaetigung",
+      "section_component": "doi_confirm"
+    }
+  ],
+  "conversion_notes": [
+    "Technische Zielseite für den Double-Opt-in-Link des Newsletter-Formulars. Der Block verarbeitet den Token serverseitig und rendert die redaktionellen Ergebnis-Texte aus dem Block-Inhaltsseed."
+  ]
+}

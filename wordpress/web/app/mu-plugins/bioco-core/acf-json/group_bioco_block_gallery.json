@@ -91,7 +91,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Mehr sehen",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -111,7 +111,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Galerie-Bilder werden geladen…",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -131,7 +131,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Die Galerie wird in Kürze mit Bildern gefüllt.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -157,24 +157,7 @@
             "collapsed": "",
             "button_label": "Filter hinzufügen",
             "rows_per_page": 20,
-            "default_value": [
-                {
-                    "key": "all",
-                    "label": "Alles"
-                },
-                {
-                    "key": "koerbe",
-                    "label": "Körbe"
-                },
-                {
-                    "key": "feld",
-                    "label": "Feld"
-                },
-                {
-                    "key": "portraits",
-                    "label": "Portraits"
-                }
-            ],
+            "default_value": [],
             "sub_fields": [
                 {
                     "key": "field_bioco_gallery_filter_key",

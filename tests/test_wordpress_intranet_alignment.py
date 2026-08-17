@@ -81,17 +81,17 @@ def test_intranet_seed_mirrors_the_live_page_content():
     assert len(section_ids) == len(set(section_ids)), "section ids must be unique"
 
 
-def test_seed_corpus_and_staging_gate_cover_twenty_pages():
+def test_seed_corpus_and_staging_gate_cover_twenty_two_pages():
     wp = sorted(path.name for path in WP_SEEDS.glob("*.json"))
     cms = sorted(path.name for path in CMS_SEEDS.glob("*.json"))
     assert wp == cms
-    assert len(wp) == 20
+    assert len(wp) == 22
     assert "intranet.json" in wp
 
     gate = (ROOT / "tests/wordpress-staging-render-gate.sh").read_text()
     routes = re.search(r"routes=\((?P<body>.*?)\)", gate, re.S).group("body").split()
     assert "/intranet/" in routes
-    assert len(routes) == 20
+    assert len(routes) == 22
 
 
 def test_utility_navigation_links_the_internal_intranet_page():

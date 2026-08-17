@@ -5,6 +5,72 @@ from pathlib import Path
 ROOT = Path(__file__).parents[1]
 
 
+def test_gemuese_gallery_images_reach_the_import_plan():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';
+    $seed = json_decode(file_get_contents('wordpress/content-seed/gemuese.json'), true);
+    foreach (bioco_import_build_page_plan($seed) as $item) {
+        if (($item['block'] ?? '') === 'gallery') echo json_encode($item['values']);
+    }
+    '''
+    result = subprocess.run(
+        ["php", "-r", php], cwd=ROOT, text=True, capture_output=True, check=True
+    )
+    values = json.loads(result.stdout)
+
+    assert len(values["items"]) == 5
+    assert all(item["category"] == "feld" for item in values["items"])
+    filenames = [
+        "gemeinsamsolidarischfrisch.1600x0.jpg",
+        "20151021_161807.1600x0.jpg",
+        "sommer.1600x0.jpg",
+        "20151021_161807-1.1600x0.jpg",
+        "wk_salate.jpg",
+    ]
+    assert [item["image"] for item in values["items"]] == [
+        {
+            "__bioco_pending_image__": (
+                f"https://cms.bioco.ch/site/assets/files/1708/{filename}"
+            ),
+            "__bioco_pending_image_alt__": "Was wir anbauen",
+        }
+        for filename in filenames
+    ]
+
+
+def test_gallery_without_toggle_label_keeps_every_image_visible():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    $values = [
+        'items' => array_fill(0, 5, [
+            'image' => ['url' => 'https://example.test/image.jpg', 'alt' => 'Bild'],
+            'category' => 'feld',
+        ]),
+        'show_more_label' => '',
+        'filters' => [['key' => 'all', 'label' => 'Alles']],
+    ];
+    function bioco_field($name, $default = null) {
+        global $values;
+        return array_key_exists($name, $values) ? $values[$name] : $default;
+    }
+    function esc_attr($value) { return htmlspecialchars((string) $value, ENT_QUOTES); }
+    function esc_html($value) { return htmlspecialchars((string) $value, ENT_QUOTES); }
+    function esc_url($value) { return (string) $value; }
+    $block = [];
+    ob_start();
+    require 'wordpress/web/app/mu-plugins/bioco-core/blocks/gallery/render.php';
+    echo ob_get_clean();
+    '''
+    html = subprocess.run(
+        ["php", "-r", php], cwd=ROOT, text=True, capture_output=True, check=True
+    ).stdout
+
+    assert html.count('class="gallery-item"') == 5
+    assert "display: none" not in html
+    assert "data-gallery-toggle" not in html
+
+
 def test_export_aborts_before_print_or_write_when_fields_are_unmapped(tmp_path):
     payload = json.loads(
         (ROOT / "tests/fixtures/wordpress-sections-with-images.json").read_text()
