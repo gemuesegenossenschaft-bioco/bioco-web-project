@@ -15,3 +15,4 @@
         </div>
     </header>
 <?php endif; ?>
+<main id="bioco-main-content">

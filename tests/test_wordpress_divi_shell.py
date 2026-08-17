@@ -53,6 +53,14 @@ def test_divi_shell_keeps_wordpress_lifecycle_hooks():
     assert footer.count("</div>") >= 1
 
 
+def test_divi_shell_wraps_parent_template_content_in_main():
+    header = (DIVI_THEME / "header.php").read_text()
+    footer = (DIVI_THEME / "footer.php").read_text()
+
+    assert '<main id="bioco-main-content">' in header
+    assert footer.count("</main>") == 1
+
+
 def test_divi_disables_parent_fixed_header_offsets():
     functions = (DIVI_THEME / "functions.php").read_text()
 
