@@ -9,6 +9,7 @@ if (!defined('ABSPATH')) exit;
 
 define('BIOCO_IMPORT_DIR', __DIR__);
 define('BIOCO_IMPORT_BLOCKS_DIR', dirname(__DIR__) . '/bioco-core/blocks');
+define('BIOCO_IMPORT_CORE_INCLUDES_DIR', dirname(__DIR__) . '/bioco-core/includes');
 
 // Seed directory resolution must work under BOTH supported layouts, because
 // the same mu-plugin ships to both:
@@ -44,6 +45,9 @@ require_once BIOCO_IMPORT_DIR . '/includes/pages.php';
 require_once BIOCO_IMPORT_DIR . '/includes/verify.php';
 require_once BIOCO_IMPORT_DIR . '/includes/collections.php';
 require_once BIOCO_IMPORT_DIR . '/includes/site-wiring.php';
+require_once BIOCO_IMPORT_CORE_INCLUDES_DIR . '/dynamic-sections.php';
+require_once BIOCO_IMPORT_DIR . '/includes/divi-blocks.php';
+require_once BIOCO_IMPORT_DIR . '/includes/divi-composer.php';
 
 // WP-CLI is the only place this plugin registers a "command" — every include
 // above is plain functions, callable/unit-reviewable without a WP-CLI

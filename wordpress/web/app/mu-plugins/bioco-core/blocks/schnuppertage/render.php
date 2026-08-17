@@ -11,16 +11,16 @@
 
 if (!defined('ABSPATH')) exit;
 
-$title = get_field('title');
-$text = get_field('text');
-$list_label = get_field('list_label');
-$items = get_field('items');
-$closing = get_field('closing');
-$signup_anchor = get_field('signup_anchor');
-$limit = (int) (get_field('limit') ?: 3);
-$schedule_title = get_field('schedule_title');
-$signup_label = get_field('signup_label');
-$empty_message = get_field('empty_message');
+$title = bioco_field('title');
+$text = bioco_field('text');
+$list_label = bioco_field('list_label');
+$items = bioco_field('items');
+$closing = bioco_field('closing');
+$signup_anchor = bioco_field('signup_anchor');
+$limit = (int) (bioco_field('limit') ?: 3);
+$schedule_title = bioco_field('schedule_title');
+$signup_label = bioco_field('signup_label');
+$empty_message = bioco_field('empty_message');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'schnuppertage';
 $class_name = 'cms-section cms-schnuppertage';
@@ -30,7 +30,8 @@ if (!empty($block['className'])) {
 
 $heading_already_in_text = bioco_text_has_heading_html($text);
 
-$termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag');
+$respect_stored_status = (bool) bioco_field('respect_stored_status');
+$termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag', $respect_stored_status);
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
     <?php if ($title && !$heading_already_in_text) : ?>

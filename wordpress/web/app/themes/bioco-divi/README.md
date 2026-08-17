@@ -1,7 +1,8 @@
 # bioco Divi Child
 
-Thin Divi 5 child theme (#101). Presentation only — no content, blocks, or forms live here; those
-come from the theme-agnostic mu-plugins (`bioco-core`, `bioco-content`, `bioco-forms`).
+Thin Divi 5 child theme (#101). Homepage layout styling and asset bootstrap only — no content,
+blocks, or forms live here; those come from the theme-agnostic mu-plugins (`bioco-core`,
+`bioco-content`, `bioco-forms`).
 
 ## Divi itself is not in this repo
 

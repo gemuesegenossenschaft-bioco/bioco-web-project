@@ -14,11 +14,11 @@
 
 if (!defined('ABSPATH')) exit;
 
-$intro = get_field('intro');
-$locations = get_field('locations');
-$locations_heading = get_field('locations_heading');
-$route_label = get_field('route_label');
-$empty_message = get_field('empty_message');
+$intro = bioco_field('intro');
+$locations = bioco_field('locations');
+$locations_heading = bioco_field('locations_heading');
+$route_label = bioco_field('route_label');
+$empty_message = bioco_field('empty_message');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'depot-map';
 $class_name = 'cms-section cms-depot-map';

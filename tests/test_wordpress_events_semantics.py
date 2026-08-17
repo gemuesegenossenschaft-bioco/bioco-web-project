@@ -136,6 +136,16 @@ def test_upcoming_is_filtered_by_current_date_not_only_by_status():
     ), date_clauses
 
 
+def test_homepage_can_explicitly_follow_source_stored_status():
+    helpers = (ROOT / "wordpress/web/app/mu-plugins/bioco-core/includes/helpers.php").read_text()
+    events = (ROOT / "wordpress/web/app/mu-plugins/bioco-core/blocks/events-feed/render.php").read_text()
+    visits = (ROOT / "wordpress/web/app/mu-plugins/bioco-core/blocks/schnuppertage/render.php").read_text()
+    assert "$respect_stored_status = false" in helpers
+    assert "respect_stored_status" in events
+    assert "include_schnuppertage" in events
+    assert "respect_stored_status" in visits
+
+
 def test_upcoming_still_excludes_an_explicitly_past_future_event():
     upcoming = query_args()["upcoming"]["meta_query"]
     status_clauses = find_clauses(upcoming, "event_status")
@@ -210,14 +220,15 @@ def test_events_feed_block_requests_general_events_only():
     ]
 
     assert len(calls) == 2, calls
-    assert "'upcoming', $limit, 'general'" in calls[0]
+    assert "$include_schnuppertage ? null : 'general'" in render
+    assert "$respect_stored_status" in render
     assert "'past', 4" in calls[1]
     assert "'general'" not in calls[1]
 
 
 def test_schnuppertage_block_still_requests_schnuppertag_events():
     render = (CORE / "blocks/schnuppertage/render.php").read_text()
-    assert "bioco_query_events('upcoming', $limit, 'schnuppertag')" in render
+    assert "bioco_query_events('upcoming', $limit, 'schnuppertag', $respect_stored_status)" in render
 
 
 def test_site_wiring_sets_zurich_timezone_idempotently():

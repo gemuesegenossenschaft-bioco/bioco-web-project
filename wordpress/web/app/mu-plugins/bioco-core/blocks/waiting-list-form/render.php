@@ -9,18 +9,18 @@
 
 if (!defined('ABSPATH')) exit;
 
-$title = get_field('title');
-$text = get_field('text');
-$name_label = get_field('name_label');
-$email_label = get_field('email_label');
-$phone_label = get_field('phone_label');
-$interest_label = get_field('interest_label');
-$interest_placeholder = get_field('interest_placeholder');
-$interest_options = get_field('interest_options');
-$notes_label = get_field('notes_label');
-$privacy_label = get_field('privacy_label');
-$submit_label = get_field('submit_label');
-$submitting_label = get_field('submitting_label');
+$title = bioco_field('title');
+$text = bioco_field('text');
+$name_label = bioco_field('name_label');
+$email_label = bioco_field('email_label');
+$phone_label = bioco_field('phone_label');
+$interest_label = bioco_field('interest_label');
+$interest_placeholder = bioco_field('interest_placeholder');
+$interest_options = bioco_field('interest_options');
+$notes_label = bioco_field('notes_label');
+$privacy_label = bioco_field('privacy_label');
+$submit_label = bioco_field('submit_label');
+$submitting_label = bioco_field('submitting_label');
 bioco_forms_localize_block('bioco/waiting-list-form', 'biocoWaitingListFormConfig', 'waiting-list');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'warteliste-anmeldung';

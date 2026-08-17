@@ -26,6 +26,18 @@ function bioco_import_find_page($slug) {
     return $posts ? $posts[0] : null;
 }
 
+function bioco_import_ensure_divi_shell($post_id, $mode) {
+    if ($mode !== 'apply' || !$post_id) return;
+    $builder = (string) get_post_meta($post_id, '_et_pb_use_builder', true);
+    if ($builder !== 'on') {
+        update_post_meta($post_id, '_et_pb_use_builder', 'on');
+    }
+    $layout = (string) get_post_meta($post_id, '_et_pb_page_layout', true);
+    if ($layout !== 'et_full_width_page') {
+        update_post_meta($post_id, '_et_pb_page_layout', 'et_full_width_page');
+    }
+}
+
 function bioco_import_excerpt($value, $len = 140) {
     $v = preg_replace('/\s+/u', ' ', (string) $value);
     $v = trim((string) $v);
@@ -163,19 +175,19 @@ function bioco_import_build_desired_content(array $seed, $mode, array &$report) 
 
         $values = $item['values'];
         $warnings = $item['warnings'] ?? [];
-        $errors = [];
         $sectionLabel = implode(',', $item['section_ids']);
 
         bioco_import_resolve_pending_images($values, $mode, $warnings);
-        $markup = bioco_import_serialize_acf_block($item['block'], $item['acf_group'], $values, $warnings, $errors);
+
+        $composerItem = $item;
+        $composerItem['values'] = $values;
+        $markup = bioco_import_serialize_divi_blocks([
+            Bioco_Import_Divi_Composer::section($composerItem)
+        ]);
 
         foreach ($warnings as $w) {
             bioco_import_report_row($report, $slug, $sectionLabel, $item['block'], 'warn', $w);
         }
-        foreach ($errors as $e) {
-            bioco_import_report_row($report, $slug, $sectionLabel, $item['block'], 'error', $e);
-        }
-        if ($markup === null) continue;
 
         if (!empty($item['note'])) {
             bioco_import_report_row($report, $slug, $sectionLabel, $item['block'], 'info', $item['note']);
@@ -217,6 +229,7 @@ function bioco_import_page_for_seed(array $seed, $mode, $force, array &$report) 
                 bioco_import_report_row($report, $slug, $label, '', 'create', 'Block geschrieben.');
             }
             $existing = get_post($postId);
+            bioco_import_ensure_divi_shell($postId, $mode);
         } else {
             bioco_import_report_row($report, $slug, '', '', 'create', 'WÜRDE: Seite anlegen (' . count($sectionLabels) . ' Block(e)).');
             foreach ($sectionLabels as $label) {
@@ -231,6 +244,7 @@ function bioco_import_page_for_seed(array $seed, $mode, $force, array &$report) 
     $currentContent = (string) $existing->post_content;
 
     if ($currentContent === $desiredContent) {
+        bioco_import_ensure_divi_shell($existing->ID, $mode);
         bioco_import_report_row($report, $slug, '', '', 'ok-equal', 'Seiteninhalt bereits identisch (post_id=' . $existing->ID . ').');
         foreach ($sectionLabels as $label) {
             bioco_import_report_row($report, $slug, $label, '', 'ok-equal', 'Bereits identisch.');
@@ -261,6 +275,7 @@ function bioco_import_page_for_seed(array $seed, $mode, $force, array &$report) 
             bioco_import_report_row($report, $slug, '', '', 'error', 'Seite konnte nicht aktualisiert werden: ' . $updated->get_error_message());
             return;
         }
+        bioco_import_ensure_divi_shell($existing->ID, $mode);
         bioco_import_report_row($report, $slug, '', '', 'update', $detail);
     } else {
         bioco_import_report_row($report, $slug, '', '', 'update', 'WÜRDE: ' . $detail);

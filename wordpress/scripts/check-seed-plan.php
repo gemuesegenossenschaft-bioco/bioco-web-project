@@ -54,6 +54,8 @@ foreach ($seeds as $seed) {
     if ((string) ($hero['hero_title'] ?? '') !== '' || (string) ($hero['hero_subtitle'] ?? '') !== '' || (string) ($hero['image_url'] ?? '') !== '') {
         $seedIds[] = '__hero__';
     }
+    // Code-owned homepage chrome is a synthetic native-Divi section, not CMS data.
+    if ($slug === 'home') $seedIds[] = '__home_chrome__';
     $plannedIds = [];
     foreach ($plan as $item) {
         foreach ($item['section_ids'] as $sid) $plannedIds[$sid] = true;
@@ -81,6 +83,10 @@ foreach ($seeds as $seed) {
         $block = $item['block'];
         $group = $item['acf_group'];
         $blocksUsed[$block] = ($blocksUsed[$block] ?? 0) + 1;
+
+        // Synthetic composer-only sections serialize directly to divi/* and
+        // intentionally have neither a bioco block directory nor an ACF group.
+        if ($block === 'home-chrome') continue;
 
         // The block directory must exist and its block.json must be valid,
         // because that is what bioco-core registers and what the serialized

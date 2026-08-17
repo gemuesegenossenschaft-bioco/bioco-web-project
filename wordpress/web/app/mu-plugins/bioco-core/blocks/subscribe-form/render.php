@@ -15,10 +15,10 @@
 
 if (!defined('ABSPATH')) exit;
 
-$title = get_field('title');
-$submit_label = get_field('submit_label');
-$submitting_label = get_field('submitting_label');
-$text = get_field('text');
+$title = bioco_field('title');
+$submit_label = bioco_field('submit_label');
+$submitting_label = bioco_field('submitting_label');
+$text = bioco_field('text');
 
 bioco_forms_localize_block('bioco/subscribe-form', 'biocoSubscribeFormConfig', 'subscribe');
 

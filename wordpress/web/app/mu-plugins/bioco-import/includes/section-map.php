@@ -718,6 +718,20 @@ function bioco_import_plan_single_section(array $section) {
 function bioco_import_build_page_plan(array $seed) {
     $sections = $seed['sections'];
     $plan = [];
+    $isHome = (string) ($seed['slug'] ?? '') === 'home';
+    $homeChromeAdded = false;
+    $addHomeChrome = static function () use (&$plan, &$homeChromeAdded): void {
+        if ($homeChromeAdded) return;
+        $plan[] = [
+            'type' => 'block',
+            'section_ids' => ['__home_chrome__'],
+            'block' => 'home-chrome',
+            'acf_group' => '',
+            'values' => [],
+            'warnings' => [],
+        ];
+        $homeChromeAdded = true;
+    };
     $hero = is_array($seed['hero'] ?? null) ? $seed['hero'] : [];
     $heroHeadline = (string) ($hero['hero_title'] ?? '');
     $heroSubtitle = (string) ($hero['hero_subtitle'] ?? '');
@@ -740,6 +754,9 @@ function bioco_import_build_page_plan(array $seed) {
     $i = 0;
     $n = count($sections);
     while ($i < $n) {
+        if ($isHome && (string) ($sections[$i]['section_id'] ?? '') === 'kennenlernen') {
+            $addHomeChrome();
+        }
         $componentKey = (string) ($sections[$i]['section_component'] ?? '');
         if ($componentKey === 'accordion_item') {
             $group = [];
@@ -763,8 +780,19 @@ function bioco_import_build_page_plan(array $seed) {
             foreach (bioco_import_plan_timeline_group($group) as $item) $plan[] = $item;
             continue;
         }
-        foreach (bioco_import_plan_single_section($sections[$i]) as $item) $plan[] = $item;
+        $singleItems = bioco_import_plan_single_section($sections[$i]);
+        foreach ($singleItems as $item) {
+            if ($isHome && $componentKey === 'events_feed' && !empty($sections[$i]['section_title'])) {
+                $item['values']['_section_heading'] = (string) $sections[$i]['section_title'];
+                $item['values']['respect_stored_status'] = true;
+                $item['values']['include_schnuppertage'] = true;
+                $item['values']['limit'] = 8;
+                $item['values']['standard_title'] = 'Nächste Events';
+            }
+            $plan[] = $item;
+        }
         $i++;
     }
+    if ($isHome) $addHomeChrome();
     return $plan;
 }

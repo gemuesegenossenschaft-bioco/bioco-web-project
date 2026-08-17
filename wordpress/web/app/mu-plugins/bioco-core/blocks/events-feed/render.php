@@ -10,17 +10,19 @@
 
 if (!defined('ABSPATH')) exit;
 
-$variant = get_field('variant') ?: 'standard';
-$limit = (int) (get_field('limit') ?: 3);
-$banner_title = get_field('title');
-$banner_link_label = get_field('banner_link_label');
-$standard_title = get_field('standard_title');
-$standard_link_label = get_field('standard_link_label');
-$past_title = get_field('past_title');
-$past_description = get_field('past_description');
-$past_link_label = get_field('past_link_label');
-$empty_message = get_field('empty_message');
-$archive_url = get_field('archive_url');
+$variant = bioco_field('variant') ?: 'standard';
+$limit = (int) (bioco_field('limit') ?: 3);
+$banner_title = bioco_field('title');
+$banner_link_label = bioco_field('banner_link_label');
+$standard_title = bioco_field('standard_title');
+$standard_link_label = bioco_field('standard_link_label');
+$past_title = bioco_field('past_title');
+$past_description = bioco_field('past_description');
+$past_link_label = bioco_field('past_link_label');
+$empty_message = bioco_field('empty_message');
+$archive_url = bioco_field('archive_url');
+$respect_stored_status = (bool) bioco_field('respect_stored_status');
+$include_schnuppertage = (bool) bioco_field('include_schnuppertage');
 $archive_href = $archive_url ? bioco_navigation_url($archive_url) : '';
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'events-feed';
@@ -29,7 +31,12 @@ if (!empty($block['className'])) {
     $class_name .= ' ' . $block['className'];
 }
 
-$upcoming_query = bioco_query_events('upcoming', $limit, 'general');
+$upcoming_query = bioco_query_events(
+    'upcoming',
+    $limit,
+    $include_schnuppertage ? null : 'general',
+    $respect_stored_status
+);
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
     <?php if ($variant === 'banner') : ?>
@@ -41,7 +48,7 @@ $upcoming_query = bioco_query_events('upcoming', $limit, 'general');
             </p><?php endif; ?>
         </div>
     <?php else :
-        $past_query = bioco_query_events('past', 4);
+        $past_query = bioco_query_events('past', 4, null, $respect_stored_status);
     ?>
         <div class="bento-card events-card bento-card-fullwidth">
             <div class="card-header"><?php if ($standard_title) : ?><h3><?php echo esc_html($standard_title); ?></h3><?php endif; ?></div>

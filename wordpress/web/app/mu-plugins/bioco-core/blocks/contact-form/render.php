@@ -8,11 +8,11 @@
 
 if (!defined('ABSPATH')) exit;
 
-$title = get_field('title');
-$text = get_field('text');
-$phone_label = get_field('phone_label');
-$submit_label = get_field('submit_label');
-$submitting_label = get_field('submitting_label');
+$title = bioco_field('title');
+$text = bioco_field('text');
+$phone_label = bioco_field('phone_label');
+$submit_label = bioco_field('submit_label');
+$submitting_label = bioco_field('submitting_label');
 
 bioco_forms_localize_block('bioco/contact-form', 'biocoContactFormConfig', 'contact');
 

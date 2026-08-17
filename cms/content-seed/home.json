@@ -51,6 +51,15 @@
         { "text": "Nimm Kontakt auf", "href": "/kontakt", "variant": "primary" },
         { "text": "Zu uns finden", "href": "/standorte-depots", "variant": "secondary" }
       ]
+    },
+    {
+      "section_id": "section-b597772b",
+      "section_title": "Aktuelles",
+      "section_text": "<h1>Aktuelles</h1>",
+      "section_layout": "split_media_text",
+      "section_theme": "default",
+      "section_component": "events_feed",
+      "section_config": { "archiveUrl": "/aktuelles" }
     }
   ],
   "conversion_notes": [

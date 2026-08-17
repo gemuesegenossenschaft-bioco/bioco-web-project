@@ -131,6 +131,7 @@ def test_navigation_footer_and_editorial_media_contracts():
         assert all(
             section.get("section_config", {}).get("styleVariant") == "feature"
             for section in home["sections"]
+            if not section.get("section_component")
         )
         for seed_path in sorted((ROOT / f"{root}/content-seed").glob("*.json")):
             seed = json.loads(seed_path.read_text())
@@ -348,4 +349,4 @@ def test_shared_visual_primitives_are_systemic():
     assert "aria-current" in shell
     events = (CORE / "blocks/events-feed/render.php").read_text()
     assert "home_url('/aktuelles')" not in events
-    assert "get_field('archive_url')" in events
+    assert "bioco_field('archive_url')" in events

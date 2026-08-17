@@ -10,17 +10,17 @@
 
 if (!defined('ABSPATH')) exit;
 
-$title = get_field('title');
-$text = get_field('text');
-$name_label = get_field('name_label');
-$email_label = get_field('email_label');
-$phone_label = get_field('phone_label');
-$date_label = get_field('date_label');
-$participants_label = get_field('participants_label');
-$notes_label = get_field('notes_label');
-$privacy_label = get_field('privacy_label');
-$submit_label = get_field('submit_label');
-$submitting_label = get_field('submitting_label');
+$title = bioco_field('title');
+$text = bioco_field('text');
+$name_label = bioco_field('name_label');
+$email_label = bioco_field('email_label');
+$phone_label = bioco_field('phone_label');
+$date_label = bioco_field('date_label');
+$participants_label = bioco_field('participants_label');
+$notes_label = bioco_field('notes_label');
+$privacy_label = bioco_field('privacy_label');
+$submit_label = bioco_field('submit_label');
+$submitting_label = bioco_field('submitting_label');
 
 bioco_forms_localize_block('bioco/visit-day-form', 'biocoVisitDayFormConfig', 'visit-day');
 

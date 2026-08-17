@@ -31,6 +31,30 @@
     "primaryLabel": "Seiten",
     "utilityLabel": "Kontakt und Zugang",
     "legalLabel": "Rechtliches",
-    "copyright": "Gemüsegenossenschaft biocò"
+    "copyright": "Gemüsegenossenschaft biocò",
+    "navigationTitle": "Navigation",
+    "navigation": [
+      { "label": "Kontakt", "url": "/kontakt/" },
+      { "label": "Impressum", "url": "/impressum/" },
+      { "label": "Datenschutz", "url": "/datenschutz/" },
+      { "label": "Statuten", "url": "/statuten/" }
+    ],
+    "contactTitle": "Kontakt",
+    "contactName": "Gemüsegenossenschaft biocò",
+    "contactAddress": ["Geisshof", "5412 Gebenstorf"],
+    "contactEmail": "info@bioco.ch",
+    "socialTitle": "Social Media",
+    "social": [
+      { "label": "Instagram", "url": "https://www.instagram.com/bioco.ch" },
+      { "label": "Facebook", "url": "https://www.facebook.com/bioco.ch" }
+    ],
+    "partnersTitle": "Partner & Zertifizierungen",
+    "partners": [
+      { "label": "Solawi", "url": "https://www.solawi.ch" },
+      { "label": "Basimilch", "url": "https://basimil.ch/" },
+      { "label": "Demeter", "url": "https://www.demeter.ch" },
+      { "label": "Bio Suisse", "url": "https://www.bio-suisse.ch" }
+    ],
+    "regionText": "Solidarische Landwirtschaft für Baden, Brugg, Gebenstorf, Wettingen und die Region Aargau"
   }
 }

@@ -285,10 +285,8 @@ function bioco_import_serialize_acf_block($blockDirName, $acfGroupKey, array $va
 }
 
 /**
- * Only the block-comment-name resolution step, exposed standalone so the
- * self-verify script (and `wp bioco verify`, which needs to recognise blocks
- * in already-saved post_content) can check block names without needing ACF
- * field values on hand.
+ * Only the legacy ACF block-comment-name resolution step, kept with the ACF
+ * editor/import helpers even though seeded pages now use native Divi blocks.
  */
 function bioco_import_registered_block_name($blockDirName) {
     $blockJson = bioco_import_block_json($blockDirName);

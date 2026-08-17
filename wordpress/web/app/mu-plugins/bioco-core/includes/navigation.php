@@ -91,17 +91,31 @@ function bioco_render_primary_navigation() {
 }
 
 function bioco_render_site_footer() {
-    $contract = bioco_navigation_contract();
-    $site = $contract['site'];
-    $footer = $contract['footer'];
-    $logo = plugins_url((string) ($site['logo'] ?? 'assets/bioco-logo.png'), dirname(__DIR__) . '/bioco-core.php');
-    $home_label = (string) ($site['homeLabel'] ?? '');
-    $logo_alt = (string) ($site['logoAlt'] ?? '');
+    $footer = bioco_navigation_contract()['footer'];
+    $links = static function (array $items): string {
+        $markup = '';
+        foreach ($items as $item) {
+            $href = bioco_navigation_url((string) ($item['url'] ?? ''));
+            if ($href === '') continue;
+            $external = preg_match('#^https?://#i', (string) $item['url']) === 1;
+            $attrs = $external ? ' target="_blank" rel="noopener noreferrer"' : '';
+            $markup .= '<a href="' . esc_url($href) . '"' . $attrs . '>'
+                . esc_html((string) ($item['label'] ?? '')) . '</a>';
+        }
+        return $markup;
+    };
+    $navigation = '';
+    foreach (is_array($footer['navigation'] ?? null) ? $footer['navigation'] : [] as $item) {
+        $navigation .= '<li>' . $links([$item]) . '</li>';
+    }
+    $address = implode('<br>', array_map('esc_html', is_array($footer['contactAddress'] ?? null) ? $footer['contactAddress'] : []));
+    $email = (string) ($footer['contactEmail'] ?? '');
 
-    return '<div class="bioco-site-footer"><div class="bioco-site-footer-inner">'
-        . '<div class="bioco-site-footer-brand"><a href="' . esc_url(home_url('/')) . '" aria-label="' . esc_attr($home_label) . '"><img src="' . esc_url($logo) . '" alt="' . esc_attr($logo_alt) . '"></a><p>' . esc_html((string) ($footer['slogan'] ?? '')) . '</p></div>'
-        . '<nav aria-label="' . esc_attr((string) ($footer['primaryLabel'] ?? '')) . '"><ul>' . bioco_navigation_links($contract['primary']) . '</ul></nav>'
-        . '<nav aria-label="' . esc_attr((string) ($footer['utilityLabel'] ?? '')) . '"><ul>' . bioco_navigation_links($contract['utility']) . '</ul></nav>'
-        . '<nav aria-label="' . esc_attr((string) ($footer['legalLabel'] ?? '')) . '"><ul>' . bioco_navigation_links($contract['legal']) . '</ul></nav>'
-        . '</div><p class="bioco-site-footer-meta">&copy; ' . esc_html((string) gmdate('Y')) . ' ' . esc_html((string) ($footer['copyright'] ?? '')) . '</p></div>';
+    return '<footer id="footer" class="bioco-site-footer"><div class="bioco-site-footer-inner">'
+        . '<div class="bioco-site-footer-column"><h3>' . esc_html((string) ($footer['navigationTitle'] ?? '')) . '</h3><ul>' . $navigation . '</ul></div>'
+        . '<div class="bioco-site-footer-column"><h3>' . esc_html((string) ($footer['contactTitle'] ?? '')) . '</h3><p><strong>' . esc_html((string) ($footer['contactName'] ?? '')) . '</strong><br>' . $address . '</p><p><a href="mailto:' . esc_attr($email) . '">' . esc_html($email) . '</a></p></div>'
+        . '<div class="bioco-site-footer-column"><h3>' . esc_html((string) ($footer['socialTitle'] ?? '')) . '</h3><p class="bioco-site-footer-social">' . $links(is_array($footer['social'] ?? null) ? $footer['social'] : []) . '</p></div>'
+        . '</div><div class="bioco-site-footer-partners"><h3>' . esc_html((string) ($footer['partnersTitle'] ?? '')) . '</h3><p class="bioco-site-footer-partner-links">'
+        . $links(is_array($footer['partners'] ?? null) ? $footer['partners'] : [])
+        . '</p><p>' . esc_html((string) ($footer['regionText'] ?? '')) . '</p></div></footer>';
 }

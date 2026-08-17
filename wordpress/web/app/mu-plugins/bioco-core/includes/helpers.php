@@ -126,13 +126,15 @@ function bioco_render_person_icons($count) {
 // Sorts by event_date: soonest-first for upcoming, most-recent-first for past
 // (mirrors api-events.php's event_status split; ordering is a WP-native choice
 // since the ProcessWire reference sorts once by event_start ascending only).
-function bioco_query_events($status, $limit, $event_type = null) {
+function bioco_query_events($status, $limit, $event_type = null, $respect_stored_status = false) {
     // event_date is a naive local datetime, so compare it against the site's
     // wall-clock now, not against a UTC instant.
     $now = current_time('Y-m-d H:i:s');
     $meta_query = ['relation' => 'AND'];
 
-    if ($status === 'past') {
+    if ($respect_stored_status) {
+        $meta_query[] = ['key' => 'event_status', 'value' => $status, 'compare' => '='];
+    } elseif ($status === 'past') {
         // Elapsed by date, OR explicitly flagged past by an editor (the
         // "Rückblick" flow can retire a still-future event early).
         $meta_query[] = [

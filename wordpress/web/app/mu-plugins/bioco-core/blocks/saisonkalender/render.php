@@ -10,10 +10,10 @@
 
 if (!defined('ABSPATH')) exit;
 
-$vegetables = get_field('vegetables');
-$vegetable_column_label = get_field('vegetable_column_label');
-$month_columns = get_field('month_columns');
-$empty_message = get_field('empty_message');
+$vegetables = bioco_field('vegetables');
+$vegetable_column_label = bioco_field('vegetable_column_label');
+$month_columns = bioco_field('month_columns');
+$empty_message = bioco_field('empty_message');
 
 $months = [];
 foreach ((array) $month_columns as $month_column) {

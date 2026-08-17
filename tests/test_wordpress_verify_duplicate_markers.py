@@ -31,8 +31,16 @@ def test_duplicate_section_markers_preserve_block_order():
 
     output = json.loads(result.stdout)
     expected = [
-        {"blockName": "bioco/rich-text", "data": {"title": "Gruppen"}},
-        {"blockName": "bioco/group-cards", "data": {"columns": "3"}},
+        {
+            "blockName": "bioco/rich-text",
+            "data": {"title": "Gruppen"},
+            "block": {"blockName": "bioco/rich-text", "attrs": {"data": {"title": "Gruppen"}}},
+        },
+        {
+            "blockName": "bioco/group-cards",
+            "data": {"columns": "3"},
+            "block": {"blockName": "bioco/group-cards", "attrs": {"data": {"columns": "3"}}},
+        },
     ]
     assert output["parsed"]["gruppen"] == expected
     assert [output["first"], output["second"]] == expected

@@ -10,8 +10,8 @@
 
 if (!defined('ABSPATH')) exit;
 
-$limit = (int) (get_field('limit') ?: -1);
-$empty_message = get_field('empty_message');
+$limit = (int) (bioco_field('limit') ?: -1);
+$empty_message = bioco_field('empty_message');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'group-cards';
 $class_name = 'cms-section cms-group-cards';
