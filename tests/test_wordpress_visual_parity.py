@@ -15,7 +15,7 @@ def _module():
     return module
 
 
-def test_visual_parity_gate_defaults_to_ninety_percent(tmp_path):
+def test_visual_parity_gate_defaults_to_ninety_five_percent(tmp_path):
     parity = _module()
     reference = tmp_path / "reference.png"
     candidate = tmp_path / "candidate.png"
@@ -23,7 +23,7 @@ def test_visual_parity_gate_defaults_to_ninety_percent(tmp_path):
     Image.new("RGB", (20, 20), "#f5f1e8").save(candidate)
 
     result = parity.compare(reference, candidate, masks=[])
-    assert parity.DEFAULT_THRESHOLD == 0.90
+    assert parity.DEFAULT_THRESHOLD == 0.95
     assert result["score"] == 1.0
     assert result["height_accuracy"] == 1.0
 

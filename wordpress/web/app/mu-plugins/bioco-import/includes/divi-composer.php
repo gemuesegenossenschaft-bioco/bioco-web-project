@@ -205,6 +205,7 @@ final class Bioco_Import_Divi_Composer {
         ]);
         $visits = bioco_dynamic_marker_html('schnuppertage', [
             'title' => 'Schnuppertage',
+            'display' => 'cards',
             'empty_message' => 'Aktuell sind keine Schnuppertage geplant.',
             'limit' => 3,
             'respect_stored_status' => true,

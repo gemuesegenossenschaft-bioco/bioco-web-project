@@ -15,6 +15,19 @@ Version: 1.0.0
     font-display: swap;
 }
 
+/* Child-theme canvas and typography: keep Divi defaults out of page content. */
+.wp-child-theme-bioco-divi {
+    background: var(--wp--preset--color--bioco-bg, #F5F1E8);
+    color: var(--wp--preset--color--bioco-text, #1A1A1A);
+    font-family: 'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+.wp-child-theme-bioco-divi main a:not(.et_pb_button) {
+    color: var(--wp--preset--color--bioco-green, #2e7d32);
+}
+
 /* Homepage cream canvas — scoped to .home so it does not leak to other pages. */
 body.home,
 .home .et_pb_page_container,
@@ -61,15 +74,22 @@ body.home,
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.55) 100%);
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0.32) 0%,
+        transparent 40%,
+        transparent 65%,
+        rgba(0, 0, 0, 0.20) 100%
+    );
     z-index: 1;
     pointer-events: none;
 }
 
 /* Hero image module: fill the card behind the overlay. */
-.home .bioco-home-hero-image {
+.home .bioco-home-hero-column .bioco-home-hero-image {
     position: absolute;
     inset: 0;
+    margin: 0 !important;
     z-index: 0;
 }
 
@@ -99,6 +119,20 @@ body.home,
     font-weight: 700;
     line-height: 1.2;
     margin-bottom: 0.5em;
+}
+
+.home .bioco-home-hero-title h1 {
+    color: #FFFFFF;
+    font-family: inherit;
+    font-size: 40px;
+    font-weight: 700;
+    line-height: 52px;
+    padding: 0;
+}
+
+.home .bioco-home-hero-subtitle p {
+    color: #FFFFFF;
+    padding: 0;
 }
 
 .home .bioco-home-hero-subtitle {
@@ -168,7 +202,7 @@ body.home,
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 44px;
+    min-height: 48px;
     padding: 0.75em 1.5em;
     font-weight: 600;
     text-decoration: none;
@@ -210,9 +244,11 @@ body.home,
     min-height: 44px;
     align-items: center;
     justify-content: center;
-    padding: 0.75em 1.5em;
+    padding: 12px 24px !important;
     border: 0;
     border-radius: 12px 24px 12px 24px;
+    font-size: 16px !important;
+    line-height: 24px !important;
     font-weight: 600;
     text-decoration: none;
 }
@@ -266,7 +302,7 @@ body.home,
     font-family: var(--wp--preset--font-family--body, 'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif);
     line-height: 1.7;
     color: var(--wp--preset--color--bioco-text, #1A1A1A);
-    padding: clamp(32px, 6vw, 96px) clamp(16px, 6vw, 96px);
+    padding: clamp(32px, 4vw, 64px) clamp(20px, 6vw, 96px);
 }
 
 .bioco-divi-row {
@@ -278,6 +314,25 @@ body.home,
 
 .bioco-divi-content {
     width: 100%;
+}
+
+.bioco-divi-section > .bioco-divi-row {
+    padding: 0;
+}
+
+.bioco-divi-row::before,
+.bioco-divi-row::after {
+    display: none;
+}
+
+.bioco-divi-section .bioco-divi-title .et_pb_module_header,
+.bioco-divi-section .bioco-divi-page-intro .et_pb_module_header {
+    color: var(--wp--preset--color--bioco-text, #1A1A1A);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+    padding: 0;
 }
 
 /* Page intro: width and alignment modifiers. */
@@ -326,6 +381,16 @@ body.home,
     grid-template-columns: 1fr 1fr;
     gap: clamp(32px, 5vw, 64px);
     align-items: center;
+}
+
+.bioco-divi-media-text .bioco-divi-row:has(> .bioco-divi-content:only-child) {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 1160px;
+}
+
+.bioco-divi-media-text .bioco-divi-row:has(> .bioco-divi-content:only-child) > .bioco-divi-content {
+    order: 1;
+    max-width: 1160px;
 }
 
 .bioco-divi-media-text.bioco-divi-media-left .bioco-divi-row > .bioco-divi-media {
@@ -474,6 +539,44 @@ body.home,
 .bioco-divi-button .et_pb_button:focus-visible {
     outline: 3px solid var(--wp--preset--color--bioco-green, #2e7d32);
     outline-offset: 2px;
+}
+
+/* Divi 5 renders the module itself as the anchor. */
+.bioco-divi-button.et_pb_button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 10px 22px;
+    border-radius: 12px 24px 12px 24px;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-decoration: none;
+}
+
+.bioco-divi-button--primary.et_pb_button {
+    border: 2px solid var(--wp--preset--color--bioco-green, #2e7d32);
+    background: var(--wp--preset--color--bioco-green, #2e7d32);
+    color: #fff !important;
+}
+
+.bioco-divi-button--secondary.et_pb_button {
+    border: 2px solid var(--wp--preset--color--bioco-green, #2e7d32);
+    background: transparent;
+    color: var(--wp--preset--color--bioco-green, #2e7d32) !important;
+}
+
+.bioco-divi-button.et_pb_button:hover {
+    padding: 10px 22px;
+    border-color: var(--wp--preset--color--bioco-green-dark, #1b5e20);
+    background: var(--wp--preset--color--bioco-green-dark, #1b5e20);
+    color: #fff;
+}
+
+.bioco-divi-button.et_pb_button::after {
+    display: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1112,15 +1215,15 @@ body.home,
 
     .home .bioco-site-header {
         position: relative;
-        height: 72px;
+        height: 120px;
         background: var(--wp--preset--color--bioco-bg, #F5F1E8);
         overflow: visible;
     }
 
     .home .bioco-site-header .bioco-page-shell {
         width: min(calc(100% - 212.8px), 1227.2px);
-        height: 72px;
-        padding-top: 32px;
+        height: 120px;
+        padding-top: 0;
         overflow: visible;
     }
 
@@ -1130,13 +1233,14 @@ body.home,
 
     .home .bioco-primary-nav {
         position: absolute;
-        top: 120px;
+        top: 40px;
         left: 0;
         width: 100%;
         min-height: 60px;
         height: 60px;
         padding: 4px 0;
         border: 0;
+        background: var(--wp--preset--color--bioco-bg, #F5F1E8);
         z-index: 10;
     }
 
@@ -1147,8 +1251,8 @@ body.home,
 
     .home .bioco-home-hero {
         width: calc(100% - 40px);
-        height: 650px;
-        margin: 48px 20px 0;
+        height: 585px;
+        margin: 0 20px;
         padding: 0;
         border-radius: 24px;
         overflow: hidden;
@@ -1157,13 +1261,18 @@ body.home,
     .home .bioco-home-hero-row {
         width: 100%;
         max-width: none;
-        height: 650px;
-        min-height: 650px;
+        height: 585px;
+        min-height: 585px;
+        padding: 0;
         border-radius: 24px;
     }
 
     .home .bioco-home-hero-column {
-        padding: 48px 72px;
+        padding: 48px 184.4px 128px;
+    }
+
+    .home .bioco-home-hero-title {
+        margin-bottom: 13px !important;
     }
 
     .home .bioco-home-hero-title,
@@ -1317,14 +1426,14 @@ body.home,
 
     .home .bioco-home-hero {
         width: calc(100% - 8px);
-        height: 572px;
-        margin: -20px 4px 0;
+        height: 552px;
+        margin: 0 4px 0;
     }
 
     .home .bioco-home-hero-row,
     .home .bioco-home-hero-column {
-        height: 572px;
-        min-height: 572px;
+        height: 552px;
+        min-height: 552px;
     }
 
     .home .bioco-home-feature {
@@ -1333,12 +1442,66 @@ body.home,
         padding: 0;
     }
 
+    .home .bioco-home-feature-title h2 {
+        font-size: 24px;
+        line-height: 28.8px;
+        padding: 0;
+    }
+
+    .home .bioco-home-feature-title.et_pb_module {
+        margin-bottom: 24px;
+    }
+
+    .home .bioco-home-feature-text {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 25.6px;
+        margin-bottom: 84px;
+    }
+
+    .home .bioco-home-feature-content {
+        margin-bottom: 20px !important;
+    }
+
+    .home .bioco-home-feature .bioco-home-button.et_pb_button {
+        width: 100%;
+        min-height: 52px;
+    }
+
     .home .bioco-home-feature-row {
         padding: 0;
     }
 
     .home .bioco-home-feature-image .et_pb_image_wrap {
-        aspect-ratio: 1 / 1;
+        height: 300px;
+        aspect-ratio: auto;
+    }
+
+    .home .bioco-home-cta-title h2,
+    .home .bioco-home-live-title h2 {
+        color: var(--wp--preset--color--bioco-text, #1A1A1A);
+        font-size: 22.4px;
+        font-weight: 700;
+        line-height: 26.88px;
+        padding: 0;
+    }
+
+    .home .bioco-home-cta-text {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 25.6px;
+    }
+
+    .home .bioco-home-cta-text.et_pb_module {
+        margin-bottom: 28px;
+    }
+
+    .home .bioco-home-cta .bioco-home-button--primary.et_pb_button {
+        min-height: 52px;
+    }
+
+    .home .bioco-home-cta .et_pb_button_module_wrapper:has(.bioco-home-button--primary) {
+        margin-bottom: 36px;
     }
 
     .home .bioco-home-hero + .bioco-home-feature {
@@ -1354,7 +1517,7 @@ body.home,
     }
 
     .home .bioco-home-live {
-        width: calc(100% - 93.6px);
+        width: calc(100% - 46.8px);
         min-height: 3514px;
         margin: 48px auto;
         padding: 48px 0 0;
@@ -1381,8 +1544,8 @@ body.home,
     }
 
     .home .bioco-home-cta {
-        width: calc(100% - 93.6px);
-        height: 389px;
+        width: calc(100% - 46.8px);
+        height: 421px;
         margin: 64px auto 0;
         padding: 0;
         border-radius: 0;
@@ -1395,7 +1558,7 @@ body.home,
 
     .home .bioco-dynamic-section {
         min-height: 5005px;
-        margin: 64px 0 0;
+        margin: 32px 0 0;
         padding: 0;
         background: var(--wp--preset--color--bioco-bg, #F5F1E8);
     }

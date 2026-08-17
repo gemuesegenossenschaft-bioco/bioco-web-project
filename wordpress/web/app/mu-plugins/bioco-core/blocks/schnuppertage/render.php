@@ -21,6 +21,7 @@ $limit = (int) (bioco_field('limit') ?: 3);
 $schedule_title = bioco_field('schedule_title');
 $signup_label = bioco_field('signup_label');
 $empty_message = bioco_field('empty_message');
+$display = bioco_field('display');
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'schnuppertage';
 $class_name = 'cms-section cms-schnuppertage';
@@ -63,6 +64,9 @@ $termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag', $respect
     <?php endif; ?>
 
 <?php if ($schedule_title) : ?>    <h4 class="cms-schnuppertage-termine-heading"><?php echo esc_html($schedule_title); ?></h4><?php endif; ?>
+    <?php if ($display === 'cards') : ?>
+        <?php bioco_render_events_list($termine_query, $empty_message); ?>
+    <?php else : ?>
     <div class="cms-schnuppertage-termine">
         <?php if ($termine_query->have_posts()) : ?>
             <?php while ($termine_query->have_posts()) :
@@ -85,4 +89,5 @@ $termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag', $respect
 <?php if ($empty_message) : ?>            <p style="color: var(--wp--preset--color--bioco-text-muted);"><?php echo esc_html($empty_message); ?></p><?php endif; ?>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 </section>

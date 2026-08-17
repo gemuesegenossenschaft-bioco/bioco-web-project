@@ -341,6 +341,12 @@ def test_home_slug_uses_native_divi_sections_and_markers():
     assert "events_feed" in content
     assert "schnuppertage" in content
 
+    marker_props = [
+        json.loads(base64.b64decode(encoded))
+        for encoded in re.findall(r'data-bioco-props=(?:"|\\u0022)([A-Za-z0-9+/=]+)(?:"|\\u0022)', content)
+    ]
+    assert any(props.get("display") == "cards" for props in marker_props)
+
     # Exactly five opening divi/section comments.
     names = _findall_block_comment_names(content)
     assert names.count("divi/section") == 5

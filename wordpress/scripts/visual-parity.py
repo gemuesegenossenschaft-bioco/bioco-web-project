@@ -8,7 +8,7 @@ from pathlib import Path
 from PIL import Image, ImageChops, ImageDraw
 
 
-DEFAULT_THRESHOLD = 0.90
+DEFAULT_THRESHOLD = 0.95
 
 DESKTOP_MASKS = [
     (0, 1846, 1440, 3828),  # CMS-fed Beiträge / Events / Schnuppertage

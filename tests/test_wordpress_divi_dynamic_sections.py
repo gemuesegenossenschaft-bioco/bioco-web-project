@@ -11,6 +11,7 @@ ROOT = Path(__file__).parents[1]
 DYNAMIC_SECTIONS = "wordpress/web/app/mu-plugins/bioco-core/includes/dynamic-sections.php"
 DIVI_BLOCKS = "wordpress/web/app/mu-plugins/bioco-import/includes/divi-blocks.php"
 DIVI_COMPOSER = "wordpress/web/app/mu-plugins/bioco-import/includes/divi-composer.php"
+SCHNUPPERTAGE_RENDER = ROOT / "wordpress/web/app/mu-plugins/bioco-core/blocks/schnuppertage/render.php"
 
 DYNAMIC_BLOCKS = {
     "contact-form": "contact_form",
@@ -26,6 +27,13 @@ DYNAMIC_BLOCKS = {
     "depot-map": "depot_map",
     "geisshof-map": "geisshof_map",
 }
+
+
+def test_schnuppertage_card_display_reuses_shared_event_cards():
+    source = SCHNUPPERTAGE_RENDER.read_text(encoding="utf-8")
+    assert "bioco_field('display')" in source
+    assert "$display === 'cards'" in source
+    assert "bioco_render_events_list($termine_query, $empty_message)" in source
 
 
 def _run_php(code: str) -> str:
