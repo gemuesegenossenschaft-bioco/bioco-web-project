@@ -136,13 +136,8 @@ def _build_desired_content_payload(seed: dict) -> str:
         + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/pages.php';\n"
         + f"$seed = json_decode(base64_decode('{seed_b64}'), true);\n"
         + "$report = bioco_import_report_new();\n"
-        + "$GLOBALS['BIOCO_ACF_SERIALIZE_CALLS'] = 0;\n"
-        + "function bioco_import_serialize_acf_block($block, $group, $values, &$warnings, &$errors) {\n"
-        + "    $GLOBALS['BIOCO_ACF_SERIALIZE_CALLS']++;\n"
-        + "    return '<!-- wp:bioco/' . $block . ' /-->ACF';\n"
-        + "}\n"
         + "[$content, $labels] = bioco_import_build_desired_content($seed, 'verify', $report);\n"
-        + "echo json_encode(['content' => $content, 'labels' => $labels, 'acf_calls' => $GLOBALS['BIOCO_ACF_SERIALIZE_CALLS']]);"
+        + "echo json_encode(['content' => $content, 'labels' => $labels]);"
     )
 
 
@@ -244,11 +239,6 @@ def _page_import_payload(
         + f"$seed = json_decode(base64_decode('{seed_b64}'), true);\n"
         + preseed_php
         + existing_php
-        + "$GLOBALS['BIOCO_ACF_SERIALIZE_CALLS'] = 0;\n"
-        + "function bioco_import_serialize_acf_block($block, $group, $values, &$warnings, &$errors) {\n"
-        + "    $GLOBALS['BIOCO_ACF_SERIALIZE_CALLS']++;\n"
-        + "    return '<!-- wp:bioco/' . $block . ' /-->ACF';\n"
-        + "}\n"
         + f"$mode = '{mode}';\n"
         + "$report = bioco_import_report_new();\n"
         + "bioco_import_page_for_seed($seed, $mode, false, $report);\n"
@@ -361,9 +351,6 @@ def test_home_slug_uses_native_divi_sections_and_markers():
     for forbidden in ("core/html", "divi/code", "divi/shortcode-module"):
         assert forbidden not in names
 
-    assert result["acf_calls"] == 0
-
-
 def test_home_seed_keeps_live_aktuelles_feed_after_cta():
     """The current CMS-owned homepage feed remains after the CTA."""
     wp_seed = json.loads((ROOT / "wordpress/content-seed/home.json").read_text())
@@ -471,11 +458,8 @@ def test_non_home_slug_uses_native_divi_serialization():
     result = _json_php(_build_desired_content_payload(seed))
     names = set(_findall_block_comment_names(result["content"]))
     assert names == {"divi/section", "divi/row", "divi/column", "divi/heading", "divi/text"}
-    assert result["acf_calls"] == 0
-
-
-def test_home_emits_one_label_per_section_and_no_acf_calls():
-    """Home emits ordered labels and never touches the ACF serializer."""
+def test_home_emits_one_label_per_section():
+    """Home emits ordered labels for the native Divi sections."""
     seed = {
         "slug": "home",
         "title": "Home",
@@ -493,7 +477,18 @@ def test_home_emits_one_label_per_section_and_no_acf_calls():
     }
     result = _json_php(_build_desired_content_payload(seed))
     assert result["labels"] == ["__hero__", "intro", "__home_chrome__"]
-    assert result["acf_calls"] == 0
+
+
+def test_native_divi_post_content_is_slashed_before_wordpress_writes():
+    pages = ROOT / "wordpress/web/app/mu-plugins/bioco-import/includes/pages.php"
+    collections = ROOT / "wordpress/web/app/mu-plugins/bioco-import/includes/collections.php"
+
+    pages_php = pages.read_text()
+    collections_php = collections.read_text()
+    assert pages_php.count("'post_content' => wp_slash($desiredContent)") == 2
+    assert collections_php.count("'post_content' => wp_slash($content)") == 1
+    assert collections_php.count("$changed['post_content'] = wp_slash($content)") == 1
+    assert "'post_content' => $content" not in collections_php
 
 
 # ---------------------------------------------------------------------------
@@ -576,8 +571,8 @@ def test_home_apply_idempotent_meta_only_writes_when_different():
 # ---------------------------------------------------------------------------
 
 
-def test_verify_non_home_does_not_query_acf_and_matches_native_tree():
-    """Non-home verifier compares full native Divi trees without touching ACF fields."""
+def test_verify_non_home_matches_native_tree():
+    """Non-home verifier compares full native Divi trees."""
     seed = {
         "slug": "wir",
         "title": "Wir",
@@ -627,14 +622,11 @@ def test_verify_non_home_does_not_query_acf_and_matches_native_tree():
         + "    ];\n"
         + "}\n"
         + "$GLOBALS['BIOCO_TEST_PAGES']['wir'] = $postContent;\n"
-        + "$GLOBALS['ACF_FIELD_CALLS'] = 0;\n"
-        + "function bioco_import_acf_group_fields($key) { $GLOBALS['ACF_FIELD_CALLS']++; return new WP_Error('should_not_call', 'bad'); }\n"
         + "$report = bioco_import_report_new();\n"
         + "bioco_import_verify_seed($seed, $report);\n"
-        + "echo json_encode(['acf_calls' => $GLOBALS['ACF_FIELD_CALLS'], 'rows' => $report['rows']]);"
+        + "echo json_encode(['rows' => $report['rows']]);"
     )
     result = _json_php(php)
-    assert result["acf_calls"] == 0
     statuses = [r["status"] for r in result["rows"]]
     assert "verify-match" in statuses
     assert "verify-mismatch" not in statuses

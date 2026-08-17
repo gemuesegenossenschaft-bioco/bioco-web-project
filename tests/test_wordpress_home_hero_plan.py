@@ -18,7 +18,7 @@ def test_home_plan_starts_with_the_approved_hero():
     ).stdout)
 
     assert item["block"] == "hero"
-    assert item["acf_group"] == "group_bioco_block_hero"
+    assert "acf_group" not in item
     assert item["values"]["headline"] == "Gemeinsam\nGemüse anbauen"
     assert item["values"]["subtitle"] == "Solidarische Landwirtschaft\nin Baden"
     assert item["values"]["image_alt"] == "Solidarische Landwirtschaft auf dem Feld"

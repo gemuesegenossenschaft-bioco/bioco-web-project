@@ -109,7 +109,6 @@ foreach ($seeds as $seed) {
         $sectionsPlanned++;
 
         $block = $item['block'];
-        $group = $item['acf_group'];
         $blocksUsed[$block] = ($blocksUsed[$block] ?? 0) + 1;
 
         if (isset($blockContent[$block])) {
@@ -121,12 +120,11 @@ foreach ($seeds as $seed) {
         }
 
         // Synthetic composer-only sections serialize directly to divi/* and
-        // intentionally have neither a bioco block directory nor an ACF group.
+        // intentionally have no matching bioco block directory.
         if ($block === 'home-chrome') continue;
 
         // The block directory must exist and its block.json must be valid,
-        // because that is what bioco-core registers and what the serialized
-        // block comment name is derived from.
+        // because bioco-core registers the corresponding dynamic renderer.
         $blockJsonPath = $coreDir . '/blocks/' . $block . '/block.json';
         if (!is_file($blockJsonPath)) {
             $failures[] = sprintf('%s: Block-Verzeichnis fehlt: blocks/%s/block.json', $slug, $block);
@@ -145,21 +143,6 @@ foreach ($seeds as $seed) {
             }
         }
 
-        // The ACF field group the plan writes into must actually ship, or every
-        // value lands under a field key that WordPress will not recognise.
-        $groupPath = $coreDir . '/acf-json/' . $group . '.json';
-        if (!is_file($groupPath)) {
-            $failures[] = sprintf('%s: ACF-Feldgruppe fehlt: acf-json/%s.json (Block %s)', $slug, $group, $block);
-        } else {
-            $decodedGroup = json_decode((string) file_get_contents($groupPath), true);
-            if (!is_array($decodedGroup) || ($decodedGroup['key'] ?? '') !== $group) {
-                $failures[] = sprintf(
-                    '%s: acf-json/%s.json hat nicht den erwarteten key "%s" (gefunden: "%s")',
-                    $slug, $group, $group, is_array($decodedGroup) ? ($decodedGroup['key'] ?? '') : 'ungueltiges JSON'
-                );
-            }
-        }
-
         if (!empty($item['warnings'])) {
             foreach ($item['warnings'] as $w) {
                 printf("  WARN  %-22s %-18s %s\n", $slug, $block, $w);
@@ -174,7 +157,7 @@ foreach ($blocksUsed as $block => $count) {
     printf("  %-22s %d\n", $block, $count);
 }
 
-// The current 17 seeds map completely: ZERO sections are skipped. Pinning this
+// The current seed corpus maps completely: ZERO sections are skipped. Pinning this
 // at 0 turns the gate from "roughly covered" into a real door lock — any newly
 // unmapped layout/component fails the build instead of quietly landing in a
 // list nobody reads. Raise this only with a note saying which section and why.
@@ -201,5 +184,5 @@ if ($failures) {
     exit(1);
 }
 
-echo "\nSEED_PLAN_CHECK: OK — jede Section ist geplant, jeder Block und jede ACF-Gruppe existiert.\n";
+echo "\nSEED_PLAN_CHECK: OK — jede Section ist geplant; Blöcke und redaktionelle Inhaltsfelder sind validiert.\n";
 exit(0);

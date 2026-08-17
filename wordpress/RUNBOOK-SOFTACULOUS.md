@@ -60,14 +60,14 @@ Softaculous besitzt und aktualisiert WordPress-Core. Der bioco-Deploy darf weder
 
 ### Secure Custom Fields — ersetzt ACF Pro
 
-**Kein ACF-Pro-Kauf nötig.** Staging läuft auf **Secure Custom Fields (SCF)**, dem GPL-Fork von ACF auf wordpress.org. SCF liefert Repeater, Flexible Content, Options Pages, Gallery, Clone und ACF Blocks, also genau die Funktionen, die der Importer und die Blöcke brauchen.
+**Kein ACF-Pro-Kauf nötig.** Staging läuft auf **Secure Custom Fields (SCF)**, dem GPL-Fork von ACF auf wordpress.org. SCF liefert Repeater, Flexible Content, Options Pages, Gallery, Clone und ACF Blocks für Block-Editor und Renderer. Der Seed-Importer erzeugt native Divi-Blöcke und benötigt die ACF-API nicht mehr.
 
 - [ ] `Plugins` → `Installieren` öffnen
 - [ ] Nach `Secure Custom Fields` suchen
 - [ ] Plugin installieren und aktivieren
 - [ ] Unter `Plugins` prüfen, dass SCF aktiv ist (Staging: Version 6.9.5)
 
-**ACF und ACF Pro dürfen nicht gleichzeitig aktiv sein.** SCF deaktiviert passende ACF-Installationen selbst, und der Importer soll gegen genau ein Feld-Plugin laufen. Wer eine ACF-Pro-Lizenz besitzt, entscheidet sich für eine der beiden Seiten. Eine ACF-Lizenz gehört niemals in eine Datei im Repo.
+**ACF und ACF Pro dürfen nicht gleichzeitig aktiv sein.** SCF deaktiviert passende ACF-Installationen selbst; Editor und Renderer sollen gegen genau ein Feld-Plugin laufen. Wer eine ACF-Pro-Lizenz besitzt, entscheidet sich für eine der beiden Seiten. Eine ACF-Lizenz gehört niemals in eine Datei im Repo.
 
 ### WP Mail SMTP
 

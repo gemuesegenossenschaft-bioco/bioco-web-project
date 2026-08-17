@@ -76,6 +76,17 @@ def test_content_seed_trees_are_mirrored_byte_for_byte():
         ).read_bytes()
 
 
+def test_importer_has_no_legacy_acf_serialization_path():
+    importer = ROOT / "wordpress/web/app/mu-plugins/bioco-import"
+    php = "\n".join(path.read_text() for path in importer.rglob("*.php"))
+
+    assert not (importer / "includes/acf-fields.php").exists()
+    assert "bioco_import_serialize_acf_block" not in php
+    assert "bioco_import_acf_block_data" not in php
+    assert "assert_acf_available" not in php
+    assert "acf_group" not in (importer / "includes/section-map.php").read_text()
+
+
 def test_hardcoded_content_gate_rejects_a_new_acf_editorial_default(tmp_path):
     copied_wordpress = tmp_path / "wordpress"
     shutil.copytree(ROOT / "wordpress", copied_wordpress)

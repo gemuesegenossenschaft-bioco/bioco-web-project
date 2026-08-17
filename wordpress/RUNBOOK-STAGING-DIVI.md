@@ -329,7 +329,7 @@ Praktisch:
 
 ## 4. Inhalte skriptgesteuert importieren
 
-Der primäre Weg ist der mitgelieferte WP-CLI-Importer. Er liest die versionierten Seed-Dateien, erzeugt die Seiten mit `bioco/*`-ACF-Blöcken und richtet Startseite, Permalinks und Hauptmenü ein. ACF Pro muss installiert und aktiv sein, weil der Importer ACF-Feldschlüssel über die ACF-API auflöst.
+Der primäre Weg ist der mitgelieferte WP-CLI-Importer. Er liest die versionierten Seed-Dateien, löst daraus den Section-Plan auf, erzeugt native Divi-Blöcke und richtet Startseite, Permalinks und Hauptmenü ein. SCF/ACF bleibt für Block-Editor und Renderer erforderlich, der Importer selbst serialisiert keine ACF-Blöcke mehr.
 
 ### Zuerst Probelauf
 

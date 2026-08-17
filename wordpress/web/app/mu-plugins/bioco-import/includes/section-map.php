@@ -126,7 +126,6 @@ function bioco_import_warn_unmapped_seed_fields(array &$warnings, array $section
 function bioco_import_media_text_layout_config($mediaSide) {
     return [
         'block' => 'media-text',
-        'acf_group' => 'group_bioco_block_media_text',
         'content_clone' => ['eyebrow', 'title', 'text'],
         'buttons' => true,
         'auto_header' => true,
@@ -145,7 +144,6 @@ function bioco_import_layout_map() {
     return [
         'rich_text' => [
             'block' => 'rich-text',
-            'acf_group' => 'group_bioco_block_rich_text',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -155,7 +153,6 @@ function bioco_import_layout_map() {
         'split_text_media' => bioco_import_media_text_layout_config('right'),
         'full_width_banner' => [
             'block' => 'banner',
-            'acf_group' => 'group_bioco_block_banner',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -168,7 +165,6 @@ function bioco_import_layout_map() {
         ],
         'media_grid' => [
             'block' => 'media-grid',
-            'acf_group' => 'group_bioco_block_media_grid',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -184,7 +180,6 @@ function bioco_import_component_map() {
     return [
         'page_intro' => [
             'block' => 'page-intro',
-            'acf_group' => 'group_bioco_block_page_intro',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -199,7 +194,6 @@ function bioco_import_component_map() {
         ],
         'pricing_table' => [
             'block' => 'pricing-table',
-            'acf_group' => 'group_bioco_block_pricing_table',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -232,7 +226,6 @@ function bioco_import_component_map() {
         ],
         'media_text' => [
             'block' => 'media-text',
-            'acf_group' => 'group_bioco_block_media_text',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -255,7 +248,6 @@ function bioco_import_component_map() {
         ],
         'cards_grid' => [
             'block' => 'cards-grid',
-            'acf_group' => 'group_bioco_block_cards_grid',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => false,
             'auto_header' => true,
@@ -288,7 +280,6 @@ function bioco_import_component_map() {
         ],
         'gallery_strip' => [
             'block' => 'gallery-strip',
-            'acf_group' => 'group_bioco_block_gallery_strip',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -316,7 +307,6 @@ function bioco_import_component_map() {
         ],
         'text_columns' => [
             'block' => 'text-columns',
-            'acf_group' => 'group_bioco_block_text_columns',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -334,7 +324,6 @@ function bioco_import_component_map() {
         ],
         'cta_band' => [
             'block' => 'cta-band',
-            'acf_group' => 'group_bioco_block_cta_band',
             'content_clone' => ['title', 'text'],
             'buttons' => true,
             'auto_header' => true,
@@ -348,56 +337,48 @@ function bioco_import_component_map() {
         ],
         'contact_form' => [
             'block' => 'contact-form',
-            'acf_group' => 'group_bioco_block_contact_form',
             'content_clone' => ['title', 'text'],
             'buttons' => false,
             'auto_header' => true,
         ],
         'membership_form' => [
             'block' => 'membership-form',
-            'acf_group' => 'group_bioco_block_membership_form',
             'content_clone' => ['title', 'text'],
             'buttons' => false,
             'auto_header' => true,
         ],
         'subscribe_form' => [
             'block' => 'subscribe-form',
-            'acf_group' => 'group_bioco_block_subscribe_form',
             'content_clone' => ['title', 'text'],
             'buttons' => false,
             'auto_header' => true,
         ],
         'visit_day_form' => [
             'block' => 'visit-day-form',
-            'acf_group' => 'group_bioco_block_visit_day_form',
             'content_clone' => ['title', 'text'],
             'buttons' => false,
             'auto_header' => true,
         ],
         'waiting_list_form' => [
             'block' => 'waiting-list-form',
-            'acf_group' => 'group_bioco_block_waiting_list_form',
             'content_clone' => ['title', 'text'],
             'buttons' => false,
             'auto_header' => true,
         ],
         'event_signup_form' => [
             'block' => 'event-signup-form',
-            'acf_group' => 'group_bioco_block_event_signup_form',
             'content_clone' => ['title', 'text'],
             'buttons' => false,
             'auto_header' => true,
         ],
         'doi_confirm' => [
             'block' => 'doi-confirm',
-            'acf_group' => 'group_bioco_block_doi_confirm',
             'content_clone' => [],
             'buttons' => false,
             'auto_header' => true,
         ],
         'gallery' => [
             'block' => 'gallery',
-            'acf_group' => 'group_bioco_block_gallery',
             'content_clone' => [],
             'buttons' => false,
             'auto_header' => true,
@@ -418,14 +399,12 @@ function bioco_import_component_map() {
         ],
         'pricing_calculator' => [
             'block' => 'pricing-calculator',
-            'acf_group' => 'group_bioco_block_pricing_calculator',
             'content_clone' => ['eyebrow', 'title', 'text'],
             'buttons' => false,
             'auto_header' => true,
         ],
         'steps' => [
             'block' => 'steps',
-            'acf_group' => 'group_bioco_block_steps',
             'content_clone' => ['title'],
             'buttons' => false,
             'auto_header' => true,
@@ -445,7 +424,6 @@ function bioco_import_component_map() {
         ],
         'link_tiles' => [
             'block' => 'link-tiles',
-            'acf_group' => 'group_bioco_block_link_tiles',
             'content_clone' => ['title'],
             'buttons' => false,
             'auto_header' => true,
@@ -468,7 +446,6 @@ function bioco_import_component_map() {
         ],
         'schnuppertage' => [
             'block' => 'schnuppertage',
-            'acf_group' => 'group_bioco_block_schnuppertage',
             'content_clone' => ['title', 'text'],
             'buttons' => false,
             'auto_header' => true,
@@ -488,16 +465,14 @@ function bioco_import_component_map() {
         ],
         'group_cards' => [
             'block' => 'group-cards',
-            'acf_group' => 'group_bioco_block_group_cards',
             'content_clone' => [],
             'buttons' => false,
             'auto_header' => true,
-            // 'limit' is not part of the seed schema — leave unset, the ACF
-            // default_value (-1 = all groups) applies at render.
+            // 'limit' is not part of the seed schema — leave unset; the
+            // renderer's code-owned presentation fallback shows all groups.
         ],
         'saisonkalender' => [
             'block' => 'saisonkalender',
-            'acf_group' => 'group_bioco_block_saisonkalender',
             'content_clone' => [],
             'buttons' => false,
             'auto_header' => true,
@@ -506,7 +481,6 @@ function bioco_import_component_map() {
         ],
         'depot_map' => [
             'block' => 'depot-map',
-            'acf_group' => 'group_bioco_block_depot_map',
             'content_clone' => [],
             'buttons' => false,
             'auto_header' => true,
@@ -520,7 +494,6 @@ function bioco_import_component_map() {
         ],
         'geisshof_map' => [
             'block' => 'geisshof-map',
-            'acf_group' => 'group_bioco_block_geisshof_map',
             'content_clone' => [],
             'buttons' => false,
             'auto_header' => true,
@@ -529,7 +502,6 @@ function bioco_import_component_map() {
         ],
         'events_feed' => [
             'block' => 'events-feed',
-            'acf_group' => 'group_bioco_block_events_feed',
             'content_clone' => [],
             'buttons' => false,
             'auto_header' => false, // handles section_title itself, see 'extra'
@@ -599,7 +571,6 @@ function bioco_import_plan_accordion_group(array $sectionGroup) {
         'type' => 'block',
         'section_ids' => $ids,
         'block' => 'accordion',
-        'acf_group' => 'group_bioco_block_accordion',
         'values' => ['items' => $items],
     ]];
 }
@@ -663,7 +634,6 @@ function bioco_import_plan_timeline_group(array $sectionGroup) {
         'type' => 'block',
         'section_ids' => $ids,
         'block' => 'timeline',
-        'acf_group' => 'group_bioco_block_timeline',
         'values' => $values,
         'warnings' => $warnings,
     ]];
@@ -732,7 +702,6 @@ function bioco_import_plan_single_section(array $section) {
             'type' => 'block',
             'section_ids' => [$sid],
             'block' => 'rich-text',
-            'acf_group' => 'group_bioco_block_rich_text',
             'values' => $headerValues,
             'warnings' => $headerWarnings,
             'note' => 'Automatisch vorangestellter Titel-/Text-Block (die Komponente selbst hat kein Titel-/Textfeld).',
@@ -743,7 +712,6 @@ function bioco_import_plan_single_section(array $section) {
         'type' => 'block',
         'section_ids' => [$sid],
         'block' => $config['block'],
-        'acf_group' => $config['acf_group'],
         'values' => $values,
         'warnings' => $warnings,
     ];
@@ -763,7 +731,6 @@ function bioco_import_build_page_plan(array $seed) {
             'type' => 'block',
             'section_ids' => ['__home_chrome__'],
             'block' => 'home-chrome',
-            'acf_group' => '',
             'values' => [],
             'warnings' => [],
         ];
@@ -783,7 +750,6 @@ function bioco_import_build_page_plan(array $seed) {
             'type' => 'block',
             'section_ids' => ['__hero__'],
             'block' => 'hero',
-            'acf_group' => 'group_bioco_block_hero',
             'values' => $heroValues,
             'warnings' => [],
         ];

@@ -97,8 +97,6 @@ class Bioco_Import_CLI_Command {
             : BIOCO_IMPORT_DEFAULT_SEED_DIR;
         $only = $this->parse_only($assoc_args);
 
-        $this->assert_acf_available();
-
         try {
             $seeds = bioco_import_load_seeds($seedDir, $only);
         } catch (RuntimeException $e) {
@@ -167,8 +165,6 @@ class Bioco_Import_CLI_Command {
             : BIOCO_IMPORT_DEFAULT_SEED_DIR;
         $only = $this->parse_only($assoc_args);
 
-        $this->assert_acf_available();
-
         try {
             $seeds = bioco_import_load_seeds($seedDir, $only);
         } catch (RuntimeException $e) {
@@ -195,21 +191,6 @@ class Bioco_Import_CLI_Command {
             WP_CLI::error('--only wurde angegeben, enthaelt aber keinen Slug.');
         }
         return $slugs;
-    }
-
-    // The ACF field keys are resolved through ACF's own API (see
-    // includes/acf-fields.php). Without ACF every single block would fail with
-    // the same error, producing a useless wall of rows — so refuse up front.
-    private function assert_acf_available() {
-        if (!function_exists('acf_get_field_group') || !function_exists('acf_get_fields')) {
-            WP_CLI::error(
-                'Es ist kein ACF-kompatibles Plugin aktiv. Der Importer loest die Feld-Keys ueber die '
-                . 'ACF-API selbst auf und kann sonst keine gueltigen Block-Daten schreiben. '
-                . 'Zuerst: wp plugin activate secure-custom-fields '
-                . '(Secure Custom Fields, frei und GPL, deckt Repeater/Blocks ab). '
-                . 'ACF Pro funktioniert ebenfalls: wp plugin activate advanced-custom-fields-pro'
-            );
-        }
     }
 
     // Shared tail for both subcommands: print, persist, then set the exit code.
