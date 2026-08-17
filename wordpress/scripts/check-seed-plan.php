@@ -35,12 +35,40 @@ $sectionsPlanned = 0;
 
 try {
     $seeds = bioco_import_load_seeds($seedDir);
+    $blockContent = bioco_import_load_block_content_defaults($seedDir);
 } catch (RuntimeException $e) {
     fwrite(STDERR, "FAIL: Seeds konnten nicht geladen werden: " . $e->getMessage() . "\n");
     exit(1);
 }
 
 printf("%d Seed-Dateien geladen aus %s\n\n", count($seeds), $seedDir);
+printf("Block-Inhaltsseeds: %d\n", count($blockContent));
+foreach ($blockContent as $block => $values) {
+    printf("  %-22s %d Felder\n", $block, count($values));
+    $blockJsonPath = $coreDir . '/blocks/' . $block . '/block.json';
+    if (!is_file($blockJsonPath)) {
+        $failures[] = "Block-Inhaltsseed {$block}: blocks/{$block}/block.json fehlt.";
+        continue;
+    }
+    $groupKey = 'group_bioco_block_' . str_replace('-', '_', $block);
+    $groupPath = $coreDir . '/acf-json/' . $groupKey . '.json';
+    $group = is_file($groupPath) ? json_decode((string) file_get_contents($groupPath), true) : null;
+    if (!is_array($group)) {
+        $failures[] = "Block-Inhaltsseed {$block}: acf-json/{$groupKey}.json fehlt oder ist ungültig.";
+        continue;
+    }
+    $fieldNames = [];
+    foreach ($group['fields'] ?? [] as $field) {
+        $name = is_array($field) ? (string) ($field['name'] ?? '') : '';
+        if ($name !== '') $fieldNames[$name] = true;
+    }
+    foreach (array_keys($values) as $fieldName) {
+        if (!isset($fieldNames[$fieldName])) {
+            $failures[] = "Block-Inhaltsseed {$block}: Feld {$fieldName} existiert nicht in {$groupKey}.";
+        }
+    }
+}
+echo "\n";
 
 foreach ($seeds as $seed) {
     $slug = $seed['slug'];
@@ -83,6 +111,14 @@ foreach ($seeds as $seed) {
         $block = $item['block'];
         $group = $item['acf_group'];
         $blocksUsed[$block] = ($blocksUsed[$block] ?? 0) + 1;
+
+        if (isset($blockContent[$block])) {
+            foreach (array_keys($blockContent[$block]) as $fieldName) {
+                if (!array_key_exists($fieldName, $item['values'])) {
+                    $failures[] = "{$slug}: Block-Inhaltsseed {$block}.{$fieldName} fehlt im Importplan.";
+                }
+            }
+        }
 
         // Synthetic composer-only sections serialize directly to divi/* and
         // intentionally have neither a bioco block directory nor an ACF group.

@@ -80,88 +80,7 @@
                     "placeholder": ""
                 }
             ],
-            "default_value": [
-                {
-                    "name": "Rüebli",
-                    "months": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Zwiebeln",
-                    "months": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Kartoffeln",
-                    "months": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Salate",
-                    "months": [
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Lauch",
-                    "months": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Kürbis",
-                    "months": [
-                        1,
-                        10,
-                        11,
-                        12
-                    ]
-                }
-            ]
+            "default_value": []
         },
         {
             "key": "field_bioco_saisonkalender_empty_message",
@@ -177,7 +96,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Noch kein Saisonkalender hinterlegt.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -197,7 +116,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Gemüse",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -223,56 +142,7 @@
             "collapsed": "",
             "button_label": "Monat hinzufügen",
             "rows_per_page": 20,
-            "default_value": [
-                {
-                    "number": 1,
-                    "label": "Jan"
-                },
-                {
-                    "number": 2,
-                    "label": "Feb"
-                },
-                {
-                    "number": 3,
-                    "label": "Mär"
-                },
-                {
-                    "number": 4,
-                    "label": "Apr"
-                },
-                {
-                    "number": 5,
-                    "label": "Mai"
-                },
-                {
-                    "number": 6,
-                    "label": "Jun"
-                },
-                {
-                    "number": 7,
-                    "label": "Jul"
-                },
-                {
-                    "number": 8,
-                    "label": "Aug"
-                },
-                {
-                    "number": 9,
-                    "label": "Sep"
-                },
-                {
-                    "number": 10,
-                    "label": "Okt"
-                },
-                {
-                    "number": 11,
-                    "label": "Nov"
-                },
-                {
-                    "number": 12,
-                    "label": "Dez"
-                }
-            ],
+            "default_value": [],
             "sub_fields": [
                 {
                     "key": "field_bioco_saisonkalender_month_column_number",

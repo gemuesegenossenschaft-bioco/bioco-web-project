@@ -11,17 +11,17 @@
 
 if (!defined('ABSPATH')) exit;
 
-$items = get_field('items');
-$show_more_label = get_field('show_more_label');
-$loading_title = get_field('loading_title');
-$loading_text = get_field('loading_text');
+$items = bioco_field('items');
+$show_more_label = bioco_field('show_more_label');
+$loading_title = bioco_field('loading_title');
+$loading_text = bioco_field('loading_text');
 
 // Filter labels come from the ACF repeater field_bioco_gallery_filters, whose
 // default rows carry today's wording. Flattened to slug => label so the two
 // loops further down stay unchanged. The slug itself is mechanical (view.js
 // matches it against each item's category), only the label is editorial.
 $filters = [];
-foreach ((array) get_field('filters') as $filter_row) {
+foreach ((array) bioco_field('filters') as $filter_row) {
     if (!is_array($filter_row)) continue;
     $filter_slug = isset($filter_row['key']) ? (string) $filter_row['key'] : '';
     $filter_text = isset($filter_row['label']) ? (string) $filter_row['label'] : '';
@@ -55,14 +55,14 @@ if (!empty($block['className'])) {
                     $category = $item['category'] ?? 'feld';
                     if (empty($image['url'])) continue;
                 ?>
-                    <div class="gallery-item" data-gallery-category="<?php echo esc_attr($category); ?>" <?php if ($index >= 4) : ?>style="display: none;"<?php endif; ?>>
+                    <div class="gallery-item" data-gallery-category="<?php echo esc_attr($category); ?>" <?php if ($show_more_label && $index >= 4) : ?>style="display: none;"<?php endif; ?>>
                         <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt'] ?: ''); ?>" loading="lazy" style="object-fit: cover; width: 100%; height: 100%; border-radius: 8px;" />
                     </div>
                 <?php endforeach; ?>
             </div>
-            <?php if (count($items) > 4) : ?>
+            <?php if ($show_more_label && count($items) > 4) : ?>
                 <div style="margin-top: var(--wp--preset--spacing--40); text-align: center;">
-<?php if ($show_more_label) : ?>                    <button type="button" class="btn btn-secondary" data-gallery-toggle><?php echo esc_html($show_more_label); ?></button><?php endif; ?>
+                    <button type="button" class="btn btn-secondary" data-gallery-toggle><?php echo esc_html($show_more_label); ?></button>
                 </div>
             <?php endif; ?>
         <?php else : ?>

@@ -29,6 +29,7 @@ function bioco_import_load_seeds($seedDir, array $onlySlugs = []) {
             throw new RuntimeException('Seed ist kein gültiges JSON: ' . basename($file) . ' (' . json_last_error_msg() . ')');
         }
         bioco_import_validate_seed($seed, basename($file));
+        $seed['_bioco_seed_dir'] = $seedDir;
         $seeds[] = $seed;
     }
 
@@ -50,6 +51,29 @@ function bioco_import_load_seeds($seedDir, array $onlySlugs = []) {
     });
 
     return $seeds;
+}
+
+// Editorial values shared by every instance of a block live beside the page
+// seeds, not in ACF field definitions. Page-specific values are merged later
+// and always win over these values.
+function bioco_import_load_block_content_defaults($seedDir) {
+    $path = rtrim((string) $seedDir, '/') . '/block-content/defaults.json';
+    static $cache = [];
+    if (array_key_exists($path, $cache)) return $cache[$path];
+    if (!is_file($path)) {
+        throw new RuntimeException("Block-Inhaltsseed nicht gefunden: {$path}");
+    }
+
+    $document = json_decode((string) file_get_contents($path), true);
+    if (!is_array($document) || ($document['version'] ?? null) !== 1 || !is_array($document['blocks'] ?? null)) {
+        throw new RuntimeException("Block-Inhaltsseed ist ungültig: {$path}");
+    }
+    foreach ($document['blocks'] as $block => $values) {
+        if (!is_string($block) || !preg_match('/^[a-z0-9][a-z0-9-]*$/', $block) || !is_array($values)) {
+            throw new RuntimeException("Block-Inhaltsseed enthält einen ungültigen Eintrag: {$path}");
+        }
+    }
+    return $cache[$path] = $document['blocks'];
 }
 
 function bioco_import_validate_seed(array $seed, $file) {

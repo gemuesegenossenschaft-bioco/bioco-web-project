@@ -36,16 +36,6 @@ $blocksDir = $root . '/web/app/mu-plugins/bioco-core/blocks';
 $acfJsonDir = $root . '/web/app/mu-plugins/bioco-core/acf-json';
 $listMode = in_array('--list', $argv, true);
 
-// Staged rollout of the acf-json scan. The recursive default_value check is
-// implemented and proven non-vacuous, but 130 pre-existing editorial defaults
-// across 15 field groups (mostly form labels) still have to be migrated into
-// real seed content before it can gate. Until that migration lands, the scan
-// runs opt-in via --acf-json and is always included in --list reporting, so
-// the findings stay visible instead of being buried in the baseline.
-// Follow-up: migrate those defaults, then make this unconditional and delete
-// the flag. Do NOT write the findings into hardcoded-content-baseline.json.
-$acfJsonMode = $listMode || in_array('--acf-json', $argv, true);
-
 // Layout/style knobs: a default here is presentation, not content.
 $PRESENTATION_KEYS = [
     'columns_desktop', 'columns_mobile', 'card_style', 'media_ratio', 'media_fit',
@@ -195,7 +185,7 @@ foreach ($files as $file) {
     }
 }
 
-$acfFiles = $acfJsonMode ? (glob($acfJsonDir . '/*.json') ?: []) : [];
+$acfFiles = glob($acfJsonDir . '/*.json') ?: [];
 sort($acfFiles);
 foreach ($acfFiles as $file) {
     $rel = ltrim(str_replace($root, '', $file), '/');
@@ -334,13 +324,7 @@ if ($failures) {
 }
 
 if (!$DEFERRED) {
-    if ($acfJsonMode) {
-        echo "\nHARDCODED_CONTENT_CHECK: OK — Nulltoleranz erreicht, kein hartkodierter Inhalt und kein redaktioneller ACF-Default.\n";
-    } else {
-        echo "\nHARDCODED_CONTENT_CHECK: OK — Nulltoleranz in den Block-Templates erreicht.\n";
-        echo "HINWEIS: acf-json wurde NICHT geprueft. Der Scan ist implementiert, aber noch opt-in:\n";
-        echo "  php wordpress/scripts/check-hardcoded-content.php --acf-json   (aktuell rot, 130 offene Defaults)\n";
-    }
+    echo "\nHARDCODED_CONTENT_CHECK: OK — Nulltoleranz erreicht, kein hartkodierter Inhalt und kein redaktioneller ACF-Default.\n";
     exit(0);
 }
 

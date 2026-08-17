@@ -16,7 +16,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Kein Bestätigungstoken angegeben.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -36,7 +36,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Anmeldung bestätigt",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -56,7 +56,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Vielen Dank! Deine Anmeldung wurde erfolgreich bestätigt.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -76,7 +76,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Du erhältst ab sofort unseren Newsletter.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -96,7 +96,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Wir haben deine Anmeldung für den Tag der offenen Tür erhalten und melden uns bald bei dir.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -116,7 +116,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Wir haben dich auf die Warteliste gesetzt und melden uns bei dir, sobald ein Platz frei wird.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -136,7 +136,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Wir haben deine Nachricht erhalten und melden uns bald bei dir.",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -156,7 +156,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Bestätigung fehlgeschlagen",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -176,7 +176,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Zurück zur Startseite",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",

@@ -39,7 +39,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Name *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -59,7 +59,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "E-Mail *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -79,7 +79,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Telefon *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -99,7 +99,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Gewünschtes Datum *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -119,7 +119,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Anzahl Personen *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -139,7 +139,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Anmerkungen",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -159,7 +159,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Ich akzeptiere die Datenschutzbestimmungen *",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -179,7 +179,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Anmelden",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",
@@ -199,7 +199,7 @@
                 "class": "",
                 "id": ""
             },
-            "default_value": "Wird gesendet …",
+            "default_value": "",
             "maxlength": "",
             "placeholder": "",
             "prepend": "",

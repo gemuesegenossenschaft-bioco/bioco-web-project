@@ -12,6 +12,9 @@ function bioco_dynamic_components(): array {
         'subscribe_form' => 'bioco/subscribe-form',
         'visit_day_form' => 'bioco/visit-day-form',
         'waiting_list_form' => 'bioco/waiting-list-form',
+        'event_signup_form' => 'bioco/event-signup-form',
+        'doi_confirm' => 'bioco/doi-confirm',
+        'gallery' => 'bioco/gallery',
         'pricing_calculator' => 'bioco/pricing-calculator',
         'events_feed' => 'bioco/events-feed',
         'schnuppertage' => 'bioco/schnuppertage',
@@ -65,10 +68,6 @@ function bioco_render_dynamic_component(string $component, array $values): strin
     $block_slug = substr($block_name, strpos($block_name, '/') + 1);
     $block_dir = dirname(__DIR__) . '/blocks/' . $block_slug;
     $block_metadata = json_decode((string) file_get_contents($block_dir . '/block.json'), true);
-    if (!$values) {
-        $values = bioco_dynamic_default_values($block_slug);
-    }
-
     if (!empty($block_metadata['viewScript'])) {
         wp_enqueue_script(bioco_forms_view_script_handle($block_name));
     }
@@ -100,25 +99,6 @@ function bioco_render_dynamic_component(string $component, array $values): strin
     } finally {
         array_pop($GLOBALS['bioco_dynamic_context_stack']);
     }
-}
-
-function bioco_dynamic_default_values(string $block_slug): array {
-    static $cache = [];
-    if (isset($cache[$block_slug])) return $cache[$block_slug];
-
-    $group_path = dirname(__DIR__) . '/acf-json/group_bioco_block_'
-        . str_replace('-', '_', $block_slug) . '.json';
-    $group = is_readable($group_path)
-        ? json_decode((string) file_get_contents($group_path), true)
-        : null;
-    $defaults = [];
-    foreach (is_array($group['fields'] ?? null) ? $group['fields'] : [] as $field) {
-        $name = (string) ($field['name'] ?? '');
-        if ($name !== '' && array_key_exists('default_value', $field)) {
-            $defaults[$name] = $field['default_value'];
-        }
-    }
-    return $cache[$block_slug] = $defaults;
 }
 
 function bioco_field($name, $default = null) {

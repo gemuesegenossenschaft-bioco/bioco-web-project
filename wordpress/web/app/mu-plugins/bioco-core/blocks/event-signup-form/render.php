@@ -11,15 +11,15 @@
 
 if (!defined('ABSPATH')) exit;
 
-$title = get_field('title');
-$text = get_field('text');
-$event_title_prefix = get_field('event_title_prefix');
-$name_label = get_field('name_label');
-$email_label = get_field('email_label');
-$phone_label = get_field('phone_label');
-$notes_label = get_field('notes_label');
-$submit_label = get_field('submit_label');
-$submitting_label = get_field('submitting_label');
+$title = bioco_field('title');
+$text = bioco_field('text');
+$event_title_prefix = bioco_field('event_title_prefix');
+$name_label = bioco_field('name_label');
+$email_label = bioco_field('email_label');
+$phone_label = bioco_field('phone_label');
+$notes_label = bioco_field('notes_label');
+$submit_label = bioco_field('submit_label');
+$submitting_label = bioco_field('submitting_label');
 
 bioco_forms_localize_block('bioco/event-signup-form', 'biocoEventSignupFormConfig', 'event-signup');
 

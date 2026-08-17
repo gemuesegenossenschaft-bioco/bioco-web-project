@@ -13,6 +13,9 @@ COMPONENTS = {
     "subscribe_form": "bioco/subscribe-form",
     "visit_day_form": "bioco/visit-day-form",
     "waiting_list_form": "bioco/waiting-list-form",
+    "event_signup_form": "bioco/event-signup-form",
+    "doi_confirm": "bioco/doi-confirm",
+    "gallery": "bioco/gallery",
     "pricing_calculator": "bioco/pricing-calculator",
     "events_feed": "bioco/events-feed",
     "schnuppertage": "bioco/schnuppertage",
@@ -80,6 +83,13 @@ def _render_preamble() -> str:
         "    return 'acf:' . $name;\n"
         "}\n"
         "function get_the_ID() { return 77; }\n"
+        "function get_the_title() { return 'Testevent'; }\n"
+        "function is_singular($type) { return false; }\n"
+        "function __($value, $domain = null) { return $value; }\n"
+        "function sanitize_text_field($value) { return trim((string)$value); }\n"
+        "function wp_unslash($value) { return $value; }\n"
+        "function get_permalink($post_id = 0) { return 'https://example.test/current/'; }\n"
+        "function home_url($path = '/') { return 'https://example.test' . $path; }\n"
         "function esc_attr($value) { return htmlspecialchars((string)$value, ENT_QUOTES); }\n"
         "function esc_html($value) { return htmlspecialchars((string)$value, ENT_QUOTES); }\n"
         "function esc_url($value) { return (string)$value; }\n"
