@@ -53,7 +53,8 @@ echo "$event" >> "$BIOCO_TEST_EVENTS"
 ''',
     )
     render = _write_executable(tmp_path / "render", 'echo smoke >> "$BIOCO_TEST_EVENTS"\n')
-    env = os.environ | {
+    base_env = {k: v for k, v in os.environ.items() if not k.startswith("BIOCO_")}
+    env = base_env | {
         "BIOCO_RELEASE_REPO_ROOT": str(repo),
         "BIOCO_RELEASE_LOG_DIR": str(tmp_path / "logs"),
         "BIOCO_RELEASE_PREFLIGHT_COMMAND": str(preflight),
@@ -350,3 +351,46 @@ def test_code_sync_never_ships_gitignored_files():
 
     assert "--filter=:- .gitignore" in deploy
     assert "--exclude=.env" in deploy
+
+
+def test_release_uses_one_timestamp_for_log_backup_and_marker(tmp_path):
+    commit, env, events = _fixture(tmp_path)
+    del env["BIOCO_RELEASE_TIMESTAMP"]
+
+    result = subprocess.run(
+        [str(SCRIPT), f"--commit={commit}", "--apply"],
+        cwd=ROOT,
+        env=env,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    logs = list(Path(env["BIOCO_RELEASE_LOG_DIR"]).glob("*.log"))
+    assert len(logs) == 1
+    log_stamp = logs[0].name.split("-")[0]
+    backup_stamp = re.search(r"backup-path=\S*/(\d{8}T\d{6}Z)-", result.stdout).group(1)
+    assert log_stamp == backup_stamp
+    assert f"release-start timestamp={log_stamp}" in result.stdout
+
+
+def test_backup_is_written_with_a_restrictive_umask():
+    release = SCRIPT.read_text()
+
+    assert "umask 077" in release
+
+
+def test_actions_job_is_hardened_and_time_boxed():
+    workflow = (ROOT / ".github/workflows/deploy-wordpress-staging.yml").read_text()
+
+    assert "persist-credentials: false" in workflow
+    assert "timeout-minutes:" in workflow
+
+
+def test_seed_plan_gate_reports_why_it_aborted():
+    preflight = (ROOT / "wordpress/scripts/release-wordpress-preflight.sh").read_text()
+
+    # `read` returns 1 when sed matched nothing; under `set -e` that would abort
+    # before the explanatory message is ever printed.
+    assert "read -r block_count page_count < <(" in preflight
+    assert "|| block_count=\"\"" in preflight

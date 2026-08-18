@@ -20,7 +20,7 @@ printf '%s\n' "${seed_plan_output}"
 read -r block_count page_count < <(
   printf '%s\n' "${seed_plan_output}" \
     | sed -n 's/^Geplante Bloecke: \([0-9][0-9]*\), Seiten: \([0-9][0-9]*\)$/\1 \2/p'
-)
+) || block_count=""
 if [[ -z "${block_count:-}" || -z "${page_count:-}" ]]; then
   echo "ERROR: seed-plan gate did not report block/page counts." >&2
   exit 1

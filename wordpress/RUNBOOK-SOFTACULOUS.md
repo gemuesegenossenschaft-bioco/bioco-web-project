@@ -99,10 +99,12 @@ export BIOCO_WP_SSH_PORT='22'
 ### Zuerst Probelauf
 
 - [ ] Im Repository-Root stehen
+- [ ] Commit-SHA einmal erfassen und für Dry-Run sowie `--apply` unverändert wiederverwenden; beide Aufrufe müssen denselben, bereits geprüften SHA verwenden
 - [ ] Dry-Run ausführen; ohne `--apply` schreibt das Script nichts
 
 ```bash
-wordpress/scripts/release-wordpress-staging.sh --commit="$(git rev-parse HEAD)"
+commit="$(git rev-parse HEAD)"
+wordpress/scripts/release-wordpress-staging.sh --commit="$commit"
 ```
 
 - [ ] Ausgabe vollständig lesen
@@ -115,7 +117,7 @@ wordpress/scripts/release-wordpress-staging.sh --commit="$(git rev-parse HEAD)"
 Nur wenn der Dry-Run sauber ist:
 
 ```bash
-wordpress/scripts/release-wordpress-staging.sh --commit="$(git rev-parse HEAD)" --apply
+wordpress/scripts/release-wordpress-staging.sh --commit="$commit" --apply
 ```
 
 - [ ] Backup-Pfad und Commit stehen im Release-Log unter `output/releases/`

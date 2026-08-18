@@ -36,7 +36,9 @@ log_file="${log_dir}/${timestamp}-${commit}.log"
 # Re-exec through a foreground tee so the EXIT trap's release-status line is
 # always flushed to the log; a backgrounded process substitution can lose it.
 if [[ -z "${BIOCO_RELEASE_LOGGING:-}" ]]; then
-  export BIOCO_RELEASE_LOGGING=1
+  # The child must reuse this timestamp, otherwise log, backup path and release
+  # marker end up stamped differently.
+  export BIOCO_RELEASE_LOGGING=1 BIOCO_RELEASE_TIMESTAMP="${timestamp}"
   set -o pipefail
   "$0" "$@" 2>&1 | tee -a "${log_file}"
   exit "${PIPESTATUS[0]}"
@@ -183,7 +185,7 @@ fi
 
 current_step="backup"
 echo "step=${current_step} status=running backup-path=${backup_path}"
-run_remote "mkdir -p '${backup_dir}'; cd '${wp_root}'; wp db export '${backup_path}' --quiet; test -s '${backup_path}'"
+run_remote "umask 077; mkdir -p '${backup_dir}'; cd '${wp_root}'; wp db export '${backup_path}' --quiet; test -s '${backup_path}'"
 echo "step=backup status=passed backup-path=${backup_path}"
 
 current_step="code-sync"
