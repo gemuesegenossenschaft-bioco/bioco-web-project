@@ -1,8 +1,8 @@
 # Staging-Inbetriebnahme + Divi-Handbuch für `staging.bioco.ch`
 
-> **Welcher Weg gilt?** Für Staging gilt der gewählte Weg **Softaculous + `wordpress/scripts/deploy-wp-code.sh`**: [RUNBOOK-SOFTACULOUS.md](RUNBOOK-SOFTACULOUS.md). Dieses Dokument beschreibt **Bedrock + GitHub-Workflow** als Alternative und CI-Pfad; es ist nicht der primäre Staging-Ablauf.
+> **Welcher Weg gilt?** Für Staging gilt **Softaculous + `wordpress/scripts/release-wordpress-staging.sh`**: [RUNBOOK-SOFTACULOUS.md](RUNBOOK-SOFTACULOUS.md). GitHub Actions ruft dieselbe Pipeline auf; der frühere Bedrock-Deploy ist entfernt.
 
-Zielgruppe: Güney für Server/Deploy, Goni für WordPress, Divi und Inhalte. Keine Secrets in GitHub oder im Repo speichern. Das Repo ist öffentlich; echte Werte gehören nur in cPanel, Server-`.env` und GitHub-Secrets.
+Zielgruppe: Güney für Server/Deploy, Goni für WordPress, Divi und Inhalte. Keine Secrets im Repo speichern. Das Repo ist öffentlich; echte Werte gehören nur in cPanel, Softaculous/wp-admin und GitHub-Secrets.
 
 ## 1. Einmaliges Server-Setup in cPanel
 
@@ -11,20 +11,20 @@ Zielgruppe: Güney für Server/Deploy, Goni für WordPress, Divi und Inhalte. Ke
 In Novatrend cPanel:
 
 - [ ] `Domains` → `Subdomains` oder `Domains`
-- [ ] Subdomain erstellen: `staging.bioco.ch`
-- [ ] Document Root auf den Bedrock-Webroot setzen:
+- [ ] Subdomain `staging.bioco.ch` und bestehende Softaculous-Installation prüfen
+- [ ] Document Root bleibt der Softaculous-WordPress-Root:
 
 ```text
-/home/bioco/.../wordpress/web
+/home/bioco/staging.bioco.ch
 ```
 
-Der GitHub-Workflow deployt in den Bedrock-Projektroot. Der Secret-Wert `STAGING_DEPLOY_PATH` muss deshalb auf den Ordner **oberhalb** von `web/` zeigen, z. B.:
+Der GitHub-Workflow deployt nur eigenen Code in die bestehende Softaculous-Installation. Der Secret-Wert `STAGING_WP_CONTENT` zeigt auf deren absoluten `wp-content`-Ordner, z. B.:
 
 ```text
-/home/bioco/.../wordpress
+/home/bioco/staging.bioco.ch/wp-content
 ```
 
-Nicht auf `web/`.
+Nicht auf den Webroot und nicht auf `uploads`.
 
 ### PHP 8.2 setzen
 
@@ -43,82 +43,18 @@ php >=8.2
 
 Falls Novatrend nur 8.3 anbietet, ist das voraussichtlich ok. Nicht auf 8.1 oder tiefer setzen.
 
-### MySQL-Datenbank und User
+### Softaculous-Voraussetzungen (verbindlich)
 
-In cPanel:
+Staging folgt Softaculous, nicht Bedrock auf dem Server. Softaculous besitzt WordPress-Core, Datenbank, `wp-config.php`, Salts und den Admin-Zugang. Aus dem Repo kommt nur eigener Code nach `wp-content/`. Die Installationsschritte stehen in [RUNBOOK-SOFTACULOUS.md](RUNBOOK-SOFTACULOUS.md).
 
-- [ ] `Databases` → `MySQL Databases`
-- [ ] Datenbank anlegen: `bioco_wp`
-- [ ] Datenbank-User anlegen, z. B. `bioco_wp_user`
-- [ ] Starkes Passwort generieren
-- [ ] User der DB zuweisen
+- [ ] WordPress liegt über Softaculous im Document Root `staging.bioco.ch`
+- [ ] Datenbank und DB-User stammen aus der Softaculous-Installation; keine separate manuelle DB-Anlage für Staging
+- [ ] Kein Bedrock-Projektroot und keine Server-`.env` für Staging anlegen
+- [ ] Keine Roots-Salts und kein `WP_SITEURL=.../wp` für Staging pflegen
+- [ ] SMTP, Turnstile und weitere Betriebsgeheimnisse nur in wp-admin bzw. der geschützten Hosting-Konfiguration speichern, nie im öffentlichen Repo
+- [ ] Absoluten `wp-content`-Pfad notieren, z. B. `/home/bioco/staging.bioco.ch/wp-content`; dieser Wert füllt `STAGING_WP_CONTENT` bzw. `BIOCO_WP_CONTENT`
 
-Rechte:
-
-- Für Installation/Updates: alle Rechte auf diese eine DB.
-- Least privilege heißt hier: Der User darf nur auf `bioco_wp`, nicht auf ProcessWire-, Matomo- oder andere Datenbanken.
-- Nach dem Installer kann man härter werden, aber für WordPress/Plugin-Migrationen sind `CREATE`, `ALTER`, `INDEX`, `INSERT`, `UPDATE`, `DELETE`, `SELECT` praktisch nötig.
-
-cPanel kann Namen automatisch prefixen, z. B. `bioco_bioco_wp`. In `.env` muss exakt der Name stehen, den cPanel anzeigt.
-
-### Server-`.env` anlegen
-
-Auf dem Server im Bedrock-Projektroot:
-
-```bash
-cd /home/bioco/.../wordpress
-cp .env.example .env
-```
-
-Dann echte Werte eintragen:
-
-```dotenv
-DB_NAME='bioco_wp'
-DB_USER='...'
-DB_PASSWORD='...'
-DB_HOST='localhost'
-
-WP_ENV='staging'
-WP_HOME='https://staging.bioco.ch'
-WP_SITEURL="${WP_HOME}/wp"
-
-SMTP_HOST='mail.bioco.ch'
-SMTP_PORT='465'
-SMTP_USER='...'
-SMTP_PASS='...'
-SMTP_SECURE='ssl'
-
-NEXT_PUBLIC_TURNSTILE_SITE_KEY='...'
-TURNSTILE_SECRET_KEY='...'
-
-INTRANET_SIGNUP_URL='https://intranet.bioco.ch/my/signup/'
-```
-
-Salts generieren über:
-
-```text
-https://roots.io/salts.html
-```
-
-Alle acht Werte ausfüllen:
-
-```dotenv
-AUTH_KEY=''
-SECURE_AUTH_KEY=''
-LOGGED_IN_KEY=''
-NONCE_KEY=''
-AUTH_SALT=''
-SECURE_AUTH_SALT=''
-LOGGED_IN_SALT=''
-NONCE_SALT=''
-```
-
-Wichtig:
-
-- [ ] `.env` nie committen
-- [ ] keine Secrets in README, Tickets oder Screenshots posten
-- [ ] Turnstile Site Key und Secret Key müssen zusammenpassen
-- [ ] SMTP läuft über `mail.bioco.ch:465` mit `ssl`
+> **Legacy Bedrock (nicht befolgen):** Frühere Anleitungen verlangten `cd .../wordpress`, `cp .env.example .env`, manuelle DB-Credentials, Roots-Salts und `WP_SITEURL="${WP_HOME}/wp"`. Dieser Weg ist für Staging entfernt.
 
 ### GitHub Repo-Secrets
 
@@ -134,8 +70,9 @@ Diese Secrets setzen:
 STAGING_SSH_HOST
 STAGING_SSH_USER
 STAGING_SSH_KEY
-STAGING_DEPLOY_PATH
-ACF_PRO_KEY
+STAGING_SSH_KNOWN_HOSTS
+STAGING_WP_CONTENT
+STAGING_SSH_PORT
 ```
 
 Bedeutung:
@@ -143,10 +80,11 @@ Bedeutung:
 - `STAGING_SSH_HOST`: Novatrend-Host, z. B. Server-IP oder SSH-Host
 - `STAGING_SSH_USER`: cPanel/SSH-User, z. B. `bioco`
 - `STAGING_SSH_KEY`: privater Deploy-Key, öffentlicher Key muss auf dem Server autorisiert sein
-- `STAGING_DEPLOY_PATH`: Bedrock-Projektroot, nicht `web/`
-- `ACF_PRO_KEY`: ACF-Pro-Lizenz für Composer-Auth
+- `STAGING_SSH_KNOWN_HOSTS`: vorab geprüfte `known_hosts`-Zeile; nie dynamisch im Workflow vertrauen
+- `STAGING_WP_CONTENT`: absoluter `wp-content`-Pfad der Softaculous-Installation
+- `STAGING_SSH_PORT`: optional, Standard `22`
 
-Der Workflow überspringt den Deploy mit Warnung, solange `STAGING_SSH_HOST` oder `STAGING_SSH_KEY` fehlen.
+Fehlende Secrets brechen das Release ab; kein Schritt wird still übersprungen.
 
 ### OPcache-Gotcha
 
@@ -178,7 +116,7 @@ Ein Push auf Branch `wordpress` triggert:
 Manuell geht es auch über GitHub:
 
 - [ ] `Actions`
-- [ ] `Deploy WordPress to staging`
+- [ ] `Release WordPress staging`
 - [ ] `Run workflow`
 
 ### Was der Workflow tut
@@ -187,50 +125,33 @@ Der Workflow läuft bei Änderungen an:
 
 ```text
 wordpress/**
+cms/content-seed/**
+tests/**
 .github/workflows/deploy-wordpress-staging.yml
 ```
 
 Schritte:
 
 - [ ] Repo checkout
-- [ ] prüft, ob Staging-Secrets vorhanden sind
+- [ ] prüft festen Commit und sauberen Checkout
 - [ ] PHP 8.2 in GitHub Actions einrichten
-- [ ] Composer-Auth für ACF Pro setzen
-- [ ] `composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist`
-- [ ] rsync nach `$STAGING_DEPLOY_PATH`
-- [ ] `.env` wird nicht überschrieben
-- [ ] `web/app/uploads/` wird nicht gelöscht
-- [ ] `.git/` wird nicht deployed
-- [ ] OPcache reset/cache flush best-effort
-- [ ] Smoke check auf `https://staging.bioco.ch/`
+- [ ] führt lokale Tests, Inhaltsgate, Seed-Plan und PHP-Lint aus
+- [ ] erstellt das Datenbank-Backup ausserhalb des Webroots
+- [ ] synchronisiert nur Repository-eigene Plugins, Themes und Seeds
+- [ ] importiert Seeds, prüft 110 Blöcke und alle 22 Routen
+- [ ] schreibt Commit und Backup-Pfad als Release-Marker
+- [ ] lädt das vollständige Release-Log als Actions-Artefakt hoch
 
-Hinweis: In der gelesenen `composer.json` ist `wp-mail-smtp` explizit drin. ACF-Pro-Auth ist im Workflow vorbereitet; wenn ACF Pro nach dem Deploy nicht unter Plugins erscheint, muss zuerst geprüft werden, ob der ACF-Pro-Composer-Require im Branch tatsächlich vorhanden ist.
+### WordPress-Zugang (Softaculous)
 
-### WordPress-Installer
+WordPress und der Admin-Zugang entstehen bei der Softaculous-Installation, nicht nach dem Code-Deploy und nicht über `install.php`. Details: [RUNBOOK-SOFTACULOUS.md](RUNBOOK-SOFTACULOUS.md), Abschnitt 2.
 
-Nach dem ersten erfolgreichen Deploy öffnen:
+- [ ] Softaculous-Installation ist abgeschlossen, bevor das erste Release läuft
+- [ ] Einloggen unter `https://staging.bioco.ch/wp-admin/` mit dem Softaculous-Admin
+- [ ] Bei Bedarf weitere Admin-Konten nur in wp-admin anlegen; niemals den User `admin` verwenden
+- [ ] Suchmaschinen-Indexierung für Staging deaktiviert lassen
 
-```text
-https://staging.bioco.ch/wp/wp-admin/install.php
-```
-
-Falls WordPress auf `/wp-admin/install.php` weiterleitet, dem Redirect folgen.
-
-Installer:
-
-- [ ] Sprache: `Deutsch`
-- [ ] Seitentitel: `biocò Staging` oder ähnlich klar als Staging erkennbar
-- [ ] Admin-User für Goni/Güney erstellen
-- [ ] keinen User `admin` verwenden
-- [ ] starkes Passwort
-- [ ] Admin-Mail setzen
-- [ ] Suchmaschinen-Indexierung für Staging deaktivieren
-
-Danach einloggen:
-
-```text
-https://staging.bioco.ch/wp/wp-admin/
-```
+> **Legacy Bedrock (nicht befolgen):** Pfade wie `https://staging.bioco.ch/wp/wp-admin/install.php` und ein manueller WordPress-Installer nach dem Deploy gehören zum entfernten Bedrock-Setup.
 
 ### Plugins aktivieren
 

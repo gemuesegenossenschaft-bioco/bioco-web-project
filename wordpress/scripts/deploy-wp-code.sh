@@ -203,7 +203,8 @@ if ! run_remote "test -d ${plugins_dir}"; then
 fi
 printf 'PASS: %s/plugins exists and will NOT be touched.\n' "${wp_content}"
 
-rsync_common=(-avzc --exclude=.git --exclude=.DS_Store --exclude=node_modules --exclude='*.log')
+rsync_common=(-avzc --exclude=.git --exclude=.DS_Store --exclude=node_modules --exclude='*.log'
+  --exclude=.env --exclude='.env.*' '--filter=:- .gitignore')
 if [[ "${apply}" == "0" ]]; then
   rsync_common+=(--dry-run)
 else

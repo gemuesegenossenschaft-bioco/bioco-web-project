@@ -1,6 +1,6 @@
 # Staging mit Softaculous + Divi
 
-> **Welcher Weg gilt?** Für Staging gilt der gewählte Weg **Softaculous + `wordpress/scripts/deploy-wp-code.sh`**. Softaculous verwaltet WordPress-Core, Datenbank und Admin-Zugang; aus dem Repo wird nur eigener Code nach `wp-content/` ausgeliefert. **Bedrock + GitHub-Workflow** bleibt als Alternative und CI-Pfad dokumentiert: [RUNBOOK-STAGING-DIVI.md](RUNBOOK-STAGING-DIVI.md).
+> **Welcher Weg gilt?** Für Staging gilt **Softaculous + `wordpress/scripts/release-wordpress-staging.sh`**. Lokal und in GitHub Actions läuft dieselbe Release-Pipeline. Softaculous verwaltet WordPress-Core, Datenbank und Admin-Zugang; aus dem Repo wird nur eigener Code nach `wp-content/` ausgeliefert.
 
 Zielgruppe: nicht-technische Betreuung für cPanel, WordPress, Divi und Inhaltsimport; eine Person mit SSH-Zugang führt den Code-Deploy und WP-CLI aus. Das Repo ist öffentlich: keine Passwörter, Schlüssel oder Zugangsdaten in Git, Markdown, Tickets oder Chats speichern.
 
@@ -81,9 +81,9 @@ Softaculous besitzt und aktualisiert WordPress-Core. Der bioco-Deploy darf weder
 
 Divi ist kein Plugin, sondern ein lizenziertes Theme. Es wird später separat als Zip unter `Design` → `Themes` hochgeladen. Der Code-Deploy liefert Divi nie aus und löscht es nie.
 
-## 4. Eigenen Code deployen
+## 4. Verifiziertes Staging-Release
 
-Der Deploy läuft lokal aus dem Git-Worktree. Host, SSH-User und Pfad sind Parameter; keine Werte werden im Script fest codiert.
+Das Release läuft nur aus einem sauberen, festen Commit. Host, SSH-User und Pfad sind Parameter; keine Werte werden im Script fest codiert.
 
 ### Parameter setzen
 
@@ -99,10 +99,12 @@ export BIOCO_WP_SSH_PORT='22'
 ### Zuerst Probelauf
 
 - [ ] Im Repository-Root stehen
+- [ ] Commit-SHA einmal erfassen und für Dry-Run sowie `--apply` unverändert wiederverwenden; beide Aufrufe müssen denselben, bereits geprüften SHA verwenden
 - [ ] Dry-Run ausführen; ohne `--apply` schreibt das Script nichts
 
 ```bash
-wordpress/scripts/deploy-wp-code.sh
+commit="$(git rev-parse HEAD)"
+wordpress/scripts/release-wordpress-staging.sh --commit="$commit"
 ```
 
 - [ ] Ausgabe vollständig lesen
@@ -115,10 +117,11 @@ wordpress/scripts/deploy-wp-code.sh
 Nur wenn der Dry-Run sauber ist:
 
 ```bash
-wordpress/scripts/deploy-wp-code.sh --apply
+wordpress/scripts/release-wordpress-staging.sh --commit="$commit" --apply
 ```
 
-- [ ] Alle Post-Deploy-Zeilen zeigen `PASS` oder einen ausdrücklich erlaubten WP-CLI-Hinweis
+- [ ] Backup-Pfad und Commit stehen im Release-Log unter `output/releases/`
+- [ ] Preflight, Backup, Code-Sync, Import, Parity, Smoke und Release-Marker zeigen `passed`
 - [ ] Unter `Plugins` → `Must-Use` sind die bioco-Komponenten sichtbar
 - [ ] `wp-content/uploads/` ist weiterhin vorhanden
 - [ ] Keine fremden Plugins oder Themes wurden verändert

@@ -1,139 +1,70 @@
-name: Deploy WordPress to staging
-
-# Builds the Bedrock WordPress project off-server (mirroring the Next.js
-# build-locally-then-rsync pattern) and deploys it to staging.bioco.ch on
-# every push to the `wordpress` branch. Epic #73 (slice W4 authors the real
-# pipeline; this is the skeleton).
-#
-# REQUIRED before this can succeed (server/admin one-time setup, see
-# wordpress/README.md): the staging.bioco.ch subdomain with docroot at
-# .../web, a bioco_wp MySQL DB + least-privilege user, and these repo
-# secrets:
-#   STAGING_SSH_HOST   e.g. 193.33.128.160
-#   STAGING_SSH_USER   e.g. bioco
-#   STAGING_SSH_KEY    private deploy key authorized on that account
-#   STAGING_DEPLOY_PATH remote path to the Bedrock project root
-#   ACF_PRO_KEY        Advanced Custom Fields Pro license key (Composer auth)
-#   STAGING_OPCACHE_TOKEN shared secret for the temporary HTTP OPcache reset
-# Until those exist the job no-ops with a clear message instead of failing.
+name: Release WordPress staging
 
 on:
   push:
     branches: [wordpress]
-    paths: ['wordpress/**', '.github/workflows/deploy-wordpress-staging.yml']
+    paths:
+      - wordpress/**
+      - cms/content-seed/**
+      - tests/**
+      - .github/workflows/deploy-wordpress-staging.yml
   workflow_dispatch:
 
 concurrency:
-  group: wp-staging-deploy
-  cancel-in-progress: true
+  group: wordpress-staging-release
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
-  build-and-deploy:
+  release:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: wordpress
+    timeout-minutes: 30
+    environment: staging
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Guard — require staging secrets
-        id: guard
-        run: |
-          if [ -z "${{ secrets.STAGING_SSH_HOST }}" ] || [ -z "${{ secrets.STAGING_SSH_KEY }}" ]; then
-            echo "::warning::Staging secrets not configured yet — skipping deploy. See wordpress/README.md."
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ready=true" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Set up PHP
-        if: steps.guard.outputs.ready == 'true'
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          php-version: '8.2'
-          tools: composer:v2
+          fetch-depth: 0
+          persist-credentials: false
 
-      - name: Composer auth (ACF Pro)
-        if: steps.guard.outputs.ready == 'true'
-        run: composer config --global --auth http-basic.connect.advancedcustomfields.com "${{ secrets.ACF_PRO_KEY }}" "https://staging.bioco.ch"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
 
-      - name: Install (no dev)
-        if: steps.guard.outputs.ready == 'true'
-        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.2"
 
-      - name: Deploy over rsync (SSH)
-        if: steps.guard.outputs.ready == 'true'
+      - name: Install test dependency
+        run: python -m pip install --require-hashes -r .github/workflows/requirements-ci.txt
+
+      - name: Configure staging SSH key
         env:
           SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-          HOST: ${{ secrets.STAGING_SSH_HOST }}
-          USER: ${{ secrets.STAGING_SSH_USER }}
-          DEST: ${{ secrets.STAGING_DEPLOY_PATH }}
+          SSH_KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
         run: |
-          install -m 600 /dev/stdin "$HOME/deploy_key" <<< "$SSH_KEY"
-          RSYNC_SSH="ssh -i $HOME/deploy_key -o StrictHostKeyChecking=accept-new"
-          # Never delete uploads or clobber the server .env; core+vendor+theme are shipped.
-          #
-          # web/app/themes/Divi MUST be excluded. Divi is licensed, therefore
-          # gitignored, therefore absent from this rsync SOURCE — so with
-          # --delete and no exclusion rsync would remove the separately
-          # installed parent theme from the server on every deploy, leaving
-          # bioco-divi with no parent to load. The same reasoning applies to any
-          # other out-of-repo theme or plugin installed via wp-admin.
-          rsync -avz --delete -e "$RSYNC_SSH" \
-            --exclude='.env' \
-            --exclude='web/app/uploads/' \
-            --exclude='web/app/themes/Divi/' \
-            --exclude='.git/' \
-            ./ "$USER@$HOST:$DEST/"
+          test -n "$SSH_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+          install -m 600 /dev/stdin "$HOME/.ssh/id_ed25519" <<< "$SSH_KEY"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
 
-      - name: Post-deploy — cache flush + smoke check
-        if: steps.guard.outputs.ready == 'true'
+      - name: Run verified staging release
         env:
-          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-          HOST: ${{ secrets.STAGING_SSH_HOST }}
-          USER: ${{ secrets.STAGING_SSH_USER }}
-          DEST: ${{ secrets.STAGING_DEPLOY_PATH }}
-          OPCACHE_TOKEN: ${{ secrets.STAGING_OPCACHE_TOKEN }}
-        run: |
-          ssh -i "$HOME/deploy_key" -o StrictHostKeyChecking=accept-new "$USER@$HOST" \
-            "cd '$DEST' && (wp cache flush --path=web/wp || true)"
+          BIOCO_WP_HOST: ${{ secrets.STAGING_SSH_HOST }}
+          BIOCO_WP_USER: ${{ secrets.STAGING_SSH_USER }}
+          BIOCO_WP_CONTENT: ${{ secrets.STAGING_WP_CONTENT }}
+          BIOCO_WP_SSH_PORT: ${{ secrets.STAGING_SSH_PORT || '22' }}
+          BIOCO_RELEASE_URL: https://staging.bioco.ch
+        run: wordpress/scripts/release-wordpress-staging.sh --commit="$GITHUB_SHA" --apply
 
-          # CLI opcache_reset() only resets the short-lived CLI process, not Apache/PHP-FPM.
-          if [ -z "$OPCACHE_TOKEN" ]; then
-            echo "::warning::STAGING_OPCACHE_TOKEN is not configured — skipping HTTP OPcache reset."
-          else
-            RESET_FILE="bioco-opcache-reset-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}.php"
-            TOKEN_HASH=$(printf '%s' "$OPCACHE_TOKEN" | sha256sum | awk '{print $1}')
-            cat > "$RUNNER_TEMP/opcache-reset.php" <<'PHP'
-          <?php
-          header('Content-Type: text/plain; charset=UTF-8');
-          $provided = $_SERVER['HTTP_X_BIOCO_OPCACHE_TOKEN'] ?? '';
-          if (!hash_equals('__TOKEN_HASH__', hash('sha256', (string) $provided))) {
-              http_response_code(403);
-              exit('Forbidden');
-          }
-          $reset = function_exists('opcache_reset') && opcache_reset();
-          http_response_code($reset ? 200 : 500);
-          echo $reset ? 'OPcache reset' : 'OPcache reset failed';
-          PHP
-            sed -i "s/__TOKEN_HASH__/$TOKEN_HASH/" "$RUNNER_TEMP/opcache-reset.php"
-            cleanup_opcache_file() {
-              ssh -i "$HOME/deploy_key" -o StrictHostKeyChecking=accept-new "$USER@$HOST" \
-                "rm -f '$DEST/web/$RESET_FILE'" || true
-            }
-            trap cleanup_opcache_file EXIT
-            scp -i "$HOME/deploy_key" -o StrictHostKeyChecking=accept-new \
-              "$RUNNER_TEMP/opcache-reset.php" "$USER@$HOST:$DEST/web/$RESET_FILE"
-            curl --fail --silent --show-error \
-              -H "X-Bioco-Opcache-Token: $OPCACHE_TOKEN" \
-              "https://staging.bioco.ch/$RESET_FILE"
-            echo
-            cleanup_opcache_file
-            trap - EXIT
-          fi
-      - name: Verify all staging routes render
-        if: steps.guard.outputs.ready == 'true'
-        run: bash ../tests/wordpress-staging-render-gate.sh
+      - name: Upload release log
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wordpress-staging-release-${{ github.sha }}
+          path: output/releases/
+          if-no-files-found: warn
