@@ -45,7 +45,10 @@ case "$*" in
   *"wp db export"*) event=backup ;;
   *"wp bioco import --apply --force"*) event=import ;;
   *"wp bioco verify"*) event=parity ;;
-  *"wp option update bioco_release_marker"*) event=marker ;;
+  *"wp option update bioco_release_marker"*)
+    event=marker
+    printf '%s\n' "$*" >> "$BIOCO_TEST_MARKER"
+    ;;
   *) event=unexpected-ssh ;;
 esac
 echo "$event" >> "$BIOCO_TEST_EVENTS"
@@ -63,6 +66,7 @@ echo "$event" >> "$BIOCO_TEST_EVENTS"
         "BIOCO_RELEASE_RENDER_GATE": str(render),
         "BIOCO_RELEASE_TIMESTAMP": "20260817T210000Z",
         "BIOCO_TEST_EVENTS": str(events),
+        "BIOCO_TEST_MARKER": str(tmp_path / "marker.log"),
         "BIOCO_WP_HOST": "staging.example.test",
         "BIOCO_WP_USER": "deploy",
         "BIOCO_WP_CONTENT": "/srv/wordpress/wp-content",
@@ -370,7 +374,9 @@ def test_release_uses_one_timestamp_for_log_backup_and_marker(tmp_path):
     assert len(logs) == 1
     log_stamp = logs[0].name.split("-")[0]
     backup_stamp = re.search(r"backup-path=\S*/(\d{8}T\d{6}Z)-", result.stdout).group(1)
-    assert log_stamp == backup_stamp
+    marker = Path(env["BIOCO_TEST_MARKER"]).read_text()
+    marker_stamp = re.search(r'"timestamp":"(\d{8}T\d{6}Z)"', marker).group(1)
+    assert log_stamp == backup_stamp == marker_stamp
     assert f"release-start timestamp={log_stamp}" in result.stdout
 
 
