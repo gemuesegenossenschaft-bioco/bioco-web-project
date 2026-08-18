@@ -60,15 +60,16 @@ cp .env.example .env   # fill DB + salts (https://roots.io/salts.html)
 ```
 
 ## Deploy to staging
-The primary staging path is the existing Softaculous WordPress installation plus `scripts/deploy-wp-code.sh`; follow `RUNBOOK-SOFTACULOUS.md`. It deploys only repository-owned code into `wp-content/` and leaves WordPress core, the database, uploads, and admin access under Softaculous control.
+The single entry point is `scripts/release-wordpress-staging.sh`; follow
+`RUNBOOK-SOFTACULOUS.md`. Local runs and `.github/workflows/deploy-wordpress-staging.yml` invoke the
+same implementation. Dry-run is the default; `--apply` performs database backup, owned-code sync,
+forced idempotent import, 110-block parity verification, the 22-route render gate, and a release
+marker. WordPress core, uploads, regular plugins, Divi, and admin accounts remain server-owned.
 
-Bedrock plus `.github/workflows/deploy-wordpress-staging.yml` remains the alternative/CI path: build off-server → rsync to the box (uploads never deleted, `.env` never shipped) → OPcache flush + smoke check.
-
-**One-time Bedrock server/admin setup required before the first workflow deploy:**
-1. Create the `staging.bioco.ch` subdomain with docroot at the Bedrock `web/` directory.
-2. Create a `bioco_wp` MySQL DB + a least-privilege user; put credentials in the server-side `.env`.
-3. Add the repo secrets: `STAGING_SSH_HOST`, `STAGING_SSH_USER`, `STAGING_SSH_KEY`, `STAGING_DEPLOY_PATH`, `ACF_PRO_KEY`. Until they exist the workflow no-ops with a warning instead of failing.
-4. Generate salts and the server `.env` (`WP_ENV=staging`, `WP_HOME=https://staging.bioco.ch`, SMTP + Turnstile keys reused from the current stack).
+GitHub Actions requires `STAGING_SSH_HOST`, `STAGING_SSH_USER`, `STAGING_SSH_KEY`,
+`STAGING_SSH_KNOWN_HOSTS` (pinned host-key line), and `STAGING_WP_CONTENT` (the absolute
+Softaculous `wp-content` path). `STAGING_SSH_PORT` is optional.
+Missing configuration fails the release; it never silently skips a step.
 
 ## Design tokens
 `web/app/themes/bioco/theme.json` mirrors the **current live** site values for pixel parity (post Phase-0 coherence, epic #72) and remains the canonical source of these values. Two value decisions are deliberately **deferred to design sign-off** (they change pixels): brand green (live `#2e7d32` vs logo `#39A933`) and the radius scale (`12/18/24` vs `6/12/18`). The real font is **DM Sans** (self-hosted `assets/fonts/dmsans-variable.woff2`), not Inter.

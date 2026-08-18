@@ -1,6 +1,6 @@
 # Staging-Inbetriebnahme + Divi-Handbuch für `staging.bioco.ch`
 
-> **Welcher Weg gilt?** Für Staging gilt der gewählte Weg **Softaculous + `wordpress/scripts/deploy-wp-code.sh`**: [RUNBOOK-SOFTACULOUS.md](RUNBOOK-SOFTACULOUS.md). Dieses Dokument beschreibt **Bedrock + GitHub-Workflow** als Alternative und CI-Pfad; es ist nicht der primäre Staging-Ablauf.
+> **Welcher Weg gilt?** Für Staging gilt **Softaculous + `wordpress/scripts/release-wordpress-staging.sh`**: [RUNBOOK-SOFTACULOUS.md](RUNBOOK-SOFTACULOUS.md). GitHub Actions ruft dieselbe Pipeline auf; der frühere Bedrock-Deploy ist entfernt.
 
 Zielgruppe: Güney für Server/Deploy, Goni für WordPress, Divi und Inhalte. Keine Secrets in GitHub oder im Repo speichern. Das Repo ist öffentlich; echte Werte gehören nur in cPanel, Server-`.env` und GitHub-Secrets.
 
@@ -11,20 +11,20 @@ Zielgruppe: Güney für Server/Deploy, Goni für WordPress, Divi und Inhalte. Ke
 In Novatrend cPanel:
 
 - [ ] `Domains` → `Subdomains` oder `Domains`
-- [ ] Subdomain erstellen: `staging.bioco.ch`
-- [ ] Document Root auf den Bedrock-Webroot setzen:
+- [ ] Subdomain `staging.bioco.ch` und bestehende Softaculous-Installation prüfen
+- [ ] Document Root bleibt der Softaculous-WordPress-Root:
 
 ```text
-/home/bioco/.../wordpress/web
+/home/bioco/staging.bioco.ch
 ```
 
-Der GitHub-Workflow deployt in den Bedrock-Projektroot. Der Secret-Wert `STAGING_DEPLOY_PATH` muss deshalb auf den Ordner **oberhalb** von `web/` zeigen, z. B.:
+Der GitHub-Workflow deployt nur eigenen Code in die bestehende Softaculous-Installation. Der Secret-Wert `STAGING_WP_CONTENT` zeigt auf deren absoluten `wp-content`-Ordner, z. B.:
 
 ```text
-/home/bioco/.../wordpress
+/home/bioco/staging.bioco.ch/wp-content
 ```
 
-Nicht auf `web/`.
+Nicht auf den Webroot und nicht auf `uploads`.
 
 ### PHP 8.2 setzen
 
@@ -134,8 +134,9 @@ Diese Secrets setzen:
 STAGING_SSH_HOST
 STAGING_SSH_USER
 STAGING_SSH_KEY
-STAGING_DEPLOY_PATH
-ACF_PRO_KEY
+STAGING_SSH_KNOWN_HOSTS
+STAGING_WP_CONTENT
+STAGING_SSH_PORT
 ```
 
 Bedeutung:
@@ -143,10 +144,11 @@ Bedeutung:
 - `STAGING_SSH_HOST`: Novatrend-Host, z. B. Server-IP oder SSH-Host
 - `STAGING_SSH_USER`: cPanel/SSH-User, z. B. `bioco`
 - `STAGING_SSH_KEY`: privater Deploy-Key, öffentlicher Key muss auf dem Server autorisiert sein
-- `STAGING_DEPLOY_PATH`: Bedrock-Projektroot, nicht `web/`
-- `ACF_PRO_KEY`: ACF-Pro-Lizenz für Composer-Auth
+- `STAGING_SSH_KNOWN_HOSTS`: vorab geprüfte `known_hosts`-Zeile; nie dynamisch im Workflow vertrauen
+- `STAGING_WP_CONTENT`: absoluter `wp-content`-Pfad der Softaculous-Installation
+- `STAGING_SSH_PORT`: optional, Standard `22`
 
-Der Workflow überspringt den Deploy mit Warnung, solange `STAGING_SSH_HOST` oder `STAGING_SSH_KEY` fehlen.
+Fehlende Secrets brechen das Release ab; kein Schritt wird still übersprungen.
 
 ### OPcache-Gotcha
 
@@ -178,7 +180,7 @@ Ein Push auf Branch `wordpress` triggert:
 Manuell geht es auch über GitHub:
 
 - [ ] `Actions`
-- [ ] `Deploy WordPress to staging`
+- [ ] `Release WordPress staging`
 - [ ] `Run workflow`
 
 ### Was der Workflow tut
@@ -187,24 +189,22 @@ Der Workflow läuft bei Änderungen an:
 
 ```text
 wordpress/**
+cms/content-seed/**
+tests/**
 .github/workflows/deploy-wordpress-staging.yml
 ```
 
 Schritte:
 
 - [ ] Repo checkout
-- [ ] prüft, ob Staging-Secrets vorhanden sind
+- [ ] prüft festen Commit und sauberen Checkout
 - [ ] PHP 8.2 in GitHub Actions einrichten
-- [ ] Composer-Auth für ACF Pro setzen
-- [ ] `composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist`
-- [ ] rsync nach `$STAGING_DEPLOY_PATH`
-- [ ] `.env` wird nicht überschrieben
-- [ ] `web/app/uploads/` wird nicht gelöscht
-- [ ] `.git/` wird nicht deployed
-- [ ] OPcache reset/cache flush best-effort
-- [ ] Smoke check auf `https://staging.bioco.ch/`
-
-Hinweis: In der gelesenen `composer.json` ist `wp-mail-smtp` explizit drin. ACF-Pro-Auth ist im Workflow vorbereitet; wenn ACF Pro nach dem Deploy nicht unter Plugins erscheint, muss zuerst geprüft werden, ob der ACF-Pro-Composer-Require im Branch tatsächlich vorhanden ist.
+- [ ] führt lokale Tests, Inhaltsgate, Seed-Plan und PHP-Lint aus
+- [ ] erstellt das Datenbank-Backup ausserhalb des Webroots
+- [ ] synchronisiert nur Repository-eigene Plugins, Themes und Seeds
+- [ ] importiert Seeds, prüft 110 Blöcke und alle 22 Routen
+- [ ] schreibt Commit und Backup-Pfad als Release-Marker
+- [ ] lädt das vollständige Release-Log als Actions-Artefakt hoch
 
 ### WordPress-Installer
 
