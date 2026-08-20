@@ -63,11 +63,14 @@
       ]
     },
     "custom": {
-      "radius": { "sm": "12px", "md": "18px", "lg": "24px", "pill": "999px" },
+      "radius": { "sm": "12px", "md": "18px", "lg": "24px", "xl": "32px", "pill": "999px" },
       "shadow": {
         "sm": "0 1px 3px rgba(31,42,27,0.08)",
         "md": "0 4px 12px rgba(31,42,27,0.12)",
         "lg": "0 8px 24px rgba(31,42,27,0.16)"
+      },
+      "border": {
+        "thin": "1px solid var(--wp--preset--color--bioco-border)"
       }
     }
   },

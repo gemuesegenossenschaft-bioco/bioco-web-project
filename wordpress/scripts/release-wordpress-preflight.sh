@@ -44,3 +44,8 @@ for php_source_dir in "${php_source_dirs[@]}"; do
 done
 php -l wordpress/deploy/bioco-mu-loader.php >/dev/null
 echo "gate=php-lint status=passed"
+
+echo "gate=divi-design-system-contract status=running"
+python3 wordpress/scripts/check-divi-design-system.py
+# TODO(#134): add --require-exports once authenticated staging exports are available.
+echo "gate=divi-design-system-contract status=passed"
