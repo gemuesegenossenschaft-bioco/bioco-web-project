@@ -33,7 +33,8 @@ foreach ((array) bioco_field('filters') as $filter_row) {
 // display limit, the "show more" button and the empty state. The importer
 // resolves seed images to bare attachment IDs, ACF hands back an array.
 $resolved_items = [];
-foreach ($items as $item) {
+foreach ((array) $items as $item) {
+    if (!is_array($item)) continue;
     $image = $item['image'] ?? null;
     $image_url = '';
     $image_alt = '';
