@@ -53,10 +53,21 @@ if (!empty($block['className'])) {
                 <?php foreach ($items as $index => $item) :
                     $image = $item['image'] ?? null;
                     $category = $item['category'] ?? 'feld';
-                    if (empty($image['url'])) continue;
+                    // Accepts both an ACF image array and a bare attachment ID
+                    // (the importer resolves seed images to int IDs).
+                    $image_url = '';
+                    $image_alt = '';
+                    if (is_array($image)) {
+                        $image_url = $image['url'] ?? '';
+                        $image_alt = $image['alt'] ?? '';
+                    } elseif (is_numeric($image) && (int) $image > 0) {
+                        $image_url = wp_get_attachment_image_url((int) $image, 'large') ?: '';
+                        $image_alt = (string) get_post_meta((int) $image, '_wp_attachment_image_alt', true);
+                    }
+                    if ($image_url === '') continue;
                 ?>
                     <div class="gallery-item" data-gallery-category="<?php echo esc_attr($category); ?>" <?php if ($show_more_label && $index >= 4) : ?>style="display: none;"<?php endif; ?>>
-                        <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt'] ?: ''); ?>" loading="lazy" style="object-fit: cover; width: 100%; height: 100%; border-radius: 8px;" />
+                        <img src="<?php echo esc_url($image_url); ?>" alt="<?php echo esc_attr($image_alt); ?>" loading="lazy" style="object-fit: cover; width: 100%; height: 100%; border-radius: 8px;" />
                     </div>
                 <?php endforeach; ?>
             </div>

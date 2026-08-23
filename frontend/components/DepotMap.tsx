@@ -9,7 +9,6 @@ interface DepotLocation {
   lat: number
   lng: number
   day: 'Dienstag' | 'Freitag' | 'Beide'
-  contact?: string
   website?: string
   notes?: string
 }
@@ -27,7 +26,6 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4725,
     lng: 8.3030,
     day: 'Dienstag',
-    contact: 'Corona Banky',
     website: 'https://www.xn--chrttli-7wa.ch/',
     notes: 'Das Depot befindet sich unter der Rampe rechts neben dem Quartierladen.'
   },
@@ -38,7 +36,6 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4735,
     lng: 8.3075,
     day: 'Dienstag',
-    contact: 'Tobias Kloter',
     website: 'https://www.ohne.ch/',
     notes: 'Die Körbe stehen unter den Tischen im hinteren Bereich.'
   },
@@ -49,18 +46,16 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4740,
     lng: 8.3085,
     day: 'Dienstag',
-    contact: 'Josef Lindiridi',
     website: 'https://anixis.ch/',
     notes: 'Hinter der Barriere auf dem Materiallager.'
   },
   {
     id: 'casa-flora',
     name: 'Casa Flora',
-    address: 'Zurzacherstrasse 171, 5200 Brugg',
+    address: 'Brugg',
     lat: 47.4880,
     lng: 8.2180,
     day: 'Dienstag',
-    contact: 'David Müller',
     notes: 'In der Nische beim hinteren Eingang des Blumengeschäfts (Zufahrt via Hauptstrasse).'
   },
   // Freitag (Friday) depots
@@ -71,27 +66,24 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4741684,
     lng: 8.2456318,
     day: 'Freitag',
-    contact: 'Matthias Müller',
     notes: 'Direkt auf dem Hof.'
   },
   {
     id: 'kupperhaus',
     name: 'Depot Kupperhaus',
-    address: 'Schulthess-Allee 4, 5200 Brugg',
+    address: 'Brugg',
     lat: 47.4843986,
     lng: 8.2069493,
     day: 'Freitag',
-    contact: 'Brigitte Perren Henneck',
     notes: 'Unten an der Rampe (Zufahrt rückwärts neben dem Kupperhaus).'
   },
   {
     id: 'ennetbaden',
     name: 'Depot Ennetbaden',
-    address: 'Geissbergstrasse 17, 5408 Ennetbaden',
+    address: 'Ennetbaden',
     lat: 47.4802623,
     lng: 8.3191206,
     day: 'Freitag',
-    contact: 'Nils und Armelle George',
     notes: 'Beim Wohnhaus.'
   },
   {
@@ -101,18 +93,16 @@ const depotLocations: DepotLocation[] = [
     lat: 47.4705,
     lng: 8.3164,
     day: 'Freitag',
-    contact: 'Martin Gruchow',
     website: 'http://lemonia.ch/',
     notes: 'Hinter dem Haus unter dem Tisch.'
   },
   {
     id: 'laegernstrasse',
     name: 'Depot Lägernstrasse',
-    address: 'Lägernstrasse 6, 5430 Wettingen',
+    address: 'Wettingen',
     lat: 47.4611864,
     lng: 8.3168081,
     day: 'Freitag',
-    contact: 'Helen Matthäus',
     notes: 'Beim Wohnhaus.'
   },
 ]

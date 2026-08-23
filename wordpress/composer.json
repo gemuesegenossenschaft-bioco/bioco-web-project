@@ -17,6 +17,7 @@
     "roots/wordpress": "^6.5",
     "roots/wp-config": "^1.0",
     "roots/wp-password-bcrypt": "^1.1",
+    "wpackagist-plugin/updraftplus": "^1.26.7",
     "wpackagist-plugin/wp-mail-smtp": "^4.0"
   },
   "extra": {

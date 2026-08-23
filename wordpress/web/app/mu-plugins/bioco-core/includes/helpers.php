@@ -177,11 +177,19 @@ function bioco_query_events($status, $limit, $event_type = null, $respect_stored
 }
 
 // Returns [url, alt] using the event's card_image field, falling back to the
-// featured image, or null if neither is set.
+// featured image, or null if neither is set. card_image may be an ACF image
+// array or a bare attachment ID (the importer resolves seed images to ints).
 function bioco_event_card_image($post_id) {
     $card_image = get_field('card_image', $post_id);
     if (is_array($card_image) && !empty($card_image['url'])) {
         return ['url' => $card_image['url'], 'alt' => $card_image['alt'] ?: get_the_title($post_id)];
+    }
+    if (is_numeric($card_image) && (int) $card_image > 0) {
+        $url = wp_get_attachment_image_url((int) $card_image, 'medium_large');
+        if ($url) {
+            $alt = get_post_meta((int) $card_image, '_wp_attachment_image_alt', true);
+            return ['url' => $url, 'alt' => $alt ?: get_the_title($post_id)];
+        }
     }
     $thumb_id = get_post_thumbnail_id($post_id);
     if ($thumb_id) {

@@ -46,55 +46,55 @@
             "name": "Depot Chrättli",
             "lat": 47.4725,
             "lng": 8.303,
-            "description": "Allmendstrasse 16, 5400 Baden · Dienstag · Kontakt: Corona Banky · https://www.xn--chrttli-7wa.ch/ · Das Depot befindet sich unter der Rampe rechts neben dem Quartierladen."
+            "description": "Allmendstrasse 16, 5400 Baden · Dienstag · https://www.xn--chrttli-7wa.ch/ · Das Depot befindet sich unter der Rampe rechts neben dem Quartierladen."
           },
           {
             "name": "Depot Ohne",
             "lat": 47.4735,
             "lng": 8.3075,
-            "description": "Stadtturmstrasse 15, 5400 Baden · Dienstag · Kontakt: Tobias Kloter · https://www.ohne.ch/ · Die Körbe stehen unter den Tischen im hinteren Bereich."
+            "description": "Stadtturmstrasse 15, 5400 Baden · Dienstag · https://www.ohne.ch/ · Die Körbe stehen unter den Tischen im hinteren Bereich."
           },
           {
             "name": "Depot Anixis",
             "lat": 47.474,
             "lng": 8.3085,
-            "description": "Oberstadtstrasse 10, Galerie Anixis, 5400 Baden · Dienstag · Kontakt: Josef Lindiridi · https://anixis.ch/ · Hinter der Barriere auf dem Materiallager."
+            "description": "Oberstadtstrasse 10, Galerie Anixis, 5400 Baden · Dienstag · https://anixis.ch/ · Hinter der Barriere auf dem Materiallager."
           },
           {
             "name": "Casa Flora",
             "lat": 47.488,
             "lng": 8.218,
-            "description": "Zurzacherstrasse 171, 5200 Brugg · Dienstag · Kontakt: David Müller · In der Nische beim hinteren Eingang des Blumengeschäfts (Zufahrt via Hauptstrasse)."
+            "description": "Brugg · Dienstag · In der Nische beim hinteren Eingang des Blumengeschäfts (Zufahrt via Hauptstrasse)."
           },
           {
             "name": "Depot Geisshof",
             "lat": 47.4741684,
             "lng": 8.2456318,
-            "description": "Geisshof, Gebenstorf · Freitag · Kontakt: Matthias Müller · Direkt auf dem Hof."
+            "description": "Geisshof, Gebenstorf · Freitag · Direkt auf dem Hof."
           },
           {
             "name": "Depot Kupperhaus",
             "lat": 47.4843986,
             "lng": 8.2069493,
-            "description": "Schulthess-Allee 4, 5200 Brugg · Freitag · Kontakt: Brigitte Perren Henneck · Unten an der Rampe (Zufahrt rückwärts neben dem Kupperhaus)."
+            "description": "Brugg · Freitag · Unten an der Rampe (Zufahrt rückwärts neben dem Kupperhaus)."
           },
           {
             "name": "Depot Ennetbaden",
             "lat": 47.4802623,
             "lng": 8.3191206,
-            "description": "Geissbergstrasse 17, 5408 Ennetbaden · Freitag · Kontakt: Nils und Armelle George · Beim Wohnhaus."
+            "description": "Ennetbaden · Freitag · Beim Wohnhaus."
           },
           {
             "name": "Depot Lemonia",
             "lat": 47.4705,
             "lng": 8.3164,
-            "description": "Schartenstrasse 28, 5430 Wettingen · Freitag · Kontakt: Martin Gruchow · http://lemonia.ch/ · Hinter dem Haus unter dem Tisch."
+            "description": "Schartenstrasse 28, 5430 Wettingen · Freitag · http://lemonia.ch/ · Hinter dem Haus unter dem Tisch."
           },
           {
             "name": "Depot Lägernstrasse",
             "lat": 47.4611864,
             "lng": 8.3168081,
-            "description": "Lägernstrasse 6, 5430 Wettingen · Freitag · Kontakt: Helen Matthäus · Beim Wohnhaus."
+            "description": "Wettingen · Freitag · Beim Wohnhaus."
           }
         ],
         "locations_heading": "Standorte",
