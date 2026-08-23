@@ -226,6 +226,7 @@
             "work_label": "Mitarbeit pro Jahr:",
             "one_time_payment_label": "Einmalige Zahlung",
             "additional_shares_label": "Zusätzliche Anteilsscheine hinzufügen:",
+            "signup_url": "/anmeldung",
             "cta_label": "Jetzt mitmachen!",
             "cta_note": "Deine Auswahl wird automatisch ins Anmeldeformular übernommen",
             "tiers": [

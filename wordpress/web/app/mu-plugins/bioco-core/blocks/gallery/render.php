@@ -29,6 +29,32 @@ foreach ((array) bioco_field('filters') as $filter_row) {
     $filters[$filter_slug] = $filter_text;
 }
 
+// Resolve images up front so only items with a usable URL drive the grid, the
+// display limit, the "show more" button and the empty state. The importer
+// resolves seed images to bare attachment IDs, ACF hands back an array.
+$resolved_items = [];
+foreach ((array) $items as $item) {
+    if (!is_array($item)) continue;
+    $image = $item['image'] ?? null;
+    $image_url = '';
+    $image_alt = '';
+    if (is_array($image)) {
+        $image_url = $image['url'] ?? '';
+        $image_alt = $image['alt'] ?? '';
+    } elseif (is_numeric($image) && (int) $image > 0) {
+        $image_url = wp_get_attachment_image_url((int) $image, 'large') ?: '';
+        $image_alt = (string) get_post_meta((int) $image, '_wp_attachment_image_alt', true);
+    }
+    if ($image_url === '') {
+        continue;
+    }
+    $resolved_items[] = [
+        'url' => $image_url,
+        'alt' => $image_alt,
+        'category' => $item['category'] ?? 'feld',
+    ];
+}
+
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'gallery';
 $class_name = 'cms-section cms-gallery';
 if (!empty($block['className'])) {
@@ -37,7 +63,7 @@ if (!empty($block['className'])) {
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
     <div class="gallery-container">
-        <?php if (!empty($items)) : ?>
+        <?php if (!empty($resolved_items)) : ?>
             <div class="gallery-filters">
                 <?php foreach ($filters as $filter_key => $filter_label) : ?>
                     <button type="button" class="gallery-filter<?php echo $filter_key === 'all' ? ' active' : ''; ?>" data-gallery-filter="<?php echo esc_attr($filter_key); ?>"><?php echo esc_html($filter_label); ?></button>
@@ -50,17 +76,13 @@ if (!empty($block['className'])) {
             </select>
 
             <div class="gallery-grid" data-gallery-grid>
-                <?php foreach ($items as $index => $item) :
-                    $image = $item['image'] ?? null;
-                    $category = $item['category'] ?? 'feld';
-                    if (empty($image['url'])) continue;
-                ?>
-                    <div class="gallery-item" data-gallery-category="<?php echo esc_attr($category); ?>" <?php if ($show_more_label && $index >= 4) : ?>style="display: none;"<?php endif; ?>>
-                        <img src="<?php echo esc_url($image['url']); ?>" alt="<?php echo esc_attr($image['alt'] ?: ''); ?>" loading="lazy" style="object-fit: cover; width: 100%; height: 100%; border-radius: 8px;" />
+                <?php foreach ($resolved_items as $index => $resolved) : ?>
+                    <div class="gallery-item" data-gallery-category="<?php echo esc_attr($resolved['category']); ?>" <?php if ($show_more_label && $index >= 4) : ?>style="display: none;"<?php endif; ?>>
+                        <img src="<?php echo esc_url($resolved['url']); ?>" alt="<?php echo esc_attr($resolved['alt']); ?>" loading="lazy" style="object-fit: cover; width: 100%; height: 100%; border-radius: 8px;" />
                     </div>
                 <?php endforeach; ?>
             </div>
-            <?php if ($show_more_label && count($items) > 4) : ?>
+            <?php if ($show_more_label && count($resolved_items) > 4) : ?>
                 <div style="margin-top: var(--wp--preset--spacing--40); text-align: center;">
                     <button type="button" class="btn btn-secondary" data-gallery-toggle><?php echo esc_html($show_more_label); ?></button>
                 </div>

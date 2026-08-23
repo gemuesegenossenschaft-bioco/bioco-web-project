@@ -50,7 +50,8 @@ def test_block_content_seed_preserves_all_migrated_fields():
 
     assert document["version"] == 1
     assert len(document["blocks"]) == 15
-    assert sum(len(values) for values in document["blocks"].values()) == 130
+    assert sum(len(values) for values in document["blocks"].values()) == 131
+    assert document["blocks"]["pricing-calculator"]["signup_url"] == "/anmeldung"
     assert document["blocks"]["doi-confirm"]["success_title"] == "Anmeldung bestätigt"
     assert document["blocks"]["event-signup-form"]["event_title_prefix"] == "Anmeldung für:"
     assert document["blocks"]["gallery"]["filters"][0] == {"key": "all", "label": "Alles"}
