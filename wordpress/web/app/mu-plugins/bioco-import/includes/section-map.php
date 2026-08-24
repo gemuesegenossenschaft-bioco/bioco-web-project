@@ -519,6 +519,11 @@ function bioco_import_component_map() {
                     'pastTitle' => 'past_title',
                     'pastDescription' => 'past_description',
                     'pastLinkLabel' => 'past_link_label',
+                    // #149: the /aktuelles Schnuppertage subsection (mirrors
+                    // AktuellesClient.tsx). Both keys were dead weight before —
+                    // seeded but never read anywhere on the WP side.
+                    'schnuppertageTitle' => 'schnuppertage_title',
+                    'schnuppertageEmptyMessage' => 'schnuppertage_empty_message',
                 ] as $configKey => $fieldName) {
                     $value = (string) bioco_import_config_value($section, $configKey);
                     if ($value !== '') $values[$fieldName] = $value;
@@ -526,7 +531,23 @@ function bioco_import_component_map() {
                 $upcomingTitle = (string) bioco_import_config_value($section, 'upcomingTitle');
                 if ($upcomingTitle !== '') $values['standard_title'] = $upcomingTitle;
                 $configuredTitle = (string) bioco_import_config_value($section, 'title');
-                if ($variant === 'banner' && $configuredTitle !== '') $values['title'] = $configuredTitle;
+                if ($configuredTitle !== '') {
+                    if ($variant === 'banner') {
+                        $values['title'] = $configuredTitle;
+                    } else {
+                        // Standard mode has no in-block h2 field; the title
+                        // becomes the composer's section heading (h2 above the
+                        // marker, see dynamicSection()), mirroring the h2 that
+                        // AktuellesClient.tsx renders from config.title.
+                        $values['_section_heading'] = $configuredTitle;
+                    }
+                }
+                if ((string) bioco_import_config_value($section, 'loadingMessage') !== '') {
+                    // Explicitly consumed, deliberately not imported: a loading
+                    // indicator only exists client-side (useEventsFeed); the
+                    // SSR block has no loading state to put the text into.
+                    $warnings[] = 'Hinweis (kein Inhaltsverlust): section_config.loadingMessage ist der reine Client-Ladezustand der Next.js-Seite (useEventsFeed). Das SSR-Rendering von bioco/events-feed kennt keinen Ladezustand und übernimmt den Text bewusst nicht.';
+                }
 
                 $title = (string) ($section['section_title'] ?? '');
                 if ($title !== '') {
@@ -786,9 +807,11 @@ function bioco_import_build_page_plan(array $seed) {
         $singleItems = bioco_import_plan_single_section($sections[$i]);
         foreach ($singleItems as $item) {
             if ($isHome && $componentKey === 'events_feed' && !empty($sections[$i]['section_title'])) {
+                // The homepage's ONE events feed (#148): the second feed the
+                // home-chrome block used to inject is gone. general-only —
+                // Schnuppertage have their own chrome block on the homepage
+                // and must not be duplicated into this list.
                 $item['values']['_section_heading'] = (string) $sections[$i]['section_title'];
-                $item['values']['respect_stored_status'] = true;
-                $item['values']['include_schnuppertage'] = true;
                 $item['values']['limit'] = 8;
                 $item['values']['standard_title'] = 'Nächste Events';
             }

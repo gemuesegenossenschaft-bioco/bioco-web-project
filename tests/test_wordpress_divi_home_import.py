@@ -328,7 +328,11 @@ def test_home_slug_uses_native_divi_sections_and_markers():
         < content.index("kennenlernen")
     )
     assert "Beiträge" in content or r"Beitr\u00e4ge" in content
-    assert "events_feed" in content
+    # #148: the chrome no longer injects an events feed — the homepage's single
+    # events_feed comes from the seed's own section (covered by
+    # test_home_seed_keeps_live_aktuelles_feed_after_cta). This synthetic seed
+    # has no events_feed section, so none may appear at all.
+    assert "events_feed" not in content
     assert "schnuppertage" in content
 
     marker_props = [
@@ -373,6 +377,9 @@ def test_home_seed_keeps_live_aktuelles_feed_after_cta():
     updates = content[content.index("section-b597772b") :]
     assert "Aktuelles" in updates
     assert "events_feed" in updates
+    # #148: exactly one events feed on the whole homepage (the seed section;
+    # the __home_chrome__ block contributes Beiträge + Schnuppertage only).
+    assert content.count("events_feed") == 1
 
 
 def test_every_seed_serializes_only_native_divi_blocks():

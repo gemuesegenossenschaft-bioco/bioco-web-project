@@ -6,7 +6,12 @@ Four contracts, all exercised against the real PHP with WP stubs:
      the WordPress site timezone — event_date is a local naive ACF datetime,
      not an instant;
   2. bioco_query_events() decides upcoming/past by DATE (current time), while
-     still honouring an explicit manual event_status=past on a future event;
+     still honouring an explicit manual event_status=past on a future event.
+     There is NO opt-out: the former respect_stored_status escape hatch let a
+     stale stored 'upcoming' pin a past-dated event into upcoming feeds (#148);
+  2b. the import derives event_status FROM the event date instead of trusting
+     the ProcessWire field (which defaults to 'upcoming' forever), while an
+     explicit source status 'past' still wins for a future-dated event;
   3. bioco_event_date_parts() reads the naive stored value in wp_timezone()
      with no shift;
   4. the events-feed block asks for general events only, schnuppertage for
@@ -136,14 +141,86 @@ def test_upcoming_is_filtered_by_current_date_not_only_by_status():
     ), date_clauses
 
 
-def test_homepage_can_explicitly_follow_source_stored_status():
+# --- 2a. the stored-status escape hatch is gone (#148) ----------------------
+
+# respect_stored_status let callers skip the date comparison entirely, which
+# is exactly how past-dated events with a stale stored 'upcoming' status ended
+# up in upcoming feeds. The parameter is deleted, not patched: no caller may
+# ever bypass the date comparison again.
+def test_the_stored_status_escape_hatch_is_gone_everywhere():
+    touched = [
+        ROOT / "wordpress/web/app/mu-plugins/bioco-core/includes/helpers.php",
+        CORE / "blocks/events-feed/render.php",
+        CORE / "blocks/schnuppertage/render.php",
+        ROOT / "wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php",
+        ROOT / "wordpress/web/app/mu-plugins/bioco-import/includes/divi-composer.php",
+        ROOT / "wordpress/web/app/mu-plugins/bioco-import/includes/collections.php",
+    ]
+    for path in touched:
+        assert "respect_stored_status" not in path.read_text(), path
+
+
+def test_query_events_signature_has_no_status_override_parameter():
     helpers = (ROOT / "wordpress/web/app/mu-plugins/bioco-core/includes/helpers.php").read_text()
-    events = (ROOT / "wordpress/web/app/mu-plugins/bioco-core/blocks/events-feed/render.php").read_text()
-    visits = (ROOT / "wordpress/web/app/mu-plugins/bioco-core/blocks/schnuppertage/render.php").read_text()
-    assert "$respect_stored_status = false" in helpers
-    assert "respect_stored_status" in events
-    assert "include_schnuppertage" in events
-    assert "respect_stored_status" in visits
+    assert "function bioco_query_events($status, $limit, $event_type = null)" in helpers
+
+
+# --- 2b. import derives event_status from the date, not the source field ----
+
+IMPORT_STATUS_PHP = r'''
+function wp_remote_get() {}
+function is_wp_error() { return false; }
+class WP_Error { public function __construct() {} }
+require 'wordpress/web/app/mu-plugins/bioco-import/includes/collections.php';
+echo json_encode([
+    'pastDate_upcomingStored' => bioco_import_event_field_plan([
+        'startDate' => '2026-05-29T14:00:00+02:00',
+        'status' => 'upcoming',
+    ]),
+    'futureDate_upcomingStored' => bioco_import_event_field_plan([
+        'startDate' => '2026-09-05T14:00:00+02:00',
+        'status' => 'upcoming',
+    ]),
+    'futureDate_pastStored' => bioco_import_event_field_plan([
+        'startDate' => '2026-09-05T14:00:00+02:00',
+        'status' => 'past',
+    ]),
+    'pastDate_pastStored' => bioco_import_event_field_plan([
+        'startDate' => '2026-05-29T14:00:00+02:00',
+        'status' => 'past',
+    ]),
+]);
+'''
+
+IMPORT_STATUS_NOW = "2026-08-24 09:00:00"
+
+
+def import_status_plans():
+    return run_php(
+        IMPORT_STATUS_PHP,
+        {"BIOCO_TEST_TZ": "Europe/Zurich", "BIOCO_TEST_NOW": IMPORT_STATUS_NOW},
+    )
+
+
+def test_past_dated_event_is_never_imported_as_upcoming():
+    """The #148 defect: stored status says 'upcoming', the date says otherwise."""
+    plan = import_status_plans()["pastDate_upcomingStored"]
+
+    assert plan["event_date"] == "2026-05-29 14:00:00"
+    assert plan["event_status"] == "past"
+
+
+def test_future_dated_event_stays_upcoming():
+    assert import_status_plans()["futureDate_upcomingStored"]["event_status"] == "upcoming"
+
+
+def test_explicit_source_past_still_wins_for_a_future_date():
+    """The Rueckblick flow retires an event early; derivation must not revive it."""
+    assert import_status_plans()["futureDate_pastStored"]["event_status"] == "past"
+
+
+def test_past_date_and_past_status_agree():
+    assert import_status_plans()["pastDate_pastStored"]["event_status"] == "past"
 
 
 def test_upcoming_still_excludes_an_explicitly_past_future_event():
@@ -219,16 +296,18 @@ def test_events_feed_block_requests_general_events_only():
         if "bioco_query_events(" in line
     ]
 
-    assert len(calls) == 2, calls
-    assert "$include_schnuppertage ? null : 'general'" in render
-    assert "$respect_stored_status" in render
-    assert "'past', 4" in calls[1]
-    assert "'general'" not in calls[1]
+    assert len(calls) == 3, calls
+    assert "bioco_query_events('upcoming', $limit, $include_schnuppertage ? null : 'general')" in calls[0]
+    assert "bioco_query_events('upcoming', $limit, 'schnuppertag')" in calls[1]
+    assert "'past', 4" in calls[2]
+    assert "'general'" not in calls[2]
+    assert "respect_stored_status" not in render
 
 
 def test_schnuppertage_block_still_requests_schnuppertag_events():
     render = (CORE / "blocks/schnuppertage/render.php").read_text()
-    assert "bioco_query_events('upcoming', $limit, 'schnuppertag', $respect_stored_status)" in render
+    assert "bioco_query_events('upcoming', $limit, 'schnuppertag')" in render
+    assert "respect_stored_status" not in render
 
 
 def test_site_wiring_sets_zurich_timezone_idempotently():
@@ -353,7 +432,12 @@ echo json_encode([
 
 
 def existing_event_force_run():
-    return run_php(EVENT_PHP, {"BIOCO_TEST_TZ": "Europe/Zurich"})
+    # Pin "now" BEFORE the fixture's event date: with date-derived event_status
+    # the planned status stays 'upcoming' and only the shifted date is written.
+    return run_php(
+        EVENT_PHP,
+        {"BIOCO_TEST_TZ": "Europe/Zurich", "BIOCO_TEST_NOW": "2026-08-01 09:00:00"},
+    )
 
 
 def test_force_writes_only_the_shifted_event_date():
@@ -414,7 +498,10 @@ function update_field($field, $value, $postId) {""",
 
 
 def newline_event_force_run():
-    return run_php(NEWLINE_EVENT_PHP, {"BIOCO_TEST_TZ": "Europe/Zurich"})
+    return run_php(
+        NEWLINE_EVENT_PHP,
+        {"BIOCO_TEST_TZ": "Europe/Zurich", "BIOCO_TEST_NOW": "2026-08-01 09:00:00"},
+    )
 
 
 def test_trailing_newline_from_formatted_get_field_is_not_rewritten():
@@ -491,7 +578,10 @@ RAW_META_EVENT_PHP = replace_once(
 
 
 def raw_meta_event_force_run():
-    return run_php(RAW_META_EVENT_PHP, {"BIOCO_TEST_TZ": "Europe/Zurich"})
+    return run_php(
+        RAW_META_EVENT_PHP,
+        {"BIOCO_TEST_TZ": "Europe/Zurich", "BIOCO_TEST_NOW": "2026-08-01 09:00:00"},
+    )
 
 
 def test_raw_meta_fallback_still_writes_the_shifted_event_date():
