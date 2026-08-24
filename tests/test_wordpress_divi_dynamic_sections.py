@@ -66,6 +66,7 @@ def _render_preamble() -> str:
     return (
         "define('ABSPATH', __DIR__);\n"
         "function wp_enqueue_script($handle, ...$args) {}\n"
+        "function wp_enqueue_style($handle, ...$args) {}\n"
         "function wp_localize_script($handle, $object, $values) {}\n"
         "function bioco_forms_view_script_handle($block_name) { return 'shared::' . $block_name; }\n"
         "function bioco_forms_localize_block($block_name, $object, $endpoint) {}\n"

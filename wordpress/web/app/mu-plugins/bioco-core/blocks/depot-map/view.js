@@ -1,10 +1,7 @@
 /**
  * Depot-map view script (W9 interactive blocks, issue #96).
- * Progressive enhancement only: draws a non-interactive Leaflet map when
- * window.L is already available. Leaflet itself is not vendored yet
- * (deferred to W11 — a local vendor file + enqueue will replace this check
- * with a real dependency); until then this block's static address list
- * (rendered server-side, see render.php) is the whole UI on every page.
+ * Draws a non-interactive map with the locally vendored Leaflet dependency.
+ * The server-rendered address list remains available if JavaScript fails.
  * Plain ES5-safe vanilla JS: the theme has no build step.
  */
 (function () {
