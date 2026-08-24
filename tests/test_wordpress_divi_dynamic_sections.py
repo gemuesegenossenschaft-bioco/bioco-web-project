@@ -88,12 +88,14 @@ def _render_preamble() -> str:
         "    public function have_posts() { return false; }\n"
         "    public function the_post() {}\n"
         "}\n"
-        "function bioco_query_events($status, $limit, $type = null, $respect_stored_status = false) { return new WP_Query(); }\n"
+        "function bioco_query_events($status, $limit, $type = null) { return new WP_Query(); }\n"
         "function wp_reset_postdata() {}\n"
         "function serialize_block($block) {\n"
         "    $content = '';\n"
         "    if ($block['blockName'] === 'divi/text') {\n"
         "        $content = $block['attrs']['content']['innerContent']['desktop']['value'];\n"
+        "    } elseif ($block['blockName'] === 'divi/heading') {\n"
+        "        $content = json_encode($block['attrs']['title']['innerContent']['desktop']['value']);\n"
         "    } else {\n"
         "        foreach ($block['innerBlocks'] as $child) $content .= serialize_block($child);\n"
         "    }\n"
@@ -239,3 +241,122 @@ def test_composer_remains_final_with_one_public_method_and_runtime_is_wired():
     assert payload == {"final": True, "public": ["section"]}
     assert "BIOCO_IMPORT_CORE_INCLUDES_DIR . '/dynamic-sections.php'" in bootstrap
     assert bootstrap.index("dynamic-sections.php") < bootstrap.index("divi-composer.php")
+
+
+# ---------------------------------------------------------------------------
+# Issue #148: exactly ONE events feed on the homepage
+# ---------------------------------------------------------------------------
+
+
+def test_homepage_plan_contains_exactly_one_events_feed():
+    """The duplicate feed came from two paths: the seed's own events_feed
+    section AND an unconditional second marker injected by homeChromeSection().
+    The chrome keeps Beitraege + Schnuppertage only; the single feed is the
+    CMS-driven seed section (it is the one with the past-events card)."""
+    payload = _json_php(
+        _render_preamble()
+        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';\n"
+        + "$seed = json_decode(file_get_contents('wordpress/content-seed/home.json'), true);\n"
+        + "$plan = bioco_import_build_page_plan($seed);\n"
+        + "$feeds = array_values(array_filter($plan, fn($i) => ($i['block'] ?? '') === 'events-feed'));\n"
+        + "$chromeSerialized = '';\n"
+        + "foreach ($plan as $i) {\n"
+        + "    if (($i['block'] ?? '') === 'home-chrome') {\n"
+        + "        $chromeSerialized = serialize_block(Bioco_Import_Divi_Composer::section($i));\n"
+        + "    }\n"
+        + "}\n"
+        + "echo json_encode(['feeds' => $feeds, 'chrome' => $chromeSerialized]);"
+    )
+
+    assert len(payload["feeds"]) == 1, payload["feeds"]
+    values = payload["feeds"][0]["values"]
+    # general-only: the schnuppertage chrome block is the one place
+    # Schnuppertage appear on the homepage, never duplicated into the feed.
+    assert "respect_stored_status" not in values
+    assert "include_schnuppertage" not in values
+
+    chrome = payload["chrome"]
+    assert 'data-bioco-component="events_feed"' not in chrome
+    assert 'data-bioco-component="schnuppertage"' in chrome
+    assert "respect_stored_status" not in chrome
+
+
+# ---------------------------------------------------------------------------
+# Issue #149: /aktuelles wires the schnuppertage subsection; /mitmachen keeps
+# its section heading
+# ---------------------------------------------------------------------------
+
+
+def test_aktuelles_events_feed_wires_the_schnuppertage_subsection():
+    """The seed carries schnuppertageTitle/schnuppertageEmptyMessage; the WP
+    port used to drop them silently, so /aktuelles rendered no Schnuppertage
+    at all. They now reach the block, mirroring AktuellesClient.tsx:
+    h2 'Events', h3 'Kommende Events' (general), h3 'Schnuppertage'."""
+    payload = _json_php(
+        _render_preamble()
+        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';\n"
+        + "$seed = json_decode(file_get_contents('wordpress/content-seed/aktuelles.json'), true);\n"
+        + "$item = null;\n"
+        + "foreach (bioco_import_build_page_plan($seed) as $candidate) {\n"
+        + "    if ($candidate['block'] === 'events-feed') $item = $candidate;\n"
+        + "}\n"
+        + "$serialized = serialize_block(Bioco_Import_Divi_Composer::section($item));\n"
+        + "$expanded = bioco_dynamic_expand_markers($serialized);\n"
+        + "echo json_encode(['values' => $item['values'], 'serialized' => $serialized, 'expanded' => $expanded]);"
+    )
+
+    values = payload["values"]
+    assert values["schnuppertage_title"] == "Schnuppertage"
+    assert values["schnuppertage_empty_message"] == "Aktuell sind keine Schnuppertage geplant."
+    # h2 'Events' (seed config.title) becomes the composer's section heading,
+    # which serializes as a divi/heading block (text lives in the attrs JSON).
+    assert values["_section_heading"] == "Events"
+    assert '"Events"' in payload["serialized"]
+
+    expanded = payload["expanded"]
+    assert "<h3>Schnuppertage</h3>" in expanded
+    assert "Aktuell sind keine Schnuppertage geplant." in expanded
+    # The general feed keeps its own empty text — no cross-contamination.
+    assert "Aktuell sind keine allgemeinen Events geplant." in expanded
+
+
+def _render_preamble_real_heading_detection() -> str:
+    """_render_preamble() stubs bioco_text_has_heading_html() to always-false,
+    which can never reproduce the suppressed-heading defect. Swap in the real
+    implementation (verbatim from bioco-core/includes/helpers.php)."""
+    stub = "function bioco_text_has_heading_html($html) { return false; }\n"
+    real = (
+        "function bioco_text_has_heading_html($html) {"
+        r" return (bool) preg_match('/<h[1-6]\b[^>]*>/i', (string) $html); }"
+        + "\n"
+    )
+    preamble = _render_preamble()
+    assert stub in preamble
+    return preamble.replace(stub, real)
+
+
+def test_mitmachen_schnuppertage_keeps_its_h2_heading_above_the_h3_subheading():
+    """The seed's section_text opens with an <h3>; suppressing the block title
+    on that basis left /mitmachen with no visible 'Schnuppertage' heading.
+    SchnuppertageSection.tsx (the reference component) renders title AND text
+    unconditionally, so the block does too — h2 title + h3 from the text is
+    the production design, not a duplicate."""
+    payload = _json_php(
+        _render_preamble_real_heading_detection()
+        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';\n"
+        + "$seed = json_decode(file_get_contents('wordpress/content-seed/mitmachen.json'), true);\n"
+        + "$item = null;\n"
+        + "foreach (bioco_import_build_page_plan($seed) as $candidate) {\n"
+        + "    if ($candidate['block'] === 'schnuppertage') $item = $candidate;\n"
+        + "}\n"
+        + "$expanded = bioco_dynamic_expand_markers(serialize_block(Bioco_Import_Divi_Composer::section($item)));\n"
+        + "echo json_encode(['expanded' => $expanded]);"
+    )
+
+    html = payload["expanded"]
+    assert 'class="cms-section cms-schnuppertage"' in html
+    assert "<h2>Schnuppertage</h2>" in html
+    assert "Komm schnuppern" in html
+    # One h2 heading, then the h3 subheading from the text — not two headings.
+    assert html.count("<h2>Schnuppertage</h2>") == 1
+    assert html.index("<h2>Schnuppertage</h2>") < html.index("Komm schnuppern")

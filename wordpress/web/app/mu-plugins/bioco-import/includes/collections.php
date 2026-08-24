@@ -61,8 +61,20 @@ function bioco_import_event_field_plan(array $item) {
             // writing a wrong instant.
         }
     }
-    if (!empty($item['status']) && in_array($item['status'], ['upcoming', 'past'], true)) {
-        $plan['event_status'] = $item['status'];
+    // #148: the source status is not trustworthy. api-events.php defaults any
+    // event without an explicit status to 'upcoming' and nothing ever flips it
+    // when the date passes, so copying it verbatim pinned long-past events into
+    // the upcoming feeds. The date decides. An explicit 'past' still wins, so
+    // the Rueckblick flow can retire a still-future event early.
+    $storedStatus = !empty($item['status']) && in_array($item['status'], ['upcoming', 'past'], true)
+        ? $item['status']
+        : null;
+    if (isset($plan['event_date'])) {
+        $elapsed = $plan['event_date'] < current_time('Y-m-d H:i:s');
+        $plan['event_status'] = ($elapsed || $storedStatus === 'past') ? 'past' : 'upcoming';
+    } elseif ($storedStatus !== null) {
+        // No parseable date: the source field is all we have.
+        $plan['event_status'] = $storedStatus;
     }
     if (!empty($item['eventType']) && in_array($item['eventType'], ['general', 'schnuppertag'], true)) {
         $plan['event_type'] = $item['eventType'];

@@ -6,6 +6,12 @@
  * and EventsBanner.tsx (variant=banner: compact events-banner). Cards link
  * straight to the single event permalink instead of opening a JS modal — the
  * client-side ItemDetailModal/useEventsFeed behaviour is not ported here.
+ *
+ * Standard variant can additionally render a Schnuppertage subsection
+ * (schnuppertage_title + schnuppertage_empty_message), mirroring
+ * AktuellesClient.tsx on /aktuelles: h3 title + a live list of upcoming
+ * event_type=schnuppertag events. It only renders when the main list stays
+ * general-only — with include_schnuppertage the events would appear twice.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -21,8 +27,9 @@ $past_description = bioco_field('past_description');
 $past_link_label = bioco_field('past_link_label');
 $empty_message = bioco_field('empty_message');
 $archive_url = bioco_field('archive_url');
-$respect_stored_status = (bool) bioco_field('respect_stored_status');
 $include_schnuppertage = (bool) bioco_field('include_schnuppertage');
+$schnuppertage_title = bioco_field('schnuppertage_title');
+$schnuppertage_empty_message = bioco_field('schnuppertage_empty_message');
 $archive_href = $archive_url ? bioco_navigation_url($archive_url) : '';
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'events-feed';
@@ -31,12 +38,10 @@ if (!empty($block['className'])) {
     $class_name .= ' ' . $block['className'];
 }
 
-$upcoming_query = bioco_query_events(
-    'upcoming',
-    $limit,
-    $include_schnuppertage ? null : 'general',
-    $respect_stored_status
-);
+$upcoming_query = bioco_query_events('upcoming', $limit, $include_schnuppertage ? null : 'general');
+$schnuppertage_query = ($schnuppertage_title && !$include_schnuppertage)
+    ? bioco_query_events('upcoming', $limit, 'schnuppertag')
+    : null;
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
     <?php if ($variant === 'banner') : ?>
@@ -48,7 +53,7 @@ $upcoming_query = bioco_query_events(
             </p><?php endif; ?>
         </div>
     <?php else :
-        $past_query = bioco_query_events('past', 4, null, $respect_stored_status);
+        $past_query = bioco_query_events('past', 4);
     ?>
         <div class="bento-card events-card bento-card-fullwidth">
             <div class="card-header"><?php if ($standard_title) : ?><h3><?php echo esc_html($standard_title); ?></h3><?php endif; ?></div>
@@ -57,6 +62,12 @@ $upcoming_query = bioco_query_events(
 <?php if ($standard_link_label && $archive_href) : ?>                <a href="<?php echo esc_url($archive_href); ?>" class="btn btn-primary events-feed-archive-link"><?php echo esc_html($standard_link_label); ?></a><?php endif; ?>
             </div>
         </div>
+        <?php if ($schnuppertage_query) : ?>
+            <div class="events-feed-schnuppertage">
+                <h3><?php echo esc_html($schnuppertage_title); ?></h3>
+                <?php bioco_render_events_list($schnuppertage_query, $schnuppertage_empty_message); ?>
+            </div>
+        <?php endif; ?>
         <?php if ($past_query->have_posts()) : ?>
             <div class="bento-card past-events-card">
                 <div class="card-header">

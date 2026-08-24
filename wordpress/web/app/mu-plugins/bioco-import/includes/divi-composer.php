@@ -194,21 +194,17 @@ final class Bioco_Import_Divi_Composer {
     }
 
     private static function homeChromeSection(): array {
-        $events = bioco_dynamic_marker_html('events_feed', [
-            'variant' => 'banner',
-            'title' => 'Kommende Events',
-            'banner_link_label' => 'Alle Events ansehen',
-            'archive_url' => '/aktuelles',
-            'empty_message' => 'Aktuell sind keine kommenden Events geplant.',
-            'limit' => 3,
-            'respect_stored_status' => true,
-        ]);
+        // #148: this block used to inject a second events_feed alongside the
+        // one the home seed already carries, so the homepage listed its events
+        // twice. The seed section is the survivor because it matches the live
+        // site: one standard list headed "Naechste Events". Schnuppertage stay
+        // here and are deliberately NOT folded into that feed, otherwise a
+        // Schnuppertag appears in both.
         $visits = bioco_dynamic_marker_html('schnuppertage', [
             'title' => 'Schnuppertage',
             'display' => 'cards',
             'empty_message' => 'Aktuell sind keine Schnuppertage geplant.',
             'limit' => 3,
-            'respect_stored_status' => true,
         ]);
 
         return self::withChildren(
@@ -224,7 +220,6 @@ final class Bioco_Import_Divi_Composer {
                             'href' => '/aktuelles',
                             'variant' => 'secondary',
                         ]),
-                        self::textBlock($events, 'bioco-home-live-events'),
                         self::textBlock($visits, 'bioco-home-live-visits'),
                     ]
                 )]

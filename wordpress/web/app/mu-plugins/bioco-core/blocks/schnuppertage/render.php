@@ -7,6 +7,13 @@
  * Termine list is live from the Veranstaltung CPT (event_type=schnuppertag).
  * The signup modal (EventSignupForm) is deferred to W10 (forms) — each
  * upcoming date's "Jetzt anmelden" button links to signup_anchor instead.
+ *
+ * Title and text ALWAYS both render (#149): the reference component renders
+ * section_title as h2 followed by section_text verbatim, even when the text
+ * opens with its own h3 subheading (that is the production design on
+ * /mitmachen, not a duplicate). Suppressing the title whenever the text
+ * contained any heading left the section with no visible "Schnuppertage"
+ * heading at all.
  */
 
 if (!defined('ABSPATH')) exit;
@@ -29,13 +36,10 @@ if (!empty($block['className'])) {
     $class_name .= ' ' . $block['className'];
 }
 
-$heading_already_in_text = bioco_text_has_heading_html($text);
-
-$respect_stored_status = (bool) bioco_field('respect_stored_status');
-$termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag', $respect_stored_status);
+$termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag');
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
-    <?php if ($title && !$heading_already_in_text) : ?>
+    <?php if ($title) : ?>
         <h2><?php echo esc_html($title); ?></h2>
     <?php endif; ?>
     <?php if ($text) : ?>
