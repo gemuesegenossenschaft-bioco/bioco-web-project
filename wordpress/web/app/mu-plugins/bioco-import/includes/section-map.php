@@ -661,10 +661,11 @@ function bioco_import_plan_timeline_group(array $sectionGroup) {
             $bodyText = $sourceText;
             if (preg_match('/^\s*<h[1-6][^>]*>(.*?)<\/h[1-6]>\s*/is', $sourceText, $heading)) {
                 $headingText = trim(html_entity_decode(strip_tags($heading[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-                if (empty($row['title'])) {
+                $normalizedTitle = trim((string) ($row['title'] ?? ''));
+                if ($normalizedTitle === '') {
                     $row['title'] = $headingText;
                     $bodyText = substr($sourceText, strlen($heading[0]));
-                } elseif ($headingText === $row['title']) {
+                } elseif ($headingText === $normalizedTitle) {
                     $bodyText = substr($sourceText, strlen($heading[0]));
                 } else {
                     $warnings[] = "Section {$sid}: Überschrift in section_text weicht von section_title ab; section_title bleibt der Titel und die abweichende Überschrift bleibt im Text erhalten.";

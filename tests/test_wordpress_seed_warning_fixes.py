@@ -21,6 +21,28 @@ def _wir_plan():
     return json.loads(result.stdout)
 
 
+def _timeline_plan(section_title, section_text):
+    sections = [
+        {
+            "section_id": "timeline-item",
+            "section_component": "timeline_item",
+            "section_title": section_title,
+            "section_text": section_text,
+        }
+    ]
+    payload = base64.b64encode(json.dumps(sections).encode()).decode()
+    php = f'''
+    define('ABSPATH', __DIR__);
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';
+    $sections = json_decode(base64_decode('{payload}'), true);
+    echo json_encode(bioco_import_plan_timeline_group($sections));
+    '''
+    result = subprocess.run(
+        ["php", "-r", php], cwd=ROOT, text=True, capture_output=True, check=True
+    )
+    return json.loads(result.stdout)[0]
+
+
 def _compose(item):
     payload = base64.b64encode(json.dumps(item).encode()).decode()
     php = f'''
@@ -73,6 +95,32 @@ def test_timeline_headings_become_titles_and_body_stays_rich_text():
         assert expected[row["title"]] in row["text"]
         assert "<h2>" not in row["text"]
     assert not any("geglättet" in warning or "geglattet" in warning for warning in item.get("warnings", []))
+
+
+def test_timeline_title_zero_is_preserved_and_different_heading_warns():
+    item = _timeline_plan("0", "<h2>Andere Überschrift</h2><p>Inhalt</p>")
+
+    # Gezielt statt auf Gesamtgleichheit: die Items tragen seit #165 zusaetzlich
+    # einen anchor, und dieser Test handelt nicht davon.
+    row = item["values"]["items"][0]
+    assert row["title"] == "0"
+    assert row["text"] == "<h2>Andere Überschrift</h2><p>Inhalt</p>"
+    assert any(
+        "Überschrift in section_text weicht von section_title ab" in warning
+        for warning in item["warnings"]
+    )
+
+
+def test_timeline_title_comparison_ignores_spacing_without_changing_title():
+    item = _timeline_plan("Titel ", "<h2>Titel</h2><p>Inhalt</p>")
+
+    row = item["values"]["items"][0]
+    assert row["title"] == "Titel "
+    assert row["text"] == "<p>Inhalt</p>"
+    assert not any(
+        "Überschrift in section_text weicht von section_title ab" in warning
+        for warning in item.get("warnings", [])
+    )
 
 
 def test_wide_grid_blocks_declare_and_render_container_width():
