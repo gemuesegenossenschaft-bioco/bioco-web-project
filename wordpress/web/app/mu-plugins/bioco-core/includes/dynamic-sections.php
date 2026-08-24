@@ -58,6 +58,18 @@ function bioco_dynamic_expand_markers(string $html): string {
     );
 }
 
+function bioco_dynamic_view_style_handle(string $block_name, string $view_style): string {
+    if (str_starts_with($view_style, 'file:')) {
+        if (function_exists('generate_block_asset_handle')) {
+            return generate_block_asset_handle($block_name, 'viewStyle');
+        }
+
+        return str_replace('/', '-', $block_name) . '-view-style';
+    }
+
+    return $view_style;
+}
+
 function bioco_render_dynamic_component(string $component, array $values): string {
     $components = bioco_dynamic_components();
     if (!isset($components[$component])) {
@@ -70,6 +82,9 @@ function bioco_render_dynamic_component(string $component, array $values): strin
     $block_metadata = json_decode((string) file_get_contents($block_dir . '/block.json'), true);
     if (!empty($block_metadata['viewScript'])) {
         wp_enqueue_script(bioco_forms_view_script_handle($block_name));
+    }
+    if (!empty($block_metadata['viewStyle']) && is_string($block_metadata['viewStyle'])) {
+        wp_enqueue_style(bioco_dynamic_view_style_handle($block_name, $block_metadata['viewStyle']));
     }
 
     $block = [

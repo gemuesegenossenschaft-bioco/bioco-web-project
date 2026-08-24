@@ -92,6 +92,49 @@ add_filter('block_categories_all', function (array $categories) {
 });
 
 /**
+ * Map assets are registered here but enqueued by block metadata only when a
+ * depot or Geisshof map is rendered. Both view scripts depend on the local
+ * Leaflet build, while viewStyle attaches its CSS to the rendered block.
+ */
+add_action('init', 'bioco_core_register_map_assets');
+
+function bioco_core_register_map_assets() {
+    $leaflet_dir = BIOCO_CORE_DIR . '/assets/vendor/leaflet';
+    $leaflet_url = plugin_dir_url(__FILE__) . 'assets/vendor/leaflet/';
+
+    wp_register_style(
+        'bioco-leaflet',
+        $leaflet_url . 'leaflet.css',
+        [],
+        (string) filemtime($leaflet_dir . '/leaflet.css')
+    );
+    wp_register_script(
+        'bioco-leaflet',
+        $leaflet_url . 'leaflet.js',
+        [],
+        (string) filemtime($leaflet_dir . '/leaflet.js'),
+        true
+    );
+
+    $depot_view_path = BIOCO_CORE_DIR . '/blocks/depot-map/view.js';
+    wp_register_script(
+        'bioco-depot-map-view-script',
+        plugin_dir_url(__FILE__) . 'blocks/depot-map/view.js',
+        ['bioco-leaflet'],
+        (string) filemtime($depot_view_path),
+        true
+    );
+    $geisshof_view_path = BIOCO_CORE_DIR . '/blocks/geisshof-map/view.js';
+    wp_register_script(
+        'bioco-geisshof-map-view-script',
+        plugin_dir_url(__FILE__) . 'blocks/geisshof-map/view.js',
+        ['bioco-leaflet'],
+        (string) filemtime($geisshof_view_path),
+        true
+    );
+}
+
+/**
  * Block registration: every block.json found one level under this plugin's
  * blocks/ dir. Additive with the block theme's own (shrinking) glob over its
  * own blocks/ dir — disjoint directories, no double registration as long as

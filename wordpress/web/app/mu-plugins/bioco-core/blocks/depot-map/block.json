@@ -12,7 +12,8 @@
     "mode": "auto",
     "renderTemplate": "render.php"
   },
-  "viewScript": "file:./view.js",
+  "viewScript": "bioco-depot-map-view-script",
+  "viewStyle": "bioco-leaflet",
   "supports": {
     "anchor": true,
     "align": false,

@@ -56,6 +56,7 @@ def _render_preamble() -> str:
         "define('ABSPATH', __DIR__);\n"
         "$GLOBALS['BIOCO_FILTERS'] = [];\n"
         "$GLOBALS['BIOCO_ENQUEUED'] = [];\n"
+        "$GLOBALS['BIOCO_ENQUEUED_STYLES'] = [];\n"
         "$GLOBALS['BIOCO_LOCALIZED'] = [];\n"
         "$GLOBALS['BIOCO_ACF_CALLS'] = [];\n"
         "$GLOBALS['BIOCO_NEST_COMPONENT'] = null;\n"
@@ -64,6 +65,7 @@ def _render_preamble() -> str:
         "    $GLOBALS['BIOCO_FILTERS'][] = [$hook, $callback, $priority, $args];\n"
         "}\n"
         "function wp_enqueue_script($handle, ...$args) { $GLOBALS['BIOCO_ENQUEUED'][] = $handle; }\n"
+        "function wp_enqueue_style($handle, ...$args) { $GLOBALS['BIOCO_ENQUEUED_STYLES'][] = $handle; }\n"
         "function wp_localize_script($handle, $object, $values) {\n"
         "    $GLOBALS['BIOCO_LOCALIZED'][] = [$handle, $object, $values];\n"
         "}\n"
@@ -224,6 +226,34 @@ def test_view_script_enqueue_and_form_localization_share_existing_handle_helper(
         [expected_handle, "biocoContactFormConfig", {"endpoint": "contact"}]
     ]
     assert payload["group_enqueued"] == []
+
+
+def test_dynamic_map_markers_enqueue_registered_leaflet_style():
+    payload = _json_php(
+        _render_preamble()
+        + "$depot = bioco_dynamic_marker_html('depot_map', ['empty_message' => 'DEPOT']);\n"
+        + "bioco_dynamic_expand_markers($depot);\n"
+        + "$depot_styles = $GLOBALS['BIOCO_ENQUEUED_STYLES'];\n"
+        + "$GLOBALS['BIOCO_ENQUEUED_STYLES'] = [];\n"
+        + "$geisshof = bioco_dynamic_marker_html('geisshof_map', ['empty_message' => 'GEISSHOF']);\n"
+        + "bioco_dynamic_expand_markers($geisshof);\n"
+        + "$geisshof_styles = $GLOBALS['BIOCO_ENQUEUED_STYLES'];\n"
+        + "$GLOBALS['BIOCO_ENQUEUED_STYLES'] = [];\n"
+        + "bioco_render_dynamic_component('group_cards', ['empty_message' => 'NONE']);\n"
+        + "echo json_encode([\n"
+        + "    'depot' => $depot_styles,\n"
+        + "    'geisshof' => $geisshof_styles,\n"
+        + "    'without_view_style' => $GLOBALS['BIOCO_ENQUEUED_STYLES'],\n"
+        + "    'file_style' => bioco_dynamic_view_style_handle('bioco/example', 'file:./style.css'),\n"
+        + "]);"
+    )
+
+    assert payload == {
+        "depot": ["bioco-leaflet"],
+        "geisshof": ["bioco-leaflet"],
+        "without_view_style": [],
+        "file_style": "bioco-example-view-style",
+    }
 
 
 def test_context_stack_restores_outer_context_and_never_leaks():

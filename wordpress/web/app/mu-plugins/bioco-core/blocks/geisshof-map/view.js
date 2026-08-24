@@ -1,8 +1,7 @@
 /**
  * Geisshof-map view script (W9 interactive blocks, issue #96).
- * Same progressive-enhancement approach as bioco/depot-map/view.js (see that
- * file for the Leaflet-deferred-to-W11 note) — duplicated rather than shared
- * because the theme has no build step to import a common module from.
+ * Same local Leaflet dependency as bioco/depot-map/view.js. The small script
+ * stays separate because the theme has no build step for a shared module.
  */
 (function () {
   'use strict';
