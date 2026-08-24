@@ -231,6 +231,9 @@ function bioco_import_component_map() {
             'auto_header' => true,
             'config_fields' => [
                 'containerWidth' => 'container_width',
+                'columnsDesktop' => null,
+                'columnsMobile' => null,
+                'cardStyle' => null,
                 'mediaSide' => 'media_side',
                 'mediaWidth' => 'media_width',
                 'mediaRatio' => 'media_ratio',
@@ -244,6 +247,22 @@ function bioco_import_component_map() {
                 $alt = (string) ($section['image_alt'] ?? '');
                 if ($url !== '') $values['image'] = bioco_import_pending_image($url);
                 if ($alt !== '') $values['image_alt'] = $alt;
+                $config = is_array($section['section_config'] ?? null) ? $section['section_config'] : [];
+                if (($config['columnsDesktop'] ?? '') !== '') {
+                    $warnings[] = (string) $config['columnsDesktop'] === '2'
+                        ? 'Hinweis (kein Inhaltsverlust): section_config.columnsDesktop wird nicht übernommen. bioco/media-text ist auf Desktop immer zweispaltig; der Seed-Wert 2 ändert das Layout nicht.'
+                        : 'section_config.columnsDesktop hat kein passendes Feld in bioco/media-text — Wert wurde nicht importiert.';
+                }
+                if (($config['columnsMobile'] ?? '') !== '') {
+                    $warnings[] = (string) $config['columnsMobile'] === '1'
+                        ? 'Hinweis (kein Inhaltsverlust): section_config.columnsMobile wird nicht übernommen. bioco/media-text stapelt Bild und Text mobil immer einspaltig; der Seed-Wert 1 ändert das Layout nicht.'
+                        : 'section_config.columnsMobile hat kein passendes Feld in bioco/media-text — Wert wurde nicht importiert.';
+                }
+                if (($config['cardStyle'] ?? '') !== '') {
+                    $warnings[] = (string) $config['cardStyle'] === 'plain'
+                        ? 'Hinweis (kein Inhaltsverlust): section_config.cardStyle wird nicht übernommen. bioco/media-text hat keine Kartenhülle; der Seed-Wert plain verlangt genau diese unverzierte Darstellung.'
+                        : 'section_config.cardStyle hat kein passendes Feld in bioco/media-text — Wert wurde nicht importiert.';
+                }
             },
         ],
         'cards_grid' => [
@@ -252,6 +271,7 @@ function bioco_import_component_map() {
             'buttons' => false,
             'auto_header' => true,
             'config_fields' => [
+                'containerWidth' => 'container_width',
                 'columnsDesktop' => 'columns_desktop',
                 'columnsMobile' => 'columns_mobile',
                 'cardStyle' => 'card_style',
@@ -284,6 +304,7 @@ function bioco_import_component_map() {
             'buttons' => true,
             'auto_header' => true,
             'config_fields' => [
+                'containerWidth' => 'container_width',
                 'columnsDesktop' => 'columns_desktop',
                 'columnsMobile' => 'columns_mobile',
                 'mediaRatio' => 'media_ratio',
@@ -313,6 +334,7 @@ function bioco_import_component_map() {
             'config_fields' => [
                 'containerWidth' => 'container_width',
                 'columnsDesktop' => 'columns',
+                'columnsMobile' => null,
                 'gap' => 'gap',
             ],
             'extra' => function (array $section, array &$values, array &$warnings) {
@@ -320,6 +342,12 @@ function bioco_import_component_map() {
                 $alt = (string) ($section['image_alt'] ?? '');
                 if ($url !== '') $values['image'] = bioco_import_pending_image($url);
                 if ($alt !== '') $values['image_alt'] = $alt;
+                $config = is_array($section['section_config'] ?? null) ? $section['section_config'] : [];
+                if (($config['columnsMobile'] ?? '') !== '') {
+                    $warnings[] = (string) $config['columnsMobile'] === '1'
+                        ? 'Hinweis (kein Inhaltsverlust): section_config.columnsMobile wird nicht übernommen. bioco/text-columns ist mobil immer einspaltig; der Seed-Wert 1 entspricht diesem Layout.'
+                        : 'section_config.columnsMobile hat kein passendes Feld in bioco/text-columns — Wert wurde nicht importiert.';
+                }
             },
         ],
         'cta_band' => [
@@ -565,7 +593,15 @@ function bioco_import_component_map() {
                 }
                 foreach (['section_eyebrow' => 'section_eyebrow', 'section_text' => 'section_text'] as $seedKey => $label) {
                     if (!empty($section[$seedKey])) {
-                        $warnings[] = "{$label} im Seed vorhanden, aber bioco/events-feed unterstützt kein {$label}-Feld — Inhalt geht sonst verloren.";
+                        $value = (string) $section[$seedKey];
+                        $headingOnly = $seedKey === 'section_text'
+                            && preg_match('/^\s*<h[1-6][^>]*>(.*?)<\/h[1-6]>\s*$/is', $value, $heading)
+                            && trim(html_entity_decode(strip_tags($heading[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8')) === trim((string) ($section['section_title'] ?? ''));
+                        if ($headingOnly) {
+                            $warnings[] = 'Hinweis (kein Inhaltsverlust): section_text enthält nur dieselbe Überschrift wie section_title und wird zusammen mit diesem bewusst nicht übernommen; EventsSection.tsx zeigt stattdessen fest „Nächste Events“.';
+                        } else {
+                            $warnings[] = "{$label} im Seed vorhanden, aber bioco/events-feed unterstützt kein {$label}-Feld — Inhalt geht sonst verloren.";
+                        }
                     }
                 }
                 if (!empty($section['buttons'])) {
@@ -623,14 +659,19 @@ function bioco_import_plan_timeline_group(array $sectionGroup) {
         if (array_key_exists('section_text', $section)) {
             $sourceText = (string) $section['section_text'];
             $bodyText = $sourceText;
-            if (!empty($row['title']) && preg_match('/^\s*<h[1-6][^>]*>(.*?)<\/h[1-6]>\s*/is', $sourceText, $heading)) {
+            if (preg_match('/^\s*<h[1-6][^>]*>(.*?)<\/h[1-6]>\s*/is', $sourceText, $heading)) {
                 $headingText = trim(html_entity_decode(strip_tags($heading[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-                if ($headingText === $row['title']) $bodyText = substr($sourceText, strlen($heading[0]));
+                $normalizedTitle = trim((string) ($row['title'] ?? ''));
+                if ($normalizedTitle === '') {
+                    $row['title'] = $headingText;
+                    $bodyText = substr($sourceText, strlen($heading[0]));
+                } elseif ($headingText === $normalizedTitle) {
+                    $bodyText = substr($sourceText, strlen($heading[0]));
+                } else {
+                    $warnings[] = "Section {$sid}: Überschrift in section_text weicht von section_title ab; section_title bleibt der Titel und die abweichende Überschrift bleibt im Text erhalten.";
+                }
             }
-            $row['text'] = trim((string) preg_replace('/\s+/u', ' ', html_entity_decode(strip_tags($bodyText), ENT_QUOTES | ENT_HTML5, 'UTF-8')));
-            if ($sourceText !== strip_tags($sourceText)) {
-                $warnings[] = "Section {$sid}: HTML-Formatierung aus section_text laesst sich in timeline.items.text nicht abbilden und wurde zu Fliesstext geglaettet.";
-            }
+            $row['text'] = trim($bodyText);
         }
 
         $config = is_array($section['section_config'] ?? null) ? $section['section_config'] : [];

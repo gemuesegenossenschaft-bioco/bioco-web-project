@@ -3,6 +3,8 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).parents[1]
 
@@ -560,6 +562,21 @@ def test_pricing_table_container_width_modifiers():
         assert _class(tree) == f"bioco-divi-section bioco-divi-pricing-table bioco-divi-width-{expected}"
 
 
+@pytest.mark.parametrize("block", ["cards-grid", "gallery-strip"])
+@pytest.mark.parametrize("width", ["sm", "md", "lg", "xl", "full"])
+def test_wide_grid_container_width_survives_composition(block, width):
+    tree = _compose({"block": block, "values": {"container_width": width}})
+
+    assert _class(tree) == f"bioco-divi-section bioco-divi-{block} bioco-divi-width-{width}"
+
+
+@pytest.mark.parametrize("block", ["cards-grid", "gallery-strip"])
+def test_wide_grid_container_width_defaults_to_xl(block):
+    tree = _compose({"block": block, "values": {}})
+
+    assert _class(tree) == f"bioco-divi-section bioco-divi-{block} bioco-divi-width-xl"
+
+
 def test_pricing_table_empty_tiers_omit_table_module():
     tree = _compose(
         {
@@ -897,7 +914,7 @@ def test_gallery_strip_is_native_and_preserves_images_and_buttons():
         }
     )
 
-    assert _class(tree) == "bioco-divi-section bioco-divi-gallery-strip"
+    assert _class(tree) == "bioco-divi-section bioco-divi-gallery-strip bioco-divi-width-xl"
     rows = _rows(tree)
     assert len(rows) == 3
     assert _class(rows[0]) == "bioco-divi-row bioco-divi-gallery-strip-header"
@@ -1112,7 +1129,7 @@ def test_cards_grid_is_native_and_preserves_cards():
         }
     )
 
-    assert _class(tree) == "bioco-divi-section bioco-divi-cards-grid"
+    assert _class(tree) == "bioco-divi-section bioco-divi-cards-grid bioco-divi-width-xl"
 
     header_row = _row(tree, 0)
     assert _class(header_row) == "bioco-divi-row bioco-divi-cards-grid-header"
