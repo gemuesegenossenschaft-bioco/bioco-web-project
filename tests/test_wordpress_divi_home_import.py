@@ -598,7 +598,7 @@ def test_verify_non_home_matches_native_tree():
     seed_b64 = base64.b64encode(json.dumps(seed).encode("utf-8")).decode("ascii")
 
     hero_b64 = _base64_item({"block": "hero", "values": {"headline": "H", "subtitle": "S", "image": 0, "image_alt": ""}})
-    intro_b64 = _base64_item({"block": "rich-text", "values": {"title": "Intro", "text": "<p>T</p>", "buttons": [], "style_variant": "feature"}})
+    intro_b64 = _base64_item({"block": "rich-text", "values": {"anchor": "intro", "title": "Intro", "text": "<p>T</p>", "buttons": [], "style_variant": "feature"}})
     php = (
         _preamble()
         + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/report.php';\n"
@@ -701,7 +701,7 @@ def test_verify_duplicate_markers_still_use_fifo():
         ],
     }
     seed_b64 = base64.b64encode(json.dumps(seed).encode("utf-8")).decode("ascii")
-    item_b64 = _base64_item({"block": "rich-text", "values": {"title": "Gruppen", "text": "<p>A</p>", "buttons": [], "style_variant": "feature"}})
+    item_b64 = _base64_item({"block": "rich-text", "values": {"anchor": "gruppen", "title": "Gruppen", "text": "<p>A</p>", "buttons": [], "style_variant": "feature"}})
 
     php = (
         _preamble()

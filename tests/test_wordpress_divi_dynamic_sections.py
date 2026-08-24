@@ -128,6 +128,49 @@ def _block_names(block: dict) -> list[str]:
     ]
 
 
+def test_every_seed_section_id_reaches_the_composed_dom_exactly_once():
+    payload = _json_php(
+        _render_preamble()
+        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/seeds.php';\n"
+        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';\n"
+        + "function wp_get_attachment_image_url($id, $size) { return 'https://example.test/image.jpg'; }\n"
+        + "$result = [];\n"
+        + "$seeds = bioco_import_load_seeds('wordpress/content-seed');\n"
+        + "$dynamicBlocks = array_map(\n"
+        + "    fn($name) => substr($name, strpos($name, '/') + 1),\n"
+        + "    bioco_dynamic_components()\n"
+        + ");\n"
+        + "$collect = function ($block) use (&$collect) {\n"
+        + "    $ids = [];\n"
+        + "    $id = $block['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['id'] ?? '';\n"
+        + "    if ($id !== '') $ids[] = $id;\n"
+        + "    foreach ($block['innerBlocks'] ?? [] as $child) {\n"
+        + "        $ids = array_merge($ids, $collect($child));\n"
+        + "    }\n"
+        + "    return $ids;\n"
+        + "};\n"
+        + "foreach ($seeds as $seed) {\n"
+        + "    $ids = [];\n"
+        + "    foreach (bioco_import_build_page_plan($seed) as $item) {\n"
+        + "        if (($item['type'] ?? '') !== 'block') continue;\n"
+        + "        $tree = Bioco_Import_Divi_Composer::section($item);\n"
+        + "        $treeIds = $collect($tree);\n"
+        + "        if (in_array($item['block'], $dynamicBlocks, true) && !empty($item['values']['anchor'])) {\n"
+        + "            $treeIds[] = $item['values']['anchor'];\n"
+        + "        }\n"
+        + "        $ids = array_merge($ids, $treeIds);\n"
+        + "    }\n"
+        + "    $expected = array_column($seed['sections'], 'section_id');\n"
+        + "    $result[$seed['slug']] = ['expected' => $expected, 'actual' => $ids];\n"
+        + "}\n"
+        + "echo json_encode($result);"
+    )
+
+    for slug, anchors in payload.items():
+        assert sorted(anchors["actual"]) == sorted(anchors["expected"]), slug
+        assert len(anchors["actual"]) == len(set(anchors["actual"])), slug
+
+
 @pytest.mark.parametrize(("plan_block", "component_key"), DYNAMIC_BLOCKS.items())
 def test_dynamic_block_is_single_native_divi_text_marker(plan_block, component_key):
     values = {

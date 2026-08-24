@@ -37,40 +37,55 @@ final class Bioco_Import_Divi_Composer {
 
         switch ($block) {
             case 'hero':
-                return self::heroSection($values);
+                $section = self::heroSection($values);
+                break;
             case 'page-intro':
-                return self::pageIntroSection($values);
+                $section = self::pageIntroSection($values);
+                break;
             case 'media-text':
-                return ($values['style_variant'] ?? '') === 'feature'
+                $section = ($values['style_variant'] ?? '') === 'feature'
                     ? self::homeMediaTextSection($values)
                     : self::mediaTextSection($values);
+                break;
             case 'rich-text':
-                return ($values['style_variant'] ?? '') === 'feature'
+                $section = ($values['style_variant'] ?? '') === 'feature'
                     ? self::homeRichTextSection($values)
                     : self::richTextSection($values);
+                break;
             case 'cta-band':
-                return self::ctaBandSection($values);
+                $section = self::ctaBandSection($values);
+                break;
             case 'text-columns':
-                return self::textColumnsSection($values);
+                $section = self::textColumnsSection($values);
+                break;
             case 'steps':
-                return self::stepsSection($values);
+                $section = self::stepsSection($values);
+                break;
             case 'link-tiles':
-                return self::linkTilesSection($values);
+                $section = self::linkTilesSection($values);
+                break;
             case 'cards-grid':
-                return self::cardsGridSection($values);
+                $section = self::cardsGridSection($values);
+                break;
             case 'gallery-strip':
-                return self::galleryStripSection($values);
+                $section = self::galleryStripSection($values);
+                break;
             case 'timeline':
-                return self::timelineSection($values);
+                $section = self::timelineSection($values);
+                break;
             case 'pricing-table':
-                return self::pricingTableSection($values);
+                $section = self::pricingTableSection($values);
+                break;
             case 'accordion':
-                return self::accordionSection($values);
+                $section = self::accordionSection($values);
+                break;
             case 'home-chrome':
                 return self::homeChromeSection();
             default:
                 throw new InvalidArgumentException("Unsupported Divi section block: {$block}");
         }
+
+        return self::withHtmlId($section, (string) ($values['anchor'] ?? ''));
     }
 
     private static function dynamicSection(string $componentKey, array $values): array {
@@ -486,13 +501,15 @@ final class Bioco_Import_Divi_Composer {
         return preg_match('/<h[1-6]\b/i', $html) === 1;
     }
 
-    private static function classAttr(string $class): array {
+    private static function classAttr(string $class, string $id = ''): array {
+        $attributes = ['class' => $class];
+        if ($id !== '') $attributes['id'] = $id;
         return [
             'module' => [
                 'advanced' => [
                     'htmlAttributes' => [
                         'desktop' => [
-                            'value' => ['class' => $class],
+                            'value' => $attributes,
                         ],
                     ],
                 ],
@@ -500,7 +517,7 @@ final class Bioco_Import_Divi_Composer {
         ];
     }
 
-    private static function rowAttr(string $structure, ?string $class = null): array {
+    private static function rowAttr(string $structure, ?string $class = null, string $id = ''): array {
         $attr = [
             'module' => [
                 'advanced' => [
@@ -510,9 +527,12 @@ final class Bioco_Import_Divi_Composer {
                 ],
             ],
         ];
-        if ($class !== null) {
+        if ($class !== null || $id !== '') {
+            $attributes = [];
+            if ($class !== null) $attributes['class'] = $class;
+            if ($id !== '') $attributes['id'] = $id;
             $attr['module']['advanced']['htmlAttributes'] = [
-                'desktop' => ['value' => ['class' => $class]],
+                'desktop' => ['value' => $attributes],
             ];
         }
         return $attr;
@@ -555,14 +575,14 @@ final class Bioco_Import_Divi_Composer {
         ] + self::classAttr($class));
     }
 
-    private static function textBlock(string $html, string $class): array {
+    private static function textBlock(string $html, string $class, string $id = ''): array {
         return bioco_import_divi_block('divi/text', [
             'content' => [
                 'innerContent' => [
                     'desktop' => ['value' => $html],
                 ],
             ],
-        ] + self::classAttr($class));
+        ] + self::classAttr($class, $id));
     }
 
     private static function imageBlock(?int $attachmentId, string $alt, string $class): ?array {
@@ -692,7 +712,11 @@ final class Bioco_Import_Divi_Composer {
             if (!$contentChildren) continue;
 
             $rows[] = self::withChildren(
-                bioco_import_divi_block('divi/row', self::rowAttr('1_4,3_4', "bioco-divi-row bioco-divi-timeline-item-row bioco-divi-timeline-item--{$emphasis}")),
+                bioco_import_divi_block('divi/row', self::rowAttr(
+                    '1_4,3_4',
+                    "bioco-divi-row bioco-divi-timeline-item-row bioco-divi-timeline-item--{$emphasis}",
+                    (string) ($item['anchor'] ?? '')
+                )),
                 [
                     self::withChildren(
                         bioco_import_divi_block('divi/column', self::columnAttr('1_4', 'bioco-divi-timeline-badge-col')),
@@ -957,7 +981,11 @@ final class Bioco_Import_Divi_Composer {
                 $html .= '<div>' . $body . '</div>';
             }
             $html .= '</details>';
-            $children[] = self::textBlock($html, 'bioco-divi-accordion-item');
+            $children[] = self::textBlock(
+                $html,
+                'bioco-divi-accordion-item',
+                (string) ($item['anchor'] ?? '')
+            );
         }
 
         return self::singleColumnSection(
@@ -971,5 +999,11 @@ final class Bioco_Import_Divi_Composer {
         $parent['innerBlocks'] = $children;
         $parent['innerContent'] = array_fill(0, count($children), null);
         return $parent;
+    }
+
+    private static function withHtmlId(array $block, string $id): array {
+        if ($id === '') return $block;
+        $block['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['id'] = $id;
+        return $block;
     }
 }
