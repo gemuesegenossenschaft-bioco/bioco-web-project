@@ -1,3 +1,4 @@
+import base64
 import json
 import subprocess
 from pathlib import Path
@@ -20,6 +21,28 @@ def _wir_plan():
     return json.loads(result.stdout)
 
 
+def _compose(item):
+    payload = base64.b64encode(json.dumps(item).encode()).decode()
+    php = f'''
+    define('ABSPATH', __DIR__);
+    function wp_get_attachment_image_url($id, $size = 'full') {{
+        return $id ? 'https://example.com/image.jpg' : false;
+    }}
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-blocks.php';
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-composer.php';
+    $item = json_decode(base64_decode('{payload}'), true);
+    echo json_encode(Bioco_Import_Divi_Composer::section($item));
+    '''
+    result = subprocess.run(
+        ["php", "-r", php], cwd=ROOT, text=True, capture_output=True, check=True
+    )
+    return json.loads(result.stdout)
+
+
+def _class(block):
+    return block["attrs"]["module"]["advanced"]["htmlAttributes"]["desktop"]["value"]["class"]
+
+
 def test_hof_team_container_width_reaches_cards_grid_plan():
     item = next(
         item for item in _wir_plan()
@@ -28,6 +51,9 @@ def test_hof_team_container_width_reaches_cards_grid_plan():
 
     assert item["values"]["container_width"] == "xl"
     assert not any("containerWidth" in warning for warning in item.get("warnings", []))
+    assert _class(_compose(item)) == (
+        "bioco-divi-section bioco-divi-cards-grid bioco-divi-width-xl"
+    )
 
 
 def test_timeline_headings_become_titles_and_body_stays_rich_text():
