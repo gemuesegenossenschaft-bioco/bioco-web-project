@@ -1,3 +1,5 @@
+import base64
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -40,3 +42,27 @@ def test_leaflet_css_marker_images_resolve_inside_vendored_directory():
     assert "images/marker-icon.png" in image_urls
     assert image_urls
     assert all((vendor / relative_url).is_file() for relative_url in image_urls)
+
+
+def test_vendored_leaflet_files_exist_and_are_unmodified():
+    """bioco-core.php calls filemtime() on both vendor files at init.
+
+    A missing file there is not a soft failure: filemtime() emits a PHP warning
+    and returns false, and the map silently loses its script or its stylesheet.
+    The hashes are the upstream npm build of Leaflet 1.9.4, the exact bytes the
+    production site loads from unpkg today, so this also catches an accidental
+    local edit to third-party code.
+    """
+    vendor = CORE / "assets/vendor/leaflet"
+    expected = {
+        "leaflet.js": "20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=",
+        "leaflet.css": "p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=",
+    }
+
+    for name, digest in expected.items():
+        path = vendor / name
+        assert path.is_file(), f"{name} fehlt unter {vendor}"
+        actual = base64.b64encode(hashlib.sha256(path.read_bytes()).digest()).decode()
+        assert actual == digest, f"{name} weicht vom upstream-Build ab"
+
+    assert (vendor / "LICENSE").is_file(), "BSD-2-Clause-Lizenz muss mitgeliefert werden"
