@@ -880,6 +880,11 @@
   display: grid;
   grid-template-columns: repeat(var(--bioco-cards-grid-columns-mobile, 1), minmax(0, 1fr));
 }
+.cms-cards-grid[data-container='sm'], .cms-gallery-strip[data-container='sm'] { max-width: 640px; }
+.cms-cards-grid[data-container='md'], .cms-gallery-strip[data-container='md'] { max-width: 820px; }
+.cms-cards-grid[data-container='lg'], .cms-gallery-strip[data-container='lg'] { max-width: 1040px; }
+.cms-cards-grid[data-container='xl'], .cms-gallery-strip[data-container='xl'] { max-width: 1280px; }
+.cms-cards-grid[data-container='full'], .cms-gallery-strip[data-container='full'] { max-width: 100%; }
 
 .cms-cards-grid-items[data-columns-mobile='1'] { --bioco-cards-grid-columns-mobile: 1; }
 .cms-cards-grid-items[data-columns-mobile='2'] { --bioco-cards-grid-columns-mobile: 2; }

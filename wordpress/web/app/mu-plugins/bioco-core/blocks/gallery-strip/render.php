@@ -13,6 +13,7 @@ $title = get_field('title');
 $text = get_field('text');
 $gallery = get_field('gallery');
 $buttons = get_field('buttons');
+$container_width = get_field('container_width') ?: 'xl';
 $columns_desktop = get_field('columns_desktop') ?: '3';
 $columns_mobile = get_field('columns_mobile') ?: '1';
 $media_ratio = get_field('media_ratio') ?: '4:3';
@@ -33,7 +34,7 @@ if (!empty($block['className'])) {
 
 $heading_already_in_text = bioco_text_has_heading_html($text);
 ?>
-<section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
+<section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>" data-container="<?php echo esc_attr($container_width); ?>">
     <?php if ($eyebrow) : ?>
         <p class="cms-section-eyebrow"><?php echo esc_html($eyebrow); ?></p>
     <?php endif; ?>
