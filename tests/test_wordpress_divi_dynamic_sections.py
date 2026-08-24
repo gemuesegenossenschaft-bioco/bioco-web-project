@@ -71,6 +71,10 @@ def _render_preamble() -> str:
         "function bioco_forms_view_script_handle($block_name) { return 'shared::' . $block_name; }\n"
         "function bioco_forms_localize_block($block_name, $object, $endpoint) {}\n"
         "function get_the_ID() { return 77; }\n"
+        "function is_singular($post_type = '') { return false; }\n"
+        "function __($text, $domain = '') { return $text; }\n"
+        "function get_permalink($id = 0) { return 'https://example.test/page'; }\n"
+        "function home_url($path = '') { return 'https://example.test' . $path; }\n"
         "function esc_attr($value) { return htmlspecialchars((string)$value, ENT_QUOTES); }\n"
         "function esc_html($value) { return htmlspecialchars((string)$value, ENT_QUOTES); }\n"
         "function esc_url($value) { return (string)$value; }\n"
@@ -126,6 +130,52 @@ def _block_names(block: dict) -> list[str]:
         for child in block.get("innerBlocks", [])
         for name in _block_names(child)
     ]
+
+
+def test_every_seed_section_id_reaches_the_composed_dom_exactly_once():
+    payload = _json_php(
+        _render_preamble()
+        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/seeds.php';\n"
+        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';\n"
+        + "function wp_get_attachment_image_url($id, $size) { return 'https://example.test/image.jpg'; }\n"
+        + "$result = [];\n"
+        + "$seeds = bioco_import_load_seeds('wordpress/content-seed');\n"
+        + "$dynamicBlocks = array_map(\n"
+        + "    fn($name) => substr($name, strpos($name, '/') + 1),\n"
+        + "    bioco_dynamic_components()\n"
+        + ");\n"
+        + "$collect = function ($block) use (&$collect) {\n"
+        + "    $ids = [];\n"
+        + "    $id = $block['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['id'] ?? '';\n"
+        + "    if ($id !== '') $ids[] = $id;\n"
+        + "    foreach ($block['innerBlocks'] ?? [] as $child) {\n"
+        + "        $ids = array_merge($ids, $collect($child));\n"
+        + "    }\n"
+        + "    return $ids;\n"
+        + "};\n"
+        + "foreach ($seeds as $seed) {\n"
+        + "    $ids = [];\n"
+        + "    foreach (bioco_import_build_page_plan($seed) as $item) {\n"
+        + "        if (($item['type'] ?? '') !== 'block') continue;\n"
+        + "        $tree = Bioco_Import_Divi_Composer::section($item);\n"
+        + "        $treeIds = $collect($tree);\n"
+        + "        if (in_array($item['block'], $dynamicBlocks, true)) {\n"
+        + "            $rendered = bioco_dynamic_expand_markers(serialize_block($tree));\n"
+        + "            if (preg_match('/\\sid=\"([^\"]+)\"/', $rendered, $match)) {\n"
+        + "                $treeIds[] = html_entity_decode($match[1], ENT_QUOTES);\n"
+        + "            }\n"
+        + "        }\n"
+        + "        $ids = array_merge($ids, $treeIds);\n"
+        + "    }\n"
+        + "    $expected = array_column($seed['sections'], 'section_id');\n"
+        + "    $result[$seed['slug']] = ['expected' => $expected, 'actual' => $ids];\n"
+        + "}\n"
+        + "echo json_encode($result);"
+    )
+
+    for slug, anchors in payload.items():
+        assert sorted(anchors["actual"]) == sorted(anchors["expected"]), slug
+        assert len(anchors["actual"]) == len(set(anchors["actual"])), slug
 
 
 @pytest.mark.parametrize(("plan_block", "component_key"), DYNAMIC_BLOCKS.items())

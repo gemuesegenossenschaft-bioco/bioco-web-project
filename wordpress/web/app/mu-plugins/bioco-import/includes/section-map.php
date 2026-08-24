@@ -583,7 +583,7 @@ function bioco_import_plan_accordion_group(array $sectionGroup) {
     $ids = [];
     foreach ($sectionGroup as $section) {
         $ids[] = (string) $section['section_id'];
-        $row = [];
+        $row = ['anchor' => (string) $section['section_id']];
         if (!empty($section['section_title'])) $row['title'] = (string) $section['section_title'];
         if (!empty($section['section_text'])) $row['body'] = (string) $section['section_text'];
         $items[] = $row;
@@ -604,6 +604,7 @@ function bioco_import_plan_timeline_group(array $sectionGroup) {
     $values = [];
     if ((string) ($sectionGroup[0]['section_component'] ?? '') === 'timeline_header') {
         $header = array_shift($sectionGroup);
+        $values['anchor'] = (string) $header['section_id'];
         bioco_import_apply_common_fields($values, $warnings, $header, ['eyebrow', 'title', 'text'], false);
         bioco_import_apply_config_fields($values, $warnings, $header, [
             'containerWidth' => 'container_width',
@@ -616,7 +617,7 @@ function bioco_import_plan_timeline_group(array $sectionGroup) {
     $items = [];
     foreach ($sectionGroup as $section) {
         $sid = (string) $section['section_id'];
-        $row = [];
+        $row = ['anchor' => $sid];
         if (array_key_exists('section_eyebrow', $section)) $row['year_eyebrow'] = (string) $section['section_eyebrow'];
         if (array_key_exists('section_title', $section)) $row['title'] = (string) $section['section_title'];
         if (array_key_exists('section_text', $section)) {
@@ -733,7 +734,7 @@ function bioco_import_plan_single_section(array $section) {
         'type' => 'block',
         'section_ids' => [$sid],
         'block' => $config['block'],
-        'values' => $values,
+        'values' => ['anchor' => $sid] + $values,
         'warnings' => $warnings,
     ];
 
