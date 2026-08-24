@@ -1,9 +1,136 @@
 import json
+import re
 import subprocess
 from pathlib import Path
 
 
 ROOT = Path(__file__).parents[1]
+
+
+def next_redirects():
+    config = (ROOT / "frontend/next.config.js").read_text()
+    redirect_block = config.split("async redirects()", 1)[1]
+    return [
+        {
+            "source": source,
+            "destination": destination,
+            "permanent": permanent == "true",
+        }
+        for source, destination, permanent in re.findall(
+            r"source:\s*'([^']+)'\s*,\s*"
+            r"destination:\s*'([^']+)'\s*,\s*"
+            r"permanent:\s*(true|false)",
+            redirect_block,
+        )
+    ]
+
+
+def test_wordpress_redirect_contract_matches_next_config_exactly():
+    wordpress_redirects = json.loads((
+        ROOT / "wordpress/web/app/mu-plugins/bioco-core/content/redirects.json"
+    ).read_text())
+    frontend_redirects = next_redirects()
+    core = (
+        ROOT / "wordpress/web/app/mu-plugins/bioco-core/bioco-core.php"
+    ).read_text()
+
+    assert len(frontend_redirects) == 14
+    assert wordpress_redirects == frontend_redirects
+    assert "require_once BIOCO_CORE_DIR . '/includes/redirects.php';" in core
+
+
+def test_wordpress_redirects_are_permanent_and_normalize_encoded_paths():
+    sources = [rule["source"] for rule in next_redirects()]
+    php = r'''
+    define('ABSPATH', __DIR__);
+    $requests = json_decode($argv[1], true);
+    $results = [];
+    function add_action($hook, $callback) {}
+    function home_url($path) { return 'https://example.test' . $path; }
+    function wp_safe_redirect($location, $status) {
+        throw new Exception(json_encode([$location, $status]));
+    }
+    require 'wordpress/web/app/mu-plugins/bioco-core/includes/redirects.php';
+    foreach ($requests as $request) {
+        $_SERVER['REQUEST_URI'] = $request;
+        try {
+            bioco_handle_permanent_redirects();
+            $results[$request] = null;
+        } catch (Exception $exception) {
+            $results[$request] = json_decode($exception->getMessage(), true);
+        }
+    }
+    echo json_encode($results);
+    '''
+    requests = sources + [
+        "/ernte/",
+        "/wp-content/uploads/2017/07/1704_Gem%C3%BCseabo.pdf",
+        "/wp-content/uploads/2017/07/1704_Gem%C3%BCseabo.pdf/",
+        "/",
+        "/not-in-the-redirect-map",
+    ]
+    result = subprocess.run(
+        ["php", "-r", php, json.dumps(requests)],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout
+    redirects = json.loads(result)
+
+    expected = {rule["source"]: rule["destination"] for rule in next_redirects()}
+    for source, destination in expected.items():
+        assert redirects[source] == [f"https://example.test{destination}", 301]
+    assert redirects["/wp-content/uploads/2017/07/1704_Gem%C3%BCseabo.pdf"] == [
+        "https://example.test/abos",
+        301,
+    ]
+    assert redirects["/ernte/"] == ["https://example.test/gemuese", 301]
+    assert redirects["/wp-content/uploads/2017/07/1704_Gem%C3%BCseabo.pdf/"] == [
+        "https://example.test/abos",
+        301,
+    ]
+    assert redirects["/"] is None
+    assert redirects["/not-in-the-redirect-map"] is None
+
+
+def test_wordpress_redirects_preserve_nonempty_query_strings_only():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    $requests = json_decode($argv[1], true);
+    $results = [];
+    function add_action($hook, $callback) {}
+    function home_url($path) { return 'https://example.test' . $path; }
+    function wp_safe_redirect($location, $status) {
+        throw new Exception(json_encode([$location, $status]));
+    }
+    require 'wordpress/web/app/mu-plugins/bioco-core/includes/redirects.php';
+    foreach ($requests as $request) {
+        $_SERVER['REQUEST_URI'] = $request;
+        try {
+            bioco_handle_permanent_redirects();
+            $results[$request] = null;
+        } catch (Exception $exception) {
+            $results[$request] = json_decode($exception->getMessage(), true);
+        }
+    }
+    echo json_encode($results);
+    '''
+    requests = ["/ernte", "/ernte?", "/ernte?utm_source=newsletter"]
+    redirects = json.loads(subprocess.run(
+        ["php", "-r", php, json.dumps(requests)],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout)
+
+    assert redirects["/ernte"] == ["https://example.test/gemuese", 301]
+    assert redirects["/ernte?"] == ["https://example.test/gemuese", 301]
+    assert redirects["/ernte?utm_source=newsletter"] == [
+        "https://example.test/gemuese?utm_source=newsletter",
+        301,
+    ]
 
 
 def test_event_singles_keep_aktuelles_prefix_without_shadowing_page():
