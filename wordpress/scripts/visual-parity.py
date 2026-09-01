@@ -376,7 +376,11 @@ def capture_page(url, viewport_name, output_path):
         browser = p.chromium.launch()
         page = browser.new_page(viewport=viewport)
         try:
-            page.goto(url, wait_until="networkidle")
+            # networkidle never settles on the production site (Matomo beacon),
+            # so wait for load + settled fonts + a fixed quiet period instead.
+            page.goto(url, wait_until="load", timeout=60_000)
+            page.wait_for_function("document.fonts.status === 'loaded'", timeout=15_000)
+            page.wait_for_timeout(1_500)
             page.screenshot(path=str(output_path), full_page=True)
         finally:
             browser.close()
