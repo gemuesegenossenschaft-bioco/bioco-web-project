@@ -43,7 +43,11 @@ function bioco_import_resolve_document_for_path(array $seed, string $relativePat
     }
 
     $tmp = wp_tempnam(basename($relativePath));
-    if ($tmp === false || !copy($file, $tmp)) return null;
+    if ($tmp === false) return null;
+    if (!copy($file, $tmp)) {
+        wp_delete_file($tmp);
+        return null;
+    }
     $attachmentId = media_handle_sideload([
         'name' => basename($relativePath),
         'tmp_name' => $tmp,
