@@ -18,11 +18,10 @@ THEME = ROOT / "wordpress/web/app/themes/bioco"
 WP_SEEDS = ROOT / "wordpress/content-seed"
 CMS_SEEDS = ROOT / "cms/content-seed"
 
-PDF_BASE = "https://cms.bioco.ch/site/assets/files/1804"
 PDFS = (
-    f"{PDF_BASE}/gemuese_ausliefertour_dienstag_2026_04.pdf",
-    f"{PDF_BASE}/gemuese_ausliefertour_freitag_2026_04.pdf",
-    f"{PDF_BASE}/2510_fahrspesenrueckforderung.pdf",
+    "documents/gemuese_ausliefertour_dienstag_2026_04.pdf",
+    "documents/gemuese_ausliefertour_freitag_2026_04.pdf",
+    "documents/2510_fahrspesenrueckforderung.pdf",
 )
 
 
