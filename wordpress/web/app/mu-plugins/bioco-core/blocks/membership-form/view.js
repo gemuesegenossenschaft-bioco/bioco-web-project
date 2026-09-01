@@ -12,8 +12,6 @@
 (function () {
   'use strict';
 
-  var FALLBACK_ERROR = 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.';
-  var CAPTCHA_MISSING_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.';
   var THANK_YOU_URL = '/anmeldung-danke/';
 
   function nonNegativeInteger(value) {
@@ -118,6 +116,7 @@
   }
 
   function showMessage(container, text, isError) {
+    if (!text) return;
     container.textContent = text;
     container.hidden = false;
     container.className = 'form-message bento-card ' + (isError ? 'form-error' : 'form-success');
@@ -139,6 +138,9 @@
 
     var configName = form.getAttribute('data-config') || 'biocoMembershipFormConfig';
     var config = window[configName] || {};
+    var successMessage = config.successMessage || '';
+    var fallbackError = config.fallbackError || '';
+    var captchaError = config.captchaError || '';
     var messageBox = form.parentNode.querySelector('.form-message');
     var submitBtn = form.querySelector('[type="submit"]');
     var captchaContainer = form.querySelector('[data-form-captcha]');
@@ -166,7 +168,7 @@
       event.preventDefault();
 
       if (config.turnstileSiteKey && !captchaToken) {
-        if (messageBox) showMessage(messageBox, CAPTCHA_MISSING_ERROR, true);
+        if (messageBox) showMessage(messageBox, captchaError, true);
         return;
       }
 
@@ -197,7 +199,7 @@
           if (result.ok && result.json && result.json.success) {
             window.location.href = THANK_YOU_URL;
           } else {
-            var errorMessage = (result.json && result.json.error) || FALLBACK_ERROR;
+            var errorMessage = (result.json && result.json.error) || fallbackError;
             var fieldText = result.json ? fieldErrorsToText(result.json.fieldErrors) : '';
             if (fieldText) errorMessage += ' ' + fieldText;
             if (messageBox) showMessage(messageBox, errorMessage, true);
@@ -212,7 +214,7 @@
           }
         })
         .catch(function () {
-          if (messageBox) showMessage(messageBox, FALLBACK_ERROR, true);
+          if (messageBox) showMessage(messageBox, fallbackError, true);
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = submitBtn.getAttribute('data-submit-label') || submitBtn.textContent;

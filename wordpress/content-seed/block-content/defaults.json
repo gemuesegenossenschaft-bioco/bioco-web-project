@@ -1,458 +1,475 @@
 {
-    "version": 1,
-    "blocks": {
-        "contact-form": {
-            "phone_label": "Telefon",
-            "submit_label": "Absenden",
-            "submitting_label": "Wird gesendet …"
+  "version": 1,
+  "blocks": {
+    "contact-form": {
+      "phone_label": "Telefon",
+      "submit_label": "Absenden",
+      "submitting_label": "Wird gesendet …",
+      "success_message": "Vielen Dank für deine Nachricht! Wir melden uns so schnell wie möglich bei dir.",
+      "fallback_error": "Deine Nachricht konnte nicht gesendet werden. Bitte versuche es erneut oder sende uns eine E-Mail direkt an info@bioco.ch",
+      "captcha_error": "Bitte bestätige, dass du kein Roboter bist."
+    },
+    "doi-confirm": {
+      "missing_token_message": "Kein Bestätigungstoken angegeben.",
+      "success_title": "Anmeldung bestätigt",
+      "success_text": "Vielen Dank! Deine Anmeldung wurde erfolgreich bestätigt.",
+      "subscribe_text": "Du erhältst ab sofort unseren Newsletter.",
+      "visit_text": "Wir haben deine Anmeldung für den Tag der offenen Tür erhalten und melden uns bald bei dir.",
+      "waiting_list_text": "Wir haben dich auf die Warteliste gesetzt und melden uns bei dir, sobald ein Platz frei wird.",
+      "contact_text": "Wir haben deine Nachricht erhalten und melden uns bald bei dir.",
+      "error_title": "Bestätigung fehlgeschlagen",
+      "home_link_label": "Zurück zur Startseite"
+    },
+    "event-signup-form": {
+      "event_title_prefix": "Anmeldung für:",
+      "name_label": "Name *",
+      "email_label": "E-Mail *",
+      "phone_label": "Telefon (optional)",
+      "notes_label": "Bemerkungen (optional)",
+      "submit_label": "Anmelden",
+      "submitting_label": "Wird gesendet …",
+      "success_message": "Anmeldung erfolgreich! Vielen Dank für deine Anmeldung. Wir melden uns bei dir.",
+      "fallback_error": "Die Anmeldung konnte nicht gesendet werden. Bitte versuche es erneut oder kontaktiere uns direkt.",
+      "captcha_error": "Bitte bestätige, dass du kein Roboter bist."
+    },
+    "events-feed": {
+      "title": "Nächste Events",
+      "banner_link_label": "Alle Events ansehen →",
+      "standard_title": "Nächste Events",
+      "standard_link_label": "Alle Events ansehen",
+      "past_title": "Vergangene Events & Eindrücke",
+      "past_description": "Rückblicke mit Fotos und Videos aus unserer Community.",
+      "past_link_label": "Rückblick ansehen →",
+      "empty_message": "Aktuell sind keine Veranstaltungen geplant."
+    },
+    "gallery": {
+      "show_more_label": "Mehr sehen",
+      "loading_title": "Galerie-Bilder werden geladen…",
+      "loading_text": "Die Galerie wird in Kürze mit Bildern gefüllt.",
+      "filters": [
+        {
+          "key": "all",
+          "label": "Alles"
         },
-        "doi-confirm": {
-            "missing_token_message": "Kein Bestätigungstoken angegeben.",
-            "success_title": "Anmeldung bestätigt",
-            "success_text": "Vielen Dank! Deine Anmeldung wurde erfolgreich bestätigt.",
-            "subscribe_text": "Du erhältst ab sofort unseren Newsletter.",
-            "visit_text": "Wir haben deine Anmeldung für den Tag der offenen Tür erhalten und melden uns bald bei dir.",
-            "waiting_list_text": "Wir haben dich auf die Warteliste gesetzt und melden uns bei dir, sobald ein Platz frei wird.",
-            "contact_text": "Wir haben deine Nachricht erhalten und melden uns bald bei dir.",
-            "error_title": "Bestätigung fehlgeschlagen",
-            "home_link_label": "Zurück zur Startseite"
+        {
+          "key": "koerbe",
+          "label": "Körbe"
         },
-        "event-signup-form": {
-            "event_title_prefix": "Anmeldung für:",
-            "name_label": "Name *",
-            "email_label": "E-Mail *",
-            "phone_label": "Telefon (optional)",
-            "notes_label": "Bemerkungen (optional)",
-            "submit_label": "Anmelden",
-            "submitting_label": "Wird gesendet …"
+        {
+          "key": "feld",
+          "label": "Feld"
         },
-        "events-feed": {
-            "title": "Nächste Events",
-            "banner_link_label": "Alle Events ansehen →",
-            "standard_title": "Nächste Events",
-            "standard_link_label": "Alle Events ansehen",
-            "past_title": "Vergangene Events & Eindrücke",
-            "past_description": "Rückblicke mit Fotos und Videos aus unserer Community.",
-            "past_link_label": "Rückblick ansehen →",
-            "empty_message": "Aktuell sind keine Veranstaltungen geplant."
-        },
-        "gallery": {
-            "show_more_label": "Mehr sehen",
-            "loading_title": "Galerie-Bilder werden geladen…",
-            "loading_text": "Die Galerie wird in Kürze mit Bildern gefüllt.",
-            "filters": [
-                {
-                    "key": "all",
-                    "label": "Alles"
-                },
-                {
-                    "key": "koerbe",
-                    "label": "Körbe"
-                },
-                {
-                    "key": "feld",
-                    "label": "Feld"
-                },
-                {
-                    "key": "portraits",
-                    "label": "Portraits"
-                }
-            ]
-        },
-        "geisshof-map": {
-            "locations": [
-                {
-                    "name": "Geisshof",
-                    "lat": 47.4741684,
-                    "lng": 8.2456318,
-                    "description": "Geisslistrasse, Gebenstorf, Schweiz"
-                }
-            ],
-            "locations_heading": "Standorte",
-            "route_label": "Route planen →",
-            "empty_message": "Noch keine Standorte hinterlegt."
-        },
-        "group-cards": {
-            "empty_message": "Aktuell sind keine Gruppen eingetragen."
-        },
-        "membership-form": {
-            "commitment_title": "Lies das und bestätige bevor du weiterklickst",
-            "commitment_intro": "Bevor du dich anmeldest, überprüfe bitte diese Punkte:",
-            "commitments": [
-                {
-                    "heading": "Anteile & Beitrag",
-                    "text": "Jedes Mitglied erwirbt <strong>Anteilsscheine zu je CHF 250.- (einmalige Zahlung)</strong>. Die Anzahl der Anteile hängt von deinem gewählten Abo ab. Der <strong>Jahresbeitrag für dein Gemüse-Abo (jährlicher Beitrag) wird per 31. Januar fällig</strong> und kann quartalsweise oder jährlich bezahlt werden."
-                },
-                {
-                    "heading": "Bindung & Kündigung",
-                    "text": "Das Gemüseabo läuft <strong>vom 1. Januar bis zum 31. Dezember</strong>. Ohne Kündigung verlängert es sich jeweils um ein Kalenderjahr. Die <strong>Kündigungsfrist beträgt zwei Monate auf Ende eines Kalenderjahres</strong>."
-                },
-                {
-                    "heading": "Mitarbeit",
-                    "text": "Wir sind eine Mitmach-Genossenschaft! Jedes Mitglied leistet pro Jahr <strong>10 Arbeitseinsätze à 2 Stunden (bei halbem Korb) bzw. 20 Arbeitseinsätze à 2 Stunden (bei ganzem Korb) Mitarbeit</strong>. Dies kann auf dem Feld, in der Logistik oder bei Events sein."
-                },
-                {
-                    "heading": "Wetterbedingte Ertragsschwankungen",
-                    "text": "Mir ist bewusst, dass es zu Ernteausfällen kommen kann und mein wöchentlicher Gemüsekorb nicht immer gleich voll sein kann."
-                }
-            ],
-            "personal_title": "Persönliche Daten",
-            "first_name_label": "Vorname *",
-            "last_name_label": "Name *",
-            "address_label": "Adresse *",
-            "zip_label": "PLZ *",
-            "city_label": "Ort *",
-            "phone_label": "Telefon",
-            "email_label": "E-Mail *",
-            "depot_payment_title": "Depot & Zahlungsweise",
-            "depot_label": "Depot-Auswahl *",
-            "depot_placeholder": "Bitte wählen...",
-            "depots": [
-                {
-                    "option": "Depot Chrättli"
-                },
-                {
-                    "option": "Depot Ohne"
-                },
-                {
-                    "option": "Depot Anixis"
-                },
-                {
-                    "option": "Casa Flora"
-                },
-                {
-                    "option": "Depot Geisshof"
-                },
-                {
-                    "option": "Depot Kupperhaus"
-                },
-                {
-                    "option": "Depot Ennetbaden"
-                },
-                {
-                    "option": "Depot Lemonia"
-                },
-                {
-                    "option": "Depot Lägernstrasse"
-                }
-            ],
-            "payment_label": "Zahlungsweise *",
-            "payment_hint": "Die erste Rechnung wird per 31. Januar fällig.",
-            "quarterly_label": "Quartalsweise (vierteljährlich)",
-            "annual_label": "Ganzes Jahr (einmalig)",
-            "participation_title": "Mitarbeit",
-            "participation_intro": "Jede(r) Mitglied bringt sich ein. Bitte teile uns deine Präferenzen mit:",
-            "preferred_days_label": "Bevorzugte Tage",
-            "preferred_days": [
-                {
-                    "option": "Montag"
-                },
-                {
-                    "option": "Dienstag"
-                },
-                {
-                    "option": "Mittwoch"
-                },
-                {
-                    "option": "Donnerstag"
-                },
-                {
-                    "option": "Freitag"
-                },
-                {
-                    "option": "Samstag"
-                }
-            ],
-            "preferred_times_label": "Bevorzugte Zeiten",
-            "preferred_times": [
-                {
-                    "option": "morgens"
-                },
-                {
-                    "option": "nachmittags"
-                },
-                {
-                    "option": "abends"
-                }
-            ],
-            "activity_areas_label": "Tätigkeitsbereiche (Mehrfachauswahl möglich)",
-            "activity_areas": [
-                {
-                    "option": "Feld/Anbau"
-                },
-                {
-                    "option": "Logistik/Verteilung"
-                },
-                {
-                    "option": "Administration"
-                },
-                {
-                    "option": "Events/Organisation"
-                },
-                {
-                    "option": "Andere"
-                }
-            ],
-            "other_activity_label": "Andere Tätigkeitsbereiche (bitte beschreiben)",
-            "additional_subscriptions_title": "Zusatzabos",
-            "additional_subscriptions_intro": "Ich bin interessiert, zusätzlich:",
-            "additional_subscriptions": [
-                {
-                    "option": "Milch"
-                },
-                {
-                    "option": "Fleisch"
-                },
-                {
-                    "option": "Käse"
-                },
-                {
-                    "option": "Kräutersalz"
-                }
-            ],
-            "additional_products_label": "Weitere Produkte von Partnern aus der Region",
-            "additional_products_hint": "Hast du Wünsche für weitere Produkte? Teile uns deine Ideen mit:",
-            "additional_products_placeholder": "z.B. Eier, Brot, Tofu, Honig...",
-            "confirmation_title": "Bestätigung",
-            "privacy_label": "Ich akzeptiere die Datenschutzbestimmungen *",
-            "submit_label": "Anmeldung einreichen",
-            "submitting_label": "Wird gesendet …"
-        },
-        "pricing-calculator": {
-            "share_price": 250,
-            "work_suffix": "Arbeitseinsätze à 2 Stunden",
-            "shares_only_label": "Nur Anteilsscheine",
-            "annual_contribution_label": "Jährlicher Beitrag",
-            "work_label": "Mitarbeit pro Jahr:",
-            "one_time_payment_label": "Einmalige Zahlung",
-            "additional_shares_label": "Zusätzliche Anteilsscheine hinzufügen:",
-            "signup_url": "/anmeldung",
-            "cta_label": "Jetzt mitmachen!",
-            "cta_note": "Deine Auswahl wird automatisch ins Anmeldeformular übernommen",
-            "tiers": [
-                {
-                    "name": "Halb (1 Person)",
-                    "price": 750,
-                    "shares": 1,
-                    "work": 10,
-                    "recommended": false
-                },
-                {
-                    "name": "Standard (2-3 Personen)",
-                    "price": 1280,
-                    "shares": 2,
-                    "work": 20,
-                    "recommended": true
-                },
-                {
-                    "name": "Doppel (4-6 Personen)",
-                    "price": 2350,
-                    "shares": 4,
-                    "work": 40,
-                    "recommended": false
-                }
-            ],
-            "recommended_label": "Empfohlen",
-            "no_subscription_label": "Kein Abo",
-            "article_label": "Artikel",
-            "quantity_label": "Anzahl",
-            "unit_price_label": "Einzelpreis",
-            "share_certificates_label": "Anteilsscheine",
-            "required_label": "erforderlich",
-            "shares_only_info": "<strong>💡 Info:</strong> Du kannst Anteilsscheine auch ohne Gemüsekorb erwerben. Genossenschafter/innen haben Vorrang auf der Warteliste für einen Gemüsekorb.",
-            "without_basket_label": "ohne Gemüsekorb",
-            "additional_label": "zusätzlich",
-            "total_label": "Total"
-        },
-        "pricing-table": {
-            "work_suffix": "à 2 Stunden",
-            "basket_column_label": "Gemüsekorb",
-            "persons_column_label": "Personen",
-            "annual_price_column_label": "Jahrespreis",
-            "share_cost_column_label": "Anteilsscheine Kosten",
-            "work_column_label": "Mitarbeit pro Jahr"
-        },
-        "saisonkalender": {
-            "vegetables": [
-                {
-                    "name": "Rüebli",
-                    "months": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Zwiebeln",
-                    "months": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Kartoffeln",
-                    "months": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Salate",
-                    "months": [
-                        3,
-                        4,
-                        5,
-                        6,
-                        7,
-                        8,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Lauch",
-                    "months": [
-                        1,
-                        2,
-                        3,
-                        4,
-                        9,
-                        10,
-                        11,
-                        12
-                    ]
-                },
-                {
-                    "name": "Kürbis",
-                    "months": [
-                        1,
-                        10,
-                        11,
-                        12
-                    ]
-                }
-            ],
-            "empty_message": "Noch kein Saisonkalender hinterlegt.",
-            "vegetable_column_label": "Gemüse",
-            "month_columns": [
-                {
-                    "number": 1,
-                    "label": "Jan"
-                },
-                {
-                    "number": 2,
-                    "label": "Feb"
-                },
-                {
-                    "number": 3,
-                    "label": "Mär"
-                },
-                {
-                    "number": 4,
-                    "label": "Apr"
-                },
-                {
-                    "number": 5,
-                    "label": "Mai"
-                },
-                {
-                    "number": 6,
-                    "label": "Jun"
-                },
-                {
-                    "number": 7,
-                    "label": "Jul"
-                },
-                {
-                    "number": 8,
-                    "label": "Aug"
-                },
-                {
-                    "number": 9,
-                    "label": "Sep"
-                },
-                {
-                    "number": 10,
-                    "label": "Okt"
-                },
-                {
-                    "number": 11,
-                    "label": "Nov"
-                },
-                {
-                    "number": 12,
-                    "label": "Dez"
-                }
-            ]
-        },
-        "schnuppertage": {
-            "list_label": "Was dich erwartet:",
-            "schedule_title": "Nächste Termine",
-            "signup_label": "Jetzt anmelden",
-            "empty_message": "Aktuell sind keine Schnuppertage geplant."
-        },
-        "subscribe-form": {
-            "submit_label": "Abonnieren",
-            "submitting_label": "Wird gesendet …"
-        },
-        "visit-day-form": {
-            "name_label": "Name *",
-            "email_label": "E-Mail *",
-            "phone_label": "Telefon *",
-            "date_label": "Gewünschtes Datum *",
-            "participants_label": "Anzahl Personen *",
-            "notes_label": "Anmerkungen",
-            "privacy_label": "Ich akzeptiere die Datenschutzbestimmungen *",
-            "submit_label": "Anmelden",
-            "submitting_label": "Wird gesendet …"
-        },
-        "waiting-list-form": {
-            "name_label": "Name *",
-            "email_label": "E-Mail *",
-            "phone_label": "Telefon *",
-            "interest_label": "Interesse an *",
-            "interest_placeholder": "Bitte wählen...",
-            "notes_label": "Anmerkungen",
-            "privacy_label": "Ich akzeptiere die Datenschutzbestimmungen *",
-            "submit_label": "Anmelden",
-            "submitting_label": "Wird gesendet …",
-            "interest_options": [
-                {
-                    "value": "program1",
-                    "label": "Programm 1"
-                },
-                {
-                    "value": "program2",
-                    "label": "Programm 2"
-                },
-                {
-                    "value": "program3",
-                    "label": "Programm 3"
-                }
-            ]
+        {
+          "key": "portraits",
+          "label": "Portraits"
         }
+      ]
+    },
+    "geisshof-map": {
+      "locations": [
+        {
+          "name": "Geisshof",
+          "lat": 47.4741684,
+          "lng": 8.2456318,
+          "description": "Geisslistrasse, Gebenstorf, Schweiz"
+        }
+      ],
+      "locations_heading": "Standorte",
+      "route_label": "Route planen →",
+      "empty_message": "Noch keine Standorte hinterlegt."
+    },
+    "group-cards": {
+      "empty_message": "Aktuell sind keine Gruppen eingetragen."
+    },
+    "membership-form": {
+      "commitment_title": "Lies das und bestätige bevor du weiterklickst",
+      "commitment_intro": "Bevor du dich anmeldest, überprüfe bitte diese Punkte:",
+      "commitments": [
+        {
+          "heading": "Anteile & Beitrag",
+          "text": "Jedes Mitglied erwirbt <strong>Anteilsscheine zu je CHF 250.- (einmalige Zahlung)</strong>. Die Anzahl der Anteile hängt von deinem gewählten Abo ab. Der <strong>Jahresbeitrag für dein Gemüse-Abo (jährlicher Beitrag) wird per 31. Januar fällig</strong> und kann quartalsweise oder jährlich bezahlt werden."
+        },
+        {
+          "heading": "Bindung & Kündigung",
+          "text": "Das Gemüseabo läuft <strong>vom 1. Januar bis zum 31. Dezember</strong>. Ohne Kündigung verlängert es sich jeweils um ein Kalenderjahr. Die <strong>Kündigungsfrist beträgt zwei Monate auf Ende eines Kalenderjahres</strong>."
+        },
+        {
+          "heading": "Mitarbeit",
+          "text": "Wir sind eine Mitmach-Genossenschaft! Jedes Mitglied leistet pro Jahr <strong>10 Arbeitseinsätze à 2 Stunden (bei halbem Korb) bzw. 20 Arbeitseinsätze à 2 Stunden (bei ganzem Korb) Mitarbeit</strong>. Dies kann auf dem Feld, in der Logistik oder bei Events sein."
+        },
+        {
+          "heading": "Wetterbedingte Ertragsschwankungen",
+          "text": "Mir ist bewusst, dass es zu Ernteausfällen kommen kann und mein wöchentlicher Gemüsekorb nicht immer gleich voll sein kann."
+        }
+      ],
+      "personal_title": "Persönliche Daten",
+      "first_name_label": "Vorname *",
+      "last_name_label": "Name *",
+      "address_label": "Adresse *",
+      "zip_label": "PLZ *",
+      "city_label": "Ort *",
+      "phone_label": "Telefon",
+      "email_label": "E-Mail *",
+      "depot_payment_title": "Depot & Zahlungsweise",
+      "depot_label": "Depot-Auswahl *",
+      "depot_placeholder": "Bitte wählen...",
+      "depots": [
+        {
+          "option": "Depot Chrättli"
+        },
+        {
+          "option": "Depot Ohne"
+        },
+        {
+          "option": "Depot Anixis"
+        },
+        {
+          "option": "Casa Flora"
+        },
+        {
+          "option": "Depot Geisshof"
+        },
+        {
+          "option": "Depot Kupperhaus"
+        },
+        {
+          "option": "Depot Ennetbaden"
+        },
+        {
+          "option": "Depot Lemonia"
+        },
+        {
+          "option": "Depot Lägernstrasse"
+        }
+      ],
+      "payment_label": "Zahlungsweise *",
+      "payment_hint": "Die erste Rechnung wird per 31. Januar fällig.",
+      "quarterly_label": "Quartalsweise (vierteljährlich)",
+      "annual_label": "Ganzes Jahr (einmalig)",
+      "participation_title": "Mitarbeit",
+      "participation_intro": "Jede(r) Mitglied bringt sich ein. Bitte teile uns deine Präferenzen mit:",
+      "preferred_days_label": "Bevorzugte Tage",
+      "preferred_days": [
+        {
+          "option": "Montag"
+        },
+        {
+          "option": "Dienstag"
+        },
+        {
+          "option": "Mittwoch"
+        },
+        {
+          "option": "Donnerstag"
+        },
+        {
+          "option": "Freitag"
+        },
+        {
+          "option": "Samstag"
+        }
+      ],
+      "preferred_times_label": "Bevorzugte Zeiten",
+      "preferred_times": [
+        {
+          "option": "morgens"
+        },
+        {
+          "option": "nachmittags"
+        },
+        {
+          "option": "abends"
+        }
+      ],
+      "activity_areas_label": "Tätigkeitsbereiche (Mehrfachauswahl möglich)",
+      "activity_areas": [
+        {
+          "option": "Feld/Anbau"
+        },
+        {
+          "option": "Logistik/Verteilung"
+        },
+        {
+          "option": "Administration"
+        },
+        {
+          "option": "Events/Organisation"
+        },
+        {
+          "option": "Andere"
+        }
+      ],
+      "other_activity_label": "Andere Tätigkeitsbereiche (bitte beschreiben)",
+      "additional_subscriptions_title": "Zusatzabos",
+      "additional_subscriptions_intro": "Ich bin interessiert, zusätzlich:",
+      "additional_subscriptions": [
+        {
+          "option": "Milch"
+        },
+        {
+          "option": "Fleisch"
+        },
+        {
+          "option": "Käse"
+        },
+        {
+          "option": "Kräutersalz"
+        }
+      ],
+      "additional_products_label": "Weitere Produkte von Partnern aus der Region",
+      "additional_products_hint": "Hast du Wünsche für weitere Produkte? Teile uns deine Ideen mit:",
+      "additional_products_placeholder": "z.B. Eier, Brot, Tofu, Honig...",
+      "confirmation_title": "Bestätigung",
+      "privacy_label": "Ich akzeptiere die Datenschutzbestimmungen *",
+      "submit_label": "Anmeldung einreichen",
+      "submitting_label": "Wird gesendet …",
+      "fallback_error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+      "captcha_error": "Bitte bestätige, dass du kein Roboter bist."
+    },
+    "pricing-calculator": {
+      "share_price": 250,
+      "work_suffix": "Arbeitseinsätze à 2 Stunden",
+      "shares_only_label": "Nur Anteilsscheine",
+      "annual_contribution_label": "Jährlicher Beitrag",
+      "work_label": "Mitarbeit pro Jahr:",
+      "one_time_payment_label": "Einmalige Zahlung",
+      "additional_shares_label": "Zusätzliche Anteilsscheine hinzufügen:",
+      "signup_url": "/anmeldung",
+      "cta_label": "Jetzt mitmachen!",
+      "cta_note": "Deine Auswahl wird automatisch ins Anmeldeformular übernommen",
+      "tiers": [
+        {
+          "name": "Halb (1 Person)",
+          "price": 750,
+          "shares": 1,
+          "work": 10,
+          "recommended": false
+        },
+        {
+          "name": "Standard (2-3 Personen)",
+          "price": 1280,
+          "shares": 2,
+          "work": 20,
+          "recommended": true
+        },
+        {
+          "name": "Doppel (4-6 Personen)",
+          "price": 2350,
+          "shares": 4,
+          "work": 40,
+          "recommended": false
+        }
+      ],
+      "recommended_label": "Empfohlen",
+      "no_subscription_label": "Kein Abo",
+      "article_label": "Artikel",
+      "quantity_label": "Anzahl",
+      "unit_price_label": "Einzelpreis",
+      "share_certificates_label": "Anteilsscheine",
+      "required_label": "erforderlich",
+      "shares_only_info": "<strong>💡 Info:</strong> Du kannst Anteilsscheine auch ohne Gemüsekorb erwerben. Genossenschafter/innen haben Vorrang auf der Warteliste für einen Gemüsekorb.",
+      "without_basket_label": "ohne Gemüsekorb",
+      "additional_label": "zusätzlich",
+      "total_label": "Total"
+    },
+    "pricing-table": {
+      "work_suffix": "à 2 Stunden",
+      "basket_column_label": "Gemüsekorb",
+      "persons_column_label": "Personen",
+      "annual_price_column_label": "Jahrespreis",
+      "share_cost_column_label": "Anteilsscheine Kosten",
+      "work_column_label": "Mitarbeit pro Jahr"
+    },
+    "saisonkalender": {
+      "vegetables": [
+        {
+          "name": "Rüebli",
+          "months": [
+            1,
+            2,
+            3,
+            4,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ]
+        },
+        {
+          "name": "Zwiebeln",
+          "months": [
+            1,
+            2,
+            3,
+            4,
+            8,
+            9,
+            10,
+            11,
+            12
+          ]
+        },
+        {
+          "name": "Kartoffeln",
+          "months": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            9,
+            10,
+            11,
+            12
+          ]
+        },
+        {
+          "name": "Salate",
+          "months": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12
+          ]
+        },
+        {
+          "name": "Lauch",
+          "months": [
+            1,
+            2,
+            3,
+            4,
+            9,
+            10,
+            11,
+            12
+          ]
+        },
+        {
+          "name": "Kürbis",
+          "months": [
+            1,
+            10,
+            11,
+            12
+          ]
+        }
+      ],
+      "empty_message": "Noch kein Saisonkalender hinterlegt.",
+      "vegetable_column_label": "Gemüse",
+      "month_columns": [
+        {
+          "number": 1,
+          "label": "Jan"
+        },
+        {
+          "number": 2,
+          "label": "Feb"
+        },
+        {
+          "number": 3,
+          "label": "Mär"
+        },
+        {
+          "number": 4,
+          "label": "Apr"
+        },
+        {
+          "number": 5,
+          "label": "Mai"
+        },
+        {
+          "number": 6,
+          "label": "Jun"
+        },
+        {
+          "number": 7,
+          "label": "Jul"
+        },
+        {
+          "number": 8,
+          "label": "Aug"
+        },
+        {
+          "number": 9,
+          "label": "Sep"
+        },
+        {
+          "number": 10,
+          "label": "Okt"
+        },
+        {
+          "number": 11,
+          "label": "Nov"
+        },
+        {
+          "number": 12,
+          "label": "Dez"
+        }
+      ]
+    },
+    "schnuppertage": {
+      "list_label": "Was dich erwartet:",
+      "schedule_title": "Nächste Termine",
+      "signup_label": "Jetzt anmelden",
+      "empty_message": "Aktuell sind keine Schnuppertage geplant."
+    },
+    "subscribe-form": {
+      "submit_label": "Abonnieren",
+      "submitting_label": "Wird gesendet …",
+      "success_message": "Vielen Dank! Bitte bestätige deine Anmeldung über den Link in der E-Mail, die wir dir gesendet haben.",
+      "fallback_error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+      "captcha_error": "Bitte bestätige, dass du kein Roboter bist."
+    },
+    "visit-day-form": {
+      "name_label": "Name *",
+      "email_label": "E-Mail *",
+      "phone_label": "Telefon *",
+      "date_label": "Gewünschtes Datum *",
+      "participants_label": "Anzahl Personen *",
+      "notes_label": "Anmerkungen",
+      "privacy_label": "Ich akzeptiere die Datenschutzbestimmungen *",
+      "submit_label": "Anmelden",
+      "submitting_label": "Wird gesendet …",
+      "success_message": "Vielen Dank für deine Anmeldung! Wir melden uns so schnell wie möglich bei dir.",
+      "fallback_error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+      "captcha_error": "Bitte bestätige, dass du kein Roboter bist."
+    },
+    "waiting-list-form": {
+      "name_label": "Name *",
+      "email_label": "E-Mail *",
+      "phone_label": "Telefon *",
+      "interest_label": "Interesse an *",
+      "interest_placeholder": "Bitte wählen...",
+      "notes_label": "Anmerkungen",
+      "privacy_label": "Ich akzeptiere die Datenschutzbestimmungen *",
+      "submit_label": "Anmelden",
+      "submitting_label": "Wird gesendet …",
+      "interest_options": [
+        {
+          "value": "program1",
+          "label": "Programm 1"
+        },
+        {
+          "value": "program2",
+          "label": "Programm 2"
+        },
+        {
+          "value": "program3",
+          "label": "Programm 3"
+        }
+      ],
+      "success_message": "Vielen Dank für deine Anmeldung! Wir melden uns so schnell wie möglich bei dir.",
+      "fallback_error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
+      "captcha_error": "Bitte bestätige, dass du kein Roboter bist."
     }
+  }
 }

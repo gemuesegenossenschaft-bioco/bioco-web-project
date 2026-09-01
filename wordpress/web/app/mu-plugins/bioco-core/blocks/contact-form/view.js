@@ -2,15 +2,12 @@
  * Contact form view script (W10, issue #97). Plain ES5-safe vanilla JS
  * (the theme has no build step): renders the Turnstile widget, serializes
  * the form generically, POSTs to the REST endpoint from
- * biocoContactFormConfig (localized in render.php), and swaps in inline
- * German success/error copy mirroring .wp-refs/ContactForm.tsx.
+ * biocoContactFormConfig (localized in render.php). Erfolg- und Fehlermeldungen
+ * kommen aus editierbaren ACF-Feldern (Issue #158) — nie hart kodiert.
  */
 (function () {
   'use strict';
 
-  var SUCCESS_MESSAGE = 'Vielen Dank für Ihre Nachricht! Wir melden uns so schnell wie möglich bei Ihnen.';
-  var FALLBACK_ERROR = 'Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder senden Sie uns eine E-Mail direkt an info@bioco.ch';
-  var CAPTCHA_MISSING_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.';
 
   function ready(fn) {
     if (document.readyState === 'loading') {
@@ -80,6 +77,7 @@
   }
 
   function showMessage(container, text, isError) {
+    if (!text) return;
     container.textContent = text;
     container.hidden = false;
     container.className = 'form-message bento-card ' + (isError ? 'form-error' : 'form-success');
@@ -88,6 +86,9 @@
   function initForm(form) {
     var configName = form.getAttribute('data-config') || 'biocoContactFormConfig';
     var config = window[configName] || {};
+    var successMessage = config.successMessage || '';
+    var fallbackError = config.fallbackError || '';
+    var captchaError = config.captchaError || '';
     var messageBox = form.parentNode.querySelector('.form-message');
     var submitBtn = form.querySelector('[type="submit"]');
     var captchaContainer = form.querySelector('[data-form-captcha]');
@@ -115,7 +116,7 @@
       event.preventDefault();
 
       if (config.turnstileSiteKey && !captchaToken) {
-        if (messageBox) showMessage(messageBox, CAPTCHA_MISSING_ERROR, true);
+        if (messageBox) showMessage(messageBox, captchaError, true);
         return;
       }
 
@@ -145,9 +146,9 @@
         .then(function (result) {
           if (result.ok && result.json && result.json.success) {
             form.hidden = true;
-            if (messageBox) showMessage(messageBox, SUCCESS_MESSAGE, false);
+            if (messageBox) showMessage(messageBox, successMessage, false);
           } else {
-            var errorMessage = (result.json && result.json.error) || FALLBACK_ERROR;
+            var errorMessage = (result.json && result.json.error) || fallbackError;
             if (messageBox) showMessage(messageBox, errorMessage, true);
             if (submitBtn) {
               submitBtn.disabled = false;
@@ -160,7 +161,7 @@
           }
         })
         .catch(function () {
-          if (messageBox) showMessage(messageBox, FALLBACK_ERROR, true);
+          if (messageBox) showMessage(messageBox, fallbackError, true);
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = submitBtn.getAttribute('data-submit-label') || submitBtn.textContent;
