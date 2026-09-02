@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "tokens": {
+    "colors": [
+      {"title": "BIOCO Green", "cssVar": "--wp--preset--color--bioco-green", "value": "#2e7d32"},
+      {"title": "BIOCO Green Dark", "cssVar": "--wp--preset--color--bioco-green-dark", "value": "#1b5e20"},
+      {"title": "BIOCO Carrot", "cssVar": "--wp--preset--color--bioco-carrot", "value": "#FF8C00"},
+      {"title": "BIOCO Beet", "cssVar": "--wp--preset--color--bioco-beet", "value": "#87213D"},
+      {"title": "BIOCO Background", "cssVar": "--wp--preset--color--bioco-bg", "value": "#F5F1E8"},
+      {"title": "BIOCO Surface", "cssVar": "--wp--preset--color--bioco-surface", "value": "#FFFFFF"},
+      {"title": "BIOCO Text", "cssVar": "--wp--preset--color--bioco-text", "value": "#1A1A1A"},
+      {"title": "BIOCO Text Muted", "cssVar": "--wp--preset--color--bioco-text-muted", "value": "#4A4A4A"},
+      {"title": "BIOCO Border", "cssVar": "--wp--preset--color--bioco-border", "value": "#E1E4E8"}
+    ],
+    "fonts": [
+      {"title": "BIOCO Body Font", "cssVar": "--wp--preset--font-family--body", "value": "'DM Sans', system-ui, -apple-system, Segoe UI, Roboto, sans-serif"}
+    ],
+    "typography": [
+      {"title": "BIOCO Text Small", "cssVar": "--wp--preset--font-size--sm", "value": "0.875rem"},
+      {"title": "BIOCO Text Base", "cssVar": "--wp--preset--font-size--base", "value": "1rem"},
+      {"title": "BIOCO Text Medium", "cssVar": "--wp--preset--font-size--md", "value": "1.125rem"},
+      {"title": "BIOCO Text Large", "cssVar": "--wp--preset--font-size--lg", "value": "1.25rem"},
+      {"title": "BIOCO Text XL", "cssVar": "--wp--preset--font-size--xl", "value": "1.5rem"},
+      {"title": "BIOCO Text 2XL", "cssVar": "--wp--preset--font-size--2xl", "value": "2rem"},
+      {"title": "BIOCO Text 3XL", "cssVar": "--wp--preset--font-size--3xl", "value": "2.5rem"}
+    ],
+    "spacing": [
+      {"title": "BIOCO Spacing 8px", "cssVar": "--wp--preset--spacing--20", "value": "8px"},
+      {"title": "BIOCO Spacing 16px", "cssVar": "--wp--preset--spacing--30", "value": "16px"},
+      {"title": "BIOCO Spacing 24px", "cssVar": "--wp--preset--spacing--40", "value": "24px"},
+      {"title": "BIOCO Spacing 32px", "cssVar": "--wp--preset--spacing--50", "value": "32px"},
+      {"title": "BIOCO Spacing 48px", "cssVar": "--wp--preset--spacing--60", "value": "48px"},
+      {"title": "BIOCO Spacing 64px", "cssVar": "--wp--preset--spacing--70", "value": "64px"},
+      {"title": "BIOCO Spacing 96px", "cssVar": "--wp--preset--spacing--80", "value": "96px"},
+      {"title": "BIOCO Content Width", "cssVar": "--wp--style--global--content-size", "value": "1160px"},
+      {"title": "BIOCO Wide Width", "cssVar": "--wp--style--global--wide-size", "value": "1400px"}
+    ],
+    "radii": [
+      {"title": "BIOCO Radius Small", "cssVar": "--wp--custom--radius--sm", "value": "12px"},
+      {"title": "BIOCO Radius Medium", "cssVar": "--wp--custom--radius--md", "value": "18px"},
+      {"title": "BIOCO Radius Large", "cssVar": "--wp--custom--radius--lg", "value": "24px"},
+      {"title": "BIOCO Radius XL", "cssVar": "--wp--custom--radius--xl", "value": "32px"},
+      {"title": "BIOCO Radius Pill", "cssVar": "--wp--custom--radius--pill", "value": "999px"}
+    ],
+    "borders": [
+      {"title": "BIOCO Border Thin", "cssVar": "--wp--custom--border--thin", "value": "1px solid var(--wp--preset--color--bioco-border)"}
+    ],
+    "shadows": [
+      {"title": "BIOCO Shadow Small", "cssVar": "--wp--custom--shadow--sm", "value": "0 1px 3px rgba(31,42,27,0.08)"},
+      {"title": "BIOCO Shadow Medium", "cssVar": "--wp--custom--shadow--md", "value": "0 4px 12px rgba(31,42,27,0.12)"},
+      {"title": "BIOCO Shadow Large", "cssVar": "--wp--custom--shadow--lg", "value": "0 8px 24px rgba(31,42,27,0.16)"}
+    ]
+  },
+  "optionGroupPresets": [
+    {"title": "BIOCO Body Typography", "groups": ["typography", "body"]},
+    {"title": "BIOCO Heading Typography", "groups": ["typography", "heading"]},
+    {"title": "BIOCO Section Spacing", "groups": ["spacing", "section"]},
+    {"title": "BIOCO Card Border", "groups": ["border", "card"]},
+    {"title": "BIOCO Card Shadow", "groups": ["shadow", "card"]},
+    {"title": "BIOCO Primary Button", "groups": ["button", "primary"]},
+    {"title": "BIOCO Secondary Button", "groups": ["button", "secondary"]}
+  ],
+  "elementPresets": [
+    {"title": "BIOCO Standard Section", "element": "section"},
+    {"title": "BIOCO Content Row", "element": "row"},
+    {"title": "BIOCO Display Heading", "element": "heading"},
+    {"title": "BIOCO Primary Button", "element": "button"},
+    {"title": "BIOCO Secondary Button", "element": "button"},
+    {"title": "BIOCO Surface Card", "element": "card"}
+  ],
+  "themeBuilder": {
+    "templates": [
+      {"slot": "header", "title": "BIOCO Global Header", "assignment": "default"},
+      {"slot": "body", "title": "BIOCO Default Body", "assignment": "default"},
+      {"slot": "footer", "title": "BIOCO Global Footer", "assignment": "default"}
+    ]
+  },
+  "css": {
+    "files": ["wordpress/web/app/themes/bioco-divi/style.css"],
+    "exceptions": [
+      {"file": "style.css", "property": "font-family", "value": "'DM Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif", "reason": "Child-theme base font stack mirrors theme.json but uses literal fallback"},
+      {"file": "style.css", "property": "font-size", "value": "16px", "reason": "Base pixel size for child-theme canvas"},
+      {"file": "style.css", "property": "color", "value": "#FFFFFF !important", "reason": "Hero text must be white above image overlay"},
+      {"file": "style.css", "property": "font-size", "value": "clamp(1.75rem, 4vw, 2.5rem)", "reason": "Responsive hero title sizing"},
+      {"file": "style.css", "property": "color", "value": "#FFFFFF", "reason": "Hero heading text must be white above overlay"},
+      {"file": "style.css", "property": "font-size", "value": "40px", "reason": "Hero h1 fixed pixel size for visual impact"},
+      {"file": "style.css", "property": "font-size", "value": "clamp(1rem, 2vw, 1.25rem)", "reason": "Responsive hero subtitle sizing"},
+      {"file": "style.css", "property": "font-size", "value": "clamp(1.5rem, 3vw, 2rem)", "reason": "Responsive feature title sizing"},
+      {"file": "style.css", "property": "border-radius", "value": "12px 24px 12px 24px", "reason": "Organic asymmetric button radius"},
+      {"file": "style.css", "property": "font-size", "value": "16px !important", "reason": "Divi 5 button module font size override"},
+      {"file": "style.css", "property": "color", "value": "#fff", "reason": "Button text white for contrast on green"},
+      {"file": "style.css", "property": "font-family", "value": "'DM Sans', system-ui, sans-serif", "reason": "Divi 5 button module font stack"},
+      {"file": "style.css", "property": "color", "value": "#fff !important", "reason": "Divi 5 primary button text must be white"},
+      {"file": "style.css", "property": "font-size", "value": "1rem", "reason": "Step number font size"},
+      {"file": "style.css", "property": "font-size", "value": "1.125rem", "reason": "Step item heading font size"},
+      {"file": "style.css", "property": "font-size", "value": "2rem", "reason": "Portal icon size"},
+      {"file": "style.css", "property": "border-radius", "value": "0", "reason": "Card image modifier: no radius"},
+      {"file": "style.css", "property": "border-radius", "value": "8px", "reason": "Card image modifier: small radius"},
+      {"file": "style.css", "property": "border-radius", "value": "16px", "reason": "Card image modifier: medium radius"},
+      {"file": "style.css", "property": "border-radius", "value": "24px", "reason": "Card image modifier: large radius"},
+      {"file": "style.css", "property": "border-radius", "value": "32px", "reason": "Card image modifier: extra large radius"},
+      {"file": "style.css", "property": "font-size", "value": "1.2rem", "reason": "Card title font size"},
+      {"file": "style.css", "property": "background-color", "value": "#8ab272", "reason": "Timeline highlight badge accent color"},
+      {"file": "style.css", "property": "font-size", "value": "1.25rem", "reason": "Timeline item title font size"},
+      {"file": "style.css", "property": "font-size", "value": "0.75rem", "reason": "Footer small text size"},
+      {"file": "style.css", "property": "font-size", "value": "0.875rem", "reason": "Footer meta text size"},
+      {"file": "style.css", "property": "font-size", "value": "24px", "reason": "Footer widget title size"},
+      {"file": "style.css", "property": "font-size", "value": "22.4px", "reason": "Footer menu link size"}
+    ]
+  },
+  "exports": {
+    "variables": "../exports/variables.json",
+    "presets": "../exports/presets.json",
+    "themeBuilder": "../exports/theme-builder.json"
+  }
+}
