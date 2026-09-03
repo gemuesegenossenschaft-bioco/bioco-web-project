@@ -24,12 +24,12 @@
       "buttons": [
         {
           "text": "Statuten (PDF)",
-          "href": "/statuten/13-11-15_Statuten_bioco.pdf",
+          "href": "documents/13-11-15_Statuten_bioco.pdf",
           "variant": "secondary"
         },
         {
           "text": "Reglement (PDF)",
-          "href": "/statuten/2212_Betriebsreglement.pdf",
+          "href": "documents/2212_Betriebsreglement.pdf",
           "variant": "secondary"
         }
       ]
