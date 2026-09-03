@@ -1,88 +1,130 @@
 {
-    "key": "group_bioco_block_subscribe_form",
-    "title": "Newsletter-Anmeldung Block (Bioco)",
-    "fields": [
-        {
-            "key": "field_bioco_subscribe_form_content_clone",
-            "label": "Inhalt (optional)",
-            "name": "",
-            "aria-label": "",
-            "type": "clone",
-            "instructions": "Optionale Überschrift/Einleitung über dem Formular.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "clone": [
-                "field_bioco_section_title",
-                "field_bioco_section_text"
-            ],
-            "display": "seamless",
-            "layout": "block",
-            "prefix_label": 0,
-            "prefix_name": 0
-        },
-        {
-            "key": "field_bioco_subscribe_form_submit_label",
-            "label": "Beschriftung Absende-Button",
-            "name": "submit_label",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "Text auf dem Absende-Button.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_subscribe_form_submitting_label",
-            "label": "Beschriftung waehrend des Sendens",
-            "name": "submitting_label",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "Text auf dem Button, solange das Formular gesendet wird.",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        }
-    ],
-    "location": [
-        [
-            {
-                "param": "block",
-                "operator": "==",
-                "value": "bioco/subscribe-form"
-            }
-        ]
-    ],
-    "menu_order": 0,
-    "position": "normal",
-    "style": "default",
-    "label_placement": "top",
-    "instruction_placement": "label",
-    "hide_on_screen": "",
-    "active": true,
-    "description": "Felder für den Newsletter-Anmeldung-Block (W10, Issue #97). Titel/Text klonen aus Section Common für eine optionale Einleitung; die Formularfelder selbst sind statisch (render.php). POST /wp-json/bioco/v1/subscribe startet den Double-Opt-in-Flow (bioco-forms mu-plugin).",
-    "show_in_rest": 0,
-    "modified": 1783728000
+  "key": "group_bioco_block_subscribe_form",
+  "title": "Newsletter-Anmeldung Block (Bioco)",
+  "fields": [
+    {
+      "key": "field_bioco_subscribe_form_content_clone",
+      "label": "Inhalt (optional)",
+      "name": "",
+      "aria-label": "",
+      "type": "clone",
+      "instructions": "Optionale Überschrift/Einleitung über dem Formular.",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "clone": [
+        "field_bioco_section_title",
+        "field_bioco_section_text"
+      ],
+      "display": "seamless",
+      "layout": "block",
+      "prefix_label": 0,
+      "prefix_name": 0
+    },
+    {
+      "key": "field_bioco_subscribe_form_submit_label",
+      "label": "Beschriftung Absende-Button",
+      "name": "submit_label",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "Text auf dem Absende-Button.",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_subscribe_form_submitting_label",
+      "label": "Beschriftung waehrend des Sendens",
+      "name": "submitting_label",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "Text auf dem Button, solange das Formular gesendet wird.",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_subscribe_form_success_message",
+      "label": "Erfolgsmeldung nach dem Absenden",
+      "name": "success_message",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      }
+    },
+    {
+      "key": "field_bioco_subscribe_form_fallback_error",
+      "label": "Fehlermeldung, wenn das Senden fehlschlaegt",
+      "name": "fallback_error",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      }
+    },
+    {
+      "key": "field_bioco_subscribe_form_captcha_error",
+      "label": "Meldung fehlender Captcha-Bestaetigung",
+      "name": "captcha_error",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      }
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "block",
+        "operator": "==",
+        "value": "bioco/subscribe-form"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": true,
+  "description": "Felder für den Newsletter-Anmeldung-Block (W10, Issue #97). Titel/Text klonen aus Section Common für eine optionale Einleitung; die Formularfelder selbst sind statisch (render.php). POST /wp-json/bioco/v1/subscribe startet den Double-Opt-in-Flow (bioco-forms mu-plugin).",
+  "show_in_rest": 0,
+  "modified": 1783728000
 }

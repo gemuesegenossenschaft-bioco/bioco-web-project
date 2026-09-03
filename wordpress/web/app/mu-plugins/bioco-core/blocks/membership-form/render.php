@@ -66,7 +66,11 @@ $privacy_label = bioco_field('privacy_label');
 $submit_label = bioco_field('submit_label');
 $submitting_label = bioco_field('submitting_label');
 
-bioco_forms_localize_block('bioco/membership-form', 'biocoMembershipFormConfig', 'membership');
+$form_strings = [
+    'fallbackError' => (string) bioco_field('fallback_error'),
+    'captchaError' => (string) bioco_field('captcha_error'),
+];
+bioco_forms_localize_block('bioco/membership-form', 'biocoMembershipFormConfig', 'membership', $form_strings);
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'mitgliedschaft-anmeldung';
 $class_name = 'cms-section cms-membership-form';

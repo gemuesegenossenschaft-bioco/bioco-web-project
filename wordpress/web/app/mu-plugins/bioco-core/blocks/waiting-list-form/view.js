@@ -3,16 +3,14 @@
  * JS (the theme has no build step). Same generic submit engine as
  * blocks/contact-form/view.js — see that file for the shared shape.
  *
- * Success copy is adapted from .wp-refs/WaitingListForm.tsx for the same
+ * Erfolgsmeldung kommt editierbar aus dem ACF-Feld success_message
+ * (Issue #158), angepasst an .wp-refs/WaitingListForm.tsx
  * reason as blocks/visit-day-form/view.js: no double-opt-in backs this
  * handler, so the confirm-by-email promise in the reference is dropped.
  */
 (function () {
   'use strict';
 
-  var SUCCESS_MESSAGE = 'Vielen Dank für Ihre Anmeldung! Wir melden uns so schnell wie möglich bei Ihnen.';
-  var FALLBACK_ERROR = 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.';
-  var CAPTCHA_MISSING_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.';
 
   function ready(fn) {
     if (document.readyState === 'loading') {
@@ -82,6 +80,7 @@
   }
 
   function showMessage(container, text, isError) {
+    if (!text) return;
     container.textContent = text;
     container.hidden = false;
     container.className = 'form-message bento-card ' + (isError ? 'form-error' : 'form-success');
@@ -90,6 +89,9 @@
   function initForm(form) {
     var configName = form.getAttribute('data-config') || 'biocoWaitingListFormConfig';
     var config = window[configName] || {};
+    var successMessage = config.successMessage || '';
+    var fallbackError = config.fallbackError || '';
+    var captchaError = config.captchaError || '';
     var messageBox = form.parentNode.querySelector('.form-message');
     var submitBtn = form.querySelector('[type="submit"]');
     var captchaContainer = form.querySelector('[data-form-captcha]');
@@ -117,7 +119,7 @@
       event.preventDefault();
 
       if (config.turnstileSiteKey && !captchaToken) {
-        if (messageBox) showMessage(messageBox, CAPTCHA_MISSING_ERROR, true);
+        if (messageBox) showMessage(messageBox, captchaError, true);
         return;
       }
 
@@ -147,9 +149,9 @@
         .then(function (result) {
           if (result.ok && result.json && result.json.success) {
             form.hidden = true;
-            if (messageBox) showMessage(messageBox, SUCCESS_MESSAGE, false);
+            if (messageBox) showMessage(messageBox, successMessage, false);
           } else {
-            var errorMessage = (result.json && result.json.error) || FALLBACK_ERROR;
+            var errorMessage = (result.json && result.json.error) || fallbackError;
             if (messageBox) showMessage(messageBox, errorMessage, true);
             if (submitBtn) {
               submitBtn.disabled = false;
@@ -162,7 +164,7 @@
           }
         })
         .catch(function () {
-          if (messageBox) showMessage(messageBox, FALLBACK_ERROR, true);
+          if (messageBox) showMessage(messageBox, fallbackError, true);
           if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.textContent = submitBtn.getAttribute('data-submit-label') || submitBtn.textContent;

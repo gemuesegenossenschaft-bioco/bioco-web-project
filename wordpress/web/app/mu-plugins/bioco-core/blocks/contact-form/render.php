@@ -14,7 +14,12 @@ $phone_label = bioco_field('phone_label');
 $submit_label = bioco_field('submit_label');
 $submitting_label = bioco_field('submitting_label');
 
-bioco_forms_localize_block('bioco/contact-form', 'biocoContactFormConfig', 'contact');
+$formStrings = [
+    'successMessage' => (string) bioco_field('success_message'),
+    'fallbackError' => (string) bioco_field('fallback_error'),
+    'captchaError' => (string) bioco_field('captcha_error'),
+];
+bioco_forms_localize_block('bioco/contact-form', 'biocoContactFormConfig', 'contact', $formStrings);
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'kontakt-formular';
 $class_name = 'cms-section cms-contact-form';

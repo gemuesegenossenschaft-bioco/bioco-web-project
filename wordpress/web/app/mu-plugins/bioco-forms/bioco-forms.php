@@ -161,7 +161,7 @@ add_action('admin_notices', function () {
 
 // Loads the Turnstile widget script + passes the REST endpoint and site key
 // to a block's view.js. Called from each form block's render.php.
-function bioco_forms_localize_block($block_name, $object_name, $endpoint) {
+function bioco_forms_localize_block($block_name, $object_name, $endpoint, array $strings = []) {
     $config = bioco_forms_turnstile_config();
     if ($config['configured']) {
         wp_enqueue_script('bioco-cf-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
@@ -171,7 +171,7 @@ function bioco_forms_localize_block($block_name, $object_name, $endpoint) {
     wp_localize_script($handle, $object_name, [
         'restUrl' => esc_url_raw(rest_url('bioco/v1/' . $endpoint)),
         'turnstileSiteKey' => $config['configured'] ? $config['site_key'] : '',
-    ]);
+    ] + $strings);
 }
 
 function bioco_forms_json_body(WP_REST_Request $request) {
@@ -287,11 +287,11 @@ function bioco_forms_validate_membership($data) {
     }
 
     if (!isset($data['privacyAccept']) || $data['privacyAccept'] !== true) {
-        $errors['privacyAccept'] = 'Bitte akzeptieren Sie die Datenschutzerklärung.';
+        $errors['privacyAccept'] = 'Bitte akzeptiere die Datenschutzerklärung.';
     }
 
     if (isset($data['email']) && is_string($data['email']) && trim($data['email']) !== '' && !is_email(trim($data['email']))) {
-        $errors['email'] = 'Bitte geben Sie eine gültige E-Mail-Adresse ein.';
+        $errors['email'] = 'Bitte gib eine gültige E-Mail-Adresse ein.';
     }
 
     $membership_type = isset($data['membershipType']) ? $data['membershipType'] : '';
@@ -311,7 +311,7 @@ function bioco_forms_validate_membership($data) {
         && $shares_only !== null
         && $shares_only >= 1;
     if (!$valid_abo && !$valid_shares_only) {
-        $errors['membershipSelection'] = 'Bitte wählen Sie eine gültige Mitgliedschaft.';
+        $errors['membershipSelection'] = 'Bitte wähle eine gültige Mitgliedschaft.';
     }
 
     return ['ok' => empty($errors), 'errors' => $errors];
@@ -552,9 +552,9 @@ add_action('rest_api_init', function () {
     ]);
 });
 
-$GLOBALS['bioco_forms_captcha_error'] = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.';
+$GLOBALS['bioco_forms_captcha_error'] = 'Bitte bestätige, dass du kein Roboter bist.';
 $GLOBALS['bioco_forms_generic_error'] = 'Es ist ein Fehler aufgetreten.';
-$GLOBALS['bioco_forms_missing_fields_error'] = 'Bitte füllen Sie alle Pflichtfelder aus.';
+$GLOBALS['bioco_forms_missing_fields_error'] = 'Bitte fülle alle Pflichtfelder aus.';
 
 // Mirrors .wp-refs/api-forms/contact/route.ts — subject line is
 // "Kontaktanfrage: {subject}", body lists all submitted fields.
@@ -636,7 +636,7 @@ function bioco_forms_handle_subscribe(WP_REST_Request $request) {
 }
 
 // Visit-day and waiting-list send mail immediately (no DOI — see the module
-// docblock above): the reference's "bestätigen Sie über den Link" success
+// docblock above): die Erfolgsmeldung des Referenztexts (Anrede du, Issue #158)
 // copy is specific to subscribe's real double-opt-in, so the ported block
 // view.js uses adapted success text instead of a false promise.
 function bioco_forms_handle_visit_day(WP_REST_Request $request) {
@@ -833,7 +833,7 @@ function bioco_forms_handle_membership(WP_REST_Request $request) {
     $sent = bioco_forms_send_mail(bioco_forms_recipient(), $subject, bioco_forms_lines($lines), $email);
 
     if (!$sent) {
-        return new WP_REST_Response(['success' => false, 'error' => 'E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.'], 500);
+        return new WP_REST_Response(['success' => false, 'error' => 'E-Mail konnte nicht gesendet werden. Bitte versuche es später erneut.'], 500);
     }
 
     $response_body = ['success' => true];

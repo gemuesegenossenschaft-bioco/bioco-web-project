@@ -21,7 +21,12 @@ $notes_label = bioco_field('notes_label');
 $submit_label = bioco_field('submit_label');
 $submitting_label = bioco_field('submitting_label');
 
-bioco_forms_localize_block('bioco/event-signup-form', 'biocoEventSignupFormConfig', 'event-signup');
+$formStrings = [
+    'successMessage' => (string) bioco_field('success_message'),
+    'fallbackError' => (string) bioco_field('fallback_error'),
+    'captchaError' => (string) bioco_field('captcha_error'),
+];
+bioco_forms_localize_block('bioco/event-signup-form', 'biocoEventSignupFormConfig', 'event-signup', $formStrings);
 
 $event_id = '';
 $event_title = '';
