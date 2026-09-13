@@ -1,4 +1,4 @@
-"""Visual contracts for the fallback block theme (bioco), its shared shell
+"""Visual contracts for the fallback block theme (bioco), the shared shell
 assets and the approved content/palette.
 
 The former monolithic source check for shell navigation markup and
@@ -8,7 +8,8 @@ tests/test_wordpress_navigation_scroll.py, and the rendered navigation/footer
 contract is exercised end-to-end through the real renderers and theme
 templates in tests/test_wordpress_divi_shell.py. What remains here are the
 contracts that still need the static sources: the block theme's own adapter
-markup, its CSS asset contracts, and the approved content/palette data.
+markup, the shared shell CSS asset contract (now owned by bioco-core,
+#180), and the approved content/palette data.
 
 The full keep/replace/remove map of the WordPress test surface lives in
 tests/README.md.
@@ -16,6 +17,7 @@ tests/README.md.
 
 import json
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -126,8 +128,60 @@ def test_block_theme_header_part_wires_the_shared_navigation_contract():
     assert (CORE / "assets/bioco-logo.png").is_file()
 
 
+def test_block_theme_adapter_enqueues_no_front_end_assets_itself():
+    """The fallback theme owns no front-end asset enqueue anymore (#180).
+
+    Tokens, block CSS, the shared shell stylesheet and the navigation script
+    all arrive from bioco-core's real wp_enqueue_scripts registrations (see
+    tests/test_wordpress_divi_shell.py). Executing the real theme
+    functions.php through its registered hook must therefore enqueue nothing
+    at all — otherwise the shared assets would load twice under this theme.
+    """
+    php = (
+        "define('ABSPATH', __DIR__);\n"
+        "$GLOBALS['BIOCO_ENQUEUED'] = [];\n"
+        "$GLOBALS['BIOCO_ACTIONS'] = [];\n"
+        "function add_theme_support($feature, ...$args) { return true; }\n"
+        "function load_theme_textdomain($domain, $path) { return true; }\n"
+        "function get_template_directory() { return 'wordpress/web/app/themes/bioco'; }\n"
+        "function get_theme_file_path($file = '') { return 'wordpress/web/app/themes/bioco/' . ltrim((string) $file, '/'); }\n"
+        "function get_theme_file_uri($file = '') { return 'https://staging.example/wp-content/themes/bioco/' . ltrim((string) $file, '/'); }\n"
+        "function add_action($hook, $callback, $priority = 10) {\n"
+        "    $GLOBALS['BIOCO_ACTIONS'][$hook][] = [(int) $priority, $callback];\n"
+        "    return true;\n"
+        "}\n"
+        "function add_filter($hook, $callback, $priority = 10) { return true; }\n"
+        "function wp_enqueue_style($handle, $src = '', $deps = [], $ver = false) {\n"
+        "    $GLOBALS['BIOCO_ENQUEUED'][] = ['type' => 'style', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];\n"
+        "}\n"
+        "function wp_enqueue_script($handle, $src = '', $deps = [], $ver = false, $footer = false) {\n"
+        "    $GLOBALS['BIOCO_ENQUEUED'][] = ['type' => 'script', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];\n"
+        "}\n"
+        "require 'wordpress/web/app/themes/bioco/functions.php';\n"
+        "foreach (['after_setup_theme', 'wp_enqueue_scripts'] as $hook) {\n"
+        "    foreach ($GLOBALS['BIOCO_ACTIONS'][$hook] ?? [] as [, $callback]) {\n"
+        "        call_user_func($callback);\n"
+        "    }\n"
+        "}\n"
+        "echo json_encode([\n"
+        "    'hooks' => array_keys($GLOBALS['BIOCO_ACTIONS']),\n"
+        "    'enqueued' => $GLOBALS['BIOCO_ENQUEUED'],\n"
+        "]);"
+    )
+    result = json.loads(subprocess.run(
+        ["php", "-r", php],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout)
+
+    assert result["hooks"] == ["after_setup_theme"]
+    assert result["enqueued"] == []
+
+
 def test_shell_chrome_css_defines_the_two_tier_navigation_chrome():
-    chrome_css = (THEME / "assets/app.css").read_text()
+    chrome_css = (CORE / "assets/bioco-shell.css").read_text()
 
     markers = ("bioco-page-shell", "bioco-utility-nav", "bioco-primary-nav", "bioco-hero-nav-overlay")
     assert [marker for marker in markers if f".{marker}" not in chrome_css] == []
@@ -141,7 +195,7 @@ def test_shell_chrome_css_defines_the_two_tier_navigation_chrome():
 
 
 def test_shell_chrome_keeps_the_logo_full_colour():
-    chrome_css = (THEME / "assets/app.css").read_text()
+    chrome_css = (CORE / "assets/bioco-shell.css").read_text()
 
     # Full-colour logo: no monochrome/invert filter may survive anywhere.
     assert "filter" not in _css_rule(chrome_css, ".bioco-logo img")
@@ -149,7 +203,7 @@ def test_shell_chrome_keeps_the_logo_full_colour():
 
 
 def test_shell_chrome_sticky_contract_avoids_overlap_and_scroll_containers():
-    chrome_css = (THEME / "assets/app.css").read_text()
+    chrome_css = (CORE / "assets/bioco-shell.css").read_text()
 
     # Stickiness must sit on the <header>, whose containing block spans the
     # whole page. A sticky .bioco-navigation-shell would be a no-op: its
@@ -177,7 +231,7 @@ def test_shell_chrome_sticky_contract_avoids_overlap_and_scroll_containers():
 
 
 def test_shell_chrome_utility_collapse_css_contract():
-    chrome_css = (THEME / "assets/app.css").read_text()
+    chrome_css = (CORE / "assets/bioco-shell.css").read_text()
 
     # Utility row: collapses on scroll down and is removed from the tab order
     # while collapsed, restored on scroll up / at page top. The script side of

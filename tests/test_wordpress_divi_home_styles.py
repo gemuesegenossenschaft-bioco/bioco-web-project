@@ -1,7 +1,10 @@
 import json
 import re
+import shutil
 import subprocess
 from pathlib import Path
+
+import pytest
 
 
 ROOT = Path(__file__).parents[1]
@@ -10,6 +13,26 @@ STYLE_CSS = THEME_DIR / "style.css"
 FUNCTIONS_PHP = THEME_DIR / "functions.php"
 FONT_FILE = THEME_DIR / "assets" / "fonts" / "dmsans-variable.woff2"
 FONT_LICENSE = THEME_DIR / "assets" / "fonts" / "OFL.txt"
+
+
+@pytest.fixture(scope="module")
+def divi_tree_without_fallback_theme(tmp_path_factory):
+    """Temporary fixture copy of the shipped code WITHOUT the fallback theme.
+
+    Copies only the trees the Divi shell chain actually needs (bioco-core
+    mu-plugin + the bioco-divi child theme) and deliberately leaves out
+    web/app/themes/bioco entirely, proving the Divi adapter loads the shared
+    shell assets from bioco-core whether or not the fallback theme exists.
+    """
+    base = tmp_path_factory.mktemp("divi-no-fallback") / "web" / "app"
+    (base / "mu-plugins").mkdir(parents=True)
+    (base / "themes").mkdir()
+    shutil.copytree(
+        ROOT / "wordpress/web/app/mu-plugins/bioco-core", base / "mu-plugins/bioco-core"
+    )
+    shutil.copytree(THEME_DIR, base / "themes/bioco-divi")
+    assert not (base / "themes/bioco").exists()
+    return base
 
 
 def _run_php(code: str):
@@ -97,8 +120,15 @@ def _media_block(css: str, width: str) -> str:
 # ---------------------------------------------------------------------------
 
 
-def test_child_theme_enqueues_parent_shell_then_child_stylesheet():
-    """functions.php enqueues Divi, shared shell, then child presentation."""
+def test_child_theme_enqueues_parent_then_child_stylesheet_depends_on_shared_shell():
+    """functions.php enqueues Divi parent, then the child presentation style.
+
+    The shared navigation/footer shell stylesheet (`bioco-shell`) is NOT the
+    child theme's business (#180): bioco-core enqueues it once for every
+    theme. The child style only *depends* on it (plus the tokens handle), so
+    the cascade order parent → shell → child stays guaranteed without this
+    theme reading assets out of the fallback theme's directory.
+    """
     theme_dir = str(THEME_DIR)
     code = (
         r"""
@@ -120,29 +150,152 @@ echo json_encode($enqueued);
 """
     )
     result = _json_php(code)
-    assert len(result) >= 2, result
 
-    parent = result[0]
-    assert parent["handle"] == "divi-parent-style"
+    handles = [asset["handle"] for asset in result]
+    assert handles == ["divi-parent-style", "bioco-divi-style"], handles
+
+    parent, child = result
     assert parent["src"] == "https://example.com/divi/style.css"
 
-    shell = result[1]
-    assert shell["handle"] == "bioco-shell"
-    assert shell["src"] == "https://example.com/bioco/assets/app.css"
-    assert shell["deps"] == ["bioco-tokens"]
-
-    child = result[2]
-    assert child["handle"] == "bioco-divi-style"
     assert child["src"] == "https://example.com/child/style.css"
-    assert "divi-parent-style" in child["deps"]
-    assert "bioco-tokens" in child["deps"]
-    assert "bioco-shell" in child["deps"]
+    assert child["deps"] == ["divi-parent-style", "bioco-tokens", "bioco-shell"]
     assert isinstance(child["ver"], str) and child["ver"].isdigit(), "Version must be a filemtime string"
 
+    # Single shared enqueue: the Divi adapter itself must not enqueue the
+    # shell (bioco-core is the only owner — see test_wordpress_divi_shell.py),
+    # and must not reach into the fallback theme's directory.
+    assert "bioco-shell" not in handles
+    assert not any("themes/bioco/" in str(asset["src"]) for asset in result)
 
-# ---------------------------------------------------------------------------
-# Font asset & CSS contract
-# ---------------------------------------------------------------------------
+
+def test_divi_loads_the_shared_shell_with_fallback_theme_absent(
+    divi_tree_without_fallback_theme,
+):
+    """Full Divi chain against a fixture copy with web/app/themes/bioco gone.
+
+    Two real mechanisms are exercised in one run:
+
+    1. Hook execution in genuine WordPress order: callbacks registered on
+       `wp_enqueue_scripts` execute sorted by priority (stable). bioco-core's
+       block assets run at priority 10 before the theme's default-10
+       callback; the shell callback runs at priority 20, AFTER the theme
+       adapter has enqueued its parent/child styles.
+    2. Real WordPress dependency resolution (vendored core classes, see
+       tests/fixtures/wp-dependencies/ATTRIBUTION.md): the printed stylesheet
+       order must come out as tokens → parent → shell → child, with the
+       shell enqueued by the priority-20 hook.
+    """
+    base = divi_tree_without_fallback_theme
+    base_posix = str(base).replace("\\", "/")
+    code = (
+        r"""
+define('ABSPATH', __DIR__);
+$GLOBALS['fixtures'] = ['enqueued' => [], 'actions' => [], 'doing_it_wrong' => []];
+function add_filter($hook, $callback, $priority = 10) { return true; }
+function add_action($hook, $callback, $priority = 10) {
+    $GLOBALS['fixtures']['actions'][$hook][] = [(int) $priority, $callback];
+    return true;
+}
+function wp_enqueue_style($handle, $src = '', $deps = [], $ver = false, $media = 'all') {
+    $GLOBALS['fixtures']['enqueued'][] = ['type' => 'style', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];
+}
+function wp_enqueue_script($handle, $src = '', $deps = [], $ver = false, $footer = false) {
+    $GLOBALS['fixtures']['enqueued'][] = ['type' => 'script', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];
+}
+function _doing_it_wrong($function, $message, $version) {
+    $GLOBALS['fixtures']['doing_it_wrong'][] = [$function, $message];
+}
+function __($text, $domain = 'default') { return $text; }
+function wp_get_list_item_separator() { return ', '; }
+function plugin_dir_url($file) {
+    // Mirrors WP core: resolve the URL from the filesystem path of the
+    // containing mu-plugin, here inside the fixture copy.
+    $dir = rtrim(str_replace('\\', '/', dirname($file)), '/');
+    $marker = '/mu-plugins/';
+    $tail = ($pos = strpos($dir, $marker)) !== false ? substr($dir, $pos + strlen($marker)) : '';
+    return 'https://fixture.example/wp-content/mu-plugins/' . $tail . '/';
+}
+function get_template_directory_uri() { return 'https://fixture.example/wp-content/themes/Divi'; }
+function get_stylesheet_directory_uri() { return 'https://fixture.example/wp-content/themes/bioco-divi'; }
+function get_stylesheet_directory() { return '"""
+        + base_posix.replace("\\", "\\\\")
+        + r"""/themes/bioco-divi'; }
+require '"""
+        + str(ROOT).replace("\\", "\\\\")
+        + r"""/tests/fixtures/wp-dependencies/class-wp-dependency.php';
+require '"""
+        + str(ROOT).replace("\\", "\\\\")
+        + r"""/tests/fixtures/wp-dependencies/class-wp-dependencies.php';
+require '"""
+        + base_posix.replace("\\", "\\\\")
+        + r"""/mu-plugins/bioco-core/bioco-core.php';
+require '"""
+        + base_posix.replace("\\", "\\\\")
+        + r"""/themes/bioco-divi/functions.php';
+
+// Genuine wp_enqueue_scripts execution: merge every registration from core
+// and the theme adapter, sort by priority (stable), then run.
+$hook = [];
+foreach ($GLOBALS['fixtures']['actions']['wp_enqueue_scripts'] ?? [] as $entry) {
+    $hook[] = $entry;
+}
+usort($hook, static fn(array $a, array $b): int => $a[0] <=> $b[0]);
+foreach ($hook as [, $callback]) {
+    call_user_func($callback);
+}
+
+// Real WordPress stylesheet resolution, as wp_styles()->do_items() does it.
+$styles = new WP_Dependencies();
+foreach ($GLOBALS['fixtures']['enqueued'] as $asset) {
+    if (($asset['type'] ?? '') !== 'style') {
+        continue;
+    }
+    $styles->add($asset['handle'], $asset['src'], $asset['deps'], $asset['ver']);
+    $styles->enqueue($asset['handle']);
+}
+$styles->all_deps($styles->queue);
+
+echo json_encode([
+    'call_order' => array_map(
+        static fn(array $asset): string => $asset['handle'],
+        $GLOBALS['fixtures']['enqueued']
+    ),
+    'resolved' => $styles->to_do,
+    'doing_it_wrong' => $GLOBALS['fixtures']['doing_it_wrong'],
+    'assets' => $GLOBALS['fixtures']['enqueued'],
+]);
+"""
+    )
+    result = _json_php(code)
+
+    # 1) Priority-ordered hook execution: the shell enqueue call happens
+    #    after the theme adapter's callback (parent + child already queued).
+    assert result["call_order"] == [
+        "bioco-tokens", "bioco-blocks", "bioco-navigation",
+        "divi-parent-style", "bioco-divi-style", "bioco-shell",
+    ], result["call_order"]
+
+    # 2) Real WP_Dependencies resolution: tokens → parent → shell → child.
+    assert result["resolved"] == [
+        "bioco-tokens", "bioco-blocks",
+        "divi-parent-style", "bioco-shell", "bioco-divi-style",
+    ], result["resolved"]
+    assert result["doing_it_wrong"] == [], result["doing_it_wrong"]
+
+    assets = result["assets"]
+    shell = next(asset for asset in assets if asset["handle"] == "bioco-shell")
+    assert shell["deps"] == ["bioco-tokens"]
+    assert shell["src"] == (
+        "https://fixture.example/wp-content/mu-plugins/bioco-core/assets/bioco-shell.css"
+    )
+    assert isinstance(shell["ver"], str) and shell["ver"].isdigit()
+    # The enqueued file must actually exist inside the fixture copy.
+    assert (base / "mu-plugins/bioco-core/assets/bioco-shell.css").is_file()
+
+    child = next(asset for asset in assets if asset["handle"] == "bioco-divi-style")
+    assert child["deps"] == ["divi-parent-style", "bioco-tokens", "bioco-shell"]
+
+    assert not any("themes/bioco/" in str(asset["src"]) for asset in assets), assets
 
 
 def test_dm_sans_font_face_is_self_hosted():

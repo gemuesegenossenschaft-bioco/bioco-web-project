@@ -200,12 +200,13 @@ web/app/mu-plugins/bioco-core/
 ├── blocks/                     # all 31 block dirs (block.json + render.php + view.js), unchanged internals
 └── assets/
     ├── bioco-tokens.css        # static --wp--* custom properties, 1:1 from theme.json (Hard Case 1)
-    └── bioco-blocks.css        # all block-scoped CSS, moved wholesale from theme app.css
+    ├── bioco-blocks.css        # all block-scoped CSS, moved wholesale from theme app.css
+    └── bioco-shell.css         # shared navigation/footer shell chrome, moved from theme app.css (#180)
 
 web/app/themes/bioco/           # DEMOTED: fallback/reference theme, see its own README.md
-├── functions.php               # only after_setup_theme supports (Hard Case 5)
+├── functions.php               # only after_setup_theme supports (Hard Case 5); no front-end enqueue left
 ├── theme.json                  # kept as the canonical source theme.json (Hard Case 1 extracts FROM this file)
-├── assets/app.css              # empty / non-block chrome only once fleet move completes
+├── assets/fonts/               # DM Sans woff2 + OFL license, loaded via theme.json (file:./sources)
 └── blocks/, acf-json/          # empty once fleet move completes
 
 web/app/themes/bioco-divi/      # NEW: thin Divi child theme, see Hard Case 4
