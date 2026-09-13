@@ -1,9 +1,10 @@
 """Rendered-browser regression for #178 (WordPress button readability).
 
 Opt-in browser suite: these tests drive the real repo CSS (bioco-tokens.css,
-bioco-blocks.css, shell app.css, bioco-divi/style.css) inside Chromium against
-DOM fixtures captured from staging.bioco.ch (tests/fixtures/button-readability/)
-and assert *computed and painted* behaviour, not CSS source strings.
+bioco-blocks.css, the shared bioco-core shell bioco-shell.css,
+bioco-divi/style.css) inside Chromium against DOM fixtures captured from
+staging.bioco.ch (tests/fixtures/button-readability/) and assert *computed and
+painted* behaviour, not CSS source strings.
 
 Run explicitly with Playwright available:
 

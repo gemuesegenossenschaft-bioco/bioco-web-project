@@ -172,6 +172,7 @@ add_action('init', function () {
  */
 add_action('wp_enqueue_scripts', 'bioco_core_enqueue_block_assets');
 add_action('enqueue_block_editor_assets', 'bioco_core_enqueue_block_assets');
+add_action('wp_enqueue_scripts', 'bioco_core_enqueue_shell_style', 20);
 
 function bioco_core_enqueue_block_assets() {
     $tokens_path = BIOCO_CORE_DIR . '/assets/bioco-tokens.css';
@@ -186,5 +187,30 @@ function bioco_core_enqueue_block_assets() {
     $navigation_path = BIOCO_CORE_DIR . '/assets/bioco-navigation.js';
     if (file_exists($navigation_path)) {
         wp_enqueue_script('bioco-navigation', plugin_dir_url(__FILE__) . 'assets/bioco-navigation.js', [], (string) filemtime($navigation_path), true);
+    }
+}
+
+/**
+ * Shared navigation/footer shell chrome (#180). Moved out of the bioco
+ * fallback theme (assets/app.css) so the active theme never reads site
+ * chrome from the fallback theme's directory; the block theme and the Divi
+ * child both receive it from here. Front end only: the shell restyles
+ * <body> (cream background, overflow clip), which must never leak into the
+ * block editor/wp-admin canvas — unlike bioco-tokens/bioco-blocks above,
+ * this handle is NOT enqueued on enqueue_block_editor_assets.
+ *
+ * Priority 20 is theme-agnostic ordering, not theme-specific logic: theme
+ * adapters register their base stylesheets at the default priority (10), so
+ * the shell's enqueue call happens after theirs. The printed order is then
+ * resolved by WordPress dependency resolution at print time: a theme's
+ * child style depends on `bioco-shell` (plus `bioco-tokens`), so the
+ * resolver emits tokens -> parent -> shell -> child — the shell must never
+ * print before a theme's parent/base stylesheet. The Divi child declares
+ * those deps in themes/bioco-divi/functions.php.
+ */
+function bioco_core_enqueue_shell_style() {
+    $shell_path = BIOCO_CORE_DIR . '/assets/bioco-shell.css';
+    if (file_exists($shell_path)) {
+        wp_enqueue_style('bioco-shell', plugin_dir_url(__FILE__) . 'assets/bioco-shell.css', ['bioco-tokens'], (string) filemtime($shell_path));
     }
 }

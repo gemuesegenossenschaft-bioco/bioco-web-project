@@ -46,7 +46,7 @@ $class_name .= $has_media ? ' has-media' : ' is-text-only';
 
 // DOM order always renders media before content, matching SectionRenderer's
 // SplitSection: mobile always stacks media on top; the is-first/is-last
-// class only reorders columns at the >=900px breakpoint (see app.css).
+// class only reorders columns at the >=900px breakpoint (see bioco-blocks.css).
 $media_first = $media_side !== 'right';
 $side_class = $media_first ? 'is-first' : 'is-last';
 $overlay_class = $image_overlay && $image_overlay !== 'none' ? 'image-overlay-' . $image_overlay : '';

@@ -8,12 +8,14 @@ renderers themselves are never faked, so a broken template breaks the test.
 Replaces the previous source-string checks in this file. Behaviour that lives
 elsewhere is deliberately not duplicated here:
 
-- the CHILD-THEME stylesheet enqueue (divi parent / bioco-shell / child
-  handles, order, deps, versioning): see
-  test_wordpress_divi_home_styles.py::test_child_theme_enqueues_parent_shell_then_child_stylesheet.
+- the CHILD-THEME stylesheet enqueue (divi parent / child handles, order,
+  deps, versioning): see
+  test_wordpress_divi_home_styles.py::test_child_theme_enqueues_parent_then_child_stylesheet_depends_on_shared_shell.
   The bioco-core asset bootstrap is the one enqueue covered IN THIS FILE: its
-  real `wp_enqueue_scripts` hook registration is captured and the registered
-  callback executed (`test_bioco_core_enqueues_tokens_blocks_and_navigation_assets_in_order`).
+  real `wp_enqueue_scripts`/`enqueue_block_editor_assets` hook registrations
+  are captured and the registered callbacks executed
+  (`test_bioco_core_enqueues_tokens_blocks_navigation_and_shared_shell_in_order`,
+  `test_block_editor_assets_never_load_the_shell_chrome`).
 - mobile-menu toggle and utility auto-hide *script* behaviour: see
   test_wordpress_navigation_scroll.py (executes the real bioco-navigation.js)
 
@@ -448,10 +450,12 @@ def test_site_footer_renders_the_region_note():
 # ---------------------------------------------------------------------------
 
 
-def _run_wp_enqueue_scripts_hook() -> dict:
-    """Require bioco-core.php and run its registered wp_enqueue_scripts
-    callbacks exactly like WordPress would — the assets must come from the
-    hook registration, not from calling the implementation directly."""
+def _run_core_enqueue_hook(hook_name: str) -> dict:
+    """Require bioco-core.php and run every callback it registered on the
+    given enqueue hook exactly like WordPress would — callbacks sorted by
+    hook priority (stable, same priority keeps registration order), the
+    assets must come from the hook registrations, not from calling the
+    implementations."""
     php = (
         "define('ABSPATH', __DIR__);\n"
         "$GLOBALS['BIOCO_ENQUEUED'] = [];\n"
@@ -469,14 +473,28 @@ def _run_wp_enqueue_scripts_hook() -> dict:
         "}\n"
         "function plugin_dir_url($file) { return 'https://staging.example/wp-content/mu-plugins/bioco-core/'; }\n"
         "require 'wordpress/web/app/mu-plugins/bioco-core/bioco-core.php';\n"
-        "$registrations = count($GLOBALS['BIOCO_ACTIONS']['wp_enqueue_scripts'] ?? []);\n"
-        "foreach ($GLOBALS['BIOCO_ACTIONS']['wp_enqueue_scripts'] ?? [] as [, $callback]) {\n"
+        "$hook_name = (string) $argv[1];\n"
+        "$registered = array_map(\n"
+        "    static fn(array $entry): array => [\n"
+        "        'priority' => $entry[0],\n"
+        "        'name' => is_string($entry[1])\n"
+        "            ? $entry[1]\n"
+        "            : get_class($entry[1]) . '::__invoke',\n"
+        "        'callback' => $entry[1],\n"
+        "    ],\n"
+        "    $GLOBALS['BIOCO_ACTIONS'][$hook_name] ?? [],\n"
+        ");\n"
+        "uasort($registered, static fn(array $a, array $b): int => $a['priority'] <=> $b['priority']);\n"
+        "foreach ($registered as ['callback' => $callback]) {\n"
         "    call_user_func($callback);\n"
         "}\n"
-        "echo json_encode(['registrations' => $registrations, 'enqueued' => $GLOBALS['BIOCO_ENQUEUED']]);"
+        "foreach ($registered as &$entry) {\n"
+        "    unset($entry['callback']);\n"
+        "}\n"
+        "echo json_encode(['registrations' => array_values($registered), 'enqueued' => $GLOBALS['BIOCO_ENQUEUED']]);"
     )
     result = subprocess.run(
-        ["php", "-r", php],
+        ["php", "-r", php, hook_name],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -485,19 +503,27 @@ def _run_wp_enqueue_scripts_hook() -> dict:
     return json.loads(result.stdout)
 
 
-def test_bioco_core_enqueues_tokens_blocks_and_navigation_assets_in_order():
-    hook = _run_wp_enqueue_scripts_hook()
+def test_bioco_core_enqueues_tokens_blocks_navigation_and_shared_shell_in_order():
+    front_end = _run_core_enqueue_hook("wp_enqueue_scripts")
 
-    # Exactly one callback must be registered on wp_enqueue_scripts and it
+    # Exactly two callbacks must be registered on wp_enqueue_scripts and they
     # alone must produce the assets: a missing or wrong hook registration
     # leaves the list empty or duplicated.
-    assert hook["registrations"] == 1
-    enqueued = hook["enqueued"]
+    # The shell must enqueue on a later hook priority than the theme
+    # adapters' default-10 callbacks: the shell call runs after themes have
+    # registered their base/child styles, and WordPress dependency resolution
+    # (proven against the real WP_Dependencies in
+    # test_wordpress_divi_home_styles.py) then prints it between them.
+    assert front_end["registrations"] == [
+        {"priority": 10, "name": "bioco_core_enqueue_block_assets"},
+        {"priority": 20, "name": "bioco_core_enqueue_shell_style"},
+    ]
+    enqueued = front_end["enqueued"]
 
     handles = [asset["handle"] for asset in enqueued]
-    assert handles == ["bioco-tokens", "bioco-blocks", "bioco-navigation"]
+    assert handles == ["bioco-tokens", "bioco-blocks", "bioco-navigation", "bioco-shell"]
 
-    tokens, blocks, navigation = enqueued
+    tokens, blocks, navigation, shell = enqueued
     assert tokens["type"] == "style"
     assert tokens["deps"] == []
     assert tokens["src"].endswith("assets/bioco-tokens.css")
@@ -509,5 +535,28 @@ def test_bioco_core_enqueues_tokens_blocks_and_navigation_assets_in_order():
     assert navigation["footer"] is True
     assert navigation["src"].endswith("assets/bioco-navigation.js")
 
+    # The shared navigation/footer shell stylesheet (#180): owned by core,
+    # loaded once for every theme, after the tokens it consumes.
+    assert shell["type"] == "style"
+    assert shell["deps"] == ["bioco-tokens"]
+    assert shell["src"].endswith("assets/bioco-shell.css")
+
     for asset in enqueued:
         assert isinstance(asset["ver"], str) and asset["ver"].isdigit(), asset
+
+
+def test_block_editor_assets_never_load_the_shell_chrome():
+    """Editor canvas keeps tokens/blocks/navigation only.
+
+    The shell stylesheet restyles <body> (cream background, overflow clip);
+    enqueueing it under `enqueue_block_editor_assets` would recolor the
+    wp-admin/editor body, so it must stay front-end-only.
+    """
+    editor = _run_core_enqueue_hook("enqueue_block_editor_assets")
+
+    assert editor["registrations"] == [
+        {"priority": 10, "name": "bioco_core_enqueue_block_assets"},
+    ]
+    handles = [asset["handle"] for asset in editor["enqueued"]]
+    assert handles == ["bioco-tokens", "bioco-blocks", "bioco-navigation"]
+    assert "bioco-shell" not in handles

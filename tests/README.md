@@ -18,9 +18,12 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 - **Shared core:** `bioco-core` (navigation/footer renderers, tokens, navigation JS, map assets) and
   `bioco-content`/`bioco-forms`/`bioco-import` are theme-agnostic mu-plugins. They stay the single
   owner of content, blocks, fields and forms regardless of theme.
-- **Fallback theme:** `bioco` (block theme) remains a real supported adapter. Divi still consumes
-  its shell assets (`app.css` enqueued as `bioco-shell`), `bioco-tokens.css`, `bioco-navigation.js`
-  and the same navigation contract. Its static contracts are kept, not blanket-deleted.
+- **Fallback theme:** `bioco` (block theme) remains a real supported adapter. The shared shell
+  stylesheet is owned by `bioco-core` (`assets/bioco-shell.css`, enqueued front-end-only at hook
+  priority 20 as `bioco-shell`, #180) — neither theme reads shell assets out of the other theme's
+  directory, and the fallback theme enqueues no front-end assets itself. Both themes share
+  `bioco-tokens.css`, `bioco-navigation.js`, the same shell stylesheet and the same navigation
+  contract. Its static contracts are kept, not blanket-deleted.
 
 ## How to run
 
@@ -33,7 +36,9 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 The suite shells out to real runtimes: **PHP** (`php -r`, one process per scenario) renders real
 templates with only WordPress runtime functions stubbed; **Node** (`tests/js/navigation-scroll-harness.mjs`)
 executes the real `bioco-navigation.js` against a deterministic DOM stub. Keep both binaries
-available when running the suite.
+available when running the suite. Real WordPress *dependency resolution* runs from the vendored
+byte-for-byte core classes in `tests/fixtures/wp-dependencies/` (see its `ATTRIBUTION.md`; the
+same pattern as `tests/fixtures/wp-block-parser/`).
 
 **PHP prerequisites:** the PHP CLI must have **ext-dom** (`php -m | grep dom`) — the runtime verify
 gate (`wp bioco verify --runtime`) judges rendered output through the real built-in `DOMDocument`
@@ -66,17 +71,17 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 
 | File | Status | Behaviour |
 | --- | --- | --- |
-| `test_wordpress_divi_shell.py` | replaced | Behavioural integration test of the Divi shell: renders real `header.php`/`footer.php` + real `bioco_render_primary_navigation`/`bioco_render_site_footer` under PHP. Covers one header/main/footer with nesting and `page-container` closure, hook order (`wp_head`→`wp_body_open`→`wp_footer`), blank-template chrome suppression, `body_class` filter removing `et_fixed_nav`/`et_show_nav` (including lower-priority re-add), canonical link labels/destinations, `aria-current`/`is-current` on page + event singular/archive routes, accessible mobile-menu contract, approved footer titles/mailto/external hardening, and the bioco-core asset enqueue executed through its registered `wp_enqueue_scripts` callback (`bioco-tokens`→`bioco-blocks`→`bioco-navigation`). |
+| `test_wordpress_divi_shell.py` | replaced | Behavioural integration test of the Divi shell: renders the real `header.php`/`footer.php` plus the real bioco-core navigation/footer renderers under PHP — structure, hook order, blank-template suppression, body-class filtering, canonical links, current routes, mobile-menu contract, footer content, and the core asset enqueues executed through their registered hooks in WordPress priority order. |
 | `test_wordpress_navigation_scroll.py` | keep (+ new) | Executes the real `bioco-navigation.js` in Node: utility-row auto-hide scenarios (collapse/reveal/top/focus/reduced-motion/mobile/passive/single/duplicate shell) and the mobile-menu toggle (open, close, Escape, link-click, no-toggle inertness). |
-| `test_wordpress_visual_contract.py` | trimmed | Block-theme adapter markup (header part + all templates carry `bioco-site-header`), approved palette/DM Sans/theme.json source of truth, approved nav labels + logo asset, unique shell CSS contracts (chrome classes, `is-open` menu rule, full-colour logo, sticky contract, utility-collapse CSS), approved homepage seed, and the primary/secondary button AA-contrast contract. |
-| `test_wordpress_subpage_design.py` | keep | Shared section-frame system: one outer frame, `data-owned` page headings, section max-widths, primary-nav CTA colour/interactivity, systemic visual primitives, intranet h1 structure. |
+| `test_wordpress_visual_contract.py` | trimmed (#101, #178, #180) | Fallback-theme adapter markup (header part, templates with `bioco-site-header`), approved palette/DM Sans/theme.json truth, nav labels + logo asset, shell-chrome CSS contracts against the core-owned `bioco-shell.css`, adapter-enqueues-nothing contract (#180), approved homepage seed, button AA contrast. |
+| `test_wordpress_subpage_design.py` | keep | Shared section-frame system: one outer frame, `data-owned` page headings, section max-widths, primary-nav CTA colour/interactivity, systemic visual primitives, intranet h1 structure. Shell/chrome rules are read from the core-owned `bioco-shell.css` (since #180). |
 | `test_wordpress_intranet_alignment.py` | keep | Intranet seam: seed mirrors live page, 22-page corpus + staging gate, utility nav links intranet (rendered with `aria-current`), external-link derivation via `bioco_link_target_attributes`. |
 
 ### Import, serialization, composer & Divi styles
 
 | File | Status | Behaviour |
 | --- | --- | --- |
-| `test_wordpress_divi_home_styles.py` | keep | Divi child stylesheet contract + enqueue behaviour: parent/shell/child handle order and deps via executed `wp_enqueue_scripts` callback, self-hosted DM Sans, scoped `.home` geometry (desktop/mobile), hero card/overlay/bitmap targeting, button variants, no global hacks. |
+| `test_wordpress_divi_home_styles.py` | keep (trimmed #180) | Divi child stylesheet and enqueue contract: parent then child, depending on `divi-parent-style`, `bioco-tokens`, `bioco-shell` — no second shell enqueue, no other-theme path. Plus the fallback-theme-absent fixture copy: hooks in WP priority order, order resolved by the vendored real `WP_Dependencies`. Also DM Sans, scoped home geometry, hero/button contracts. |
 | `test_wordpress_divi_home.py` | keep | PHP-rendered Divi block renderers (hero, media-text, rich-text): structure, variants, missing images, unicode transport, unknown-block rejection. |
 | `test_wordpress_divi_home_import.py` | keep | Import pipeline with mocked WP APIs: native Divi serialization, attachment resolution, `_divi_builder` meta writes, idempotent re-apply, verify-mode equality. |
 | `test_wordpress_divi_block_serialization.py` | keep | The serializer stub and real block-serialization contract (self-closing, nesting, comment order, name validation). |
@@ -123,7 +128,7 @@ Removed assertions and where their coverage now lives:
 | Removed (file · assertion) | Replacement |
 | --- | --- |
 | `test_wordpress_divi_shell.py` · all five source-string checks (renderer call counts in `header.php`/`footer.php`, `bioco-site-header`/`bioco-page-shell` markers, absence of `main-header`/`show_page_menu`, lifecycle-hook name lists, `main` wrapper strings, `body_class`/`et_fixed_nav`/`et_show_nav`/`array_values(array_diff`/`PHP_INT_MAX` in `functions.php`) | `tests/test_wordpress_divi_shell.py` behavioural render tests (structure, hook order, blank template, body-class filter incl. priority, canonical links, current-route, footer contract) |
-| `test_wordpress_divi_shell.py` · `"$theme_root_uri . '/bioco/assets/app.css'"` / `bioco-shell` / `"bioco-navigation" in bioco-core.php` source checks | enqueue behaviour already behavioural in `test_wordpress_divi_home_styles.py::test_child_theme_enqueues_parent_shell_then_child_stylesheet`; mu-plugin side now behavioural in `test_wordpress_divi_shell.py::test_bioco_core_enqueues_tokens_blocks_and_navigation_assets_in_order`, which executes the registered `wp_enqueue_scripts` callback instead of calling the implementation (a missing or wrongly named hook registration fails the test) |
+| `test_wordpress_divi_shell.py` · `"$theme_root_uri . '/bioco/assets/app.css'"` / `bioco-shell` / `"bioco-navigation" in bioco-core.php` source checks | enqueue behaviour already behavioural in `test_wordpress_divi_home_styles.py::test_child_theme_enqueues_parent_then_child_stylesheet_depends_on_shared_shell`; mu-plugin side now behavioural in `test_wordpress_divi_shell.py::test_bioco_core_enqueues_tokens_blocks_navigation_and_shared_shell_in_order`, which executes the registered enqueue-hook callbacks in WordPress priority order instead of calling the implementation (a missing or wrongly named hook registration fails the test) |
 | `test_wordpress_divi_shell.py` · footer contract titles read from `navigation.json` | approved German titles (`Navigation`, `Kontakt`, `Social Media`, `Partner & Zertifizierungen`) are asserted as pinned `<h3>` values in `test_site_footer_renders_the_approved_titles_and_internal_links` — the render must match the approved content, not just whatever navigation.json currently says |
 | `test_wordpress_visual_contract.py` · `navigation.js` helper-name strings (`aria-expanded`, `aria-label`, `?.focus()`, `is-open`) | executed behaviourally by the new menu scenarios in `tests/js/navigation-scroll-harness.mjs` + `test_wordpress_navigation_scroll.py` (red evidence H1/H2/H3: removing the aria-expanded flip, the `?.focus()` call, or the Escape handler makes the new tests fail) |
 | `test_wordpress_visual_contract.py` · utility auto-hide JS strings (`is-utility-hidden`, `addEventListener('scroll'`, `{ passive: true }`, `requestAnimationFrame`, `window.scrollY`, `anchorY`, `utility.contains(...)`, `initUtilityAutoHide`, ordering) | already executed by the existing harness scenarios (collapse/reveal/passive/single-listener/focus/top-zone) |
@@ -136,6 +141,21 @@ missing `wp_footer`, duplicated navigation markup, removed `body_class` filter, 
 current-route detection, missing `wp_enqueue_scripts` hook registration, hook renamed to `init`,
 `page-container` never closed, `</main>` removed — every defect is caught by at least one of the
 new tests; pristine and restored trees pass.
+
+## #180 shared shell ownership (this pass)
+
+The navigation/footer shell stylesheet moved from the bioco fallback theme into `bioco-core`
+(`assets/bioco-shell.css`); the fallback theme's `assets/app.css` was removed. What changed in the
+test surface:
+
+| Changed | Replacement |
+| --- | --- |
+| `test_wordpress_divi_home_styles.py` · Divi enqueue order `parent → shell(../bioco/assets/app.css) → child` (cross-theme path) | the Divi adapter now enqueues only parent + child and *depends* on `bioco-shell` (`test_child_theme_enqueues_parent_then_child_stylesheet_depends_on_shared_shell`); the shell arrives from bioco-core, which is theme-independent |
+| enqueue-call-order expectations | hook execution in real WordPress priority order (shell at priority 20, after the theme adapters' default-10 callbacks) + stylesheet order resolved by the REAL vendored `WP_Dependencies` (`tests/fixtures/wp-dependencies/`, attribution in place) → `tokens → parent → shell → child`. Red/green: under the old priority-10 mechanism the same test fails with `… bioco-shell, divi-parent-style …` (shell before parent) — the ordering regression root's spec review found is caught, not blessed |
+| `test_wordpress_visual_contract.py` · 4 shell-chrome CSS reads from `themes/bioco/assets/app.css` | same assertions (none weakened) against `bioco-core/assets/bioco-shell.css`; plus the new adapter test: the real fallback-theme `functions.php` executed through its registered hooks enqueues nothing (`test_block_theme_adapter_enqueues_no_front_end_assets_itself`) |
+| `tests/test_wordpress_subpage_design.py` · 3 shell reads from the theme's `app.css` | same assertions against `bioco-core/assets/bioco-shell.css` |
+| `tests/fixtures/button-readability/*.html` shell stylesheet link | points at `bioco-core/assets/bioco-shell.css` (same link position in the cascade) |
+| themes/bioco `assets/app.css` | deleted only after every consumer (Divi functions.php, fallback functions.php, tests, fixtures) used the core copy; the full suite runs green on the tree without the file |
 
 ## Known limits
 

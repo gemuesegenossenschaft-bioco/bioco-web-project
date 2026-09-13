@@ -1,4 +1,16 @@
-/* Theme-owned shell. Block presentation remains in bioco-core. */
+/**
+ * Shared navigation/footer shell chrome, owned by bioco-core (#180).
+ *
+ * Moved verbatim from web/app/themes/bioco/assets/app.css (removed in the
+ * same change) so the active theme no longer loads site chrome from the
+ * fallback theme's directory: every theme adapter (bioco block theme,
+ * bioco-divi) receives this stylesheet through bioco-core's
+ * wp_enqueue_scripts bootstrap below (handle `bioco-shell`, depends on
+ * `bioco-tokens`, versioned by filemtime). Block presentation remains in
+ * bioco-blocks.css; theme-specific presentation layers on top
+ * (e.g. bioco-divi/style.css). The file references no external assets —
+ * fonts stay in the themes (theme.json / child style.css @font-face).
+ */
 *,
 *::before,
 *::after { box-sizing: border-box; }
