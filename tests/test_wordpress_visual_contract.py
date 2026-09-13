@@ -9,6 +9,9 @@ contract is exercised end-to-end through the real renderers and theme
 templates in tests/test_wordpress_divi_shell.py. What remains here are the
 contracts that still need the static sources: the block theme's own adapter
 markup, its CSS asset contracts, and the approved content/palette data.
+
+The full keep/replace/remove map of the WordPress test surface lives in
+tests/README.md.
 """
 
 import json

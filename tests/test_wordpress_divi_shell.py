@@ -8,10 +8,17 @@ renderers themselves are never faked, so a broken template breaks the test.
 Replaces the previous source-string checks in this file. Behaviour that lives
 elsewhere is deliberately not duplicated here:
 
-- enqueue behaviour (handle order, deps, versioning): see
-  test_wordpress_divi_home_styles.py::test_child_theme_enqueues_parent_shell_then_child_stylesheet
+- the CHILD-THEME stylesheet enqueue (divi parent / bioco-shell / child
+  handles, order, deps, versioning): see
+  test_wordpress_divi_home_styles.py::test_child_theme_enqueues_parent_shell_then_child_stylesheet.
+  The bioco-core asset bootstrap is the one enqueue covered IN THIS FILE: its
+  real `wp_enqueue_scripts` hook registration is captured and the registered
+  callback executed (`test_bioco_core_enqueues_tokens_blocks_and_navigation_assets_in_order`).
 - mobile-menu toggle and utility auto-hide *script* behaviour: see
   test_wordpress_navigation_scroll.py (executes the real bioco-navigation.js)
+
+The full keep/replace/remove map of the WordPress test surface lives in
+tests/README.md.
 """
 
 import json
