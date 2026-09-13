@@ -113,6 +113,19 @@ function bioco_import_acf_stored_value_equals($postId, $field, $current, $planne
     return (string) $raw === (string) $planned;
 }
 
+// Read-only check used by the force PREVIEW: which planned fields would a
+// follow-up --apply --force actually overwrite? Unknown state (no ACF)
+// is reported as overwrite risk rather than as "no risk".
+function bioco_import_fields_would_overwrite($postId, array $fieldPlan) {
+    if (!function_exists('get_field')) return array_keys($fieldPlan);
+    $changed = [];
+    foreach ($fieldPlan as $field => $value) {
+        $current = get_field($field, $postId);
+        if (!bioco_import_acf_stored_value_equals($postId, $field, $current, $value)) $changed[] = $field;
+    }
+    return $changed;
+}
+
 function bioco_import_write_acf_fields($postId, array $fieldPlan, $mode, $force, $label, array &$report) {
     if (!function_exists('update_field') || !function_exists('get_field')) {
         bioco_import_report_row($report, $label, '', '', 'error', 'ACF (update_field/get_field) nicht verfügbar.');
@@ -120,6 +133,20 @@ function bioco_import_write_acf_fields($postId, array $fieldPlan, $mode, $force,
     }
     foreach ($fieldPlan as $field => $value) {
         if ($mode !== 'apply') {
+            // Der Vorschau-Bericht muss denselben Umfang beschreiben, den ein
+            // nachfolgender --apply --force wirklich schreiben wuerde:
+            // identische Felder melden ok-equal, geschuetzte Felder
+            // skip-existing, und nur tatsaechlich geplante Schreibvorgaenge
+            // melden eine Update-Zeile.
+            $current = get_field($field, $postId);
+            if (bioco_import_acf_stored_value_equals($postId, $field, $current, $value)) {
+                bioco_import_report_row($report, $label, '', $field, 'ok-equal', 'Bereits identisch — kein Schreibvorgang nötig.');
+                continue;
+            }
+            if ($current !== null && $current !== '' && !$force) {
+                bioco_import_report_row($report, $label, '', $field, 'skip-existing', 'Bereits gesetzt — CMS gewinnt (--force zum Überschreiben).');
+                continue;
+            }
             bioco_import_report_row($report, $label, '', $field, 'update', 'WÜRDE: setzen auf "' . bioco_import_excerpt((string) $value) . '".');
             continue;
         }
@@ -174,11 +201,17 @@ function bioco_import_import_event_item(array $item, $mode, $force, array &$repo
 
         if (!$changed) {
             bioco_import_report_row($report, $label, '', '', 'ok-equal', 'Event existiert bereits (post_id=' . $post->ID . ') — Titel/Beitragsinhalt bereits identisch.');
-        } elseif (!$force || $mode !== 'apply') {
+        } elseif ($mode !== 'apply' && $force) {
+            // Force-Probelauf: der naechste --apply --force WUERDE ueberschreiben —
+            // genau die geplanten Felder melden, wie der Apply-Lauf es tut, damit
+            // ein unveränderter Beitragsinhalt nicht falsch als überschrieben
+            // erscheint.
+            bioco_import_report_row($report, $label, '', '', 'update', 'WÜRDE: FORCE: ' . implode(', ', array_keys($changed)) . ' ueberschrieben (post_id=' . $post->ID . ').');
+        } elseif (!$force) {
             bioco_import_report_row($report, $label, '', '', 'ok-equal', 'Event existiert bereits (post_id=' . $post->ID . ') — Titel/Beitragsinhalt abweichend, CMS gewinnt (--force zum Überschreiben).');
         } else {
             wp_update_post(['ID' => $post->ID] + $changed);
-            bioco_import_report_row($report, $label, '', '', 'update', 'FORCE: ' . implode(', ', array_keys($changed)) . ' aktualisiert.');
+            bioco_import_report_row($report, $label, '', '', 'update', 'FORCE: ' . implode(', ', array_keys($changed)) . ' ueberschrieben.');
         }
     }
 
@@ -228,6 +261,10 @@ function bioco_import_import_group_item(array $item, $mode, $force, array &$repo
     $existing = get_posts(['post_type' => 'bioco_group', 'name' => $slug, 'post_status' => 'any', 'numberposts' => 1]);
     $post = $existing ? $existing[0] : null;
 
+    $fieldPlan = [];
+    if (!empty($item['text'])) $fieldPlan['group_text'] = (string) $item['text'];
+    if (!empty($item['contact'])) $fieldPlan['group_contact'] = (string) $item['contact'];
+
     if (!$post) {
         if ($mode === 'apply') {
             $postId = wp_insert_post(['post_type' => 'bioco_group', 'post_status' => 'publish', 'post_title' => $title, 'post_name' => $slug], true);
@@ -241,12 +278,22 @@ function bioco_import_import_group_item(array $item, $mode, $force, array &$repo
             bioco_import_report_row($report, $label, '', '', 'create', 'WÜRDE: Gruppe anlegen.');
         }
     } else {
-        bioco_import_report_row($report, $label, '', '', 'ok-equal', 'Gruppe existiert bereits (post_id=' . $post->ID . ') — CMS gewinnt.');
+        // Nur melden, wenn wirklich etwas ueberschrieben wuerde: ein
+        // allseits identischer Gruppen-Eintrag bekommt keine irrefuehrende
+        // Update-Zeile im Vorschau-Bericht.
+        $overwriteFields = ($force && $mode !== 'apply')
+            ? bioco_import_fields_would_overwrite($post->ID, $fieldPlan)
+            : [];
+        if ($overwriteFields) {
+            bioco_import_report_row($report, $label, '', '', 'update', 'Gruppe existiert bereits (post_id=' . $post->ID . ') — Vorschau: ' . implode(', ', $overwriteFields) . ' wuerden mit --force ueberschrieben.');
+        } else {
+            $groupNote = $force && $mode !== 'apply'
+                ? 'Gruppe existiert bereits (post_id=' . $post->ID . ') — Vorschau: alle geplanten Felder bereits identisch, kein Schreibvorgang.'
+                : 'Gruppe existiert bereits (post_id=' . $post->ID . ') — CMS gewinnt.';
+            bioco_import_report_row($report, $label, '', '', 'ok-equal', $groupNote);
+        }
     }
 
-    $fieldPlan = [];
-    if (!empty($item['text'])) $fieldPlan['group_text'] = (string) $item['text'];
-    if (!empty($item['contact'])) $fieldPlan['group_contact'] = (string) $item['contact'];
     if ($post) {
         bioco_import_write_acf_fields($post->ID, $fieldPlan, $mode, $force, $label, $report);
     } else {

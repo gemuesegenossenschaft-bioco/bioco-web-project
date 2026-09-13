@@ -121,10 +121,15 @@ wordpress/scripts/release-wordpress-staging.sh --commit="$commit" --apply
 ```
 
 - [ ] Backup-Pfad und Commit stehen im Release-Log unter `output/releases/`
-- [ ] Preflight, Backup, Code-Sync, Import, Parity, Smoke und Release-Marker zeigen `passed`
+- [ ] Preflight, Backup, Code-Sync, Cache-Flush, Runtime-Verify, Smoke und Release-Marker zeigen `passed`
 - [ ] Unter `Plugins` → `Must-Use` sind die bioco-Komponenten sichtbar
 - [ ] `wp-content/uploads/` ist weiterhin vorhanden
 - [ ] Keine fremden Plugins oder Themes wurden verändert
+
+Ein normales Release ist **code-only**: Es schreibt keinen Inhalt. Der Schritt `runtime-verify`
+(`wp bioco verify --runtime`) prüft, dass jede benötigte Seite vorhanden, nicht leer, gültiges
+Divi-Markup trägt und insgesamt sichtbaren Inhalt rendert — ohne den redaktionell gepflegten
+Text zurückzufordern. Der Inhalts-Import ist eine eigene, ausdrückliche Operation (Abschnitt 6).
 
 ## 5. Divi und Child Theme aktivieren
 
@@ -170,6 +175,10 @@ Rückweg, falls nach der Aktivierung etwas fehlt: unter `Design` → `Themes` wi
 Der Divi-Lizenzschlüssel gehört ausschliesslich über wp-admin in die WordPress-Datenbank. Er gehört **nie** ins Repo, in eine Markdown-Datei, `.env`, ein Ticket oder eine Chat-Nachricht.
 
 ## 6. Inhalte importieren und prüfen
+
+Dieser Abschnitt ist der **ausdrückliche Inhalts-Import** — eine eigene Operation, kein Teil
+eines normalen Code-Releases (ein Release prüft nur mit `wp bioco verify --runtime`, siehe
+[ADR 0001](adr/0001-wordpress-release-code-only-vs-seed-import.md)).
 
 WP-CLI-Befehle im WordPress-Root ausführen, also im Ordner direkt oberhalb von `wp-content/`.
 
