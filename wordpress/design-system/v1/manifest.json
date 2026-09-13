@@ -87,6 +87,8 @@
       {"file": "style.css", "property": "font-size", "value": "clamp(1rem, 2vw, 1.25rem)", "reason": "Responsive hero subtitle sizing"},
       {"file": "style.css", "property": "font-size", "value": "clamp(1.5rem, 3vw, 2rem)", "reason": "Responsive feature title sizing"},
       {"file": "style.css", "property": "border-radius", "value": "12px 24px 12px 24px", "reason": "Organic asymmetric button radius"},
+      {"file": "style.css", "property": "border-radius", "value": "28px 22px 26px 18px", "reason": "#178: bioco.ch organic reference button radius (btn-organic parity); no token for the asymmetric reference rounding"},
+      {"file": "style.css", "property": "box-shadow", "value": "0 8px 16px rgba(0, 0, 0, 0.12)", "reason": "#178: bioco.ch organic reference button shadow (btn-organic parity); token set has no equivalent"},
       {"file": "style.css", "property": "font-size", "value": "16px !important", "reason": "Divi 5 button module font size override"},
       {"file": "style.css", "property": "color", "value": "#fff", "reason": "Button text white for contrast on green"},
       {"file": "style.css", "property": "font-family", "value": "'DM Sans', system-ui, sans-serif", "reason": "Divi 5 button module font stack"},
