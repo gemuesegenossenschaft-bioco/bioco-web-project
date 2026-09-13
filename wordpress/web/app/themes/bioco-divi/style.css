@@ -24,7 +24,10 @@ Version: 1.0.0
     line-height: 1.6;
 }
 
-.wp-child-theme-bioco-divi main a:not(.et_pb_button) {
+/* #178: mu-plugin .btn buttons (pricing calculator, forms, events links) keep
+   their own label colours — the green text-link colour must not recolor them
+   (it produced green labels on the green button polygon). */
+.wp-child-theme-bioco-divi main a:not(.et_pb_button):not(.btn) {
     color: var(--wp--preset--color--bioco-green, #2e7d32);
 }
 
@@ -238,31 +241,65 @@ body.home,
     outline-offset: 2px;
 }
 
-/* Divi 5 renders the button module itself as the anchor. */
+/* Divi 5 renders the button module itself as the anchor. Organic shape and
+   typography ported from the bioco.ch reference button (btn-primary
+   btn-organic): torn-paper clip-path on the element, 28/22/26/18 radius,
+   weight 700, 2px border, soft shadow (#178). */
 .home .bioco-home-button.et_pb_button {
     display: inline-flex;
-    min-height: 44px;
+    min-height: 52px;
     align-items: center;
     justify-content: center;
     padding: 12px 24px !important;
-    border: 0;
-    border-radius: 12px 24px 12px 24px;
+    border: 2px solid transparent;
+    border-radius: 28px 22px 26px 18px;
+    clip-path: polygon(4% 8%, 12% 2%, 26% 6%, 36% 3%, 48% 7%, 60% 2%, 74% 6%, 86% 3%, 96% 10%, 98% 24%, 96% 42%, 99% 58%, 96% 76%, 98% 90%, 90% 98%, 74% 94%, 60% 98%, 46% 94%, 32% 98%, 18% 94%, 8% 96%, 2% 86%, 4% 70%, 2% 54%, 6% 36%, 2% 20%);
     font-size: 16px !important;
     line-height: 24px !important;
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.home .bioco-home-button.et_pb_button::after {
+    display: none;
+}
+
+/* Keyboard focus on torn shapes: clip-path would clip the outline, so the
+   clip is lifted for focus-visible and the enclosing ring paints around the
+   full button box (#178). */
+.home .bioco-home-button.et_pb_button:focus-visible {
+    clip-path: none;
+    outline: 3px solid var(--wp--preset--color--bioco-carrot, #FF8C00);
+    outline-offset: 2px;
 }
 
 .home .bioco-home-feature .bioco-home-button.et_pb_button,
 .home .bioco-home-live .bioco-home-button.et_pb_button,
 .home .bioco-home-cta .bioco-home-button--primary.et_pb_button {
     background: var(--wp--preset--color--bioco-green, #2e7d32);
+    border-color: var(--wp--preset--color--bioco-green, #2e7d32);
+    color: #fff;
+}
+
+.home .bioco-home-feature .bioco-home-button--primary.et_pb_button:hover,
+.home .bioco-home-live .bioco-home-button--primary.et_pb_button:hover,
+.home .bioco-home-cta .bioco-home-button--primary.et_pb_button:hover {
+    background: var(--wp--preset--color--bioco-green-dark, #1b5e20);
+    border-color: var(--wp--preset--color--bioco-green-dark, #1b5e20);
     color: #fff;
 }
 
 .home .bioco-home-cta .bioco-home-button--secondary.et_pb_button {
     background: #fff;
     color: var(--wp--preset--color--bioco-green, #2e7d32);
+    border-color: transparent;
+}
+
+.home .bioco-home-cta .bioco-home-button--secondary.et_pb_button:hover {
+    background: var(--wp--preset--color--bioco-bg, #F5F1E8);
+    color: var(--wp--preset--color--bioco-green-dark, #1b5e20);
+    border-color: transparent;
 }
 
 /* CTA section: scoped, centered, responsive padding. */
@@ -541,42 +578,123 @@ body.home,
     outline-offset: 2px;
 }
 
-/* Divi 5 renders the module itself as the anchor. */
+/* Divi 5 renders the module itself as the anchor. Same organic reference
+   shape as the home buttons (#178). */
 .bioco-divi-button.et_pb_button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 44px;
-    padding: 10px 22px;
-    border-radius: 12px 24px 12px 24px;
+    padding: 12px 24px;
+    border: 2px solid transparent;
+    border-radius: 28px 22px 26px 18px;
+    clip-path: polygon(4% 8%, 12% 2%, 26% 6%, 36% 3%, 48% 7%, 60% 2%, 74% 6%, 86% 3%, 96% 10%, 98% 24%, 96% 42%, 99% 58%, 96% 76%, 98% 90%, 90% 98%, 74% 94%, 60% 98%, 46% 94%, 32% 98%, 18% 94%, 8% 96%, 2% 86%, 4% 70%, 2% 54%, 6% 36%, 2% 20%);
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 16px;
-    font-weight: 600;
-    line-height: 1.4;
+    font-weight: 700;
+    line-height: 24px;
     text-decoration: none;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
 .bioco-divi-button--primary.et_pb_button {
-    border: 2px solid var(--wp--preset--color--bioco-green, #2e7d32);
+    border-color: var(--wp--preset--color--bioco-green, #2e7d32);
     background: var(--wp--preset--color--bioco-green, #2e7d32);
     color: #fff !important;
 }
 
 .bioco-divi-button--secondary.et_pb_button {
-    border: 2px solid var(--wp--preset--color--bioco-green, #2e7d32);
-    background: transparent;
+    border-color: transparent;
+    background: #fff;
     color: var(--wp--preset--color--bioco-green, #2e7d32) !important;
 }
 
-.bioco-divi-button.et_pb_button:hover {
-    padding: 10px 22px;
+.bioco-divi-button--primary.et_pb_button:hover {
+    padding: 12px 24px;
     border-color: var(--wp--preset--color--bioco-green-dark, #1b5e20);
     background: var(--wp--preset--color--bioco-green-dark, #1b5e20);
     color: #fff;
 }
 
+.bioco-divi-button--secondary.et_pb_button:hover {
+    padding: 12px 24px;
+    border-color: transparent;
+    background: var(--wp--preset--color--bioco-bg, #F5F1E8);
+    color: var(--wp--preset--color--bioco-green-dark, #1b5e20);
+}
+
 .bioco-divi-button.et_pb_button::after {
     display: none;
+}
+
+.bioco-divi-button.et_pb_button:focus-visible {
+    clip-path: none;
+    outline: 3px solid var(--wp--preset--color--bioco-carrot, #FF8C00);
+    outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Shared mu-plugin .btn buttons inside Divi content (#178)
+ * Pricing-calculator CTA, form submit buttons and events links render through
+ * bioco-blocks.css .btn rules whose torn-paper ::before sits inside the
+ * element's transparent border — under Divi the gap showed as a white shell
+ * around the polygon and the child-theme link colour overrode label colours.
+ * Variants with an element-level surface (primary/secondary) render bioco.ch's
+ * plain solid button (18px radius, no torn edge). Every other .btn variant
+ * (btn-orange and custom ones) keeps its var-driven ::before surface; the
+ * pseudo layer is extended over the transparent border ring so no shell shows.
+ * --------------------------------------------------------------------------- */
+.wp-child-theme-bioco-divi main .btn {
+    border-radius: var(--wp--custom--radius--md, 18px);
+}
+
+.wp-child-theme-bioco-divi main .btn::before {
+    inset: -2px;
+}
+
+.wp-child-theme-bioco-divi main .btn-primary::before,
+.wp-child-theme-bioco-divi main .btn-secondary::before {
+    display: none;
+}
+
+.wp-child-theme-bioco-divi main .btn-organic {
+    border-radius: 28px 22px 26px 18px;
+    clip-path: polygon(4% 8%, 12% 2%, 26% 6%, 36% 3%, 48% 7%, 60% 2%, 74% 6%, 86% 3%, 96% 10%, 98% 24%, 96% 42%, 99% 58%, 96% 76%, 98% 90%, 90% 98%, 74% 94%, 60% 98%, 46% 94%, 32% 98%, 18% 94%, 8% 96%, 2% 86%, 4% 70%, 2% 54%, 6% 36%, 2% 20%);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.wp-child-theme-bioco-divi main .btn-primary {
+    background-color: var(--wp--preset--color--bioco-green, #2e7d32);
+    border-color: var(--wp--preset--color--bioco-green, #2e7d32);
+    color: #fff;
+}
+
+.wp-child-theme-bioco-divi main .btn-primary:hover {
+    background-color: var(--wp--preset--color--bioco-green-dark, #1b5e20);
+    border-color: var(--wp--preset--color--bioco-green-dark, #1b5e20);
+    color: #fff;
+}
+
+.wp-child-theme-bioco-divi main .btn-secondary {
+    background-color: var(--wp--preset--color--bioco-surface, #FFFFFF);
+    border-color: transparent;
+    color: var(--wp--preset--color--bioco-green, #2e7d32);
+}
+
+/* Disabled submits stay recognizable (bioco-forms view.js sets .disabled
+   while a submission runs). */
+.wp-child-theme-bioco-divi main .btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Keyboard focus on torn shapes: clip-path would clip the outline, so the
+   clip is lifted for focus-visible and the enclosing ring paints around the
+   full button box (#178). */
+.wp-child-theme-bioco-divi main .btn-organic:focus-visible {
+    clip-path: none;
+    outline: 3px solid var(--wp--preset--color--bioco-carrot, #FF8C00);
+    outline-offset: 2px;
 }
 
 /* ---------------------------------------------------------------------------
