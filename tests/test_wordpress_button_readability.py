@@ -462,15 +462,34 @@ class TestSharedBtnFamily:
 
     def test_btn_orange_keeps_its_surface(self, page):
         """Root review: hiding ::before removed the orange surface entirely.
-        The preserved variant must keep a painted orange surface + white label."""
+        This test preserves the existing legacy `btn-orange` surface/white-label
+        style (currently unused in prod markup, CSS-only). It is a preservation
+        assertion, NOT an accessibility claim — no contrast target applies here."""
         _, pg = page
         pg.goto(f"{page[0]}/tests/fixtures/button-readability/bioco-werden.html",
                 wait_until="load")
         style = _style(pg, "a.btn.btn-orange")
         assert style["before"]["bg"] == "rgb(255, 140, 0)", style["before"]["bg"]
         assert style["color"] == WHITE, style["color"]
-        assert contrast_ratio(style["color"], style["before"]["bg"]) > 0
         assert style["backgroundColor"] == "rgba(0, 0, 0, 0)"
+
+    def test_fixture_extras_are_siblings_of_calculator_module(self, page):
+        """Fixture integrity guard: the appended probe sections/forms must be
+        true siblings of the pricing-calculator text module inside
+        .et_builder_inner_content, not descendants of the calculator section."""
+        _, pg = page
+        pg.goto(f"{page[0]}/tests/fixtures/button-readability/bioco-werden.html",
+                wait_until="load")
+        boundary = pg.evaluate("""() => {
+            const section = document.querySelector('section#pricing-calculator');
+            const extras = document.querySelector('.et_pb_section_extra');
+            return {
+                extrasInsideSection: !!(section && extras && section.contains(extras)),
+                extrasParent: extras ? extras.parentElement.className : null,
+            };
+        }""")
+        assert not boundary["extrasInsideSection"], boundary
+        assert boundary["extrasParent"] == "et_builder_inner_content et_pb_gutters3", boundary
 
     def test_disabled_submit_state_is_recognizable(self, page):
         _, pg = page
