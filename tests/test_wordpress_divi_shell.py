@@ -1,71 +1,506 @@
+"""Behavioural integration tests for the Divi shell (header.php/footer.php).
+
+Every scenario executes the *real* theme templates and the *real* shared
+renderers (`bioco_render_primary_navigation` / `bioco_render_site_footer` from
+bioco-core) under PHP. Only WordPress runtime functions are stubbed; the
+renderers themselves are never faked, so a broken template breaks the test.
+
+Replaces the previous source-string checks in this file. Behaviour that lives
+elsewhere is deliberately not duplicated here:
+
+- enqueue behaviour (handle order, deps, versioning): see
+  test_wordpress_divi_home_styles.py::test_child_theme_enqueues_parent_shell_then_child_stylesheet
+- mobile-menu toggle and utility auto-hide *script* behaviour: see
+  test_wordpress_navigation_scroll.py (executes the real bioco-navigation.js)
+"""
+
+import json
+import subprocess
+from functools import cache
 from pathlib import Path
 
-
 ROOT = Path(__file__).parents[1]
-DIVI_THEME = ROOT / "wordpress/web/app/themes/bioco-divi"
+STAGING = "https://staging.example"
+
+NAVIGATION_JSON = ROOT / "wordpress/web/app/mu-plugins/bioco-core/content/navigation.json"
+
+_BODY_CLASS_ADDER = (
+    "$GLOBALS['BIOCO_FILTERS']['body_class'][] = [10, static function (array $classes): array "
+    "{ $classes[] = 'et_fixed_nav'; return $classes; }];\n"
+)
 
 
-def test_divi_uses_canonical_bioco_header_and_footer_renderers():
-    header = (DIVI_THEME / "header.php").read_text()
-    footer = (DIVI_THEME / "footer.php").read_text()
+def _php_source(
+    current_page: str,
+    singular: str,
+    archive: str,
+    template: str,
+    extra_body_class_filter: bool,
+) -> str:
+    # fmt: off
+    state = (
+        "$GLOBALS['BIOCO_CURRENT_PAGE'] = '" + current_page + "';\n"
+        + "$GLOBALS['BIOCO_SINGULAR'] = '" + singular + "';\n"
+        + "$GLOBALS['BIOCO_ARCHIVE'] = '" + archive + "';\n"
+        + "$GLOBALS['BIOCO_TEMPLATE'] = '" + template + "';\n"
+    )
+    return (
+        "define('ABSPATH', __DIR__);\n"
+        "$GLOBALS['BIOCO_FILTERS'] = [];\n"
+        + state
+        + "$GLOBALS['BIOCO_BASE_CLASSES'] = 'home page page-id-5 et_fixed_nav et_show_nav';\n"
+        "function add_filter($hook, $callback, $priority = 10) {\n"
+        "    $GLOBALS['BIOCO_FILTERS'][$hook][] = [(int) $priority, $callback];\n"
+        "    return true;\n"
+        "}\n"
+        "function add_action($hook, $callback, $priority = 10) { return true; }\n"
+        "function apply_filters($hook, $value) {\n"
+        "    $hooks = $GLOBALS['BIOCO_FILTERS'][$hook] ?? [];\n"
+        "    usort($hooks, static fn($a, $b) => $a[0] <=> $b[0]);\n"
+        "    foreach ($hooks as [, $callback]) {\n"
+        "        $value = $callback($value);\n"
+        "    }\n"
+        "    return $value;\n"
+        "}\n"
+        "function language_attributes() { echo 'lang=\"de-CH\"'; }\n"
+        "function bloginfo($show) { echo 'UTF-8'; }\n"
+        "function wp_head() { echo 'BIOCO-MARK-WP-HEAD'; }\n"
+        "function wp_body_open() { echo 'BIOCO-MARK-WP-BODY-OPEN'; }\n"
+        "function wp_footer() { echo 'BIOCO-MARK-WP-FOOTER'; }\n"
+        "function body_class($extra = '') {\n"
+        "    $classes = array_values(array_filter(explode(' ', trim($GLOBALS['BIOCO_BASE_CLASSES'] . ' ' . $extra))));\n"
+        "    $classes = apply_filters('body_class', $classes);\n"
+        "    echo 'class=\"' . esc_attr(implode(' ', array_unique($classes))) . '\"';\n"
+        "}\n"
+        "function is_page($page = '') {\n"
+        "    return $GLOBALS['BIOCO_CURRENT_PAGE'] !== '' && (string) $page === $GLOBALS['BIOCO_CURRENT_PAGE'];\n"
+        "}\n"
+        "function is_singular($post_types = '') {\n"
+        "    $singular = $GLOBALS['BIOCO_SINGULAR'];\n"
+        "    if ($singular === '') return false;\n"
+        "    if ($post_types === '' || $post_types === []) return true;\n"
+        "    return in_array($singular, (array) $post_types, true);\n"
+        "}\n"
+        "function is_post_type_archive($post_types = '') {\n"
+        "    $archive = $GLOBALS['BIOCO_ARCHIVE'];\n"
+        "    if ($archive === '') return false;\n"
+        "    if ($post_types === '' || $post_types === []) return true;\n"
+        "    return in_array($archive, (array) $post_types, true);\n"
+        "}\n"
+        "function is_page_template($template = '') {\n"
+        "    $current = $GLOBALS['BIOCO_TEMPLATE'];\n"
+        "    if ($current === '') return false;\n"
+        "    return (string) $template === $current;\n"
+        "}\n"
+        "function home_url($path = '/') { return 'https://staging.example' . $path; }\n"
+        "function plugins_url($path = '', $plugin = null) {\n"
+        "    // Mirrors WP: the URL base is the containing (mu-)plugin directory,\n"
+        "    // located from the plugin file passed as second argument.\n"
+        "    $tail = '';\n"
+        "    if (is_string($plugin) && $plugin !== '') {\n"
+        "        $dir = rtrim(str_replace('\\\\', '/', dirname($plugin)), '/');\n"
+        "        $marker = '/mu-plugins/';\n"
+        "        if (($pos = strpos($dir, $marker)) !== false) {\n"
+        "            $tail = substr($dir, $pos + strlen($marker));\n"
+        "        }\n"
+        "    }\n"
+        "    return 'https://staging.example/wp-content/mu-plugins/' . $tail . '/' . ltrim((string) $path, '/');\n"
+        "}\n"
+        "function esc_url($value) { return (string) $value; }\n"
+        "function esc_attr($value) { return (string) $value; }\n"
+        "function esc_html($value) { return (string) $value; }\n"
+        "require 'wordpress/web/app/mu-plugins/bioco-core/includes/navigation.php';\n"
+        "require 'wordpress/web/app/themes/bioco-divi/functions.php';\n"
+        + (_BODY_CLASS_ADDER if extra_body_class_filter else "")
+        + "ob_start();\n"
+        "require 'wordpress/web/app/themes/bioco-divi/header.php';\n"
+        "$header = ob_get_clean();\n"
+        "ob_start();\n"
+        "require 'wordpress/web/app/themes/bioco-divi/footer.php';\n"
+        "$footer = ob_get_clean();\n"
+        "echo json_encode(['header' => $header, 'footer' => $footer]);"
+    )
+    # fmt: on
 
-    assert header.count("bioco_render_primary_navigation()") == 1
-    assert 'class="bioco-site-header"' in header
-    assert 'class="bioco-page-shell bioco-hero-nav-overlay"' in header
-    assert "main-header" not in header
-    assert "show_page_menu" not in header
 
-    assert footer.count("bioco_render_site_footer()") == 1
-    assert "main-footer" not in footer
-    assert "get_sidebar" not in footer
-
-    navigation = __import__("json").loads((
-        ROOT / "wordpress/web/app/mu-plugins/bioco-core/content/navigation.json"
-    ).read_text())
-    footer_contract = navigation["footer"]
-    assert footer_contract["navigationTitle"] == "Navigation"
-    assert footer_contract["contactTitle"] == "Kontakt"
-    assert footer_contract["socialTitle"] == "Social Media"
-    assert footer_contract["partnersTitle"] == "Partner & Zertifizierungen"
-
-
-def test_divi_reuses_shared_shell_styles_and_navigation_script():
-    functions = (DIVI_THEME / "functions.php").read_text()
-
-    assert "bioco-shell" in functions
-    assert "$theme_root_uri . '/bioco/assets/app.css'" in functions
-    assert "$theme_root_path . '/bioco/assets/app.css'" in functions
-    assert "bioco-navigation" in (
-        ROOT / "wordpress/web/app/mu-plugins/bioco-core/bioco-core.php"
-    ).read_text()
+@cache
+def _render(
+    current_page: str = "",
+    singular: str = "",
+    archive: str = "",
+    template: str = "",
+    extra_body_class_filter: bool = False,
+) -> dict:
+    result = subprocess.run(
+        [
+            "php",
+            "-r",
+            _php_source(current_page, singular, archive, template, extra_body_class_filter),
+        ],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return json.loads(result.stdout)
 
 
-def test_divi_shell_keeps_wordpress_lifecycle_hooks():
-    header = (DIVI_THEME / "header.php").read_text()
-    footer = (DIVI_THEME / "footer.php").read_text()
-
-    assert "language_attributes()" in header
-    assert "wp_head()" in header
-    assert "body_class()" in header
-    assert "wp_body_open()" in header
-    assert "wp_footer()" in footer
-    assert header.count('id="page-container"') == 1
-    assert footer.count("</div>") >= 1
+def _document(scenario: dict) -> str:
+    return scenario["header"] + scenario["footer"]
 
 
-def test_divi_shell_wraps_parent_template_content_in_main():
-    header = (DIVI_THEME / "header.php").read_text()
-    footer = (DIVI_THEME / "footer.php").read_text()
-
-    assert '<main id="bioco-main-content">' in header
-    assert footer.count("</main>") == 1
+# ---------------------------------------------------------------------------
+# Contract data (the single navigation contract shared by both themes)
+# ---------------------------------------------------------------------------
 
 
-def test_divi_disables_parent_fixed_header_offsets():
-    functions = (DIVI_THEME / "functions.php").read_text()
+def _contract() -> dict:
+    return json.loads(NAVIGATION_JSON.read_text())
 
-    assert "body_class" in functions
-    assert "et_fixed_nav" in functions
-    assert "et_show_nav" in functions
-    assert "array_values(array_diff" in functions
-    assert "PHP_INT_MAX" in functions
+
+def _expected_href(url: str) -> str:
+    """Internal paths resolve against home_url(); absolute URLs pass through."""
+    if url.startswith(("http://", "https://")):
+        return url
+    return STAGING + url
+
+
+# ---------------------------------------------------------------------------
+# Document structure and lifecycle hooks
+# ---------------------------------------------------------------------------
+
+
+def test_shell_renders_exactly_one_header_main_and_footer():
+    scenario = _render()
+    document = _document(scenario)
+
+    assert document.count("<header ") == 1
+    assert document.count("<main ") == 1
+    assert document.count("<footer ") == 1
+    assert document.count('id="page-container"') == 1
+    assert document.count('id="bioco-main-content"') == 1
+
+    assert '<header class="bioco-site-header">' in scenario["header"]
+    assert '<div class="bioco-page-shell bioco-hero-nav-overlay">' in scenario["header"]
+    assert "</main>" in scenario["footer"]
+
+
+def test_shell_closes_every_element_it_opens_and_keeps_hooks_in_order():
+    scenario = _render()
+    document = _document(scenario)
+
+    assert document.count("<main ") == document.count("</main>") == 1
+    assert document.count("<header ") == document.count("</header>") == 1
+    assert document.count("<footer ") == document.count("</footer>") == 1
+    # The shell owns the page-container wrapper; the renderers own their own
+    # nested divs. Both sides together must stay balanced.
+    assert document.count("<div") == document.count("</div>")
+
+    head = document.index("BIOCO-MARK-WP-HEAD")
+    body_open = document.index("BIOCO-MARK-WP-BODY-OPEN")
+    body = document.index("<body ")
+    page_container = document.index('id="page-container"')
+    header_open = document.index("<header ")
+    header_close = document.index("</header>")
+    main_content = document.index('id="bioco-main-content"')
+    main_close = document.index("</main>")
+    footer = document.index("<footer ")
+    footer_close = document.index("</footer>")
+    # page-container closes after the footer render, before wp_footer.
+    page_container_close = document.index("</div>", footer_close)
+    wp_footer = document.index("BIOCO-MARK-WP-FOOTER")
+    body_close = document.index("</body>")
+
+    assert head < body
+    assert body < body_open
+    assert body_open < page_container
+    assert page_container < header_open
+    assert header_open < header_close
+    assert header_close < main_content
+    assert main_content < main_close
+    assert main_close < footer
+    assert footer < footer_close
+    assert footer_close < page_container_close
+    assert page_container_close < wp_footer
+    assert wp_footer < body_close
+
+    assert document.rstrip().endswith("</html>")
+
+
+def test_shell_marks_wordpress_hooks_instead_of_bypassing_them():
+    scenario = _render()
+    document = _document(scenario)
+
+    for marker in ("BIOCO-MARK-WP-HEAD", "BIOCO-MARK-WP-BODY-OPEN", "BIOCO-MARK-WP-FOOTER"):
+        assert document.count(marker) == 1, marker
+
+    assert 'lang="de-CH"' in document
+    assert "UTF-8" in document
+    assert 'class="home page page-id-5"' in document
+
+
+def test_blank_template_renders_content_without_header_or_footer():
+    scenario = _render(template="page-template-blank.php")
+    document = _document(scenario)
+
+    assert "<header " not in document
+    assert "<footer " not in document
+    assert "bioco-site-header" not in document
+    assert "bioco-site-footer" not in document
+
+    assert document.count("<main ") == 1
+    assert document.count('id="page-container"') == 1
+    assert document.index("BIOCO-MARK-WP-HEAD") < document.index('id="bioco-main-content"')
+    assert document.index('id="bioco-main-content"') < document.index("BIOCO-MARK-WP-FOOTER")
+    assert document.rstrip().endswith("</html>")
+
+
+# ---------------------------------------------------------------------------
+# Body-class filtering (registered by functions.php, invoked by header.php)
+# ---------------------------------------------------------------------------
+
+
+def test_body_classes_lose_divi_fixed_nav_classes_through_the_registered_filter():
+    scenario = _render()
+    document = _document(scenario)
+
+    assert 'class="home page page-id-5"' in document
+    assert "et_fixed_nav" not in document
+    assert "et_show_nav" not in document
+
+
+def test_divi_fixed_nav_class_is_removed_even_when_a_lower_priority_filter_adds_it():
+    scenario = _render(extra_body_class_filter=True)
+    document = _document(scenario)
+
+    assert "et_fixed_nav" not in document
+
+
+# ---------------------------------------------------------------------------
+# Primary navigation: canonical links, accessibility contract, current route
+# ---------------------------------------------------------------------------
+
+
+def test_primary_navigation_renders_the_full_canonical_contract():
+    scenario = _render()
+    document = _document(scenario)
+    contract = _contract()
+
+    # Two labelled navigation landmarks: utility above primary.
+    assert '<nav class="bioco-utility-nav" aria-label="Hilfsnavigation">' in document
+    assert '<nav class="bioco-primary-nav" aria-label="Hauptnavigation">' in document
+    # Structure order: utility row, then primary row (logo first, then menu).
+    utility = document.index('class="bioco-utility-nav"')
+    primary = document.index('class="bioco-primary-nav"')
+    logo = document.index('class="bioco-logo"')
+    menu = document.index('id="bioco-primary-menu"')
+    assert utility < primary
+    assert primary < logo
+    assert logo < menu
+
+    for item in contract["utility"]:
+        href = _expected_href(item["url"])
+        assert f'href="{href}">{item["label"]}</a>' in document, item
+
+    for item in contract["primary"]:
+        href = _expected_href(item["url"])
+        assert f'href="{href}">{item["label"]}</a>' in document, item
+
+    cta = contract["cta"]
+    assert f'class="bioco-primary-cta" href="{_expected_href(cta["url"])}">{cta["label"]}</a>' in document
+
+    # The logo links home with the contract's alt text and the bioco-core
+    # asset, resolved through the real plugins_url($path, $plugin) call.
+    logo_src = "https://staging.example/wp-content/mu-plugins/bioco-core/assets/bioco-logo.png"
+    assert f'href="{STAGING}/" aria-label="{contract["site"]["homeLabel"]}">' in document
+    assert f'src="{logo_src}" alt="{contract["site"]["logoAlt"]}">' in document
+
+
+def test_mobile_menu_contract_is_wired_for_accessible_script_control():
+    scenario = _render()
+    document = _document(scenario)
+    site = _contract()["site"]
+
+    toggle = (
+        '<button class="bioco-menu-toggle" type="button" '
+        f'aria-label="{site["menuOpenLabel"]}" '
+        f'data-open-label="{site["menuOpenLabel"]}" '
+        f'data-close-label="{site["menuCloseLabel"]}" '
+        'aria-controls="bioco-primary-menu" aria-expanded="false">'
+    )
+    assert toggle in document
+    assert document.count("bioco-menu-toggle") == 1
+    # Exactly one menu element carries the id the toggle controls.
+    assert document.count('id="bioco-primary-menu"') == 1
+    assert 'aria-controls="bioco-primary-menu"' in document
+
+
+def test_mobile_utility_entries_are_duplicated_into_the_primary_menu():
+    scenario = _render()
+    document = _document(scenario)
+    utility = _contract()["utility"]
+
+    menu_start = document.index('id="bioco-primary-menu"')
+    menu_end = document.index("</ul>", menu_start)
+    menu = document[menu_start:menu_end]
+
+    for item in utility:
+        href = _expected_href(item["url"])
+        expected = (
+            f'<li class="bioco-mobile-utility"><a href="{href}">{item["label"]}</a></li>'
+        )
+        assert expected in menu, item
+
+
+def test_current_route_marks_the_matching_link_and_nothing_else():
+    scenario = _render(current_page="gemuese")
+    document = _document(scenario)
+
+    assert '<li class="is-current"><a class="is-current" aria-current="page" href="https://staging.example/gemuese/">Gemüse</a></li>' in document
+    assert document.count("aria-current") == 1
+    assert document.count("is-current") == 2  # li + a
+
+
+def test_event_pages_mark_aktuelles_as_current():
+    singular = _render(singular="event")
+    assert '<a class="is-current" aria-current="page" href="https://staging.example/aktuelles/">Aktuelles</a>' in singular["header"]
+    assert singular["header"].count("aria-current") == 1
+
+    archive = _render(archive="event")
+    assert '<a class="is-current" aria-current="page" href="https://staging.example/aktuelles/">Aktuelles</a>' in archive["header"]
+    assert archive["header"].count("aria-current") == 1
+
+
+def test_utility_current_route_marks_both_the_row_and_the_mobile_copy():
+    scenario = _render(current_page="kontakt")
+    document = _document(scenario)
+
+    assert document.count("aria-current") == 2  # utility row + mobile duplicate
+    assert '<li class="is-current"><a class="is-current" aria-current="page" href="https://staging.example/kontakt/">Kontakt</a></li>' in document
+    assert '<li class="bioco-mobile-utility is-current"><a class="is-current" aria-current="page" href="https://staging.example/kontakt/">Kontakt</a></li>' in document
+
+
+def test_primary_navigation_without_a_current_route_marks_nothing():
+    document = _document(_render())
+
+    assert "aria-current" not in document
+    assert "is-current" not in document
+
+
+# ---------------------------------------------------------------------------
+# Site footer: titles, canonical destinations, external link hardening
+# ---------------------------------------------------------------------------
+
+
+def test_site_footer_renders_the_approved_titles_and_internal_links():
+    scenario = _render()
+    footer = scenario["footer"]
+    contract = _contract()["footer"]
+
+    assert '<footer id="footer" class="bioco-site-footer">' in footer
+    # Approved titles stay pinned here: the footer must render exactly these
+    # German headings, not just whatever navigation.json currently says.
+    assert "<h3>Navigation</h3>" in footer
+    assert "<h3>Kontakt</h3>" in footer
+    assert "<h3>Social Media</h3>" in footer
+    assert "<h3>Partner & Zertifizierungen</h3>" in footer
+
+    for item in contract["navigation"]:
+        assert f'href="{_expected_href(item["url"])}">{item["label"]}</a>' in footer, item
+
+
+def test_site_footer_renders_contact_details_with_mailto():
+    footer = _render()["footer"]
+    contract = _contract()["footer"]
+
+    assert f"<strong>{contract['contactName']}</strong>" in footer
+    for line in contract["contactAddress"]:
+        assert line in footer
+    assert "<br>" in footer
+    assert f'href="mailto:{contract["contactEmail"]}">{contract["contactEmail"]}</a>' in footer
+
+
+def test_site_footer_external_links_open_safely():
+    footer = _render()["footer"]
+    contract = _contract()["footer"]
+
+    for item in contract["social"] + contract["partners"]:
+        assert (
+            f'<a href="{item["url"]}" target="_blank" rel="noopener noreferrer">'
+            f'{item["label"]}</a>'
+        ) in footer, item
+
+
+def test_site_footer_renders_the_region_note():
+    footer = _render()["footer"]
+    assert _contract()["footer"]["regionText"] in footer
+
+
+# ---------------------------------------------------------------------------
+# bioco-core asset bootstrap (shared by the block theme and Divi)
+# ---------------------------------------------------------------------------
+
+
+def _run_wp_enqueue_scripts_hook() -> dict:
+    """Require bioco-core.php and run its registered wp_enqueue_scripts
+    callbacks exactly like WordPress would — the assets must come from the
+    hook registration, not from calling the implementation directly."""
+    php = (
+        "define('ABSPATH', __DIR__);\n"
+        "$GLOBALS['BIOCO_ENQUEUED'] = [];\n"
+        "$GLOBALS['BIOCO_ACTIONS'] = [];\n"
+        "function add_filter($hook, $callback, $priority = 10) { return true; }\n"
+        "function add_action($hook, $callback, $priority = 10) {\n"
+        "    $GLOBALS['BIOCO_ACTIONS'][$hook][] = [(int) $priority, $callback];\n"
+        "    return true;\n"
+        "}\n"
+        "function wp_enqueue_style($handle, $src = '', $deps = [], $ver = false) {\n"
+        "    $GLOBALS['BIOCO_ENQUEUED'][] = ['type' => 'style', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];\n"
+        "}\n"
+        "function wp_enqueue_script($handle, $src = '', $deps = [], $ver = false, $footer = false) {\n"
+        "    $GLOBALS['BIOCO_ENQUEUED'][] = ['type' => 'script', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver, 'footer' => (bool) $footer];\n"
+        "}\n"
+        "function plugin_dir_url($file) { return 'https://staging.example/wp-content/mu-plugins/bioco-core/'; }\n"
+        "require 'wordpress/web/app/mu-plugins/bioco-core/bioco-core.php';\n"
+        "$registrations = count($GLOBALS['BIOCO_ACTIONS']['wp_enqueue_scripts'] ?? []);\n"
+        "foreach ($GLOBALS['BIOCO_ACTIONS']['wp_enqueue_scripts'] ?? [] as [, $callback]) {\n"
+        "    call_user_func($callback);\n"
+        "}\n"
+        "echo json_encode(['registrations' => $registrations, 'enqueued' => $GLOBALS['BIOCO_ENQUEUED']]);"
+    )
+    result = subprocess.run(
+        ["php", "-r", php],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    return json.loads(result.stdout)
+
+
+def test_bioco_core_enqueues_tokens_blocks_and_navigation_assets_in_order():
+    hook = _run_wp_enqueue_scripts_hook()
+
+    # Exactly one callback must be registered on wp_enqueue_scripts and it
+    # alone must produce the assets: a missing or wrong hook registration
+    # leaves the list empty or duplicated.
+    assert hook["registrations"] == 1
+    enqueued = hook["enqueued"]
+
+    handles = [asset["handle"] for asset in enqueued]
+    assert handles == ["bioco-tokens", "bioco-blocks", "bioco-navigation"]
+
+    tokens, blocks, navigation = enqueued
+    assert tokens["type"] == "style"
+    assert tokens["deps"] == []
+    assert tokens["src"].endswith("assets/bioco-tokens.css")
+
+    assert blocks["deps"] == ["bioco-tokens"]
+    assert blocks["src"].endswith("assets/bioco-blocks.css")
+
+    assert navigation["type"] == "script"
+    assert navigation["footer"] is True
+    assert navigation["src"].endswith("assets/bioco-navigation.js")
+
+    for asset in enqueued:
+        assert isinstance(asset["ver"], str) and asset["ver"].isdigit(), asset

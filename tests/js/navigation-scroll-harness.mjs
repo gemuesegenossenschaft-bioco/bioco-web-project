@@ -1,10 +1,14 @@
-// Deterministic simulator for the utility-row auto-hide scroll handler.
+// Deterministic simulator for the real `bioco-navigation.js`.
 //
-// It executes the real `bioco-navigation.js` in a VM against a minimal DOM
-// stub that reproduces the live defect: collapsing/expanding the utility row
-// changes the document layout, so the browser shifts `scrollY` by the same
-// amount over the CSS transition — a layout-induced scroll that must not be
-// read as user intent.
+// It executes the real script in a VM against a minimal DOM stub. Two behaviour
+// families are covered:
+//
+// 1. Sticky-header utility-row auto-hide. The stub reproduces the live defect:
+//    collapsing the utility row shrinks the document, so the browser shifts
+//    `scrollY` down over the CSS transition — a layout-induced scroll that
+//    must not be read as user intent.
+// 2. Mobile menu toggle (open/close/Escape/link-click), driven against stub
+//    elements that mirror the server-rendered accessible contract.
 //
 // Prints one JSON object with the outcome of every scenario; assertions live
 // in tests/test_wordpress_navigation_scroll.py.
@@ -24,7 +28,13 @@ const PRIMARY_HEIGHT = 76;
 const UTILITY_HEIGHT = 70;
 const TRANSITION_STEP = 8; // px per animation frame (~.22s ease, discretised)
 
-function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false } = {}) {
+function makeEnv({
+  reducedMotion = false,
+  mobile = false,
+  duplicateShell = false,
+  menu = false,
+  menuWithoutToggle = false,
+} = {}) {
   const state = {
     scrollY: 0,
     utility: mobile ? 0 : UTILITY_HEIGHT, // mobile CSS: display:none
@@ -149,6 +159,60 @@ function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false
   };
   const shells = duplicateShell ? [shell, decoy] : [shell];
 
+  // ---- Mobile menu stubs: the elements initMenus touches, no more. ----
+  const focusLog = [];
+  const simpleClassList = () => {
+    const classes = new Set();
+    return {
+      contains: (name) => classes.has(name),
+      add: (name) => classes.add(name),
+      remove: (name) => classes.delete(name),
+      toggle: (name, force) => {
+        const next = force === undefined ? !classes.has(name) : !!force;
+        if (next) classes.add(name);
+        else classes.delete(name);
+        return next;
+      },
+    };
+  };
+  const makeNode = (nodeName, { attrs = {}, dataset = {} } = {}) => {
+    const listeners = {};
+    const node = {
+      nodeName,
+      parentNode: null,
+      attrs: { ...attrs },
+      dataset: { ...dataset },
+      addEventListener: (type, fn) => {
+        (listeners[type] ??= []).push(fn);
+      },
+      listenerCount: (type) => (listeners[type] ?? []).length,
+      dispatch: (type, event = {}) => {
+        const payload = { type, ...event };
+        for (const fn of listeners[type] ?? []) fn(payload);
+      },
+      setAttribute: (name, value) => {
+        node.attrs[name] = value;
+      },
+      focus: () => focusLog.push(nodeName),
+    };
+    node.classList = simpleClassList();
+    return node;
+  };
+  // Mirrors the server-rendered contract: aria-expanded/aria-label start in
+  // the closed state with the contract labels.
+  const menuLink = makeNode('A');
+  const menuToggle = makeNode('BUTTON', {
+    attrs: { 'aria-expanded': 'false', 'aria-label': 'Menü öffnen' },
+    dataset: { openLabel: 'Menü öffnen', closeLabel: 'Menü schliessen' },
+  });
+  const nav = makeNode('NAV', { attrs: { 'aria-label': 'Hauptnavigation' } });
+  nav.querySelector = (sel) => {
+    if (sel === '.bioco-menu-toggle') return menuWithoutToggle ? null : menuToggle;
+    if (sel === '#bioco-primary-menu a') return menuLink;
+    return null;
+  };
+  nav.querySelectorAll = (sel) => (sel === 'a' ? [menuLink] : []);
+
   const sandbox = {
     window: {
       get scrollY() {
@@ -170,8 +234,11 @@ function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false
       readyState: 'complete',
       activeElement: null,
       addEventListener: () => {},
-      querySelectorAll: (sel) =>
-        sel === '.bioco-navigation-shell' ? shells.slice() : [],
+      querySelectorAll: (sel) => {
+        if (sel === '.bioco-navigation-shell') return shells.slice();
+        if (sel === '.bioco-primary-nav' && menu) return [nav];
+        return [];
+      },
       querySelector: (sel) =>
         sel === '.bioco-navigation-shell' ? shells[0] : null,
     },
@@ -230,6 +297,7 @@ function makeEnv({ reducedMotion = false, mobile = false, duplicateShell = false
     utilityLink,
     outsideLink,
     focusWithinUtility,
+    menuNodes: { nav, menuToggle, menuLink, focusLog },
   };
 }
 
@@ -365,6 +433,67 @@ const scenarios = {};
     utility_height: env.state.utility,
     total_class_changes: env.state.classChanges.length,
     decoy_touches: env.decoyChanges.length,
+  };
+}
+
+// 10. Toggle click opens the menu: class, a11y attrs and focus all flip
+// together in one handler.
+{
+  const env = makeEnv({ menu: true });
+  env.menuNodes.menuToggle.dispatch('click');
+  scenarios.menu_toggle_open = {
+    is_open: env.menuNodes.nav.classList.contains('is-open'),
+    aria_expanded: env.menuNodes.menuToggle.attrs['aria-expanded'],
+    aria_label: env.menuNodes.menuToggle.attrs['aria-label'],
+    focus_target: env.menuNodes.focusLog.at(-1) ?? null,
+  };
+}
+
+// 11. Second click closes again and restores the open label.
+{
+  const env = makeEnv({ menu: true });
+  env.menuNodes.menuToggle.dispatch('click');
+  env.menuNodes.menuToggle.dispatch('click');
+  scenarios.menu_toggle_close = {
+    is_open: env.menuNodes.nav.classList.contains('is-open'),
+    aria_expanded: env.menuNodes.menuToggle.attrs['aria-expanded'],
+    aria_label: env.menuNodes.menuToggle.attrs['aria-label'],
+  };
+}
+
+// 12. Escape closes the menu and returns focus to the toggle.
+{
+  const env = makeEnv({ menu: true });
+  env.menuNodes.menuToggle.dispatch('click');
+  env.menuNodes.nav.dispatch('keydown', { key: 'Escape' });
+  scenarios.menu_escape_closes = {
+    is_open: env.menuNodes.nav.classList.contains('is-open'),
+    aria_expanded: env.menuNodes.menuToggle.attrs['aria-expanded'],
+    focus_target: env.menuNodes.focusLog.at(-1) ?? null,
+  };
+}
+
+// 13. Clicking a link inside the nav closes the menu.
+{
+  const env = makeEnv({ menu: true });
+  env.menuNodes.menuToggle.dispatch('click');
+  env.menuNodes.menuLink.dispatch('click');
+  scenarios.menu_link_click_closes = {
+    is_open: env.menuNodes.nav.classList.contains('is-open'),
+    aria_expanded: env.menuNodes.menuToggle.attrs['aria-expanded'],
+    aria_label: env.menuNodes.menuToggle.attrs['aria-label'],
+  };
+}
+
+// 14. A primary nav without a toggle stays completely inert.
+{
+  const env = makeEnv({ menu: true, menuWithoutToggle: true });
+  env.menuNodes.menuToggle.dispatch('click'); // no-op: nothing was wired
+  scenarios.menu_without_toggle_inert = {
+    toggle_click_listeners: env.menuNodes.menuToggle.listenerCount('click'),
+    nav_keydown_listeners: env.menuNodes.nav.listenerCount('keydown'),
+    link_click_listeners: env.menuNodes.menuLink.listenerCount('click'),
+    is_open: env.menuNodes.nav.classList.contains('is-open'),
   };
 }
 
