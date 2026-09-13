@@ -26,7 +26,7 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 
 | Command | Needs | Gate |
 | --- | --- | --- |
-| `python3 -m pytest tests/ -q` | python3, php, node | full suite, all green required (372 tests before this pass) |
+| `python3 -m pytest tests/ -q` | python3, php, node | full suite, all green required |
 | `bash tests/wordpress-staging-render-gate.sh` | network access to staging | all 22 routes return 200 |
 | `bash wordpress/scripts/release-wordpress-staging.sh --commit=<full-40-char-sha>` (dry run default) | repo + CI env | release pipeline preflight |
 
@@ -34,6 +34,11 @@ The suite shells out to real runtimes: **PHP** (`php -r`, one process per scenar
 templates with only WordPress runtime functions stubbed; **Node** (`tests/js/navigation-scroll-harness.mjs`)
 executes the real `bioco-navigation.js` against a deterministic DOM stub. Keep both binaries
 available when running the suite.
+
+**PHP prerequisites:** the PHP CLI must have **ext-dom** (`php -m | grep dom`) — the runtime verify
+gate (`wp bioco verify --runtime`) judges rendered output through the real built-in `DOMDocument`
+(`bioco_import_runtime_html_is_meaningful()` in `bioco-import/includes/verify.php`). A missing
+extension fails closed with a clear error, not a false pass.
 
 ## Principles
 
@@ -107,6 +112,9 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 | `test_wordpress_divi_design_system.py` | keep | Design-system checker contract (#134): token-only values, malformed manifest fail-closed behaviour, documented exceptions. |
 | `test_wordpress_visual_parity.py` | keep | 95% visual parity gate semantics: fail-closed results, masking discipline, threshold validation. |
 | `test_wordpress_release_pipeline.py` | keep | Release pipeline: dry-run non-mutation, step order/abort, input hygiene, CI parity, hash-pinned deps. |
+| `test_wordpress_release_preservation.py` | new (#179) | Exact remote-command boundary, no import, fail-closed aborts, non-writing dry run. Database preservation requires the separate real release check. |
+| `test_wordpress_import_cli.py` | new (#179) | Real CLI/importer with controlled WordPress storage: preview writes, no-clobber, forced apply, repeated apply, collection reports and exit statuses. |
+| `test_wordpress_verify_runtime.py` | new (#179) | Real WordPress parser with controlled renderer output: edited layouts, malformed nested comments, empty output, renderer failures and page context. Actual Divi rendering is checked separately. |
 
 ## Consolidated in this pass (removed → replacement)
 
@@ -134,6 +142,16 @@ new tests; pristine and restored trees pass.
 - **Native block serialization is not the Divi editor.** Import/serialization tests run against the
   repo's serializer and PHP render paths. They do not prove a real Divi 5 editor load/save roundtrip
   of generated content — that stays a staging-checklist item.
+- **The runtime gate judges pages, not components.** `wp bioco verify --runtime` accepts editorial
+  change by design: it proves every required page exists, is non-empty, carries valid Divi markup and
+  renders visible content in total (decorative divider/spacer sections may stay individually empty).
+  Without declaring components required it cannot detect every missing individual component on an
+  otherwise populated page; exact seed fidelity remains the separate acceptance gate of the explicit
+  import (`wp bioco verify`). The unit suite does not model Divi rendering; actual Divi rendering is
+  checked against a real local WordPress runtime.
+- **Release-preservation tests assert the command boundary, not database state.** The shell release
+  tests control the external commands only; actual editorial preservation is verified in a real
+  staging release with data hashes taken before and after.
 - **Render smoke is not mail delivery.** Form/renderer tests verify markup and handler wiring; no
   test sends actual mail (and none may — the suite must stay network-free).
 - **Static CSS values are not computed contrast.** The AA checks compute contrast ratios from

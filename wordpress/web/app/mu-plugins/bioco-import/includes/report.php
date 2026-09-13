@@ -27,7 +27,7 @@ function bioco_import_report_row(array &$report, $page, $section, $field, $statu
 }
 
 function bioco_import_report_has_failures(array $report) {
-    foreach (['error', 'verify-mismatch', 'verify-missing'] as $failStatus) {
+    foreach (['error', 'verify-mismatch', 'verify-missing', 'runtime-missing', 'runtime-empty', 'runtime-corrupt'] as $failStatus) {
         if (!empty($report['counts'][$failStatus])) return true;
     }
     return false;

@@ -207,15 +207,16 @@ else
   echo "step=cache-flush status=passed opcache-reset=skipped"
 fi
 
-current_step="import"
+# A normal release ships code only. Content is never written here: the
+# importer is a separate explicit operation (wp bioco import) and its
+# no-clobber rule is the editorial protection. Runtime verification then
+# checks the site as the editors left it: every required page present,
+# non-empty and still valid Divi block markup — without demanding the
+# seed text back.
+current_step="runtime-verify"
 echo "step=${current_step} status=running"
-run_remote "cd '${wp_root}'; wp bioco import --apply --force"
-echo "step=import status=passed"
-
-current_step="parity"
-echo "step=${current_step} status=running"
-run_remote "cd '${wp_root}'; wp bioco verify"
-echo "step=parity status=passed"
+run_remote "cd '${wp_root}'; wp bioco verify --runtime"
+echo "step=${current_step} status=passed"
 
 current_step="smoke"
 echo "step=${current_step} status=running"
@@ -226,7 +227,7 @@ echo "step=smoke status=passed"
 
 current_step="release-marker"
 echo "step=${current_step} status=running"
-marker_json="{\"commit\":\"${commit}\",\"backup\":\"${backup_path}\",\"timestamp\":\"${timestamp}\",\"parity\":\"passed\",\"smoke\":\"passed\"}"
+marker_json="{\"commit\":\"${commit}\",\"backup\":\"${backup_path}\",\"timestamp\":\"${timestamp}\",\"verify\":\"passed\",\"smoke\":\"passed\"}"
 run_remote "cd '${wp_root}'; wp option update bioco_release_marker '${marker_json}' --format=json >/dev/null"
 echo "step=release-marker status=passed release-marker=${commit} backup-path=${backup_path}"
 
