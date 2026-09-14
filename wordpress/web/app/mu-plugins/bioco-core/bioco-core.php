@@ -135,6 +135,58 @@ function bioco_core_register_map_assets() {
 }
 
 /**
+ * Shared forms lifecycle runtime (#181) and the six public form view
+ * scripts, registered with the same pre-registered-handle pattern as the
+ * map blocks above. Every form view script depends on bioco-forms-lifecycle
+ * (assets/bioco-forms-lifecycle.js), which owns Turnstile loading, native
+ * validity, serialization, pending state and response handling; the thin
+ * per-block adapters (view.js) mount through window.BiocoForms. The handles
+ * match generate_block_asset_handle() ("bioco/contact-form" ->
+ * "bioco-contact-form-view-script"), so both the standard block render and
+ * the dynamic-marker seam (bioco_render_dynamic_component in
+ * includes/dynamic-sections.php) enqueue exactly these scripts, and
+ * bioco_forms_localize_block() can localize onto them before they mount.
+ * WordPress prints the runtime before every dependent view script.
+ */
+add_action('init', 'bioco_core_register_form_assets');
+
+function bioco_core_register_form_assets() {
+    $runtime_path = BIOCO_CORE_DIR . '/assets/bioco-forms-lifecycle.js';
+    $runtime_deps = [];
+    if (file_exists($runtime_path)) {
+        wp_register_script(
+            'bioco-forms-lifecycle',
+            plugin_dir_url(__FILE__) . 'assets/bioco-forms-lifecycle.js',
+            [],
+            (string) filemtime($runtime_path),
+            true
+        );
+        $runtime_deps = ['bioco-forms-lifecycle'];
+    }
+    // The dependency list carries bioco-forms-lifecycle only when the runtime
+    // was actually registered: WordPress silently omits a dependent script
+    // whose dependency handle is missing, which would disable the adapters'
+    // own no-runtime fail-closed listeners (they block native GET submission
+    // of personal fields). Registering the existing adapters unconditionally
+    // keeps that protection live even when the runtime file is absent.
+    $form_slugs = [
+        'contact-form', 'subscribe-form', 'visit-day-form',
+        'waiting-list-form', 'event-signup-form', 'membership-form',
+    ];
+    foreach ($form_slugs as $slug) {
+        $view_path = BIOCO_CORE_DIR . '/blocks/' . $slug . '/view.js';
+        if (!file_exists($view_path)) continue;
+        wp_register_script(
+            'bioco-' . $slug . '-view-script',
+            plugin_dir_url(__FILE__) . 'blocks/' . $slug . '/view.js',
+            $runtime_deps,
+            (string) filemtime($view_path),
+            true
+        );
+    }
+}
+
+/**
  * Block registration: every block.json found one level under this plugin's
  * blocks/ dir. Additive with the block theme's own (shrinking) glob over its
  * own blocks/ dir — disjoint directories, no double registration as long as

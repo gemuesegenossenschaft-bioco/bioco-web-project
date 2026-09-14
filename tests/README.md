@@ -30,6 +30,8 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 | Command | Needs | Gate |
 | --- | --- | --- |
 | `python3 -m pytest tests/ -q` | python3, php, node | full suite, all green required |
+| `BIOCO_FORMS_BROWSER_TESTS=1 python3 -m pytest tests/test_wordpress_forms_lifecycle.py -q` | Playwright Chromium, local WP runtime at 127.0.0.1:8770 for the runtime proofs | six-form lifecycle in a real browser; opted in, a missing stack fails |
+| `BIOCO_BUTTON_BROWSER_TESTS=1 python3 -m pytest tests/test_wordpress_button_readability.py -q` | Playwright Chromium | button readability/contrast in Chromium |
 | `bash tests/wordpress-staging-render-gate.sh` | network access to staging | all 22 routes return 200 |
 | `bash wordpress/scripts/release-wordpress-staging.sh --commit=<full-40-char-sha>` (dry run default) | repo + CI env | release pipeline preflight |
 
@@ -106,8 +108,10 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 | File | Status | Behaviour |
 | --- | --- | --- |
 | `test_wordpress_leaflet_assets.py` | keep | Vendored Leaflet files exist unmodified, registered handles used only by map blocks, marker images resolve inside the vendored dir. |
-| `test_wordpress_membership_handoff.py` | keep | Pricing calculator → membership form selection handoff, server-side tampering rejection. |
+| `test_wordpress_membership_handoff.py` | keep (updated #181) | Pricing calculator → membership form selection handoff now runs through the real shared lifecycle runtime plus the real adapter in one minimal DOM context (Node VM); server-side tampering rejection unchanged. The full membership lifecycle matrix lives in the opt-in browser suite — no duplicated VM matrix. |
 | `test_wordpress_forms_turnstile.py` | keep | Turnstile: official test keys only on unconfigured staging. |
+| `test_wordpress_forms_assets.py` | new (#181) | Six form blocks reference pre-registered view-script handles with the shared runtime as (conditional) dependency (map-block pattern); the real `bioco_forms_localize_block()` localizes onto that handle and does NOT pre-enqueue the parser-blocking Turnstile script; adapters stay thin over the shared engine. The vendored real `WP_Dependencies` resolver proves the printed order (runtime before every adapter) AND that a missing runtime FILE still prints all six adapters without the dependency (CodeRabbit blocker: a missing dependency handle would otherwise silently omit the adapters' own fail-closed listeners). |
+| `test_wordpress_forms_lifecycle.py` | new (#181, opt-in browser) | All six real PHP-rendered forms in Chromium with intercepted fetch/Turnstile (no real network, no submissions): tracer contact submit, in-flight duplicate guard, native validity gates, HTTP 400/200-false/malformed-JSON/network errors with per-adapter copy, retry with fresh token, expiry/widget-error isolation, two-instance/data-config isolation, terminal accepted response even when success display throws, six-adapter payload matrix (subscribe DOI, visit number, waiting CMS values, event hidden strings, membership redirect incl. explicit `forwarded:false`, selected checkbox arrays in DOM order), membership fieldErrors flattening + calculator matrix, missing-runtime fail-closed across all six forms (network abort AND emitted-without-runtime file case), loader branches (script error, spent pre-existing element, load-without-global, indefinitely hung transport). The hung transport is canonical-URL only: a bounded timeout latches an explicit German manual-reload copy, keeps values/caption, creates no further scripts, and a late-appearing global recovers without new transport — no URL workaround is claimed. Plus real local-runtime proofs: emitted runtime-before-adapter order without a blocking Turnstile tag, real mount, and the real-page hung-Turnstile no-native-GET/no-API-submit regression. |
 | `test_wordpress_review_fixes.py` | keep | DOI confirmation has no public REST route, gallery filter validation, DOI nonce rules. |
 
 ### Design system & release infrastructure

@@ -156,7 +156,14 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
             <?php if ($depot_payment_title) : ?><h3><?php echo esc_html($depot_payment_title); ?></h3><?php endif; ?>
             <div class="form-group">
                 <?php if ($depot_label) : ?><label for="membership_depot"><?php echo esc_html($depot_label); ?></label><?php endif; ?>
-                <select id="membership_depot" name="depot" required>
+                <?php
+                // No required attribute: the backend accepts an empty depot
+                // for every membership selection (shares-only included; see
+                // bioco_forms_validate_membership()). The old misleading
+                // required marker would block valid signups once native
+                // validity gates submissions (#181).
+                ?>
+                <select id="membership_depot" name="depot">
                     <?php if ($depot_placeholder) : ?><option value=""><?php echo esc_html($depot_placeholder); ?></option><?php endif; ?>
                     <?php foreach ((array) $depots as $depot) :
                         $depot_option = $depot['option'] ?? '';
