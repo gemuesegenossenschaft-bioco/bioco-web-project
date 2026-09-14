@@ -63,8 +63,20 @@ cp .env.example .env   # fill DB + salts (https://roots.io/salts.html)
 The single entry point is `scripts/release-wordpress-staging.sh`; follow
 `RUNBOOK-SOFTACULOUS.md`. Local runs and `.github/workflows/deploy-wordpress-staging.yml` invoke the
 same implementation. Dry-run is the default; `--apply` performs database backup, owned-code sync,
-forced idempotent import, 110-block parity verification, the 22-route render gate, and a release
+cache flush, the `wp bioco verify --runtime` gate, the 22-route render smoke gate, and a release
 marker. WordPress core, uploads, regular plugins, Divi, and admin accounts remain server-owned.
+
+A normal release is **code-only**: it never writes content. Editorial pages, events, groups and Divi
+builder metadata survive exactly as the editors left them. `wp bioco verify --runtime` is the release
+gate for that contract: it accepts editorially changed pages and checks instead that every required
+page exists, is non-empty, carries valid Divi block markup and renders visible content in total
+(decorative divider/spacer sections may stay individually empty) — see
+[ADR 0001](adr/0001-wordpress-release-code-only-vs-seed-import.md).
+
+Importing content is a separate, explicit operation: `wp bioco import` (dry-run preview by default,
+`--apply` to write, `--apply --force` to deliberately overwrite existing content after a checked
+backup). Its seed-parity check `wp bioco verify` remains the acceptance gate for the first import;
+section 6 of `RUNBOOK-SOFTACULOUS.md` documents it.
 
 GitHub Actions requires `STAGING_SSH_HOST`, `STAGING_SSH_USER`, `STAGING_SSH_KEY`,
 `STAGING_SSH_KNOWN_HOSTS` (pinned host-key line), and `STAGING_WP_CONTENT` (the absolute

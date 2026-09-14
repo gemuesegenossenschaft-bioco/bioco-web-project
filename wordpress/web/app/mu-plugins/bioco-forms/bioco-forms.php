@@ -159,13 +159,16 @@ add_action('admin_notices', function () {
     );
 });
 
-// Loads the Turnstile widget script + passes the REST endpoint and site key
-// to a block's view.js. Called from each form block's render.php.
+// Passes the REST endpoint and site key to a block's view.js. Called from
+// each form block's render.php. The Turnstile script itself is NOT
+// pre-enqueued here (#181): a parser-blocking api.js tag delays
+// DOMContentLoaded, so the shared runtime would mount too late and the
+// pre-#181 forms could leak personal fields via a native GET. The shared
+// lifecycle runtime (assets/bioco-forms-lifecycle.js, dependency of every
+// form view script in bioco-core.php) owns loading/retry and appends the
+// script itself after mounting.
 function bioco_forms_localize_block($block_name, $object_name, $endpoint) {
     $config = bioco_forms_turnstile_config();
-    if ($config['configured']) {
-        wp_enqueue_script('bioco-cf-turnstile', 'https://challenges.cloudflare.com/turnstile/v0/api.js', [], null, true);
-    }
 
     $handle = bioco_forms_view_script_handle($block_name);
     wp_localize_script($handle, $object_name, [

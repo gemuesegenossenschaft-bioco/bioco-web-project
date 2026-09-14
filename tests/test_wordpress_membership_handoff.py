@@ -3,11 +3,20 @@ import subprocess
 from pathlib import Path
 
 
+import json
+import subprocess
+from pathlib import Path
+
+
 ROOT = Path(__file__).parents[1]
 CALCULATOR_FIELDS = (
     ROOT
     / "wordpress/web/app/mu-plugins/bioco-core/acf-json"
     / "group_bioco_block_pricing_calculator.json"
+)
+RUNTIME_JS = (
+    ROOT
+    / "wordpress/web/app/mu-plugins/bioco-core/assets/bioco-forms-lifecycle.js"
 )
 MEMBERSHIP_JS = (
     ROOT
@@ -20,9 +29,20 @@ FORMS_PLUGIN = (
 
 
 def membership_selection(search):
+    """Runs the REAL shared runtime (the adapter's registered dependency)
+    and then the REAL membership adapter in one minimal DOM context, so the
+    calculator selection keeps being exercised through the actual shipped
+    code path (mount -> onPrepare -> query-derived hidden values).
+
+    The shim stays minimal on purpose: the full six-adapter lifecycle
+    matrix lives in the real-browser suite
+    (test_wordpress_forms_lifecycle.py, opt-in); this VM harness only needs
+    enough compatibility for the adapter's mount and its onPrepare hook."""
     script = r'''
     const fs = require('fs');
     const vm = require('vm');
+    const runtime = fs.readFileSync(process.argv[1], 'utf8');
+    const adapter = fs.readFileSync(process.argv[2], 'utf8');
     const inputs = Object.fromEntries(
       ['membershipType', 'aboType', 'additionalShares', 'sharesOnly']
         .map(name => [name, { name, value: '' }])
@@ -40,17 +60,18 @@ def membership_selection(search):
       readyState: 'complete',
       querySelectorAll: selector => selector.includes('membership-form') ? [form] : [],
     };
-    const context = {
+    const context = vm.createContext({
       document,
-      window: { location: { search: process.argv[2] } },
+      window: { location: { search: process.argv[3] } },
       URLSearchParams,
       console,
-    };
-    vm.runInNewContext(fs.readFileSync(process.argv[1], 'utf8'), context);
+    });
+    vm.runInContext(runtime, context);
+    vm.runInContext(adapter, context);
     process.stdout.write(JSON.stringify(inputs));
     '''
     return json.loads(subprocess.run(
-        ["node", "-e", script, str(MEMBERSHIP_JS), search],
+        ["node", "-e", script, str(RUNTIME_JS), str(MEMBERSHIP_JS), search],
         cwd=ROOT,
         text=True,
         capture_output=True,

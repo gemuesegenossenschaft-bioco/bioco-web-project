@@ -135,6 +135,58 @@ function bioco_core_register_map_assets() {
 }
 
 /**
+ * Shared forms lifecycle runtime (#181) and the six public form view
+ * scripts, registered with the same pre-registered-handle pattern as the
+ * map blocks above. Every form view script depends on bioco-forms-lifecycle
+ * (assets/bioco-forms-lifecycle.js), which owns Turnstile loading, native
+ * validity, serialization, pending state and response handling; the thin
+ * per-block adapters (view.js) mount through window.BiocoForms. The handles
+ * match generate_block_asset_handle() ("bioco/contact-form" ->
+ * "bioco-contact-form-view-script"), so both the standard block render and
+ * the dynamic-marker seam (bioco_render_dynamic_component in
+ * includes/dynamic-sections.php) enqueue exactly these scripts, and
+ * bioco_forms_localize_block() can localize onto them before they mount.
+ * WordPress prints the runtime before every dependent view script.
+ */
+add_action('init', 'bioco_core_register_form_assets');
+
+function bioco_core_register_form_assets() {
+    $runtime_path = BIOCO_CORE_DIR . '/assets/bioco-forms-lifecycle.js';
+    $runtime_deps = [];
+    if (file_exists($runtime_path)) {
+        wp_register_script(
+            'bioco-forms-lifecycle',
+            plugin_dir_url(__FILE__) . 'assets/bioco-forms-lifecycle.js',
+            [],
+            (string) filemtime($runtime_path),
+            true
+        );
+        $runtime_deps = ['bioco-forms-lifecycle'];
+    }
+    // The dependency list carries bioco-forms-lifecycle only when the runtime
+    // was actually registered: WordPress silently omits a dependent script
+    // whose dependency handle is missing, which would disable the adapters'
+    // own no-runtime fail-closed listeners (they block native GET submission
+    // of personal fields). Registering the existing adapters unconditionally
+    // keeps that protection live even when the runtime file is absent.
+    $form_slugs = [
+        'contact-form', 'subscribe-form', 'visit-day-form',
+        'waiting-list-form', 'event-signup-form', 'membership-form',
+    ];
+    foreach ($form_slugs as $slug) {
+        $view_path = BIOCO_CORE_DIR . '/blocks/' . $slug . '/view.js';
+        if (!file_exists($view_path)) continue;
+        wp_register_script(
+            'bioco-' . $slug . '-view-script',
+            plugin_dir_url(__FILE__) . 'blocks/' . $slug . '/view.js',
+            $runtime_deps,
+            (string) filemtime($view_path),
+            true
+        );
+    }
+}
+
+/**
  * Block registration: every block.json found one level under this plugin's
  * blocks/ dir. Additive with the block theme's own (shrinking) glob over its
  * own blocks/ dir — disjoint directories, no double registration as long as
@@ -172,6 +224,7 @@ add_action('init', function () {
  */
 add_action('wp_enqueue_scripts', 'bioco_core_enqueue_block_assets');
 add_action('enqueue_block_editor_assets', 'bioco_core_enqueue_block_assets');
+add_action('wp_enqueue_scripts', 'bioco_core_enqueue_shell_style', 20);
 
 function bioco_core_enqueue_block_assets() {
     $tokens_path = BIOCO_CORE_DIR . '/assets/bioco-tokens.css';
@@ -186,5 +239,30 @@ function bioco_core_enqueue_block_assets() {
     $navigation_path = BIOCO_CORE_DIR . '/assets/bioco-navigation.js';
     if (file_exists($navigation_path)) {
         wp_enqueue_script('bioco-navigation', plugin_dir_url(__FILE__) . 'assets/bioco-navigation.js', [], (string) filemtime($navigation_path), true);
+    }
+}
+
+/**
+ * Shared navigation/footer shell chrome (#180). Moved out of the bioco
+ * fallback theme (assets/app.css) so the active theme never reads site
+ * chrome from the fallback theme's directory; the block theme and the Divi
+ * child both receive it from here. Front end only: the shell restyles
+ * <body> (cream background, overflow clip), which must never leak into the
+ * block editor/wp-admin canvas — unlike bioco-tokens/bioco-blocks above,
+ * this handle is NOT enqueued on enqueue_block_editor_assets.
+ *
+ * Priority 20 is theme-agnostic ordering, not theme-specific logic: theme
+ * adapters register their base stylesheets at the default priority (10), so
+ * the shell's enqueue call happens after theirs. The printed order is then
+ * resolved by WordPress dependency resolution at print time: a theme's
+ * child style depends on `bioco-shell` (plus `bioco-tokens`), so the
+ * resolver emits tokens -> parent -> shell -> child — the shell must never
+ * print before a theme's parent/base stylesheet. The Divi child declares
+ * those deps in themes/bioco-divi/functions.php.
+ */
+function bioco_core_enqueue_shell_style() {
+    $shell_path = BIOCO_CORE_DIR . '/assets/bioco-shell.css';
+    if (file_exists($shell_path)) {
+        wp_enqueue_style('bioco-shell', plugin_dir_url(__FILE__) . 'assets/bioco-shell.css', ['bioco-tokens'], (string) filemtime($shell_path));
     }
 }

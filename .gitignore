@@ -65,3 +65,4 @@ Thumbs.db
 # Lokale Test-Artefakte (Playwright-Screenshots, Vergleichslaeufe)
 /frontend/output/
 /output/releases/
+/output/visual-parity/

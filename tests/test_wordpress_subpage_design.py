@@ -210,7 +210,7 @@ def test_section_outer_frames_share_a_single_content_max():
     data-container variants keep their semantic widths and are centred within
     it. Inner text max-widths stay untouched. No route-specific tweaks."""
     blocks = (CORE / "assets/bioco-blocks.css").read_text()
-    shell = (THEME / "assets/app.css").read_text()
+    shell = (CORE / "assets/bioco-shell.css").read_text()
 
     section_rule = _css_rule(blocks, ".cms-section")
     assert "max-width: var(--wp--style--global--content-size, 1160px)" in section_rule
@@ -267,7 +267,7 @@ def test_section_outer_frames_share_a_single_content_max():
 
 
 def test_primary_nav_cta_is_green_white_organic_and_interactive():
-    shell = (THEME / "assets/app.css").read_text()
+    shell = (CORE / "assets/bioco-shell.css").read_text()
 
     cta = _css_rule(shell, ".bioco-primary-nav .bioco-primary-cta")
     assert "--bioco-nav-cta-background:" in cta
@@ -328,7 +328,7 @@ def test_intranet_seed_page_is_a_single_h1_with_structured_blocks():
 
 def test_shared_visual_primitives_are_systemic():
     blocks = (CORE / "assets/bioco-blocks.css").read_text()
-    shell = (THEME / "assets/app.css").read_text()
+    shell = (CORE / "assets/bioco-shell.css").read_text()
     assert ".cms-split.is-text-only" in blocks
     desktop_media = blocks[blocks.index("@media (min-width: 900px)"):blocks.index("/* banner block */")]
     assert ".cms-split.is-text-only { grid-template-columns: 1fr; }" in desktop_media

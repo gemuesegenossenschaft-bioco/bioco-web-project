@@ -1,5 +1,23 @@
+"""Visual contracts for the fallback block theme (bioco), the shared shell
+assets and the approved content/palette.
+
+The former monolithic source check for shell navigation markup and
+bioco-navigation.js helper names was consolidated: script behaviour (mobile
+menu toggle, utility-row auto-hide) is executed in
+tests/test_wordpress_navigation_scroll.py, and the rendered navigation/footer
+contract is exercised end-to-end through the real renderers and theme
+templates in tests/test_wordpress_divi_shell.py. What remains here are the
+contracts that still need the static sources: the block theme's own adapter
+markup, the shared shell CSS asset contract (now owned by bioco-core,
+#180), and the approved content/palette data.
+
+The full keep/replace/remove map of the WordPress test surface lives in
+tests/README.md.
+"""
+
 import json
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -73,17 +91,28 @@ def test_approved_palette_and_bundled_dm_sans_are_the_theme_source_of_truth():
     ] == []
 
 
-def test_global_shell_exposes_approved_utility_primary_navigation_and_logo():
+def test_block_theme_header_part_wires_the_shared_navigation_contract():
     header = (THEME / "parts/header.html").read_text()
-    chrome_css = (THEME / "assets/app.css").read_text()
-    navigation_php = (CORE / "includes/navigation.php").read_text()
-
-    markers = ("bioco-page-shell", "bioco-utility-nav", "bioco-primary-nav", "bioco-hero-nav-overlay")
-    assert [marker for marker in ("bioco-page-shell", "bioco-hero-nav-overlay") if marker not in header] == []
-    assert [marker for marker in markers if f".{marker}" not in chrome_css] == []
 
     assert "wp:bioco/primary-navigation" in header
+    assert [
+        marker
+        for marker in ("bioco-page-shell", "bioco-hero-nav-overlay")
+        if marker not in header
+    ] == []
 
+    # Every block-theme template renders the shared bioco-site-header block.
+    templates = sorted((THEME / "templates").glob("*.html"))
+    assert templates
+    assert [
+        template.name
+        for template in templates
+        if '"slug":"header","tagName":"header","className":"bioco-site-header"'
+        not in template.read_text()
+    ] == []
+
+    # Approved content contract (the rendered side of it is exercised
+    # behaviourally in tests/test_wordpress_divi_shell.py).
     navigation = json.loads((CORE / "content/navigation.json").read_text())
     assert [item["label"] for item in navigation["utility"]] == [
         "Standorte", "Kontakt", "Intranet",
@@ -97,25 +126,84 @@ def test_global_shell_exposes_approved_utility_primary_navigation_and_logo():
     ]
     assert navigation["cta"]["label"] == "BIOCÒ WERDEN"
     assert (CORE / "assets/bioco-logo.png").is_file()
-    navigation_js = (CORE / "assets/bioco-navigation.js").read_text()
-    assert "aria-expanded" in navigation_js
-    assert "aria-label" in navigation_js
-    assert "?.focus()" in navigation_js
-    assert "is-open" in navigation_js
+
+
+def test_block_theme_adapter_enqueues_no_front_end_assets_itself():
+    """The fallback theme owns no front-end asset enqueue anymore (#180).
+
+    Tokens, block CSS, the shared shell stylesheet and the navigation script
+    all arrive from bioco-core's real wp_enqueue_scripts registrations (see
+    tests/test_wordpress_divi_shell.py). Executing the real theme
+    functions.php through its registered hook must therefore enqueue nothing
+    at all — otherwise the shared assets would load twice under this theme.
+    """
+    php = (
+        "define('ABSPATH', __DIR__);\n"
+        "$GLOBALS['BIOCO_ENQUEUED'] = [];\n"
+        "$GLOBALS['BIOCO_ACTIONS'] = [];\n"
+        "function add_theme_support($feature, ...$args) { return true; }\n"
+        "function load_theme_textdomain($domain, $path) { return true; }\n"
+        "function get_template_directory() { return 'wordpress/web/app/themes/bioco'; }\n"
+        "function get_theme_file_path($file = '') { return 'wordpress/web/app/themes/bioco/' . ltrim((string) $file, '/'); }\n"
+        "function get_theme_file_uri($file = '') { return 'https://staging.example/wp-content/themes/bioco/' . ltrim((string) $file, '/'); }\n"
+        "function add_action($hook, $callback, $priority = 10) {\n"
+        "    $GLOBALS['BIOCO_ACTIONS'][$hook][] = [(int) $priority, $callback];\n"
+        "    return true;\n"
+        "}\n"
+        "function add_filter($hook, $callback, $priority = 10) { return true; }\n"
+        "function wp_enqueue_style($handle, $src = '', $deps = [], $ver = false) {\n"
+        "    $GLOBALS['BIOCO_ENQUEUED'][] = ['type' => 'style', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];\n"
+        "}\n"
+        "function wp_enqueue_script($handle, $src = '', $deps = [], $ver = false, $footer = false) {\n"
+        "    $GLOBALS['BIOCO_ENQUEUED'][] = ['type' => 'script', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];\n"
+        "}\n"
+        "require 'wordpress/web/app/themes/bioco/functions.php';\n"
+        "foreach (['after_setup_theme', 'wp_enqueue_scripts'] as $hook) {\n"
+        "    foreach ($GLOBALS['BIOCO_ACTIONS'][$hook] ?? [] as [, $callback]) {\n"
+        "        call_user_func($callback);\n"
+        "    }\n"
+        "}\n"
+        "echo json_encode([\n"
+        "    'hooks' => array_keys($GLOBALS['BIOCO_ACTIONS']),\n"
+        "    'enqueued' => $GLOBALS['BIOCO_ENQUEUED'],\n"
+        "]);"
+    )
+    result = json.loads(subprocess.run(
+        ["php", "-r", php],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout)
+
+    assert result["hooks"] == ["after_setup_theme"]
+    assert result["enqueued"] == []
+
+
+def test_shell_chrome_css_defines_the_two_tier_navigation_chrome():
+    chrome_css = (CORE / "assets/bioco-shell.css").read_text()
+
+    markers = ("bioco-page-shell", "bioco-utility-nav", "bioco-primary-nav", "bioco-hero-nav-overlay")
+    assert [marker for marker in markers if f".{marker}" not in chrome_css] == []
+
+    # Mobile open state: the menu list becomes visible inside the open nav.
     assert ".bioco-primary-nav.is-open ul" in chrome_css
-    assert "bioco-mobile-utility" in navigation_php
     assert "box-sizing: border-box" in chrome_css
-    # Logo lives inside the primary row (not the hero), utility row above it.
-    assert navigation_php.index('class="bioco-primary-nav"') < navigation_php.index(
-        'class="bioco-logo"'
-    )
-    assert navigation_php.index('class="bioco-utility-nav"') < navigation_php.index(
-        'class="bioco-primary-nav"'
-    )
+
+    # No horizontal overflow escape hatches in the sticky chrome.
+    assert "white-space: nowrap" in _css_rule(chrome_css, ".bioco-primary-nav li a")
+
+
+def test_shell_chrome_keeps_the_logo_full_colour():
+    chrome_css = (CORE / "assets/bioco-shell.css").read_text()
 
     # Full-colour logo: no monochrome/invert filter may survive anywhere.
     assert "filter" not in _css_rule(chrome_css, ".bioco-logo img")
     assert "invert(" not in chrome_css
+
+
+def test_shell_chrome_sticky_contract_avoids_overlap_and_scroll_containers():
+    chrome_css = (CORE / "assets/bioco-shell.css").read_text()
 
     # Stickiness must sit on the <header>, whose containing block spans the
     # whole page. A sticky .bioco-navigation-shell would be a no-op: its
@@ -127,14 +215,6 @@ def test_global_shell_exposes_approved_utility_primary_navigation_and_logo():
     assert "position: sticky" in sticky_rule
     assert "top: 0" in sticky_rule
     assert ".bioco-site-header," in chrome_css
-    templates = sorted((THEME / "templates").glob("*.html"))
-    assert templates
-    assert [
-        template.name
-        for template in templates
-        if '"slug":"header","tagName":"header","className":"bioco-site-header"'
-        not in template.read_text()
-    ] == []
 
     # The primary row stays in normal flow, so it reserves its own height and
     # can never overlap page content on any subpage.
@@ -147,35 +227,23 @@ def test_global_shell_exposes_approved_utility_primary_navigation_and_logo():
     # `overflow-x: hidden` on <body> must be superseded by `clip`.
     body_rule = _css_rule(chrome_css, "body")
     assert body_rule.index("overflow-x: hidden") < body_rule.index("overflow-x: clip")
+    assert "overflow-x: clip" in body_rule
+
+
+def test_shell_chrome_utility_collapse_css_contract():
+    chrome_css = (CORE / "assets/bioco-shell.css").read_text()
 
     # Utility row: collapses on scroll down and is removed from the tab order
-    # while collapsed, restored on scroll up / at page top.
+    # while collapsed, restored on scroll up / at page top. The script side of
+    # this contract is executed in tests/test_wordpress_navigation_scroll.py.
     hidden_rule = _css_rule(
         chrome_css, ".bioco-navigation-shell.is-utility-hidden .bioco-utility-nav"
     )
     assert "height: 0" in hidden_rule
     assert "visibility: hidden" in hidden_rule
     assert "pointer-events: none" in hidden_rule
-    assert "is-utility-hidden" in navigation_js
-    assert "addEventListener('scroll'" in navigation_js
-    assert "{ passive: true }" in navigation_js
-    assert "requestAnimationFrame" in navigation_js
-    assert "window.scrollY" in navigation_js
-    assert "anchorY" in navigation_js
-    assert "utility.contains(document.activeElement)" in navigation_js
     assert ".bioco-navigation-shell.is-utility-hidden .bioco-utility-nav:focus-within" in chrome_css
     assert "prefers-reduced-motion: reduce" in chrome_css
-    # Auto-hide is wired independently of the mobile toggle: the scroll
-    # listener lives in its own initialiser, after the `if (!toggle) return;`
-    # early exit of the menu loop, not inside it.
-    assert "initUtilityAutoHide" in navigation_js
-    assert navigation_js.index("addEventListener('scroll'") > navigation_js.index(
-        "const initUtilityAutoHide"
-    )
-
-    # No horizontal overflow escape hatches in the sticky chrome.
-    assert "white-space: nowrap" in _css_rule(chrome_css, ".bioco-primary-nav li a")
-    assert "overflow-x: clip" in body_rule
 
 
 def test_homepage_seed_contains_approved_hero_section_images_and_cta_labels():

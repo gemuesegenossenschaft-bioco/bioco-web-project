@@ -13,7 +13,13 @@ This theme now supplies only:
 - `theme.json` — the canonical source of the design token *values* (colors, spacing, radius, shadow,
   font). `bioco-core/assets/bioco-tokens.css` was extracted 1:1 from it and must be kept in sync if
   these values ever change (see `HARDCASES.md` Hard Case 1).
+- `assets/fonts/` — the self-hosted DM Sans woff2 + OFL license, loaded via `theme.json`
+  (`file:./` sources).
 - `functions.php` — minimal `after_setup_theme` presentation support only.
+
+The shared navigation/footer shell stylesheet is **not** here anymore: since #180 it lives in
+`bioco-core/assets/bioco-shell.css` and is enqueued by bioco-core for every active theme (front end
+only, hook priority 20), so the active theme never reads site chrome from this theme's directory.
 
 **Do not** add blocks, ACF field groups, or shared render helpers here — add them to `bioco-core`
 instead. This theme stays fully functional standalone (e.g. to visually verify a block, or as an

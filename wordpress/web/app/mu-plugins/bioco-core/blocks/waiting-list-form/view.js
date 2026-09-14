@@ -1,20 +1,25 @@
 /**
- * Waiting-list form view script (W10, issue #97). Plain ES5-safe vanilla
- * JS (the theme has no build step). Same generic submit engine as
- * blocks/contact-form/view.js — see that file for the shared shape.
- *
- * Success copy is adapted from .wp-refs/WaitingListForm.tsx for the same
- * reason as blocks/visit-day-form/view.js: no double-opt-in backs this
- * handler, so the confirm-by-email promise in the reference is dropped.
+ * Waiting-list form view script (W10, issue #97 → shared lifecycle #181).
+ * Thin adapter: the shared submit engine lives in
+ * assets/bioco-forms-lifecycle.js (registered as this script's dependency
+ * in bioco-core.php). This file only carries the adapter contract —
+ * selectors, localized config object name and the German copy — and hides
+ * the form inline on success. POST goes to the immediate-mail waiting-list
+ * endpoint (no double-opt-in; see bioco-forms mu-plugin), so the success
+ * copy below reflects that instead of repeating the reference's
+ * confirm-by-email promise.
  */
 (function () {
   'use strict';
 
-  var SUCCESS_MESSAGE = 'Vielen Dank für Ihre Anmeldung! Wir melden uns so schnell wie möglich bei Ihnen.';
-  var FALLBACK_ERROR = 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.';
-  var CAPTCHA_MISSING_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.';
+  var SCOPE = '.cms-waiting-list-form';
+  var FORM_SELECTOR = 'form[data-form="waiting-list"]';
 
-  function ready(fn) {
+  // The renderers ship novalidate; without the shared runtime nothing would
+  // intercept the submit event and the form would submit personal data via
+  // a native GET. Block native submission so a failed runtime leaves the
+  // form inert (fail closed: no request, no mail), never leaky.
+  function onReady(fn) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', fn);
     } else {
@@ -22,165 +27,27 @@
     }
   }
 
-  function loadTurnstile(cb) {
-    if (window.turnstile) {
-      cb();
-      return;
+  if (!window.BiocoForms) {
+    if (window.console && window.console.error) {
+      window.console.error('bioco forms: lifecycle runtime missing, waiting-list form stays inert');
     }
-    var existing = document.getElementById('bioco-cf-turnstile-js');
-    if (existing) {
-      existing.addEventListener('load', cb);
-      return;
-    }
-    var script = document.createElement('script');
-    script.id = 'bioco-cf-turnstile-js';
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-    script.async = true;
-    script.defer = true;
-    script.addEventListener('load', cb);
-    document.head.appendChild(script);
-  }
-
-  function serializeForm(form) {
-    var data = {};
-    var elements = form.elements;
-    for (var i = 0; i < elements.length; i++) {
-      var el = elements[i];
-      if (!el.name || el.type === 'submit' || el.type === 'button' || el.disabled) continue;
-
-      var isMulti = el.name.slice(-2) === '[]';
-      var key = isMulti ? el.name.slice(0, -2) : el.name;
-
-      if (el.type === 'checkbox') {
-        if (isMulti) {
-          if (!data[key]) data[key] = [];
-          if (el.hasAttribute('data-bool-array')) {
-            data[key].push(el.checked);
-          } else if (el.checked) {
-            data[key].push(el.value);
-          }
-        } else {
-          data[key] = el.checked;
-        }
-        continue;
-      }
-
-      if (el.type === 'radio') {
-        if (!el.checked) continue;
-        data[key] = el.value;
-        continue;
-      }
-
-      if (el.type === 'number') {
-        data[key] = el.value === '' ? '' : Number(el.value);
-        continue;
-      }
-
-      data[key] = el.value;
-    }
-    return data;
-  }
-
-  function showMessage(container, text, isError) {
-    container.textContent = text;
-    container.hidden = false;
-    container.className = 'form-message bento-card ' + (isError ? 'form-error' : 'form-success');
-  }
-
-  function initForm(form) {
-    var configName = form.getAttribute('data-config') || 'biocoWaitingListFormConfig';
-    var config = window[configName] || {};
-    var messageBox = form.parentNode.querySelector('.form-message');
-    var submitBtn = form.querySelector('[type="submit"]');
-    var captchaContainer = form.querySelector('[data-form-captcha]');
-    var captchaToken = '';
-    var widgetId = null;
-
-    function renderCaptcha() {
-      if (!captchaContainer || !config.turnstileSiteKey) return;
-      loadTurnstile(function () {
-        widgetId = window.turnstile.render(captchaContainer, {
-          sitekey: config.turnstileSiteKey,
-          callback: function (token) {
-            captchaToken = token;
-          },
-          'expired-callback': function () {
-            captchaToken = '';
-          }
+    onReady(function () {
+      var forms = document.querySelectorAll(SCOPE + ' ' + FORM_SELECTOR);
+      for (var i = 0; i < forms.length; i++) {
+        forms[i].addEventListener('submit', function (event) {
+          event.preventDefault();
         });
-      });
-    }
-
-    renderCaptcha();
-
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-
-      if (config.turnstileSiteKey && !captchaToken) {
-        if (messageBox) showMessage(messageBox, CAPTCHA_MISSING_ERROR, true);
-        return;
       }
-
-      var data = serializeForm(form);
-      data.captchaToken = captchaToken;
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = submitBtn.getAttribute('data-submitting-label') || submitBtn.textContent;
-      }
-      if (messageBox) {
-        messageBox.hidden = true;
-      }
-
-      fetch(config.restUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-        .then(function (response) {
-          return response.json().catch(function () {
-            return { success: false, error: 'Server error: ' + response.status };
-          }).then(function (json) {
-            return { ok: response.ok, json: json };
-          });
-        })
-        .then(function (result) {
-          if (result.ok && result.json && result.json.success) {
-            form.hidden = true;
-            if (messageBox) showMessage(messageBox, SUCCESS_MESSAGE, false);
-          } else {
-            var errorMessage = (result.json && result.json.error) || FALLBACK_ERROR;
-            if (messageBox) showMessage(messageBox, errorMessage, true);
-            if (submitBtn) {
-              submitBtn.disabled = false;
-              submitBtn.textContent = submitBtn.getAttribute('data-submit-label') || submitBtn.textContent;
-            }
-            captchaToken = '';
-            if (window.turnstile && widgetId !== null) {
-              window.turnstile.reset(widgetId);
-            }
-          }
-        })
-        .catch(function () {
-          if (messageBox) showMessage(messageBox, FALLBACK_ERROR, true);
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = submitBtn.getAttribute('data-submit-label') || submitBtn.textContent;
-          }
-          captchaToken = '';
-          if (window.turnstile && widgetId !== null) {
-            window.turnstile.reset(widgetId);
-          }
-        });
     });
+    return;
   }
 
-  function init() {
-    var forms = document.querySelectorAll('.cms-waiting-list-form form[data-form="waiting-list"]');
-    for (var i = 0; i < forms.length; i++) {
-      initForm(forms[i]);
-    }
-  }
-
-  ready(init);
+  window.BiocoForms.mount({
+    scope: SCOPE,
+    form: FORM_SELECTOR,
+    config: 'biocoWaitingListFormConfig',
+    success: 'Vielen Dank für Ihre Anmeldung! Wir melden uns so schnell wie möglich bei Ihnen.',
+    error: 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
+    captcha: 'Bitte bestätigen Sie, dass Sie kein Roboter sind.'
+  });
 })();

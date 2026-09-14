@@ -43,7 +43,8 @@ case "$*" in
     ;;
   *"wp cache flush"*) event=cache-flush ;;
   *"wp db export"*) event=backup ;;
-  *"wp bioco import --apply --force"*) event=import ;;
+  *"wp bioco import"*) event=import ;;
+  *"wp bioco verify --runtime"*) event=runtime-verify ;;
   *"wp bioco verify"*) event=parity ;;
   *"wp option update bioco_release_marker"*)
     event=marker
@@ -115,8 +116,7 @@ def test_release_pipeline_apply_runs_each_step_in_order(tmp_path):
         "backup",
         "deploy:apply",
         "cache-flush",
-        "import",
-        "parity",
+        "runtime-verify",
         "smoke",
         "marker",
     ]
@@ -126,7 +126,7 @@ def test_release_pipeline_apply_runs_each_step_in_order(tmp_path):
 
 def test_release_pipeline_stops_after_first_failed_step(tmp_path):
     commit, env, events = _fixture(tmp_path)
-    env["BIOCO_TEST_FAIL_STEP"] = "import"
+    env["BIOCO_TEST_FAIL_STEP"] = "runtime-verify"
 
     result = subprocess.run(
         [str(SCRIPT), f"--commit={commit}", "--apply"],
@@ -143,15 +143,15 @@ def test_release_pipeline_stops_after_first_failed_step(tmp_path):
         "backup",
         "deploy:apply",
         "cache-flush",
-        "import",
+        "runtime-verify",
     ]
     assert "release-status=failed" in result.stdout
-    assert "failed-step=import" in result.stdout
-    assert "step=parity" not in result.stdout
+    assert "failed-step=runtime-verify" in result.stdout
+    assert "step=smoke" not in result.stdout
     assert "step=release-marker" not in result.stdout
     log = Path(env["BIOCO_RELEASE_LOG_DIR"]) / f"20260817T210000Z-{commit}.log"
     assert "release-status=failed" in log.read_text()
-    assert "failed-step=import" in log.read_text()
+    assert "failed-step=runtime-verify" in log.read_text()
 
 
 def test_release_pipeline_rejects_untracked_deploy_inputs(tmp_path):
