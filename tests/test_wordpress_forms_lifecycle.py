@@ -189,6 +189,13 @@ FORM_VALUES = {
     },
 }
 
+# Message content comes from the same editorial seeds used by installation.
+_MESSAGE_DEFAULTS = json.loads((REPO / "wordpress/content-seed/block-content/defaults.json").read_text())["blocks"]
+for _slug, _values in FORM_VALUES.items():
+    for _key in ("success_message", "fallback_error", "captcha_error", "transport_error"):
+        if _key in _MESSAGE_DEFAULTS[_slug]:
+            _values[_key] = _MESSAGE_DEFAULTS[_slug][_key]
+
 _RENDER_PHP = r"""
 define('ABSPATH', __DIR__);
 $GLOBALS['BIOCO_ENQUEUED'] = [];
@@ -561,7 +568,7 @@ def submit_button(form):
 # ---------------------------------------------------------------------------
 
 CONTACT_SUCCESS = (
-    "Vielen Dank für Ihre Nachricht! Wir melden uns so schnell wie möglich bei Ihnen."
+    "Vielen Dank für deine Nachricht! Wir melden uns so schnell wie möglich bei dir."
 )
 CONTACT_VALUES = {
     "name": "Anna Muster",
@@ -637,10 +644,10 @@ def test_contact_duplicate_submit_sends_one_request(page):
 
 
 CONTACT_FALLBACK_ERROR = (
-    "Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut "
-    "oder senden Sie uns eine E-Mail direkt an info@bioco.ch"
+    "Deine Nachricht konnte nicht gesendet werden. Bitte versuche es erneut "
+    "oder sende uns eine E-Mail direkt an info@bioco.ch"
 )
-CAPTCHA_ERROR = "Bitte bestätigen Sie, dass Sie kein Roboter sind."
+CAPTCHA_ERROR = "Bitte bestätige, dass du kein Roboter bist."
 TURNSTILE_LOAD_FAILED_MESSAGE = (
     "Die Sicherheitsprüfung konnte nicht geladen werden. "
     "Bitte lade die Seite neu und versuche es nochmals."
@@ -728,7 +735,7 @@ def test_contact_malformed_json_and_network_failure_are_errors(page):
     page.wait_for_function(
         "document.querySelector('#kontakt-formular .form-message').hidden === false"
     )
-    assert message.text_content() == "Server error: 200"
+    assert message.text_content() == CONTACT_FALLBACK_ERROR
     assert submit_button(form).is_enabled()
 
     # Network rejection (fetch rejects): adapter fallback copy.
@@ -738,7 +745,7 @@ def test_contact_malformed_json_and_network_failure_are_errors(page):
     page.evaluate("window.__turnstileEmit('token', 0, 'tkn-m-2')")
     submit_button(form).click()
     page.wait_for_function(
-        "document.querySelector('#kontakt-formular .form-message').textContent !== 'Server error: 200'"
+        "document.querySelector('#kontakt-formular button[type=submit]').disabled === false"
     )
     assert message.text_content() == CONTACT_FALLBACK_ERROR
     assert submit_button(form).is_enabled()
@@ -1027,16 +1034,16 @@ def test_late_turnstile_global_recovers_without_new_transport(make_page):
 # ---------------------------------------------------------------------------
 
 SUBSCRIBE_SUCCESS = (
-    "Vielen Dank! Bitte bestätigen Sie Ihre Anmeldung über den Link in der "
-    "E-Mail, die wir Ihnen gesendet haben."
+    "Vielen Dank! Bitte bestätige deine Anmeldung über den Link in der "
+    "E-Mail, die wir dir gesendet haben."
 )
 SIGNUP_SUCCESS = (
-    "Vielen Dank für Ihre Anmeldung! Wir melden uns so schnell wie möglich bei Ihnen."
+    "Vielen Dank für deine Anmeldung! Wir melden uns so schnell wie möglich bei dir."
 )
 EVENT_SUCCESS = (
     "Anmeldung erfolgreich! Vielen Dank für deine Anmeldung. Wir melden uns bei dir."
 )
-GENERIC_ERROR = "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+GENERIC_ERROR = "Es ist ein Fehler aufgetreten. Bitte versuche es erneut."
 EVENT_ERROR = (
     "Die Anmeldung konnte nicht gesendet werden. Bitte versuche es erneut "
     "oder kontaktiere uns direkt."
@@ -1579,7 +1586,7 @@ def test_membership_field_errors_flatten_and_values_survive(page):
     page.evaluate(
         "() => { window.__formResponder = function () { return { status: 400, body: "
         "{ success: false, error: 'Bitte korrigiere deine Angaben.', fieldErrors: "
-        "{ firstName: 'Dieses Feld ist erforderlich.', privacyAccept: 'Bitte akzeptieren Sie die Datenschutzerklärung.' } } }; }; }"
+        "{ firstName: 'Dieses Feld ist erforderlich.', privacyAccept: 'Bitte akzeptiere die Datenschutzerklärung.' } } }; }; }"
     )
     form = fill_membership(page)
     submit_membership(page, token="tkn-mem-3", wait_url=False)
@@ -1589,7 +1596,7 @@ def test_membership_field_errors_flatten_and_values_survive(page):
     message = page.locator("#mitgliedschaft-anmeldung .form-message")
     assert message.text_content() == (
         "Bitte korrigiere deine Angaben. Dieses Feld ist erforderlich. "
-        "Bitte akzeptieren Sie die Datenschutzerklärung."
+        "Bitte akzeptiere die Datenschutzerklärung."
     )
     assert message.get_attribute("class") == "form-message bento-card form-error"
     # No navigation happened; values and controls are ready for a retry.
@@ -1852,3 +1859,41 @@ def test_wordpress_hung_turnstile_blocks_native_get_and_api_submit(browser_ctx):
     finally:
         settle()
         context.close()
+
+
+def test_empty_captcha_copy_clears_a_previous_message(page):
+    form = fill_contact(page)
+    message = contact_section(page).locator('.form-message')
+    submit_button(form).click()
+    assert message.text_content() == CAPTCHA_ERROR
+    page.evaluate("window.biocoContactFormConfig.captchaError = ''")
+    submit_button(form).click()
+    assert message.text_content() == ''
+    assert message.is_hidden()
+    assert page.evaluate('window.__formTraffic') == []
+
+
+def test_editor_copy_controls_captcha_error_and_success(page):
+    form = fill_contact(page)
+    message = contact_section(page).locator('.form-message')
+    page.evaluate("""() => Object.assign(window.biocoContactFormConfig, {
+        captchaError: 'Redaktion: Sicherheitsprüfung nötig.',
+        fallbackError: 'Redaktion: Bitte erneut versuchen.',
+        successMessage: 'Redaktion: Deine Nachricht ist angekommen.'
+    })""")
+    submit_button(form).click()
+    assert message.text_content() == 'Redaktion: Sicherheitsprüfung nötig.'
+    page.evaluate("""() => {
+        window.fetch = () => Promise.resolve(new Response(JSON.stringify({success:false}), {status:500}));
+        window.__turnstileEmit('token', 0, 'editor-test-1');
+    }""")
+    submit_button(form).click()
+    page.wait_for_function("document.querySelector('#kontakt-formular button[type=submit]').disabled === false")
+    assert message.text_content() == 'Redaktion: Bitte erneut versuchen.'
+    page.evaluate("""() => {
+        window.fetch = () => Promise.resolve(new Response(JSON.stringify({success:true}), {status:200}));
+        window.__turnstileEmit('token', 0, 'editor-test-2');
+    }""")
+    submit_button(form).click()
+    page.wait_for_function("document.querySelector('#kontakt-formular form').hidden")
+    assert message.text_content() == 'Redaktion: Deine Nachricht ist angekommen.'

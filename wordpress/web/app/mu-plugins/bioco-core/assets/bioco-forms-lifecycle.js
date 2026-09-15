@@ -31,9 +31,6 @@
   // coalesce onto the dead request): the honest recovery is the documented
   // manual page reload. Entered values are kept, nothing is reloaded or
   // re-submitted automatically.
-  var TURNSTILE_LOAD_FAILED_MESSAGE =
-    'Die Sicherheitsprüfung konnte nicht geladen werden. ' +
-    'Bitte lade die Seite neu und versuche es nochmals.';
   // Set once a bounded attempt settled without a working global (hung
   // transport). While latched, no further script elements are created —
   // browsers coalesce in-flight requests for an identical URL and removing
@@ -205,8 +202,8 @@
   }
 
   function showMessage(container, text, isError) {
-    container.textContent = text;
-    container.hidden = false;
+    container.textContent = text || '';
+    container.hidden = !text;
     container.className = 'form-message bento-card ' + (isError ? 'form-error' : 'form-success');
   }
 
@@ -274,7 +271,7 @@
         // reload copy (a completed error stays retryable on the next
         // submit, so no premature copy here).
         if (messageBox && turnstileTransportFailed) {
-          showMessage(messageBox, TURNSTILE_LOAD_FAILED_MESSAGE, true);
+          showMessage(messageBox, config.transportError, true);
         }
       });
     }
@@ -283,8 +280,8 @@
 
     function showError(json) {
       var errorMessage = adapter.errorText
-        ? adapter.errorText(json, adapter.error)
-        : ((json && json.error) || adapter.error);
+        ? adapter.errorText(json, config.fallbackError)
+        : ((json && json.error) || config.fallbackError);
       if (messageBox) showMessage(messageBox, errorMessage, true);
       inFlight = false;
       if (submitBtn) {
@@ -306,7 +303,7 @@
         return;
       }
       form.hidden = true;
-      if (messageBox) showMessage(messageBox, adapter.success, false);
+      if (messageBox) showMessage(messageBox, config.successMessage, false);
     }
 
     form.addEventListener('submit', function (event) {
@@ -335,11 +332,11 @@
             // no global arrived since: say exactly that instead of
             // pretending a retry exists. Values and caption stay
             // untouched, nothing reloads or re-submits itself.
-            showMessage(messageBox, TURNSTILE_LOAD_FAILED_MESSAGE, true);
+            showMessage(messageBox, config.transportError, true);
           } else {
             // The widget is rendering or a token is awaited (also the
             // truthful transitional copy right after a late recovery).
-            showMessage(messageBox, adapter.captcha, true);
+            showMessage(messageBox, config.captchaError, true);
           }
         }
         return;
@@ -364,7 +361,7 @@
       })
         .then(function (response) {
           return response.json().catch(function () {
-            return { success: false, error: 'Server error: ' + response.status };
+            return { success: false, error: config.fallbackError };
           }).then(function (json) {
             return { ok: response.ok, json: json };
           });
