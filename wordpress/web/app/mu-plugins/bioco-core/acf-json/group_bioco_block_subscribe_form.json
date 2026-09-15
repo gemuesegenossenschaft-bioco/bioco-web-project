@@ -47,7 +47,7 @@
     },
     {
       "key": "field_bioco_subscribe_form_submitting_label",
-      "label": "Beschriftung waehrend des Sendens",
+      "label": "Text während des Sendens",
       "name": "submitting_label",
       "aria-label": "",
       "type": "text",

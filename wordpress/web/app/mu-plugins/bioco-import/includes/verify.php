@@ -283,13 +283,28 @@ function bioco_import_runtime_inspect_inner_html(array $block, array &$corrupt) 
     }
 }
 
+/** Divi adds this transparent wrapper when the Visual Builder saves a page. */
+function bioco_import_runtime_unwrap(array $blocks): array {
+    $result = [];
+    foreach ($blocks as $block) {
+        if (($block['blockName'] ?? '') === 'divi/placeholder') {
+            // Preserve residual markup so malformed comments still fail inspection.
+            $result[] = ['blockName' => null, 'innerHTML' => $block['innerHTML'] ?? '', 'innerBlocks' => []];
+            array_push($result, ...bioco_import_runtime_unwrap($block['innerBlocks'] ?? []));
+        } else {
+            $result[] = $block;
+        }
+    }
+    return $result;
+}
+
 function bioco_import_runtime_scan_content($content, $post = null) {
     $scan = ['markers' => [], 'sections' => 0, 'corrupt' => [], 'pageHtml' => ''];
 
     bioco_import_runtime_validate_block_delimiters($content, $scan['corrupt']);
 
     $pendingMarkers = [];
-    foreach (parse_blocks((string) $content) as $block) {
+    foreach (bioco_import_runtime_unwrap(parse_blocks((string) $content)) as $block) {
         if (($block['blockName'] ?? null) === null) {
             // The real parser merges marker comments, stray block-comment
             // fragments and plain text into ONE freeform block — collect the

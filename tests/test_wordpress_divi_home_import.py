@@ -294,18 +294,15 @@ def test_home_slug_uses_native_divi_sections_and_markers():
     assert "events_feed" not in content
     assert "schnuppertage" in content
 
-    marker_props = [
-        json.loads(base64.b64decode(encoded))
-        for encoded in re.findall(r'data-bioco-props=(?:"|\\u0022)([A-Za-z0-9+/=]+)(?:"|\\u0022)', content)
-    ]
-    assert any(props.get("display") == "cards" for props in marker_props)
+    assert 'bioco-dynamic' not in content
+    assert '"display":{"innerContent":{"desktop":{"value":"cards"}}}' in content
 
     # Exactly five opening divi/section comments.
     names = _findall_block_comment_names(content)
     assert names.count("divi/section") == 5
 
     # Every block comment is divi/*; no ACF block names.
-    assert all(name.startswith("divi/") for name in names), names
+    assert all(name.startswith(("divi/", "bioco-divi/")) for name in names), names
     assert "bioco/hero" not in names
     assert "bioco/media-text" not in names
     assert "bioco/rich-text" not in names
@@ -335,10 +332,10 @@ def test_home_seed_keeps_live_aktuelles_feed_after_cta():
     assert content.index("kennenlernen") < content.index("section-b597772b")
     updates = content[content.index("section-b597772b") :]
     assert "Aktuelles" in updates
-    assert "events_feed" in updates
+    assert "bioco-divi/events-feed" in updates
     # #148: exactly one events feed on the whole homepage (the seed section;
     # the __home_chrome__ block contributes Beiträge + Schnuppertage only).
-    assert content.count("events_feed") == 1
+    assert content.count("<!-- wp:bioco-divi/events-feed ") == 1
 
 
 def test_every_seed_serializes_only_native_divi_blocks():
@@ -352,6 +349,7 @@ def test_every_seed_serializes_only_native_divi_blocks():
         "divi/image",
         "divi/button",
     }
+    allowed.update("bioco-divi/" + p.parent.name for p in (ROOT / "wordpress/web/app/mu-plugins/bioco-core/native-modules").glob("*/module.json"))
     seed_paths = sorted((ROOT / "wordpress/content-seed").glob("*.json"))
     assert seed_paths, "No content seeds found"
 

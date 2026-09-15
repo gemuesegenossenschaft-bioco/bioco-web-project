@@ -20,7 +20,8 @@
  */
 function bioco_import_divi_block(string $name, array $attrs = [], array $children = []): array
 {
-    if (!in_array($name, ['divi/section', 'divi/row', 'divi/column', 'divi/text', 'divi/heading', 'divi/image', 'divi/button'], true)) {
+    $native = function_exists('bioco_dynamic_components') && in_array(str_replace('bioco-divi/', 'bioco/', $name), array_values(bioco_dynamic_components()), true) && str_starts_with($name, 'bioco-divi/');
+    if (!$native && !in_array($name, ['divi/section', 'divi/row', 'divi/column', 'divi/text', 'divi/heading', 'divi/image', 'divi/button'], true)) {
         throw new InvalidArgumentException("Unsupported Divi block: {$name}");
     }
 

@@ -880,3 +880,15 @@ def test_seed_verify_still_rejects_editorially_changed_content(tmp_path):
 
     counts = result["counts"]
     assert counts.get("verify-mismatch", 0) >= 1, counts
+
+
+def test_runtime_verify_accepts_builder_placeholder_wrapper(tmp_path):
+    content = '<!-- wp:divi/placeholder -->' + _edited_divi_content() + '<!-- /wp:divi/placeholder -->'
+    result = _run_scenario(tmp_path, {"only": ["kontakt"], "runtime": True, "pages_override": {"kontakt": _b64(content)}})
+    assert result["counts"].get("runtime-ok") == 1
+
+
+def test_runtime_verify_still_rejects_broken_comment_in_placeholder(tmp_path):
+    content = '<!-- wp:divi/placeholder --><!-- wp:broken ' + _edited_divi_content() + '<!-- /wp:divi/placeholder -->'
+    result = _run_scenario(tmp_path, {"only": ["kontakt"], "runtime": True, "pages_override": {"kontakt": _b64(content)}})
+    assert result["counts"].get("runtime-corrupt") == 1

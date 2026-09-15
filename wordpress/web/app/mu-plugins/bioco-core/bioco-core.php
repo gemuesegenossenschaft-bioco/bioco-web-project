@@ -13,6 +13,7 @@ require_once BIOCO_CORE_DIR . '/includes/helpers.php';
 require_once BIOCO_CORE_DIR . '/includes/navigation.php';
 require_once BIOCO_CORE_DIR . '/includes/redirects.php';
 require_once BIOCO_CORE_DIR . '/includes/dynamic-sections.php';
+require_once BIOCO_CORE_DIR . '/includes/native-modules.php';
 
 /**
  * ACF Local JSON — this plugin's own acf-json/ dir. The fleet move is complete,

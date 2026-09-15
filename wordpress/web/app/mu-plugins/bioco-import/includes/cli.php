@@ -21,6 +21,36 @@ if (!defined('ABSPATH')) exit;
 class Bioco_Import_CLI_Command {
 
     /**
+     * Konvertiert vorhandene Marker ohne erneuten Inhaltsimport in native Module.
+     *
+     * ## OPTIONS
+     *
+     * [--apply]
+     * : Schreibt nach vollständiger Vorprüfung. Standard ist dry-run.
+     *
+     * @subcommand native-modules
+     * @when after_wp_load
+     */
+    public function native_modules($args, $assoc_args) {
+        $apply = !empty($assoc_args['apply']);
+        $plan = [];
+        foreach (get_posts(['post_type' => 'page', 'post_status' => 'any', 'numberposts' => -1]) as $page) {
+            try { [$content, $count] = bioco_import_native_content($page->post_content); }
+            catch (Throwable $error) { WP_CLI::error($page->post_name . ': ' . $error->getMessage()); }
+            if ($count) $plan[] = [$page, $content, $count];
+        }
+        foreach ($plan as [$page, $content, $count]) {
+            if ($apply) {
+                try { bioco_import_native_save($page, $content); }
+                catch (Throwable $error) { WP_CLI::error($error->getMessage()); }
+            }
+            WP_CLI::log(($apply ? 'converted ' : 'would-convert ') . $page->post_name . ': ' . $count);
+        }
+        WP_CLI::success(count($plan) . ' page(s); ' . ($apply ? 'applied' : 'dry-run, no writes'));
+    }
+
+
+    /**
      * Importiert die bioco-Inhalte aus den Seed-Dateien in WordPress.
      *
      * Standard ist ein Probelauf (dry-run): es wird NICHTS geschrieben, nur

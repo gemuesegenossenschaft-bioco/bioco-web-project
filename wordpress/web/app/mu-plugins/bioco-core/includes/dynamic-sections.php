@@ -70,11 +70,18 @@ function bioco_dynamic_view_style_handle(string $block_name, string $view_style)
     return $view_style;
 }
 
-function bioco_render_dynamic_component(string $component, array $values): string {
+function bioco_render_dynamic_component(string $component, array $values, array $options = []): string {
     $components = bioco_dynamic_components();
     if (!isset($components[$component])) {
         throw new InvalidArgumentException('Unknown bioco dynamic component: ' . $component);
     }
+
+    // Render mode: 'inert' = editor/preview context (read-only display, no
+    // form scripts/localization/submit paths, DOI fixed preview branch),
+    // 'public' = the real frontend render. The mode is always forced by the
+    // caller from its own server-side context detection; native modules pass
+    // bioco_native_render_mode(), the project preview endpoint forces 'inert'.
+    $mode = ($options['mode'] ?? null) === 'inert' ? 'inert' : 'public';
 
     $block_name = $components[$component];
     $block_slug = substr($block_name, strpos($block_name, '/') + 1);
@@ -83,7 +90,9 @@ function bioco_render_dynamic_component(string $component, array $values): strin
     }
     $block_dir = dirname(__DIR__) . '/blocks/' . $block_slug;
     $block_metadata = json_decode((string) file_get_contents($block_dir . '/block.json'), true);
-    if (!empty($block_metadata['viewScript'])) {
+    if ($mode === 'public' && !empty($block_metadata['viewScript'])) {
+        // Form/filter view scripts mount submission listeners and captcha
+        // loading; they are skipped in every editor/preview context.
         wp_enqueue_script(bioco_forms_view_script_handle($block_name));
     }
     if (!empty($block_metadata['viewStyle']) && is_string($block_metadata['viewStyle'])) {
@@ -95,7 +104,7 @@ function bioco_render_dynamic_component(string $component, array $values): strin
         'className' => $values['className'] ?? '',
     ];
     $content = '';
-    $is_preview = false;
+    $is_preview = $mode === 'inert';
     $post_id = get_the_ID();
     $context = [];
 
@@ -103,12 +112,39 @@ function bioco_render_dynamic_component(string $component, array $values): strin
         $GLOBALS['bioco_dynamic_context_stack'] = [];
     }
     $GLOBALS['bioco_dynamic_context_stack'][] = $values;
+
+    // The inert flag must restore its previous value AND existence: nested
+    // dynamic renders (outer inert -> inner public -> outer inert) each save
+    // and restore their caller's exact state.
+    $inert_key = 'bioco_dynamic_render_inert';
+    $inert_had_prev = array_key_exists($inert_key, $GLOBALS);
+    $inert_prev = $inert_had_prev ? $GLOBALS[$inert_key] : null;
+    $GLOBALS[$inert_key] = $is_preview;
+
     $buffer_level = ob_get_level();
     ob_start();
 
     try {
         include $block_dir . '/render.php';
-        return ob_get_clean();
+        $rendered = ob_get_clean();
+        if ($is_preview) {
+            // Preview forms must be structurally non-submitting, not merely
+            // handler-guarded: inline onsubmit can be stripped/blocked and
+            // cannot stop public form runtime listeners that coexist in an
+            // editor canvas. In inert output only, form wrappers become
+            // non-form containers that keep the original attributes/classes
+            // (the .bioco-form CSS is class-based), plus an explicit preview
+            // marker and the inert attribute; submit buttons are demoted to
+            // type=button. Public HTML is never touched.
+            $rendered = preg_replace(
+                '~<form(?=[\s>])([^>]*)>~',
+                '<div$1 data-bioco-preview="1" inert>',
+                $rendered
+            );
+            $rendered = str_replace('</form>', '</div>', $rendered);
+            $rendered = preg_replace('~type=(["\'])submit\1~', 'type=$1button$1', $rendered);
+        }
+        return $rendered;
     } catch (Throwable $error) {
         while (ob_get_level() > $buffer_level) {
             ob_end_clean();
@@ -116,6 +152,11 @@ function bioco_render_dynamic_component(string $component, array $values): strin
         throw $error;
     } finally {
         array_pop($GLOBALS['bioco_dynamic_context_stack']);
+        if ($inert_had_prev) {
+            $GLOBALS[$inert_key] = $inert_prev;
+        } else {
+            unset($GLOBALS[$inert_key]);
+        }
     }
 }
 

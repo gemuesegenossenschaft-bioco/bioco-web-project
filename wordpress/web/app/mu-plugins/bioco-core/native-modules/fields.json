@@ -1,0 +1,982 @@
+{
+  "contact_form": {
+    "title": {
+      "type": "text",
+      "label": "Titel"
+    },
+    "text": {
+      "type": "richtext",
+      "label": "Text"
+    },
+    "phone_label": {
+      "type": "text",
+      "label": "Label Telefonfeld"
+    },
+    "submit_label": {
+      "type": "text",
+      "label": "Beschriftung Absende-Button"
+    },
+    "submitting_label": {
+      "type": "text",
+      "label": "Text während des Sendens"
+    },
+    "success_message": {
+      "type": "text",
+      "label": "Erfolgsmeldung nach dem Absenden"
+    },
+    "fallback_error": {
+      "type": "text",
+      "label": "Fehlermeldung, wenn das Senden fehlschlaegt"
+    },
+    "captcha_error": {
+      "type": "text",
+      "label": "Meldung fehlender Captcha-Bestaetigung"
+    },
+    "transport_error": {
+      "type": "textarea",
+      "label": "Fehler beim Laden der Sicherheitsprüfung"
+    }
+  },
+  "membership_form": {
+    "title": {
+      "type": "text",
+      "label": "Titel"
+    },
+    "text": {
+      "type": "richtext",
+      "label": "Text"
+    },
+    "commitment_title": {
+      "type": "text",
+      "label": "Titel der Hinweise"
+    },
+    "commitment_intro": {
+      "type": "text",
+      "label": "Einleitung der Hinweise"
+    },
+    "commitments": {
+      "type": "rows",
+      "label": "Hinweise zur Mitgliedschaft",
+      "row": {
+        "heading": {
+          "type": "text",
+          "label": "Überschrift",
+          "required": true
+        },
+        "text": {
+          "type": "textarea",
+          "label": "Text",
+          "required": true
+        }
+      }
+    },
+    "personal_title": {
+      "type": "text",
+      "label": "Titel persönliche Daten"
+    },
+    "first_name_label": {
+      "type": "text",
+      "label": "Feldname Vorname"
+    },
+    "last_name_label": {
+      "type": "text",
+      "label": "Feldname Name"
+    },
+    "address_label": {
+      "type": "text",
+      "label": "Feldname Adresse"
+    },
+    "zip_label": {
+      "type": "text",
+      "label": "Feldname PLZ"
+    },
+    "city_label": {
+      "type": "text",
+      "label": "Feldname Ort"
+    },
+    "phone_label": {
+      "type": "text",
+      "label": "Feldname Telefon"
+    },
+    "email_label": {
+      "type": "text",
+      "label": "Feldname E-Mail"
+    },
+    "depot_payment_title": {
+      "type": "text",
+      "label": "Titel Depot und Zahlung"
+    },
+    "depot_label": {
+      "type": "text",
+      "label": "Feldname Depot"
+    },
+    "depot_placeholder": {
+      "type": "text",
+      "label": "Auswahlhinweis Depot"
+    },
+    "depots": {
+      "type": "rows",
+      "label": "Depots",
+      "row": {
+        "option": {
+          "type": "text",
+          "label": "Depot",
+          "required": true
+        }
+      }
+    },
+    "payment_label": {
+      "type": "text",
+      "label": "Feldname Zahlungsweise"
+    },
+    "payment_hint": {
+      "type": "text",
+      "label": "Hinweis zur ersten Rechnung"
+    },
+    "quarterly_label": {
+      "type": "text",
+      "label": "Auswahl quartalsweise"
+    },
+    "annual_label": {
+      "type": "text",
+      "label": "Auswahl ganzes Jahr"
+    },
+    "participation_title": {
+      "type": "text",
+      "label": "Titel Mitarbeit"
+    },
+    "participation_intro": {
+      "type": "text",
+      "label": "Einleitung Mitarbeit"
+    },
+    "preferred_days_label": {
+      "type": "text",
+      "label": "Feldname bevorzugte Tage"
+    },
+    "preferred_days": {
+      "type": "rows",
+      "label": "Bevorzugte Tage",
+      "row": {
+        "option": {
+          "type": "text",
+          "label": "Tag",
+          "required": true
+        }
+      }
+    },
+    "preferred_times_label": {
+      "type": "text",
+      "label": "Feldname bevorzugte Zeiten"
+    },
+    "preferred_times": {
+      "type": "rows",
+      "label": "Bevorzugte Zeiten",
+      "row": {
+        "option": {
+          "type": "text",
+          "label": "Zeit",
+          "required": true
+        }
+      }
+    },
+    "activity_areas_label": {
+      "type": "text",
+      "label": "Feldname Tätigkeitsbereiche"
+    },
+    "activity_areas": {
+      "type": "rows",
+      "label": "Tätigkeitsbereiche",
+      "row": {
+        "option": {
+          "type": "text",
+          "label": "Bereich",
+          "required": true
+        }
+      }
+    },
+    "other_activity_label": {
+      "type": "text",
+      "label": "Feldname andere Tätigkeiten"
+    },
+    "additional_subscriptions_title": {
+      "type": "text",
+      "label": "Titel Zusatzabos"
+    },
+    "additional_subscriptions_intro": {
+      "type": "text",
+      "label": "Einleitung Zusatzabos"
+    },
+    "additional_subscriptions": {
+      "type": "rows",
+      "label": "Zusatzabos",
+      "row": {
+        "option": {
+          "type": "text",
+          "label": "Produkt",
+          "required": true
+        }
+      }
+    },
+    "additional_products_label": {
+      "type": "text",
+      "label": "Feldname weitere Produkte"
+    },
+    "additional_products_hint": {
+      "type": "text",
+      "label": "Hinweis weitere Produkte"
+    },
+    "additional_products_placeholder": {
+      "type": "text",
+      "label": "Beispiel weitere Produkte"
+    },
+    "confirmation_title": {
+      "type": "text",
+      "label": "Titel Bestätigung"
+    },
+    "privacy_label": {
+      "type": "text",
+      "label": "Datenschutz-Bestätigung"
+    },
+    "submit_label": {
+      "type": "text",
+      "label": "Text des Anmeldebuttons"
+    },
+    "submitting_label": {
+      "type": "text",
+      "label": "Text während des Sendens"
+    },
+    "fallback_error": {
+      "type": "text",
+      "label": "Fehlermeldung, wenn das Senden fehlschlaegt"
+    },
+    "captcha_error": {
+      "type": "text",
+      "label": "Meldung fehlender Captcha-Bestaetigung"
+    },
+    "transport_error": {
+      "type": "textarea",
+      "label": "Fehler beim Laden der Sicherheitsprüfung"
+    }
+  },
+  "subscribe_form": {
+    "title": {
+      "type": "text",
+      "label": "Titel"
+    },
+    "text": {
+      "type": "richtext",
+      "label": "Text"
+    },
+    "submit_label": {
+      "type": "text",
+      "label": "Beschriftung Absende-Button"
+    },
+    "submitting_label": {
+      "type": "text",
+      "label": "Text während des Sendens"
+    },
+    "success_message": {
+      "type": "text",
+      "label": "Erfolgsmeldung nach dem Absenden"
+    },
+    "fallback_error": {
+      "type": "text",
+      "label": "Fehlermeldung, wenn das Senden fehlschlaegt"
+    },
+    "captcha_error": {
+      "type": "text",
+      "label": "Meldung fehlender Captcha-Bestaetigung"
+    },
+    "transport_error": {
+      "type": "textarea",
+      "label": "Fehler beim Laden der Sicherheitsprüfung"
+    }
+  },
+  "visit_day_form": {
+    "title": {
+      "type": "text",
+      "label": "Titel"
+    },
+    "text": {
+      "type": "richtext",
+      "label": "Text"
+    },
+    "name_label": {
+      "type": "text",
+      "label": "Feldname Name"
+    },
+    "email_label": {
+      "type": "text",
+      "label": "Feldname E-Mail"
+    },
+    "phone_label": {
+      "type": "text",
+      "label": "Feldname Telefon"
+    },
+    "date_label": {
+      "type": "text",
+      "label": "Feldname Datum"
+    },
+    "participants_label": {
+      "type": "text",
+      "label": "Feldname Personenzahl"
+    },
+    "notes_label": {
+      "type": "text",
+      "label": "Feldname Anmerkungen"
+    },
+    "privacy_label": {
+      "type": "text",
+      "label": "Datenschutz-Bestätigung"
+    },
+    "submit_label": {
+      "type": "text",
+      "label": "Text des Anmeldebuttons"
+    },
+    "submitting_label": {
+      "type": "text",
+      "label": "Text während des Sendens"
+    },
+    "success_message": {
+      "type": "text",
+      "label": "Erfolgsmeldung nach dem Absenden"
+    },
+    "fallback_error": {
+      "type": "text",
+      "label": "Fehlermeldung, wenn das Senden fehlschlaegt"
+    },
+    "captcha_error": {
+      "type": "text",
+      "label": "Meldung fehlender Captcha-Bestaetigung"
+    },
+    "transport_error": {
+      "type": "textarea",
+      "label": "Fehler beim Laden der Sicherheitsprüfung"
+    }
+  },
+  "waiting_list_form": {
+    "title": {
+      "type": "text",
+      "label": "Titel"
+    },
+    "text": {
+      "type": "richtext",
+      "label": "Text"
+    },
+    "name_label": {
+      "type": "text",
+      "label": "Feldname Name"
+    },
+    "email_label": {
+      "type": "text",
+      "label": "Feldname E-Mail"
+    },
+    "phone_label": {
+      "type": "text",
+      "label": "Feldname Telefon"
+    },
+    "interest_label": {
+      "type": "text",
+      "label": "Feldname Interesse"
+    },
+    "interest_placeholder": {
+      "type": "text",
+      "label": "Auswahlhinweis Interesse"
+    },
+    "notes_label": {
+      "type": "text",
+      "label": "Feldname Anmerkungen"
+    },
+    "privacy_label": {
+      "type": "text",
+      "label": "Datenschutz-Bestätigung"
+    },
+    "submit_label": {
+      "type": "text",
+      "label": "Text des Anmeldebuttons"
+    },
+    "submitting_label": {
+      "type": "text",
+      "label": "Text während des Sendens"
+    },
+    "interest_options": {
+      "type": "rows",
+      "label": "Auswahlmöglichkeiten Interesse",
+      "row": {
+        "value": {
+          "type": "text",
+          "label": "Technischer Wert",
+          "required": true
+        },
+        "label": {
+          "type": "text",
+          "label": "Angezeigter Text",
+          "required": true
+        }
+      }
+    },
+    "success_message": {
+      "type": "text",
+      "label": "Erfolgsmeldung nach dem Absenden"
+    },
+    "fallback_error": {
+      "type": "text",
+      "label": "Fehlermeldung, wenn das Senden fehlschlaegt"
+    },
+    "captcha_error": {
+      "type": "text",
+      "label": "Meldung fehlender Captcha-Bestaetigung"
+    },
+    "transport_error": {
+      "type": "textarea",
+      "label": "Fehler beim Laden der Sicherheitsprüfung"
+    }
+  },
+  "event_signup_form": {
+    "title": {
+      "type": "text",
+      "label": "Titel"
+    },
+    "text": {
+      "type": "richtext",
+      "label": "Text"
+    },
+    "event_title_prefix": {
+      "type": "text",
+      "label": "Titel vor dem Eventnamen"
+    },
+    "name_label": {
+      "type": "text",
+      "label": "Feldname Name"
+    },
+    "email_label": {
+      "type": "text",
+      "label": "Feldname E-Mail"
+    },
+    "phone_label": {
+      "type": "text",
+      "label": "Feldname Telefon"
+    },
+    "notes_label": {
+      "type": "text",
+      "label": "Feldname Bemerkungen"
+    },
+    "submit_label": {
+      "type": "text",
+      "label": "Text des Anmeldebuttons"
+    },
+    "submitting_label": {
+      "type": "text",
+      "label": "Text während des Sendens"
+    },
+    "success_message": {
+      "type": "text",
+      "label": "Erfolgsmeldung nach dem Absenden"
+    },
+    "fallback_error": {
+      "type": "text",
+      "label": "Fehlermeldung, wenn das Senden fehlschlaegt"
+    },
+    "captcha_error": {
+      "type": "text",
+      "label": "Meldung fehlender Captcha-Bestaetigung"
+    },
+    "transport_error": {
+      "type": "textarea",
+      "label": "Fehler beim Laden der Sicherheitsprüfung"
+    }
+  },
+  "doi_confirm": {
+    "missing_token_message": {
+      "type": "text",
+      "label": "Fehler ohne Bestätigungslink"
+    },
+    "success_title": {
+      "type": "text",
+      "label": "Titel bei Erfolg"
+    },
+    "success_text": {
+      "type": "text",
+      "label": "Text bei Erfolg"
+    },
+    "subscribe_text": {
+      "type": "text",
+      "label": "Zusatztext Newsletter"
+    },
+    "visit_text": {
+      "type": "text",
+      "label": "Zusatztext Besuchstag"
+    },
+    "waiting_list_text": {
+      "type": "text",
+      "label": "Zusatztext Warteliste"
+    },
+    "contact_text": {
+      "type": "text",
+      "label": "Zusatztext Kontakt"
+    },
+    "error_title": {
+      "type": "text",
+      "label": "Titel bei Fehler"
+    },
+    "home_link_label": {
+      "type": "text",
+      "label": "Linktext zur Startseite"
+    },
+    "confirmation_prompt": {
+      "type": "textarea",
+      "label": "Bestätigungsaufforderung",
+      "required": true
+    },
+    "confirmation_button_label": {
+      "type": "textarea",
+      "label": "Bestätigungsbutton",
+      "required": true
+    }
+  },
+  "gallery": {
+    "items": {
+      "type": "rows",
+      "label": "Bilder",
+      "row": {
+        "image": {
+          "type": "int",
+          "label": "Bild",
+          "required": true
+        },
+        "category": {
+          "type": "text",
+          "label": "Kategorie",
+          "choices": {
+            "koerbe": "Körbe",
+            "feld": "Feld",
+            "portraits": "Portraits"
+          }
+        }
+      }
+    },
+    "show_more_label": {
+      "type": "text",
+      "label": "Text des Mehr-anzeigen-Buttons"
+    },
+    "loading_title": {
+      "type": "text",
+      "label": "Titel ohne Bilder"
+    },
+    "loading_text": {
+      "type": "text",
+      "label": "Text ohne Bilder"
+    },
+    "filters": {
+      "type": "rows",
+      "label": "Filter",
+      "row": {
+        "key": {
+          "type": "text",
+          "label": "Technischer Schlüssel",
+          "required": true,
+          "choices": {
+            "all": "Alle",
+            "koerbe": "Körbe",
+            "feld": "Feld",
+            "portraits": "Portraits"
+          }
+        },
+        "label": {
+          "type": "text",
+          "label": "Angezeigter Text",
+          "required": true
+        }
+      }
+    }
+  },
+  "pricing_calculator": {
+    "eyebrow": {
+      "type": "text",
+      "label": "Eyebrow (Kicker)"
+    },
+    "title": {
+      "type": "text",
+      "label": "Titel"
+    },
+    "text": {
+      "type": "richtext",
+      "label": "Text"
+    },
+    "share_price": {
+      "type": "number",
+      "label": "Preis pro Anteilsschein (CHF)"
+    },
+    "work_suffix": {
+      "type": "text",
+      "label": "Mitarbeit-Zusatz"
+    },
+    "signup_url": {
+      "type": "text",
+      "label": "Anmelde-URL"
+    },
+    "shares_only_label": {
+      "type": "text",
+      "label": "Hinweis bei Abo ohne Korb"
+    },
+    "annual_contribution_label": {
+      "type": "text",
+      "label": "Bezeichnung Jahresbeitrag"
+    },
+    "work_label": {
+      "type": "text",
+      "label": "Bezeichnung Mitarbeit"
+    },
+    "one_time_payment_label": {
+      "type": "text",
+      "label": "Bezeichnung Einmalzahlung"
+    },
+    "additional_shares_label": {
+      "type": "text",
+      "label": "Bezeichnung zusätzliche Anteilsscheine"
+    },
+    "cta_label": {
+      "type": "text",
+      "label": "Text des Anmeldebuttons"
+    },
+    "cta_note": {
+      "type": "text",
+      "label": "Hinweis unter dem Anmeldebutton"
+    },
+    "tiers": {
+      "type": "rows",
+      "label": "Abo-Stufen",
+      "row": {
+        "name": {
+          "type": "text",
+          "label": "Name",
+          "required": true
+        },
+        "price": {
+          "type": "number",
+          "label": "Jahrespreis (CHF)",
+          "required": true
+        },
+        "shares": {
+          "type": "number",
+          "label": "Anteilsscheine erforderlich",
+          "required": true
+        },
+        "work": {
+          "type": "number",
+          "label": "Arbeitseinsätze pro Jahr"
+        },
+        "recommended": {
+          "type": "toggle",
+          "label": "Empfohlen"
+        }
+      }
+    },
+    "recommended_label": {
+      "type": "text",
+      "label": "Kennzeichnung der Empfehlung"
+    },
+    "no_subscription_label": {
+      "type": "text",
+      "label": "Auswahl ohne Abo"
+    },
+    "article_label": {
+      "type": "text",
+      "label": "Spaltentitel Artikel"
+    },
+    "quantity_label": {
+      "type": "text",
+      "label": "Spaltentitel Anzahl"
+    },
+    "unit_price_label": {
+      "type": "text",
+      "label": "Spaltentitel Einzelpreis"
+    },
+    "share_certificates_label": {
+      "type": "text",
+      "label": "Bezeichnung Anteilsscheine"
+    },
+    "required_label": {
+      "type": "text",
+      "label": "Hinweis benötigte Anzahl"
+    },
+    "shares_only_info": {
+      "type": "textarea",
+      "label": "Infotext ohne Gemüseabo"
+    },
+    "without_basket_label": {
+      "type": "text",
+      "label": "Hinweis ohne Gemüsekorb"
+    },
+    "additional_label": {
+      "type": "text",
+      "label": "Hinweis zusätzliche Anteile"
+    },
+    "total_label": {
+      "type": "text",
+      "label": "Spaltentitel Total"
+    }
+  },
+  "events_feed": {
+    "variant": {
+      "type": "text",
+      "label": "Variante",
+      "choices": {
+        "standard": "Standard",
+        "banner": "Banner"
+      }
+    },
+    "limit": {
+      "type": "number",
+      "label": "Maximale Anzahl"
+    },
+    "archive_url": {
+      "type": "text",
+      "label": "Archiv-Link"
+    },
+    "title": {
+      "type": "text",
+      "label": "Banner-Titel"
+    },
+    "banner_link_label": {
+      "type": "text",
+      "label": "Banner-Linktext"
+    },
+    "standard_title": {
+      "type": "text",
+      "label": "Titel der Standardansicht"
+    },
+    "standard_link_label": {
+      "type": "text",
+      "label": "Linktext der Standardansicht"
+    },
+    "past_title": {
+      "type": "text",
+      "label": "Rückblick-Titel"
+    },
+    "past_description": {
+      "type": "text",
+      "label": "Rückblick-Beschreibung"
+    },
+    "past_link_label": {
+      "type": "text",
+      "label": "Rückblick-Linktext"
+    },
+    "empty_message": {
+      "type": "text",
+      "label": "Hinweis ohne Veranstaltungen"
+    },
+    "schnuppertage_title": {
+      "type": "text",
+      "label": "Überschrift Schnuppertage"
+    },
+    "schnuppertage_empty_message": {
+      "type": "text",
+      "label": "Leere Schnuppertag-Liste"
+    }
+  },
+  "schnuppertage": {
+    "title": {
+      "type": "text",
+      "label": "Titel"
+    },
+    "text": {
+      "type": "richtext",
+      "label": "Text"
+    },
+    "list_label": {
+      "type": "text",
+      "label": "Listen-Label"
+    },
+    "items": {
+      "type": "rows",
+      "label": "Punkte",
+      "row": {
+        "text": {
+          "type": "text",
+          "label": "Text",
+          "required": true
+        }
+      }
+    },
+    "closing": {
+      "type": "richtext",
+      "label": "Schlusstext"
+    },
+    "signup_anchor": {
+      "type": "text",
+      "label": "Anmelde-Anker"
+    },
+    "limit": {
+      "type": "number",
+      "label": "Maximale Anzahl Termine"
+    },
+    "schedule_title": {
+      "type": "text",
+      "label": "Titel über den Terminen"
+    },
+    "signup_label": {
+      "type": "text",
+      "label": "Text des Anmeldebuttons"
+    },
+    "empty_message": {
+      "type": "text",
+      "label": "Hinweis ohne Termine"
+    },
+    "display": {
+      "type": "text",
+      "label": "Darstellung",
+      "choices": {
+        "list": "Liste",
+        "cards": "Karten"
+      }
+    }
+  },
+  "group_cards": {
+    "limit": {
+      "type": "number",
+      "label": "Maximale Anzahl"
+    },
+    "empty_message": {
+      "type": "text",
+      "label": "Hinweis ohne Gruppen"
+    }
+  },
+  "saisonkalender": {
+    "vegetables": {
+      "type": "rows",
+      "label": "Gemüse",
+      "row": {
+        "name": {
+          "type": "text",
+          "label": "Name",
+          "required": true
+        },
+        "months": {
+          "type": "choices",
+          "label": "Monate",
+          "choices": {
+            "1": "Januar",
+            "2": "Februar",
+            "3": "März",
+            "4": "April",
+            "5": "Mai",
+            "6": "Juni",
+            "7": "Juli",
+            "8": "August",
+            "9": "September",
+            "10": "Oktober",
+            "11": "November",
+            "12": "Dezember"
+          }
+        }
+      }
+    },
+    "empty_message": {
+      "type": "text",
+      "label": "Hinweis ohne Saisonkalender"
+    },
+    "vegetable_column_label": {
+      "type": "text",
+      "label": "Titel der Gemüse-Spalte"
+    },
+    "month_columns": {
+      "type": "rows",
+      "label": "Monatsspalten",
+      "row": {
+        "number": {
+          "type": "number",
+          "label": "Monatsnummer",
+          "required": true
+        },
+        "label": {
+          "type": "text",
+          "label": "Abkürzung",
+          "required": true
+        }
+      }
+    }
+  },
+  "depot_map": {
+    "intro": {
+      "type": "text",
+      "label": "Hinweistext"
+    },
+    "locations": {
+      "type": "rows",
+      "label": "Standorte",
+      "row": {
+        "name": {
+          "type": "text",
+          "label": "Name",
+          "required": true
+        },
+        "lat": {
+          "type": "number",
+          "label": "Breitengrad (lat)",
+          "required": true
+        },
+        "lng": {
+          "type": "number",
+          "label": "Längengrad (lng)",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "label": "Beschreibung"
+        }
+      }
+    },
+    "locations_heading": {
+      "type": "text",
+      "label": "Titel über den Standorten"
+    },
+    "route_label": {
+      "type": "text",
+      "label": "Text des Routenlinks"
+    },
+    "empty_message": {
+      "type": "text",
+      "label": "Hinweis ohne Standorte"
+    }
+  },
+  "geisshof_map": {
+    "locations": {
+      "type": "rows",
+      "label": "Standorte",
+      "row": {
+        "name": {
+          "type": "text",
+          "label": "Name",
+          "required": true
+        },
+        "lat": {
+          "type": "number",
+          "label": "Breitengrad (lat)",
+          "required": true
+        },
+        "lng": {
+          "type": "number",
+          "label": "Längengrad (lng)",
+          "required": true
+        },
+        "description": {
+          "type": "textarea",
+          "label": "Beschreibung"
+        }
+      }
+    },
+    "locations_heading": {
+      "type": "text",
+      "label": "Titel über den Standorten"
+    },
+    "route_label": {
+      "type": "text",
+      "label": "Text des Routenlinks"
+    },
+    "empty_message": {
+      "type": "text",
+      "label": "Hinweis ohne Standorte"
+    }
+  }
+}
