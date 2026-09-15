@@ -10,7 +10,7 @@
   "hero": {
     "hero_title": "Gemeinsam\nGemüse anbauen",
     "hero_subtitle": "Solidarische Landwirtschaft\nin Baden",
-    "image_url": "https://cms.bioco.ch/site/assets/files/1/frontseitestartseite.jpg",
+    "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/c31c50bd4372-frontseitestartseite.jpg",
     "image_alt": "Solidarische Landwirtschaft auf dem Feld"
   },
   "sections": [
@@ -21,7 +21,7 @@
       "section_layout": "split_text_media",
       "section_theme": "default",
       "section_config": { "styleVariant": "feature" },
-      "image_url": "https://cms.bioco.ch/site/assets/files/1778/zusammen-arbeiten-2.1600x0.jpg",
+      "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/70b221f807da-zusammen-arbeiten-2.1600x0.jpg",
       "image_alt": "Gemeinschaft bei solidarischer Landwirtschaft biocò Baden-Brugg",
       "buttons": [
         { "text": "Lerne uns kennen", "href": "/wir", "variant": "primary" }
@@ -34,7 +34,7 @@
       "section_layout": "split_media_text",
       "section_theme": "default",
       "section_config": { "styleVariant": "feature" },
-      "image_url": "https://cms.bioco.ch/site/assets/files/1779/gemeinsamsolidarischfrisch-1.1600x0.jpg",
+      "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/87f1bcb50466-gemeinsamsolidarischfrisch-1.1600x0.jpg",
       "image_alt": "Frisch geerntetes Demeter-Gemüse vom Geisshof",
       "buttons": [
         { "text": "Was gerade wächst", "href": "/gemuese", "variant": "secondary" }

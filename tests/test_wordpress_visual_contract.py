@@ -261,9 +261,9 @@ def test_homepage_seed_contains_approved_hero_section_images_and_cta_labels():
     assert actual == {
         "hero_title": "Gemeinsam\nGemüse anbauen",
         "hero_subtitle": "Solidarische Landwirtschaft\nin Baden",
-        "hero_image": "frontseitestartseite.jpg",
-        "willkommen_image": "zusammen-arbeiten-2.1600x0.jpg",
-        "gemeinsam_image": "gemeinsamsolidarischfrisch-1.1600x0.jpg",
+        "hero_image": "c31c50bd4372-frontseitestartseite.jpg",
+        "willkommen_image": "70b221f807da-zusammen-arbeiten-2.1600x0.jpg",
+        "gemeinsam_image": "87f1bcb50466-gemeinsamsolidarischfrisch-1.1600x0.jpg",
     }
 
     labels = [

@@ -23,5 +23,5 @@ def test_home_plan_starts_with_the_approved_hero():
     assert item["values"]["subtitle"] == "Solidarische Landwirtschaft\nin Baden"
     assert item["values"]["image_alt"] == "Solidarische Landwirtschaft auf dem Feld"
     assert item["values"]["image"]["__bioco_pending_image__"].endswith(
-        "/frontseitestartseite.jpg"
+        "/c31c50bd4372-frontseitestartseite.jpg"
     )

@@ -123,7 +123,7 @@ def test_navigation_footer_and_editorial_media_contracts():
     assert team["section_config"]["mediaRatio"] == "4:3"
     mitmachen = json.loads((ROOT / "wordpress/content-seed/mitmachen.json").read_text())
     kinder = next(s for s in mitmachen["sections"] if s["section_id"] == "familien")
-    assert kinder["image_url"] == "https://cms.bioco.ch/site/assets/files/1770/bioco_kinder.jpg"
+    assert kinder["image_url"] == "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/ee6700041ac8-bioco_kinder.jpg"
     assert "Kinder" in kinder["image_alt"]
 
     for root in ("wordpress", "cms"):

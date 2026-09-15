@@ -22,16 +22,16 @@ def test_gemuese_gallery_images_reach_the_import_plan():
     assert len(values["items"]) == 5
     assert all(item["category"] == "feld" for item in values["items"])
     filenames = [
-        "gemeinsamsolidarischfrisch.1600x0.jpg",
-        "20151021_161807.1600x0.jpg",
-        "sommer.1600x0.jpg",
-        "20151021_161807-1.1600x0.jpg",
-        "wk_salate.jpg",
+        "3102bc0573d2-gemeinsamsolidarischfrisch.1600x0.jpg",
+        "26741e65769d-20151021_161807.1600x0.jpg",
+        "ffc4e484f643-sommer.1600x0.jpg",
+        "79b3e09bb537-20151021_161807-1.1600x0.jpg",
+        "f2041ea9f43e-wk_salate.jpg",
     ]
     assert [item["image"] for item in values["items"]] == [
         {
             "__bioco_pending_image__": (
-                f"https://cms.bioco.ch/site/assets/files/1708/{filename}"
+                f"https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/{filename}"
             ),
             "__bioco_pending_image_alt__": "Was wir anbauen",
         }
