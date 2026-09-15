@@ -33,7 +33,7 @@
                 "gap": "lg",
                 "rounded": "lg"
             },
-            "image_url": "https://cms.bioco.ch/site/assets/files/1700/bioco_gemeinschaft.1600x0.jpg",
+            "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/594838a9fdb1-bioco_gemeinschaft.1600x0.jpg",
             "image_alt": "Wir"
         },
         {
@@ -52,7 +52,7 @@
                 "gap": "lg",
                 "rounded": "lg"
             },
-            "image_url": "https://cms.bioco.ch/site/assets/files/1785/alle-mitglieder-bioco.jpeg",
+            "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/3904a7c2ddc6-alle-mitglieder-bioco.jpeg",
             "image_alt": "Alle Mitglieder"
         },
         {
@@ -71,7 +71,7 @@
                 "gap": "lg",
                 "rounded": "lg"
             },
-            "image_url": "https://cms.bioco.ch/site/assets/files/1786/bg_2025_-_gv_mai.jpeg",
+            "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/41f58d818772-bg_2025_-_gv_mai.jpeg",
             "image_alt": "Betriebsgruppe (BG)"
         },
         {
@@ -90,19 +90,19 @@
                 "gap": "lg",
                 "rounded": "md"
             },
-            "image_url": "https://cms.bioco.ch/site/assets/files/1787/hofteam_matthias.1600x0.jpg",
+            "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/3ca8ae4fcc65-hofteam_matthias.1600x0.jpg",
             "image_alt": "Hof-Team",
             "images": [
                 {
-                    "url": "https://cms.bioco.ch/site/assets/files/1787/hofteam_matthias.1600x0.jpg",
+                    "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/3ca8ae4fcc65-hofteam_matthias.1600x0.jpg",
                     "alt": "Matthias"
                 },
                 {
-                    "url": "https://cms.bioco.ch/site/assets/files/1787/bioco_hofteam_christian.1600x0.jpg",
+                    "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/18f8c7d1125f-bioco_hofteam_christian.1600x0.jpg",
                     "alt": "Michael"
                 },
                 {
-                    "url": "https://cms.bioco.ch/site/assets/files/1787/tino-geisshof.jpeg",
+                    "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/4d8b813cc762-tino-geisshof.jpeg",
                     "alt": "Tino"
                 }
             ]
@@ -122,23 +122,23 @@
                 "gap": "lg",
                 "rounded": "lg"
             },
-            "image_url": "https://cms.bioco.ch/site/assets/files/1701/whatsapp_bild_2023-11-08_um_15_35_08_aecee0f2.jpg",
+            "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/eeaa45a62a58-whatsapp_bild_2023-11-08_um_15_35_08_aecee0f2.jpg",
             "image_alt": "Der Geisshof",
             "images": [
                 {
-                    "url": "https://cms.bioco.ch/site/assets/files/1701/whatsapp_bild_2023-11-08_um_15_35_08_aecee0f2.jpg",
+                    "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/eeaa45a62a58-whatsapp_bild_2023-11-08_um_15_35_08_aecee0f2.jpg",
                     "alt": "Der Geisshof"
                 },
                 {
-                    "url": "https://cms.bioco.ch/site/assets/files/1701/20240906_212141.1600x0.jpg",
+                    "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/0cc1c5951cc1-20240906_212141.1600x0.jpg",
                     "alt": "Der Geisshof"
                 },
                 {
-                    "url": "https://cms.bioco.ch/site/assets/files/1701/20240907_101250.1600x0.jpg",
+                    "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/382f17320367-20240907_101250.1600x0.jpg",
                     "alt": "Der Geisshof"
                 },
                 {
-                    "url": "https://cms.bioco.ch/site/assets/files/1701/img_4800.1600x0.jpg",
+                    "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/c23ec4454d94-img_4800.1600x0.jpg",
                     "alt": "Der Geisshof"
                 }
             ],
@@ -162,7 +162,7 @@
                 "columnsMobile": "1",
                 "gap": "lg"
             },
-            "image_url": "https://cms.bioco.ch/site/assets/files/1702/titelbild_hp.jpg",
+            "image_url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/ae6413466b0a-titelbild_hp.jpg",
             "image_alt": "Unsere Mission",
             "buttons": [
                 {

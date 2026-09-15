@@ -68,3 +68,12 @@ Nur belegte Felder angeben; leere Strings/Arrays weglassen.
 - Bilder: `image_url` zeigt auf die produktive URL
   (`https://www.bioco.ch/images/…`); die Migration importiert die Datei in
   das ProcessWire-Bildfeld der Section.
+
+## Dauerhafte Bildquellen
+
+Die 20 früher vom Legacy-CMS bezogenen Bilder liegen bytegleich unter `images/`.
+Die Seeds verweisen für den einmaligen WordPress-Import auf diese Dateien im
+öffentlichen Repository (unveränderlicher Commit `d970bf08d8fb58d4208d7568fbd06f17f83725ac`). Zur Laufzeit liefert WordPress
+die importierten Bilder aus seiner Mediathek; es lädt keine GitHub-Bilder nach.
+Bestehende Attachments erhalten bei der Quellenumstellung zusätzlich die neue
+`_bioco_import_source_url`, damit erneutes Importieren dieselben IDs verwendet.

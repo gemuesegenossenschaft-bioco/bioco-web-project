@@ -70,27 +70,27 @@
       "section_text": "<p>Einblicke in unsere Ernte, den Anbau und die Gemeinschaft.</p>",
       "images": [
         {
-          "url": "https://cms.bioco.ch/site/assets/files/1708/gemeinsamsolidarischfrisch.1600x0.jpg",
+          "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/3102bc0573d2-gemeinsamsolidarischfrisch.1600x0.jpg",
           "alt": "Was wir anbauen",
           "category": "feld"
         },
         {
-          "url": "https://cms.bioco.ch/site/assets/files/1708/20151021_161807.1600x0.jpg",
+          "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/26741e65769d-20151021_161807.1600x0.jpg",
           "alt": "Was wir anbauen",
           "category": "feld"
         },
         {
-          "url": "https://cms.bioco.ch/site/assets/files/1708/sommer.1600x0.jpg",
+          "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/ffc4e484f643-sommer.1600x0.jpg",
           "alt": "Was wir anbauen",
           "category": "feld"
         },
         {
-          "url": "https://cms.bioco.ch/site/assets/files/1708/20151021_161807-1.1600x0.jpg",
+          "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/79b3e09bb537-20151021_161807-1.1600x0.jpg",
           "alt": "Was wir anbauen",
           "category": "feld"
         },
         {
-          "url": "https://cms.bioco.ch/site/assets/files/1708/wk_salate.jpg",
+          "url": "https://raw.githubusercontent.com/gemuesegenossenschaft-bioco/bioco-web-project/d970bf08d8fb58d4208d7568fbd06f17f83725ac/wordpress/content-seed/images/f2041ea9f43e-wk_salate.jpg",
           "alt": "Was wir anbauen",
           "category": "feld"
         }

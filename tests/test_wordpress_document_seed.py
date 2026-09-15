@@ -174,3 +174,20 @@ def test_verify_and_dry_run_never_import():
     # instead of half-rewritten markup against a never-imported page.
     assert "documents/" in intra_text
     assert "cms.bioco.ch" not in intra_text
+
+def test_all_seed_assets_are_independent_of_legacy_cms():
+    """Asset contract: tests/README.md, Keep/Replace/Remove map."""
+    import re
+    prefix = r'https://raw\.githubusercontent\.com/gemuesegenossenschaft-bioco/bioco-web-project/[0-9a-f]{40}/wordpress/content-seed/'
+    count = set()
+    for tree in (ROOT / 'wordpress/content-seed', ROOT / 'cms/content-seed'):
+        for seed in tree.glob('*.json'):
+            text = seed.read_text()
+            assert '/bioco-web-project/wordpress/wordpress/' not in text
+            assert not re.search(r'https?://cms\.bioco\.ch/site/assets/', text), seed
+            for source in re.findall(prefix + r'([^"\s]+)', text):
+                asset = tree / source
+                assert asset.is_file(), asset
+                assert asset.read_bytes().startswith(b'\xff\xd8\xff'), asset
+                count.add(source)
+    assert len(count) == 20
