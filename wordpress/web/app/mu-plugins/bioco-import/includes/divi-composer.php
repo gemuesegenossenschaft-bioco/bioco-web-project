@@ -88,6 +88,16 @@ final class Bioco_Import_Divi_Composer {
         return self::withHtmlId($section, (string) ($values['anchor'] ?? ''));
     }
 
+    private static function nativeModule(string $componentKey, array $values): array {
+        $attrs = self::classAttr(trim('bioco-native-component ' . ($values['className'] ?? '')));
+        if (!empty($values['anchor'])) $attrs['module']['advanced']['htmlAttributes']['desktop']['value']['id'] = $values['anchor'];
+        foreach ($values as $field => $value) {
+            if ($field === 'anchor' || $field === 'className') continue;
+            $attrs[$field] = ['innerContent' => ['desktop' => ['value' => $value]]];
+        }
+        return bioco_import_divi_block('bioco-divi/' . str_replace('_', '-', $componentKey), $attrs);
+    }
+
     private static function dynamicSection(string $componentKey, array $values): array {
         $sectionHeading = trim((string) ($values['_section_heading'] ?? ''));
         unset($values['_section_heading']);
@@ -95,10 +105,7 @@ final class Bioco_Import_Divi_Composer {
         if ($sectionHeading !== '') {
             $children[] = self::headingBlock($sectionHeading, 'h2', 'bioco-dynamic-section-title');
         }
-        $children[] = self::textBlock(
-            bioco_dynamic_marker_html($componentKey, $values),
-            'bioco-dynamic-text'
-        );
+        $children[] = self::nativeModule($componentKey, $values);
 
         return self::withChildren(
             bioco_import_divi_block('divi/section', self::classAttr('bioco-dynamic-section')),
@@ -215,7 +222,7 @@ final class Bioco_Import_Divi_Composer {
         // site: one standard list headed "Naechste Events". Schnuppertage stay
         // here and are deliberately NOT folded into that feed, otherwise a
         // Schnuppertag appears in both.
-        $visits = bioco_dynamic_marker_html('schnuppertage', [
+        $visits = self::nativeModule('schnuppertage', [
             'title' => 'Schnuppertage',
             'display' => 'cards',
             'empty_message' => 'Aktuell sind keine Schnuppertage geplant.',
@@ -235,7 +242,7 @@ final class Bioco_Import_Divi_Composer {
                             'href' => '/aktuelles',
                             'variant' => 'secondary',
                         ]),
-                        self::textBlock($visits, 'bioco-home-live-visits'),
+                        $visits,
                     ]
                 )]
             )]

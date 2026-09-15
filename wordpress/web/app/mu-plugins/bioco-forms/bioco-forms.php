@@ -170,6 +170,8 @@ add_action('admin_notices', function () {
 // form view script in bioco-core.php) owns loading/retry and appends the
 // script itself after mounting.
 function bioco_forms_localize_block($block_name, $object_name, $endpoint, array $strings = []) {
+    if (function_exists('bioco_dynamic_render_is_inert') && bioco_dynamic_render_is_inert()) return;
+
     $config = bioco_forms_turnstile_config();
 
     $group = substr($block_name, strpos($block_name, '/') + 1);

@@ -280,6 +280,22 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_bioco_events_feed_schnuppertage_title",
+            "name": "schnuppertage_title",
+            "label": "Überschrift Schnuppertage",
+            "type": "text",
+            "required": 0,
+            "default_value": ""
+        },
+        {
+            "key": "field_bioco_events_feed_schnuppertage_empty_message",
+            "name": "schnuppertage_empty_message",
+            "label": "Leere Schnuppertag-Liste",
+            "type": "text",
+            "required": 0,
+            "default_value": ""
         }
     ],
     "location": [

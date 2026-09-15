@@ -207,6 +207,17 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_bioco_schnuppertage_display",
+            "name": "display",
+            "label": "Darstellung",
+            "type": "select",
+            "choices": {
+                "list": "Liste",
+                "cards": "Karten"
+            },
+            "default_value": "list"
         }
     ],
     "location": [

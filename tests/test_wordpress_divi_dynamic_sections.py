@@ -99,6 +99,9 @@ def _render_preamble() -> str:
         "    $content = '';\n"
         "    if ($block['blockName'] === 'divi/text') {\n"
         "        $content = $block['attrs']['content']['innerContent']['desktop']['value'];\n"
+        "    } elseif (str_starts_with($block['blockName'], 'bioco-divi/')) {\n"
+        "        $runtime = (object)['block_type' => (object)['name' => $block['blockName']]];\n"
+        "        $content = bioco_native_render_block($block['attrs'], '', $runtime, null);\n"
         "    } elseif ($block['blockName'] === 'divi/heading') {\n"
         "        $content = json_encode($block['attrs']['title']['innerContent']['desktop']['value']);\n"
         "    } else {\n"
@@ -107,6 +110,12 @@ def _render_preamble() -> str:
         "    return '<!-- wp:' . $block['blockName'] . ' -->' . $content\n"
         "        . '<!-- /wp:' . $block['blockName'] . ' -->';\n"
         "}\n"
+        "function add_action(...$args) {}\n"
+        "function add_filter(...$args) {}\n"
+        "function wp_doing_ajax() { return false; }\n"
+        "function is_admin() { return false; }\n"
+        "class WP_Error { public function __construct(...$args) {} }\n"
+        "require 'wordpress/web/app/mu-plugins/bioco-core/includes/native-modules.php';\n"
         f"require '{DYNAMIC_SECTIONS}';\n"
         f"require '{DIVI_BLOCKS}';\n"
         f"require '{DIVI_COMPOSER}';\n"
@@ -159,12 +168,6 @@ def test_every_seed_section_id_reaches_the_composed_dom_exactly_once():
         + "        if (($item['type'] ?? '') !== 'block') continue;\n"
         + "        $tree = Bioco_Import_Divi_Composer::section($item);\n"
         + "        $treeIds = $collect($tree);\n"
-        + "        if (in_array($item['block'], $dynamicBlocks, true)) {\n"
-        + "            $rendered = bioco_dynamic_expand_markers(serialize_block($tree));\n"
-        + "            if (preg_match('/\\sid=\"([^\"]+)\"/', $rendered, $match)) {\n"
-        + "                $treeIds[] = html_entity_decode($match[1], ENT_QUOTES);\n"
-        + "            }\n"
-        + "        }\n"
         + "        $ids = array_merge($ids, $treeIds);\n"
         + "    }\n"
         + "    $expected = array_column($seed['sections'], 'section_id');\n"
@@ -179,7 +182,7 @@ def test_every_seed_section_id_reaches_the_composed_dom_exactly_once():
 
 
 @pytest.mark.parametrize(("plan_block", "component_key"), DYNAMIC_BLOCKS.items())
-def test_dynamic_block_is_single_native_divi_text_marker(plan_block, component_key):
+def test_dynamic_block_is_typed_native_divi_module(plan_block, component_key):
     values = {
         "title": f"Seed title for {plan_block}",
         "text": "Seed body",
@@ -192,7 +195,7 @@ def test_dynamic_block_is_single_native_divi_text_marker(plan_block, component_k
         "divi/section",
         "divi/row",
         "divi/column",
-        "divi/text",
+        "bioco-divi/" + plan_block,
     ]
     row = section["innerBlocks"][0]
     column = row["innerBlocks"][0]
@@ -210,15 +213,8 @@ def test_dynamic_block_is_single_native_divi_text_marker(plan_block, component_k
         "bioco-dynamic-row",
         "bioco-dynamic-column",
     ]
-    marker = text["attrs"]["content"]["innerContent"]["desktop"]["value"]
-    match = re.fullmatch(
-        rf'<div class="bioco-dynamic" data-bioco-component="{component_key}" '
-        r'data-bioco-props="([A-Za-z0-9+/=]*)"></div>',
-        marker,
-    )
-    assert match is not None
-    assert json.loads(base64.b64decode(match.group(1))) == values
-    assert "divi/heading" not in _block_names(section)
+    assert 'bioco-dynamic' not in json.dumps(text)
+    assert {key: attr['innerContent']['desktop']['value'] for key, attr in text['attrs'].items() if key != 'module'} == values
 
 
 @pytest.mark.parametrize(
@@ -267,8 +263,8 @@ def test_serialized_dynamic_section_expands_to_real_ssr(
     )
 
     assert "divi/section" in payload["serialized"]
-    assert "bioco-dynamic" in payload["serialized"]
-    assert f'class="cms-section {section_class}"' in payload["expanded"]
+    assert "bioco-divi/" + plan_block in payload["serialized"]
+    assert re.search(r'class="cms-section ' + re.escape(section_class) + r'(?: |")', payload["expanded"])
     assert rendered_value in payload["expanded"]
     if plan_block == "pricing-calculator":
         assert 'data-pc-action="select-tier"' in payload["expanded"]
@@ -328,7 +324,7 @@ def test_homepage_plan_contains_exactly_one_events_feed():
 
     chrome = payload["chrome"]
     assert 'data-bioco-component="events_feed"' not in chrome
-    assert 'data-bioco-component="schnuppertage"' in chrome
+    assert 'bioco-divi/schnuppertage' in chrome
     assert "respect_stored_status" not in chrome
 
 
@@ -405,7 +401,7 @@ def test_mitmachen_schnuppertage_keeps_its_h2_heading_above_the_h3_subheading():
     )
 
     html = payload["expanded"]
-    assert 'class="cms-section cms-schnuppertage"' in html
+    assert re.search(r'class="cms-section cms-schnuppertage(?: |")', html)
     assert "<h2>Schnuppertage</h2>" in html
     assert "Komm schnuppern" in html
     # One h2 heading, then the h3 subheading from the text — not two headings.
