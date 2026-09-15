@@ -1,3 +1,4 @@
+"""Runtime-Prüfung: tests/README.md, Keep/Replace/Remove-Karte."""
 import json
 import subprocess
 from pathlib import Path

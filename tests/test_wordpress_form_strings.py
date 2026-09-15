@@ -47,7 +47,7 @@ def test_acf_groups_have_the_editable_string_fields_without_hard_defaults():
     for form in FORMS:
         group = json.loads((CORE / f"acf-json/group_bioco_block_{form.replace('-', '_')}.json").read_text())
         names = {f["name"] for f in group["fields"]}
-        expected = {"fallback_error", "captcha_error"}
+        expected = {"fallback_error", "captcha_error", "transport_error"}
         if form != "membership-form":
             expected |= {"success_message"}
         assert expected <= names, (form, expected - names)

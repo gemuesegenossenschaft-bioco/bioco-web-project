@@ -1,5 +1,7 @@
 """Issue #151: Dokumentverweise im Seed.
 
+Testflächen: tests/README.md, Keep/Replace/Remove-Karte.
+
 Die fünf PDFs (zwei Statuten, drei Intranet-Dokumente) liegen als Quelle im
 Repo unter content-seed/documents/. Der Import lädt sie einmal in die
 Mediathek, taggt sie mit _bioco_import_source_url = "documents/<datei>" und

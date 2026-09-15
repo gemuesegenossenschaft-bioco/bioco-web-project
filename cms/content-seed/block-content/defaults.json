@@ -496,7 +496,8 @@
       "newsletter_expiry": "Der Link ist 24 Stunden gültig.",
       "newsletter_ignore": "Falls du diese Anmeldung nicht ausgelöst hast, kannst du diese E-Mail ignorieren.",
       "newsletter_subject": "Bitte bestätige deine Newsletter-Anmeldung",
-      "newsletter_greeting": "Hallo {name},"
+      "newsletter_greeting": "Hallo {name},",
+      "newsletter_greeting_anonymous": "Hallo,"
     }
   }
 }

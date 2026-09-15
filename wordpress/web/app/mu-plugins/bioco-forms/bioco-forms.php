@@ -627,7 +627,9 @@ function bioco_forms_handle_subscribe(WP_REST_Request $request) {
     $token = bioco_forms_doi_create_token('subscribe', ['email' => $email, 'name' => $name]);
     $confirm_url = trailingslashit(home_url('/newsletter-bestaetigen')) . '?token=' . rawurlencode($token);
 
-    $greeting = str_replace('{name}', $name, bioco_forms_message('shared', 'newsletter_greeting'));
+    $greeting = $name !== ''
+        ? str_replace('{name}', $name, bioco_forms_message('shared', 'newsletter_greeting'))
+        : bioco_forms_message('shared', 'newsletter_greeting_anonymous');
     $body_lines = [
         $greeting,
         '',

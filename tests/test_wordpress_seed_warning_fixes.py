@@ -146,3 +146,18 @@ def test_wide_grid_blocks_declare_and_render_container_width():
 def test_entity_encoded_markup_does_not_become_a_timeline_title_tag():
     item = _timeline_plan('', '<h2>&lt;img src=x onerror=alert(1)&gt;Titel</h2><p>Inhalt</p>')
     assert item['values']['items'][0]['title'] == 'Titel'
+
+
+def test_wide_grid_templates_emit_selected_container_width():
+    for slug in ('cards-grid', 'gallery-strip'):
+        for width in ('sm', 'xl', 'full'):
+            php = f'''
+            define('ABSPATH', __DIR__);
+            function get_field($key) {{ return $key === 'container_width' ? '{width}' : ''; }}
+            function esc_attr($value) {{ return htmlspecialchars((string)$value, ENT_QUOTES); }}
+            require 'wordpress/web/app/mu-plugins/bioco-core/includes/helpers.php';
+            $block = []; $is_preview = false;
+            include 'wordpress/web/app/mu-plugins/bioco-core/blocks/{slug}/render.php';
+            '''
+            result = subprocess.run(['php', '-r', php], cwd=ROOT, capture_output=True, text=True, check=True)
+            assert f'data-container="{width}"' in result.stdout
