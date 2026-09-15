@@ -12,6 +12,8 @@
 
 if (!defined('ABSPATH')) exit;
 
+require_once __DIR__ . '/messages.php';
+
 /**
  * bioco_subscriber CPT — confirmed (double-opt-in complete) newsletter
  * subscribers. Not public: this is a data store, not a front-end archive.
@@ -167,14 +169,18 @@ add_action('admin_notices', function () {
 // lifecycle runtime (assets/bioco-forms-lifecycle.js, dependency of every
 // form view script in bioco-core.php) owns loading/retry and appends the
 // script itself after mounting.
-function bioco_forms_localize_block($block_name, $object_name, $endpoint) {
+function bioco_forms_localize_block($block_name, $object_name, $endpoint, array $strings = []) {
     $config = bioco_forms_turnstile_config();
 
+    $group = substr($block_name, strpos($block_name, '/') + 1);
+    foreach (['successMessage' => 'success_message', 'fallbackError' => 'fallback_error', 'captchaError' => 'captcha_error', 'transportError' => 'transport_error'] as $configKey => $field) {
+        $strings[$configKey] = bioco_forms_message($group, $field, $strings[$configKey] ?? '');
+    }
     $handle = bioco_forms_view_script_handle($block_name);
     wp_localize_script($handle, $object_name, [
         'restUrl' => esc_url_raw(rest_url('bioco/v1/' . $endpoint)),
         'turnstileSiteKey' => $config['configured'] ? $config['site_key'] : '',
-    ]);
+    ] + $strings);
 }
 
 function bioco_forms_json_body(WP_REST_Request $request) {
@@ -255,16 +261,19 @@ function bioco_forms_doi_on_confirm($form_type, $data) {
 function bioco_forms_doi_confirm_token($token) {
     $token = is_string($token) ? sanitize_text_field($token) : '';
 
-    if (!$token || !ctype_xdigit($token)) {
-        return ['success' => false, 'form_type' => '', 'error' => 'Kein Bestätigungstoken angegeben.'];
+    if ($token === '') {
+        return ['success' => false, 'form_type' => '', 'error' => bioco_forms_message('shared', 'missing_token')];
     }
 
+    if (!ctype_xdigit($token)) {
+        return ['success' => false, 'form_type' => '', 'error' => bioco_forms_message('shared', 'invalid_token')];
+    }
     $hash = hash('sha256', $token);
     $key = bioco_forms_doi_transient_key($hash);
     $entry = get_transient($key);
 
     if (!is_array($entry) || empty($entry['form_type'])) {
-        return ['success' => false, 'form_type' => '', 'error' => 'Ungültiger oder abgelaufener Bestätigungslink.'];
+        return ['success' => false, 'form_type' => '', 'error' => bioco_forms_message('shared', 'invalid_token')];
     }
 
     delete_transient($key);
@@ -285,16 +294,16 @@ function bioco_forms_validate_membership($data) {
     foreach ($required_fields as $field) {
         $value = isset($data[$field]) ? $data[$field] : null;
         if (!is_string($value) || trim($value) === '') {
-            $errors[$field] = 'Dieses Feld ist erforderlich.';
+            $errors[$field] = bioco_forms_message('shared', 'required_field');
         }
     }
 
     if (!isset($data['privacyAccept']) || $data['privacyAccept'] !== true) {
-        $errors['privacyAccept'] = 'Bitte akzeptieren Sie die Datenschutzerklärung.';
+        $errors['privacyAccept'] = bioco_forms_message('shared', 'privacy');
     }
 
     if (isset($data['email']) && is_string($data['email']) && trim($data['email']) !== '' && !is_email(trim($data['email']))) {
-        $errors['email'] = 'Bitte geben Sie eine gültige E-Mail-Adresse ein.';
+        $errors['email'] = bioco_forms_message('shared', 'email');
     }
 
     $membership_type = isset($data['membershipType']) ? $data['membershipType'] : '';
@@ -314,7 +323,7 @@ function bioco_forms_validate_membership($data) {
         && $shares_only !== null
         && $shares_only >= 1;
     if (!$valid_abo && !$valid_shares_only) {
-        $errors['membershipSelection'] = 'Bitte wählen Sie eine gültige Mitgliedschaft.';
+        $errors['membershipSelection'] = bioco_forms_message('shared', 'membership');
     }
 
     return ['ok' => empty($errors), 'errors' => $errors];
@@ -555,9 +564,9 @@ add_action('rest_api_init', function () {
     ]);
 });
 
-$GLOBALS['bioco_forms_captcha_error'] = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.';
-$GLOBALS['bioco_forms_generic_error'] = 'Es ist ein Fehler aufgetreten.';
-$GLOBALS['bioco_forms_missing_fields_error'] = 'Bitte füllen Sie alle Pflichtfelder aus.';
+$GLOBALS['bioco_forms_captcha_error'] = bioco_forms_message('shared', 'captcha');
+$GLOBALS['bioco_forms_generic_error'] = bioco_forms_message('shared', 'generic');
+$GLOBALS['bioco_forms_missing_fields_error'] = bioco_forms_message('shared', 'missing_fields');
 
 // Mirrors .wp-refs/api-forms/contact/route.ts — subject line is
 // "Kontaktanfrage: {subject}", body lists all submitted fields.
@@ -618,19 +627,21 @@ function bioco_forms_handle_subscribe(WP_REST_Request $request) {
     $token = bioco_forms_doi_create_token('subscribe', ['email' => $email, 'name' => $name]);
     $confirm_url = trailingslashit(home_url('/newsletter-bestaetigen')) . '?token=' . rawurlencode($token);
 
-    $greeting = $name ? ('Hallo ' . $name . ',') : 'Hallo,';
+    $greeting = $name !== ''
+        ? str_replace('{name}', $name, bioco_forms_message('shared', 'newsletter_greeting'))
+        : bioco_forms_message('shared', 'newsletter_greeting_anonymous');
     $body_lines = [
         $greeting,
         '',
-        'Bitte bestätige deine Newsletter-Anmeldung über folgenden Link:',
+        bioco_forms_message('shared', 'newsletter_intro'),
         $confirm_url,
         '',
-        'Der Link ist 24 Stunden gültig.',
+        bioco_forms_message('shared', 'newsletter_expiry'),
         '',
-        'Falls du diese Anmeldung nicht ausgelöst hast, kannst du diese E-Mail ignorieren.',
+        bioco_forms_message('shared', 'newsletter_ignore'),
     ];
 
-    $sent = bioco_forms_send_mail($email, 'Bitte bestätige deine Newsletter-Anmeldung', bioco_forms_lines($body_lines));
+    $sent = bioco_forms_send_mail($email, bioco_forms_message('shared', 'newsletter_subject'), bioco_forms_lines($body_lines));
     if (!$sent) {
         return new WP_REST_Response(['success' => false, 'error' => $GLOBALS['bioco_forms_generic_error']], 500);
     }
@@ -639,7 +650,7 @@ function bioco_forms_handle_subscribe(WP_REST_Request $request) {
 }
 
 // Visit-day and waiting-list send mail immediately (no DOI — see the module
-// docblock above): the reference's "bestätigen Sie über den Link" success
+// docblock above): die Erfolgsmeldung des Referenztexts (Anrede du, Issue #158)
 // copy is specific to subscribe's real double-opt-in, so the ported block
 // view.js uses adapted success text instead of a false promise.
 function bioco_forms_handle_visit_day(WP_REST_Request $request) {
@@ -836,7 +847,7 @@ function bioco_forms_handle_membership(WP_REST_Request $request) {
     $sent = bioco_forms_send_mail(bioco_forms_recipient(), $subject, bioco_forms_lines($lines), $email);
 
     if (!$sent) {
-        return new WP_REST_Response(['success' => false, 'error' => 'E-Mail konnte nicht gesendet werden. Bitte versuchen Sie es später erneut.'], 500);
+        return new WP_REST_Response(['success' => false, 'error' => bioco_forms_message('shared', 'mail_failed')], 500);
     }
 
     $response_body = ['success' => true];

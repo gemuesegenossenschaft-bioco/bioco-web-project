@@ -45,8 +45,5 @@
     scope: SCOPE,
     form: FORM_SELECTOR,
     config: 'biocoSubscribeFormConfig',
-    success: 'Vielen Dank! Bitte bestätigen Sie Ihre Anmeldung über den Link in der E-Mail, die wir Ihnen gesendet haben.',
-    error: 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
-    captcha: 'Bitte bestätigen Sie, dass Sie kein Roboter sind.'
   });
 })();

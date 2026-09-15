@@ -78,6 +78,9 @@ function bioco_render_dynamic_component(string $component, array $values): strin
 
     $block_name = $components[$component];
     $block_slug = substr($block_name, strpos($block_name, '/') + 1);
+    if (function_exists('bioco_forms_message_values')) {
+        $values = bioco_forms_message_values($block_slug, $values);
+    }
     $block_dir = dirname(__DIR__) . '/blocks/' . $block_slug;
     $block_metadata = json_decode((string) file_get_contents($block_dir . '/block.json'), true);
     if (!empty($block_metadata['viewScript'])) {

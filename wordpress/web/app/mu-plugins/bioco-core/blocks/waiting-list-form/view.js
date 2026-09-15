@@ -46,8 +46,5 @@
     scope: SCOPE,
     form: FORM_SELECTOR,
     config: 'biocoWaitingListFormConfig',
-    success: 'Vielen Dank für Ihre Anmeldung! Wir melden uns so schnell wie möglich bei Ihnen.',
-    error: 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
-    captcha: 'Bitte bestätigen Sie, dass Sie kein Roboter sind.'
   });
 })();

@@ -1,205 +1,221 @@
 {
-    "key": "group_bioco_block_doi_confirm",
-    "title": "Newsletter-Bestätigung Block (Bioco)",
-    "fields": [
-        {
-            "key": "field_bioco_doi_confirm_missing_token_message",
-            "label": "Fehler ohne Bestätigungslink",
-            "name": "missing_token_message",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_doi_confirm_success_title",
-            "label": "Titel bei Erfolg",
-            "name": "success_title",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_doi_confirm_success_text",
-            "label": "Text bei Erfolg",
-            "name": "success_text",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_doi_confirm_subscribe_text",
-            "label": "Zusatztext Newsletter",
-            "name": "subscribe_text",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_doi_confirm_visit_text",
-            "label": "Zusatztext Besuchstag",
-            "name": "visit_text",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_doi_confirm_waiting_list_text",
-            "label": "Zusatztext Warteliste",
-            "name": "waiting_list_text",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_doi_confirm_contact_text",
-            "label": "Zusatztext Kontakt",
-            "name": "contact_text",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_doi_confirm_error_title",
-            "label": "Titel bei Fehler",
-            "name": "error_title",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        },
-        {
-            "key": "field_bioco_doi_confirm_home_link_label",
-            "label": "Linktext zur Startseite",
-            "name": "home_link_label",
-            "aria-label": "",
-            "type": "text",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "default_value": "",
-            "maxlength": "",
-            "placeholder": "",
-            "prepend": "",
-            "append": ""
-        }
-    ],
-    "location": [
-        [
-            {
-                "param": "block",
-                "operator": "==",
-                "value": "bioco/doi-confirm"
-            }
-        ]
-    ],
-    "menu_order": 0,
-    "position": "normal",
-    "style": "default",
-    "label_placement": "top",
-    "instruction_placement": "label",
-    "hide_on_screen": "",
-    "active": true,
-    "description": "Editierbare Texte für die Zustände der Double-Opt-in-Bestätigung. render.php zeigt bei einem GET mit Token ein Bestätigungsformular an; der Token wird erst bei POST nach Nonce-Prüfung konsumiert.",
-    "show_in_rest": 0,
-    "modified": 1786788000
+  "key": "group_bioco_block_doi_confirm",
+  "title": "Newsletter-Bestätigung Block (Bioco)",
+  "fields": [
+    {
+      "key": "field_bioco_doi_confirm_missing_token_message",
+      "label": "Fehler ohne Bestätigungslink",
+      "name": "missing_token_message",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_success_title",
+      "label": "Titel bei Erfolg",
+      "name": "success_title",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_success_text",
+      "label": "Text bei Erfolg",
+      "name": "success_text",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_subscribe_text",
+      "label": "Zusatztext Newsletter",
+      "name": "subscribe_text",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_visit_text",
+      "label": "Zusatztext Besuchstag",
+      "name": "visit_text",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_waiting_list_text",
+      "label": "Zusatztext Warteliste",
+      "name": "waiting_list_text",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_contact_text",
+      "label": "Zusatztext Kontakt",
+      "name": "contact_text",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_error_title",
+      "label": "Titel bei Fehler",
+      "name": "error_title",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_home_link_label",
+      "label": "Linktext zur Startseite",
+      "name": "home_link_label",
+      "aria-label": "",
+      "type": "text",
+      "instructions": "",
+      "required": 0,
+      "conditional_logic": 0,
+      "wrapper": {
+        "width": "",
+        "class": "",
+        "id": ""
+      },
+      "default_value": "",
+      "maxlength": "",
+      "placeholder": "",
+      "prepend": "",
+      "append": ""
+    },
+    {
+      "key": "field_bioco_doi_confirm_confirmation_prompt",
+      "label": "Bestätigungsaufforderung",
+      "name": "confirmation_prompt",
+      "type": "textarea",
+      "default_value": "",
+      "required": 1
+    },
+    {
+      "key": "field_bioco_doi_confirm_confirmation_button_label",
+      "label": "Bestätigungsbutton",
+      "name": "confirmation_button_label",
+      "type": "textarea",
+      "default_value": "",
+      "required": 1
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "block",
+        "operator": "==",
+        "value": "bioco/doi-confirm"
+      }
+    ]
+  ],
+  "menu_order": 0,
+  "position": "normal",
+  "style": "default",
+  "label_placement": "top",
+  "instruction_placement": "label",
+  "hide_on_screen": "",
+  "active": true,
+  "description": "Editierbare Texte für die Zustände der Double-Opt-in-Bestätigung. render.php zeigt bei einem GET mit Token ein Bestätigungsformular an; der Token wird erst bei POST nach Nonce-Prüfung konsumiert.",
+  "show_in_rest": 0,
+  "modified": 1786788000
 }

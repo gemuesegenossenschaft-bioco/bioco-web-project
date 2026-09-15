@@ -396,6 +396,18 @@ def test_raw_one_off_color_literal_fails(tmp_path, tmp_manifest):
     assert "literal" in (result.stdout + result.stderr).lower() or "raw" in (result.stdout + result.stderr).lower()
 
 
+@pytest.mark.parametrize("css", [
+    "a:hover { color: #123456; }",
+    "@media (min-width: 900px) { .item { color: #123456; } }",
+])
+def test_raw_color_after_selector_colon_fails(tmp_path, tmp_manifest, css):
+    manifest = _valid_base_manifest(tmp_path)
+    Path(manifest["css"]["files"][0]).write_text(css)
+    result = _run_checker("--manifest", str(tmp_manifest(manifest)))
+    assert result.returncode != 0
+    assert "color" in _out(result)
+
+
 # ---------------------------------------------------------------------------
 # Missing exception reason
 # ---------------------------------------------------------------------------

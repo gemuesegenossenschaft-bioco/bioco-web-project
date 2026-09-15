@@ -737,6 +737,7 @@ final class Bioco_Import_Divi_Composer {
     }
 
     private static function galleryStripSection(array $values): array {
+        $container      = self::modifier($values['container_width'] ?? '', ['sm', 'md', 'lg', 'xl', 'full'], 'xl');
         $columnsDesktop = self::modifier($values['columns_desktop'] ?? '', ['2', '3', '4'], '3');
         $columnsMobile  = self::modifier($values['columns_mobile']  ?? '', ['1', '2'], '1');
         $mediaRatio     = self::modifier($values['media_ratio']    ?? '', ['1:1', '4:3', '16:9'], '4:3');
@@ -805,12 +806,13 @@ final class Bioco_Import_Divi_Composer {
         }
 
         return self::withChildren(
-            bioco_import_divi_block('divi/section', self::classAttr('bioco-divi-section bioco-divi-gallery-strip')),
+            bioco_import_divi_block('divi/section', self::classAttr("bioco-divi-section bioco-divi-gallery-strip bioco-divi-width-{$container}")),
             $rows
         );
     }
 
     private static function cardsGridSection(array $values): array {
+        $container      = self::modifier($values['container_width'] ?? '', ['sm', 'md', 'lg', 'xl', 'full'], 'xl');
         $columnsDesktop = self::modifier($values['columns_desktop'] ?? '', ['2', '3', '4'], '3');
         $columnsMobile  = self::modifier($values['columns_mobile']  ?? '', ['1', '2'], '1');
         $cardStyle      = self::modifier($values['card_style']     ?? '', ['plain', 'soft', 'outlined'], 'soft');
@@ -872,7 +874,7 @@ final class Bioco_Import_Divi_Composer {
         );
 
         return self::withChildren(
-            bioco_import_divi_block('divi/section', self::classAttr('bioco-divi-section bioco-divi-cards-grid')),
+            bioco_import_divi_block('divi/section', self::classAttr("bioco-divi-section bioco-divi-cards-grid bioco-divi-width-{$container}")),
             [$headerRow, $gridRow]
         );
     }

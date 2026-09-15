@@ -44,8 +44,5 @@
     scope: SCOPE,
     form: FORM_SELECTOR,
     config: 'biocoEventSignupFormConfig',
-    success: 'Anmeldung erfolgreich! Vielen Dank für deine Anmeldung. Wir melden uns bei dir.',
-    error: 'Die Anmeldung konnte nicht gesendet werden. Bitte versuche es erneut oder kontaktiere uns direkt.',
-    captcha: 'Bitte bestätigen Sie, dass Sie kein Roboter sind.'
   });
 })();

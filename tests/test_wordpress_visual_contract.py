@@ -233,14 +233,15 @@ def test_shell_chrome_sticky_contract_avoids_overlap_and_scroll_containers():
 def test_shell_chrome_utility_collapse_css_contract():
     chrome_css = (CORE / "assets/bioco-shell.css").read_text()
 
-    # Utility row: collapses on scroll down and is removed from the tab order
-    # while collapsed, restored on scroll up / at page top. The script side of
+    # Utility row stays keyboard reachable while collapsed and expands on focus.
+    # The script side of
     # this contract is executed in tests/test_wordpress_navigation_scroll.py.
     hidden_rule = _css_rule(
         chrome_css, ".bioco-navigation-shell.is-utility-hidden .bioco-utility-nav"
     )
     assert "height: 0" in hidden_rule
-    assert "visibility: hidden" in hidden_rule
+    assert "visibility: hidden" not in hidden_rule
+    assert "overflow: hidden" in _css_rule(chrome_css, ".bioco-utility-nav")
     assert "pointer-events: none" in hidden_rule
     assert ".bioco-navigation-shell.is-utility-hidden .bioco-utility-nav:focus-within" in chrome_css
     assert "prefers-reduced-motion: reduce" in chrome_css

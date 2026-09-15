@@ -109,6 +109,13 @@ namespace {
             if (isset($GLOBALS['BIOCO_URL_TO_ATTACHMENT'][$url])) {
                 return [(object) ['ID' => $GLOBALS['BIOCO_URL_TO_ATTACHMENT'][$url], 'post_type' => 'attachment']];
             }
+            // Documents are tagged via update_post_meta after sideload; the
+            // meta store is the source of truth for their reuse on re-run.
+            foreach ($GLOBALS['BIOCO_META'] as $postId => $meta) {
+                if (($meta['_bioco_import_source_url'] ?? null) === $url) {
+                    return [(object) ['ID' => $postId, 'post_type' => 'attachment']];
+                }
+            }
             return [];
         }
         $matches = [];
@@ -163,6 +170,17 @@ namespace {
         $GLOBALS['BIOCO_JOURNAL_SIDELOAD'][] = $url;
         return $id;
     }
+
+    function wp_tempnam($name) { return tempnam(sys_get_temp_dir(), 'bioco-doc-'); }
+    function media_handle_sideload($fileArray, $postId) {
+        if (!is_file($fileArray['tmp_name'])) return (object) ['error' => ['no-file']];
+        $id = $GLOBALS['BIOCO_NEXT_ID']++;
+        $GLOBALS['BIOCO_ATTACHMENT_TO_URL'][$id] = 'https://staging.bioco.test/wp-content/uploads/' . $fileArray['name'];
+        $GLOBALS['BIOCO_JOURNAL_SIDELOAD'][] = $fileArray['name'];
+        return $id;
+    }
+    function wp_get_attachment_url($id) { return $GLOBALS['BIOCO_ATTACHMENT_TO_URL'][$id] ?? false; }
+    function wp_delete_file($path) { return @unlink($path); }
 
     function get_post_meta($post_id, $key, $single = true) {
         if (!$single) return isset($GLOBALS['BIOCO_META'][$post_id][$key]) ? [$GLOBALS['BIOCO_META'][$post_id][$key]] : [];
@@ -229,6 +247,7 @@ namespace {
     require 'wordpress/web/app/mu-plugins/bioco-core/includes/dynamic-sections.php';
     require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-blocks.php';
     require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-composer.php';
+    require 'wordpress/web/app/mu-plugins/bioco-import/includes/documents.php';
     require 'wordpress/web/app/mu-plugins/bioco-import/includes/pages.php';
     require 'wordpress/web/app/mu-plugins/bioco-import/includes/verify.php';
     require 'wordpress/web/app/mu-plugins/bioco-import/includes/collections.php';

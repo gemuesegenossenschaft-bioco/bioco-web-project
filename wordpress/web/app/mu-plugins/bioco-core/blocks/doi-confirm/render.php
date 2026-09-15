@@ -18,8 +18,8 @@
 if (!defined('ABSPATH')) exit;
 
 $missing_token_message = bioco_field('missing_token_message');
-$confirmation_prompt = __('Bitte bestätige deine Anmeldung.', 'bioco');
-$confirmation_button_label = __('Anmeldung bestätigen', 'bioco');
+$confirmation_prompt = bioco_field('confirmation_prompt');
+$confirmation_button_label = bioco_field('confirmation_button_label');
 $success_title = bioco_field('success_title');
 $success_text = bioco_field('success_text');
 $subscribe_text = bioco_field('subscribe_text');

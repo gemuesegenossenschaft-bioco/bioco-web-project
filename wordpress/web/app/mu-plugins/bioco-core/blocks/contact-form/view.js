@@ -45,8 +45,5 @@
     scope: SCOPE,
     form: FORM_SELECTOR,
     config: 'biocoContactFormConfig',
-    success: 'Vielen Dank für Ihre Nachricht! Wir melden uns so schnell wie möglich bei Ihnen.',
-    error: 'Ihre Nachricht konnte nicht gesendet werden. Bitte versuchen Sie es erneut oder senden Sie uns eine E-Mail direkt an info@bioco.ch',
-    captcha: 'Bitte bestätigen Sie, dass Sie kein Roboter sind.'
   });
 })();

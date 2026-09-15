@@ -67,6 +67,7 @@ function bioco_import_verify_seed(array $seed, array &$report) {
         // sideloaded attachment (by source URL) or resolves to nothing —
         // it never downloads during verify.
         bioco_import_resolve_pending_images($values, 'verify', $imageWarnings);
+        bioco_import_resolve_pending_documents($values, $seed, 'verify', $imageWarnings);
 
         $found = bioco_import_take_marked_block($actualBlocks, $sectionLabel);
         if ($found === null) {
@@ -341,11 +342,15 @@ function bioco_import_verify_runtime_page(array $seed, array &$report) {
     if (!$scan['sections']) {
         $scan['corrupt'][] = 'Kein Divi-Abschnitt im Seiteninhalt gefunden.';
     }
-    if (!$scan['corrupt'] && !bioco_import_runtime_html_is_meaningful($scan['pageHtml'])) {
-        // Per-PAGE judgment: decorative divider/spacer sections may render
-        // nothing individually; the required page as a whole must still show
-        // something a visitor could see.
-        $scan['corrupt'][] = 'Benötigte Seite rendert insgesamt ohne sichtbaren Inhalt (alle Abschnitte leer).';
+    if (!$scan['corrupt']) {
+        try {
+            if (!bioco_import_runtime_html_is_meaningful($scan['pageHtml'])) {
+                // Decorative sections may be empty; the page must show content.
+                $scan['corrupt'][] = 'Benötigte Seite rendert insgesamt ohne sichtbaren Inhalt (alle Abschnitte leer).';
+            }
+        } catch (RuntimeException $error) {
+            $scan['corrupt'][] = $error->getMessage();
+        }
     }
     if ($scan['corrupt']) {
         foreach ($scan['corrupt'] as $detail) {

@@ -178,6 +178,7 @@ function bioco_import_build_desired_content(array $seed, $mode, array &$report) 
         $sectionLabel = implode(',', $item['section_ids']);
 
         bioco_import_resolve_pending_images($values, $mode, $warnings);
+        bioco_import_resolve_pending_documents($values, $seed, $mode, $warnings);
 
         $composerItem = $item;
         $composerItem['values'] = $values;

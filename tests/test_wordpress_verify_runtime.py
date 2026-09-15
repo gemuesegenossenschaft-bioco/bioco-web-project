@@ -1,3 +1,4 @@
+"""Runtime-Prüfung: tests/README.md, Keep/Replace/Remove-Karte."""
 import json
 import subprocess
 from pathlib import Path
@@ -48,6 +49,15 @@ function serialize_block($block) {
 # reimplementation, so the runtime gate is proven against genuine parser
 # behaviour (freeform merging, self-recovery of missing closers, …).
 HARNESS = r'''<?php
+// Model an installation without ext-dom while retaining the real verifier.
+// Only the dedicated subprocess test disables the built-in class_exists.
+if (!function_exists('class_exists')) {
+    function class_exists($name, $autoload = true) {
+        if ($name === 'DOMDocument') return false;
+        try { new ReflectionClass($name); return true; }
+        catch (ReflectionException $error) { return false; }
+    }
+}
 define('ABSPATH', __DIR__ . '/');
 error_reporting(E_ALL);
 
@@ -107,6 +117,15 @@ function get_posts($args) {
     if ($type === 'attachment' && isset($args['meta_value']) && isset($GLOBALS['BIOCO_URL_TO_ATTACHMENT'][$args['meta_value']])) {
         return [(object) ['ID' => $GLOBALS['BIOCO_URL_TO_ATTACHMENT'][$args['meta_value']]]];
     }
+    // Documents are tagged via update_post_meta after sideload; the meta
+    // store is the source of truth for their reuse on re-run.
+    if ($type === 'attachment' && isset($args['meta_key']) && $args['meta_key'] === '_bioco_import_source_url') {
+        foreach ($GLOBALS['BIOCO_META'] as $postId => $meta) {
+            if (($meta['_bioco_import_source_url'] ?? null) === ($args['meta_value'] ?? null)) {
+                return [(object) ['ID' => $postId]];
+            }
+        }
+    }
     return [];
 }
 
@@ -135,6 +154,16 @@ function media_sideload_image($url, $post_id, $description, $return) {
     return $id;
 }
 
+function wp_tempnam($name) { return tempnam(sys_get_temp_dir(), 'bioco-doc-'); }
+function media_handle_sideload($fileArray, $postId) {
+    if (!is_file($fileArray['tmp_name'])) return (object) ['error' => ['no-file']];
+    $id = $GLOBALS['BIOCO_NEXT_ATTACHMENT_ID']++;
+    $GLOBALS['BIOCO_ATTACHMENT_TO_URL'][$id] = 'https://staging.bioco.test/wp-content/uploads/' . $fileArray['name'];
+    return $id;
+}
+function wp_get_attachment_url($id) { return $GLOBALS['BIOCO_ATTACHMENT_TO_URL'][$id] ?? false; }
+function wp_delete_file($path) { return @unlink($path); }
+
 WP_SERIALIZER
 
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/report.php';
@@ -142,6 +171,7 @@ require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/dynamic-sections.php';
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-blocks.php';
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-composer.php';
+require 'wordpress/web/app/mu-plugins/bioco-import/includes/documents.php';
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/pages.php';
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/verify.php';
 
@@ -195,7 +225,7 @@ def _b64(text: str) -> str:
     return base64.b64encode(text.encode("utf-8")).decode("ascii")
 
 
-def _run_scenario(tmp_path: Path, scenario: dict) -> dict:
+def _run_scenario(tmp_path: Path, scenario: dict, php_options=()) -> dict:
     scenario = dict(scenario)
     scenario["seed_dir"] = str(SEED_DIR)
     scenario_path = tmp_path / "scenario.json"
@@ -203,7 +233,7 @@ def _run_scenario(tmp_path: Path, scenario: dict) -> dict:
     harness_path = tmp_path / "harness-verify.php"
     harness_path.write_text(HARNESS.replace("WP_SERIALIZER", WP_SERIALIZER_STUB), encoding="utf-8")
     proc = subprocess.run(
-        ["php", "-d", "error_reporting=E_ALL", "-f", str(harness_path), str(scenario_path)],
+        ["php", *php_options, "-d", "error_reporting=E_ALL", "-f", str(harness_path), str(scenario_path)],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -261,6 +291,17 @@ def test_runtime_verify_accepts_every_page_after_editorial_change(tmp_path):
         assert counts.get(status, 0) == 0, counts
     # The output proof ran the real render path for every top-level section.
     assert len(result["render_calls"]) >= 22, result["render_calls"][:5]
+
+
+def test_runtime_verify_reports_missing_dom_and_continues(tmp_path):
+    result = _run_scenario(
+        tmp_path,
+        {"build_seeds": True, "runtime": True, "render_html": "<img src='/test.png'>"},
+        php_options=("-d", "disable_functions=class_exists"),
+    )
+    assert result["counts"].get("runtime-corrupt") == 22
+    assert len({row["page"] for row in result["rows"]}) == 22
+    assert "ext-dom" in json.dumps(result["rows"])
 
 
 def test_runtime_verify_accepts_valid_editorial_content_without_section_markers(tmp_path):

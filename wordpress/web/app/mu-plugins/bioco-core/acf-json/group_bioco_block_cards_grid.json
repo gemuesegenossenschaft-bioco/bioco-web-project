@@ -27,6 +27,24 @@
             "prefix_name": 0
         },
         {
+            "key": "field_bioco_cards_grid_container_width",
+            "label": "Containerbreite",
+            "name": "container_width",
+            "type": "select",
+            "instructions": "Maximale Breite des Blocks.",
+            "required": 0,
+            "conditional_logic": 0,
+            "wrapper": { "width": "", "class": "", "id": "" },
+            "choices": { "sm": "S", "md": "M", "lg": "L", "xl": "XL", "full": "Voll" },
+            "default_value": "xl",
+            "return_format": "value",
+            "multiple": 0,
+            "allow_null": 0,
+            "ui": 1,
+            "ajax": 0,
+            "placeholder": ""
+        },
+        {
             "key": "field_bioco_cards_grid_columns_desktop",
             "label": "Spalten Desktop",
             "name": "columns_desktop",

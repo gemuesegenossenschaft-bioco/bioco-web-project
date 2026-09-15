@@ -64,21 +64,18 @@ header:has(.bioco-navigation-shell) {
   border-bottom: 1px solid var(--wp--preset--color--bioco-border);
   overflow: hidden;
   opacity: 1;
-  visibility: visible;
-  transition: height .22s ease, opacity .18s ease, visibility .22s;
+  transition: height .22s ease, opacity .18s ease;
 }
 
 .bioco-navigation-shell.is-utility-hidden .bioco-utility-nav {
   height: 0;
   opacity: 0;
-  visibility: hidden;
   pointer-events: none;
 }
 
 .bioco-navigation-shell.is-utility-hidden .bioco-utility-nav:focus-within {
   height: 70px;
   opacity: 1;
-  visibility: visible;
   pointer-events: auto;
 }
 
@@ -253,6 +250,10 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
     gap: 0;
     padding: 12px 20px 24px;
     background: var(--wp--preset--color--bioco-bg);
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .bioco-primary-nav.is-open li.bioco-mobile-utility {
     display: block;

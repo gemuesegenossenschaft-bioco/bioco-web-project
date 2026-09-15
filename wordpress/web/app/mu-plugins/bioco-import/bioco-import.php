@@ -40,6 +40,7 @@ unset($biocoImportSeedCandidates, $biocoImportSeedCandidate, $biocoImportSeedDir
 require_once BIOCO_IMPORT_DIR . '/includes/seeds.php';
 require_once BIOCO_IMPORT_DIR . '/includes/section-map.php';
 require_once BIOCO_IMPORT_DIR . '/includes/report.php';
+require_once BIOCO_IMPORT_DIR . '/includes/documents.php';
 require_once BIOCO_IMPORT_DIR . '/includes/pages.php';
 require_once BIOCO_IMPORT_DIR . '/includes/verify.php';
 require_once BIOCO_IMPORT_DIR . '/includes/collections.php';

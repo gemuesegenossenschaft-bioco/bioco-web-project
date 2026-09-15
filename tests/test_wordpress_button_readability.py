@@ -189,6 +189,34 @@ def _style(page, sel, pseudo=None):
     return data
 
 
+def test_collapsed_utility_navigation_reopens_on_keyboard_focus(page):
+    base, browser_page = page
+    browser_page.goto(base)
+    browser_page.set_content(f'''<link rel="stylesheet" href="{base}/wordpress/web/app/mu-plugins/bioco-core/assets/bioco-shell.css">
+        <div class="bioco-navigation-shell is-utility-hidden">
+          <nav class="bioco-utility-nav"><a href="#account">Account</a></nav>
+        </div><a href="#next">Next</a>''')
+    browser_page.wait_for_function("getComputedStyle(document.querySelector('.bioco-utility-nav')).height === '0px'")
+    browser_page.keyboard.press("Tab")
+    assert browser_page.locator(".bioco-utility-nav a").evaluate("el => el === document.activeElement")
+    browser_page.wait_for_function("document.querySelector('.bioco-utility-nav').getBoundingClientRect().height >= 69")
+
+
+def test_short_mobile_menu_scrolls_to_last_link(page):
+    base, pg = page
+    pg.set_viewport_size({"width": 600, "height": 320})
+    pg.goto(f"{base}/tests/fixtures/button-readability/home.html", wait_until="load")
+    pg.locator(".bioco-menu-toggle").click()
+    for _ in range(pg.locator("#bioco-primary-menu a").count() - 1):
+        pg.keyboard.press("Tab")
+    last_link = pg.locator("#bioco-primary-menu a").last
+    assert last_link.evaluate("el => el === document.activeElement")
+    box = last_link.bounding_box()
+    assert box["y"] >= 76
+    assert box["y"] + box["height"] <= 320
+    assert pg.locator("#bioco-primary-menu").evaluate("el => el.scrollTop > 0")
+
+
 def _assert_organic_reference(style, *, min_height):
     assert style["clipPath"].replace(" ", "") == REF_POLYGON.replace(" ", ""), style["clipPath"]
     assert style["borderRadius"] == "28px 22px 26px 18px", style["borderRadius"]
@@ -238,6 +266,14 @@ def _outline_pixels_outside(page, sel, band=8):
     """
     from PIL import Image
 
+    # Keyboard focus can expand the utility row and move the target. Measure
+    # after finite transitions finish so the screenshot uses the same box.
+    page.evaluate("""async () => {
+        await document.fonts.ready;
+        await Promise.all(document.getAnimations()
+            .filter(animation => Number.isFinite(animation.effect.getComputedTiming().endTime))
+            .map(animation => animation.finished.catch(() => {})));
+    }""")
     box = page.locator(sel).first.bounding_box()
     margin = band + 12
     shot = page.screenshot(

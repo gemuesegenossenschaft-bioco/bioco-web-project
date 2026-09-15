@@ -305,7 +305,7 @@ def main() -> int:
             })
 
     # Regex patterns
-    decl_re = re.compile(r"([\w-]+)\s*:\s*([^;}]*)[;}]")
+    decl_re = re.compile(r"([\w-]+)\s*:\s*([^;{}]*)[;}]")
     monitored_properties = {
         "color",
         "background-color",

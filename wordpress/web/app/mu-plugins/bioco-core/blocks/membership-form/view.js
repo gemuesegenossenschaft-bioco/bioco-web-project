@@ -94,8 +94,6 @@
     scope: SCOPE,
     form: FORM_SELECTOR,
     config: 'biocoMembershipFormConfig',
-    error: 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
-    captcha: 'Bitte bestätigen Sie, dass Sie kein Roboter sind.',
     onPrepare: applyCalculatorSelection,
     onValid: function () {
       window.location.href = THANK_YOU_URL;
