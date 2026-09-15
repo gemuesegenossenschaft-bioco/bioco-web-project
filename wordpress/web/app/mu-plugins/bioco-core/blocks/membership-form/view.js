@@ -1,19 +1,21 @@
 /**
- * Membership form view script (W10, issue #97). Plain ES5-safe vanilla JS
- * (the theme has no build step). Same generic submit engine as
- * blocks/contact-form/view.js, extended to surface fieldErrors returned by
- * POST /wp-json/bioco/v1/membership (see bioco_forms_validate_membership()
- * in the bioco-forms mu-plugin, ported from .wp-refs/membership.ts).
- *
- * This is the single-page long-form variant — see the deferral note at the
- * top of render.php. Redirect-on-success targets the imported WordPress
- * thank-you page at /anmeldung-danke/.
+ * Membership form view script (W10, issue #97 → shared lifecycle #181).
+ * Thin adapter: the shared submit engine lives in
+ * assets/bioco-forms-lifecycle.js (registered as this script's dependency
+ * in bioco-core.php). This file carries the membership-specific contract:
+ * the pricing-calculator URL selection (?abo=&shares=&additional=) applied
+ * before wiring, the flattened fieldErrors display, and the success policy
+ * — navigate to the imported WordPress thank-you page at
+ * /anmeldung-danke/ (no inline success replacement). PHP sends
+ * administrator mail first and treats intranet forwarding as best effort,
+ * so HTTP 200 {success:true,forwarded:false} is still a completed signup
+ * and must redirect exactly once.
  */
 (function () {
   'use strict';
 
-  var FALLBACK_ERROR = 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.';
-  var CAPTCHA_MISSING_ERROR = 'Bitte bestätigen Sie, dass Sie kein Roboter sind.';
+  var SCOPE = '.cms-membership-form';
+  var FORM_SELECTOR = 'form[data-form="membership"]';
   var THANK_YOU_URL = '/anmeldung-danke/';
 
   function nonNegativeInteger(value) {
@@ -50,79 +52,6 @@
     setHiddenValue(form, 'sharesOnly', 0);
   }
 
-  function ready(fn) {
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', fn);
-    } else {
-      fn();
-    }
-  }
-
-  function loadTurnstile(cb) {
-    if (window.turnstile) {
-      cb();
-      return;
-    }
-    var existing = document.getElementById('bioco-cf-turnstile-js');
-    if (existing) {
-      existing.addEventListener('load', cb);
-      return;
-    }
-    var script = document.createElement('script');
-    script.id = 'bioco-cf-turnstile-js';
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
-    script.async = true;
-    script.defer = true;
-    script.addEventListener('load', cb);
-    document.head.appendChild(script);
-  }
-
-  function serializeForm(form) {
-    var data = {};
-    var elements = form.elements;
-    for (var i = 0; i < elements.length; i++) {
-      var el = elements[i];
-      if (!el.name || el.type === 'submit' || el.type === 'button' || el.disabled) continue;
-
-      var isMulti = el.name.slice(-2) === '[]';
-      var key = isMulti ? el.name.slice(0, -2) : el.name;
-
-      if (el.type === 'checkbox') {
-        if (isMulti) {
-          if (!data[key]) data[key] = [];
-          if (el.hasAttribute('data-bool-array')) {
-            data[key].push(el.checked);
-          } else if (el.checked) {
-            data[key].push(el.value);
-          }
-        } else {
-          data[key] = el.checked;
-        }
-        continue;
-      }
-
-      if (el.type === 'radio') {
-        if (!el.checked) continue;
-        data[key] = el.value;
-        continue;
-      }
-
-      if (el.type === 'number') {
-        data[key] = el.value === '' ? '' : Number(el.value);
-        continue;
-      }
-
-      data[key] = el.value;
-    }
-    return data;
-  }
-
-  function showMessage(container, text, isError) {
-    container.textContent = text;
-    container.hidden = false;
-    container.className = 'form-message bento-card ' + (isError ? 'form-error' : 'form-success');
-  }
-
   function fieldErrorsToText(fieldErrors) {
     if (!fieldErrors) return '';
     var parts = [];
@@ -134,103 +63,47 @@
     return parts.join(' ');
   }
 
-  function initForm(form) {
-    applyCalculatorSelection(form);
-
-    var configName = form.getAttribute('data-config') || 'biocoMembershipFormConfig';
-    var config = window[configName] || {};
-    var messageBox = form.parentNode.querySelector('.form-message');
-    var submitBtn = form.querySelector('[type="submit"]');
-    var captchaContainer = form.querySelector('[data-form-captcha]');
-    var captchaToken = '';
-    var widgetId = null;
-
-    function renderCaptcha() {
-      if (!captchaContainer || !config.turnstileSiteKey) return;
-      loadTurnstile(function () {
-        widgetId = window.turnstile.render(captchaContainer, {
-          sitekey: config.turnstileSiteKey,
-          callback: function (token) {
-            captchaToken = token;
-          },
-          'expired-callback': function () {
-            captchaToken = '';
-          }
-        });
-      });
+  // The renderers ship novalidate; without the shared runtime nothing would
+  // intercept the submit event and the form would submit personal data via
+  // a native GET. Block native submission so a failed runtime leaves the
+  // form inert (fail closed: no request, no mail), never leaky.
+  function onReady(fn) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', fn);
+    } else {
+      fn();
     }
+  }
 
-    renderCaptcha();
-
-    form.addEventListener('submit', function (event) {
-      event.preventDefault();
-
-      if (config.turnstileSiteKey && !captchaToken) {
-        if (messageBox) showMessage(messageBox, CAPTCHA_MISSING_ERROR, true);
-        return;
-      }
-
-      var data = serializeForm(form);
-      data.captchaToken = captchaToken;
-
-      if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.textContent = submitBtn.getAttribute('data-submitting-label') || submitBtn.textContent;
-      }
-      if (messageBox) {
-        messageBox.hidden = true;
-      }
-
-      fetch(config.restUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      })
-        .then(function (response) {
-          return response.json().catch(function () {
-            return { success: false, error: 'Server error: ' + response.status };
-          }).then(function (json) {
-            return { ok: response.ok, json: json };
-          });
-        })
-        .then(function (result) {
-          if (result.ok && result.json && result.json.success) {
-            window.location.href = THANK_YOU_URL;
-          } else {
-            var errorMessage = (result.json && result.json.error) || FALLBACK_ERROR;
-            var fieldText = result.json ? fieldErrorsToText(result.json.fieldErrors) : '';
-            if (fieldText) errorMessage += ' ' + fieldText;
-            if (messageBox) showMessage(messageBox, errorMessage, true);
-            if (submitBtn) {
-              submitBtn.disabled = false;
-              submitBtn.textContent = submitBtn.getAttribute('data-submit-label') || submitBtn.textContent;
-            }
-            captchaToken = '';
-            if (window.turnstile && widgetId !== null) {
-              window.turnstile.reset(widgetId);
-            }
-          }
-        })
-        .catch(function () {
-          if (messageBox) showMessage(messageBox, FALLBACK_ERROR, true);
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = submitBtn.getAttribute('data-submit-label') || submitBtn.textContent;
-          }
-          captchaToken = '';
-          if (window.turnstile && widgetId !== null) {
-            window.turnstile.reset(widgetId);
-          }
+  if (!window.BiocoForms) {
+    if (window.console && window.console.error) {
+      window.console.error('bioco forms: lifecycle runtime missing, membership form stays inert');
+    }
+    onReady(function () {
+      var forms = document.querySelectorAll(SCOPE + ' ' + FORM_SELECTOR);
+      for (var i = 0; i < forms.length; i++) {
+        forms[i].addEventListener('submit', function (event) {
+          event.preventDefault();
         });
+      }
     });
+    return;
   }
 
-  function init() {
-    var forms = document.querySelectorAll('.cms-membership-form form[data-form="membership"]');
-    for (var i = 0; i < forms.length; i++) {
-      initForm(forms[i]);
+  window.BiocoForms.mount({
+    scope: SCOPE,
+    form: FORM_SELECTOR,
+    config: 'biocoMembershipFormConfig',
+    error: 'Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.',
+    captcha: 'Bitte bestätigen Sie, dass Sie kein Roboter sind.',
+    onPrepare: applyCalculatorSelection,
+    onValid: function () {
+      window.location.href = THANK_YOU_URL;
+    },
+    errorText: function (json, fallback) {
+      var message = (json && json.error) || fallback;
+      var fieldText = json ? fieldErrorsToText(json.fieldErrors) : '';
+      return fieldText ? message + ' ' + fieldText : message;
     }
-  }
-
-  ready(init);
+  });
 })();

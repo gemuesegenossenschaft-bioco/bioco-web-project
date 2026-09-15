@@ -76,13 +76,13 @@ function bioco_import_resolve_pending_documents(array &$values, array $seed, $mo
         }
         if (!is_string($value)) continue;
 
-        $rewrite = static function (array $m) use ($seed, $mode, &$warnings) {
+        $rewrite = static function (array $m) use ($seed, $mode, $key, &$warnings) {
             $path = BIOCO_IMPORT_DOCUMENTS_PREFIX . basename($m[1]);
             $attachmentId = bioco_import_resolve_document_for_path($seed, $path, $mode);
             if ($attachmentId === null) {
                 $warnings[] = ($mode === 'apply')
                     ? "Dokument-Import fehlgeschlagen: {$path} — Verweis bleibt unverändert."
-                    : "WÜRDE: Dokument importieren: {$path} (Feld '{$m[0]}').";
+                    : "WÜRDE: Dokument importieren: {$path} (Feld '{$key}').";
                 return $m[0];
             }
             return str_replace($m[1], (string) wp_get_attachment_url($attachmentId), $m[0]);

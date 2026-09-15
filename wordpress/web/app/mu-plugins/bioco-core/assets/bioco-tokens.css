@@ -50,10 +50,14 @@
   --wp--custom--radius--sm: 12px;
   --wp--custom--radius--md: 18px;
   --wp--custom--radius--lg: 24px;
+  --wp--custom--radius--xl: 32px;
   --wp--custom--radius--pill: 999px;
   --wp--custom--shadow--sm: 0 1px 3px rgba(31,42,27,0.08);
   --wp--custom--shadow--md: 0 4px 12px rgba(31,42,27,0.12);
   --wp--custom--shadow--lg: 0 8px 24px rgba(31,42,27,0.16);
+
+  /* settings.custom.border (nested) -> --wp--custom--border--{subkey} */
+  --wp--custom--border--thin: 1px solid var(--wp--preset--color--bioco-border);
 
   /* settings.layout -> --wp--style--global--{content,wide}-size */
   --wp--style--global--content-size: 1160px;

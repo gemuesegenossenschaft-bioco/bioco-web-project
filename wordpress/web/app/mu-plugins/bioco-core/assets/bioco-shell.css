@@ -1,4 +1,16 @@
-/* Theme-owned shell. Block presentation remains in bioco-core. */
+/**
+ * Shared navigation/footer shell chrome, owned by bioco-core (#180).
+ *
+ * Moved verbatim from web/app/themes/bioco/assets/app.css (removed in the
+ * same change) so the active theme no longer loads site chrome from the
+ * fallback theme's directory: every theme adapter (bioco block theme,
+ * bioco-divi) receives this stylesheet through bioco-core's
+ * wp_enqueue_scripts bootstrap below (handle `bioco-shell`, depends on
+ * `bioco-tokens`, versioned by filemtime). Block presentation remains in
+ * bioco-blocks.css; theme-specific presentation layers on top
+ * (e.g. bioco-divi/style.css). The file references no external assets —
+ * fonts stay in the themes (theme.json / child style.css @font-face).
+ */
 *,
 *::before,
 *::after { box-sizing: border-box; }
@@ -52,21 +64,18 @@ header:has(.bioco-navigation-shell) {
   border-bottom: 1px solid var(--wp--preset--color--bioco-border);
   overflow: hidden;
   opacity: 1;
-  visibility: visible;
-  transition: height .22s ease, opacity .18s ease, visibility .22s;
+  transition: height .22s ease, opacity .18s ease;
 }
 
 .bioco-navigation-shell.is-utility-hidden .bioco-utility-nav {
   height: 0;
   opacity: 0;
-  visibility: hidden;
   pointer-events: none;
 }
 
 .bioco-navigation-shell.is-utility-hidden .bioco-utility-nav:focus-within {
   height: 70px;
   opacity: 1;
-  visibility: visible;
   pointer-events: auto;
 }
 
@@ -119,7 +128,9 @@ header:has(.bioco-navigation-shell) {
 
 .bioco-primary-nav li a:hover { color: var(--wp--preset--color--bioco-green); }
 
-.bioco-primary-nav li a[aria-current='page'] {
+/* #178: the CTA is a button, not an active text link — the aria-current
+   dark-green/underline treatment made it unreadable on its own polygon. */
+.bioco-primary-nav li a[aria-current='page']:not(.bioco-primary-cta) {
   color: var(--wp--preset--color--bioco-green-dark);
   text-decoration: underline;
   text-decoration-thickness: 3px;
@@ -135,6 +146,7 @@ header:has(.bioco-navigation-shell) {
   padding: 10px 20px;
   background: transparent;
   color: #fff;
+  text-decoration: none;
   border-radius: 24px 20px 26px 18px;
   text-shadow: none;
   letter-spacing: .04em;
@@ -238,6 +250,10 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
     gap: 0;
     padding: 12px 20px 24px;
     background: var(--wp--preset--color--bioco-bg);
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .bioco-primary-nav.is-open li.bioco-mobile-utility {
     display: block;

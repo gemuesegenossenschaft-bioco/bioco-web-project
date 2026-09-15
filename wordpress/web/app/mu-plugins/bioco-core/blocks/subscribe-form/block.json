@@ -12,7 +12,7 @@
     "mode": "auto",
     "renderTemplate": "render.php"
   },
-  "viewScript": "file:./view.js",
+  "viewScript": "bioco-subscribe-form-view-script",
   "supports": {
     "anchor": true,
     "align": false,

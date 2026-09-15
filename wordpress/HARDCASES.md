@@ -101,7 +101,7 @@ Every function/filter in the original theme `functions.php`, classified, and **w
 | Symbol | Classification | Moves to | When |
 |---|---|---|---|
 | `after_setup_theme` closure (`wp-block-styles`, `responsive-embeds`, `editor-styles`, textdomain load) | theme-presentation | stays in theme | never (theme's own bootstrap) |
-| `wp_enqueue_scripts` closure enqueuing `assets/app.css` | block-CSS loader | **replaced** by `bioco-core`'s `bioco_core_enqueue_block_assets()` (pattern 7); theme's copy is deleted once `app.css` has no non-block chrome left to enqueue (Hard Case 5) | fleet completion |
+| `wp_enqueue_scripts` closure enqueuing `assets/app.css` | block-CSS loader | **replaced** by `bioco-core`'s `bioco_core_enqueue_block_assets()` (pattern 7); theme's copy is deleted once `app.css` has no non-block chrome left to enqueue (Hard Case 5). Done (#180): the remaining shell chrome moved to `bioco-core/assets/bioco-shell.css` (front end only, hook priority 20), the theme's enqueue closure was deleted, and `app.css` was removed | fleet completion, reached in #180 |
 | `acf/settings/save_json` / `acf/settings/load_json` filters | block-shared infra | `bioco-core.php`; after fleet completion `load_json` returns ONLY the `bioco-core/acf-json` path. Additive theme+plugin loading was a migration-window state, not the end state. | tracer bullet adds the plugin's copy; theme's copy deleted and plugin `load_json` made exclusive at fleet completion |
 | `block_categories_all` filter | block-shared infra | `bioco-core.php`, verbatim | tracer bullet |
 | `init` block-registration glob | block-shared infra | `bioco-core.php` (new copy over `bioco-core/blocks`); theme **keeps its own copy** globbing its own `blocks/` dir until empty | tracer bullet adds the plugin's copy; theme's copy deleted at fleet completion |
@@ -155,7 +155,10 @@ is sufficient, same as the two existing mu-plugins.
   background, scoped hero/feature/CTA layout, and responsive breakpoint. No design-token duplication
   (uses `--wp--preset--*`/`--wp--custom--*` values already defined by `bioco-tokens.css`).
 - `functions.php` — enqueues the parent Divi stylesheet first, then the child theme's own
-  `style.css` with `divi-parent-style` and `bioco-tokens` as dependencies and a filemtime version.
+  `style.css` with `divi-parent-style`, `bioco-tokens`, and `bioco-shell` (the shared shell
+  stylesheet from bioco-core, #180) as dependencies and a filemtime version. The child theme
+  does not enqueue the shell itself — bioco-core owns it (front end only, hook priority 20, so
+  dependency resolution prints parent → shell → child).
   (`get_template_directory_uri()` for the parent stylesheet is correct and intentional — this is the
   one place in the whole restructure where a theme-relative helper is *right*: it targets the **parent
   Divi theme's** stylesheet, which is a theme concern, not a block/content concern.)
@@ -177,7 +180,8 @@ is sufficient, same as the two existing mu-plugins.
   `theme.json` and `assets/fonts/` stay untouched — they remain the canonical value source that
   `bioco-tokens.css` was extracted from (Hard Case 1), and the theme is still fully usable
   standalone (e.g. to verify a block visually, or as an instant rollback target if Divi is ever
-  deactivated).
+  deactivated). Reached in #180: the last front-end enqueue (the shell chrome `app.css`, which the
+  Divi child had been reading from this theme's directory) moved to `bioco-core/assets/bioco-shell.css`.
 - A new `web/app/themes/bioco/README.md` documents this role: "This theme is a fallback/reference
   implementation. All blocks, ACF field groups, and shared render helpers live in the
   `bioco-core` mu-plugin (`web/app/mu-plugins/bioco-core/`) and work under **any** active theme,
@@ -210,7 +214,9 @@ until fleet completion is the same "harmless duplication, single source of truth
 finishes" pattern as Hard Case 1 — the not-yet-migrated blocks that still read from `app.css`
 (`link-tiles`, `doi-confirm`, `group-cards`, and everything using `.btn`/`.cms-section-*`) keep
 working unchanged throughout. At fleet completion, `app.css` is emptied entirely (Hard Case 5), so
-the duplication resolves to a single copy living only in `bioco-blocks.css`.
+the duplication resolves to a single copy living only in `bioco-blocks.css`. The fleet move has
+since completed (#101) and the emptied `app.css` file itself was removed in #180 after its
+remaining shell chrome moved to `bioco-core/assets/bioco-shell.css`.
 
 ## Joint review
 

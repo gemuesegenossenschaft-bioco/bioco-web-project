@@ -142,50 +142,6 @@ def _build_desired_content_payload(seed: dict) -> str:
     )
 
 
-def _page_import_payload(
-    seed: dict,
-    mode: str = "apply",
-    existing_content: str | None | bool = False,
-    preseed_meta: dict | None = None,
-) -> str:
-    """Return PHP code invoking bioco_import_page_for_seed with mocked WP APIs."""
-    seed_b64 = base64.b64encode(json.dumps(seed).encode("utf-8")).decode("ascii")
-    preseed = json.dumps(preseed_meta or {})
-    php = (
-        _preamble()
-        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/report.php';\n"
-        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';\n"
-        + "require 'wordpress/web/app/mu-plugins/bioco-core/includes/dynamic-sections.php';\n"
-        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-blocks.php';\n"
-        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-composer.php';\n"
-        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/documents.php';\n"
-        + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/pages.php';\n"
-        + "$seed = json_decode(base64_decode('" + seed_b64 + "'), true);\n"
-        + "$mode = '" + mode + "';\n"
-        + "$GLOBALS['BIOCO_META'] = json_decode('" + preseed + "', true);\n"
-        + "$GLOBALS['BIOCO_META_WRITES'] = [];\n"
-        + "$GLOBALS['BIOCO_TEST_PAGES'] = [];\n"
-        + "$report = bioco_import_report_new();\n"
-    )
-    if existing_content is False:
-        pass  # create path: no existing page
-    elif existing_content is None:
-        php += (
-            "[$desired, $labels] = bioco_import_build_desired_content($seed, 'apply', $report);\n"
-            + "$GLOBALS['BIOCO_TEST_PAGES'][(string)$seed['slug']] = (object) ['ID' => 7, 'post_content' => $desired, 'post_status' => 'publish'];\n"
-            + "$GLOBALS['BIOCO_META_WRITES'] = [];\n"
-            + "$report = bioco_import_report_new();\n"
-        )
-    else:
-        escaped = json.dumps(existing_content)
-        php += f"$GLOBALS['BIOCO_TEST_PAGES'][(string)$seed['slug']] = (object) ['ID' => 7, 'post_content' => {escaped}, 'post_status' => 'publish'];\n"
-    php += (
-        "bioco_import_page_for_seed($seed, $mode, false, $report);\n"
-        + "echo json_encode(['meta_writes' => $GLOBALS['BIOCO_META_WRITES'], 'rows' => $report['rows'], 'meta' => $GLOBALS['BIOCO_META']]);"
-    )
-    return php
-
-
 def _has_meta_write(writes: list, post_id: int, key: str, value: str) -> bool:
     return any(w["post_id"] == post_id and w["key"] == key and w["value"] == value for w in writes)
 

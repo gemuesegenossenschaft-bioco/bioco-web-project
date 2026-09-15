@@ -51,12 +51,37 @@ reviews:
         getenv().
     - path: "wordpress/**"
       instructions: >-
-        Bedrock + Block-Theme + ACF Blocks. Kernregel (#101): das Theme ist
+        Staging läuft auf Softaculous (Softaculous besitzt WordPress-Core, DB
+        und Admin; aus dem Repo kommt nur eigener Code nach wp-content/) mit
+        Divi 5 als aktivem Theme: bioco-divi ist ein dünnes Child-Theme für
+        Präsentation. Felder/Live-Werte laufen über SCF (Secure Custom Fields);
+        der Seed-Importer erzeugt native Divi-Blöcke mit dynamischen Markern,
+        die bioco_dynamic_expand_markers (render_block/the_content) zur
+        Laufzeit füllt. Kernregel (#101) gilt unverändert: das Theme ist
         austauschbar — Inhalte, Blöcke, Felder und Formulare leben in den
         mu-plugins bioco-core/bioco-content/bioco-forms, NICHT im Theme. Kein
-        Zugriff aus mu-plugins auf get_template_directory()/get_stylesheet_directory().
-        Divi ist lizenzpflichtig und wird nie eingecheckt. Ausgaben immer escapen
-        (esc_html/esc_url/esc_attr, wp_kses für Rich-Text). Secrets nur via getenv().
+        Zugriff aus mu-plugins auf get_template_directory()/
+        get_stylesheet_directory(). Das Block-Theme (bioco) bleibt als
+        Fallback-Adapter real nutzbar und teilt Shell-Assets und Navigation
+        mit Divi — seine Contracts nicht pauschal löschen. Divi ist
+        lizenzpflichtig und wird nie eingecheckt. Ausgaben immer escapen
+        (esc_html/esc_url/esc_attr, wp_kses für Rich-Text). Secrets nur via
+        getenv(). Reviews sollen markieren: (1) quellenbasierte Scheinsicherheit
+        — Tests, die nur Quelldateien auf Strings prüfen, obwohl ein echter
+        Render-/Script-Test existiert (tests/test_wordpress_divi_shell.py,
+        tests/test_wordpress_navigation_scroll.py); (2) Regressionen beim
+        Import/Editor-Ownership — Content, Marker oder Felder wandern ins Theme,
+        oder der Renderer/Editor liest aus dem falschen Ort.
+    - path: "tests/test_wordpress*.py"
+      instructions: >-
+        Tests sind der Paritäts- und Verhaltenswächter des WordPress-Stacks.
+        Bevorzugt verhaltenstestende Prüfung: echte Templates unter PHP
+        rendern, echtes JS in Node ausführen, nur WordPress-Runtime-Funktionen
+        stubben — den getesteten Renderer selbst nie mocken. Prüfe, ob ein
+        Test wirklich fehlschlagen KANN — vacuous, tautologische oder
+        rein quellenbasierte Assertions sind ein Befund, wenn bereits ein
+        echter Verhaltenstest dieselbe Fläche abdeckt. Neue Tests verweisen
+        auf tests/README.md (Keep/Replace/Remove-Karte).
     - path: "**/*.test.ts"
       instructions: >-
         Tests sind der Paritäts-Wächter dieses Projekts (Zero-Visual-Change-Umbau).

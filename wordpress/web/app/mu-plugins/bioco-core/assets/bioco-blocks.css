@@ -11,8 +11,9 @@
  * (needed by hero), .cms-section* (needed by rich-text), and
  * .card-header/.card-body/.bento-card-fullwidth (needed by events-feed,
  * originally defined alongside the not-yet-migrated link-tiles block).
- * These rules still also exist in the theme's app.css until the fleet move
- * empties it out — harmless duplication in the meantime (same values).
+ * The duplicate rule copies in the theme's app.css were removed when the
+ * fleet move completed (#101); the file itself is gone since #180, when the
+ * remaining shell chrome moved to bioco-shell.css in this directory.
  */
 
 .hero {
