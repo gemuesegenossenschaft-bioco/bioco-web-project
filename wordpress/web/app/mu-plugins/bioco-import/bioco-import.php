@@ -49,6 +49,7 @@ require_once BIOCO_IMPORT_CORE_INCLUDES_DIR . '/dynamic-sections.php';
 require_once BIOCO_IMPORT_DIR . '/includes/divi-blocks.php';
 require_once BIOCO_IMPORT_DIR . '/includes/divi-composer.php';
 require_once BIOCO_IMPORT_DIR . '/includes/native-migration.php';
+require_once BIOCO_IMPORT_DIR . '/includes/design-system.php';
 
 // WP-CLI is the only place this plugin registers a "command" — every include
 // above is plain functions, callable/unit-reviewable without a WP-CLI

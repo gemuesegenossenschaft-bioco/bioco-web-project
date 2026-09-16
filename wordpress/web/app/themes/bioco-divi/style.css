@@ -1686,3 +1686,25 @@ body.home,
         margin: 0 auto;
     }
 }
+
+/* Theme Builder supplies the shell; its neutral wrappers must not add a
+   second content gutter around the page's own editable Divi sections.
+   The text-module reset targets only the shell's own adapter modules
+   (direct children), never .et_pb_text inside .et_pb_post_content. */
+.bioco-global-layout.et_pb_section,
+.bioco-global-layout > .et_pb_row,
+.bioco-global-layout > .et_pb_row > .et_pb_column,
+.bioco-global-layout .et_pb_post_content,
+.bioco-global-layout > .et_pb_row > .et_pb_column > .et_pb_text {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: none;
+    background: transparent;
+}
+
+.et-l--header:has(.bioco-global-header) {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
