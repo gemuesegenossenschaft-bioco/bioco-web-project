@@ -13,6 +13,7 @@
 if (!defined('ABSPATH')) exit;
 
 require_once __DIR__ . '/messages.php';
+require_once __DIR__ . '/membership.php';
 
 /**
  * bioco_subscriber CPT — confirmed (double-opt-in complete) newsletter
@@ -328,6 +329,24 @@ function bioco_forms_validate_membership($data) {
         $errors['membershipSelection'] = bioco_forms_message('shared', 'membership');
     }
 
+    foreach (['phone', 'mobilePhone', 'birthday', 'comment', 'otherActivity', 'weitereProdukte', 'depot', 'paymentType'] as $field) {
+        if (isset($data[$field]) && (!is_string($data[$field]) || strlen($data[$field]) > 5000)) $errors[$field] = bioco_forms_message('shared', 'generic');
+    }
+    foreach (['preferredDays', 'preferredTimes', 'activityAreas', 'zusatzabos'] as $field) {
+        if (isset($data[$field]) && (!is_array($data[$field]) || !array_is_list($data[$field]) || count($data[$field]) > 100 || array_filter($data[$field], static fn($item) => !is_string($item)))) $errors[$field] = bioco_forms_message('shared', 'generic');
+    }
+    if (!empty($data['birthday']) && is_string($data['birthday'])) {
+        $date = DateTimeImmutable::createFromFormat('!Y-m-d', $data['birthday']);
+        if (!$date || $date->format('Y-m-d') !== $data['birthday'] || $date > new DateTimeImmutable('today')) $errors['birthday'] = bioco_forms_message('shared', 'generic');
+    }
+    $commitments = $data['commitmentAccepted'] ?? [];
+    $count = bioco_forms_bounded_share_count($data['commitmentCount'] ?? null, 1);
+    $signature = $data['commitmentSignature'] ?? '';
+    $valid_signature = $count !== null && is_string($signature) && hash_equals(bioco_forms_commitment_signature($count), $signature);
+    if (!$valid_signature || !is_array($commitments) || !array_is_list($commitments) || count($commitments) !== $count || array_filter($commitments, static fn($item) => $item !== true)) {
+        $errors['commitmentAccepted'] = bioco_forms_message('shared', 'required_field');
+    }
+
     return ['ok' => empty($errors), 'errors' => $errors];
 }
 
@@ -357,6 +376,7 @@ function bioco_forms_membership_total_shares($data) {
 
 function bioco_forms_membership_notes($data) {
     $lines = [];
+    if (!empty($data['comment']) && is_string($data['comment'])) $lines[] = trim($data['comment']);
 
     if (!empty($data['preferredDays']) && is_array($data['preferredDays'])) {
         $lines[] = 'Bevorzugte Tage: ' . implode(', ', $data['preferredDays']);
@@ -380,8 +400,7 @@ function bioco_forms_membership_notes($data) {
     return implode("\n", $lines);
 }
 
-// D.2a mirror — field names as agreed with the Django intranet, see
-// .wp-refs/membership.ts INTRANET_FIELD_NAMES (still provisional there).
+// Current intranet field contract (#139); transport is isolated in membership.php.
 function bioco_forms_build_intranet_payload($data) {
     $commitment_accepted = false;
     if (!empty($data['commitmentAccepted']) && is_array($data['commitmentAccepted'])) {
@@ -395,130 +414,25 @@ function bioco_forms_build_intranet_payload($data) {
     }
     $terms = $commitment_accepted && isset($data['privacyAccept']) && $data['privacyAccept'] === true;
 
-    return [
+    $payload = [
         'first_name' => isset($data['firstName']) ? $data['firstName'] : '',
         'last_name' => isset($data['lastName']) ? $data['lastName'] : '',
         'email' => isset($data['email']) ? $data['email'] : '',
         'phone' => isset($data['phone']) ? $data['phone'] : '',
-        'street' => isset($data['address']) ? $data['address'] : '',
-        'postal_code' => isset($data['zip']) ? $data['zip'] : '',
-        'city' => isset($data['city']) ? $data['city'] : '',
+        'addr_street' => isset($data['address']) ? $data['address'] : '',
+        'addr_zipcode' => isset($data['zip']) ? $data['zip'] : '',
+        'addr_location' => isset($data['city']) ? $data['city'] : '',
         'membership_type' => isset($data['membershipType']) ? $data['membershipType'] : '',
         'abo' => isset($data['aboType']) ? $data['aboType'] : '',
         'shares' => (string) bioco_forms_membership_total_shares($data),
         'depot' => isset($data['depot']) ? $data['depot'] : '',
         'payment_interval' => isset($data['paymentType']) ? $data['paymentType'] : '',
-        'terms' => $terms ? 'on' : '',
-        'notes' => bioco_forms_membership_notes($data),
+        'agb' => $terms ? 'on' : '',
+        'mobile_phone' => isset($data['mobilePhone']) ? $data['mobilePhone'] : '',
+        'birthday' => isset($data['birthday']) ? $data['birthday'] : '',
+        'comment' => bioco_forms_membership_notes($data),
     ];
-}
-
-/**
- * Intranet forwarding — PHP port of .wp-refs/intranetSignup.ts
- * forwardToIntranet(). Best-effort only: the admin email sent by the
- * membership handler is already the system of record, so a forwarding
- * failure here must never fail the user's submission.
- */
-
-function bioco_forms_extract_csrf_cookie($response) {
-    $header = wp_remote_retrieve_header($response, 'set-cookie');
-    if (is_array($header)) {
-        $header = implode('; ', $header);
-    }
-    if (!$header) {
-        return null;
-    }
-    if (preg_match('/csrftoken=([^;]+)/', $header, $matches)) {
-        return $matches[1];
-    }
-    return null;
-}
-
-function bioco_forms_extract_hidden_csrf_token($html) {
-    if (preg_match('/name=["\']csrfmiddlewaretoken["\'][^>]*value=["\']([^"\']+)["\']/', $html, $matches)) {
-        return $matches[1];
-    }
-    if (preg_match('/value=["\']([^"\']+)["\'][^>]*name=["\']csrfmiddlewaretoken["\']/', $html, $matches)) {
-        return $matches[1];
-    }
-    return null;
-}
-
-// PROVISIONAL heuristic mirrored from intranetSignup.ts: Django's default
-// form rendering emits <ul class="errorlist"><li>message</li></ul>
-// immediately before the offending field's name="..." attribute.
-function bioco_forms_extract_django_field_errors($html) {
-    $errors = [];
-    if (!preg_match_all('/<ul class="errorlist[^"]*"[^>]*>\s*<li>([^<]+)<\/li>/', $html, $matches, PREG_OFFSET_CAPTURE)) {
-        return $errors;
-    }
-
-    foreach ($matches[1] as $index => $match) {
-        $message = trim($match[0]);
-        $full_match_offset = $matches[0][$index][1];
-        $full_match_length = strlen($matches[0][$index][0]);
-        $rest = substr($html, $full_match_offset + $full_match_length, 500);
-        $field_name = 'field_' . $index;
-        if (preg_match('/name=["\']([a-zA-Z0-9_]+)["\']/', $rest, $name_match)) {
-            $field_name = $name_match[1];
-        }
-        $errors[$field_name] = $message;
-    }
-
-    return $errors;
-}
-
-function bioco_forms_forward_to_intranet($payload) {
-    $url = getenv('INTRANET_SIGNUP_URL');
-    if (!$url) {
-        return ['ok' => false, 'error' => 'intranet_signup_url_not_configured'];
-    }
-
-    $prime = wp_remote_get($url, ['timeout' => 5, 'redirection' => 0]);
-    if (is_wp_error($prime)) {
-        return ['ok' => false, 'error' => $prime->get_error_message()];
-    }
-
-    $csrf_cookie = bioco_forms_extract_csrf_cookie($prime);
-    $csrf_hidden = bioco_forms_extract_hidden_csrf_token(wp_remote_retrieve_body($prime));
-
-    if (!$csrf_cookie || !$csrf_hidden) {
-        return ['ok' => false, 'error' => 'csrf_prime_failed'];
-    }
-
-    $body = $payload;
-    $body['csrfmiddlewaretoken'] = $csrf_hidden;
-
-    $forward = wp_remote_post($url, [
-        'timeout' => 5,
-        'redirection' => 0,
-        'headers' => [
-            'Content-Type' => 'application/x-www-form-urlencoded',
-            'Cookie' => 'csrftoken=' . $csrf_cookie,
-            'Referer' => $url,
-        ],
-        'body' => $body,
-    ]);
-
-    if (is_wp_error($forward)) {
-        return ['ok' => false, 'error' => $forward->get_error_message()];
-    }
-
-    $status = wp_remote_retrieve_response_code($forward);
-
-    if ($status >= 300 && $status < 400) {
-        return ['ok' => true, 'status' => $status];
-    }
-
-    if ($status >= 200 && $status < 300) {
-        $errors = bioco_forms_extract_django_field_errors(wp_remote_retrieve_body($forward));
-        if (!empty($errors)) {
-            return ['ok' => false, 'status' => $status, 'errors' => $errors];
-        }
-        return ['ok' => true, 'status' => $status];
-    }
-
-    return ['ok' => false, 'status' => $status, 'error' => 'unexpected_status_' . $status];
+    return array_map(static fn($value) => sanitize_textarea_field(is_string($value) ? $value : ''), $payload);
 }
 
 /**
@@ -806,6 +720,18 @@ function bioco_forms_handle_membership(WP_REST_Request $request) {
         ], 400);
     }
 
+    $acceptance = bioco_forms_membership_accept($data);
+    if ($acceptance['status'] !== 'accepted') {
+        return new WP_REST_Response([
+            'success' => false,
+            'error' => bioco_forms_message('shared', 'generic'),
+            'fieldErrors' => $acceptance['fieldErrors'] ?? [],
+        ], $acceptance['status'] === 'validation' ? 400 : 502);
+    }
+    if (!empty($acceptance['replayed'])) {
+        return new WP_REST_Response(['success' => true, 'receipt' => $acceptance['receipt'], 'simulated' => !empty($acceptance['simulated'])], 200);
+    }
+
     $first_name = sanitize_text_field($data['firstName']);
     $last_name = sanitize_text_field($data['lastName']);
     $email = sanitize_email($data['email']);
@@ -845,27 +771,15 @@ function bioco_forms_handle_membership(WP_REST_Request $request) {
         $lines[] = $notes;
     }
 
-    $subject = 'Neue Mitgliedschaftsanmeldung: ' . $first_name . ' ' . $last_name;
-    $sent = bioco_forms_send_mail(bioco_forms_recipient(), $subject, bioco_forms_lines($lines), $email);
-
-    if (!$sent) {
-        return new WP_REST_Response(['success' => false, 'error' => bioco_forms_message('shared', 'mail_failed')], 500);
-    }
-
-    $response_body = ['success' => true];
-
-    // D.2b — best-effort forward to intranet.bioco.ch. Must never fail the
-    // user's submission: the admin email above already guarantees the
-    // signup isn't lost.
-    if (getenv('INTRANET_SIGNUP_URL')) {
+    // Acceptance is durable before notification. A failed notification must
+    // never invite another submission. Fake staging signups send no real mail.
+    if (empty($acceptance['simulated'])) {
         try {
-            $payload = bioco_forms_build_intranet_payload($data);
-            $result = bioco_forms_forward_to_intranet($payload);
-            $response_body['forwarded'] = !empty($result['ok']);
-        } catch (Throwable $e) {
-            $response_body['forwarded'] = false;
+            $subject = 'Neue Mitgliedschaftsanmeldung: ' . $first_name . ' ' . $last_name;
+            bioco_forms_send_mail(bioco_forms_recipient(), $subject, bioco_forms_lines($lines), $email);
+        } catch (Throwable $error) {
+            error_log('bioco membership: accepted signup notification failed');
         }
     }
-
-    return new WP_REST_Response($response_body, 200);
+    return new WP_REST_Response(['success' => true, 'receipt' => $acceptance['receipt'], 'simulated' => !empty($acceptance['simulated'])], 200);
 }

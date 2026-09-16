@@ -983,6 +983,42 @@
       "name": "transport_error",
       "type": "textarea",
       "default_value": ""
+    },
+    {
+      "key": "field_membership_next_label",
+      "label": "Weiter-Button",
+      "name": "next_label",
+      "type": "text"
+    },
+    {
+      "key": "field_membership_previous_label",
+      "label": "Zurück-Button",
+      "name": "previous_label",
+      "type": "text"
+    },
+    {
+      "key": "field_membership_progress_label",
+      "label": "Fortschritt ({current}, {total})",
+      "name": "progress_label",
+      "type": "text"
+    },
+    {
+      "key": "field_membership_birthday_label",
+      "label": "Geburtsdatum",
+      "name": "birthday_label",
+      "type": "text"
+    },
+    {
+      "key": "field_membership_mobile_phone_label",
+      "label": "Mobiltelefon",
+      "name": "mobile_phone_label",
+      "type": "text"
+    },
+    {
+      "key": "field_membership_comment_label",
+      "label": "Bemerkungen",
+      "name": "comment_label",
+      "type": "text"
     }
   ],
   "location": [

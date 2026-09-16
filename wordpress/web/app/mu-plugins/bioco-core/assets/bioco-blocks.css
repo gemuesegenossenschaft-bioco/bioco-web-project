@@ -1971,3 +1971,9 @@ a.portal-tile:hover {
 .bioco-doi-confirm-error .card-header {
   background-color: rgba(135, 33, 61, 0.08);
 }
+
+/* Membership wizard visibility must survive theme form layout rules. */
+.cms-membership-form [hidden] { display: none !important; }
+.cms-membership-form [data-wizard-progress] { color: var(--wp--preset--color--bioco-text-muted); }
+.cms-membership-form [data-membership-summary] { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--wp--preset--spacing--20); }
+.cms-membership-form [data-membership-summary] dd { margin: 0; overflow-wrap: anywhere; }

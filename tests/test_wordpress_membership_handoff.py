@@ -1,4 +1,6 @@
 import json
+import hmac
+import hashlib
 import subprocess
 from pathlib import Path
 
@@ -118,6 +120,7 @@ def test_membership_form_receives_calculator_selection():
 def membership_contract(data):
     php = r'''
     define('ABSPATH', __DIR__);
+    function wp_salt($scheme) {return 'test-salt';}
     function add_action() {}
     function sanitize_text_field($value) { return trim((string) $value); }
     function is_email($value) { return filter_var($value, FILTER_VALIDATE_EMAIL); }
@@ -150,6 +153,9 @@ def valid_membership(**updates):
         "zip": "5400",
         "city": "Baden",
         "privacyAccept": True,
+        "commitmentAccepted": [True]*4,
+        "commitmentCount": "4",
+        "commitmentSignature": hmac.new(b"test-salt", b"membership-commitments:4", hashlib.sha256).hexdigest(),
         "membershipType": "abo",
         "aboType": "standard",
         "additionalShares": 0,

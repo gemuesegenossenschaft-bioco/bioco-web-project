@@ -54,6 +54,10 @@ def _runtime_preamble() -> str:
 def _render_preamble() -> str:
     return (
         "define('ABSPATH', __DIR__);\n"
+        "function wp_salt($scheme) {return 'test-salt';}\n"
+        "require_once 'wordpress/web/app/mu-plugins/bioco-forms/membership.php';\n"
+        "function add_action(...$args) {}\n"
+        "require 'wordpress/web/app/mu-plugins/bioco-forms/messages.php';\n"
         "$GLOBALS['BIOCO_FILTERS'] = [];\n"
         "$GLOBALS['BIOCO_ENQUEUED'] = [];\n"
         "$GLOBALS['BIOCO_ENQUEUED_STYLES'] = [];\n"

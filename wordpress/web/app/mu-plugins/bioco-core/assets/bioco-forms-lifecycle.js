@@ -279,6 +279,7 @@
     renderCaptcha();
 
     function showError(json) {
+      if (adapter.onError) adapter.onError(form, json);
       var errorMessage = adapter.errorText
         ? adapter.errorText(json, config.fallbackError)
         : ((json && json.error) || config.fallbackError);
