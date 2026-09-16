@@ -65,6 +65,8 @@ def _composer_preamble() -> str:
 def _render_preamble() -> str:
     return (
         "define('ABSPATH', __DIR__);\n"
+        "function wp_salt($scheme) {return 'test-salt';}\n"
+        "require_once 'wordpress/web/app/mu-plugins/bioco-forms/membership.php';\n"
         "function wp_enqueue_script($handle, ...$args) {}\n"
         "function wp_enqueue_style($handle, ...$args) {}\n"
         "function wp_localize_script($handle, $object, $values) {}\n"

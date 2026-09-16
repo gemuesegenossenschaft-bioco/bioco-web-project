@@ -1,27 +1,5 @@
 <?php
-/**
- * Membership form block render template (W10, issue #97).
- * ACF renderTemplate scope: $block, $content, $is_preview, $post_id, $context.
- *
- * DEFERRAL (explicitly allowed by issue #97): .wp-refs/MembershipForm.tsx is
- * a 6-step JS wizard (commitment checklist -> personal -> depot/payment ->
- * mitarbeit -> zusatzabos -> summary) with client-side step validation and a
- * sticky live price summary. Porting that step machine to dependency-free
- * ES5 was judged too large for this slice, so this block instead renders a
- * SINGLE-PAGE long-form capturing the exact same fields, sectioned with the
- * same headings/copy. No live price calculator (see bioco/pricing-calculator
- * for that, already shipped in W9) and no per-step validation — the whole
- * form is validated by the browser's native required-field handling plus
- * bioco_forms_validate_membership() server-side, which mirrors
- * .wp-refs/membership.ts validateMembership() exactly (only
- * firstName/lastName/email/address/zip/city/privacyAccept are required
- * there — depot/paymentType/mitarbeit are not server-validated in the
- * reference either).
- *
- * membershipType/aboType/additionalShares/sharesOnly default to the reference
- * form's standard tier. view.js replaces them from the pricing calculator's
- * ?abo=&shares=&additional= handoff when those parameters are present.
- */
+/** Six on-site steps; view.js validates each step without discarding inputs. */
 
 if (!defined('ABSPATH')) exit;
 
@@ -29,7 +7,9 @@ $title = bioco_field('title');
 $text = bioco_field('text');
 $commitment_title = bioco_field('commitment_title');
 $commitment_intro = bioco_field('commitment_intro');
-$commitments = bioco_field('commitments');
+$commitments = array_values(array_filter((array) bioco_field('commitments'), static fn($item) => !empty($item['heading']) || !empty($item['text'])));
+$commitment_count = count($commitments);
+$commitment_signature = bioco_forms_commitment_signature($commitment_count);
 $personal_title = bioco_field('personal_title');
 $first_name_label = bioco_field('first_name_label');
 $last_name_label = bioco_field('last_name_label');
@@ -92,6 +72,10 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
     <div class="form-message" role="status" aria-live="polite" hidden></div>
 
     <form class="membership-form bioco-form" data-form="membership" data-config="biocoMembershipFormConfig" novalidate>
+        <input type="hidden" name="submissionId" value="">
+        <input type="hidden" name="commitmentCount" value="<?php echo esc_attr($commitment_count); ?>">
+        <input type="hidden" name="commitmentSignature" value="<?php echo esc_attr($commitment_signature); ?>">
+        <p data-wizard-progress role="status" aria-live="polite" data-label="<?php echo esc_attr(bioco_field('progress_label')); ?>"></p>
         <input type="hidden" name="membershipType" value="abo">
         <input type="hidden" name="aboType" value="standard">
         <input type="hidden" name="additionalShares" value="0">
@@ -108,7 +92,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
                         if (!$commitment_heading && !$commitment_text) continue;
                     ?>
                         <label class="commitment-item">
-                            <input type="checkbox" name="commitmentAccepted[]" data-bool-array>
+                            <input type="checkbox" name="commitmentAccepted[]" data-bool-array required>
                             <div>
 <?php if ($commitment_heading) : ?>                                <h4><?php echo esc_html($commitment_heading); ?></h4><?php endif; ?>
 <?php if ($commitment_text) : ?>                                <p><?php echo bioco_kses_rich_text($commitment_text); ?></p><?php endif; ?>
@@ -153,6 +137,16 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
                 <div class="form-group">
                     <?php if ($email_label) : ?><label for="membership_email"><?php echo esc_html($email_label); ?></label><?php endif; ?>
                     <input type="email" id="membership_email" name="email" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="membership_birthday"><?php echo esc_html(bioco_field('birthday_label')); ?></label>
+                    <input type="date" id="membership_birthday" name="birthday">
+                </div>
+                <div class="form-group">
+                    <label for="membership_mobile_phone"><?php echo esc_html(bioco_field('mobile_phone_label')); ?></label>
+                    <input type="tel" id="membership_mobile_phone" name="mobilePhone">
                 </div>
             </div>
         </div>
@@ -270,6 +264,11 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
 
         <div class="form-step">
             <?php if ($confirmation_title) : ?><h3><?php echo esc_html($confirmation_title); ?></h3><?php endif; ?>
+            <dl data-membership-summary></dl>
+            <div class="form-group">
+                <label for="membership_comment"><?php echo esc_html(bioco_field('comment_label')); ?></label>
+                <textarea id="membership_comment" name="comment" rows="3"></textarea>
+            </div>
             <div class="form-group">
                 <label class="checkbox-option">
                     <input type="checkbox" name="privacyAccept" required>
@@ -282,6 +281,8 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
         </div>
 
         <div class="form-navigation">
+            <button type="button" class="btn btn-secondary" data-wizard-back hidden><?php echo esc_html(bioco_field('previous_label')); ?></button>
+            <button type="button" class="btn btn-primary" data-wizard-next hidden><?php echo esc_html(bioco_field('next_label')); ?></button>
             <?php if ($submit_label) : ?><button type="submit" class="btn btn-primary" data-submit-label="<?php echo esc_attr($submit_label); ?>"<?php if ($submitting_label) : ?> data-submitting-label="<?php echo esc_attr($submitting_label); ?>"<?php endif; ?>><?php echo esc_html($submit_label); ?></button><?php endif; ?>
         </div>
     </form>

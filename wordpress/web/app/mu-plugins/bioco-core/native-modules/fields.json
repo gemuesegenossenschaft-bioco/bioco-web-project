@@ -256,6 +256,30 @@
     "transport_error": {
       "type": "textarea",
       "label": "Fehler beim Laden der Sicherheitsprüfung"
+    },
+    "next_label": {
+      "type": "text",
+      "label": "Weiter-Button"
+    },
+    "previous_label": {
+      "type": "text",
+      "label": "Zurück-Button"
+    },
+    "progress_label": {
+      "type": "text",
+      "label": "Fortschritt ({current}, {total})"
+    },
+    "birthday_label": {
+      "type": "text",
+      "label": "Geburtsdatum"
+    },
+    "mobile_phone_label": {
+      "type": "text",
+      "label": "Mobiltelefon"
+    },
+    "comment_label": {
+      "type": "text",
+      "label": "Bemerkungen"
     }
   },
   "subscribe_form": {

@@ -1128,6 +1128,30 @@
       "type": "object",
       "selector": "{{selector}}"
     },
+    "next_label": {
+      "type": "object",
+      "selector": "{{selector}}"
+    },
+    "previous_label": {
+      "type": "object",
+      "selector": "{{selector}}"
+    },
+    "progress_label": {
+      "type": "object",
+      "selector": "{{selector}}"
+    },
+    "birthday_label": {
+      "type": "object",
+      "selector": "{{selector}}"
+    },
+    "mobile_phone_label": {
+      "type": "object",
+      "selector": "{{selector}}"
+    },
+    "comment_label": {
+      "type": "object",
+      "selector": "{{selector}}"
+    },
     "messageSettings": {
       "type": "object",
       "selector": "{{selector}}",

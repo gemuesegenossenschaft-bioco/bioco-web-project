@@ -200,6 +200,8 @@ _RENDER_PHP = r"""
 define('ABSPATH', __DIR__);
 $GLOBALS['BIOCO_ENQUEUED'] = [];
 $GLOBALS['BIOCO_LOCALIZED'] = [];
+function wp_salt($scheme) {return 'test-salt';}
+function get_option($key, $default = false) { return $key === 'bioco_form_messages' ? ['membership-form' => json_decode(file_get_contents('wordpress/content-seed/block-content/defaults.json'), true)['blocks']['membership-form']] : $default; }
 function add_action($hook, $callback) {}
 function add_filter($hook, $callback, $priority = 10, $args = 1) {}
 function wp_enqueue_script(...$args) { $GLOBALS['BIOCO_ENQUEUED'][] = $args; }
@@ -1462,9 +1464,13 @@ MEMBERSHIP_PERSONAL = {
 
 def fill_membership(page, anchor="mitgliedschaft-anmeldung"):
     form = adapter_form(page, "membership", anchor)
+    for checkbox in form.locator('input[name="commitmentAccepted[]"]').all():
+        checkbox.check()
+    form.locator('[data-wizard-next]').click()
     for name, value in MEMBERSHIP_PERSONAL.items():
         form.locator(f'[name="{name}"]').fill(value)
-    form.locator('input[name="commitmentAccepted[]"]').first.check()  # second stays unchecked
+    for _ in range(4):
+        form.locator('[data-wizard-next]').click()
     form.locator('[name="privacyAccept"]').check()
     return form
 
@@ -1496,17 +1502,10 @@ def membership_traffic(page):
 
 
 def test_membership_redirect_payload_with_optional_depot(page):
-    """Abo signup with an EMPTY depot is accepted by the backend and still
-    redirects exactly once. The response is explicitly the intranet-degraded
-    {success:true,forwarded:false}: PHP sends the administrator mail first
-    and treats intranet forwarding as best effort, so this is a COMPLETED
-    signup and must redirect exactly once. The payload proves the
-    serialization contract: camelCase fields, boolean array including
-    unchecked entries, empty value arrays preserved, ZIP string, hidden
-    counts as strings, scalar privacy boolean."""
+    """Six on-site steps preserve the complete payload and redirect after acceptance."""
     page.evaluate(
         "() => { window.__formResponder = function () { return { status: 200, body: "
-        "{ success: true, forwarded: false } }; }; }"
+        "{ success: true, receipt: 'fake-receipt', simulated: true } }; }; }"
     )
     form = fill_membership(page)
     assert form.locator('[name="depot"]').input_value() == ""  # depot optional
@@ -1515,12 +1514,16 @@ def test_membership_redirect_payload_with_optional_depot(page):
     entries = membership_traffic(page)
     assert len(entries) == 1
     assert entries[0]["url"] == "https://forms.test/wp-json/bioco/v1/membership"
+    identity = entries[0]["body"].pop("submissionId")
+    assert len(identity) == 32
     assert entries[0]["body"] == {
         "membershipType": "abo",
         "aboType": "standard",
         "additionalShares": "0",
         "sharesOnly": "0",
-        "commitmentAccepted": [True, False],
+        "commitmentAccepted": [True, True],
+        "commitmentCount": "2",
+        "commitmentSignature": __import__("hmac").new(b"test-salt", b"membership-commitments:2", __import__("hashlib").sha256).hexdigest(),
         "firstName": "Milena",
         "lastName": "Muster",
         "address": "Gartenweg 12",
@@ -1538,11 +1541,9 @@ def test_membership_redirect_payload_with_optional_depot(page):
         "weitereProdukte": "",
         "privacyAccept": True,
         "captchaToken": "tkn-mem-1",
+        "birthday": "", "mobilePhone": "", "comment": "",
     }
-    # The archived body records exactly what was sent for the response the
-    # server gave: success with forwarded:false, yet a real redirect.
-    assert entries[0]["response"]["body"] == {"success": True, "forwarded": False}
-    # Redirect happened despite forwarded:false, and only once.
+    assert entries[0]["response"]["body"] == {"success": True, "receipt": "fake-receipt", "simulated": True}
     assert urlparse(page.url).path == THANK_YOU_PATH
     assert len(membership_traffic(page)) == 1
 
@@ -1556,11 +1557,15 @@ def test_membership_shares_only_with_empty_depot_redirects(page):
     page.goto(f"{TEST_ORIGIN}/bioco-forms/?abo=kein&shares=3", wait_until="load")
     page.wait_for_timeout(100)
     form = fill_membership(page)
+    form.locator("[data-wizard-back]").click()
+    form.locator("[data-wizard-back]").click()
     form.locator('input[name="preferredDays[]"][value="Dienstag"]').check()
     form.locator('input[name="preferredDays[]"][value="Freitag"]').check()
     form.locator('input[name="activityAreas[]"][value="Ernte"]').check()
     form.locator('input[name="activityAreas[]"][value="Packerei"]').check()
+    form.locator("[data-wizard-next]").click()
     form.locator('input[name="zusatzabos[]"][value="Eier-Abo"]').check()
+    form.locator("[data-wizard-next]").click()
     submit_membership(page, token="tkn-mem-2")
 
     entries = membership_traffic(page)
@@ -1897,3 +1902,37 @@ def test_editor_copy_controls_captcha_error_and_success(page):
     submit_button(form).click()
     page.wait_for_function("document.querySelector('#kontakt-formular form').hidden")
     assert message.text_content() == 'Redaktion: Deine Nachricht ist angekommen.'
+
+
+def test_membership_wizard_validates_steps_and_keeps_values_on_back(page):
+    form = adapter_form(page, 'membership')
+    assert form.locator('.form-step:visible').count() == 1
+    assert form.locator('[data-wizard-progress]').inner_text() == 'Schritt 1 von 6'
+    form.locator('[data-wizard-next]').click()
+    assert form.locator('[data-wizard-progress]').inner_text() == 'Schritt 1 von 6'
+    for field in form.locator('[name="commitmentAccepted[]"]').all():
+        field.check()
+    form.locator('[data-wizard-next]').click()
+    form.locator('[name="firstName"]').fill('Erhalten')
+    form.locator('[data-wizard-next]').click()
+    assert form.locator('[data-wizard-progress]').inner_text() == 'Schritt 2 von 6'
+    form.locator('[data-wizard-back]').click()
+    form.locator('[data-wizard-next]').click()
+    assert form.locator('[name="firstName"]').input_value() == 'Erhalten'
+    assert membership_traffic(page) == []
+
+
+def test_membership_unavailable_retry_keeps_identity_and_data(page):
+    page.evaluate("window.__formResponder = () => ({status:502,body:{success:false,error:'Nicht verfügbar'}})")
+    form = fill_membership(page)
+    identity = form.locator('[name="submissionId"]').input_value()
+    submit_membership(page, wait_url=False)
+    page.wait_for_function("!document.querySelector('#mitgliedschaft-anmeldung button[type=submit]').disabled")
+    assert form.locator('[name="firstName"]').input_value() == MEMBERSHIP_PERSONAL['firstName']
+    assert form.locator('[name="submissionId"]').input_value() == identity
+    assert form.locator('[data-wizard-progress]').inner_text() == 'Schritt 6 von 6'
+    page.evaluate("window.__formResponder = () => ({status:200,body:{success:true,receipt:'fake-retry',simulated:true}})")
+    submit_membership(page, token='fresh-captcha')
+    entries = membership_traffic(page)
+    assert len(entries) == 2
+    assert entries[0]['body']['submissionId'] == entries[1]['body']['submissionId'] == identity

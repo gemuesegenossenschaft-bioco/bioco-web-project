@@ -229,7 +229,13 @@
       "submitting_label": "Wird gesendet …",
       "fallback_error": "Es ist ein Fehler aufgetreten. Bitte versuche es erneut.",
       "captcha_error": "Bitte bestätige, dass du kein Roboter bist.",
-      "transport_error": "Die Sicherheitsprüfung konnte nicht geladen werden. Bitte lade die Seite neu und versuche es nochmals."
+      "transport_error": "Die Sicherheitsprüfung konnte nicht geladen werden. Bitte lade die Seite neu und versuche es nochmals.",
+      "next_label": "Weiter",
+      "previous_label": "Zurück",
+      "progress_label": "Schritt {current} von {total}",
+      "birthday_label": "Geburtsdatum (optional)",
+      "mobile_phone_label": "Mobiltelefon (optional)",
+      "comment_label": "Bemerkungen (optional)"
     },
     "pricing-calculator": {
       "share_price": 250,
