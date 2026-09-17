@@ -67,7 +67,7 @@ final class Bioco_Divi_Foundation {
         if ($conflicts || !$apply) return $report;
         if ($missing_colors) self::request('/global-data/global-colors', ['global_colors' => $colors + $missing_colors]);
         if ($missing_variables) self::request('/global-data/global-variables', ['global_variables' => self::merge_variables($variables, $missing_variables)]);
-        self::presets_apply($preset_data);
+        if ($preset_report) self::presets_apply($preset_data);
         self::layouts_apply($missing_layouts);
         // Every planned line is now written; 'would-add ' is 10 characters.
         return array_map(static fn($line) => 'added ' . substr($line, 10), $report);

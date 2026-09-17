@@ -1,4 +1,7 @@
-"""Live Divi values are safe CSS, and the deploy bundle matches its seed source."""
+"""Live Divi values are safe CSS, and the deploy bundle matches its seed source.
+
+Keep/Replace/Remove map for the WordPress test surface lives in tests/README.md.
+"""
 import json
 import subprocess
 from pathlib import Path
@@ -51,8 +54,8 @@ IMPORT = ROOT / 'wordpress/web/app/mu-plugins/bioco-import/includes/design-syste
 SEED_HARNESS = r'''<?php
 namespace ET\Builder\Packages\GlobalData {
 class GlobalData {
-    public static function get_global_colors() {return $GLOBALS['colors'];}
-    public static function get_global_variables() {return ['numbers'=>(object) [],'strings'=>(object) [],'fonts'=>(object) []];}
+    public static function get_global_colors() {return $GLOBALS['colors'] ?? [];}
+    public static function get_global_variables() {return $GLOBALS['vars'] ?? ['numbers'=>(object) [],'strings'=>(object) [],'fonts'=>(object) []];}
 }
 class GlobalPreset {public static function get_data() {return ['module'=>[],'group'=>[]];}}
 }
@@ -88,11 +91,29 @@ def php_array(value):
     return json.dumps(value)
 
 
-def run_seed(colors, apply=False):
+def run_seed(colors, apply=False, variables=None):
     env = f"$GLOBALS['colors'] = {php_array(colors)};\n"
+    if variables is not None:
+        env += f"$GLOBALS['vars'] = {php_array(variables)};\n"
     code = SEED_HARNESS.replace('/*COLORS*/', env) % (json.dumps(str(CORE)), json.dumps(str(IMPORT)), 'true' if apply else 'false')
     out = subprocess.check_output(['php'], input=code.encode()).decode()
     return json.loads(out)
+
+
+def existing_token_state():
+    """Prefilled vendor state that already contains every manifest token."""
+    import hashlib
+    manifest = json.loads((CORE / 'assets/design-system.json').read_text())
+    colors, variables = {}, {}
+    for category, tokens in manifest['tokens'].items():
+        for token in tokens:
+            token_id = ('gcid-' if category == 'colors' else 'gvid-') + 'bioco-' + hashlib.sha256(token['cssVar'].encode()).hexdigest()[:16]
+            if category == 'colors':
+                colors[token_id] = {'label': token['title']}
+            else:
+                token_type = 'fonts' if category == 'fonts' else ('numbers' if category in ('typography', 'spacing', 'radii') else 'strings')
+                variables.setdefault(token_type, {})[token_id] = {'label': token['title']}
+    return colors, variables
 
 
 def test_seed_reports_existing_label_as_conflict_instead_of_duplicate():
@@ -123,6 +144,18 @@ def test_apply_without_conflict_writes_through_divi_routes():
     assert '/global-data/global-preset/sync' in result['restCalls'], result
     # The harness fills every Theme Builder slot, so no Theme Builder write.
     assert '/outside-vb/theme-builder/update-template' not in result['restCalls'], result
+
+
+def test_clean_rerun_skips_satisfied_writes():
+    colors, variables = existing_token_state()
+    result = run_seed(colors, apply=True, variables=variables)
+    # Token definitions exist in the vendor fake: no token report lines and no
+    # token write routes. The fake preset store is empty, so its sync is the
+    # one legitimate write.
+    assert 'added BIOCO Green' not in result['report'] and 'would-add BIOCO Green' not in result['report'], result
+    assert '/global-data/global-colors' not in result['restCalls'], result
+    assert '/global-data/global-variables' not in result['restCalls'], result
+    assert '/global-data/global-preset/sync' in result['restCalls'], result
 
 
 def test_unknown_manifest_preset_title_fails_the_run(tmp_path):
