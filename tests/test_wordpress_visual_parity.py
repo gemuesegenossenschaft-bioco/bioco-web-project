@@ -147,8 +147,65 @@ def test_run_gate_items_use_caller_threshold(tmp_path):
 
     assert result.passed is True
     for item in result.items:
-        assert item["threshold"] == 0.99
+        if item["informational"]:
+            # The home route is informational (ROUTE_THRESHOLDS["/"] is None):
+            # compared against the default threshold, reported, never enforced.
+            assert item["route"] == "/"
+            assert item["threshold"] == parity.DEFAULT_THRESHOLD
+            assert item["informational_reason"]
+        else:
+            assert item["threshold"] == 0.99
         assert item["passed"] is True
+
+
+def test_home_gate_is_informational_and_never_fails(tmp_path):
+    """A badly diverging home route must not fail the gate; every other
+    route still does."""
+    parity = _module()
+
+    def fake_capture(url, viewport_name, output_path):
+        import shutil
+        import urllib.parse
+
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        parsed = urllib.parse.urlparse(url)
+        is_reference = parsed.hostname == "bioco.ch"
+        if parsed.path == "/":
+            # Reference has a content island the candidate lacks -> fails.
+            if is_reference:
+                ref = _make_image((100, 100), "white")
+                for x in range(10):
+                    for y in range(10):
+                        ref.putpixel((x, y), (64, 64, 64))
+                ref.save(output_path)
+            else:
+                _make_image((100, 100), "white").save(output_path)
+        else:
+            _make_image((100, 100), "white").save(output_path)
+        return output_path
+
+    with patch.object(parity, "capture_page", fake_capture):
+        result = parity.run_gate(
+            reference_origin="https://bioco.ch",
+            candidate_origin="https://staging.bioco.ch",
+            output_dir=tmp_path / "out",
+        )
+
+    home_items = [item for item in result.items if item["route"] == "/"]
+    assert home_items and all(item["informational"] for item in home_items)
+    assert any(item["passed"] is False for item in home_items)
+    assert result.failed_items == []
+    assert result.passed is True
+
+
+def test_route_thresholds_override_is_documented_and_in_bounds():
+    parity = _module()
+    assert set(parity.ROUTE_THRESHOLDS) <= set(parity.CANONICAL_ROUTES)
+    for route, value in parity.ROUTE_THRESHOLDS.items():
+        if value is None:
+            assert parity.ROUTE_THRESHOLD_REASONS.get(route), route
+        else:
+            assert 0.0 <= value <= 1.0, route
 
 
 # -----------------------------------------------------------------------------
@@ -206,7 +263,10 @@ def test_run_gate_rejects_threshold_outside_unit_interval_nan_and_infinities(tmp
             )
             assert result.passed is True
             for item in result.items:
-                assert item["threshold"] == threshold
+                if item["informational"]:
+                    assert item["threshold"] == parity.DEFAULT_THRESHOLD
+                else:
+                    assert item["threshold"] == threshold
 
 
 # -----------------------------------------------------------------------------

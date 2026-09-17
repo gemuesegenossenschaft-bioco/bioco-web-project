@@ -301,7 +301,8 @@ def test_homepage_plan_contains_exactly_one_events_feed():
     """The duplicate feed came from two paths: the seed's own events_feed
     section AND an unconditional second marker injected by homeChromeSection().
     The chrome keeps Beitraege + Schnuppertage only; the single feed is the
-    CMS-driven seed section (it is the one with the past-events card)."""
+    CMS-driven seed section (the "Naechste Events" panel). It mixes
+    schnuppertage events into the panel to mirror the live homepage."""
     payload = _json_php(
         _render_preamble()
         + "require 'wordpress/web/app/mu-plugins/bioco-import/includes/section-map.php';\n"
@@ -319,10 +320,11 @@ def test_homepage_plan_contains_exactly_one_events_feed():
 
     assert len(payload["feeds"]) == 1, payload["feeds"]
     values = payload["feeds"][0]["values"]
-    # general-only: the schnuppertage chrome block is the one place
-    # Schnuppertage appear on the homepage, never duplicated into the feed.
+    # Status stays date-derived (#148); the panel mixes event types like the
+    # live site, the past card stays suppressed (live API has an empty past list).
     assert "respect_stored_status" not in values
-    assert "include_schnuppertage" not in values
+    assert values["include_schnuppertage"] is True
+    assert values["past_title"] == ""
 
     chrome = payload["chrome"]
     assert 'data-bioco-component="events_feed"' not in chrome

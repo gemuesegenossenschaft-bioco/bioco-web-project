@@ -29,6 +29,14 @@ $schedule_title = bioco_field('schedule_title');
 $signup_label = bioco_field('signup_label');
 $empty_message = bioco_field('empty_message');
 $display = bioco_field('display');
+// Generalize the titled live list: the same "h2 + event cards" shape the home
+// chrome needs for "Kommende Events" (general events, no bento card, no
+// Schnuppertage subsection). Defaults to the historical schnuppertag filter so
+// every existing module instance keeps its behaviour.
+$event_type = bioco_field('event_type');
+if (!in_array($event_type, ['general', 'schnuppertag'], true)) {
+    $event_type = 'schnuppertag';
+}
 
 $anchor = !empty($block['anchor']) ? $block['anchor'] : 'schnuppertage';
 $class_name = 'cms-section cms-schnuppertage';
@@ -36,7 +44,7 @@ if (!empty($block['className'])) {
     $class_name .= ' ' . $block['className'];
 }
 
-$termine_query = bioco_query_events('upcoming', $limit, 'schnuppertag');
+$termine_query = bioco_query_events('upcoming', $limit, $event_type);
 ?>
 <section id="<?php echo esc_attr($anchor); ?>" class="<?php echo esc_attr($class_name); ?>">
     <?php if ($title) : ?>

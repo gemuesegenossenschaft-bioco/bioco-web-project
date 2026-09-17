@@ -226,6 +226,33 @@
         }
       }
     },
+    "event_type": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "event_type.innerContent",
+            "label": "Anlasstyp",
+            "category": "basic_option",
+            "priority": 15,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+        "component": {
+          "name": "bioco/schnuppertage-event_type",
+          "type": "field"
+        }
+          }
+        }
+      }
+    },
     "schedule_title": {
       "type": "object",
       "selector": "{{selector}}",

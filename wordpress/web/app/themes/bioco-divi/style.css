@@ -1426,7 +1426,6 @@ body.home,
         margin: 96px auto;
         padding: 96px 86.4px 0;
         background: transparent;
-        min-height: 1885.6px;
     }
 
     .home .bioco-home-live-row,
@@ -1494,7 +1493,6 @@ body.home,
         margin: 96px 0 0;
         padding: 0;
         background: var(--wp--preset--color--bioco-bg, #F5F1E8);
-        min-height: 2406px;
     }
 
     .home .bioco-dynamic-row {
@@ -1623,12 +1621,10 @@ body.home,
     }
 
     .home .bioco-home-hero + .bioco-home-feature {
-        min-height: 864px;
-    }
+            }
 
     .home .bioco-home-feature + .bioco-home-feature {
-        min-height: 892px;
-    }
+            }
 
     .home .bioco-home-feature + .bioco-home-feature .bioco-home-feature-content {
         order: -1;
@@ -1636,8 +1632,7 @@ body.home,
 
     .home .bioco-home-live {
         width: calc(100% - 46.8px);
-        min-height: 3514px;
-        margin: 48px auto;
+                margin: 48px auto;
         padding: 48px 0 0;
         background: transparent;
     }
@@ -1675,8 +1670,7 @@ body.home,
     }
 
     .home .bioco-dynamic-section {
-        min-height: 5005px;
-        margin: 32px 0 0;
+                margin: 32px 0 0;
         padding: 0;
         background: var(--wp--preset--color--bioco-bg, #F5F1E8);
     }
