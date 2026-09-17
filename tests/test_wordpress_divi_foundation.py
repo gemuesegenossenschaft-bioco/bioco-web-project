@@ -46,8 +46,8 @@ def test_stylesheet_injection_is_rejected():
 
 IMPORT = ROOT / 'wordpress/web/app/mu-plugins/bioco-import/includes/design-system.php'
 
-# Real seed(), fake vendor storage and REST boundary. Dry-run only: report
-# lines are the observable output, nothing is written.
+# Real seed(), fake vendor storage and REST boundary. The REST fake records
+# every write route so tests can assert what an apply would have touched.
 SEED_HARNESS = r'''<?php
 namespace ET\Builder\Packages\GlobalData {
 class GlobalData {
@@ -58,23 +58,25 @@ class GlobalPreset {public static function get_data() {return ['module'=>[],'gro
 }
 namespace {
 define('ABSPATH','/'); define('BIOCO_CORE_DIR', %s); define('ET_BUILDER_VERSION','5.0.0');
+$GLOBALS['REST_CALLS'] = [];
 function add_action(...$a) {} function add_shortcode(...$a) {}
 function current_user_can(...$a) {return true;}
 function wp_create_nonce($a) {return 'nonce';}
 function wp_json_encode($v) {return json_encode($v);}
-class WP_REST_Request {public function __construct(...$a) {} public function set_header(...$a) {} public function set_body(...$a) {}}
+class WP_REST_Request {public $route; public function __construct($m=null, $r=null) {$this->route = $r;} public function set_header(...$a) {} public function set_body(...$a) {} public function get_route() {return $this->route;}}
 class WP_REST_Response {private $d; public function __construct($d=[]) {$this->d=$d;} public function get_status() {return 200;} public function get_data() {return $this->d;}}
 function rest_get_server() {
-    return new class {public function get_routes() {return ['/outside-vb/theme-builder/list-templates' => []];}};
+    return new class {public function get_routes() {return ['/global-data/global-colors' => [], '/global-data/global-variables' => [], '/global-data/global-preset/sync' => [], '/outside-vb/theme-builder/list-templates' => []];}};
 }
 function rest_do_request($r) {
+    $GLOBALS['REST_CALLS'][] = $r->get_route();
     return new WP_REST_Response(['templates' => [['default' => true, 'enabled' => true, 'layouts' => ['header'=>['id'=>1,'enabled'=>true],'body'=>['id'=>2,'enabled'=>true],'footer'=>['id'=>3,'enabled'=>true]]]]]);
 }
 /*COLORS*/
 require BIOCO_CORE_DIR.'/includes/design-system.php';
 require %s;
-$report = Bioco_Divi_Foundation::seed(false);
-echo json_encode($report);
+$report = Bioco_Divi_Foundation::seed(%s);
+echo json_encode(['report' => $report, 'restCalls' => $GLOBALS['REST_CALLS']]);
 }'''
 
 
@@ -86,23 +88,41 @@ def php_array(value):
     return json.dumps(value)
 
 
-def run_seed(colors):
-    env = f"$GLOBALS['colors'] = {php_array(colors)};\n" if colors else ''
-    code = SEED_HARNESS.replace('/*COLORS*/', env) % (json.dumps(str(CORE)), json.dumps(str(IMPORT)))
+def run_seed(colors, apply=False):
+    env = f"$GLOBALS['colors'] = {php_array(colors)};\n"
+    code = SEED_HARNESS.replace('/*COLORS*/', env) % (json.dumps(str(CORE)), json.dumps(str(IMPORT)), 'true' if apply else 'false')
     out = subprocess.check_output(['php'], input=code.encode()).decode()
     return json.loads(out)
 
 
 def test_seed_reports_existing_label_as_conflict_instead_of_duplicate():
-    report = run_seed({'native-123': {'label': 'BIOCO Green', 'color': '#000000', 'status': 'active'}})
-    assert any(line.startswith('conflict BIOCO Green') for line in report), report
-    assert 'would-add BIOCO Green' not in report and 'added BIOCO Green' not in report
+    result = run_seed({'native-123': {'label': 'BIOCO Green', 'color': '#000000', 'status': 'active'}})
+    assert any(line.startswith('conflict BIOCO Green') for line in result['report']), result
+    assert 'would-add BIOCO Green' not in result['report'] and 'added BIOCO Green' not in result['report']
 
 
 def test_seed_without_label_match_still_would_add():
-    report = run_seed({'native-123': {'label': 'Editor Green', 'color': '#000000', 'status': 'active'}})
-    assert 'would-add BIOCO Green' in report, report
-    assert not any(line.startswith('conflict BIOCO Green') for line in report), report
+    result = run_seed({'native-123': {'label': 'Editor Green', 'color': '#000000', 'status': 'active'}})
+    assert 'would-add BIOCO Green' in result['report'], result
+    assert not any(line.startswith('conflict BIOCO Green') for line in result['report']), result
+
+
+def test_apply_with_conflict_performs_no_writes():
+    result = run_seed({'native-123': {'label': 'BIOCO Green', 'color': '#000000', 'status': 'active'}}, apply=True)
+    assert any(line.startswith('conflict BIOCO Green') for line in result['report']), result
+    # The read-only plan request may run; no write route may fire.
+    assert result['restCalls'] == ['/outside-vb/theme-builder/list-templates'], result
+
+
+def test_apply_without_conflict_writes_through_divi_routes():
+    result = run_seed({}, apply=True)
+    assert 'added BIOCO Green' in result['report'], result
+    assert 'added group preset: BIOCO Heading Typography' in result['report'], result
+    assert '/global-data/global-colors' in result['restCalls'], result
+    assert '/global-data/global-variables' in result['restCalls'], result
+    assert '/global-data/global-preset/sync' in result['restCalls'], result
+    # The harness fills every Theme Builder slot, so no Theme Builder write.
+    assert '/outside-vb/theme-builder/update-template' not in result['restCalls'], result
 
 
 def test_unknown_manifest_preset_title_fails_the_run(tmp_path):
@@ -114,7 +134,7 @@ def test_unknown_manifest_preset_title_fails_the_run(tmp_path):
     (core / 'assets/design-system.json').write_text(json.dumps(manifest))
     import shutil
     shutil.copy(CORE / 'includes/design-system.php', core / 'includes/design-system.php')
-    code = SEED_HARNESS.replace('/*COLORS*/', "$GLOBALS['colors'] = [];\n") % (json.dumps(str(core)), json.dumps(str(IMPORT)))
+    code = SEED_HARNESS.replace('/*COLORS*/', "$GLOBALS['colors'] = [];\n") % (json.dumps(str(core)), json.dumps(str(IMPORT)), 'false')
     result = subprocess.run(['php'], input=code.encode(), capture_output=True)
     assert result.returncode != 0
     assert b'No Divi mapping for option-group preset: BIOCO Renamed Preset' in result.stdout + result.stderr

@@ -5,7 +5,18 @@ if (!defined('ABSPATH')) exit;
 function bioco_divi_design_manifest(): array {
     static $manifest;
     if ($manifest === null) {
-        $manifest = json_decode(file_get_contents(BIOCO_CORE_DIR . '/assets/design-system.json'), true, 512, JSON_THROW_ON_ERROR);
+        $raw = @file_get_contents(BIOCO_CORE_DIR . '/assets/design-system.json');
+        $decoded = null;
+        if (is_string($raw) && $raw !== '') {
+            try {
+                $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+            } catch (Throwable $loadError) {
+                $decoded = null;
+            }
+        }
+        // Fail closed: the bridge runs on every front-end request. Without a
+        // structurally valid manifest it contributes no CSS instead of raising.
+        $manifest = is_array($decoded) && is_array($decoded['tokens'] ?? null) ? $decoded : ['tokens' => []];
     }
     return $manifest;
 }
@@ -26,7 +37,9 @@ function bioco_divi_token_css(): string {
     $variables = array_map(static fn($items) => (array) $items, $api::get_global_variables());
     $declarations = [];
     foreach (bioco_divi_design_manifest()['tokens'] as $category => $tokens) {
+        if (!is_array($tokens)) continue;
         foreach ($tokens as $token) {
+            if (!is_array($token) || !is_string($token['cssVar'] ?? null)) continue;
             $id = bioco_divi_token_id($token, $category);
             $item = $category === 'colors' ? ($colors[$id] ?? []) : ($variables[bioco_divi_token_type($category)][$id] ?? []);
             $value = $item[$category === 'colors' ? 'color' : 'value'] ?? null;

@@ -20,39 +20,67 @@ final class Bioco_Divi_Foundation {
     public static function seed(bool $apply): array {
         $api = '\\ET\\Builder\\Packages\\GlobalData\\GlobalData';
         if (!class_exists($api)) throw new RuntimeException('Divi 5 must be active.');
-        if (!current_user_can('manage_options')) throw new RuntimeException('Use --user=<administrator>.');
+        if (!current_user_can('manage_options')) throw new RuntimeException('Use --user=ADMINISTRATOR_LOGIN.');
+        // Validate the whole plan before any write: manifest sections, preset
+        // definitions (unknown titles throw) and the read-only plan all run
+        // first. No route is called while a conflict is open, so a failed run
+        // never leaves partial seed data behind; a mid-apply REST failure is
+        // repaired by rerunning, which only adds what is still missing and
+        // never overwrites.
+        $manifest = bioco_divi_design_manifest();
+        foreach (['tokens', 'optionGroupPresets', 'elementPresets', 'themeBuilder'] as $section) {
+            if (!is_array($manifest[$section] ?? null)) throw new RuntimeException('Invalid design-system manifest section: ' . $section);
+        }
+        if (!is_array($manifest['themeBuilder']['templates'] ?? null)) throw new RuntimeException('Invalid design-system manifest section: themeBuilder.templates');
+        $definitions = self::preset_definitions();
         $colors = $api::get_global_colors();
         $variables = array_map(static fn($items) => (array) $items, $api::get_global_variables());
         $report = [];
-        $colors_changed = $variables_changed = false;
+        $conflicts = [];
+        $missing_colors = [];
+        $missing_variables = [];
         foreach (bioco_divi_design_manifest()['tokens'] as $category => $tokens) {
             foreach ($tokens as $token) {
                 $id = bioco_divi_token_id($token, $category);
                 if ($category === 'colors') {
                     if (isset($colors[$id])) continue;
                     if ($conflict = self::label_conflict($colors, $token['title'], $id)) {
-                        $report[] = 'conflict ' . $token['title'] . ' already exists as "' . $conflict . '"; resolve in Divi';
+                        $conflicts[] = 'conflict ' . $token['title'] . ' already exists as "' . $conflict . '"; resolve in Divi';
                         continue;
                     }
-                    $colors[$id] = ['label' => $token['title'], 'color' => $token['value'], 'status' => 'active', 'usedInPosts' => [], 'lastUpdated' => gmdate('c')];
-                    $colors_changed = true;
+                    $missing_colors[$id] = ['label' => $token['title'], 'color' => $token['value'], 'status' => 'active', 'usedInPosts' => [], 'lastUpdated' => gmdate('c')];
                 } else {
                     $type = bioco_divi_token_type($category);
                     if (isset($variables[$type][$id])) continue;
                     if ($conflict = self::label_conflict($variables[$type] ?? [], $token['title'], $id)) {
-                        $report[] = 'conflict ' . $token['title'] . ' already exists as "' . $conflict . '"; resolve in Divi';
+                        $conflicts[] = 'conflict ' . $token['title'] . ' already exists as "' . $conflict . '"; resolve in Divi';
                         continue;
                     }
-                    $variables[$type][$id] = ['label' => $token['title'], 'value' => $token['value'], 'status' => 'active', 'order' => count($variables[$type] ?? [])];
-                    $variables_changed = true;
+                    $missing_variables[$type][$id] = ['label' => $token['title'], 'value' => $token['value'], 'status' => 'active', 'order' => count($variables[$type] ?? []) + count($missing_variables[$type] ?? [])];
                 }
-                $report[] = ($apply ? 'added ' : 'would-add ') . $token['title'];
+                $report[] = 'would-add ' . $token['title'];
             }
         }
-        if ($apply && $colors_changed) self::request('/global-data/global-colors', ['global_colors' => $colors]);
-        if ($apply && $variables_changed) self::request('/global-data/global-variables', ['global_variables' => $variables]);
-        return array_merge($report, self::presets($apply), self::layouts($apply));
+        [$preset_report, $preset_data] = self::presets($definitions);
+        [$layout_report, $missing_layouts] = self::layouts();
+        $report = array_merge($conflicts, $report, $preset_report, $layout_report);
+        if ($conflicts || !$apply) return $report;
+        if ($missing_colors) self::request('/global-data/global-colors', ['global_colors' => $colors + $missing_colors]);
+        if ($missing_variables) self::request('/global-data/global-variables', ['global_variables' => self::merge_variables($variables, $missing_variables)]);
+        self::presets_apply($preset_data);
+        self::layouts_apply($missing_layouts);
+        // Every planned line is now written; 'would-add ' is 10 characters.
+        return array_map(static fn($line) => 'added ' . substr($line, 10), $report);
     }
+
+    private static function merge_variables(array $existing, array $missing): array {
+        foreach ($missing as $type => $items) {
+            $existing[$type] = $existing[$type] ?? [];
+            foreach ($items as $id => $item) $existing[$type][$id] = $item;
+        }
+        return $existing;
+    }
+
     /** Same-label entry under another ID: a duplicate would silently fork the value. */
     private static function label_conflict(array $entries, string $label, string $id): ?string {
         foreach ($entries as $existingId => $entry) {
@@ -158,10 +186,11 @@ final class Bioco_Divi_Foundation {
         return $definitions;
     }
 
-    private static function presets(bool $apply): array {
+    /** Read-only preset plan: [report lines, preset data with planned additions]. */
+    private static function presets(array $definitions): array {
         $data = \ET\Builder\Packages\GlobalData\GlobalPreset::get_data();
         $report = [];
-        foreach (self::preset_definitions() as $preset) {
+        foreach ($definitions as $preset) {
             $type = $preset['type'];
             $key = $preset[$type === 'module' ? 'moduleName' : 'groupName'];
             $id = 'bioco-' . substr(hash('sha256', $type . $preset['name']), 0, 16);
@@ -169,18 +198,19 @@ final class Bioco_Divi_Foundation {
             $preset += ['id' => $id, 'created' => time(), 'updated' => time(), 'version' => ET_BUILDER_VERSION, 'priority' => 10];
             if (!isset($data[$type][$key])) $data[$type][$key] = ['default' => '', 'items' => []];
             $data[$type][$key]['items'][$id] = $preset;
-            $report[] = ($apply ? 'added ' : 'would-add ') . $type . ' preset: ' . $preset['name'];
+            $report[] = 'would-add ' . $type . ' preset: ' . $preset['name'];
         }
-        if ($apply && $report) {
-            $payload = [];
-            foreach ($data as $type => $groups) {
-                if (!in_array($type, ['module', 'group'], true)) continue;
-                $payload[$type] = [];
-                foreach ($groups as $group) $payload[$type][] = ['default' => $group['default'], 'items' => array_values($group['items'])];
-            }
-            self::request('/global-data/global-preset/sync', ['presets' => $payload]);
+        return [$report, $data];
+    }
+
+    private static function presets_apply(array $data): void {
+        $payload = [];
+        foreach ($data as $type => $groups) {
+            if (!in_array($type, ['module', 'group'], true)) continue;
+            $payload[$type] = [];
+            foreach ($groups as $group) $payload[$type][] = ['default' => $group['default'], 'items' => array_values($group['items'])];
         }
-        return $report;
+        self::request('/global-data/global-preset/sync', ['presets' => $payload]);
     }
 
     private static function layout_content(string $slot): string {
@@ -195,7 +225,8 @@ final class Bioco_Divi_Foundation {
         return serialize_blocks([bioco_import_divi_block('divi/section', $attrs, [$row])]);
     }
 
-    private static function layouts(bool $apply): array {
+    /** Read-only layout plan: [report lines, missing slots]. */
+    private static function layouts(): array {
         $state = self::request('/outside-vb/theme-builder/list-templates', ['live' => true]);
         $templates = $state['templates'] ?? [];
         $default = null;
@@ -211,9 +242,15 @@ final class Bioco_Divi_Foundation {
             $slot = $definition['slot'];
             if (!empty($default['layouts'][$slot]['id'])) continue;
             $missing[$slot] = $definition['title'];
-            $report[] = ($apply ? 'added ' : 'would-add ') . $definition['title'];
+            $report[] = 'would-add ' . $definition['title'];
         }
-        if (!$apply || !$missing) return $report;
+        return [$report, ['missing' => $missing, 'default' => $default]];
+    }
+
+    private static function layouts_apply(array $plan): void {
+        $missing = $plan['missing'];
+        if (!$missing) return;
+        $default = $plan['default'];
         if (!$default) {
             $created = self::request('/outside-vb/theme-builder/create-template', ['live' => true, 'title' => 'BIOCO Default Website']);
             $default = $created['template'];
@@ -236,7 +273,6 @@ final class Bioco_Divi_Foundation {
             $layouts[$slot] = ['id' => $post->ID, 'enabled' => true];
         }
         self::request('/outside-vb/theme-builder/update-template', ['live' => true, 'template_id' => $default['id'], 'template' => ['default' => true, 'enabled' => true, 'layouts' => $layouts]]);
-        return $report;
     }
 
 }

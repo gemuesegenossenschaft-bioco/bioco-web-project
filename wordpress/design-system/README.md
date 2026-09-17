@@ -17,14 +17,22 @@ python3 wordpress/scripts/build-divi-design-system.py
 On a Divi 5 installation, using an existing administrator:
 
 ```sh
-wp bioco design-system --user=<administrator>
-wp bioco design-system --apply --user=<administrator>
+wp bioco design-system --user=ADMINISTRATOR_LOGIN
+wp bioco design-system --apply --user=ADMINISTRATOR_LOGIN
 ```
+
+Replace `ADMINISTRATOR_LOGIN` with an existing administrator's login name.
 
 The first command reports missing definitions. The second adds them through
 Divi's REST interfaces. It preserves existing IDs, values, presets, populated
 layouts and other templates. Run setup while no editor is changing global
 settings. A second run reports zero missing definitions.
+
+The command validates the complete plan (manifest sections, preset mappings,
+label conflicts) before the first write; a conflicted or invalid plan performs
+no write at all. A network or REST failure during apply can stop between
+writes; rerunning `--apply` resumes — it adds only what is still missing and
+never overwrites editor values.
 
 The command does not reimport pages. A pre-existing default template keeps every
 occupied slot. Empty slots receive BIOCO layouts; review those assignments in
