@@ -70,6 +70,27 @@ VIEWPORTS = {
 # Rectangles are clamped to the captured screenshot bounds at comparison time.
 MASKS = {route: {"desktop": [], "mobile": []} for route in CANONICAL_ROUTES}
 
+# Per-route threshold overrides.  A value of None marks the route as
+# informational: it is still captured, compared and reported, but it never
+# fails the gate.
+#
+# "/" is informational because the live reference serves a permanently stale
+# events feed: cms.bioco.ch keeps past-dated events as "upcoming" with an
+# empty past list (nothing flips statuses server-side), while the WordPress
+# candidate date-derives event status (#148).  Matching that pixel state
+# would require masking both dynamic row regions — 21.8% desktop and ~38%
+# mobile of the page — far above MAX_MASK_RATIO.  Owner decision 2026-09-17
+# (issue #135, PR #192): drop the 0.95 home parity gate.
+ROUTE_THRESHOLDS = {"/": None}
+
+ROUTE_THRESHOLD_REASONS = {
+    "/": (
+        "live reference serves a permanently stale events feed "
+        "(past-dated events as upcoming, empty past list); the WP "
+        "date-derives status per #148, so the divergence is data, not styling"
+    ),
+}
+
 
 class GateResult:
     """Per-route/viewport gate result.  Never collapses to a single score."""
@@ -80,11 +101,18 @@ class GateResult:
 
     @property
     def passed(self):
-        return bool(self.items) and all(item.get("passed", False) for item in self.items)
+        # Informational routes (ROUTE_THRESHOLDS value None) are reported but
+        # never fail the gate.
+        enforced = [item for item in self.items if not item.get("informational", False)]
+        return bool(enforced) and all(item.get("passed", False) for item in enforced)
 
     @property
     def failed_items(self):
-        return [item for item in self.items if not item.get("passed", False)]
+        return [
+            item
+            for item in self.items
+            if not item.get("passed", False) and not item.get("informational", False)
+        ]
 
     @property
     def overall(self):
@@ -447,9 +475,20 @@ def run_gate(reference_origin, candidate_origin, output_dir, threshold=DEFAULT_T
             capture_page(cand_url, viewport_name, cand_path)
 
             masks = MASKS[route].get(viewport_name, [])
-            result = compare(ref_path, cand_path, masks, threshold=threshold, output_dir=artifact_dir)
+            route_threshold = ROUTE_THRESHOLDS.get(route, threshold)
+            # Informational routes still need a valid threshold for the
+            # comparison math; the gate simply ignores their verdict.
+            comparison_threshold = (
+                DEFAULT_THRESHOLD if route_threshold is None else route_threshold
+            )
+            result = compare(
+                ref_path, cand_path, masks, threshold=comparison_threshold, output_dir=artifact_dir
+            )
             result["route"] = route
             result["viewport"] = viewport_name
+            result["informational"] = route_threshold is None
+            if route_threshold is None:
+                result["informational_reason"] = ROUTE_THRESHOLD_REASONS.get(route)
             items.append(result)
 
     return GateResult(threshold=threshold, items=items)
