@@ -68,7 +68,7 @@ $schnuppertage_query = ($schnuppertage_title && !$include_schnuppertage)
                 <?php bioco_render_events_list($schnuppertage_query, $schnuppertage_empty_message); ?>
             </div>
         <?php endif; ?>
-        <?php if ($past_query->have_posts()) : ?>
+        <?php if ($past_title && $past_query->have_posts()) : ?>
             <div class="bento-card past-events-card">
                 <div class="card-header">
 <?php if ($past_title) : ?>                    <h3><?php echo esc_html($past_title); ?></h3><?php endif; ?>

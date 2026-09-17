@@ -396,12 +396,13 @@
   background: rgba(46, 125, 50, 0.1);
   border-radius: var(--wp--custom--radius--md);
   padding: var(--wp--preset--spacing--40);
+  margin-bottom: var(--wp--preset--spacing--20);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   color: inherit;
   text-decoration: none;
-  box-shadow: var(--wp--custom--shadow--sm);
+  box-shadow: var(--wp--custom--shadow--md);
 }
 
 .event-item-with-image {
@@ -419,8 +420,21 @@
 }
 
 .event-item p {
-  margin: 4px 0;
+  margin: var(--wp--preset--spacing--20) 0;
   color: var(--wp--preset--color--bioco-text-muted);
+}
+
+.event-item p strong {
+  color: var(--wp--preset--color--bioco-text);
+}
+
+/* "Mehr erfahren →" CTA row, ported from AktuellesItem.tsx (0.875rem,
+   bioco-green, weight 600, margin-top 8px). */
+.event-item .event-item-more {
+  margin-top: var(--wp--preset--spacing--20);
+  font-size: 0.875rem;
+  color: var(--wp--preset--color--bioco-green);
+  font-weight: 600;
 }
 
 .event-card-image {
@@ -432,7 +446,12 @@
   background: var(--wp--preset--color--bioco-bg);
 }
 
+/* next/image `fill` equivalent: the image never drives the row height — the
+   text column does, and the picture crops to the stretched row height
+   (object-fit: cover), exactly like the reference grid. */
 .event-card-image img {
+  position: absolute;
+  inset: 0;
   display: block;
   width: 100%;
   height: 100%;

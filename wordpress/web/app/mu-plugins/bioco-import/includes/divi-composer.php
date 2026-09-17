@@ -222,6 +222,22 @@ final class Bioco_Import_Divi_Composer {
         // site: one standard list headed "Naechste Events". Schnuppertage stay
         // here and are deliberately NOT folded into that feed, otherwise a
         // Schnuppertag appears in both.
+        //
+        // The live homepage (HomeClient.tsx) additionally renders a plain
+        // "Kommende Events" list between "Alle Beiträge ansehen" and
+        // "Schnuppertage": h2 + general upcoming events + "Alle Events ansehen"
+        // button, without the bento card. That list is page chrome, not the CMS
+        // events_feed section, so it is composed from the generalized titled
+        // event-list module (event_type=general) plus a button block — the
+        // page still renders exactly one cms-events-feed (#148).
+        $upcoming = self::nativeModule('schnuppertage', [
+            'title' => 'Kommende Events',
+            'event_type' => 'general',
+            'display' => 'cards',
+            'empty_message' => 'Aktuell sind keine allgemeinen Events geplant.',
+            'limit' => 3,
+            'className' => 'bioco-home-live-events',
+        ]);
         $visits = self::nativeModule('schnuppertage', [
             'title' => 'Schnuppertage',
             'display' => 'cards',
@@ -241,6 +257,12 @@ final class Bioco_Import_Divi_Composer {
                             'text' => 'Alle Beiträge ansehen',
                             'href' => '/aktuelles',
                             'variant' => 'secondary',
+                        ]),
+                        $upcoming,
+                        self::homeButtonBlock([
+                            'text' => 'Alle Events ansehen',
+                            'href' => '/aktuelles',
+                            'variant' => 'primary',
                         ]),
                         $visits,
                     ]

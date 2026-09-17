@@ -380,7 +380,36 @@ def capture_page(url, viewport_name, output_path):
             # so wait for load + settled fonts + a fixed quiet period instead.
             page.goto(url, wait_until="load", timeout=60_000)
             page.wait_for_function("document.fonts.status === 'loaded'", timeout=15_000)
+            # The production reference fetches event feeds client-side with
+            # `cache: 'no-store'` (useEventsFeed); a capture taken mid-fetch
+            # freezes the transient "Events werden geladen…" state and makes
+            # the reference itself nondeterministic. Wait (bounded) until the
+            # feed settles — networkidle stays unusable because of the beacon.
+            try:
+                page.wait_for_function(
+                    "() => !document.body || !document.body.innerText.includes('Events werden geladen')",
+                    timeout=15_000,
+                )
+            except Exception:
+                pass  # route without the loading state, or the feed never settled
             page.wait_for_timeout(1_500)
+            # Full-page screenshots do not trigger `loading="lazy"` images
+            # below the fold, so a candidate would be measured against its
+            # half-loaded state while the client-rendered reference loads the
+            # same images during hydration. Scroll through the document once
+            # to request every lazy resource, then return to the top and let
+            # decoding settle before the capture.
+            page.evaluate(
+                """async () => {
+                    const height = document.body.scrollHeight;
+                    for (let y = 0; y < height; y += 800) {
+                        window.scrollTo(0, y);
+                        await new Promise((resolve) => setTimeout(resolve, 100));
+                    }
+                    window.scrollTo(0, 0);
+                }"""
+            )
+            page.wait_for_timeout(2_000)
             page.screenshot(path=str(output_path), full_page=True)
         finally:
             browser.close()

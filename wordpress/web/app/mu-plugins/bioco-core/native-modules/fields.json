@@ -754,6 +754,10 @@
       "type": "number",
       "label": "Maximale Anzahl"
     },
+    "include_schnuppertage": {
+      "type": "toggle",
+      "label": "Schnuppertage in dieser Liste zeigen"
+    },
     "archive_url": {
       "type": "text",
       "label": "Archiv-Link"
@@ -834,6 +838,14 @@
     "limit": {
       "type": "number",
       "label": "Maximale Anzahl Termine"
+    },
+    "event_type": {
+      "type": "text",
+      "label": "Anlasstyp",
+      "choices": {
+        "general": "Allgemeine Anlässe",
+        "schnuppertag": "Schnuppertage"
+      }
     },
     "schedule_title": {
       "type": "text",

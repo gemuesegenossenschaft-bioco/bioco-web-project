@@ -247,13 +247,14 @@ function bioco_render_events_list($query, $empty_message) {
                     </div>
                 <?php endif; ?>
                 <div class="event-card-content">
-                    <h3><?php echo esc_html(get_the_title($post_id)); ?></h3>
                     <?php if ($date_parts['dateLabel']) : ?>
-                        <p><?php echo esc_html($date_parts['dateLabel']); ?><?php if ($date_parts['timeLabel']) : ?> · <?php echo esc_html($date_parts['timeLabel']); ?><?php endif; ?></p>
+                        <h3><?php echo esc_html($date_parts['dateLabel']); ?></h3>
                     <?php endif; ?>
+                    <p><strong><?php echo esc_html(get_the_title($post_id)); ?></strong></p>
                     <?php if ($summary) : ?>
                         <p><?php echo esc_html(wp_strip_all_tags($summary)); ?></p>
                     <?php endif; ?>
+                    <p class="event-item-more">Mehr erfahren &rarr;</p>
                 </div>
             </a>
             <?php

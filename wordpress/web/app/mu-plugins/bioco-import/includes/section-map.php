@@ -850,12 +850,20 @@ function bioco_import_build_page_plan(array $seed) {
         foreach ($singleItems as $item) {
             if ($isHome && $componentKey === 'events_feed' && !empty($sections[$i]['section_title'])) {
                 // The homepage's ONE events feed (#148): the second feed the
-                // home-chrome block used to inject is gone. general-only —
-                // Schnuppertage have their own chrome block on the homepage
-                // and must not be duplicated into this list.
+                // home-chrome block used to inject is gone. The panel mirrors
+                // the live "Aktuelles" panel, which mixes general events and
+                // Schnuppertage (EventsSection.tsx <- useEventsFeed without a
+                // type filter) — the dedicated chrome "Schnuppertage" section
+                // below repeats the Schnuppertag on the live site too.
+                // past_title='' suppresses the past-events card: the home CMS
+                // section config carries no past recap (the live API reports
+                // an empty past array, so live renders none either); past
+                // recaps live on /aktuelles.
                 $item['values']['_section_heading'] = (string) $sections[$i]['section_title'];
                 $item['values']['limit'] = 8;
                 $item['values']['standard_title'] = 'Nächste Events';
+                $item['values']['include_schnuppertage'] = true;
+                $item['values']['past_title'] = '';
             }
             $plan[] = $item;
         }

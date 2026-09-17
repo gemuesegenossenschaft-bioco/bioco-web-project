@@ -89,6 +89,33 @@
         }
       }
     },
+    "include_schnuppertage": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "include_schnuppertage.innerContent",
+            "label": "Schnuppertage in dieser Liste zeigen",
+            "category": "basic_option",
+            "priority": 25,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/events_feed-include_schnuppertage",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
     "archive_url": {
       "type": "object",
       "selector": "{{selector}}",

@@ -305,8 +305,13 @@ def test_events_feed_block_requests_general_events_only():
 
 
 def test_schnuppertage_block_still_requests_schnuppertag_events():
+    """The block generalised to event_type (general | schnuppertag, default
+    schnuppertag) so the homepage "Kommende Events" list can reuse it; the
+    dedicated Schnuppertage sections still default to schnuppertag-only."""
     render = (CORE / "blocks/schnuppertage/render.php").read_text()
-    assert "bioco_query_events('upcoming', $limit, 'schnuppertag')" in render
+    assert "bioco_query_events('upcoming', $limit, $event_type)" in render
+    assert "$event_type = bioco_field('event_type');" in render
+    assert "if (!in_array($event_type, ['general', 'schnuppertag'], true))" in render
     assert "respect_stored_status" not in render
 
 
