@@ -460,6 +460,7 @@ def _run_core_enqueue_hook(hook_name: str) -> dict:
         "define('ABSPATH', __DIR__);\n"
         "$GLOBALS['BIOCO_ENQUEUED'] = [];\n"
         "$GLOBALS['BIOCO_ACTIONS'] = [];\n"
+        "$GLOBALS['BIOCO_INLINE_STYLES'] = [];\n"
         "function add_filter($hook, $callback, $priority = 10) { return true; }\n"
         "function add_action($hook, $callback, $priority = 10) {\n"
         "    $GLOBALS['BIOCO_ACTIONS'][$hook][] = [(int) $priority, $callback];\n"
@@ -470,6 +471,10 @@ def _run_core_enqueue_hook(hook_name: str) -> dict:
         "}\n"
         "function wp_enqueue_script($handle, $src = '', $deps = [], $ver = false, $footer = false) {\n"
         "    $GLOBALS['BIOCO_ENQUEUED'][] = ['type' => 'script', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver, 'footer' => (bool) $footer];\n"
+        "}\n"
+        "function wp_add_inline_style($handle, $css) {\n"
+        "    $GLOBALS['BIOCO_INLINE_STYLES'][$handle][] = $css;\n"
+        "    return true;\n"
         "}\n"
         "function plugin_dir_url($file) { return 'https://staging.example/wp-content/mu-plugins/bioco-core/'; }\n"
         "require 'wordpress/web/app/mu-plugins/bioco-core/bioco-core.php';\n"
@@ -491,7 +496,7 @@ def _run_core_enqueue_hook(hook_name: str) -> dict:
         "foreach ($registered as &$entry) {\n"
         "    unset($entry['callback']);\n"
         "}\n"
-        "echo json_encode(['registrations' => array_values($registered), 'enqueued' => $GLOBALS['BIOCO_ENQUEUED']]);"
+        "echo json_encode(['registrations' => array_values($registered), 'enqueued' => $GLOBALS['BIOCO_ENQUEUED'], 'inlineStyles' => $GLOBALS['BIOCO_INLINE_STYLES']]);"
     )
     result = subprocess.run(
         ["php", "-r", php, hook_name],
@@ -506,20 +511,24 @@ def _run_core_enqueue_hook(hook_name: str) -> dict:
 def test_bioco_core_enqueues_tokens_blocks_navigation_and_shared_shell_in_order():
     front_end = _run_core_enqueue_hook("wp_enqueue_scripts")
 
-    # Exactly two callbacks must be registered on wp_enqueue_scripts and they
-    # alone must produce the assets: a missing or wrong hook registration
-    # leaves the list empty or duplicated.
-    # The shell must enqueue on a later hook priority than the theme
-    # adapters' default-10 callbacks: the shell call runs after themes have
-    # registered their base/child styles, and WordPress dependency resolution
-    # (proven against the real WP_Dependencies in
-    # test_wordpress_divi_home_styles.py) then prints it between them.
-    assert front_end["registrations"] == [
-        {"priority": 10, "name": "bioco_core_enqueue_block_assets"},
-        {"priority": 20, "name": "bioco_core_enqueue_shell_style"},
-    ]
+    # The intended asset order is fixed, not the number of callbacks: the
+    # design-system bridge (#134) legitimately adds a third callback that only
+    # attaches live Divi token CSS as an inline style. The shell must enqueue
+    # on a later hook priority than the theme adapters' default-10 callbacks:
+    # the shell call runs after themes have registered their base/child
+    # styles, and WordPress dependency resolution (proven against the real
+    # WP_Dependencies in test_wordpress_divi_home_styles.py) then prints it
+    # between them. The bridge must run after the shell so the tokens handle
+    # it extends is already registered.
+    priorities = [entry["priority"] for entry in front_end["registrations"]]
+    assert priorities == sorted(priorities)
+    assert priorities[-1] > 20, front_end["registrations"]
+    assert front_end["registrations"][0]["name"] == "bioco_core_enqueue_block_assets"
+    assert front_end["registrations"][1]["name"] == "bioco_core_enqueue_shell_style"
     enqueued = front_end["enqueued"]
 
+    # The bridge may only extend existing handles with inline styles; it must
+    # never introduce new handles or reorder the asset contract.
     handles = [asset["handle"] for asset in enqueued]
     assert handles == ["bioco-tokens", "bioco-blocks", "bioco-navigation", "bioco-shell"]
 
@@ -543,6 +552,11 @@ def test_bioco_core_enqueues_tokens_blocks_navigation_and_shared_shell_in_order(
 
     for asset in enqueued:
         assert isinstance(asset["ver"], str) and asset["ver"].isdigit(), asset
+
+    # Bridge fallback: without Divi global data (this harness has no Divi
+    # classes) it must attach nothing. The live-value path is covered in
+    # test_wordpress_divi_foundation.py against a fake vendor boundary.
+    assert front_end["inlineStyles"] in ([], {}), front_end["inlineStyles"]
 
 
 def test_block_editor_assets_never_load_the_shell_chrome():

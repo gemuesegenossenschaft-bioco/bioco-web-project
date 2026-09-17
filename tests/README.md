@@ -119,6 +119,7 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 | File | Status | Behaviour |
 | --- | --- | --- |
 | `test_wordpress_divi_design_system.py` | keep | Design-system checker contract (#134): token-only values, malformed manifest fail-closed behaviour, documented exceptions. |
+| `test_wordpress_divi_foundation.py` | new (#134) | Manifest bundle matches its source; live-value bridge (editor override, archived fallback, stylesheet-injection rejection); seed dry-run/apply semantics against a fake vendor REST boundary: label conflicts report instead of duplicate, conflicted apply performs no write, clean rerun skips satisfied writes, unknown manifest preset titles fail the run. |
 | `test_wordpress_visual_parity.py` | keep | 95% visual parity gate semantics: fail-closed results, masking discipline, threshold validation. |
 | `test_wordpress_release_pipeline.py` | keep | Release pipeline: dry-run non-mutation, step order/abort, input hygiene, CI parity, hash-pinned deps. |
 | `test_wordpress_release_preservation.py` | new (#179) | Exact remote-command boundary, no import, fail-closed aborts, non-writing dry run. Database preservation requires the separate real release check. |

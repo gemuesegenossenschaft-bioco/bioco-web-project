@@ -19,6 +19,29 @@
 if (!defined('ABSPATH')) exit;
 
 class Bioco_Import_CLI_Command {
+    /**
+     * Add missing named Divi design definitions; preserve existing editor values.
+     *
+     * ## OPTIONS
+     *
+     * [--apply]
+     * : Write missing definitions. Requires --user=<administrator>.
+     *
+     * @subcommand design-system
+     * @when after_wp_load
+     */
+    public function design_system($args, $assoc_args) {
+        try {
+            $apply = !empty($assoc_args['apply']);
+            $report = Bioco_Divi_Foundation::seed($apply);
+            $conflicts = array_filter($report, static fn($line) => str_starts_with($line, 'conflict '));
+            $added = array_filter($report, static fn($line) => str_starts_with($line, $apply ? 'added ' : 'would-add '));
+            foreach ($report as $line) WP_CLI::log($line);
+            if ($conflicts) WP_CLI::error(count($conflicts) . ' conflict(s) must be resolved in Divi before setup can proceed.');
+            WP_CLI::success(count($added) . ($apply ? ' definition(s) added.' : ' missing definition(s).'));
+        } catch (Throwable $error) { WP_CLI::error($error->getMessage()); }
+    }
+
 
     /**
      * Konvertiert vorhandene Marker ohne erneuten Inhaltsimport in native Module.
