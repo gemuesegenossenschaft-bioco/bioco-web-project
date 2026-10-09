@@ -293,10 +293,12 @@ function bioco_forms_doi_confirm_token($token) {
 function bioco_forms_validate_membership($data) {
     $errors = [];
     $required_fields = ['firstName', 'lastName', 'email', 'address', 'zip', 'city'];
+    $allowed = array_merge($required_fields, ['phone', 'mobilePhone', 'birthday', 'comment', 'otherActivity', 'weitereProdukte', 'depot', 'paymentType', 'preferredDays', 'preferredTimes', 'activityAreas', 'zusatzabos', 'privacyAccept', 'commitmentAccepted', 'commitmentCount', 'commitmentSignature', 'membershipType', 'aboType', 'additionalShares', 'sharesOnly', 'submissionId', 'captchaToken', 'cf-turnstile-response']);
+    foreach (array_diff(array_keys($data), $allowed) as $field) $errors[$field] = bioco_forms_message('shared', 'generic');
 
     foreach ($required_fields as $field) {
         $value = isset($data[$field]) ? $data[$field] : null;
-        if (!is_string($value) || trim($value) === '') {
+        if (!is_string($value) || trim($value) === '' || strlen($value) > 5000) {
             $errors[$field] = bioco_forms_message('shared', 'required_field');
         }
     }
@@ -333,7 +335,7 @@ function bioco_forms_validate_membership($data) {
         if (isset($data[$field]) && (!is_string($data[$field]) || strlen($data[$field]) > 5000)) $errors[$field] = bioco_forms_message('shared', 'generic');
     }
     foreach (['preferredDays', 'preferredTimes', 'activityAreas', 'zusatzabos'] as $field) {
-        if (isset($data[$field]) && (!is_array($data[$field]) || !array_is_list($data[$field]) || count($data[$field]) > 100 || array_filter($data[$field], static fn($item) => !is_string($item)))) $errors[$field] = bioco_forms_message('shared', 'generic');
+        if (isset($data[$field]) && (!is_array($data[$field]) || !array_is_list($data[$field]) || count($data[$field]) > 100 || array_filter($data[$field], static fn($item) => !is_string($item) || strlen($item) > 5000))) $errors[$field] = bioco_forms_message('shared', 'generic');
     }
     if (!empty($data['birthday']) && is_string($data['birthday'])) {
         $date = DateTimeImmutable::createFromFormat('!Y-m-d', $data['birthday']);
@@ -698,15 +700,11 @@ function bioco_forms_handle_event_signup(WP_REST_Request $request) {
     return new WP_REST_Response(['success' => true], 200);
 }
 
-// Mirrors .wp-refs/api-forms/membership/route.ts: validate -> email ->
-// best-effort intranet forward. No Turnstile in the reference MembershipForm
-// (no CaptchaField import there) — added here per issue #97's "every
-// handler verifies Turnstile" requirement; the block's view.js renders a
-// widget that the reference component lacks.
+// Membership keeps the email/manual workflow; local acceptance precedes mail.
 function bioco_forms_handle_membership(WP_REST_Request $request) {
     $data = bioco_forms_json_body($request);
 
-    $captcha_token = isset($data['captchaToken']) ? sanitize_text_field($data['captchaToken']) : '';
+    $captcha_token = isset($data['captchaToken']) && is_string($data['captchaToken']) ? sanitize_text_field($data['captchaToken']) : '';
     if (!bioco_forms_verify_turnstile($captcha_token, bioco_forms_client_ip())) {
         return new WP_REST_Response(['success' => false, 'error' => $GLOBALS['bioco_forms_captcha_error']], 400);
     }
@@ -774,12 +772,14 @@ function bioco_forms_handle_membership(WP_REST_Request $request) {
     // Acceptance is durable before notification. A failed notification must
     // never invite another submission. Fake staging signups send no real mail.
     if (empty($acceptance['simulated'])) {
+        $sent = false;
         try {
             $subject = 'Neue Mitgliedschaftsanmeldung: ' . $first_name . ' ' . $last_name;
-            bioco_forms_send_mail(bioco_forms_recipient(), $subject, bioco_forms_lines($lines), $email);
+            $sent = bioco_forms_send_mail(bioco_forms_recipient(), $subject, bioco_forms_lines(array_merge(['Receipt: ' . $acceptance['receipt']], $lines)), $email);
         } catch (Throwable $error) {
-            error_log('bioco membership: accepted signup notification failed');
+            // Retained registration remains successful; admins see failure.
         }
+        bioco_forms_membership_notification($data['submissionId'], (bool) $sent);
     }
     return new WP_REST_Response(['success' => true, 'receipt' => $acceptance['receipt'], 'simulated' => !empty($acceptance['simulated'])], 200);
 }

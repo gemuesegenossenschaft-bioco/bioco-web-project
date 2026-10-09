@@ -202,3 +202,13 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
   gate, not the unit suite).
 - Button-contrast replacement in `test_wordpress_visual_contract.py` is intentionally untouched
   here — it is being revised in parallel with the button readability fix (#178).
+
+## Production readiness slice
+
+| File | Keep/Replace/Remove | Evidence |
+| --- | --- | --- |
+| `test_wordpress_membership_adapter.py` | Keep, extended | Real PHP REST acceptance, complete local payload, insert-before-mail, overlapping replay, notification false/exception retention, conflicts, storage failure, staging gates. WP storage/mail/CAPTCHA are controlled; no real InnoDB or delivery claim. |
+| `test_wordpress_membership_admin.py` | Keep, new | Real PHP review callback denies non-admins before querying and escapes private records. No public REST hooks. |
+| `test_wordpress_production_routing.py` | Keep, new | Real generator plus limited rule evaluator checks route precedence, internal rounds, deny policy, canonical slash, hosts, handler choice, and print-only behavior. Replace evaluator with Apache integration evidence when available; target-host integration remains required. |
+| `test_wordpress_cms_archive.py` | Keep, new | Real CLI helper archives complete JSON, preserves current content/SEO, fills empty fields, validates before writing, previews without writes, and repeats safely. WP metadata is controlled. |
+| `test_wordpress_matomo.py` | Keep, new | Real PHP enqueue/config gating and real native JS command order, cookie disabling, async loading, and inline escaping. No tracker network requests. |
