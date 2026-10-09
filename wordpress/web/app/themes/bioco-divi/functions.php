@@ -17,6 +17,12 @@
 
 if (!defined('ABSPATH')) exit;
 
+// These singles use the child template's shared shell and native article layout.
+// Leave the saved global Theme Builder template available to all other requests.
+add_filter('et_theme_builder_template_layouts', function ($layouts) {
+    return is_singular(['event', 'post']) ? [] : $layouts;
+});
+
 // The shared single template supplies a native layout at render time. Expose
 // the same builder marker used by imported pages to Divi's frontend bootstrap,
 // without changing the post's saved body or metadata.
