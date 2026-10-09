@@ -148,3 +148,94 @@ function bioco_forms_membership_accept(array $data): array {
     if (!update_option($key, $accepted, false)) return ['status' => 'unavailable'];
     return $accepted + ['replayed' => false];
 }
+
+function bioco_forms_handle_membership(WP_REST_Request $request) {
+    $data = bioco_forms_json_body($request);
+
+    $captcha_token = isset($data['captchaToken']) && is_string($data['captchaToken']) ? sanitize_text_field($data['captchaToken']) : '';
+    if (!bioco_forms_verify_turnstile($captcha_token, bioco_forms_client_ip())) {
+        return new WP_REST_Response(['success' => false, 'error' => $GLOBALS['bioco_forms_captcha_error']], 400);
+    }
+
+    $validation = bioco_forms_validate_membership($data);
+    if (!$validation['ok']) {
+        return new WP_REST_Response([
+            'success' => false,
+            'error' => $GLOBALS['bioco_forms_missing_fields_error'],
+            'fieldErrors' => $validation['errors'],
+        ], 400);
+    }
+
+    $acceptance = bioco_forms_membership_accept($data);
+    if ($acceptance['status'] !== 'accepted') {
+        return new WP_REST_Response([
+            'success' => false,
+            'error' => bioco_forms_message('shared', 'generic'),
+            'fieldErrors' => $acceptance['fieldErrors'] ?? [],
+        ], $acceptance['status'] === 'validation' ? 400 : 502);
+    }
+    if (!empty($acceptance['replayed'])) {
+        return new WP_REST_Response(['success' => true, 'receipt' => $acceptance['receipt'], 'simulated' => !empty($acceptance['simulated'])], 200);
+    }
+
+    $first_name = sanitize_text_field($data['firstName']);
+    $last_name = sanitize_text_field($data['lastName']);
+    $email = sanitize_email($data['email']);
+    $address = sanitize_text_field($data['address']);
+    $zip = sanitize_text_field($data['zip']);
+    $city = sanitize_text_field($data['city']);
+    $phone = isset($data['phone']) ? sanitize_text_field($data['phone']) : '';
+    $mobile_phone = isset($data['mobilePhone']) ? sanitize_text_field($data['mobilePhone']) : '';
+    $birthday = isset($data['birthday']) ? sanitize_text_field($data['birthday']) : '';
+    $depot = isset($data['depot']) ? sanitize_text_field($data['depot']) : '';
+    $payment_type = isset($data['paymentType']) ? sanitize_text_field($data['paymentType']) : '';
+    $abo_type = isset($data['aboType']) ? sanitize_text_field($data['aboType']) : '';
+    $membership_type = isset($data['membershipType']) ? sanitize_text_field($data['membershipType']) : '';
+
+    $lines = [
+        'Vorname: ' . $first_name,
+        'Name: ' . $last_name,
+        'Adresse: ' . $address . ', ' . $zip . ' ' . $city,
+        'E-Mail: ' . $email,
+    ];
+    if ($phone) {
+        $lines[] = 'Telefon: ' . $phone;
+    }
+    if ($mobile_phone) {
+        $lines[] = 'Mobiltelefon: ' . $mobile_phone;
+    }
+    if ($birthday) {
+        $lines[] = 'Geburtsdatum: ' . $birthday;
+    }
+    $lines[] = '';
+    $lines[] = 'Mitgliedschaft: ' . ($membership_type === 'shares-only' ? 'Nur Anteilsscheine' : 'Gemüseabo');
+    if ($membership_type !== 'shares-only') {
+        $lines[] = 'Gemüsekorb: ' . $abo_type;
+    }
+    $lines[] = 'Anteilsscheine: ' . bioco_forms_membership_total_shares($data);
+    if ($depot) {
+        $lines[] = 'Depot: ' . $depot;
+    }
+    if ($payment_type) {
+        $lines[] = 'Zahlungsweise: ' . ($payment_type === 'quarterly' ? 'Quartalsweise' : 'Ganzes Jahr');
+    }
+    $notes = bioco_forms_membership_notes($data);
+    if ($notes) {
+        $lines[] = '';
+        $lines[] = $notes;
+    }
+
+    // Acceptance is durable before notification. A failed notification must
+    // never invite another submission. Fake staging signups send no real mail.
+    if (empty($acceptance['simulated'])) {
+        $sent = false;
+        try {
+            $subject = 'Neue Mitgliedschaftsanmeldung: ' . $first_name . ' ' . $last_name;
+            $sent = bioco_forms_send_mail(bioco_forms_recipient(), $subject, bioco_forms_lines(array_merge(['Receipt: ' . $acceptance['receipt']], $lines)), $email);
+        } catch (Throwable $error) {
+            // Retained registration remains successful; admins see failure.
+        }
+        bioco_forms_membership_notification($data['submissionId'], (bool) $sent);
+    }
+    return new WP_REST_Response(['success' => true, 'receipt' => $acceptance['receipt'], 'simulated' => !empty($acceptance['simulated'])], 200);
+}

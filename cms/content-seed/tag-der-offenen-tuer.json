@@ -18,6 +18,12 @@
       }
     },
     {
+      "section_id": "anreise-parken",
+      "section_layout": "rich_text",
+      "section_title": "Anreise & Parken",
+      "section_text": "<p><strong>Bitte komm wenn möglich mit dem Velo oder Bus!</strong></p><p>Falls du mit dem Auto kommst:</p><ul><li>Bitte <strong>nicht auf den Hof hinauffahren</strong></li><li>Parkiere unten an der Strasse</li><li>Halte den <strong>Wendeplatz zwingend frei</strong> (für landwirtschaftliche Fahrzeuge)</li></ul><p>Danke für deine Rücksichtnahme!</p>"
+    },
+    {
       "section_id": "anmeldung-formular",
       "section_component": "visit_day_form"
     }

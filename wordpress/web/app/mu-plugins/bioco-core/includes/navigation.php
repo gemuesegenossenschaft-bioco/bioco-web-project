@@ -76,6 +76,11 @@ function bioco_render_primary_navigation() {
     $primary_label = (string) ($site['primaryLabel'] ?? '');
     $menu_open_label = (string) ($site['menuOpenLabel'] ?? '');
     $menu_close_label = (string) ($site['menuCloseLabel'] ?? '');
+    if (function_exists('is_page') && is_page('anmeldung')) {
+        return '<div class="bioco-navigation-shell"><nav class="bioco-primary-nav" aria-label="' . esc_attr($primary_label) . '">'
+            . '<a class="bioco-logo" href="' . esc_url(home_url('/')) . '" aria-label="' . esc_attr($home_label) . '"><img src="' . esc_url($logo) . '" alt="' . esc_attr($logo_alt) . '"></a>'
+            . '</nav></div>';
+    }
     $cta = $contract['cta'] ? bioco_navigation_links([$contract['cta']], 'bioco-primary-cta') : '';
     $mobile_utility = bioco_navigation_links($contract['utility'], '', 'bioco-mobile-utility');
 
@@ -91,6 +96,7 @@ function bioco_render_primary_navigation() {
 }
 
 function bioco_render_site_footer() {
+    if (function_exists('is_page') && is_page('anmeldung')) return '';
     $footer = bioco_navigation_contract()['footer'];
     $links = static function (array $items): string {
         $markup = '';

@@ -11,6 +11,8 @@
 if (!defined('ABSPATH')) exit;
 
 $vegetables = bioco_field('vegetables');
+$catalog_rows = function_exists('bioco_catalog_rows') ? bioco_catalog_rows('vegetables') : null;
+if ($catalog_rows !== null) $vegetables = $catalog_rows;
 $vegetable_column_label = bioco_field('vegetable_column_label');
 $month_columns = bioco_field('month_columns');
 $empty_message = bioco_field('empty_message');

@@ -1,0 +1,471 @@
+[
+  {
+    "name": "Yacon",
+    "months": [
+      1,
+      2,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Wirz",
+    "months": [
+      1,
+      2,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Nüssli",
+    "months": [
+      1,
+      2,
+      3,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Federkohl",
+    "months": [
+      1,
+      2,
+      3,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Lauch",
+    "months": [
+      1,
+      2,
+      3,
+      4,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Kürbis",
+    "months": [
+      1,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Randen",
+    "months": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "(Sellerie)",
+    "months": [
+      1,
+      2,
+      4
+    ]
+  },
+  {
+    "name": "Zwiebeln",
+    "months": [
+      1,
+      2,
+      3,
+      4,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Kartoffeln",
+    "months": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Knoblauch",
+    "months": [
+      1,
+      2,
+      3,
+      4,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Rüebli",
+    "months": [
+      1,
+      2,
+      3,
+      4,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Asiasalate",
+    "months": [
+      1,
+      2,
+      3,
+      4,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Krautstiel",
+    "months": [
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "name": "Sellerie",
+    "months": [
+      3,
+      5,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Spinat",
+    "months": [
+      3,
+      4,
+      5,
+      6,
+      9,
+      10
+    ]
+  },
+  {
+    "name": "Salate",
+    "months": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Blumenkohl",
+    "months": [
+      4,
+      5
+    ]
+  },
+  {
+    "name": "Fenchel",
+    "months": [
+      5,
+      6,
+      7,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "name": "Radiesli",
+    "months": [
+      5,
+      6,
+      7
+    ]
+  },
+  {
+    "name": "Lattich",
+    "months": [
+      5,
+      6
+    ]
+  },
+  {
+    "name": "Kräuter",
+    "months": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "name": "Kohlrabi",
+    "months": [
+      5,
+      6,
+      7,
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Broccoli",
+    "months": [
+      6
+    ]
+  },
+  {
+    "name": "Knackerbsen",
+    "months": [
+      6,
+      7
+    ]
+  },
+  {
+    "name": "Dicke Bohnen",
+    "months": [
+      6
+    ]
+  },
+  {
+    "name": "Kefen",
+    "months": [
+      6
+    ]
+  },
+  {
+    "name": "Frühkartoffeln",
+    "months": [
+      6,
+      8
+    ]
+  },
+  {
+    "name": "Lauch-/Frühlingszwiebeln",
+    "months": [
+      6
+    ]
+  },
+  {
+    "name": "Gurken",
+    "months": [
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "name": "Buschbohnen",
+    "months": [
+      7,
+      8,
+      9
+    ]
+  },
+  {
+    "name": "Frühkartoffel",
+    "months": [
+      7
+    ]
+  },
+  {
+    "name": "Tomaten",
+    "months": [
+      7,
+      8,
+      9,
+      10
+    ]
+  },
+  {
+    "name": "Zucchetti",
+    "months": [
+      7,
+      8,
+      9
+    ]
+  },
+  {
+    "name": "Aubergine",
+    "months": [
+      7,
+      8
+    ]
+  },
+  {
+    "name": "Lauchzwiebeln",
+    "months": [
+      7
+    ]
+  },
+  {
+    "name": "Rettich",
+    "months": [
+      8,
+      10
+    ]
+  },
+  {
+    "name": "Stangenbohnen",
+    "months": [
+      8,
+      9
+    ]
+  },
+  {
+    "name": "Rondini",
+    "months": [
+      8,
+      9,
+      10,
+      11
+    ]
+  },
+  {
+    "name": "Peperoni",
+    "months": [
+      8,
+      10
+    ]
+  },
+  {
+    "name": "Süssmais",
+    "months": [
+      8
+    ]
+  },
+  {
+    "name": "Auberginen",
+    "months": [
+      9
+    ]
+  },
+  {
+    "name": "Stangensellerie",
+    "months": [
+      9
+    ]
+  },
+  {
+    "name": "Chinakohl",
+    "months": [
+      10,
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Pak Choi",
+    "months": [
+      10,
+      11
+    ]
+  },
+  {
+    "name": "Rucola",
+    "months": [
+      10
+    ]
+  },
+  {
+    "name": "Radicchio",
+    "months": [
+      10,
+      11
+    ]
+  },
+  {
+    "name": "Kürbisse",
+    "months": [
+      10
+    ]
+  },
+  {
+    "name": "Zuckerhut",
+    "months": [
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Endivien",
+    "months": [
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Portulak",
+    "months": [
+      11
+    ]
+  },
+  {
+    "name": "Pastinaken",
+    "months": [
+      11,
+      12
+    ]
+  },
+  {
+    "name": "Hirschhorn",
+    "months": [
+      11
+    ]
+  },
+  {
+    "name": "Rotkraut",
+    "months": [
+      11,
+      12
+    ]
+  }
+]

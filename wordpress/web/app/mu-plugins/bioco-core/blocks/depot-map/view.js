@@ -42,7 +42,7 @@
       var marker = window.L.marker([loc.lat, loc.lng]).addTo(map);
       var popup = '<strong>' + escapeHtml(loc.name) + '</strong>';
       if (loc.description) {
-        popup += '<br>' + escapeHtml(loc.description).replace(/\n/g, '<br>');
+        popup += '<br>' + descriptionHtml(loc.description).replace(/\n/g, '<br>');
       }
       marker.bindPopup(popup);
       markers.push(marker);
@@ -58,6 +58,23 @@
     var div = document.createElement('div');
     div.textContent = value;
     return div.innerHTML;
+  }
+
+  function descriptionHtml(value) {
+    var parts = String(value).split(/(https?:\/\/[^\s<>"']+)/gi);
+    return parts.map(function (part, index) {
+      var url = part.replace(/[.,;!?)]+$/, '');
+      if (index % 2 === 1) {
+        try {
+          var parsed = new URL(url);
+          if ((parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.hostname) {
+            return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' +
+              escapeHtml(url) + '</a>' + escapeHtml(part.slice(url.length));
+          }
+        } catch (error) { /* Keep malformed URLs as text. */ }
+      }
+      return escapeHtml(part);
+    }).join('');
   }
 
   function init() {
