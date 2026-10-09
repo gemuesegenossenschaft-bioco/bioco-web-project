@@ -20,7 +20,7 @@ def requests(items, mode='fake', environment='staging', host='staging.bioco.ch',
     define('ABSPATH', __DIR__);
     $scenario = json_decode($argv[1], true);
     $options = ['bioco_membership_adapter'=>$scenario['mode']];
-    $adapter_calls=0; $mail=0; $network=[]; $mail_record=null; $overlap=null;
+    $adapter_calls=0; $mail=0; $network=[]; $mail_record=null; $mail_args=[]; $overlap=null;
     function wp_salt($scheme) {return 'test-salt';}
     function add_action(...$args) {}
     function get_option($key,$default=false) {
@@ -47,6 +47,7 @@ def requests(items, mode='fake', environment='staging', host='staging.bioco.ch',
     function is_wp_error($v) {return false;}
     function wp_mail(...$args) {
         $GLOBALS['mail']++;
+        $GLOBALS['mail_args'][]=['to'=>$args[0],'subject'=>$args[1],'body'=>$args[2],'headers'=>$args[3] ?? ''];
         $records=array_values(array_filter($GLOBALS['options'],fn($v)=>is_array($v)&&($v['adapter']??'')==='local'));
         $GLOBALS['mail_record']=$records[0]??null;
         // Interleave a retry while the winning request is notifying.
@@ -54,7 +55,7 @@ def requests(items, mode='fake', environment='staging', host='staging.bioco.ch',
         $GLOBALS['overlap']=['status'=>$retry->status,'data'=>$retry->data]; if($GLOBALS['scenario']['mail_result']==='throw')throw new Exception('Real mail forbidden'); return $GLOBALS['scenario']['mail_result']==='sent';}
     class WP_REST_Request {function __construct(public $data){} function get_json_params(){return $this->data;}}
     class WP_REST_Response {function __construct(public $data,public $status){}}
-    putenv('TURNSTILE_SECRET_KEY=mock'); putenv('NEXT_PUBLIC_TURNSTILE_SITE_KEY=mock');
+    putenv('TURNSTILE_SECRET_KEY=mock'); putenv('NEXT_PUBLIC_TURNSTILE_SITE_KEY=mock'); putenv('BIOCO_FORMS_RECIPIENT');
     require 'wordpress/web/app/mu-plugins/bioco-forms/bioco-forms.php';
     $GLOBALS['bioco_forms_missing_fields_error']='missing'; $GLOBALS['bioco_forms_captcha_error']='captcha';
     $responses=[];
@@ -63,7 +64,7 @@ def requests(items, mode='fake', environment='staging', host='staging.bioco.ch',
         $r=bioco_forms_handle_membership(new WP_REST_Request($item['data']));
         $responses[]=['status'=>$r->status,'data'=>$r->data];
     }
-    echo json_encode(['responses'=>$responses,'adapter_calls'=>$adapter_calls,'mail'=>$mail,'network'=>$network,'mail_record'=>$mail_record,'overlap'=>$overlap,'records'=>array_values(array_filter($options,fn($v)=>is_array($v)&&($v['adapter']??'')==='local')),'payload'=>bioco_forms_build_intranet_payload($scenario['items'][0]['data'])]);
+    echo json_encode(['responses'=>$responses,'adapter_calls'=>$adapter_calls,'mail'=>$mail,'mail_args'=>$mail_args,'network'=>$network,'mail_record'=>$mail_record,'overlap'=>$overlap,'records'=>array_values(array_filter($options,fn($v)=>is_array($v)&&($v['adapter']??'')==='local')),'payload'=>bioco_forms_build_intranet_payload($scenario['items'][0]['data'])]);
     '''
     result = subprocess.run(['php', '-r', php, json.dumps(scenario)], cwd=ROOT, text=True, capture_output=True, check=True)
     assert 'Warning' not in result.stderr
@@ -170,6 +171,49 @@ def test_local_rejects_unvalidated_extra_fields():
     result = requests([{'data': dict(valid_data(), extra={'secret': 'no'})}], 'local', 'production', 'bioco.ch')
     assert result['responses'][0]['status'] == 400
     assert result['records'] == []
+
+
+def test_backup_mail_reaches_info_with_complete_signup_summary_across_replay():
+    data = valid_data()
+    data.update(preferredDays=['Montag'], preferredTimes=['Morgen'], activityAreas=['Ernte'],
+                otherActivity='Andere Arbeit', zusatzabos=['Brot'], weitereProdukte='Eier',
+                depot='Baden', paymentType='yearly', additionalShares='3', sharesOnly='0')
+    result = requests([{'data': data}, {'data': dict(data, captchaToken='new-token')}],
+                      'local', 'production', 'bioco.ch', 'sent')
+    assert [r['status'] for r in result['responses']] == [200, 200]
+    assert result['responses'][0]['data'] == result['responses'][1]['data']
+    # Exactly one backup notification attempt, even across the accepted
+    # identical replay (interleaved retry included by the harness).
+    assert result['mail'] == 1
+    assert len(result['mail_args']) == 1
+    mail = result['mail_args'][0]
+    assert mail['to'] == 'info@bioco.ch'
+    assert mail['subject'] == 'Neue Mitgliedschaftsanmeldung: Stage Test'
+    assert mail['body'].startswith(f"Receipt: {result['responses'][0]['data']['receipt']}\n")
+    expected_lines = [
+        'Vorname: Stage',
+        'Name: Test',
+        'Adresse: Testweg 1, 5400 Baden',
+        'E-Mail: stage@example.test',
+        'Telefon: 0561234567',
+        'Mobiltelefon: 0791234567',
+        'Geburtsdatum: 1990-01-02',
+        'Mitgliedschaft: Gemüseabo',
+        'Gemüsekorb: standard',
+        'Anteilsscheine: 5',
+        'Depot: Baden',
+        'Zahlungsweise: Ganzes Jahr',
+        'Bevorzugte Tage: Montag',
+        'Bevorzugte Zeiten: Morgen',
+        'Tätigkeitsbereiche: Ernte',
+        'Andere Tätigkeit: Andere Arbeit',
+        'Zusatzabos: Brot',
+        'Weitere Produkte: Eier',
+    ]
+    for line in expected_lines:
+        assert line in mail['body'], line
+    assert 'Reply-To: stage@example.test' in mail['headers']
+    assert 'Content-Type: text/plain; charset=UTF-8' in mail['headers']
 
 
 def test_actual_browser_transport_field_is_accepted_but_never_persisted():

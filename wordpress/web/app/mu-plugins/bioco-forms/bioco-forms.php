@@ -737,6 +737,8 @@ function bioco_forms_handle_membership(WP_REST_Request $request) {
     $zip = sanitize_text_field($data['zip']);
     $city = sanitize_text_field($data['city']);
     $phone = isset($data['phone']) ? sanitize_text_field($data['phone']) : '';
+    $mobile_phone = isset($data['mobilePhone']) ? sanitize_text_field($data['mobilePhone']) : '';
+    $birthday = isset($data['birthday']) ? sanitize_text_field($data['birthday']) : '';
     $depot = isset($data['depot']) ? sanitize_text_field($data['depot']) : '';
     $payment_type = isset($data['paymentType']) ? sanitize_text_field($data['paymentType']) : '';
     $abo_type = isset($data['aboType']) ? sanitize_text_field($data['aboType']) : '';
@@ -750,6 +752,12 @@ function bioco_forms_handle_membership(WP_REST_Request $request) {
     ];
     if ($phone) {
         $lines[] = 'Telefon: ' . $phone;
+    }
+    if ($mobile_phone) {
+        $lines[] = 'Mobiltelefon: ' . $mobile_phone;
+    }
+    if ($birthday) {
+        $lines[] = 'Geburtsdatum: ' . $birthday;
     }
     $lines[] = '';
     $lines[] = 'Mitgliedschaft: ' . ($membership_type === 'shares-only' ? 'Nur Anteilsscheine' : 'Gemüseabo');
