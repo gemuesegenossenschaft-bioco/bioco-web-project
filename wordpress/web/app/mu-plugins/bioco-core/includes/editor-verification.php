@@ -8,7 +8,9 @@ function bioco_editor_verification_layouts(array $layouts): array {
     if ($id && is_string($run) && preg_match('/^[a-z0-9][a-z0-9-]{7,79}$/D', $run)
         && in_array(get_post_status($id), ['draft', 'auto-draft'], true)
         && current_user_can('edit_post', $id)) {
-        return [];
+        // A standalone header/footer copy must retain its own editing context.
+        return array_filter($layouts, static fn($layout) => is_array($layout)
+            && (int) ($layout['id'] ?? 0) === $id);
     }
     return $layouts;
 }
