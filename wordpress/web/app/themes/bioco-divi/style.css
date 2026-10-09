@@ -1704,43 +1704,43 @@ body.home,
 }
 
 /* Native single-article modules share one comfortable reading column. */
-#bioco-main-content .bioco-article-section.et_pb_section {
+#bioco-main-content #et-boc .bioco-article-section.et_pb_section {
     padding: clamp(56px, 8vw, 112px) 0;
     background: var(--wp--preset--color--bioco-bg);
 }
-#bioco-main-content .bioco-article-section .bioco-article-row.et_pb_row {
+#bioco-main-content #et-boc .bioco-article-section .bioco-article-row.et_pb_row {
     width: calc(100% - 40px);
     max-width: 760px;
     margin: 0 auto;
     padding: 0;
 }
-#bioco-main-content .bioco-article-column.et_pb_column { width: 100%; }
-#bioco-main-content .bioco-article-title .entry-title {
+#bioco-main-content #et-boc .bioco-article-column.et_pb_column { width: 100%; }
+#bioco-main-content #et-boc .bioco-article-title .entry-title {
     font-size: var(--wp--preset--font-size--3xl);
     line-height: 1.08;
     letter-spacing: -.03em;
     overflow-wrap: anywhere;
 }
-#bioco-main-content .bioco-article-date {
+#bioco-main-content #et-boc .bioco-article-date {
     color: var(--wp--preset--color--bioco-text-muted);
     font-size: var(--wp--preset--font-size--base);
     margin-bottom: 32px;
 }
-#bioco-main-content .bioco-article-image { margin-bottom: 40px; }
-#bioco-main-content .bioco-article-image img { display: block; width: 100%; height: auto; border-radius: 16px; }
-#bioco-main-content .bioco-article-body {
+#bioco-main-content #et-boc .bioco-article-image { margin-bottom: 40px; }
+#bioco-main-content #et-boc .bioco-article-image img { display: block; width: 100%; height: auto; border-radius: 16px; }
+#bioco-main-content #et-boc .bioco-article-body {
     font-size: var(--wp--preset--font-size--md);
     line-height: 1.8;
     overflow-wrap: anywhere;
 }
-#bioco-main-content .bioco-article-body p,
-#bioco-main-content .bioco-article-body ul,
-#bioco-main-content .bioco-article-body ol { margin-bottom: 1.4em; padding-bottom: 0; }
-#bioco-main-content .bioco-article-body h2 { font-size: var(--wp--preset--font-size--2xl); }
-#bioco-main-content .bioco-article-body h3 { font-size: var(--wp--preset--font-size--xl); }
-#bioco-main-content .bioco-article-body h2,
-#bioco-main-content .bioco-article-body h3 { margin: 1.8em 0 .7em; line-height: 1.2; }
-#bioco-main-content .bioco-article-back { margin-top: 48px; }
+#bioco-main-content #et-boc .bioco-article-body p,
+#bioco-main-content #et-boc .bioco-article-body ul,
+#bioco-main-content #et-boc .bioco-article-body ol { margin-bottom: 1.4em; padding-bottom: 0; }
+#bioco-main-content #et-boc .bioco-article-body h2 { font-size: var(--wp--preset--font-size--2xl); }
+#bioco-main-content #et-boc .bioco-article-body h3 { font-size: var(--wp--preset--font-size--xl); }
+#bioco-main-content #et-boc .bioco-article-body h2,
+#bioco-main-content #et-boc .bioco-article-body h3 { margin: 1.8em 0 .7em; line-height: 1.2; }
+#bioco-main-content #et-boc .bioco-article-back { margin-top: 48px; }
 
 /* Keep feed headings distinct from card titles and leave room for the next section. */
 #bioco-main-content .cms-events-feed .events-banner > h2,
