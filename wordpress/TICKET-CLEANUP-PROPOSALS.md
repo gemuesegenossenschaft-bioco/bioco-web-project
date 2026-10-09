@@ -2,7 +2,7 @@
 
 Ticket-body and label proposals only. PR #198 contains the independent implementation slices; issue bodies and labels remain unchanged. Based on the GLM 5.3 Flash first pass in `open-issues-audit-2026-10-09.md`, issue bodies and comments, implementation baseline `origin/wordpress` at b0c65f9, and saved public HTML.
 
-No open issue has enough evidence for unconditional closure. Missing evidence is a verification task, not proof that implementation is absent.
+The initial audit covered 27 open issues. A final refresh found #195 closed by its separate membership work, leaving 26 open issues. None of the remaining issues has enough evidence here for unconditional closure. Missing evidence is a verification task, not proof that implementation is absent.
 
 ## Ask Matt route
 
@@ -90,8 +90,10 @@ authorized Codex instead. No quota exhaustion was claimed.
   links. Signup retained its form and home logo, with no footer content or
   horizontal overflow at 390px.
 - All 24 original form functions were preserved byte-for-byte during extraction.
-- The updated arrival seed reuses existing Standorte & Depots wording. An existing
-  page requires a deliberate insertion; do not force-import its other content.
+- The arrival seed reuses existing Standorte & Depots wording. A guarded staging-only
+  insertion placed it before the visit form, preserved every existing content byte
+  and retained a revision. Mobile browser inspection confirmed the heading,
+  parking/wendeplatz copy and form. Do not force-import the other page content.
 - A subsequent commit removes trailing blank lines only. The staging marker still
   identifies the behavior-equivalent 8531b51 release.
 - CodeRabbit refused review because all three included reviews were consumed;
