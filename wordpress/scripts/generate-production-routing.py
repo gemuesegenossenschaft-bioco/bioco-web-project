@@ -1,6 +1,36 @@
 #!/usr/bin/env python3
 """Print reviewable Apache 2.4 config. Never edits a server or document root."""
 
+import json
+import re
+from pathlib import Path
+
+REDIRECT_MANIFEST = Path(__file__).resolve().parents[1] / 'web/app/mu-plugins/bioco-core/content/redirects.json'
+LEAFLET_PATTERN = (
+    r'wp-content/mu-plugins/bioco-core/assets/vendor/leaflet/'
+    r'(?:leaflet\.(?:css|js)|images/(?:layers(?:-2x)?|marker-icon(?:-2x)?|marker-shadow)\.png)'
+)
+
+
+def asset_redirect_rules():
+    """Only static PDF redirects under wp-content/uploads need Apache routing."""
+    rules = []
+    for redirect in json.loads(REDIRECT_MANIFEST.read_text(encoding='utf-8')):
+        source = redirect['source']
+        if not source.startswith('/wp-content/'):
+            continue
+        destination = redirect['destination']
+        for path in (source, destination):
+            if (not re.fullmatch(r'/(?:[\w.-]+(?:/[\w.-]+)*/?)?', path)
+                    or any(part in ('.', '..') for part in path.split('/'))):
+                raise ValueError(f'Invalid asset redirect path: {path!r}')
+        if (not source.startswith('/wp-content/uploads/') or not source.endswith('.pdf')
+                or source == destination or redirect.get('permanent') is not True):
+            raise ValueError(f'Unsupported asset redirect: {source!r}')
+        rules.append(f'RewriteRule ^{re.escape(source.lstrip("/"))}$ {destination} [R=301,END]')
+    return rules
+
+
 DENY_VERSION = 1
 # Versioned policy: dot files, private/config/source trees, database/archive backups.
 DENY_PATTERNS = (
@@ -32,6 +62,13 @@ def generate():
         "RewriteCond %{THE_REQUEST} \\s/+_bioco_wp(?:[/\\s?]|%[0-9a-f]{2}) [NC]",
         "RewriteRule ^ - [F,END]",
     ]
+    # Only these shipped Leaflet files may bypass the vendor denial.
+    lines += [
+        f"RewriteRule ^_bioco_wp/{LEAFLET_PATTERN}$ - [END]",
+        "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",
+        f"RewriteRule ^{LEAFLET_PATTERN}$ https://bioco.ch%{{REQUEST_URI}} [R=301,END,NE]",
+        f"RewriteRule ^({LEAFLET_PATTERN})$ /_bioco_wp/$1 [END]",
+    ]
     lines += [f"RewriteRule {pattern} - [F,END,NC]" for pattern in DENY_PATTERNS]
     lines += [
         "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",
@@ -42,6 +79,7 @@ def generate():
         "RewriteRule ^_next/static(?:/|$) - [L]",
         # DirectorySlash must never redirect the browser to the internal path.
         "RewriteRule ^wp-admin$ /wp-admin/ [R=301,END]",
+        *asset_redirect_rules(),
         "RewriteRule ^(wp-admin|wp-content|wp-includes)(/.*)?$ /_bioco_wp/$1$2 [END]",
         "RewriteRule ^(" + "|".join(CORE_ENDPOINTS) + r")\.php$ /_bioco_wp/$1.php [END]",
         # These must beat dormant files/symlinks in public_html.

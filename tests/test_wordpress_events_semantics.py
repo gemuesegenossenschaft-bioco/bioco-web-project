@@ -606,3 +606,58 @@ def test_raw_meta_fallback_reports_the_event_date_update():
     assert by_field["event_date"] == "update"
     for equal_field in ("event_status", "event_type", "event_summary", "card_image"):
         assert by_field[equal_field] == "ok-equal", (equal_field, rows)
+
+
+# Empty fullDescription must use description, without clobbering the editor.
+def event_body_run(body, full_description, description, mode='apply', force=False):
+    php = EVENT_PHP.replace("$p->post_content = '<p>Fest im Garten.</p>';", "$p->post_content = " + json.dumps(body) + ";")
+    php = php.replace("$p->post_title = 'Sommerfest';", "$p->post_title = 'Redaktioneller Titel';")
+    php = php.replace("'fullDescription' => '<p>Fest im Garten.</p>'", "'fullDescription' => " + json.dumps(full_description))
+    php = php.replace("'description' => 'Fest im Garten.'", "'description' => " + json.dumps(description))
+    php = php.replace("], 'apply', true, $report);", "], '" + mode + "', " + ('true' if force else 'false') + ", $report);")
+    return run_php(php)
+
+
+def test_empty_full_description_repairs_empty_body_without_force_and_keeps_title():
+    for full in ('', '  \n', None):
+        payload = event_body_run('', full, '<p>Zusammenfassung.</p>')
+        assert payload['post_writes'] == [{'ID': 42, 'post_content': '<p>Zusammenfassung.</p>'}]
+
+
+def test_nonempty_full_description_wins_over_summary_for_empty_body():
+    assert event_body_run('  ', '<p>Voller Text.</p>', 'Zusammenfassung')['post_writes'] == [
+        {'ID': 42, 'post_content': '<p>Voller Text.</p>'}]
+
+
+def test_nonempty_editor_body_survives_description_fallback():
+    for body in ('<p>Redaktion.</p>', '<!-- wp:shortcode -->[event]<!-- /wp:shortcode -->', '0'):
+        assert event_body_run(body, '', 'Zusammenfassung')['post_writes'] == []
+
+
+def test_empty_source_does_not_write_empty_body():
+    assert event_body_run('', '', '  ')['post_writes'] == []
+
+
+def test_empty_body_repair_preview_reports_update_without_writing():
+    payload = event_body_run('', '', 'Zusammenfassung', mode='preview')
+    assert payload['post_writes'] == []
+    assert any(row['status'] == 'update' and 'WÜRDE: Leeren Beitragsinhalt' in row['detail'] for row in payload['report'])
+
+
+def test_repaired_body_is_not_written_again():
+    assert event_body_run('<p>Zusammenfassung.</p>', '', '<p>Zusammenfassung.</p>')['post_writes'] == []
+
+
+def test_new_event_uses_nonempty_source_description():
+    for full, description, expected in (
+        ('', '<p>Zusammenfassung.</p>', '<p>Zusammenfassung.</p>'),
+        ('  ', '<p>Zusammenfassung.</p>', '<p>Zusammenfassung.</p>'),
+        ('<p>Voller Text.</p>', 'Zusammenfassung', '<p>Voller Text.</p>'),
+    ):
+        php = EVENT_PHP.replace('return [$p];', 'return [];')
+        php = php.replace("'fullDescription' => '<p>Fest im Garten.</p>'", "'fullDescription' => " + json.dumps(full))
+        php = php.replace("'description' => 'Fest im Garten.'", "'description' => " + json.dumps(description))
+        php = php.replace("function wp_update_post($args)", "function wp_insert_post($args, $error) { $GLOBALS['post_writes'][] = $args; return 42; }\nfunction get_post($id) { return (object) ['ID' => $id]; }\nfunction wp_update_post($args)")
+        payload = run_php(php)
+        assert payload['post_writes'][0]['post_content'] == expected
+        assert payload['post_writes'][0]['post_title'] == 'Sommerfest'

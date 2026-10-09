@@ -1702,3 +1702,68 @@ body.home,
     top: 0;
     z-index: 100;
 }
+
+/* Native single-article modules share one comfortable reading column. */
+#bioco-main-content #et-boc .bioco-article-section.et_pb_section {
+    padding: clamp(56px, 8vw, 112px) 0;
+    background: var(--wp--preset--color--bioco-bg);
+}
+#bioco-main-content #et-boc .bioco-article-section .bioco-article-row.et_pb_row {
+    width: calc(100% - 40px);
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0;
+}
+#bioco-main-content #et-boc .bioco-article-column.et_pb_column { width: 100%; }
+#bioco-main-content #et-boc .bioco-article-title .entry-title {
+    font-size: var(--wp--preset--font-size--3xl);
+    line-height: 1.08;
+    letter-spacing: -.03em;
+    overflow-wrap: anywhere;
+}
+#bioco-main-content #et-boc .bioco-article-date {
+    color: var(--wp--preset--color--bioco-text-muted);
+    font-size: var(--wp--preset--font-size--base);
+    margin-bottom: 32px;
+}
+#bioco-main-content #et-boc .bioco-article-image { margin-bottom: 40px; }
+#bioco-main-content #et-boc .bioco-article-image img { display: block; width: 100%; height: auto; border-radius: 16px; }
+#bioco-main-content #et-boc .bioco-article-body {
+    font-size: var(--wp--preset--font-size--md);
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+}
+#bioco-main-content #et-boc .bioco-article-body p,
+#bioco-main-content #et-boc .bioco-article-body ul,
+#bioco-main-content #et-boc .bioco-article-body ol { margin-bottom: 1.4em; padding-bottom: 0; }
+#bioco-main-content #et-boc .bioco-article-body h2 { font-size: var(--wp--preset--font-size--2xl); }
+#bioco-main-content #et-boc .bioco-article-body h3 { font-size: var(--wp--preset--font-size--xl); }
+#bioco-main-content #et-boc .bioco-article-body h2,
+#bioco-main-content #et-boc .bioco-article-body h3 { margin: 1.8em 0 .7em; line-height: 1.2; }
+#bioco-main-content #et-boc .bioco-article-back { margin-top: 48px; }
+
+/* Keep feed headings distinct from card titles and leave room for the next section. */
+#bioco-main-content .cms-events-feed .events-banner > h2,
+#bioco-main-content .cms-schnuppertage > h2,
+#bioco-main-content .bioco-dynamic-section:has(.cms-events-feed) .bioco-dynamic-section-title h2,
+#bioco-main-content .bioco-dynamic-section:has(.cms-schnuppertage) .bioco-dynamic-section-title h2 {
+    font-size: var(--wp--preset--font-size--3xl);
+    line-height: 1.15;
+    margin-bottom: 28px;
+}
+#bioco-main-content .cms-events-feed .card-header h3,
+#bioco-main-content .cms-events-feed .events-feed-schnuppertage > h3 {
+    font-size: var(--wp--preset--font-size--2xl);
+    line-height: 1.2;
+}
+#bioco-main-content .cms-schnuppertage .cms-schnuppertage-termine-heading {
+    font-size: var(--wp--preset--font-size--lg);
+    line-height: 1.3;
+    margin: 32px 0 20px;
+}
+#bioco-main-content .cms-events-feed .events-feed-schnuppertage,
+#bioco-main-content .cms-events-feed .past-events-card { margin-top: clamp(40px, 6vw, 72px); }
+#bioco-main-content .bioco-dynamic-section:has(.cms-events-feed),
+#bioco-main-content .bioco-dynamic-section:has(.cms-schnuppertage) {
+    padding-bottom: clamp(48px, 7vw, 88px);
+}

@@ -450,7 +450,8 @@ def test_native_divi_post_content_is_slashed_before_wordpress_writes():
     pages_php = pages.read_text()
     collections_php = collections.read_text()
     assert pages_php.count("'post_content' => wp_slash($desiredContent)") == 2
-    assert collections_php.count("'post_content' => wp_slash($content)") == 1
+    # Creation and the safe empty-body repair both slash before WP writes.
+    assert collections_php.count("'post_content' => wp_slash($content)") == 2
     assert collections_php.count("$changed['post_content'] = wp_slash($content)") == 1
     assert "'post_content' => $content" not in collections_php
 
