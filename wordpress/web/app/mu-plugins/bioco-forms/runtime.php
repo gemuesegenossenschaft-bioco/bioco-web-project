@@ -144,4 +144,3 @@ function bioco_forms_json_body(WP_REST_Request $request) {
     $params = $request->get_json_params();
     return is_array($params) ? $params : [];
 }
-

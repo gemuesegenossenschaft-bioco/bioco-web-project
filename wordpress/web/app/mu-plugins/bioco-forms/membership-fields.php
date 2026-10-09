@@ -159,4 +159,3 @@ function bioco_forms_build_intranet_payload($data) {
  * (permission_callback => __return_true): they are anonymous form
  * submissions gated by Turnstile, not authenticated API calls.
  */
-

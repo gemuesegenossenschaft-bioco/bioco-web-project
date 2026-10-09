@@ -172,4 +172,3 @@ function bioco_forms_handle_subscribe(WP_REST_Request $request) {
 
     return new WP_REST_Response(['success' => true], 200);
 }
-
