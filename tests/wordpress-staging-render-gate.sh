@@ -61,4 +61,7 @@ PY
   printf 'PASS %s\n' "$route"
 done
 
-echo "WORDPRESS_STAGING_RENDER_GATE: PASS (${#routes[@]} routes)"
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+python3 "${script_dir}/../wordpress/scripts/check-editor-assets.py" --url "${base_url}"
+
+echo "WORDPRESS_STAGING_RENDER_GATE: PASS (${#routes[@]} routes, editor assets)"

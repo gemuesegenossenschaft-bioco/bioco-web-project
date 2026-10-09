@@ -10,6 +10,18 @@ LEAFLET_PATTERN = (
     r'wp-content/mu-plugins/bioco-core/assets/vendor/leaflet/'
     r'(?:leaflet\.(?:css|js)|images/(?:layers(?:-2x)?|marker-icon(?:-2x)?|marker-shadow)\.png)'
 )
+# WordPress ships these browser dependencies under a directory named vendor.
+# Keep the exception file-specific: it must never expose arbitrary vendor trees.
+CORE_VENDOR_NAMES = (
+    'lodash', 'moment', 'react', 'react-dom', 'react-jsx-runtime',
+    'react-jsx-runtime-19', 'regenerator-runtime', 'wp-polyfill',
+    'wp-polyfill-dom-rect', 'wp-polyfill-element-closest', 'wp-polyfill-fetch',
+    'wp-polyfill-formdata', 'wp-polyfill-inert', 'wp-polyfill-node-contains',
+    'wp-polyfill-object-fit', 'wp-polyfill-url',
+)
+CORE_VENDOR_PATTERN = (
+    r'wp-includes/js/dist/vendor/(?:' + '|'.join(CORE_VENDOR_NAMES) + r')(?:\.min)?\.js'
+)
 
 
 def asset_redirect_rules():
@@ -62,13 +74,13 @@ def generate():
         "RewriteCond %{THE_REQUEST} \\s/+_bioco_wp(?:[/\\s?]|%[0-9a-f]{2}) [NC]",
         "RewriteRule ^ - [F,END]",
     ]
-    # Only these shipped Leaflet files may bypass the vendor denial.
-    lines += [
-        f"RewriteRule ^_bioco_wp/{LEAFLET_PATTERN}$ - [END]",
-        "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",
-        f"RewriteRule ^{LEAFLET_PATTERN}$ https://bioco.ch%{{REQUEST_URI}} [R=301,END,NE]",
-        f"RewriteRule ^({LEAFLET_PATTERN})$ /_bioco_wp/$1 [END]",
-    ]
+    for pattern in (LEAFLET_PATTERN, CORE_VENDOR_PATTERN):
+        lines += [
+            f"RewriteRule ^_bioco_wp/{pattern}$ - [END]",
+            "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",
+            f"RewriteRule ^{pattern}$ https://bioco.ch%{{REQUEST_URI}} [R=301,END,NE]",
+            f"RewriteRule ^({pattern})$ /_bioco_wp/$1 [END]",
+        ]
     lines += [f"RewriteRule {pattern} - [F,END,NC]" for pattern in DENY_PATTERNS]
     lines += [
         "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",
