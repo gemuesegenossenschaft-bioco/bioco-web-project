@@ -16,6 +16,8 @@ if (!defined('ABSPATH')) exit;
 
 $intro = bioco_field('intro');
 $locations = bioco_field('locations');
+$catalog_rows = function_exists('bioco_catalog_rows') ? bioco_catalog_rows('depots') : null;
+if ($catalog_rows !== null) $locations = $catalog_rows;
 $locations_heading = bioco_field('locations_heading');
 $route_label = bioco_field('route_label');
 $empty_message = bioco_field('empty_message');

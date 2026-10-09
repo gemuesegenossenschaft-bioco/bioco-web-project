@@ -5,8 +5,9 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 
 ## Runtime map (what is actually live)
 
-- **Production:** Next.js 14 frontend + ProcessWire CMS (out of scope of this test surface; covered
-  by `frontend/tests/*` and the frontend deploy gates).
+- **Production:** WordPress with Divi since 9 October 2026. Next.js and ProcessWire
+  are retained as rollback/recovery sources. This suite verifies repository behavior;
+  passing it does not establish the deployed production code or database state.
 - **WordPress staging:** Softaculous-managed WordPress at `staging.bioco.ch` — Softaculous owns
   Core, database and admin; the repo ships only own code into `wp-content/`
   (`wordpress/scripts/release-wordpress-staging.sh`).
@@ -29,7 +30,7 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 
 | Command | Needs | Gate |
 | --- | --- | --- |
-| `python3 -m pytest tests/ -q` | python3, php, node | full suite, all green required |
+| `python3 -m pytest tests/ -q` | python3, php, node, Playwright Chromium | full suite, all green required |
 | `BIOCO_FORMS_BROWSER_TESTS=1 python3 -m pytest tests/test_wordpress_forms_lifecycle.py -q` | Playwright Chromium, local WP runtime at 127.0.0.1:8770 for the runtime proofs | six-form lifecycle in a real browser; opted in, a missing stack fails |
 | `BIOCO_BUTTON_BROWSER_TESTS=1 python3 -m pytest tests/test_wordpress_button_readability.py -q` | Playwright Chromium | button readability/contrast in Chromium |
 | `bash tests/wordpress-staging-render-gate.sh` | network access to staging | all 22 routes return 200 |
@@ -73,6 +74,7 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 
 | File | Status | Behaviour |
 | --- | --- | --- |
+| `test_wordpress_issue_completion.py` | new | Depot website links and safe map popups, signup-only minimal shell, Schnuppertag arrival guidance, and CI capture-browser prerequisites. |
 | `test_wordpress_divi_shell.py` | replaced | Behavioural integration test of the Divi shell: renders the real `header.php`/`footer.php` plus the real bioco-core navigation/footer renderers under PHP — structure, hook order, blank-template suppression, body-class filtering, canonical links, current routes, mobile-menu contract, footer content, and the core asset enqueues executed through their registered hooks in WordPress priority order. |
 | `test_wordpress_navigation_scroll.py` | keep (+ new) | Executes the real `bioco-navigation.js` in Node: utility-row auto-hide scenarios (collapse/reveal/top/focus/reduced-motion/mobile/passive/single/duplicate shell) and the mobile-menu toggle (open, close, Escape, link-click, no-toggle inertness). |
 | `test_wordpress_visual_contract.py` | trimmed (#101, #178, #180) | Fallback-theme adapter markup (header part, templates with `bioco-site-header`), approved palette/DM Sans/theme.json truth, nav labels + logo asset, shell-chrome CSS contracts against the core-owned `bioco-shell.css`, adapter-enqueues-nothing contract (#180), approved homepage seed, button AA contrast. |
@@ -212,3 +214,17 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 | `test_wordpress_production_routing.py` | Keep, new | Real generator plus limited rule evaluator checks route precedence, internal rounds, deny policy, canonical slash, hosts, handler choice, and print-only behavior. Replace evaluator with Apache integration evidence when available; target-host integration remains required. |
 | `test_wordpress_cms_archive.py` | Keep, new | Real CLI helper archives complete JSON, preserves current content/SEO, fills empty fields, validates before writing, previews without writes, and repeats safely. WP metadata is controlled. |
 | `test_wordpress_matomo.py` | Keep, new | Real PHP enqueue/config gating and real native JS command order, cookie disabling, async loading, and inline escaping. No tracker network requests. |
+
+## Shared catalogs
+
+`wp bioco catalog` reports the one-time vegetable/depot import without writing.
+After a staging backup and code release, `wp bioco catalog --apply --user=<administrator>`
+initializes the lists from existing source snapshots. Existing editor records are adopted;
+repeat imports preserve edits and deletions. The public modules retain their local rows
+until initialization. A catalog emptied by an editor stays empty.
+
+`test_wordpress_catalog.py` covers registration, field definitions, source reconciliation,
+dry run, adoption, partial-import recovery, and edit/delete preservation. Catalog field
+changes use WordPress post metadata; this suite does not prove a deployed Divi editor session.
+A failed process can leave `bioco_catalog_lock_<kind>` behind. Before removing that option,
+verify that no import is running; retain `bioco_catalog_pending_<kind>` so retry resumes.

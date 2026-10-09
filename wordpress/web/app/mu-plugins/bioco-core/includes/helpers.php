@@ -266,6 +266,22 @@ function bioco_render_events_list($query, $empty_message) {
     echo '</div>';
 }
 
+/** Render website URLs in existing plain-text descriptions without accepting HTML. */
+function bioco_map_description_html($description) {
+    $parts = preg_split('~(https?://[^\s<>"\x27]+)~iu', (string) $description, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $html = '';
+    foreach ($parts as $index => $part) {
+        $url = rtrim($part, '.,;!?)');
+        if ($index % 2 === 1 && filter_var($url, FILTER_VALIDATE_URL)) {
+            $html .= '<a href="' . esc_url($url) . '" target="_blank" rel="noopener noreferrer">'
+                . esc_html($url) . '</a>' . esc_html(substr($part, strlen($url)));
+        } else {
+            $html .= esc_html($part);
+        }
+    }
+    return $html;
+}
+
 /**
  * Shared map-block renderer (W9 interactive blocks, issue #96). Used by both
  * bioco/depot-map and bioco/geisshof-map: a non-interactive Leaflet map
@@ -304,7 +320,7 @@ function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom, $lo
                     <div class="address-item">
                         <strong><?php echo esc_html($location['name']); ?></strong>
                         <?php if (!empty($location['description'])) : ?>
-                            <p><?php echo esc_html($location['description']); ?></p>
+                            <p><?php echo bioco_map_description_html($location['description']); ?></p>
                         <?php endif; ?>
 <?php if ($route_label) : ?>                        <a
                             href="<?php echo esc_url('https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($location['lat'] . ',' . $location['lng'])); ?>"

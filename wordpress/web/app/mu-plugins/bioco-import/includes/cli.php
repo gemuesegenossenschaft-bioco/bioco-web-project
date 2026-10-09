@@ -20,6 +20,27 @@ if (!defined('ABSPATH')) exit;
 
 class Bioco_Import_CLI_Command {
     /**
+     * Initialize shared vegetable/depot catalogs without overwriting editor data.
+     *
+     * ## OPTIONS
+     *
+     * [--apply]
+     * : Write missing catalogs. Requires --user=<administrator>.
+     *
+     * @when after_wp_load
+     */
+    public function catalog($args, $assoc_args) {
+        try {
+            $apply = !empty($assoc_args['apply']);
+            if ($apply && !current_user_can('manage_options')) throw new RuntimeException('Catalog writes require --user=<administrator>.');
+            foreach (['vegetables', 'depots'] as $kind) {
+                WP_CLI::log($kind . ': ' . wp_json_encode(bioco_catalog_seed($kind, $apply)));
+            }
+            WP_CLI::success($apply ? 'Catalog initialization complete.' : 'Dry run complete; nothing changed.');
+        } catch (Throwable $error) { WP_CLI::error($error->getMessage()); }
+    }
+
+    /**
      * Add missing named Divi design definitions; preserve existing editor values.
      *
      * ## OPTIONS

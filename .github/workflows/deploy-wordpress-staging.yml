@@ -8,6 +8,7 @@ on:
       - cms/content-seed/**
       - tests/**
       - .github/workflows/deploy-wordpress-staging.yml
+      - .github/workflows/requirements-ci.txt
   workflow_dispatch:
 
 concurrency:
@@ -38,6 +39,9 @@ jobs:
 
       - name: Install test dependency
         run: python -m pip install --require-hashes -r .github/workflows/requirements-ci.txt
+
+      - name: Install capture browser
+        run: python -m playwright install --with-deps chromium
 
       - name: Configure staging SSH key
         env:
