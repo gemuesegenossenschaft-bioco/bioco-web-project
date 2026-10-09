@@ -1704,66 +1704,66 @@ body.home,
 }
 
 /* Native single-article modules share one comfortable reading column. */
-.bioco-article-section.et_pb_section {
-    padding: clamp(56px, 8vw, 112px) 0 !important;
+#bioco-main-content .bioco-article-section.et_pb_section {
+    padding: clamp(56px, 8vw, 112px) 0;
     background: var(--wp--preset--color--bioco-bg);
 }
-.bioco-article-section .bioco-article-row.et_pb_row {
-    width: calc(100% - 40px) !important;
-    max-width: 760px !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
+#bioco-main-content .bioco-article-section .bioco-article-row.et_pb_row {
+    width: calc(100% - 40px);
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 0;
 }
-.bioco-article-column.et_pb_column { width: 100%; }
-.bioco-article-title .entry-title {
-    font-size: clamp(2.4rem, 5vw, 4.25rem) !important;
-    line-height: 1.08 !important;
+#bioco-main-content .bioco-article-column.et_pb_column { width: 100%; }
+#bioco-main-content .bioco-article-title .entry-title {
+    font-size: var(--wp--preset--font-size--3xl);
+    line-height: 1.08;
     letter-spacing: -.03em;
     overflow-wrap: anywhere;
 }
-.bioco-article-date {
+#bioco-main-content .bioco-article-date {
     color: var(--wp--preset--color--bioco-text-muted);
-    font-size: 1.05rem;
-    margin-bottom: 32px !important;
+    font-size: var(--wp--preset--font-size--base);
+    margin-bottom: 32px;
 }
-.bioco-article-image { margin-bottom: 40px !important; }
-.bioco-article-image img { display: block; width: 100%; height: auto; border-radius: 16px; }
-.bioco-article-body {
-    font-size: 1.125rem;
+#bioco-main-content .bioco-article-image { margin-bottom: 40px; }
+#bioco-main-content .bioco-article-image img { display: block; width: 100%; height: auto; border-radius: 16px; }
+#bioco-main-content .bioco-article-body {
+    font-size: var(--wp--preset--font-size--md);
     line-height: 1.8;
     overflow-wrap: anywhere;
 }
-.bioco-article-body p,
-.bioco-article-body ul,
-.bioco-article-body ol { margin-bottom: 1.4em; padding-bottom: 0; }
-.bioco-article-body h2 { font-size: clamp(1.75rem, 3vw, 2.25rem); }
-.bioco-article-body h3 { font-size: clamp(1.35rem, 2.4vw, 1.65rem); }
-.bioco-article-body h2,
-.bioco-article-body h3 { margin: 1.8em 0 .7em; line-height: 1.2; }
-.bioco-article-back { margin-top: 48px !important; }
+#bioco-main-content .bioco-article-body p,
+#bioco-main-content .bioco-article-body ul,
+#bioco-main-content .bioco-article-body ol { margin-bottom: 1.4em; padding-bottom: 0; }
+#bioco-main-content .bioco-article-body h2 { font-size: var(--wp--preset--font-size--2xl); }
+#bioco-main-content .bioco-article-body h3 { font-size: var(--wp--preset--font-size--xl); }
+#bioco-main-content .bioco-article-body h2,
+#bioco-main-content .bioco-article-body h3 { margin: 1.8em 0 .7em; line-height: 1.2; }
+#bioco-main-content .bioco-article-back { margin-top: 48px; }
 
 /* Keep feed headings distinct from card titles and leave room for the next section. */
-.cms-events-feed .events-banner > h2,
-.cms-schnuppertage > h2,
-.bioco-dynamic-section:has(.cms-events-feed) .bioco-dynamic-section-title h2,
-.bioco-dynamic-section:has(.cms-schnuppertage) .bioco-dynamic-section-title h2 {
-    font-size: clamp(2rem, 3.8vw, 3rem);
+#bioco-main-content .cms-events-feed .events-banner > h2,
+#bioco-main-content .cms-schnuppertage > h2,
+#bioco-main-content .bioco-dynamic-section:has(.cms-events-feed) .bioco-dynamic-section-title h2,
+#bioco-main-content .bioco-dynamic-section:has(.cms-schnuppertage) .bioco-dynamic-section-title h2 {
+    font-size: var(--wp--preset--font-size--3xl);
     line-height: 1.15;
     margin-bottom: 28px;
 }
-.cms-events-feed .card-header h3,
-.cms-events-feed .events-feed-schnuppertage > h3 {
-    font-size: clamp(1.5rem, 2.8vw, 2rem);
+#bioco-main-content .cms-events-feed .card-header h3,
+#bioco-main-content .cms-events-feed .events-feed-schnuppertage > h3 {
+    font-size: var(--wp--preset--font-size--2xl);
     line-height: 1.2;
 }
-.cms-schnuppertage .cms-schnuppertage-termine-heading {
-    font-size: 1.3rem;
+#bioco-main-content .cms-schnuppertage .cms-schnuppertage-termine-heading {
+    font-size: var(--wp--preset--font-size--lg);
     line-height: 1.3;
     margin: 32px 0 20px;
 }
-.cms-events-feed .events-feed-schnuppertage,
-.cms-events-feed .past-events-card { margin-top: clamp(40px, 6vw, 72px); }
-.bioco-dynamic-section:has(.cms-events-feed),
-.bioco-dynamic-section:has(.cms-schnuppertage) {
-    padding-bottom: clamp(48px, 7vw, 88px) !important;
+#bioco-main-content .cms-events-feed .events-feed-schnuppertage,
+#bioco-main-content .cms-events-feed .past-events-card { margin-top: clamp(40px, 6vw, 72px); }
+#bioco-main-content .bioco-dynamic-section:has(.cms-events-feed),
+#bioco-main-content .bioco-dynamic-section:has(.cms-schnuppertage) {
+    padding-bottom: clamp(48px, 7vw, 88px);
 }

@@ -42,7 +42,7 @@ function get_post_thumbnail_id($id) { return 7; }
 function wp_get_attachment_image_url($id, $size) { return ''; }
 function get_post_meta($id, $key, $single) { return 'Article thumbnail'; }
 function home_url($path) { return 'https://example.test' . $path; }
-function add_filter($hook, $callback, $priority = 10, $args = 1) { $GLOBALS['filters'][$hook] = $callback; }
+function add_filter($hook, $callback, $priority = 10, $args = 1) { $GLOBALS['filters'][$hook] = $callback; $GLOBALS['filter_args'][$hook] = $args; }
 function add_action($hook, $callback) {}
 function is_singular($types) { return in_array(get_post_type(42), (array) $types, true); }
 function get_queried_object_id() { return 42; }
@@ -73,9 +73,18 @@ $html = ob_get_clean();
 $metadata_filter = $GLOBALS['filters']['get_post_metadata'];
 echo json_encode(['html' => $html, 'calls' => $calls, 'layout' => $GLOBALS['layout'],
     'layout_input' => $GLOBALS['layout_input'], 'fixture' => $fixture,
-    'builder_marker' => $metadata_filter(null, 42, '_et_pb_use_builder'),
-    'other_post_marker' => $metadata_filter(null, 99, '_et_pb_use_builder'),
-    'unrelated_meta' => $metadata_filter('original', 42, 'unrelated')]);
+    'metadata' => array_map(static function ($key) use ($metadata_filter) {
+        return [
+            'single' => $metadata_filter(null, 42, $key, true),
+            'multi' => $metadata_filter(null, 42, $key, false),
+            'other_single' => $metadata_filter('other', 99, $key, true),
+            'other_multi' => $metadata_filter(['other'], 99, $key, false),
+        ];
+    }, ['_et_pb_use_builder', '_et_pb_page_layout']),
+    'accepted_args' => $GLOBALS['filter_args']['get_post_metadata'],
+    'unrelated_single' => $metadata_filter('original', 42, 'unrelated', true),
+    'unrelated_multi' => $metadata_filter(['original'], 42, 'unrelated', false)]);
+
 '''
 
 
@@ -172,12 +181,16 @@ def test_empty_post_does_not_use_event_summary():
 
 
 def test_frontend_builder_marker_is_request_only_and_scoped_to_queried_single():
-    for post_type in ('event', 'post'):
+    for post_type in ('event', 'post', 'page'):
         result = render(post_type=post_type)
-        assert result['builder_marker'] == 'on'
-        assert result['other_post_marker'] is None
-        assert result['unrelated_meta'] == 'original'
-    assert render(post_type='page')['builder_marker'] is None
+        assert result['accepted_args'] == 4
+        for metadata, value in zip(result['metadata'], ('on', 'et_full_width_page')):
+            assert metadata['single'] == (value if post_type != 'page' else None)
+            assert metadata['multi'] == ([value] if post_type != 'page' else None)
+            assert metadata['other_single'] == 'other'
+            assert metadata['other_multi'] == ['other']
+        assert result['unrelated_single'] == 'original'
+        assert result['unrelated_multi'] == ['original']
 
 
 def test_image_url_stays_raw_in_native_attributes_without_double_encoding():
