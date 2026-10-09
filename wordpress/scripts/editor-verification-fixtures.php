@@ -11,7 +11,7 @@ if (!defined('WP_CLI') || !WP_CLI) {
 }
 
 $action = $args[0] ?? '';
-$types = ['page', 'post', 'bioco_event', 'bioco_group', 'et_header_layout', 'et_footer_layout', 'et_body_layout'];
+$types = ['page', 'post', 'event', 'group', 'et_header_layout', 'et_footer_layout', 'et_body_layout'];
 $template_types = ['et_template', 'et_theme_builder'];
 $ignored_meta = ['_edit_lock', '_edit_last'];
 

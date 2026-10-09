@@ -6,6 +6,8 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).parents[1]
 SCRIPT = ROOT / 'wordpress/scripts/editor-verification-fixtures.php'
 
@@ -90,6 +92,13 @@ def test_global_assignment_can_never_be_duplicated_as_fixture():
     result = run(['create', '5', 'qa-20261009'], posts=[post(type='et_template')])
     assert 'never a global assignment' in result['result']['error']
     assert result['events'] == []
+
+
+@pytest.mark.parametrize('type', ['event', 'group'])
+def test_registered_record_types_are_inventoried_and_copied(type):
+    assert run(['inventory'], posts=[post(type=type)])['result'][0]['type'] == type
+    result = run(['create', '5', 'qa-20261009'], posts=[post(type=type)])
+    assert result['events'][0][1]['post_type'] == type
 
 
 def test_cleanup_validates_all_candidates_before_deleting_anything():

@@ -15,6 +15,7 @@ require_once BIOCO_CORE_DIR . '/includes/redirects.php';
 require_once BIOCO_CORE_DIR . '/includes/dynamic-sections.php';
 require_once BIOCO_CORE_DIR . '/includes/native-modules.php';
 require_once BIOCO_CORE_DIR . '/includes/design-system.php';
+require_once BIOCO_CORE_DIR . '/includes/editor-verification.php';
 require_once BIOCO_CORE_DIR . '/includes/matomo.php';
 
 /**

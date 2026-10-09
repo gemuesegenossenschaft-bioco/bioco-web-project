@@ -213,6 +213,7 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 | `test_wordpress_membership_admin.py` | Keep, new | Real PHP review callback denies non-admins before querying and escapes private records. No public REST hooks. |
 | `test_wordpress_production_routing.py` | keep | Real generator plus limited rule evaluator covers route precedence, internal rounds, deny policy, canonical slash, hosts, handler choice and print-only behavior. Actual Apache behavior is covered below. |
 | `test_wordpress_editor_fixtures.py` | new (#199) | Runs the actual WP-CLI fixture helper against storage boundaries: drafts retain serialized Divi content, assignment copies are rejected, cleanup validates the entire set before deleting, inventory detects editorial metadata changes. |
+| `test_wordpress_editor_isolation.py` | new (#199) | Tagged drafts hide active Theme Builder layouts only for users allowed to edit the copy. Published pages and unauthorized requests keep their assigned layouts. |
 | `test_wordpress_editor_routing_http.py` | new (#199) | Runs the generated routing under real Apache with a symlinked private WordPress fixture. Proves all 32 editor libraries are served, stale root assets lose, private/vendor files remain denied, and the original routing fails. Exercises the shared HTTP probe against real HTTP responses. Release preflight requires Apache; CI installs it. |
 | `test_wordpress_cms_archive.py` | Keep, new | Real CLI helper archives complete JSON, preserves current content/SEO, fills empty fields, validates before writing, previews without writes, and repeats safely. WP metadata is controlled. |
 | `test_wordpress_matomo.py` | Keep, new | Real PHP enqueue/config gating and real native JS command order, cookie disabling, async loading, and inline escaping. No tracker network requests. |
@@ -255,6 +256,9 @@ establish editor ownership.
 
 Draft fixtures can be created without changing published content via
 `wp eval-file /private/code/editor-verification-fixtures.php create <source-id> <run>`.
+The core plugin excludes active Theme Builder layouts from these tagged drafts.
+Divi can otherwise convert and save assigned global layouts while saving a page
+copy. Verify that the builder shows only the copied layout before editing.
 Use `inventory` before/after and `cleanup <run>` after testing. This helper rejects
 global-assignment sources and validates every cleanup candidate before deleting
 any copy. Transfer it outside the document root and remove it after verification.
