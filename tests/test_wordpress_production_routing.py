@@ -111,3 +111,81 @@ def test_internal_wp_round_stops_child_rewrites():
 @pytest.mark.parametrize('path', ['/images/.env', '/_next/static/private/db.sql', '/images/site.zip'])
 def test_legacy_asset_passthrough_does_not_bypass_denials(path):
     assert route(path)[0] == 403
+
+
+LEAFLET_ROOT = '/wp-content/mu-plugins/bioco-core/assets/vendor/leaflet/'
+LEAFLET_FILES = ['leaflet.css', 'leaflet.js', 'images/layers.png', 'images/layers-2x.png',
+                 'images/marker-icon.png', 'images/marker-icon-2x.png', 'images/marker-shadow.png']
+
+
+@pytest.mark.parametrize('name', LEAFLET_FILES)
+def test_shipped_leaflet_assets_route_through_both_rewrite_rounds(name):
+    path = LEAFLET_ROOT + name
+    assert (ROOT / 'wordpress/web/app/mu-plugins/bioco-core/assets/vendor/leaflet' / name).is_file()
+    target = '/_bioco_wp' + path
+    assert route(path) == (200, target)
+    assert route(target, original=path) == (200, target)
+    assert route(target)[0] == 403
+    assert route(path, 'www.bioco.ch') == (301, 'https://bioco.ch' + path)
+
+
+@pytest.mark.parametrize('path', [
+    LEAFLET_ROOT + 'LICENSE', LEAFLET_ROOT + 'leaflet.js.map',
+    LEAFLET_ROOT + 'images/unknown.png', LEAFLET_ROOT + 'leaflet.js/config.php',
+    LEAFLET_ROOT + '.env', LEAFLET_ROOT + '../private/config.php',
+    '/wp-content/mu-plugins/other/assets/vendor/leaflet/leaflet.js',
+    '/vendor/leaflet/leaflet.css', '/wp-content/vendor/config.php',
+    '/wp-config.php', '/composer.json',
+])
+def test_leaflet_allowlist_preserves_vendor_and_config_denial(path):
+    assert route(path)[0] == 403
+    assert route('/_bioco_wp' + path, original=path)[0] == 403
+
+
+def test_manifest_pdf_redirect_precedes_static_content_routing():
+    import json
+    manifest = ROOT / 'wordpress/web/app/mu-plugins/bioco-core/content/redirects.json'
+    redirect = next(row for row in json.loads(manifest.read_text()) if row['source'].startswith('/wp-content/'))
+    assert route(redirect['source']) == (301, redirect['destination'])
+    # The dot is literal, and the rule only matches the entire legacy path.
+    assert route(redirect['source'].replace('.pdf', 'Xpdf')) == (200, '/_bioco_wp' + redirect['source'].replace('.pdf', 'Xpdf'))
+    assert route(redirect['source'] + '/extra') == (200, '/_bioco_wp' + redirect['source'] + '/extra')
+
+
+def routing_module():
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('production_routing', SCRIPT)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+@pytest.mark.parametrize('field,value', [
+    ('source', '/wp-content/uploads/../bad.pdf'),
+    ('source', '/wp-content/uploads/bad.pdf\nRewriteRule'),
+    ('source', '/wp-content/uploads/bad%20.pdf'),
+    ('source', '/wp-content/uploads/bad.php'),
+    ('destination', '//evil.example/path'), ('destination', 'https://evil.example/'),
+    ('destination', '/abos?x=1'), ('destination', '/abos [END]'),
+    ('destination', '/abos/../config'), ('destination', '/abos\\config'),
+])
+def test_asset_redirect_rejects_unsafe_paths(tmp_path, field, value):
+    import json
+    module = routing_module()
+    row = {'source': '/wp-content/uploads/legacy.pdf', 'destination': '/abos', 'permanent': True}
+    row[field] = value
+    module.REDIRECT_MANIFEST = tmp_path / 'redirects.json'
+    module.REDIRECT_MANIFEST.write_text(json.dumps([row]))
+    with pytest.raises(ValueError):
+        module.generate()
+
+
+def test_asset_redirect_regex_escapes_manifest_filename(tmp_path):
+    import json
+    module = routing_module()
+    source = '/wp-content/uploads/legacy.v2.pdf'
+    module.REDIRECT_MANIFEST = tmp_path / 'redirects.json'
+    module.REDIRECT_MANIFEST.write_text(json.dumps([{'source': source, 'destination': '/abos', 'permanent': True}]))
+    config = module.generate()
+    assert route(source, config=config) == (301, '/abos')
+    assert route(source.replace('.v2', 'Xv2'), config=config)[0] == 200

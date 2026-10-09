@@ -17,6 +17,17 @@
 
 if (!defined('ABSPATH')) exit;
 
+// The shared single template supplies a native layout at render time. Expose
+// the same builder marker used by imported pages to Divi's frontend bootstrap,
+// without changing the post's saved body or metadata.
+add_filter('get_post_metadata', function ($value, $post_id, $key) {
+    if (is_singular(['event', 'post']) && (int) $post_id === (int) get_queried_object_id()) {
+        if ($key === '_et_pb_use_builder') return 'on';
+        if ($key === '_et_pb_page_layout') return 'et_full_width_page';
+    }
+    return $value;
+}, 10, 3);
+
 add_filter('body_class', function (array $classes): array {
     return array_values(array_diff($classes, ['et_fixed_nav', 'et_show_nav']));
 }, PHP_INT_MAX);

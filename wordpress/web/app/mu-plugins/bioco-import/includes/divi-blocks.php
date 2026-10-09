@@ -12,7 +12,7 @@
  * Build a single WordPress block array from a Divi block descriptor.
  *
  * @param string $name    One of divi/section, divi/row, divi/column, divi/text,
- *                         divi/heading, divi/image, divi/button.
+ *                         divi/heading, divi/image, divi/button, divi/post-title.
  * @param array  $attrs   Block attributes (rich HTML lives here only).
  * @param array  $children Child blocks for container types.
  * @return array Standard WordPress block array.
@@ -21,7 +21,7 @@
 function bioco_import_divi_block(string $name, array $attrs = [], array $children = []): array
 {
     $native = function_exists('bioco_dynamic_components') && in_array(str_replace('bioco-divi/', 'bioco/', $name), array_values(bioco_dynamic_components()), true) && str_starts_with($name, 'bioco-divi/');
-    if (!$native && !in_array($name, ['divi/section', 'divi/row', 'divi/column', 'divi/text', 'divi/heading', 'divi/image', 'divi/button'], true)) {
+    if (!$native && !in_array($name, ['divi/section', 'divi/row', 'divi/column', 'divi/text', 'divi/heading', 'divi/image', 'divi/button', 'divi/post-title'], true)) {
         throw new InvalidArgumentException("Unsupported Divi block: {$name}");
     }
 

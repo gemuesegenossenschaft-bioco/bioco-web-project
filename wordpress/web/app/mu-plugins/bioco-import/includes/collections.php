@@ -178,7 +178,10 @@ function bioco_import_import_event_item(array $item, $mode, $force, array &$repo
     $label = "event:{$slug}";
     $existing = get_posts(['post_type' => 'event', 'name' => $slug, 'post_status' => 'any', 'numberposts' => 1]);
     $post = $existing ? $existing[0] : null;
-    $content = (string) ($item['fullDescription'] ?? ($item['description'] ?? ''));
+    $fullDescription = (string) ($item['fullDescription'] ?? '');
+    $content = trim($fullDescription) !== ''
+        ? $fullDescription
+        : (string) ($item['description'] ?? '');
 
     if (!$post) {
         if ($mode === 'apply') {
@@ -207,6 +210,12 @@ function bioco_import_import_event_item(array $item, $mode, $force, array &$repo
             // ein unveränderter Beitragsinhalt nicht falsch als überschrieben
             // erscheint.
             bioco_import_report_row($report, $label, '', '', 'update', 'WÜRDE: FORCE: ' . implode(', ', array_keys($changed)) . ' ueberschrieben (post_id=' . $post->ID . ').');
+        } elseif (!$force && trim((string) ($post->post_content ?? '')) === '' && trim($content) !== '') {
+            // Repair only the missing body; an editorial title still wins.
+            if ($mode === 'apply') {
+                wp_update_post(['ID' => $post->ID, 'post_content' => wp_slash($content)]);
+            }
+            bioco_import_report_row($report, $label, '', '', 'update', ($mode === 'apply' ? '' : 'WÜRDE: ') . 'Leeren Beitragsinhalt ergänzt (post_id=' . $post->ID . ').');
         } elseif (!$force) {
             bioco_import_report_row($report, $label, '', '', 'ok-equal', 'Event existiert bereits (post_id=' . $post->ID . ') — Titel/Beitragsinhalt abweichend, CMS gewinnt (--force zum Überschreiben).');
         } else {

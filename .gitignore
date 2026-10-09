@@ -66,3 +66,6 @@ Thumbs.db
 /frontend/output/
 /output/releases/
 /output/visual-parity/
+
+# Private generated WordPress credentials
+**/wordpress-zugaenge-*.md
