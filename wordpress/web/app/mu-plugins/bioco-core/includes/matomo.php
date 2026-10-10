@@ -15,7 +15,7 @@ function bioco_core_enqueue_matomo(): void {
         || isset($parts['query']) || isset($parts['fragment'])
         || !preg_match('/^[1-9][0-9]*$/D', $id)) return;
     $path = dirname(__DIR__) . '/assets/bioco-matomo.js';
-    wp_enqueue_script('bioco-matomo', plugin_dir_url(dirname(__DIR__) . '/bioco-core.php') . 'assets/bioco-matomo.js', [], (string) filemtime($path), true);
+    wp_enqueue_script('bioco-matomo', plugin_dir_url(dirname(__DIR__) . '/bioco-core.php') . 'assets/bioco-matomo.js', ['bioco-consent'], (string) filemtime($path), true);
     wp_add_inline_script('bioco-matomo', 'window.biocoMatomoConfig = ' . wp_json_encode(
         ['url' => $url . '/', 'siteId' => $id],
         JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT

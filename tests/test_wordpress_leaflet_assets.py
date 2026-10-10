@@ -25,7 +25,7 @@ def test_map_blocks_use_registered_leaflet_assets_only_when_rendered():
         assert metadata["viewScript"] == handle
         assert metadata["viewStyle"] == "bioco-leaflet"
         assert re.search(
-            rf"wp_register_script\(\s*'{handle}'.*?blocks/{block_name}/view\.js.*?\['bioco-leaflet'\]",
+            rf"wp_register_script\(\s*'{handle}'.*?blocks/{block_name}/view\.js.*?\['bioco-leaflet', 'bioco-consent'\]",
             core,
             re.DOTALL,
         )

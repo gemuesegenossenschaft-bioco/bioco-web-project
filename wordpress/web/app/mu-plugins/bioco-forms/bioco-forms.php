@@ -15,6 +15,7 @@ if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/messages.php';
 require_once __DIR__ . '/runtime.php';
 require_once __DIR__ . '/newsletter.php';
+require_once __DIR__ . '/newsletter-admin.php';
 require_once __DIR__ . '/membership-fields.php';
 require_once __DIR__ . '/membership.php';
 require_once __DIR__ . '/public-forms.php';
