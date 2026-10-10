@@ -63,7 +63,8 @@ cp .env.example .env   # fill DB + salts (https://roots.io/salts.html)
 The single entry point is `scripts/release-wordpress-staging.sh`; follow
 `RUNBOOK-SOFTACULOUS.md`. Local runs and `.github/workflows/deploy-wordpress-staging.yml` invoke the
 same implementation. Dry-run is the default; `--apply` performs database backup, owned-code sync,
-cache flush, the `wp bioco verify --runtime` gate, the 22-route render smoke gate, and a release
+atomic editor asset guard installation, cache flush, the `wp bioco verify --runtime` gate,
+the 22-route render and editor-asset smoke gates, and a release
 marker. WordPress core, uploads, regular plugins, Divi, and admin accounts remain server-owned.
 
 A normal release is **code-only**: it never writes content. Editorial pages, events, groups and Divi

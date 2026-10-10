@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Print reviewable Apache 2.4 config. Never edits a server or document root."""
 
+import argparse
 import json
 import re
 from pathlib import Path
@@ -10,6 +11,60 @@ LEAFLET_PATTERN = (
     r'wp-content/mu-plugins/bioco-core/assets/vendor/leaflet/'
     r'(?:leaflet\.(?:css|js)|images/(?:layers(?:-2x)?|marker-icon(?:-2x)?|marker-shadow)\.png)'
 )
+# WordPress ships these browser dependencies under a directory named vendor.
+# Keep the exception file-specific: it must never expose arbitrary vendor trees.
+CORE_VENDOR_NAMES = (
+    'lodash', 'moment', 'react', 'react-dom', 'react-jsx-runtime',
+    'react-jsx-runtime-19', 'regenerator-runtime', 'wp-polyfill',
+    'wp-polyfill-dom-rect', 'wp-polyfill-element-closest', 'wp-polyfill-fetch',
+    'wp-polyfill-formdata', 'wp-polyfill-inert', 'wp-polyfill-node-contains',
+    'wp-polyfill-object-fit', 'wp-polyfill-url',
+)
+CORE_VENDOR_PATTERN = (
+    r'wp-includes/js/dist/vendor/(?:' + '|'.join(CORE_VENDOR_NAMES) + r')(?:\.min)?\.js'
+)
+EDITOR_PLUGIN_ASSET_PATTERN = (
+    r'wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/'
+    r'(?:css/cmb2\.min\.css|js/cmb2\.min\.js)'
+)
+# THE_REQUEST survives internal rewrites and DirectoryIndex. Match encoded letters
+# as well: RewriteRule receives decoded paths, but THE_REQUEST does not.
+INTERNAL_REQUEST_PATTERN = (
+    r'\s+(?:https?://[^/\s]+)?/(?:/|%2f)*'
+    r'(?:_|%5f)(?:b|%62)(?:i|%69)(?:o|%6f)(?:c|%63)(?:o|%6f)'
+    r'(?:_|%5f)(?:w|%77)(?:p|%70)(?:/|%2f|\s|\?)'
+)
+
+
+def generate_private_child_guard():
+    """Install outside WordPress markers, preserving PHP handlers and WP rules."""
+    return '\n'.join((
+        '# BEGIN bioco private clone guard',
+        '<IfModule mod_rewrite.c>',
+        'RewriteEngine On',
+        # Descendant .htaccess rules must not override this immutable guard.
+        'RewriteOptions InheritDownBefore',
+        f'RewriteCond %{{THE_REQUEST}} {INTERNAL_REQUEST_PATTERN} [NC]',
+        'RewriteRule ^ - [F,END]',
+        '</IfModule>',
+        '# END bioco private clone guard',
+        '',
+    ))
+
+
+def generate_editor_asset_guard():
+    """Staging WordPress owns its document root, so static URLs need no rewrite."""
+    lines = ['# BEGIN bioco editor asset guard', 'Options -Indexes -MultiViews',
+             '<IfModule mod_rewrite.c>', 'RewriteEngine On',
+             'RewriteOptions InheritDownBefore']
+    for pattern in (LEAFLET_PATTERN, CORE_VENDOR_PATTERN, EDITOR_PLUGIN_ASSET_PATTERN):
+        lines += [f'RewriteCond %{{REQUEST_URI}} ^/{pattern}$', 'RewriteRule ^ - [END]']
+    # Inherited rules match paths relative to the descendant directory. Use the
+    # full decoded URI so a nested RewriteEngine cannot hide its vendor prefix.
+    for pattern in DENY_PATTERNS:
+        uri_pattern = '^/' + pattern[1:] if pattern.startswith('^') else pattern
+        lines += [f'RewriteCond %{{REQUEST_URI}} {uri_pattern} [NC]', 'RewriteRule ^ - [F,END]']
+    return '\n'.join(lines + ['</IfModule>', '# END bioco editor asset guard', ''])
 
 
 def asset_redirect_rules():
@@ -60,16 +115,16 @@ def generate():
         "RewriteCond %{ENV:REDIRECT_STATUS} ^$",
         "RewriteRule ^_bioco_wp(?:/|$) - [F,END,NC]",
         # THE_REQUEST is unchanged by internal rewrite/DirectoryIndex rounds.
-        "RewriteCond %{THE_REQUEST} \\s/+_bioco_wp(?:[/\\s?]|%[0-9a-f]{2}) [NC]",
+        f"RewriteCond %{{THE_REQUEST}} {INTERNAL_REQUEST_PATTERN} [NC]",
         "RewriteRule ^ - [F,END]",
     ]
-    # Only these shipped Leaflet files may bypass the vendor denial.
-    lines += [
-        f"RewriteRule ^_bioco_wp/{LEAFLET_PATTERN}$ - [END]",
-        "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",
-        f"RewriteRule ^{LEAFLET_PATTERN}$ https://bioco.ch%{{REQUEST_URI}} [R=301,END,NE]",
-        f"RewriteRule ^({LEAFLET_PATTERN})$ /_bioco_wp/$1 [END]",
-    ]
+    for pattern in (LEAFLET_PATTERN, CORE_VENDOR_PATTERN, EDITOR_PLUGIN_ASSET_PATTERN):
+        lines += [
+            f"RewriteRule ^_bioco_wp/{pattern}$ - [END]",
+            "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",
+            f"RewriteRule ^{pattern}$ https://bioco.ch%{{REQUEST_URI}} [R=301,END,NE]",
+            f"RewriteRule ^({pattern})$ /_bioco_wp/$1 [END]",
+        ]
     lines += [f"RewriteRule {pattern} - [F,END,NC]" for pattern in DENY_PATTERNS]
     lines += [
         "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",
@@ -93,4 +148,11 @@ def generate():
 
 
 if __name__ == "__main__":
-    print(generate(), end="")
+    parser = argparse.ArgumentParser(description=__doc__)
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--private-child-guard', action='store_true',
+                        help='Print the guard required in the private WordPress .htaccess')
+    mode.add_argument('--editor-guard', action='store_true', help='Print the staging static asset guard')
+    args = parser.parse_args()
+    print(generate_private_child_guard() if args.private_child_guard else
+          generate_editor_asset_guard() if args.editor_guard else generate(), end="")

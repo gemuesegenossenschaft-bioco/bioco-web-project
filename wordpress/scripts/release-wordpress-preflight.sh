@@ -7,7 +7,7 @@ repo_root="${BIOCO_RELEASE_REPO_ROOT:-$(cd "${script_dir}/../.." && pwd)}"
 cd "${repo_root}"
 
 echo "gate=pytest status=running"
-PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider tests/ -q
+BIOCO_APACHE_TESTS=1 PYTHONDONTWRITEBYTECODE=1 pytest -p no:cacheprovider tests/ -q
 echo "gate=pytest status=passed"
 
 echo "gate=hardcoded-content status=running"

@@ -61,6 +61,7 @@ case "$cmd" in
   "set -eu; umask 077; mkdir -p '${BIOCO_RELEASE_BACKUP_DIR}'; cd '${wp_root}'; wp db export '${backup}' --quiet; test -s '${backup}'")
     event=backup
     ;;
+  "set -eu; cd '${wp_root}'; wp bioco editor-routing-guard --backup='${backup}.htaccess' --apply") event=editor-routing-guard ;;
   "set -eu; cd '${wp_root}'; wp cache flush") event=cache-flush ;;
   "set -eu; cd '${wp_root}'; wp bioco verify --runtime")
     event=runtime-verify
@@ -146,6 +147,7 @@ def test_staging_release_runs_only_the_allowed_remote_commands(tmp_path):
     expected_remotes = [
         f"set -eu; cd '{wp_root}'; wp option get siteurl; wp option get home",
         f"set -eu; umask 077; mkdir -p '{backup_dir}'; cd '{wp_root}'; wp db export '{backup}' --quiet; test -s '{backup}'",
+        f"set -eu; cd '{wp_root}'; wp bioco editor-routing-guard --backup='{backup}.htaccess' --apply",
         f"set -eu; cd '{wp_root}'; wp cache flush",
         f"set -eu; cd '{wp_root}'; wp bioco verify --runtime",
         f"set -eu; cd '{wp_root}'; wp option update bioco_release_marker '{marker_json}' --format=json >/dev/null",
@@ -161,6 +163,7 @@ def test_staging_release_runs_only_the_allowed_remote_commands(tmp_path):
         "identity",
         "backup",
         "deploy:apply",
+        "editor-routing-guard",
         "cache-flush",
         "web-opcache",
         "runtime-verify",
@@ -199,6 +202,7 @@ def test_staging_release_fails_on_unexpected_import_command(tmp_path):
         "identity",
         "backup",
         "deploy:apply",
+        "editor-routing-guard",
         "cache-flush",
         "web-opcache",
         "unexpected-import",
@@ -222,6 +226,7 @@ def test_staging_release_aborts_when_runtime_verification_fails(tmp_path):
         "identity",
         "backup",
         "deploy:apply",
+        "editor-routing-guard",
         "cache-flush",
         "web-opcache",
         "runtime-verify",
@@ -259,6 +264,7 @@ def test_staging_release_fails_on_an_unexpected_remote_command(tmp_path):
         "identity",
         "backup",
         "deploy:apply",
+        "editor-routing-guard",
         "unexpected-ssh",
     ]
     assert "step=release-marker" not in result.stdout
@@ -296,6 +302,7 @@ def test_staging_release_rejects_a_compound_remote_command(tmp_path):
         "identity",
         "backup",
         "deploy:apply",
+        "editor-routing-guard",
         "unexpected-ssh",
     ]
     assert "step=smoke" not in result.stdout

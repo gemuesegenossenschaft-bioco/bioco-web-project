@@ -43,10 +43,23 @@ Configure the private production WordPress child's `.htaccess` explicitly:
 The orchestrator has configured this explicit `SetHandler` in production. A plain
 child `AddHandler` alone may be overridden by the parent's `FilesMatch` handler.
 The child also denies requests for `wp-config.php` and `wp-settings.php`.
+Install the private clone guard in the child's `.htaccess` **outside** the
+`# BEGIN WordPress` / `# END WordPress` markers, preserving the handler above:
+
+```sh
+python3 wordpress/scripts/generate-production-routing.py --private-child-guard
+```
+
+WordPress can regenerate its own rewrite block during administration. Child
+`RewriteEngine` rules override root rules, so the root guard alone cannot protect
+direct `/_bioco_wp` requests. The child guard uses the original request and
+`InheritDownBefore` to remain effective with descendant rewrite rules. Public URLs
+rewritten into the clone remain accessible. Back up both files, install atomically,
+and rerun the editor asset gate after an admin login or permalink update.
 Do not switch root PHP globally. Preserve CMS and other vhost local handlers.
 Check Matomo and ProcessWire before and after the switch; the generator does not
 install child handlers. The CLI PHP version cannot establish the web handler.
-The public root `.htaccess` has not been switched yet.
+Production has used this root routing since 9 October 2026.
 
 Apache 2.4 rules route core directories and PHP endpoints into the clone before
 any dormant root files can run. `/wp-admin` redirects to the public slash URL.

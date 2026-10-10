@@ -215,7 +215,10 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 | --- | --- | --- |
 | `test_wordpress_membership_adapter.py` | Keep, extended | Real PHP REST acceptance, complete local payload, insert-before-mail, overlapping replay, notification false/exception retention, conflicts, storage failure, staging gates. WP storage/mail/CAPTCHA are controlled; no real InnoDB or delivery claim. |
 | `test_wordpress_membership_admin.py` | Keep, new | Real PHP review callback denies non-admins before querying and escapes private records. No public REST hooks. |
-| `test_wordpress_production_routing.py` | Keep, new | Real generator plus limited rule evaluator checks route precedence, internal rounds, deny policy, canonical slash, hosts, handler choice, and print-only behavior. Replace evaluator with Apache integration evidence when available; target-host integration remains required. |
+| `test_wordpress_production_routing.py` | keep | Real generator plus limited rule evaluator covers route precedence, internal rounds, deny policy, canonical slash, hosts, handler choice and print-only behavior. Actual Apache behavior is covered below. |
+| `test_wordpress_editor_fixtures.py` | new (#199) | Runs the actual WP-CLI fixture helper against storage boundaries: drafts retain serialized Divi content, assignment copies are rejected, cleanup validates the entire set before deleting, inventory detects editorial metadata changes. |
+| `test_wordpress_editor_isolation.py` | new (#199) | Tagged drafts hide active Theme Builder layouts only for users allowed to edit the copy. Published pages and unauthorized requests keep their assigned layouts. |
+| `test_wordpress_editor_routing_http.py` | new (#199) | Runs the generated routing under real Apache with a symlinked private WordPress fixture. Proves all 32 editor libraries are served, stale root assets lose, private/vendor files remain denied, and the original routing fails. Exercises the shared HTTP probe against real HTTP responses. Release preflight requires Apache; CI installs it. |
 | `test_wordpress_cms_archive.py` | Keep, new | Real CLI helper archives complete JSON, preserves current content/SEO, fills empty fields, validates before writing, previews without writes, and repeats safely. WP metadata is controlled. |
 | `test_wordpress_matomo.py` | Keep, new | Real PHP enqueue/config gating and real native JS command order, cookie disabling, async loading, and inline escaping. No tracker network requests. |
 
@@ -232,3 +235,58 @@ dry run, adoption, partial-import recovery, and edit/delete preservation. Catalo
 changes use WordPress post metadata; this suite does not prove a deployed Divi editor session.
 A failed process can leave `bioco_catalog_lock_<kind>` behind. Before removing that option,
 verify that no import is running; retain `bioco_catalog_pending_<kind>` so retry resumes.
+
+## Editor acceptance on staging and production (#199–#215)
+
+`python3 wordpress/scripts/check-editor-assets.py --url https://staging.bioco.ch`
+and the same command with `https://bioco.ch` check HTTP status, JavaScript/CSS MIME,
+nonempty bodies, origin, internal-path leaks and private-resource denial. This gate
+runs after the route render gate on every staging release. On macOS, set
+`SSL_CERT_FILE` to the installed trusted CA bundle if Python lacks its own bundle.
+Never disable TLS verification.
+The gate checks 32 core libraries and Rank Math's two named CMB2 editor assets.
+Other plugin vendor files, PHP source and source maps remain denied.
+
+The asset gate proves dependencies can load. It does not prove the Divi editor
+can initialize, edit, save, reopen, duplicate or expand a layout. Verify those
+actions on temporary unpublished copies in both environments. Retain screenshots
+and interaction traces, inspect required network failures and runtime exceptions,
+then remove copies and revoke test sessions. Compare published content and active
+global-template hashes before and after. Never submit production forms or consume
+live DOI tokens. Safe adapter tests retain the backend submission contract.
+
+Production must also install the generated private child guard outside WordPress's
+rewrite markers. The real Apache suite reproduces how a regenerated child block
+exposes internal URLs without that guard, and checks encoded paths and nested
+rewrite rules with it installed. Rerun the HTTP gate after administration actions;
+a pre-login check alone does not establish that routing stays protected.
+The staging release installs its generated asset guard outside WordPress markers,
+with a private `.htaccess` backup and atomic replacement. It retains cPanel handlers
+and protects vendor sources even when a descendant adds rewrite rules.
+`test_wordpress_editor_guard_install.py` checks real file preservation, dry runs,
+idempotence, private backups and malformed-region rejection. The Apache suite
+executes the shipped guard, including a nested vendor rewrite and encoded paths.
+
+For each family, record its saved block/template identity, editor controls changed,
+rendered desktop/mobile result and cleanup. Keep frozen parity thresholds. A source
+scan, a 200 response, a mocked renderer or a preserved screenshot alone cannot
+establish editor ownership.
+
+Draft fixtures can be created without changing published content via
+`wp eval-file /private/code/editor-verification-fixtures.php create <source-id> <run>`.
+The core plugin excludes active Theme Builder layouts from these tagged drafts.
+Divi can otherwise convert and save assigned global layouts while saving a page
+copy. Verify that the builder shows only the copied layout before editing.
+Run the helper's read-only `check` action before opening or saving a verification
+copy, including after any release. Creation refuses a missing isolation hook;
+inventory and cleanup remain available. A changed release marker requires
+coordination and a fresh check before editing resumes.
+Use `inventory` before/after and `cleanup <run>` after testing. This helper rejects
+global-assignment sources and validates every cleanup candidate before deleting
+any copy. Transfer it outside the document root and remove it after verification.
+
+Inventories retain every metadata hash and a full hash, plus an `editorial_hash`
+that excludes only Divi's three generated asset-cache fields. Page visits can
+recompute those fields. Keep their raw differences as evidence, and investigate
+any content, assignment or editorial-metadata change. Concurrent editor revisions
+must be preserved; never restore a stale database to make a comparison pass.

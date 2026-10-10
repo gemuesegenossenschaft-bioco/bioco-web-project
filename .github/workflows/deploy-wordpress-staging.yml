@@ -43,6 +43,9 @@ jobs:
       - name: Install capture browser
         run: python -m playwright install --with-deps chromium
 
+      - name: Install Apache routing test runtime
+        run: sudo apt-get update && sudo apt-get install -y apache2
+
       - name: Configure staging SSH key
         env:
           SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
