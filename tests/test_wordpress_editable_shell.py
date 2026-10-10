@@ -209,6 +209,44 @@ console.log(JSON.stringify(saved));
     assert 'error' not in render('footer', columns=columns)
 
 
+def test_row_reordering_accepts_divis_read_only_array_copies():
+    code = r'''
+const fs = require('fs'), vm = require('vm'), registered = {};
+const fields = JSON.parse(fs.readFileSync(process.argv[1], 'utf8')).navigation_shell;
+const React = {createElement:(type,props,...children)=>({type,props:props||{},children:children.flat(Infinity)})};
+const window = {React,BiocoNativeModulesData:{modules:[{component:'navigation_shell',metadata:{name:'bioco-divi/navigation-shell'},fields}]},divi:{moduleLibrary:{registerModule(){}},fieldLibrary:{registerFieldComponent(f){registered[f.name]=f.component;}}}};
+vm.runInNewContext(fs.readFileSync(process.argv[2],'utf8'),{window,setTimeout(){}});
+const original = [{label:'First',url:'/wir/'},{label:'Second',url:'/abos/'},{label:'Third',url:'/kontakt/'}].map(Object.freeze);
+original.slice = () => Object.freeze(Array.from(original));
+Object.freeze(original);
+let saved;
+const tree = registered['bioco/navigation_shell-primary']({value:original,onChange:p=>{saved=p.inputValue;}});
+tree.children[2].children.find(c=>c.type==='button'&&c.children[0]==='Nach oben').props.onClick();
+console.log(JSON.stringify({saved,original}));
+'''
+    result = subprocess.run(['node', '-e', code, CORE + '/native-modules/fields.json', CORE + '/native-modules/editor.js'],
+                            cwd=ROOT, check=True, text=True, capture_output=True)
+    data = json.loads(result.stdout)
+    assert [row['label'] for row in data['saved']] == ['First', 'Third', 'Second']
+    assert [row['label'] for row in data['original']] == ['First', 'Second', 'Third']
+
+
+@pytest.mark.parametrize('value,expected', [(None, ''), (0, ''), ('0', ''), (42, 42)])
+def test_logo_control_does_not_request_an_empty_attachment(value, expected):
+    code = r'''
+const fs = require('fs'),vm = require('vm'),registered = {};
+const fields = JSON.parse(fs.readFileSync(process.argv[1],'utf8')).navigation_shell;
+const React = {createElement:(type,props,...children)=>({type,props:props||{},children:children.flat(Infinity)})};
+const window = {React,BiocoNativeModulesData:{modules:[{component:'navigation_shell',metadata:{name:'bioco-divi/navigation-shell'},fields}]},divi:{moduleLibrary:{registerModule(){}},fieldLibrary:{Upload:'upload',registerFieldComponent(f){registered[f.name]=f.component;}}}};
+vm.runInNewContext(fs.readFileSync(process.argv[2],'utf8'),{window,setTimeout(){}});
+const tree=registered['bioco/navigation_shell-logo']({value:JSON.parse(process.argv[3]),onChange(){}});
+console.log(JSON.stringify({value:tree.props.value}));
+'''
+    result = subprocess.run(['node', '-e', code, CORE + '/native-modules/fields.json', CORE + '/native-modules/editor.js', json.dumps(value)],
+                            cwd=ROOT, check=True, text=True, capture_output=True)
+    assert json.loads(result.stdout)['value'] == expected
+
+
 def test_scoped_metadata_rebuild_preserves_other_component_fields(tmp_path):
     import importlib.util
     spec = importlib.util.spec_from_file_location('shell_metadata', ROOT / 'wordpress/scripts/build-native-modules.py')

@@ -87,7 +87,7 @@
                 }}, 'Eintrag hinzufügen'));
         }
         if (kind === 'int') {
-            return React.createElement(window.divi.fieldLibrary.Upload, {value: value || 0, attachmentId: true, dataType: 'image', onChange: function (payload) {change(Number(payload.inputValue) || 0);}});
+            return React.createElement(window.divi.fieldLibrary.Upload, {value: Number(value) > 0 ? Number(value) : '', attachmentId: true, dataType: 'image', onChange: function (payload) {change(Number(payload.inputValue) || 0);}});
         }
         if (spec.choices) {
             return React.createElement('select', {multiple: kind === 'choices', value: value === undefined ? (kind === 'choices' ? [] : '') : value, onChange: function (event) {
@@ -111,11 +111,10 @@
         if (target < 0 || target >= rows.length) {
             return rows;
         }
-        var next = rows.slice();
-        var tmp = next[index];
-        next[index] = next[target];
-        next[target] = tmp;
-        return next;
+        // Divi can return read-only copies from slice(); never mutate its arrays.
+        return rows.map(function (row, position) {
+            return position === index ? rows[target] : position === target ? rows[index] : row;
+        });
     }
 
     function propsLikeArray(value) {
