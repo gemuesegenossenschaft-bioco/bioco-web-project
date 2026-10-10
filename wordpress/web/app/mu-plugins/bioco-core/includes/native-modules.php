@@ -231,8 +231,12 @@ function bioco_native_extract_rows(array $attrs, string $field, array $spec): ar
     if ($raw === null) {
         return null;
     }
+    return bioco_native_validate_rows($raw, $spec);
+}
+
+function bioco_native_validate_rows($raw, array $spec): array|WP_Error {
     if (!is_array($raw)) {
-        return new WP_Error('bioco_native_invalid_value', "Field must be a list: {$field}", ['status' => 400]);
+        return new WP_Error('bioco_native_invalid_value', 'Rows must be a list.', ['status' => 400]);
     }
 
     $rows = [];
@@ -312,7 +316,10 @@ function bioco_native_validate_row($row, array $row_spec) {
             }
             continue;
         }
-        $converted = bioco_native_convert_value($row[$row_field], $row_spec_item);
+        $converted = ($row_spec_item['type'] ?? '') === 'rows'
+            ? bioco_native_validate_rows($row[$row_field], $row_spec_item)
+            : bioco_native_convert_value($row[$row_field], $row_spec_item);
+        if ($converted instanceof WP_Error) return $converted;
         if ($converted === null) {
             return new WP_Error('bioco_native_invalid_value', "Invalid row field: {$row_field}", ['status' => 400]);
         }

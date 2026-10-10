@@ -1014,5 +1014,255 @@
       "type": "text",
       "label": "Hinweis ohne Standorte"
     }
+  },
+  "navigation_shell": {
+    "logo": {
+      "type": "int",
+      "label": "Logo"
+    },
+    "logo_url": {
+      "type": "text",
+      "label": "Logo-URL"
+    },
+    "logo_alt": {
+      "type": "text",
+      "label": "Alternativtext Logo"
+    },
+    "home_label": {
+      "type": "text",
+      "label": "Beschriftung Startseitenlink"
+    },
+    "utility_label": {
+      "type": "text",
+      "label": "Beschriftung Hilfsnavigation"
+    },
+    "primary_label": {
+      "type": "text",
+      "label": "Beschriftung Hauptnavigation"
+    },
+    "menu_open_label": {
+      "type": "text",
+      "label": "Beschriftung Menü öffnen"
+    },
+    "menu_close_label": {
+      "type": "text",
+      "label": "Beschriftung Menü schliessen"
+    },
+    "utility": {
+      "type": "rows",
+      "label": "Hilfsnavigation",
+      "row": {
+        "label": {
+          "type": "text",
+          "label": "Beschriftung"
+        },
+        "url": {
+          "type": "text",
+          "label": "Link"
+        },
+        "slug": {
+          "type": "text",
+          "label": "Seitenkennung für aktiven Link"
+        }
+      }
+    },
+    "primary": {
+      "type": "rows",
+      "label": "Hauptnavigation",
+      "row": {
+        "label": {
+          "type": "text",
+          "label": "Beschriftung"
+        },
+        "url": {
+          "type": "text",
+          "label": "Link"
+        },
+        "slug": {
+          "type": "text",
+          "label": "Seitenkennung für aktiven Link"
+        }
+      }
+    },
+    "cta_label": {
+      "type": "text",
+      "label": "Beschriftung Hauptbutton"
+    },
+    "cta_url": {
+      "type": "text",
+      "label": "Link Hauptbutton"
+    },
+    "cta_slug": {
+      "type": "text",
+      "label": "Seitenkennung Hauptbutton"
+    },
+    "container_width": {
+      "type": "number",
+      "label": "Maximale Breite (px)"
+    },
+    "inline_padding": {
+      "type": "number",
+      "label": "Seitlicher Abstand (px)"
+    },
+    "gap": {
+      "type": "number",
+      "label": "Abstand zwischen Links/Spalten (px)"
+    },
+    "font_size": {
+      "type": "number",
+      "label": "Schriftgrösse (px)"
+    },
+    "logo_width": {
+      "type": "number",
+      "label": "Logobreite Desktop (px)"
+    },
+    "logo_width_mobile": {
+      "type": "number",
+      "label": "Logobreite Mobil (px)"
+    },
+    "padding_vertical": {
+      "type": "number",
+      "label": "Abstand oben/unten (px)"
+    },
+    "padding_mobile": {
+      "type": "number",
+      "label": "Seitlicher Abstand Mobil (px)"
+    },
+    "background_color": {
+      "type": "text",
+      "label": "Hintergrundfarbe"
+    },
+    "text_color": {
+      "type": "text",
+      "label": "Textfarbe"
+    },
+    "link_color": {
+      "type": "text",
+      "label": "Linkfarbe"
+    },
+    "font_size_mobile": {
+      "type": "number",
+      "label": "Schriftgrösse Mobil (px)"
+    },
+    "toggle_size": {
+      "type": "number",
+      "label": "Grösse Menütaste (px)"
+    },
+    "toggle_line_width": {
+      "type": "number",
+      "label": "Breite Menülinien (px)"
+    },
+    "toggle_color": {
+      "type": "text",
+      "label": "Farbe Menülinien"
+    }
+  },
+  "footer_shell": {
+    "columns": {
+      "type": "rows",
+      "label": "Spalten",
+      "row": {
+        "heading": {
+          "type": "text",
+          "label": "Überschrift"
+        },
+        "text": {
+          "type": "richtext",
+          "label": "Text"
+        },
+        "links": {
+          "type": "rows",
+          "label": "Links",
+          "row": {
+            "label": {
+              "type": "text",
+              "label": "Beschriftung"
+            },
+            "url": {
+              "type": "text",
+              "label": "Link"
+            },
+            "slug": {
+              "type": "text",
+              "label": "Seitenkennung für aktiven Link"
+            }
+          }
+        },
+        "link_gap": {
+          "type": "number",
+          "label": "Abstand zwischen Links (px)"
+        }
+      }
+    },
+    "partners_title": {
+      "type": "text",
+      "label": "Titel Partner"
+    },
+    "partners": {
+      "type": "rows",
+      "label": "Partnerlinks",
+      "row": {
+        "label": {
+          "type": "text",
+          "label": "Beschriftung"
+        },
+        "url": {
+          "type": "text",
+          "label": "Link"
+        },
+        "slug": {
+          "type": "text",
+          "label": "Seitenkennung für aktiven Link"
+        }
+      }
+    },
+    "region_text": {
+      "type": "textarea",
+      "label": "Text Region"
+    },
+    "container_width": {
+      "type": "number",
+      "label": "Maximale Breite (px)"
+    },
+    "inline_padding": {
+      "type": "number",
+      "label": "Seitlicher Abstand (px)"
+    },
+    "gap": {
+      "type": "number",
+      "label": "Abstand zwischen Links/Spalten (px)"
+    },
+    "font_size": {
+      "type": "number",
+      "label": "Schriftgrösse (px)"
+    },
+    "padding_vertical": {
+      "type": "number",
+      "label": "Abstand oben/unten (px)"
+    },
+    "padding_mobile": {
+      "type": "number",
+      "label": "Seitlicher Abstand Mobil (px)"
+    },
+    "columns_desktop": {
+      "type": "number",
+      "label": "Spalten Desktop"
+    },
+    "columns_mobile": {
+      "type": "number",
+      "label": "Spalten Mobil"
+    },
+    "background_color": {
+      "type": "text",
+      "label": "Hintergrundfarbe"
+    },
+    "text_color": {
+      "type": "text",
+      "label": "Textfarbe"
+    },
+    "link_color": {
+      "type": "text",
+      "label": "Linkfarbe"
+    }
   }
 }

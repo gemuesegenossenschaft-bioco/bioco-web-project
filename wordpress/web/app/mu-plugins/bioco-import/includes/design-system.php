@@ -218,7 +218,8 @@ final class Bioco_Divi_Foundation {
         if ($slot === 'body') {
             $leaf = ['blockName' => 'divi/post-content', 'attrs' => [], 'innerBlocks' => [], 'innerHTML' => '', 'innerContent' => ["\n"]];
         } else {
-            $leaf = bioco_import_divi_block('divi/text', ['content' => ['innerContent' => ['desktop' => ['value' => '[bioco_global_' . $slot . ']']]]]);
+            require_once __DIR__ . '/shell-layouts.php';
+            $leaf = bioco_import_shell_block($slot);
         }
         $column = bioco_import_divi_block('divi/column', ['module' => ['advanced' => ['type' => ['desktop' => ['value' => '4_4']]]]], [$leaf]);
         $row = bioco_import_divi_block('divi/row', ['module' => ['advanced' => ['columnStructure' => ['desktop' => ['value' => '4_4']]]]], [$column]);

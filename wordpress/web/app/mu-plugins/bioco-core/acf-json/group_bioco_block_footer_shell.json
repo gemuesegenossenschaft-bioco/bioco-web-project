@@ -1,0 +1,204 @@
+{
+  "key": "group_bioco_block_footer_shell",
+  "title": "Fusszeile (Bioco)",
+  "fields": [
+    {
+      "key": "field_bioco_footer_shell_columns",
+      "name": "columns",
+      "label": "Spalten",
+      "type": "repeater",
+      "required": 0,
+      "layout": "block",
+      "sub_fields": [
+        {
+          "key": "field_bioco_footer_shell_column_heading",
+          "name": "heading",
+          "label": "Überschrift",
+          "type": "text",
+          "required": 0
+        },
+        {
+          "key": "field_bioco_footer_shell_column_text",
+          "name": "text",
+          "label": "Text",
+          "type": "wysiwyg",
+          "required": 0
+        },
+        {
+          "key": "field_bioco_footer_shell_column_links",
+          "name": "links",
+          "label": "Links",
+          "type": "repeater",
+          "required": 0,
+          "layout": "block",
+          "sub_fields": [
+            {
+              "key": "field_bioco_footer_shell_column_links_label",
+              "name": "label",
+              "label": "Beschriftung",
+              "type": "text",
+              "required": 0
+            },
+            {
+              "key": "field_bioco_footer_shell_column_links_url",
+              "name": "url",
+              "label": "Link",
+              "type": "text",
+              "required": 0
+            },
+            {
+              "key": "field_bioco_footer_shell_column_links_slug",
+              "name": "slug",
+              "label": "Seitenkennung für aktiven Link",
+              "type": "text",
+              "required": 0
+            }
+          ]
+        },
+        {
+          "key": "field_bioco_footer_shell_link_gap",
+          "name": "link_gap",
+          "label": "Abstand zwischen Links (px)",
+          "type": "number",
+          "required": 0
+        }
+      ]
+    },
+    {
+      "key": "field_bioco_footer_shell_partners_title",
+      "name": "partners_title",
+      "label": "Titel Partner",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_partners",
+      "name": "partners",
+      "label": "Partnerlinks",
+      "type": "repeater",
+      "required": 0,
+      "layout": "block",
+      "sub_fields": [
+        {
+          "key": "field_bioco_footer_shell_partners_label",
+          "name": "label",
+          "label": "Beschriftung",
+          "type": "text",
+          "required": 0
+        },
+        {
+          "key": "field_bioco_footer_shell_partners_url",
+          "name": "url",
+          "label": "Link",
+          "type": "text",
+          "required": 0
+        },
+        {
+          "key": "field_bioco_footer_shell_partners_slug",
+          "name": "slug",
+          "label": "Seitenkennung für aktiven Link",
+          "type": "text",
+          "required": 0
+        }
+      ]
+    },
+    {
+      "key": "field_bioco_footer_shell_region_text",
+      "name": "region_text",
+      "label": "Text Region",
+      "type": "textarea",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_container_width",
+      "name": "container_width",
+      "label": "Maximale Breite (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_inline_padding",
+      "name": "inline_padding",
+      "label": "Seitlicher Abstand (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_gap",
+      "name": "gap",
+      "label": "Abstand zwischen Links/Spalten (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_font_size",
+      "name": "font_size",
+      "label": "Schriftgrösse (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_padding_vertical",
+      "name": "padding_vertical",
+      "label": "Abstand oben/unten (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_padding_mobile",
+      "name": "padding_mobile",
+      "label": "Seitlicher Abstand Mobil (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_columns_desktop",
+      "name": "columns_desktop",
+      "label": "Spalten Desktop",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_columns_mobile",
+      "name": "columns_mobile",
+      "label": "Spalten Mobil",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_background_color",
+      "name": "background_color",
+      "label": "Hintergrundfarbe",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_text_color",
+      "name": "text_color",
+      "label": "Textfarbe",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_footer_shell_link_color",
+      "name": "link_color",
+      "label": "Linkfarbe",
+      "type": "text",
+      "required": 0
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "block",
+        "operator": "==",
+        "value": "bioco/footer-shell"
+      }
+    ]
+  ],
+  "active": true,
+  "show_in_rest": 0,
+  "position": "normal",
+  "style": "default",
+  "menu_order": 0
+}

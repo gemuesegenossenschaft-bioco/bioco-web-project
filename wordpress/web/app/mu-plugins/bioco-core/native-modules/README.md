@@ -1,6 +1,6 @@
 # Native Divi modules
 
-The 15 dynamic components appear as individual modules in the Divi module picker.
+The 17 dynamic components appear as individual modules in the Divi module picker.
 Their Content panel edits the ACF-defined fields; repeatable lists support adding,
 removing and reordering entries. Images use the WordPress media library.
 Form messages link to the shared **Formulartexte** admin screen.
@@ -19,6 +19,21 @@ python3 wordpress/scripts/build-native-modules.py
 
 Commit the generated `fields.json` and module metadata with the ACF change.
 Public text defaults belong in content seeds, not in module metadata or PHP.
+For a scoped field change, use `--components navigation_shell footer_shell` to
+rebuild those modules while preserving metadata for other components.
+
+## Header and footer
+
+Kopfzeile and Fusszeile expose logo, labels, link lists, nested footer groups and
+desktop/mobile presentation controls. Saved module values own the visible shell.
+The canonical navigation JSON supplies the initial migration values only.
+
+Back up the database, then preview `wp bioco editable-shell`. It replaces pure
+shell shortcode leaves in header/footer layouts while retaining wrapper styles,
+editorial siblings and template assignments. `--post=<id>` limits verification to
+an unpublished copy. Use `--apply` only after reviewing the plan. Mixed editorial
+text aborts validation; concurrent changes prevent the corresponding save.
+Production acceptance uses tagged draft copies and never saves active assignments.
 
 ## Existing pages
 

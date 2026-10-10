@@ -140,6 +140,49 @@ class Bioco_Import_CLI_Command {
 
 
     /**
+     * Convert shell shortcode leaves to editable Divi modules, preserving the layout.
+     *
+     * ## OPTIONS
+     *
+     * [--post=<id>]
+     * : Limit the plan to one header/footer layout, including a draft QA copy.
+     *
+     * [--apply]
+     * : Apply the validated plan with concurrent-edit protection. Default is dry-run.
+     *
+     * @subcommand editable-shell
+     * @when after_wp_load
+     */
+    public function editable_shell($args, $assoc_args) {
+        $query = ['post_type' => ['et_header_layout', 'et_footer_layout'], 'post_status' => 'publish', 'numberposts' => -1];
+        if (isset($assoc_args['post'])) {
+            if (!ctype_digit((string) $assoc_args['post']) || (int) $assoc_args['post'] < 1) {
+                WP_CLI::error('--post must be a positive numeric layout ID.');
+            }
+            $target = get_post((int) $assoc_args['post']);
+            if (!$target || !in_array($target->post_type, $query['post_type'], true)) {
+                WP_CLI::error('--post must identify a header or footer layout.');
+            }
+            $query['include'] = [(int) $assoc_args['post']];
+            $query['post_status'] = 'any';
+        }
+        $plan = [];
+        foreach (get_posts($query) as $post) {
+            try { [$content, $count] = bioco_import_shell_content($post->post_content); }
+            catch (Throwable $error) { WP_CLI::error($post->post_name . ': ' . $error->getMessage()); }
+            if ($count) $plan[] = [$post, $content, $count];
+        }
+        foreach ($plan as [$post, $content, $count]) {
+            if (!empty($assoc_args['apply'])) {
+                try { bioco_import_native_save($post, $content); }
+                catch (Throwable $error) { WP_CLI::error($error->getMessage()); }
+            }
+            WP_CLI::log((empty($assoc_args['apply']) ? 'would-convert ' : 'converted ') . $post->ID . ': ' . $count);
+        }
+        WP_CLI::success(count($plan) . ' shell layout(s).');
+    }
+
+    /**
      * Importiert die bioco-Inhalte aus den Seed-Dateien in WordPress.
      *
      * Standard ist ein Probelauf (dry-run): es wird NICHTS geschrieben, nur

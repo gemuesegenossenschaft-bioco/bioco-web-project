@@ -68,10 +68,15 @@
                 rows.map(function (row, index) {
                     return React.createElement('fieldset', {key: index, style: {border: '1px solid #ccc', padding: '8px', marginBottom: '8px'}},
                         Object.keys(spec.row).map(function (key) {
-                            return React.createElement('label', {key: key, style: {display: 'block'}}, spec.row[key].label,
-                                EditorialControl(spec.row[key], row[key], function (next) {
+                            var field = spec.row[key];
+                            var control = EditorialControl(field, row[key], function (next) {
                                     change(rows.map(function (r, i) { return i === index ? Object.assign({}, r, {[key]: next}) : r; }));
-                                }));
+                                });
+                            if (field.type === 'rows') {
+                                return React.createElement('fieldset', {key: key, style: {border: 0, padding: 0, margin: 0}},
+                                    React.createElement('legend', null, field.label), control);
+                            }
+                            return React.createElement('label', {key: key, style: {display: 'block'}}, field.label, control);
                         }),
                         React.createElement('button', {type: 'button', disabled: index === 0, onClick: function () {change(rowsMove(rows, index, -1));}}, 'Nach oben'),
                         React.createElement('button', {type: 'button', disabled: index === rows.length - 1, onClick: function () {change(rowsMove(rows, index, 1));}}, 'Nach unten'),
@@ -81,13 +86,13 @@
                     var row = {};
                     Object.keys(spec.row).forEach(function (key) {
                         var field = spec.row[key];
-                        row[key] = field.type === 'choices' ? [] : field.type === 'toggle' ? false : ['int','number'].indexOf(field.type) !== -1 ? 0 : '';
+                        row[key] = ['rows', 'choices'].indexOf(field.type) !== -1 ? [] : field.type === 'toggle' ? false : ['int','number'].indexOf(field.type) !== -1 ? 0 : '';
                     });
                     change(rows.concat([row]));
                 }}, 'Eintrag hinzufügen'));
         }
         if (kind === 'int') {
-            return React.createElement(window.divi.fieldLibrary.Upload, {value: value || 0, attachmentId: true, dataType: 'image', onChange: function (payload) {change(Number(payload.inputValue) || 0);}});
+            return React.createElement(window.divi.fieldLibrary.Upload, {value: Number(value) > 0 ? Number(value) : '', attachmentId: true, dataType: 'image', onChange: function (payload) {change(Number(payload.inputValue) || 0);}});
         }
         if (spec.choices) {
             return React.createElement('select', {multiple: kind === 'choices', value: value === undefined ? (kind === 'choices' ? [] : '') : value, onChange: function (event) {
@@ -111,11 +116,10 @@
         if (target < 0 || target >= rows.length) {
             return rows;
         }
-        var next = rows.slice();
-        var tmp = next[index];
-        next[index] = next[target];
-        next[target] = tmp;
-        return next;
+        // Divi can return read-only copies from slice(); never mutate its arrays.
+        return rows.map(function (row, position) {
+            return position === index ? rows[target] : position === target ? rows[index] : row;
+        });
     }
 
     function propsLikeArray(value) {

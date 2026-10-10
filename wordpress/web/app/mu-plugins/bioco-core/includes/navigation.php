@@ -66,10 +66,11 @@ function bioco_navigation_links(array $items, $linkClass = '', $itemClass = '') 
     return $markup;
 }
 
-function bioco_render_primary_navigation() {
-    $contract = bioco_navigation_contract();
+function bioco_render_primary_navigation(?array $contract = null) {
+    $contract = $contract ?? bioco_navigation_contract();
     $site = $contract['site'];
-    $logo = plugins_url((string) ($site['logo'] ?? 'assets/bioco-logo.png'), dirname(__DIR__) . '/bioco-core.php');
+    $logo = array_key_exists('logoUrl', $site) ? (string) $site['logoUrl']
+        : plugins_url((string) ($site['logo'] ?? 'assets/bioco-logo.png'), dirname(__DIR__) . '/bioco-core.php');
     $home_label = (string) ($site['homeLabel'] ?? '');
     $logo_alt = (string) ($site['logoAlt'] ?? '');
     $utility_label = (string) ($site['utilityLabel'] ?? '');
@@ -95,9 +96,9 @@ function bioco_render_primary_navigation() {
         . '</nav></div>';
 }
 
-function bioco_render_site_footer() {
+function bioco_render_site_footer(?array $contract = null) {
     if (function_exists('is_page') && is_page('anmeldung')) return '';
-    $footer = bioco_navigation_contract()['footer'];
+    $footer = ($contract ?? bioco_navigation_contract())['footer'];
     $links = static function (array $items): string {
         $markup = '';
         foreach ($items as $item) {

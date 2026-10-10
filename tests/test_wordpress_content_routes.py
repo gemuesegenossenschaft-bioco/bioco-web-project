@@ -235,4 +235,4 @@ def test_primary_navigation_contract_lives_outside_the_theme():
         ROOT / "wordpress/web/app/mu-plugins/bioco-core/bioco-core.php"
     ).read_text()
     assert "register_block_type('bioco/primary-navigation'" in core
-    assert "'render_callback' => 'bioco_render_primary_navigation'" in core
+    assert "'render_callback' => static fn() => bioco_render_primary_navigation()" in core
