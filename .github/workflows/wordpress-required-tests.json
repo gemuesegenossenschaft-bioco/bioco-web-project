@@ -1,0 +1,29 @@
+{
+  "required_modules": [
+    "tests/test_wordpress_pr_gates.py",
+    "tests/test_wordpress_consent.py",
+    "tests/test_wordpress_button_readability.py",
+    "tests/test_wordpress_forms_lifecycle.py",
+    "tests/test_wordpress_navigation_scroll.py",
+    "tests/test_wordpress_visual_contract.py",
+    "tests/test_wordpress_visual_parity.py",
+    "tests/test_wordpress_issue_completion.py",
+    "tests/test_wordpress_forms_assets.py",
+    "tests/test_wordpress_forms_turnstile.py",
+    "tests/test_wordpress_membership_adapter.py",
+    "tests/test_wordpress_membership_handoff.py",
+    "tests/test_wordpress_membership_admin.py",
+    "tests/test_wordpress_newsletter_operations.py",
+    "tests/test_wordpress_matomo.py",
+    "tests/test_wordpress_security_controls.py",
+    "tests/test_wordpress_content_routes.py",
+    "tests/test_wordpress_production_routing.py",
+    "tests/test_wordpress_editor_routing_http.py",
+    "tests/test_wordpress_editor_guard_install.py"
+  ],
+  "operator_only_nodes": [
+    "tests/test_wordpress_forms_lifecycle.py::test_wordpress_runtime_emits_runtime_before_adapters_without_blocking_turnstile",
+    "tests/test_wordpress_forms_lifecycle.py::test_wordpress_real_page_mounts_runtime_and_adapters",
+    "tests/test_wordpress_forms_lifecycle.py::test_wordpress_hung_turnstile_blocks_native_get_and_api_submit"
+  ]
+}

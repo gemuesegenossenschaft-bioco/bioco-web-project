@@ -704,65 +704,125 @@ final class Bioco_Import_Divi_Composer {
         return ['tag' => 'a', 'attrs' => $attrs];
     }
 
+    /** Import defaults only. Divi owns subsequent layout and responsive edits.
+     * Dedicated classes avoid the retired child-theme 120px/1fr CSS override.
+     * Preset IDs match the existing design-system seed/export; no global write.
+     */
+    private static function timelineModule(array $block, array $decoration = [], string $label = ''): array {
+        $presets = [
+            'divi/section' => 'BIOCO Standard Section',
+            'divi/row' => 'BIOCO Content Row',
+            'divi/heading' => 'BIOCO Display Heading',
+        ];
+        $name = $block['blockName'];
+        if (isset($presets[$name])) {
+            $block['attrs']['modulePreset'] = ['bioco-' . substr(hash('sha256', 'module' . $presets[$name]), 0, 16)];
+        } elseif ($name === 'divi/text') {
+            $block['attrs']['groupPreset']['content.decoration.bodyFont'] = [
+                'presetId' => ['bioco-' . substr(hash('sha256', 'groupBIOCO Body Typography'), 0, 16)],
+                'groupName' => 'divi/font-body',
+            ];
+        }
+        if ($decoration) $block['attrs']['module']['decoration'] = $decoration;
+        if ($label !== '') $block['attrs']['module']['meta']['adminLabel']['desktop']['value'] = $label;
+        return $block;
+    }
+
     private static function timelineSection(array $values): array {
-        $container  = self::modifier($values['container_width'] ?? '', ['md', 'lg', 'xl'], 'lg');
-        $textWidth  = self::modifier($values['text_width']    ?? '', ['narrow', 'normal', 'wide'], 'normal');
-        $align      = self::modifier($values['align']          ?? '', ['left', 'center'], 'left');
+        $container = self::modifier($values['container_width'] ?? '', ['md', 'lg', 'xl'], 'lg');
+        $textWidth = self::modifier($values['text_width'] ?? '', ['narrow', 'normal', 'wide'], 'normal');
+        $align = self::modifier($values['align'] ?? '', ['left', 'center'], 'left');
+        $desktop = static fn(array $value): array => ['desktop' => ['value' => $value]];
+        $rowDecoration = [
+            'sizing' => $desktop(['width' => '100%', 'maxWidth' => ['md' => '820px', 'lg' => '1040px', 'xl' => '1280px'][$container], 'alignment' => 'center']),
+            'spacing' => $desktop(['padding' => ['top' => '0px', 'right' => '0px', 'bottom' => '0px', 'left' => '0px'], 'margin' => ['bottom' => '28px']]),
+        ];
 
         $rows = [];
-        $headerChildren = self::headerBlocks($values);
+        $headerChildren = array_map(static function(array $block) use ($align): array {
+            $block = self::timelineModule($block);
+            if ($block['blockName'] === 'divi/heading') {
+                $block['attrs']['title']['decoration']['font']['font']['desktop']['value']['textAlign'] = $align;
+            } else {
+                $block['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']['textAlign'] = $align;
+            }
+            return $block;
+        }, self::headerBlocks($values));
         if ($headerChildren) {
-            $rows[] = self::withChildren(
-                bioco_import_divi_block('divi/row', self::rowAttr('4_4', 'bioco-divi-row bioco-divi-timeline-header')),
-                [self::withChildren(
-                    bioco_import_divi_block('divi/column', self::columnAttr('4_4', "bioco-divi-content bioco-divi-text-{$textWidth} bioco-divi-align-{$align}")),
-                    $headerChildren
-                )]
+            $headerColumn = self::timelineModule(
+                bioco_import_divi_block('divi/column', self::columnAttr('4_4', 'bioco-timeline-header-content')),
+                ['sizing' => $desktop(['width' => '100%', 'maxWidth' => ['narrow' => '42rem', 'normal' => '58rem', 'wide' => '74rem'][$textWidth], 'alignment' => $align === 'center' ? 'center' : 'left'])]
             );
+            $rows[] = self::withChildren(self::timelineModule(
+                bioco_import_divi_block('divi/row', self::rowAttr('4_4', 'bioco-timeline-header')),
+                $rowDecoration,
+                'Zeitleiste Kopf'
+            ), [self::withChildren($headerColumn, $headerChildren)]);
         }
 
         foreach ($values['items'] ?? [] as $item) {
             if (!is_array($item)) continue;
-            $year  = trim((string) ($item['year_eyebrow'] ?? ''));
-            $title = trim((string) ($item['title']        ?? ''));
-            $text  = trim((string) ($item['text']         ?? ''));
+            $year = trim((string) ($item['year_eyebrow'] ?? ''));
+            $title = trim((string) ($item['title'] ?? ''));
+            $text = trim((string) ($item['text'] ?? ''));
             if ($year === '' && $title === '' && $text === '') continue;
-
             $emphasis = self::modifier($item['emphasis'] ?? '', ['normal', 'highlight'], 'normal');
-            $badgeText = $year !== '' ? $year : '•';
 
             $contentChildren = [];
             if ($title !== '') {
-                $contentChildren[] = self::headingBlock($title, 'h3', 'bioco-divi-timeline-item-title');
+                $heading = self::timelineModule(self::headingBlock(htmlspecialchars($title, ENT_QUOTES, 'UTF-8'), 'h3', 'bioco-timeline-item-title'));
+                $heading['attrs']['title']['decoration']['font']['font']['desktop']['value']['size'] = '1.25rem';
+                $contentChildren[] = $heading;
             }
-            if ($text !== '') {
-                $contentChildren[] = self::textBlock($text, 'bioco-divi-timeline-item-text');
-            }
-            if (!$contentChildren) continue;
+            if ($text !== '') $contentChildren[] = self::timelineModule(self::textBlock($text, 'bioco-timeline-item-text'));
 
-            $rows[] = self::withChildren(
-                bioco_import_divi_block('divi/row', self::rowAttr(
-                    '1_4,3_4',
-                    "bioco-divi-row bioco-divi-timeline-item-row bioco-divi-timeline-item--{$emphasis}",
-                    (string) ($item['anchor'] ?? '')
-                )),
-                [
-                    self::withChildren(
-                        bioco_import_divi_block('divi/column', self::columnAttr('1_4', 'bioco-divi-timeline-badge-col')),
-                        [self::textBlock($badgeText, 'bioco-divi-timeline-badge')]
-                    ),
-                    self::withChildren(
-                        bioco_import_divi_block('divi/column', self::columnAttr('3_4', 'bioco-divi-timeline-item-content')),
-                        $contentChildren
-                    ),
-                ]
-            );
+            $badge = self::timelineModule(self::textBlock(htmlspecialchars($year !== '' ? $year : '•', ENT_QUOTES, 'UTF-8'), 'bioco-timeline-badge'), [
+                'sizing' => $desktop(['width' => 'auto', 'maxWidth' => '100%']),
+                'spacing' => $desktop(['padding' => ['top' => '10px', 'bottom' => '10px', 'left' => '14px', 'right' => '14px']]),
+                'background' => $desktop(['color' => $emphasis === 'highlight' ? '#8ab272' : '#111827']),
+                'border' => $desktop(['radius' => ['topLeft' => '999px', 'topRight' => '999px', 'bottomLeft' => '999px', 'bottomRight' => '999px']]),
+            ]);
+            $badge['attrs']['content']['decoration']['bodyFont']['body']['font'] = $desktop(['color' => '#FFFFFF', 'weight' => '700']);
+
+            $badgeColumn = self::timelineModule(bioco_import_divi_block('divi/column', self::columnAttr('1_4', 'bioco-timeline-badge-col')), [
+                'layout' => [
+                    'desktop' => ['value' => ['display' => 'flex', 'flexDirection' => 'column', 'alignItems' => 'flex-end']],
+                    'tablet' => ['value' => ['alignItems' => 'flex-start']],
+                    'phone' => ['value' => ['alignItems' => 'flex-start']],
+                ],
+                'sizing' => $desktop(['width' => '100%', 'minWidth' => '0px']),
+            ]);
+            $contentColumn = self::timelineModule(bioco_import_divi_block('divi/column', self::columnAttr('3_4', 'bioco-timeline-item-content')), [
+                'layout' => $desktop(['display' => 'flex', 'flexDirection' => 'column', 'rowGap' => '10px']),
+                'sizing' => $desktop(['width' => '100%', 'minWidth' => '0px']),
+                'spacing' => $desktop(['padding' => ['left' => '20px']]),
+                'border' => $desktop(['styles' => ['left' => ['width' => '2px', 'style' => 'solid', 'color' => 'var(--wp--preset--color--bioco-border, #E1E4E8)']]]),
+            ]);
+            $decoration = $rowDecoration;
+            $decoration['layout'] = [
+                'desktop' => ['value' => ['display' => 'grid', 'gridColumnWidths' => 'manual', 'gridTemplateColumns' => '120px minmax(0, 1fr)', 'columnGap' => '24px', 'rowGap' => '28px', 'alignItems' => 'start']],
+                'tablet' => ['value' => ['gridTemplateColumns' => 'minmax(0, 1fr)', 'rowGap' => '12px']],
+                'phone' => ['value' => ['gridTemplateColumns' => 'minmax(0, 1fr)', 'rowGap' => '12px']],
+            ];
+            $rows[] = self::withChildren(self::timelineModule(
+                bioco_import_divi_block('divi/row', self::rowAttr('1_4,3_4', 'bioco-timeline-item-row', (string) ($item['anchor'] ?? ''))),
+                $decoration,
+                trim($year . ' ' . strip_tags($title))
+            ), [self::withChildren($badgeColumn, [$badge]), self::withChildren($contentColumn, $contentChildren)]);
         }
 
-        return self::withChildren(
-            bioco_import_divi_block('divi/section', self::classAttr("bioco-divi-section bioco-divi-timeline bioco-divi-width-{$container} bioco-divi-align-{$align}")),
-            $rows
-        );
+        return self::withChildren(self::timelineModule(
+            bioco_import_divi_block('divi/section', self::classAttr('bioco-timeline-section')),
+            [
+                'background' => $desktop(['color' => 'var(--wp--preset--color--bioco-bg, #F5F1E8)']),
+                'spacing' => [
+                    'desktop' => ['value' => ['padding' => ['left' => '6vw', 'right' => '6vw']]],
+                    'tablet' => ['value' => ['padding' => ['left' => '20px', 'right' => '20px']]],
+                    'phone' => ['value' => ['padding' => ['top' => '32px', 'bottom' => '32px', 'left' => '20px', 'right' => '20px']]],
+                ],
+            ],
+            'Zeitleiste'
+        ), $rows);
     }
 
     private static function galleryStripSection(array $values): array {

@@ -1085,11 +1085,15 @@
   margin-top: var(--wp--preset--spacing--40);
 }
 
-.cms-timeline-item {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  gap: var(--wp--preset--spacing--40);
-  align-items: start;
+/* Legacy ACF output uses normal flow. Native Divi rows carry their own
+   responsive layout, spacing, badge and rail settings in editable attributes. */
+.cms-timeline-item,
+.cms-timeline-badge,
+.cms-timeline-item-content,
+.bioco-timeline-section .et_pb_column,
+.bioco-timeline-section .et_pb_text_inner {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .cms-timeline-badge {

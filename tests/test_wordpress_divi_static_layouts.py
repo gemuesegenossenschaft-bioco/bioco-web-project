@@ -1039,16 +1039,15 @@ def test_timeline_is_native_and_preserves_header_and_items():
     )
 
     assert _class(tree) == (
-        "bioco-divi-section bioco-divi-timeline bioco-divi-width-lg bioco-divi-align-left"
+        "bioco-timeline-section"
     )
 
     header_row = _row(tree, 0)
-    assert _class(header_row) == "bioco-divi-row bioco-divi-timeline-header"
+    assert _class(header_row) == "bioco-timeline-header"
     header_col = _row_column(header_row, 0)
     header_class = _class(header_col)
-    assert "bioco-divi-content" in header_class
-    assert "bioco-divi-text-normal" in header_class
-    assert "bioco-divi-align-left" in header_class
+    assert header_class == "bioco-timeline-header-content"
+    assert header_col["attrs"]["module"]["decoration"]["sizing"]["desktop"]["value"]["maxWidth"] == "58rem"
     assert [child["blockName"] for child in header_col["innerBlocks"]] == [
         "divi/text",
         "divi/text",
@@ -1059,19 +1058,20 @@ def test_timeline_is_native_and_preserves_header_and_items():
     for i in range(3):
         item_row = _row(tree, i + 1)
         row_class = _class(item_row)
-        assert "bioco-divi-timeline-item-row" in row_class
+        assert "bioco-timeline-item-row" in row_class
         emphasis = "highlight" if i == 1 else "normal"
-        assert f"bioco-divi-timeline-item--{emphasis}" in row_class
+        expected_color = "#8ab272" if emphasis == "highlight" else "#111827"
 
         badge_col = _row_column(item_row, 0)
-        assert "bioco-divi-timeline-badge-col" in _class(badge_col)
+        assert "bioco-timeline-badge-col" in _class(badge_col)
         badge = badge_col["innerBlocks"][0]
-        assert _class(badge) == "bioco-divi-timeline-badge"
+        assert _class(badge) == "bioco-timeline-badge"
+        assert badge["attrs"]["module"]["decoration"]["background"]["desktop"]["value"]["color"] == expected_color
         year = ["2013", "2014", "2025"][i]
         assert badge["attrs"]["content"]["innerContent"]["desktop"]["value"] == year
 
         content_col = _row_column(item_row, 1)
-        assert "bioco-divi-timeline-item-content" in _class(content_col)
+        assert "bioco-timeline-item-content" in _class(content_col)
         assert [child["blockName"] for child in content_col["innerBlocks"]] == [
             "divi/heading",
             "divi/text",
@@ -1095,7 +1095,7 @@ def test_timeline_item_only_with_empty_badge_fallback():
     rows = _rows(tree)
     assert len(rows) == 1
     item_row = rows[0]
-    assert "bioco-divi-timeline-item--highlight" in _class(item_row)
+    assert _class(item_row) == "bioco-timeline-item-row"
     badge = _row_column(item_row, 0)["innerBlocks"][0]
     assert badge["attrs"]["content"]["innerContent"]["desktop"]["value"] == "•"
 

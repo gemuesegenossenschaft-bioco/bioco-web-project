@@ -17,6 +17,13 @@
 
 if (!defined('ABSPATH')) exit;
 
+add_action('after_setup_theme', function () {
+    // Asset-only bootstraps may load the theme without WordPress's content API.
+    if (function_exists('add_shortcode')) {
+        require_once dirname(__DIR__, 2) . '/mu-plugins/bioco-core/includes/utility-queries.php';
+    }
+});
+
 // These singles use the child template's shared shell and native article layout.
 // Leave the saved global Theme Builder template available to all other requests.
 add_filter('et_theme_builder_template_layouts', function ($layouts) {

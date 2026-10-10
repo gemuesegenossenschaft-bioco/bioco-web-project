@@ -1069,15 +1069,23 @@ body.home,
     margin-right: auto;
 }
 
+/* Legacy compatibility. Remove under #214 after saved /wir content migrates
+ * to native Divi controls. */
 .bioco-divi-timeline-item-row {
     display: grid;
-    grid-template-columns: 120px 1fr;
+    grid-template-columns: 120px minmax(0, 1fr);
     gap: var(--wp--preset--spacing--40, 24px);
     align-items: start;
     width: 100%;
     max-width: var(--wp--style--global--content-size, 1160px);
     margin-left: auto;
     margin-right: auto;
+}
+
+.bioco-divi-timeline .bioco-divi-timeline-item-row > .et_pb_column {
+    min-width: 0;
+    width: auto;
+    margin: 0;
 }
 
 .bioco-divi-timeline-badge-col {
@@ -1141,6 +1149,15 @@ body.home,
     .bioco-divi-media-text.bioco-divi-media-right .bioco-divi-row > .bioco-divi-media,
     .bioco-divi-media-text.bioco-divi-media-right .bioco-divi-row > .bioco-divi-content {
         order: unset;
+    }
+
+    .bioco-divi-timeline-item-row {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .bioco-divi-timeline-item-row > .bioco-divi-timeline-badge-col {
+        text-align: left;
     }
 }
 
