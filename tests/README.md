@@ -249,6 +249,12 @@ then remove copies and revoke test sessions. Compare published content and activ
 global-template hashes before and after. Never submit production forms or consume
 live DOI tokens. Safe adapter tests retain the backend submission contract.
 
+Production must also install the generated private child guard outside WordPress's
+rewrite markers. The real Apache suite reproduces how a regenerated child block
+exposes internal URLs without that guard, and checks encoded paths and nested
+rewrite rules with it installed. Rerun the HTTP gate after administration actions;
+a pre-login check alone does not establish that routing stays protected.
+
 For each family, record its saved block/template identity, editor controls changed,
 rendered desktop/mobile result and cleanup. Keep frozen parity thresholds. A source
 scan, a 200 response, a mocked renderer or a preserved screenshot alone cannot

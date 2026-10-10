@@ -44,6 +44,7 @@ def apache_site(tmp_path_factory):
     gate = load_script('check-editor-assets.py')
     config = gate.routing.generate()
     (docroot / '.htaccess').write_text(config)
+    (private_wp / '.htaccess').write_text(gate.routing.generate_private_child_guard())
     for path in gate.PUBLIC_ASSETS:
         asset = private_wp / path.lstrip('/')
         asset.parent.mkdir(parents=True, exist_ok=True)
@@ -159,6 +160,61 @@ def test_original_vendor_denial_breaks_editor_under_real_apache(apache_site):
     finally:
         (docroot / '.htaccess').write_text(config)
     assert get(base, '/wp-includes/js/dist/vendor/react.min.js')[0] == 200
+
+
+def test_direct_internal_asset_stays_denied_with_inherited_redirect_status(apache_site):
+    base, docroot, config, _ = apache_site
+    inherited = config.replace('RewriteEngine On\n', 'RewriteEngine On\nRewriteRule ^ - [E=REDIRECT_STATUS:200]\n', 1)
+    try:
+        (docroot / '.htaccess').write_text(inherited)
+        assert get(base, '/_bioco_wp/wp-includes/js/dist/vendor/react.min.js')[0] == 403
+        assert get(base, '/wp-includes/js/dist/vendor/react.min.js')[0] == 200
+    finally:
+        (docroot / '.htaccess').write_text(config)
+
+
+def test_wordpress_child_rewrite_rules_cannot_expose_internal_assets(apache_site):
+    base, docroot, _, gate = apache_site
+    child = docroot / '_bioco_wp/.htaccess'
+    guard = gate.routing.generate_private_child_guard()
+    try:
+        child.write_text(guard + '\n# BEGIN WordPress\nRewriteEngine On\n'
+                         'RewriteRule ^index\\.php$ - [L]\n# END WordPress\n')
+        assert get(base, '/_bioco_wp/wp-includes/js/dist/vendor/react.min.js')[0] == 403
+        for path in gate.PUBLIC_ASSETS:
+            assert get(base, path)[0] == 200, path
+    finally:
+        child.write_text(guard)
+
+
+@pytest.mark.parametrize('path', [
+    '/_bioco_wp/wp-includes/js/dist/vendor/react.min.js',
+    '/%5fbioco_wp/wp-includes/js/dist/vendor/react.min.js',
+    '/_bioco_%77p/wp-includes/js/dist/vendor/react.min.js',
+    '/%5f%62%69%6f%63%6f%5f%77%70/wp-includes/js/dist/vendor/react.min.js',
+    '/_bioco_wp/wp-includes/js/dist/vendor/config.php',
+])
+def test_child_guard_is_inherited_before_nested_rewrite_rules(apache_site, path):
+    base, docroot, _, _ = apache_site
+    nested = docroot / '_bioco_wp/wp-includes/js/dist/vendor/.htaccess'
+    try:
+        nested.write_text('RewriteEngine On\nRewriteRule ^ - [L]\n')
+        status, body, _ = get(base, path)
+        assert status == 403, path
+        assert b'PRIVATE_SENTINEL' not in body
+        assert get(base, '/wp-includes/js/dist/vendor/react.min.js')[0] == 200
+    finally:
+        nested.unlink()
+
+
+def test_missing_child_guard_reproduces_wordpress_rewrite_regression(apache_site):
+    base, docroot, _, gate = apache_site
+    child = docroot / '_bioco_wp/.htaccess'
+    try:
+        child.write_text('RewriteEngine On\n')
+        assert get(base, '/_bioco_wp/wp-includes/js/dist/vendor/react.min.js')[0] == 200
+    finally:
+        child.write_text(gate.routing.generate_private_child_guard())
 
 
 def test_asset_probe_rejects_html_and_private_file_success():

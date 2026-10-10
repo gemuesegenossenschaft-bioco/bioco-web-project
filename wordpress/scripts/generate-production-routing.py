@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Print reviewable Apache 2.4 config. Never edits a server or document root."""
 
+import argparse
 import json
 import re
 from pathlib import Path
@@ -22,6 +23,29 @@ CORE_VENDOR_NAMES = (
 CORE_VENDOR_PATTERN = (
     r'wp-includes/js/dist/vendor/(?:' + '|'.join(CORE_VENDOR_NAMES) + r')(?:\.min)?\.js'
 )
+# THE_REQUEST survives internal rewrites and DirectoryIndex. Match encoded letters
+# as well: RewriteRule receives decoded paths, but THE_REQUEST does not.
+INTERNAL_REQUEST_PATTERN = (
+    r'\s+(?:https?://[^/\s]+)?/(?:/|%2f)*'
+    r'(?:_|%5f)(?:b|%62)(?:i|%69)(?:o|%6f)(?:c|%63)(?:o|%6f)'
+    r'(?:_|%5f)(?:w|%77)(?:p|%70)(?:/|%2f|\s|\?)'
+)
+
+
+def generate_private_child_guard():
+    """Install outside WordPress markers, preserving PHP handlers and WP rules."""
+    return '\n'.join((
+        '# BEGIN bioco private clone guard',
+        '<IfModule mod_rewrite.c>',
+        'RewriteEngine On',
+        # Descendant .htaccess rules must not override this immutable guard.
+        'RewriteOptions InheritDownBefore',
+        f'RewriteCond %{{THE_REQUEST}} {INTERNAL_REQUEST_PATTERN} [NC]',
+        'RewriteRule ^ - [F,END]',
+        '</IfModule>',
+        '# END bioco private clone guard',
+        '',
+    ))
 
 
 def asset_redirect_rules():
@@ -71,7 +95,7 @@ def generate():
         "RewriteCond %{ENV:REDIRECT_STATUS} ^$",
         "RewriteRule ^_bioco_wp(?:/|$) - [F,END,NC]",
         # THE_REQUEST is unchanged by internal rewrite/DirectoryIndex rounds.
-        "RewriteCond %{THE_REQUEST} \\s/+_bioco_wp(?:[/\\s?]|%[0-9a-f]{2}) [NC]",
+        f"RewriteCond %{{THE_REQUEST}} {INTERNAL_REQUEST_PATTERN} [NC]",
         "RewriteRule ^ - [F,END]",
     ]
     for pattern in (LEAFLET_PATTERN, CORE_VENDOR_PATTERN):
@@ -104,4 +128,8 @@ def generate():
 
 
 if __name__ == "__main__":
-    print(generate(), end="")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--private-child-guard', action='store_true',
+                        help='Print the guard required in the private WordPress .htaccess')
+    args = parser.parse_args()
+    print(generate_private_child_guard() if args.private_child_guard else generate(), end="")

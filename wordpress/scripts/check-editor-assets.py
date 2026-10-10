@@ -25,6 +25,8 @@ PRIVATE_PATHS = (
     '/wp-includes/js/dist/vendor/react.min.js.map',
     '/_bioco_wp/wp-includes/js/dist/vendor/react.min.js',
     '/_bioco_wp%2fwp-includes/js/dist/vendor/react.min.js',
+    '/%5fbioco_wp/wp-includes/js/dist/vendor/react.min.js',
+    '/_bioco_%77p/wp-includes/js/dist/vendor/react.min.js',
 )
 
 
@@ -67,7 +69,8 @@ def main():
     targets = [(path, True) for path in PUBLIC_ASSETS]
     # The internal clone path is production-specific. Other denials apply on both.
     targets += [(path, False) for path in PRIVATE_PATHS
-                if parts.hostname == 'bioco.ch' or not path.startswith('/_bioco_wp')]
+                if parts.hostname == 'bioco.ch' or path.startswith((
+                    '/wp-config', '/.env', '/vendor/', '/wp-includes/'))]
     with ThreadPoolExecutor(max_workers=6) as pool:
         rows = list(pool.map(lambda target: probe(base_url, *target), targets))
     report = {'url': base_url, 'passed': all(row['ok'] for row in rows), 'assets': rows}
