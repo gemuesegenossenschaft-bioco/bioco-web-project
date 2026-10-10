@@ -2,6 +2,7 @@
 /**
  * WP-CLI-only draft fixtures and published-content hashes for editor acceptance.
  * wp eval-file /private/code/editor-verification-fixtures.php inventory
+ * wp eval-file /private/code/editor-verification-fixtures.php check
  * wp eval-file /private/code/editor-verification-fixtures.php create <source-id> <run>
  * wp eval-file /private/code/editor-verification-fixtures.php cleanup <run>
  * Never submits forms, creates tokens, uploads media or assigns global templates.
@@ -18,6 +19,17 @@ $ignored_meta = ['_edit_lock', '_edit_last'];
 // so distinguish their changes from editorial drift without hiding the evidence.
 $derived_meta = ['_divi_dynamic_assets_cached_modules', '_divi_dynamic_assets_canvases_used',
     '_divi_dynamic_assets_cached_feature_used'];
+
+if (in_array($action, ['check', 'create'], true)) {
+    if (!function_exists('bioco_editor_verification_layouts')
+        || has_filter('et_theme_builder_template_layouts', 'bioco_editor_verification_layouts') !== 100) {
+        WP_CLI::error('Draft isolation is not loaded; stop editor verification and reconcile the deployed release.');
+    }
+    if ($action === 'check') {
+        WP_CLI::line(wp_json_encode(['isolation' => 'loaded']));
+        return;
+    }
+}
 
 if ($action === 'inventory') {
     $posts = get_posts([
@@ -115,4 +127,4 @@ if ($action === 'cleanup') {
     return;
 }
 
-WP_CLI::error('Expected inventory, create or cleanup.');
+WP_CLI::error('Expected check, inventory, create or cleanup.');

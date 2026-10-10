@@ -62,7 +62,8 @@ def generate_editor_asset_guard():
     # Inherited rules match paths relative to the descendant directory. Use the
     # full decoded URI so a nested RewriteEngine cannot hide its vendor prefix.
     for pattern in DENY_PATTERNS:
-        lines += [f'RewriteCond %{{REQUEST_URI}} {pattern} [NC]', 'RewriteRule ^ - [F,END]']
+        uri_pattern = '^/' + pattern[1:] if pattern.startswith('^') else pattern
+        lines += [f'RewriteCond %{{REQUEST_URI}} {uri_pattern} [NC]', 'RewriteRule ^ - [F,END]']
     return '\n'.join(lines + ['</IfModule>', '# END bioco editor asset guard', ''])
 
 
@@ -88,6 +89,7 @@ def asset_redirect_rules():
 DENY_VERSION = 1
 # Versioned policy: dot files, private/config/source trees, database/archive backups.
 DENY_PATTERNS = (
+    r"^(?:_bioco_wp/)?wp-content/uploads/.*\.(?:php[0-9]*|phtml|phar)(?:$|[./])",
     r"(^|/)\.(?!well-known(?:/|$))",
     r"(^|/)(?:wp-config(?:-sample)?\.php|wp-settings\.php|composer\.(?:json|lock)|package(?:-lock)?\.json)(?:$|[./~])",
     r"(^|/)(?:vendor|node_modules|private|backups?|cms-api)(?:/|$)",

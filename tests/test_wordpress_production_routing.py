@@ -113,6 +113,18 @@ def test_legacy_asset_passthrough_does_not_bypass_denials(path):
     assert route(path)[0] == 403
 
 
+@pytest.mark.parametrize('suffix', ['php', 'PHP', 'php8', 'phtml', 'phar', 'php/extra', 'php.jpg'])
+def test_uploads_never_execute_php(suffix):
+    assert route('/wp-content/uploads/2026/10/file.' + suffix)[0] == 403
+    assert route('/_bioco_wp/wp-content/uploads/2026/10/file.' + suffix, original='/wp-content/uploads/2026/10/file.' + suffix)[0] == 403
+
+
+def test_uploads_keep_images_and_documents_accessible():
+    for suffix in ['png', 'jpg', 'pdf']:
+        path = '/wp-content/uploads/2026/10/file.' + suffix
+        assert route(path) == (200, '/_bioco_wp' + path)
+
+
 LEAFLET_ROOT = '/wp-content/mu-plugins/bioco-core/assets/vendor/leaflet/'
 LEAFLET_FILES = ['leaflet.css', 'leaflet.js', 'images/layers.png', 'images/layers-2x.png',
                  'images/marker-icon.png', 'images/marker-icon-2x.png', 'images/marker-shadow.png']

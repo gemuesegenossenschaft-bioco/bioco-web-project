@@ -10,6 +10,7 @@ preflight_command="${BIOCO_RELEASE_PREFLIGHT_COMMAND:-${script_dir}/release-word
 deploy_script="${BIOCO_RELEASE_DEPLOY_SCRIPT:-${script_dir}/deploy-wp-code.sh}"
 ssh_bin="${BIOCO_RELEASE_SSH_BIN:-ssh}"
 render_gate="${BIOCO_RELEASE_RENDER_GATE:-${repo_root}/tests/wordpress-staging-render-gate.sh}"
+web_opcache_command="${BIOCO_RELEASE_WEB_OPCACHE_COMMAND:-${script_dir}/flush-wordpress-web-opcache.sh}"
 timestamp="${BIOCO_RELEASE_TIMESTAMP:-$(date -u +%Y%m%dT%H%M%SZ)}"
 
 commit=""
@@ -208,8 +209,8 @@ if [[ -n "${BIOCO_RELEASE_OPCACHE_URL:-}" && -n "${BIOCO_RELEASE_OPCACHE_TOKEN:-
     "${BIOCO_RELEASE_OPCACHE_URL}" >/dev/null
   echo "step=cache-flush status=passed opcache-reset=applied"
 else
-  echo "WARNING: BIOCO_RELEASE_OPCACHE_URL/TOKEN unset; the web PHP worker may serve stale bytecode."
-  echo "step=cache-flush status=passed opcache-reset=skipped"
+  BIOCO_RELEASE_SSH_BIN="${ssh_bin}" "${web_opcache_command}"
+  echo "step=cache-flush status=passed opcache-reset=scoped"
 fi
 
 # A normal release ships code only. Content is never written here: the

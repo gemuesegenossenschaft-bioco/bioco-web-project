@@ -104,3 +104,75 @@ authorized Codex instead. No quota exhaustion was claimed.
 These results do not close the parent tickets. Remaining editor acceptance, route
 parity, shared pricing, live delivery and deployment evidence remain explicit work.
 The missing content/service inputs remain excluded under the user's instruction.
+
+## Execution pass, 10 October 2026
+
+The current instruction authorizes execution of open issues, excludes #199-#215,
+and asks for status checks on #216 and #217. All changes from this pass belong to
+one PR based on `wordpress` at `29fc0ed`. The original dirty checkout is preserved.
+The client agreed to defer missing inputs but supplied no destination, PDFs,
+contacts, pickup-time decision or approved content/SEO decisions.
+
+| Issue | Current result and remaining work |
+| --- | --- |
+| #100 | Cutover already live. Added retention/decommission checklist. Rollback rehearsal, inbox delivery, counting and production backup proof remain. No traffic switch or deletion performed. |
+| #132 | Keep epic open. Remaining native-editor and responsive acceptance depends on excluded #199-#215 and the children below. |
+| #135 | Existing shell/home implementation retained. Shared-preset ownership and deployed keyboard/mobile acceptance remain; home parity waiver is preserved. |
+| #136 | Editorial migration already implemented. Native editing/save/reopen proof and frozen-reference parity remain; excluded editor work blocks acceptance. |
+| #137 | Dynamic modules already registered. Interactive/failure-state and responsive acceptance remain; excluded module work is not reimplemented here. |
+| #138 | PR #198 extracted the shared form handlers. Regression suite passes. Contact staging browser/parity acceptance remains. |
+| #140 | Six shared forms and DOI retained. Newsletter re-opt-in now invalidates earlier unsubscribe links. Per-form staging behavior/parity evidence remains. |
+| #141 | Added restricted anonymous users endpoint, login limiting, security headers and upload routing denial. Metadata, privacy, a11y and performance acceptance remain owned by the related tickets. |
+| #142 | Final staging release passes at `a6c428b`, run 38046044921, including 757 tests, backup, runtime verification and all 22 routes. Frozen reference comparisons, client content decisions and editor acceptance remain. |
+| #144 | Real public key already present. Private secret/hostname and all-six-form production inbox tests remain. No production form submitted. |
+| #147 | Existing vegetable/depot catalogs and groups retained. Shared pricing, editorial preservation acceptance and client tariff approval remain. |
+| #150 | Client source decisions remain missing. Recovered sources are retained; no disputed public text overwritten. |
+| #153 | Off-server destination/access and production restore proof remain missing. No backup destination invented. |
+| #154 | Verified for closure. Own consent solution is active on staging, all nine editable texts are saved, choices persist, maps/analytics are independent, and withdrawal works across tabs and during delayed tracker loading. No consent plugin is needed. Production rollout remains separate from this issue's staging acceptance. |
+| #155 | Added Rank Math to Composer and locked dependencies. Client-approved route metadata and actual plugin installation/rendered output remain. |
+| #156 | Cache/security plugin installation remains. Production SSH timed out, so hosting capability, cold/warm measurements, cache exclusions and invalidation cannot yet be verified. No cache enabled speculatively. |
+| #157 | Implemented confirmed-only CSV/admin columns, queued plain-text sending, per-recipient delivery state, signed unsubscribe and re-opt-in. Captured transport tests pass; staging admin fields/export control are visible. Dedicated test-list inbox proof and provider signing remain. No live list sent. |
+| #159 | Client punch-list decisions/signoff and a new design baseline remain. Existing contrast fixes retained; legacy migration references are not replaced. |
+| #160 | Prior recheck matrix retained. #174/#175 and signup behavior rechecked on current staging. Remaining human-check outcomes require their owners. |
+| #163 | Added login/REST/upload controls, Dependabot and a locked update path. Staging anonymous user collection/detail requests return 401; public pages and authenticated user API return 200. Private production flags, database grants, upload behavior and update-path acceptance remain. |
+| #164 | Tracking now waits for analytics consent and stops after withdrawal. Controlled production counting still requires Matomo report access. |
+| #165 | Verified for closure. Seed-anchor decision retained. Current staging signup has one home-logo link, a form, no footer text and no horizontal overflow at 390px and 1280px. Thank-you page links to `mailto:info@bioco.ch`; all five page-specific CTA texts match the seed. |
+| #174 | Current staging HTML includes all four clickable website destinations, including Chrättli. Existing escaping and personal-contact regression tests pass. |
+| #175 | Current staging includes Velo/Bus, not driving onto the farm, street parking and keeping the turning area clear. Copy was recovered from the existing approved location guidance in PR #198. |
+| #176 | Approved PDFs and the 15:00/16:00 decision remain missing. No substitute documents or pickup-time changes invented. |
+| #177 | Approved BG, ELKI and Kräutergruppe contact methods remain missing. No personal contacts invented. |
+
+PR #216 is open and unmerged at `06fb6b6` at the final check. CodeRabbit is
+successful and the PR is mergeable. Production React returned HTTP 200 on the
+final check, improving on the earlier 404. The PR still requires its final
+acceptance and merge disposition. This pass does not merge or extend it because
+it implements excluded editor work.
+
+Issue #217 is open and incomplete. On production the back button was blue
+(`rgb(46, 163, 242)`) with a 3px radius at 1280px and 390px. The desktop button
+bottom and footer top were both 983.3125px, leaving zero gap. Editable event
+template work depends on excluded #202. No event-template change is claimed.
+
+Local evidence is recorded in the PR: release preflight, captured newsletter
+transport/storage tests, real-browser consent tests, routing tests and CodeRabbit
+review. Final staging preflight passed 757 tests (55 skipped), PHP lint, the
+hardcoded-content gate and the 22-page/111-block seed plan. Composer audit found
+no vulnerability advisories; the existing abandoned `roots/wp-password-bcrypt`
+package still requires a separate compatibility decision.
+The first staging release passed at `10f1b9d` (run 38044168023). All nine
+consent texts were saved and reopened through WordPress admin. On the depot
+page, rejection persisted, map-only opt-in loaded tiles without analytics, and
+withdrawal removed the tiles while preserving addresses. At 390px the banner
+had no horizontal overflow and buttons exceeded 44px. A stricter release gate
+then caught a public REST denial failure. The guard now runs after other REST
+response filters, with a regression test. Final release `a6c428b` (run
+38046044921) passed the live anonymous-user 401 gate and all release checks.
+The web probe bootstraps WordPress, invalidates only owned staging OPcache
+entries and deletes itself; this host reported zero cached entries and the
+security hook present. Review fixes also synchronize tabs, cancel pending
+Matomo commands and strengthen the login boundary. A real Matomo tracker at
+commit `cfa50c9d638cdcb8884d983c0de814a2b0112966` sent no captured hits after
+withdrawal during delayed loading, one after explicit regrant, and no additional
+hits after another withdrawal. Follow-up CLI CodeRabbit review found no new
+findings. #154, #165, #174 and #175 meet their recorded acceptance criteria.
+Do not close the broader tickets from source changes alone.

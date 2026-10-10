@@ -17,6 +17,8 @@ require_once BIOCO_CORE_DIR . '/includes/native-modules.php';
 require_once BIOCO_CORE_DIR . '/includes/design-system.php';
 require_once BIOCO_CORE_DIR . '/includes/editor-verification.php';
 require_once BIOCO_CORE_DIR . '/includes/matomo.php';
+require_once BIOCO_CORE_DIR . '/includes/consent.php';
+require_once BIOCO_CORE_DIR . '/includes/security.php';
 
 /**
  * ACF Local JSON — this plugin's own acf-json/ dir. The fleet move is complete,
@@ -124,7 +126,7 @@ function bioco_core_register_map_assets() {
     wp_register_script(
         'bioco-depot-map-view-script',
         plugin_dir_url(__FILE__) . 'blocks/depot-map/view.js',
-        ['bioco-leaflet'],
+        ['bioco-leaflet', 'bioco-consent'],
         (string) filemtime($depot_view_path),
         true
     );
@@ -132,7 +134,7 @@ function bioco_core_register_map_assets() {
     wp_register_script(
         'bioco-geisshof-map-view-script',
         plugin_dir_url(__FILE__) . 'blocks/geisshof-map/view.js',
-        ['bioco-leaflet'],
+        ['bioco-leaflet', 'bioco-consent'],
         (string) filemtime($geisshof_view_path),
         true
     );

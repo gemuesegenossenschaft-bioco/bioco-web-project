@@ -1,0 +1,8 @@
+.bioco-consent-panel[hidden] { display: none; }
+.bioco-consent-panel { position: fixed; z-index: 100000; inset: auto 1rem 4.5rem; max-height: 75vh; overflow: auto; padding: 1.5rem; background: var(--wp--preset--color--bioco-bg, #fff); color: var(--wp--preset--color--bioco-text, #222); border: 2px solid var(--wp--preset--color--bioco-green, #356b36); border-radius: 1rem; box-shadow: 0 4px 24px #0003; }
+.bioco-consent-panel h2 { font-size: 1.4rem; }
+.bioco-consent-panel label { display: inline-flex; align-items: center; gap: .5rem; margin: .5rem 1rem .5rem 0; }
+.bioco-consent-panel button, .bioco-consent-settings, .bioco-map-consent { min-height: 44px; padding: .6rem 1rem; border: 2px solid var(--wp--preset--color--bioco-green, #356b36); border-radius: 2rem; background: var(--wp--preset--color--bioco-bg, #fff); color: var(--wp--preset--color--bioco-green, #356b36); font: inherit; cursor: pointer; }
+.bioco-consent-panel button { margin: .5rem .5rem 0 0; }
+.bioco-consent-settings { position: fixed; bottom: .75rem; left: .75rem; z-index: 99999; max-width: calc(100vw - 1.5rem); font-size: .875rem; }
+.bioco-consent-panel button:focus-visible, .bioco-consent-settings:focus-visible, .bioco-map-consent:focus-visible { outline: 3px solid var(--wp--preset--color--bioco-green, #356b36); outline-offset: 3px; }

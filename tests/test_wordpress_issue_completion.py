@@ -125,6 +125,7 @@ def test_depot_popups_link_websites_and_escape_editor_content():
         page = browser.new_page()
         page.set_content('<section class="cms-depot-map">' + render_map(locations) + '</section><div id="popups"></div>')
         page.evaluate("""() => {
+          window.BiocoConsent = {mountMap: (wrapper, start) => start(wrapper)};
           window.L = {
             map: () => ({setView() {return this;}, fitBounds() {}}),
             tileLayer: () => ({addTo() {}}),

@@ -35,7 +35,7 @@ def test_tracking_is_off_outside_configured_production(changes):
 
 def test_enabled_tracking_uses_core_native_asset_and_safe_inline_config():
     result = enqueue(url='https://matomo.bioco.ch/</script>')
-    assert result['scripts'][0][0:3] == ['bioco-matomo', 'https://bioco.ch/wp-content/mu-plugins/bioco-core/assets/bioco-matomo.js', []]
+    assert result['scripts'][0][0:3] == ['bioco-matomo', 'https://bioco.ch/wp-content/mu-plugins/bioco-core/assets/bioco-matomo.js', ['bioco-consent']]
     assert result['scripts'][0][4] is True
     assert result['inline'][0][0] == 'bioco-matomo'
     assert result['inline'][0][2] == 'before'
@@ -48,7 +48,7 @@ def test_real_js_queues_cookieless_commands_before_loading_async_tracker():
     result = enqueue()
     node = r'''
     const fs=require('fs'),vm=require('vm');
-    const appended=[];const window={};
+    const appended=[];const window={BiocoConsent:{has:()=>true},addEventListener:()=>{}};
     const context=vm.createContext({window,document:{createElement:tag=>({tag}),head:{appendChild:s=>appended.push({...s,queue:JSON.parse(JSON.stringify(window._paq))})}}});
     vm.runInContext(process.argv[1],context);
     vm.runInContext(fs.readFileSync(process.argv[2],'utf8'),context);
@@ -56,6 +56,6 @@ def test_real_js_queues_cookieless_commands_before_loading_async_tracker():
     '''
     output = subprocess.run(['node', '-e', node, result['inline'][0][1], str(CORE / 'assets/bioco-matomo.js')], check=True, capture_output=True, text=True)
     behavior = json.loads(output.stdout)
-    expected = [['setTrackerUrl', 'https://matomo.bioco.ch/matomo.php'], ['setSiteId', '1'], ['disableCookies'], ['trackPageView'], ['enableLinkTracking']]
+    expected = [['setTrackerUrl', 'https://matomo.bioco.ch/matomo.php'], ['setSiteId', '1'], ['requireConsent'], ['disableCookies'], ['setConsentGiven'], ['trackPageView'], ['enableLinkTracking']]
     assert behavior['queue'] == expected
     assert behavior['appended'] == [dict(tag='script', **{'async': True}, src='https://matomo.bioco.ch/matomo.js', queue=expected)]

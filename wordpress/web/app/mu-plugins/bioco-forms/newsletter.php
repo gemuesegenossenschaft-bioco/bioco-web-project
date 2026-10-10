@@ -94,6 +94,15 @@ function bioco_forms_doi_on_confirm($form_type, $data) {
             update_post_meta($post_id, 'subscriber_email', $email);
             update_post_meta($post_id, 'subscriber_name', $name);
             update_post_meta($post_id, 'confirmed_at', current_time('mysql'));
+            update_post_meta($post_id, '_bioco_confirmation_id', bin2hex(random_bytes(16)));
+        }
+    } else {
+        $post_id = (int) $existing->posts[0];
+        if (get_post_meta($post_id, 'unsubscribed_at', true) !== '') {
+            update_post_meta($post_id, 'subscriber_name', $name);
+            update_post_meta($post_id, 'confirmed_at', current_time('mysql'));
+            update_post_meta($post_id, '_bioco_confirmation_id', bin2hex(random_bytes(16)));
+            delete_post_meta($post_id, 'unsubscribed_at');
         }
     }
 

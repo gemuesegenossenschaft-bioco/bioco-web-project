@@ -42,6 +42,29 @@ class Bioco_Import_CLI_Command {
     }
 
     /**
+     * Install missing consent texts; preserve saved editorial values.
+     *
+     * ## OPTIONS
+     *
+     * [--apply]
+     * : Write missing texts. Requires --user=<administrator>.
+     *
+     * @when after_wp_load
+     */
+    public function consent($args, $assoc_args) {
+        try {
+            $apply = !empty($assoc_args['apply']);
+            if ($apply && !current_user_can('manage_options')) throw new RuntimeException('Consent setup requires --user=<administrator>.');
+            $raw = file_get_contents(dirname(__DIR__, 2) . '/bioco-core/content/consent-texts.json');
+            if ($raw === false) throw new RuntimeException('Consent seed file is not readable.');
+            $seed = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+            if (!is_array($seed)) throw new RuntimeException('Consent seed must be a JSON object.');
+            bioco_consent_seed_texts($seed, $apply);
+            WP_CLI::success($apply ? 'Consent texts initialized.' : 'Dry run complete; nothing changed.');
+        } catch (Throwable $error) { WP_CLI::error($error->getMessage()); }
+    }
+
+    /**
      * Initialize shared vegetable/depot catalogs without overwriting editor data.
      *
      * ## OPTIONS

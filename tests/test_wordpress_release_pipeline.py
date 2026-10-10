@@ -58,6 +58,7 @@ echo "$event" >> "$BIOCO_TEST_EVENTS"
 ''',
     )
     render = _write_executable(tmp_path / "render", 'echo smoke >> "$BIOCO_TEST_EVENTS"\n')
+    web_opcache = _write_executable(tmp_path / "web-opcache", 'echo web-opcache >> "$BIOCO_TEST_EVENTS"\n')
     base_env = {k: v for k, v in os.environ.items() if not k.startswith("BIOCO_")}
     env = base_env | {
         "BIOCO_RELEASE_REPO_ROOT": str(repo),
@@ -66,6 +67,7 @@ echo "$event" >> "$BIOCO_TEST_EVENTS"
         "BIOCO_RELEASE_DEPLOY_SCRIPT": str(deploy),
         "BIOCO_RELEASE_SSH_BIN": str(ssh),
         "BIOCO_RELEASE_RENDER_GATE": str(render),
+        "BIOCO_RELEASE_WEB_OPCACHE_COMMAND": str(web_opcache),
         "BIOCO_RELEASE_TIMESTAMP": "20260817T210000Z",
         "BIOCO_TEST_EVENTS": str(events),
         "BIOCO_TEST_MARKER": str(tmp_path / "marker.log"),
@@ -118,6 +120,7 @@ def test_release_pipeline_apply_runs_each_step_in_order(tmp_path):
         "deploy:apply",
         "editor-routing-guard",
         "cache-flush",
+        "web-opcache",
         "runtime-verify",
         "smoke",
         "marker",
@@ -146,6 +149,7 @@ def test_release_pipeline_stops_after_first_failed_step(tmp_path):
         "deploy:apply",
         "editor-routing-guard",
         "cache-flush",
+        "web-opcache",
         "runtime-verify",
     ]
     assert "release-status=failed" in result.stdout
@@ -338,7 +342,7 @@ def test_render_gate_default_follows_the_configured_repo_root():
     assert "${repo_root}/tests/wordpress-staging-render-gate.sh" in release
 
 
-def test_release_warns_when_no_opcache_reset_is_configured(tmp_path):
+def test_release_invalidates_web_opcache_without_a_permanent_endpoint(tmp_path):
     commit, env, events = _fixture(tmp_path)
 
     result = subprocess.run(
@@ -350,7 +354,8 @@ def test_release_warns_when_no_opcache_reset_is_configured(tmp_path):
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "opcache-reset=skipped" in result.stdout
+    assert "opcache-reset=scoped" in result.stdout
+    assert "web-opcache" in events.read_text().splitlines()
 
 
 def test_code_sync_never_ships_gitignored_files():

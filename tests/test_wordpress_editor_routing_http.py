@@ -273,11 +273,23 @@ def test_staging_guard_matches_generated_policy_and_denies_nested_vendor_sources
             prior.append(name)
         shutil.copytree(docroot / '_bioco_wp' / name, target)
     nested = docroot / 'wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/.htaccess'
+    uploads = docroot / 'wp-content/uploads/2026/10'
+    uploads.mkdir(parents=True, exist_ok=True)
     try:
         (docroot / '.htaccess').write_text(guard + '\n# BEGIN WordPress\nRewriteEngine On\n# END WordPress\n')
         nested.write_text('RewriteEngine On\nRewriteRule ^ - [L]\n')
+        (uploads / '.htaccess').write_text('RewriteEngine On\nRewriteRule ^ - [L]\n')
+        (uploads / 'photo.jpg').write_bytes(b'PUBLIC_IMAGE')
+        for extension in ('php', 'php5', 'phtml', 'phar'):
+            (uploads / ('editor.' + extension)).write_bytes(b'PRIVATE_UPLOAD_SENTINEL')
         for path in gate.PUBLIC_ASSETS:
             assert get(base, path)[0] == 200, path
+        assert get(base, '/wp-content/uploads/2026/10/photo.jpg')[0] == 200
+        for filename in ('editor.php', 'editor.php5', 'editor.phtml', 'editor.phar',
+                         'editor.%70hp', 'editor.php/path'):
+            status, body, _ = get(base, '/wp-content/uploads/2026/10/' + filename)
+            assert status == 403, filename
+            assert b'PRIVATE_UPLOAD_SENTINEL' not in body
         for segment in ('vendor', '%76endor'):
             status, body, _ = get(base, '/wp-content/plugins/seo-by-rank-math/' + segment + '/cmb2/cmb2/includes/CMB2.php')
             assert status == 403

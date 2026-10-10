@@ -16,6 +16,10 @@ define('WP_CLI', true);
 $state = json_decode(getenv('BIOCO_FIXTURE_STATE'), true);
 $args = $state['args'];
 $events = [];
+if ($state['isolation_loaded']) {
+    function bioco_editor_verification_layouts(array $layouts): array { return $layouts; }
+}
+function has_filter($hook, $callback) { return $GLOBALS['state']['isolation_priority']; }
 class WP_CLI {
     static function line($text) { $GLOBALS['result'] = json_decode($text, true); }
     static function error($text) { throw new RuntimeException($text); }
@@ -60,15 +64,32 @@ def post(id=5, type='page', status='publish', title='Original'):
                 post_excerpt='', post_parent=0, menu_order=0)
 
 
-def run(args, posts=None, meta=None):
+def run(args, posts=None, meta=None, isolation_loaded=True, isolation_priority=100):
     import os
-    state = {'args': args, 'posts': [post()] if posts is None else posts, 'meta': meta or {}}
+    state = {'args': args, 'posts': [post()] if posts is None else posts, 'meta': meta or {},
+             'isolation_loaded': isolation_loaded, 'isolation_priority': isolation_priority}
     result = subprocess.run(['php', '-r', HARNESS], check=True, capture_output=True,
                             text=True, env=os.environ | {
                                 'BIOCO_FIXTURE_STATE': json.dumps(state),
                                 'BIOCO_FIXTURE_SCRIPT': str(SCRIPT),
                             })
     return json.loads(result.stdout)
+
+
+@pytest.mark.parametrize('action', [['check'], ['create', '5', 'qa-20261009']])
+@pytest.mark.parametrize('loaded,priority', [(False, 100), (True, False), (True, 10)])
+def test_verification_stops_without_the_deployed_isolation_hook(action, loaded, priority):
+    result = run(action, isolation_loaded=loaded, isolation_priority=priority)
+    assert 'stop editor verification' in result['result']['error']
+    assert result['events'] == []
+
+
+def test_isolation_probe_is_read_only_and_cleanup_survives_a_replaced_release():
+    assert run(['check']) == {'result': {'isolation': 'loaded'}, 'events': []}
+    result = run(['cleanup', 'qa-20261009'], isolation_loaded=False, posts=[
+        post(status='draft', title='BIOCO QA qa-20261009 5'),
+    ], meta={'5': {'_bioco_editor_verification': ['qa-20261009']}})
+    assert result['events'] == [['delete', 5, True]]
 
 
 def test_copy_is_draft_and_preserves_builder_metadata():
