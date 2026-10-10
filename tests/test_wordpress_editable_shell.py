@@ -13,7 +13,7 @@ HARNESS = r'''
 define('ABSPATH', '/');
 $state = json_decode(getenv('BIOCO_SHELL_STATE'), true);
 function add_filter(...$args) {}
-function add_action(...$args) {}
+function add_action($tag, $callback, ...$args) { $GLOBALS['actions'][$tag][] = $callback; }
 function get_the_ID() { return 5; }
 function is_page($name) { return $GLOBALS['state']['page'] === $name; }
 function is_singular($type) { return false; }
@@ -30,6 +30,7 @@ class WP_Error { public function __construct(public $code, public $message, publ
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/dynamic-sections.php';
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/native-modules.php';
 require getenv('BIOCO_SHELL_NAVIGATION');
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/design-system.php';
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-blocks.php';
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/shell-layouts.php';
 $block = bioco_import_shell_block($state['slot']);
@@ -38,13 +39,19 @@ $component = $state['slot'] === 'header' ? 'navigation_shell' : 'footer_shell';
 $values = bioco_native_extract_values($component, $block['attrs']);
 $validated = $values instanceof WP_Error ? $values : bioco_native_validate_values($component, $values);
 if ($validated instanceof WP_Error) { echo json_encode(['error' => $validated->message]); }
-else { echo json_encode(['html' => bioco_render_dynamic_component($component, $validated, ['mode'=>'inert']), 'values'=>$validated]); }
+else {
+    if ($state['theme_builder']) foreach ($GLOBALS['actions']['et_theme_builder_template_before_' . $state['slot']] ?? [] as $callback) $callback(299, true);
+    $html = bioco_render_dynamic_component($component, $validated, ['mode'=>'inert']);
+    if ($state['theme_builder']) foreach ($GLOBALS['actions']['et_theme_builder_template_after_' . $state['slot']] ?? [] as $callback) $callback(299, true);
+    echo json_encode(['html' => $html, 'values' => $validated,
+        'after_html' => bioco_render_dynamic_component($component, $validated, ['mode'=>'inert'])]);
+}
 '''
 
 
-def render(slot='header', page='', navigation_path=None, **values):
+def render(slot='header', page='', navigation_path=None, theme_builder=False, **values):
     result = subprocess.run(['php', '-r', HARNESS], cwd=ROOT, check=True, capture_output=True, text=True,
-                            env=os.environ | {'BIOCO_SHELL_STATE': json.dumps(dict(slot=slot, page=page, values=values)),
+                            env=os.environ | {'BIOCO_SHELL_STATE': json.dumps(dict(slot=slot, page=page, values=values, theme_builder=theme_builder)),
                                               'BIOCO_SHELL_NAVIGATION': str(navigation_path or ROOT / CORE / 'includes/navigation.php')})
     return json.loads(result.stdout)
 
@@ -55,6 +62,14 @@ def test_header_seed_keeps_confirmed_links_and_logo():
     assert 'assets/bioco-logo.png' in html
     assert html.startswith('<header ') and html.endswith('</header>')
     assert 'BIOCÒ WERDEN' in html
+
+
+@pytest.mark.parametrize('slot', ['header', 'footer'])
+def test_theme_builder_owns_shell_landmarks_without_nested_headers_or_footers(slot):
+    result = render(slot, theme_builder=True)
+    assert result['html'].startswith('<div ') and result['html'].endswith('</div>')
+    assert '<' + slot not in result['html']
+    assert result['after_html'].startswith('<' + slot + ' ')
 
 
 def test_missing_logo_seed_keeps_the_shared_renderer_default(tmp_path):

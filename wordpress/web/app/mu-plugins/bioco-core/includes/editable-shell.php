@@ -28,6 +28,7 @@ function bioco_editable_shell_style(string $slot): string {
 }
 
 function bioco_render_editable_header(): string {
+    $tag = empty($GLOBALS['bioco_theme_builder_shell_depth']['header']) ? 'header' : 'div';
     $site = [];
     foreach (['logo_alt' => 'logoAlt', 'home_label' => 'homeLabel', 'utility_label' => 'utilityLabel',
         'primary_label' => 'primaryLabel', 'menu_open_label' => 'menuOpenLabel', 'menu_close_label' => 'menuCloseLabel'] as $field => $key) {
@@ -37,8 +38,8 @@ function bioco_render_editable_header(): string {
     $site['logoUrl'] = $image ? (string) wp_get_attachment_image_url($image, 'full') : (string) bioco_field('logo_url', '');
     $contract = ['site' => $site, 'utility' => bioco_field('utility', []), 'primary' => bioco_field('primary', []),
         'cta' => ['label' => bioco_field('cta_label', ''), 'url' => bioco_field('cta_url', ''), 'slug' => bioco_field('cta_slug', '')]];
-    return '<header class="cms-navigation-shell bioco-site-header bioco-editable-header" style="' . esc_attr(bioco_editable_shell_style('header')) . '">'
-        . '<div class="bioco-page-shell bioco-hero-nav-overlay">' . bioco_render_primary_navigation($contract) . '</div></header>';
+    return '<' . $tag . ' class="cms-navigation-shell bioco-site-header bioco-editable-header" style="' . esc_attr(bioco_editable_shell_style('header')) . '">'
+        . '<div class="bioco-page-shell bioco-hero-nav-overlay">' . bioco_render_primary_navigation($contract) . '</div></' . $tag . '>';
 }
 
 function bioco_editable_shell_links(array $links): string {
@@ -55,7 +56,8 @@ function bioco_editable_shell_links(array $links): string {
 
 function bioco_render_editable_footer(): string {
     if (is_page('anmeldung')) return '';
-    $html = '<footer id="footer" class="cms-footer-shell bioco-site-footer bioco-editable-footer" style="' . esc_attr(bioco_editable_shell_style('footer')) . '"><div class="bioco-site-footer-inner">';
+    $tag = empty($GLOBALS['bioco_theme_builder_shell_depth']['footer']) ? 'footer' : 'div';
+    $html = '<' . $tag . ' id="footer" class="cms-footer-shell bioco-site-footer bioco-editable-footer" style="' . esc_attr(bioco_editable_shell_style('footer')) . '"><div class="bioco-site-footer-inner">';
     foreach (bioco_field('columns', []) as $column) {
         $gap = max(0, min(200, (float) ($column['link_gap'] ?? 0)));
         $html .= '<div class="bioco-site-footer-column" style="--bioco-footer-link-gap:' . $gap . 'px"><h3>' . esc_html((string) ($column['heading'] ?? '')) . '</h3>'
@@ -63,5 +65,5 @@ function bioco_render_editable_footer(): string {
     }
     return $html . '</div><div class="bioco-site-footer-partners"><h3>' . esc_html((string) bioco_field('partners_title', ''))
         . '</h3><ul class="bioco-site-footer-partner-links">' . bioco_editable_shell_links(bioco_field('partners', [])) . '</ul><p>'
-        . esc_html((string) bioco_field('region_text', '')) . '</p></div></footer>';
+        . esc_html((string) bioco_field('region_text', '')) . '</p></div></' . $tag . '>';
 }

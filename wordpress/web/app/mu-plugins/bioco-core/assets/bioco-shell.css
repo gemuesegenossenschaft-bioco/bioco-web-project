@@ -180,6 +180,12 @@ header:has(.bioco-navigation-shell) {
 }
 
 .bioco-menu-toggle { display: none; }
+.bioco-navigation-shell a:focus-visible,
+.bioco-menu-toggle:focus-visible,
+.bioco-site-footer a:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 4px;
+}
 .bioco-primary-nav li.bioco-mobile-utility { display: none; }
 
 main.wp-block-group {
@@ -292,7 +298,7 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
 }
 
 /* Native shell fields override geometry inside their own template instance. */
-header.bioco-site-header.bioco-editable-header {
+.cms-navigation-shell.bioco-site-header.bioco-editable-header {
   background: var(--bioco-header-background-color, var(--wp--preset--color--bioco-bg));
   color: var(--bioco-header-text-color, var(--wp--preset--color--bioco-text));
 }
@@ -329,13 +335,14 @@ header.bioco-site-header.bioco-editable-header {
   gap: var(--bioco-footer-gap, clamp(32px, 7vw, 112px));
 }
 .bioco-editable-footer .bioco-site-footer-column { min-width: 0; overflow-wrap: anywhere; }
-.bioco-editable-footer .bioco-site-footer-column:not(:first-child) ul { display: flex; flex-direction: column; gap: var(--bioco-footer-link-gap, 0px); }
+.bioco-editable-footer .bioco-site-footer-column:not(:first-child) ul { display: flex; flex-direction: column; gap: var(--bioco-footer-link-gap, 0px); line-height: inherit; }
+.bioco-editable-footer .bioco-site-footer-column:not(:first-child) ul:not(:empty) { margin-bottom: 8px; }
 .bioco-editable-footer a { color: var(--bioco-footer-link-color, inherit); }
-.bioco-editable-footer .bioco-site-footer-partner-links { list-style: none; padding: 0; margin-bottom: 8px; }
+.bioco-editable-footer .bioco-site-footer-partner-links { list-style: none; padding: 0 0 1em; margin-bottom: 8px; line-height: inherit; }
 @media (min-width: 901px) {
   /* Preserve the homepage's default geometry while letting saved fields own it. */
-  .home header.bioco-editable-header { height: auto; min-height: 120px; }
-  .home header.bioco-editable-header .bioco-page-shell {
+  .home .bioco-site-header.bioco-editable-header { height: auto; min-height: 120px; }
+  .home .bioco-site-header.bioco-editable-header .bioco-page-shell {
     width: min(calc(100% - 2 * var(--bioco-header-inline-padding, 106.4px)), var(--bioco-header-container-width, 1227.2px));
     height: auto;
   }

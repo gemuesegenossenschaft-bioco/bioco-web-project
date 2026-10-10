@@ -63,6 +63,18 @@ add_action('wp_enqueue_scripts', function () {
 
 // Theme Builder owns placement. The existing WordPress navigation settings
 // remain the source of labels, links and contact data.
+foreach (['header', 'footer'] as $slot) {
+    add_action('et_theme_builder_template_before_' . $slot, static function ($id, $enabled) use ($slot) {
+        if ($id && $enabled) {
+            $GLOBALS['bioco_theme_builder_shell_depth'][$slot] = ($GLOBALS['bioco_theme_builder_shell_depth'][$slot] ?? 0) + 1;
+        }
+    }, 20, 2);
+    add_action('et_theme_builder_template_after_' . $slot, static function ($id, $enabled) use ($slot) {
+        if ($id && $enabled) {
+            $GLOBALS['bioco_theme_builder_shell_depth'][$slot] = max(0, ($GLOBALS['bioco_theme_builder_shell_depth'][$slot] ?? 0) - 1);
+        }
+    }, 20, 2);
+}
 add_action('init', function () {
 add_shortcode('bioco_global_header', function () {
     return '<div class="bioco-site-header"><div class="bioco-page-shell bioco-hero-nav-overlay">' . bioco_render_primary_navigation() . '</div></div>';
