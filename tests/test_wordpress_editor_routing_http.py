@@ -48,10 +48,13 @@ def apache_site(tmp_path_factory):
     for path in gate.PUBLIC_ASSETS:
         asset = private_wp / path.lstrip('/')
         asset.parent.mkdir(parents=True, exist_ok=True)
-        asset.write_text('window.biocoRoutingSentinel = true;\n')
+        asset.write_text('.bioco-routing-sentinel { color: green; }\n' if path.endswith('.css')
+                         else 'window.biocoRoutingSentinel = true;\n')
     for path in ('vendor/autoload.php', 'wp-config.php', '.env',
                  'wp-includes/js/dist/vendor/config.php',
-                 'wp-includes/js/dist/vendor/react.min.js.map'):
+                 'wp-includes/js/dist/vendor/react.min.js.map',
+                 'wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/includes/CMB2.php',
+                 'wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/js/cmb2.min.js.map'):
         asset = private_wp / path
         asset.parent.mkdir(parents=True, exist_ok=True)
         asset.write_text('PRIVATE_SENTINEL_MUST_NOT_BE_SERVED')
@@ -82,7 +85,7 @@ def apache_site(tmp_path_factory):
                   for name in module_names)
         + f'ErrorLog "{root}/error.log"\nLogLevel warn\n'
         + f'DocumentRoot "{docroot}"\nTypesConfig /dev/null\n'
-        + 'AddType application/javascript .js\n'
+        + 'AddType application/javascript .js\nAddType text/css .css\n'
         + f'<Directory "{root}">\nRequire all granted\n'
           'Options FollowSymLinks\nAllowOverride All\n</Directory>\n')
     command = [binary, '-f', str(apache_config)]
@@ -126,8 +129,10 @@ def test_apache_serves_every_editor_dependency_from_private_clone(apache_site):
     for path in gate.PUBLIC_ASSETS:
         status, body, headers = get(base, path + '?ver=7.1.3')
         assert status == 200, path
-        assert body == b'window.biocoRoutingSentinel = true;\n', path
-        assert headers.get_content_type() == 'application/javascript'
+        css = path.endswith('.css')
+        assert body == (b'.bioco-routing-sentinel { color: green; }\n' if css
+                        else b'window.biocoRoutingSentinel = true;\n'), path
+        assert headers.get_content_type() == ('text/css' if css else 'application/javascript')
 
 
 @pytest.mark.parametrize('path', [
@@ -138,6 +143,9 @@ def test_apache_serves_every_editor_dependency_from_private_clone(apache_site):
     '/wp-includes/js/dist/vendor/react.min.js.map',
     '/wp-includes/js/dist/vendor/react.min.js/config.php',
     '/wp-includes/js/dist/vendor/%2eenv',
+    '/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/includes/CMB2.php',
+    '/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/js/cmb2.min.js.map',
+    '/_bioco_wp/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/js/cmb2.min.js',
 ])
 def test_apache_keeps_private_vendor_resources_denied(apache_site, path):
     status, body, _ = get(apache_site[0], path)
@@ -241,6 +249,7 @@ def test_asset_probe_rejects_html_and_private_file_success():
         try:
             assert gate.probe(base, '/react.js', True)['ok']
             assert not gate.probe(base, '/html', True)['ok']
+            assert not gate.probe(base, '/javascript.css', True)['ok']
             assert not gate.probe(base, '/react.js', False)['ok']
             assert gate.probe(base, '/denied', False)['ok']
             assert not gate.probe(base, '/denied', True)['ok']

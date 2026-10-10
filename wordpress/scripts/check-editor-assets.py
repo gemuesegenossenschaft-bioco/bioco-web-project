@@ -18,6 +18,9 @@ spec.loader.exec_module(routing)
 PUBLIC_ASSETS = tuple(
     f'/wp-includes/js/dist/vendor/{name}{suffix}.js'
     for name in routing.CORE_VENDOR_NAMES for suffix in ('', '.min')
+) + (
+    '/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/css/cmb2.min.css',
+    '/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/js/cmb2.min.js',
 )
 PRIVATE_PATHS = (
     '/wp-config.php', '/.env', '/vendor/autoload.php',
@@ -27,6 +30,8 @@ PRIVATE_PATHS = (
     '/_bioco_wp%2fwp-includes/js/dist/vendor/react.min.js',
     '/%5fbioco_wp/wp-includes/js/dist/vendor/react.min.js',
     '/_bioco_%77p/wp-includes/js/dist/vendor/react.min.js',
+    '/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/includes/CMB2.php',
+    '/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/js/cmb2.min.js.map',
 )
 
 
@@ -39,12 +44,13 @@ def probe(base_url, path, public):
             body = response.read(4096)
             row.update(status=response.status, url=response.url,
                        content_type=response.headers.get_content_type())
+            mime_types = ('text/css',) if path.endswith('.css') else (
+                'application/javascript', 'text/javascript', 'application/x-javascript')
             row['ok'] = (
                 public and response.status == 200
                 and urlsplit(response.url).netloc == urlsplit(base_url).netloc
                 and '/_bioco_wp' not in urlsplit(response.url).path
-                and response.headers.get_content_type() in (
-                    'application/javascript', 'text/javascript', 'application/x-javascript')
+                and response.headers.get_content_type() in mime_types
                 and bool(body.strip()) and b'<html' not in body.lower()
                 and b'<!doctype' not in body.lower()
             )
@@ -70,7 +76,7 @@ def main():
     # The internal clone path is production-specific. Other denials apply on both.
     targets += [(path, False) for path in PRIVATE_PATHS
                 if parts.hostname == 'bioco.ch' or path.startswith((
-                    '/wp-config', '/.env', '/vendor/', '/wp-includes/'))]
+                    '/wp-config', '/.env', '/vendor/', '/wp-includes/', '/wp-content/'))]
     with ThreadPoolExecutor(max_workers=6) as pool:
         rows = list(pool.map(lambda target: probe(base_url, *target), targets))
     report = {'url': base_url, 'passed': all(row['ok'] for row in rows), 'assets': rows}

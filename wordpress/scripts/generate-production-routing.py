@@ -23,6 +23,10 @@ CORE_VENDOR_NAMES = (
 CORE_VENDOR_PATTERN = (
     r'wp-includes/js/dist/vendor/(?:' + '|'.join(CORE_VENDOR_NAMES) + r')(?:\.min)?\.js'
 )
+EDITOR_PLUGIN_ASSET_PATTERN = (
+    r'wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/'
+    r'(?:css/cmb2\.min\.css|js/cmb2\.min\.js)'
+)
 # THE_REQUEST survives internal rewrites and DirectoryIndex. Match encoded letters
 # as well: RewriteRule receives decoded paths, but THE_REQUEST does not.
 INTERNAL_REQUEST_PATTERN = (
@@ -98,7 +102,7 @@ def generate():
         f"RewriteCond %{{THE_REQUEST}} {INTERNAL_REQUEST_PATTERN} [NC]",
         "RewriteRule ^ - [F,END]",
     ]
-    for pattern in (LEAFLET_PATTERN, CORE_VENDOR_PATTERN):
+    for pattern in (LEAFLET_PATTERN, CORE_VENDOR_PATTERN, EDITOR_PLUGIN_ASSET_PATTERN):
         lines += [
             f"RewriteRule ^_bioco_wp/{pattern}$ - [END]",
             "RewriteCond %{HTTP_HOST} ^www\\.bioco\\.ch(?::[0-9]+)?$ [NC]",

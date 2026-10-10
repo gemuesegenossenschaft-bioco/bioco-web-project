@@ -14,6 +14,10 @@ $action = $args[0] ?? '';
 $types = ['page', 'post', 'event', 'group', 'et_header_layout', 'et_footer_layout', 'et_body_layout'];
 $template_types = ['et_template', 'et_theme_builder'];
 $ignored_meta = ['_edit_lock', '_edit_last'];
+// Keep the full metadata hashes too. These fields are recomputed on page visits,
+// so distinguish their changes from editorial drift without hiding the evidence.
+$derived_meta = ['_divi_dynamic_assets_cached_modules', '_divi_dynamic_assets_canvases_used',
+    '_divi_dynamic_assets_cached_feature_used'];
 
 if ($action === 'inventory') {
     $posts = get_posts([
@@ -30,10 +34,15 @@ if ($action === 'inventory') {
             unset($meta[$key]);
         }
         ksort($meta);
+        $editorial_meta = array_diff_key($meta, array_flip($derived_meta));
         $result[] = [
             'id' => $post->ID, 'type' => $post->post_type, 'status' => $post->post_status,
             'content_hash' => hash('sha256', $post->post_content),
             'meta_hashes' => array_map(static fn($value) => hash('sha256', serialize($value)), $meta),
+            'editorial_hash' => hash('sha256', serialize([
+                $post->post_title, $post->post_name, $post->post_content,
+                $post->post_excerpt, $post->post_parent, $post->menu_order, $editorial_meta,
+            ])),
             'hash' => hash('sha256', serialize([
                 $post->post_title, $post->post_name, $post->post_content,
                 $post->post_excerpt, $post->post_parent, $post->menu_order, $meta,

@@ -235,11 +235,13 @@ verify that no import is running; retain `bioco_catalog_pending_<kind>` so retry
 ## Editor acceptance on staging and production (#199–#215)
 
 `python3 wordpress/scripts/check-editor-assets.py --url https://staging.bioco.ch`
-and the same command with `https://bioco.ch` check HTTP status, JavaScript MIME,
+and the same command with `https://bioco.ch` check HTTP status, JavaScript/CSS MIME,
 nonempty bodies, origin, internal-path leaks and private-resource denial. This gate
 runs after the route render gate on every staging release. On macOS, set
 `SSL_CERT_FILE` to the installed trusted CA bundle if Python lacks its own bundle.
 Never disable TLS verification.
+The gate checks 32 core libraries and Rank Math's two named CMB2 editor assets.
+Other plugin vendor files, PHP source and source maps remain denied.
 
 The asset gate proves dependencies can load. It does not prove the Divi editor
 can initialize, edit, save, reopen, duplicate or expand a layout. Verify those
@@ -268,3 +270,9 @@ copy. Verify that the builder shows only the copied layout before editing.
 Use `inventory` before/after and `cleanup <run>` after testing. This helper rejects
 global-assignment sources and validates every cleanup candidate before deleting
 any copy. Transfer it outside the document root and remove it after verification.
+
+Inventories retain every metadata hash and a full hash, plus an `editorial_hash`
+that excludes only Divi's three generated asset-cache fields. Page visits can
+recompute those fields. Keep their raw differences as evidence, and investigate
+any content, assignment or editorial-metadata change. Concurrent editor revisions
+must be preserved; never restore a stale database to make a comparison pass.
