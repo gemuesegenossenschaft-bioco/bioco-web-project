@@ -149,11 +149,12 @@ def text_block(content, **attrs):
     return '<!-- wp:divi/text ' + json.dumps(values) + ' -->\n<!-- /wp:divi/text -->'
 
 
-def test_shell_migration_preserves_wrapper_design_and_editorial_siblings():
+@pytest.mark.parametrize('shortcode', ['[bioco_global_header]', '<p>[bioco_global_header]</p>'])
+def test_shell_migration_preserves_wrapper_design_and_editorial_siblings(shortcode):
     wrapper = {'module': {'advanced': {'htmlAttributes': {'desktop': {'value': {'class': 'keep-shell'}}}}}}
     text_design = {'module': {'decoration': {'spacing': {'desktop': {'value': {'padding': {'top': '17px'}}}}}}}
     source = '<!-- wp:divi/section ' + json.dumps(wrapper) + ' -->\n'
-    source += text_block('[bioco_global_header]', **text_design)
+    source += text_block(shortcode, **text_design)
     source += text_block('<p>Keep editorial prose &amp; destinations.</p>')
     source += '\n<!-- /wp:divi/section -->'
     result = migrate(source)
@@ -178,8 +179,11 @@ def test_footer_migration_captures_existing_contact_links_and_partners():
     assert result['count'] == 1 and result['idempotent']
 
 
-def test_migration_rejects_mixed_editorial_text_instead_of_dropping_it():
-    result = migrate(text_block('<p>Preserve me</p>[bioco_global_header]'))
+@pytest.mark.parametrize('content', ['<p>Preserve me</p>[bioco_global_header]',
+                                    '<p>[bioco_global_header]</p><p>Preserve me</p>',
+                                    '<p style="color:red">[bioco_global_header]</p>'])
+def test_migration_rejects_mixed_editorial_text_instead_of_dropping_it(content):
+    result = migrate(text_block(content))
     assert 'editorial content' in result['error']
 
 

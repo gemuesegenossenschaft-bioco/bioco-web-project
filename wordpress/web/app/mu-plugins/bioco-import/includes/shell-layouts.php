@@ -36,6 +36,10 @@ function bioco_import_shell_tree(array $blocks, int &$count): array {
     foreach ($blocks as &$block) {
         if (($block['blockName'] ?? '') === 'divi/text') {
             $content = $block['attrs']['content']['innerContent']['desktop']['value'] ?? '';
+            // Divi's text editor wraps an otherwise pure shortcode in a paragraph.
+            if (is_string($content) && preg_match('/^\s*<p>\s*(\[bioco_global_(?:header|footer)\])\s*<\/p>\s*$/D', $content, $paragraph)) {
+                $content = $paragraph[1];
+            }
             if (is_string($content) && preg_match('/^\s*\[bioco_global_(header|footer)\]\s*$/D', $content, $match)) {
                 $replacement = bioco_import_shell_block($match[1]);
                 $attrs = $block['attrs'];
