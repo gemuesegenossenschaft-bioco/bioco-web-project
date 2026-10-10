@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: composer
+    directory: /wordpress
+    schedule:
+      interval: weekly
+    target-branch: wordpress
+    open-pull-requests-limit: 5
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    target-branch: wordpress
+    open-pull-requests-limit: 5

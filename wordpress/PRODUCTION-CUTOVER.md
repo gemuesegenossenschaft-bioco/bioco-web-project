@@ -133,3 +133,95 @@ tracker request in the orchestrator's browser integration check.
 
 This document describes operations, not a completed migration. The orchestrator
 writes the German team handoff after observing actual migration results.
+
+## Retention and decommission gate
+
+WordPress has served production since 9 October 2026. Retain the Next server on
+port 49154, its watchdog, ProcessWire, the previous root routing file and private
+recovery backups for at least 30 days, through 8 November 2026. Extend retention
+while any gate below is open. This checklist does not authorize deletion.
+
+- [ ] Confirm current production registrations, editorial content and uploads are
+      covered by a scheduled off-server backup. Restore a retrieved backup to an
+      isolated target and compare records and files (#153).
+- [ ] Rehearse both routing states in an isolated Apache setup. Record the saved
+      routing file, commands and response bodies. Never restore an older database
+      over accepted registrations (#100).
+- [ ] Verify production mail inbox delivery, Matomo counting and rollback health.
+      A successful transport return or an HTTP 200 is insufficient.
+- [ ] Obtain the owner's approval that WordPress owns the retained content and
+      that remaining migration, editing and delivery defects are accepted.
+- [ ] After those gates and retention pass, inventory references to
+      `cms.bioco.ch`, ProcessWire APIs, legacy assets and the Next port. Redirect
+      public links and retain required media before removing any service.
+- [ ] With a dedicated approved maintenance window, remove the Next watchdog
+      cron, stop its one verified worker, then retire `start.sh`, `healthcheck.sh`,
+      sharp bindings and the old frontend directory. Verify WordPress routes,
+      admin, forms, assets and independent vhosts afterward.
+- [ ] Export the final ProcessWire database, content and media privately. Remove
+      its vhost and credentials only after the owner accepts that archive. Keep
+      `docs.bioco.ch` and Matomo independent of this cleanup.
+- [ ] Record the operator, UTC time, retained backup location, smoke results and
+      recovery procedure. Do not put credentials or private backup URLs in Git.
+
+## Operations added by the remaining-ticket pass
+
+The consent controls, newsletter administration and hardening ship as owned
+mu-plugin code. Use the canonical staging release for code deployment. A code
+release does not overwrite page content or install Composer dependencies.
+
+Initialize the editable consent copy explicitly after deploying the code:
+
+```sh
+wp --path=<staging-wordpress-root> --user=<administrator> bioco consent
+wp --path=<staging-wordpress-root> --user=<administrator> bioco consent --apply
+```
+
+Saved text wins on subsequent setup runs, including an intentionally empty
+value. Editors can fill the fields under Datenschutz-Texte. Missing configuration
+keeps maps and analytics disabled. Consent is stored locally for 180 days. The
+visitor can reject both categories, choose either category, or withdraw consent
+through the persistent settings button. Addresses remain visible without maps.
+Changes synchronize across tabs; withdrawal removes pending Matomo grants and
+page views while the tracker is still loading.
+Matomo uses its documented [consent API](https://developer.matomo.org/guides/tracking-consent)
+to stop subsequent tracking after withdrawal.
+
+Newsletter administrators use Newsletter > Versenden / Export. Confirmed test
+subscribers use the existing double-opt-in flow. Every message contains a visible
+unsubscribe link and the [one-click unsubscribe headers](https://www.rfc-editor.org/rfc/rfc8058.html).
+GET displays a confirmation; POST performs unsubscribe. A new opt-in invalidates
+earlier links. CSV export and sending require administrator permission and a
+nonce. Mail is plain text through the existing WP Mail SMTP transport.
+
+Bulk mail uses single cron events in batches of 20. Each campaign records sent,
+failed, skipped, pending and uncertain outcomes. A transport crash leaves a
+`sending` record; no automatic resend occurs. An abandoned campaign lock is left
+in place for manual investigation. Verify that the worker stopped and inspect
+delivery records before removing `bioco_newsletter_lock_<campaign-id>` and
+rescheduling `bioco_newsletter_batch`. Record inbox receipt separately from
+transport acceptance. Configure the provider's DKIM signature to cover the
+unsubscribe headers before real bulk sending.
+
+The security module denies anonymous REST user enumeration while retaining
+authenticated editor routes, limits failed login attempts per connected peer,
+and removes WordPress XML-RPC methods. Successful logins do not reset the shared
+peer counter. The tenth failure starts a fixed 15-minute lockout and the
+password-check boundary rejects locked requests before hashing.
+Generated production routing also denies
+executable upload paths. Installing the code does not replace production routing
+or change database grants; verify those independently before closing #163.
+
+Composer now owns Rank Math and has a lockfile. Dependency updates run in a
+private checkout with `composer install --no-dev`, backups and a staging check,
+followed by the approved dependency release. Do not run `composer update` on
+production or use the owned-code sync script as a dependency installer. No
+dependency installation on a server is claimed by this change. The locked audit
+reported no vulnerability advisories and the pre-existing abandoned
+`roots/wp-password-bcrypt` package; resolving that warning remains part of #163.
+
+The canonical staging release now invalidates only owned staging PHP in the web
+OPcache. Its authenticated temporary probe expires after five minutes, deletes
+itself on use, and is removed over SSH on success or failure. It leaves core,
+vendor plugins, production code and editorial data untouched. A failed probe or
+cleanup fails the release rather than reporting stale code as healthy.

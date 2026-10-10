@@ -48,6 +48,7 @@
     }
 
     if (firstMarker) firstMarker.openPopup();
+    return map;
   }
 
   function escapeHtml(value) {
@@ -59,7 +60,7 @@
   function init() {
     var wrappers = document.querySelectorAll('.cms-geisshof-map .map-wrapper');
     for (var i = 0; i < wrappers.length; i++) {
-      initMap(wrappers[i]);
+      if (window.BiocoConsent) window.BiocoConsent.mountMap(wrappers[i], initMap);
     }
   }
 

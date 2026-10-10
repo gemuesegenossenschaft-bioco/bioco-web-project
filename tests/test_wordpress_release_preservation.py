@@ -90,6 +90,7 @@ echo "$event" >> "$BIOCO_TEST_EVENTS"
         'case " $* " in *" --apply "*) echo deploy:apply ;; *) echo deploy:dry ;; esac >> "$BIOCO_TEST_EVENTS"\n',
     )
     render = _write_executable(tmp_path / "render", 'echo smoke >> "$BIOCO_TEST_EVENTS"\n')
+    web_opcache = _write_executable(tmp_path / "web-opcache", 'echo web-opcache >> "$BIOCO_TEST_EVENTS"\n')
 
     base_env = {k: v for k, v in os.environ.items() if not k.startswith("BIOCO_")}
     env = base_env | {
@@ -99,6 +100,7 @@ echo "$event" >> "$BIOCO_TEST_EVENTS"
         "BIOCO_RELEASE_DEPLOY_SCRIPT": str(deploy),
         "BIOCO_RELEASE_SSH_BIN": str(ssh),
         "BIOCO_RELEASE_RENDER_GATE": str(render),
+        "BIOCO_RELEASE_WEB_OPCACHE_COMMAND": str(web_opcache),
         "BIOCO_RELEASE_TIMESTAMP": "20260913T120000Z",
         "BIOCO_RELEASE_BACKUP_DIR": str(tmp_path / "backups"),
         "BIOCO_TEST_EVENTS": str(events),
@@ -160,6 +162,7 @@ def test_staging_release_runs_only_the_allowed_remote_commands(tmp_path):
         "backup",
         "deploy:apply",
         "cache-flush",
+        "web-opcache",
         "runtime-verify",
         "smoke",
         "marker",
@@ -197,6 +200,7 @@ def test_staging_release_fails_on_unexpected_import_command(tmp_path):
         "backup",
         "deploy:apply",
         "cache-flush",
+        "web-opcache",
         "unexpected-import",
     ]
     assert "step=runtime-verify status=passed" not in result.stdout
@@ -219,6 +223,7 @@ def test_staging_release_aborts_when_runtime_verification_fails(tmp_path):
         "backup",
         "deploy:apply",
         "cache-flush",
+        "web-opcache",
         "runtime-verify",
     ]
     assert not marker.exists() or marker.read_text() == ""

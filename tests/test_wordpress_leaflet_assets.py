@@ -2,6 +2,7 @@ import base64
 import hashlib
 import json
 import re
+import subprocess
 from pathlib import Path
 
 
@@ -10,7 +11,20 @@ CORE = ROOT / "wordpress/web/app/mu-plugins/bioco-core"
 
 
 def test_map_blocks_use_registered_leaflet_assets_only_when_rendered():
+    """Execute real map registration. Coverage map: tests/README.md."""
     core = (CORE / "bioco-core.php").read_text(encoding="utf-8")
+    code = r'''
+    define('ABSPATH','/');$assets=[];
+    function add_action(...$args) {} function add_filter(...$args) {}
+    function plugin_dir_url($file) {return 'https://fixture.example/wp-content/mu-plugins/bioco-core/';}
+    function wp_register_style(...$args) {$GLOBALS['assets'][$args[0]]=$args;}
+    function wp_register_script(...$args) {$GLOBALS['assets'][$args[0]]=$args;}
+    require 'wordpress/web/app/mu-plugins/bioco-core/bioco-core.php';
+    bioco_core_register_map_assets();echo json_encode($assets);
+    '''
+    run = subprocess.run(['php', '-r', code], cwd=ROOT, capture_output=True, text=True)
+    assert run.returncode == 0, run.stderr
+    assets = json.loads(run.stdout)
 
     assert "plugin_dir_url(__FILE__) . 'assets/vendor/leaflet/'" in core
     assert re.search(
@@ -24,11 +38,8 @@ def test_map_blocks_use_registered_leaflet_assets_only_when_rendered():
 
         assert metadata["viewScript"] == handle
         assert metadata["viewStyle"] == "bioco-leaflet"
-        assert re.search(
-            rf"wp_register_script\(\s*'{handle}'.*?blocks/{block_name}/view\.js.*?\['bioco-leaflet'\]",
-            core,
-            re.DOTALL,
-        )
+        assert assets[handle][1].endswith(f'/blocks/{block_name}/view.js')
+        assert assets[handle][2] == ['bioco-leaflet', 'bioco-consent']
 
     assert "wp_enqueue_script('bioco-leaflet'" not in core
     assert "wp_enqueue_style('bioco-leaflet'" not in core

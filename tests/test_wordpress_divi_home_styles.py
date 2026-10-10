@@ -202,6 +202,9 @@ function wp_enqueue_style($handle, $src = '', $deps = [], $ver = false, $media =
 function wp_enqueue_script($handle, $src = '', $deps = [], $ver = false, $footer = false) {
     $GLOBALS['fixtures']['enqueued'][] = ['type' => 'script', 'handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];
 }
+function get_option($key, $default = false) {return $default;}
+function wp_json_encode(...$args) {return json_encode(...$args);}
+function wp_add_inline_script(...$args) {}
 function _doing_it_wrong($function, $message, $version) {
     $GLOBALS['fixtures']['doing_it_wrong'][] = [$function, $message];
 }
@@ -273,12 +276,14 @@ echo json_encode([
     assert result["call_order"] == [
         "bioco-tokens", "bioco-blocks", "bioco-navigation",
         "divi-parent-style", "bioco-divi-style", "bioco-shell",
+        "bioco-consent", "bioco-consent",
     ], result["call_order"]
 
     # 2) Real WP_Dependencies resolution: tokens → parent → shell → child.
     assert result["resolved"] == [
         "bioco-tokens", "bioco-blocks",
         "divi-parent-style", "bioco-shell", "bioco-divi-style",
+        "bioco-consent",
     ], result["resolved"]
     assert result["doing_it_wrong"] == [], result["doing_it_wrong"]
 

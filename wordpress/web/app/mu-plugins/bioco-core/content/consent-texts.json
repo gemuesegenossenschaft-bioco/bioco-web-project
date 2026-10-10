@@ -1,0 +1,11 @@
+{
+  "title": "Datenschutz-Einstellungen",
+  "text": "Wir laden Reichweitenmessung und externe Karten erst mit deiner Zustimmung. Karten übertragen deine IP-Adresse an OpenStreetMap. Du kannst deine Wahl jederzeit ändern.",
+  "analytics": "Reichweitenmessung",
+  "maps": "OpenStreetMap-Karten",
+  "accept": "Alle erlauben",
+  "reject": "Nur notwendige Funktionen",
+  "save": "Auswahl speichern",
+  "settings": "Datenschutz-Einstellungen",
+  "map_prompt": "Externe Karte ist deaktiviert. Datenschutz-Einstellungen öffnen"
+}
