@@ -183,7 +183,7 @@ class TestRegistry:
             _preamble()
             + "echo json_encode(bioco_native_components());"
         )
-        assert len(payload) == 15
+        assert len(payload) == 17
         assert payload["bioco-divi/contact-form"] == "contact_form"
         assert payload["bioco-divi/gallery"] == "gallery"
 
@@ -209,7 +209,7 @@ class TestRegistry:
             + "]);"
         )
         calls = payload["calls"]
-        assert len(calls) == 15
+        assert len(calls) == 17
         folders = [folder for folder, _args in calls]
         assert {Path(folder).name for folder in folders} == {p.parent.name for p in (ROOT / CORE_DIR / "native-modules").glob("*/module.json")}
         for _folder, args in calls:
@@ -962,10 +962,10 @@ def test_empty_array_attrs_of_native_modules_survive_save_sanitization():
     }
 
 
-def test_all_fifteen_native_modules_have_editorial_fields():
+def test_all_registered_native_modules_have_editorial_fields():
     """Native editor contract: tests/README.md, Keep/Replace/Remove map."""
     payload = _json_php(_preamble() + "echo json_encode(array_map('bioco_native_field_map', array_values(bioco_native_components())));")
-    assert len(payload) == 15
+    assert len(payload) == 17
     assert all(fields for fields in payload)
 
 

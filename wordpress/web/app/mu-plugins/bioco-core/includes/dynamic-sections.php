@@ -7,6 +7,8 @@ if (!defined('ABSPATH')) exit;
 
 function bioco_dynamic_components(): array {
     return [
+        'navigation_shell' => 'bioco/navigation-shell',
+        'footer_shell' => 'bioco/footer-shell',
         'contact_form' => 'bioco/contact-form',
         'membership_form' => 'bioco/membership-form',
         'subscribe_form' => 'bioco/subscribe-form',

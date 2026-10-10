@@ -1,0 +1,265 @@
+{
+  "key": "group_bioco_block_navigation_shell",
+  "title": "Kopfzeile (Bioco)",
+  "fields": [
+    {
+      "key": "field_bioco_navigation_shell_logo",
+      "name": "logo",
+      "label": "Logo",
+      "type": "image",
+      "required": 0,
+      "return_format": "id"
+    },
+    {
+      "key": "field_bioco_navigation_shell_logo_url",
+      "name": "logo_url",
+      "label": "Logo-URL",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_logo_alt",
+      "name": "logo_alt",
+      "label": "Alternativtext Logo",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_home_label",
+      "name": "home_label",
+      "label": "Beschriftung Startseitenlink",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_utility_label",
+      "name": "utility_label",
+      "label": "Beschriftung Hilfsnavigation",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_primary_label",
+      "name": "primary_label",
+      "label": "Beschriftung Hauptnavigation",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_menu_open_label",
+      "name": "menu_open_label",
+      "label": "Beschriftung Menü öffnen",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_menu_close_label",
+      "name": "menu_close_label",
+      "label": "Beschriftung Menü schliessen",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_utility",
+      "name": "utility",
+      "label": "Hilfsnavigation",
+      "type": "repeater",
+      "required": 0,
+      "layout": "block",
+      "sub_fields": [
+        {
+          "key": "field_bioco_navigation_shell_utility_item_label",
+          "name": "label",
+          "label": "Beschriftung",
+          "type": "text",
+          "required": 0
+        },
+        {
+          "key": "field_bioco_navigation_shell_utility_url",
+          "name": "url",
+          "label": "Link",
+          "type": "text",
+          "required": 0
+        },
+        {
+          "key": "field_bioco_navigation_shell_utility_slug",
+          "name": "slug",
+          "label": "Seitenkennung für aktiven Link",
+          "type": "text",
+          "required": 0
+        }
+      ]
+    },
+    {
+      "key": "field_bioco_navigation_shell_primary",
+      "name": "primary",
+      "label": "Hauptnavigation",
+      "type": "repeater",
+      "required": 0,
+      "layout": "block",
+      "sub_fields": [
+        {
+          "key": "field_bioco_navigation_shell_primary_item_label",
+          "name": "label",
+          "label": "Beschriftung",
+          "type": "text",
+          "required": 0
+        },
+        {
+          "key": "field_bioco_navigation_shell_primary_url",
+          "name": "url",
+          "label": "Link",
+          "type": "text",
+          "required": 0
+        },
+        {
+          "key": "field_bioco_navigation_shell_primary_slug",
+          "name": "slug",
+          "label": "Seitenkennung für aktiven Link",
+          "type": "text",
+          "required": 0
+        }
+      ]
+    },
+    {
+      "key": "field_bioco_navigation_shell_cta_label",
+      "name": "cta_label",
+      "label": "Beschriftung Hauptbutton",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_cta_url",
+      "name": "cta_url",
+      "label": "Link Hauptbutton",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_cta_slug",
+      "name": "cta_slug",
+      "label": "Seitenkennung Hauptbutton",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_container_width",
+      "name": "container_width",
+      "label": "Maximale Breite (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_inline_padding",
+      "name": "inline_padding",
+      "label": "Seitlicher Abstand (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_gap",
+      "name": "gap",
+      "label": "Abstand zwischen Links/Spalten (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_font_size",
+      "name": "font_size",
+      "label": "Schriftgrösse (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_logo_width",
+      "name": "logo_width",
+      "label": "Logobreite Desktop (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_logo_width_mobile",
+      "name": "logo_width_mobile",
+      "label": "Logobreite Mobil (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_padding_vertical",
+      "name": "padding_vertical",
+      "label": "Abstand oben/unten (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_padding_mobile",
+      "name": "padding_mobile",
+      "label": "Seitlicher Abstand Mobil (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_background_color",
+      "name": "background_color",
+      "label": "Hintergrundfarbe",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_text_color",
+      "name": "text_color",
+      "label": "Textfarbe",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_link_color",
+      "name": "link_color",
+      "label": "Linkfarbe",
+      "type": "text",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_font_size_mobile",
+      "name": "font_size_mobile",
+      "label": "Schriftgrösse Mobil (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_toggle_size",
+      "name": "toggle_size",
+      "label": "Grösse Menütaste (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_toggle_line_width",
+      "name": "toggle_line_width",
+      "label": "Breite Menülinien (px)",
+      "type": "number",
+      "required": 0
+    },
+    {
+      "key": "field_bioco_navigation_shell_toggle_color",
+      "name": "toggle_color",
+      "label": "Farbe Menülinien",
+      "type": "text",
+      "required": 0
+    }
+  ],
+  "location": [
+    [
+      {
+        "param": "block",
+        "operator": "==",
+        "value": "bioco/navigation-shell"
+      }
+    ]
+  ],
+  "active": true,
+  "show_in_rest": 0,
+  "position": "normal",
+  "style": "default",
+  "menu_order": 0
+}

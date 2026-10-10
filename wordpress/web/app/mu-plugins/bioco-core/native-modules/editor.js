@@ -81,7 +81,7 @@
                     var row = {};
                     Object.keys(spec.row).forEach(function (key) {
                         var field = spec.row[key];
-                        row[key] = field.type === 'choices' ? [] : field.type === 'toggle' ? false : ['int','number'].indexOf(field.type) !== -1 ? 0 : '';
+                        row[key] = ['rows', 'choices'].indexOf(field.type) !== -1 ? [] : field.type === 'toggle' ? false : ['int','number'].indexOf(field.type) !== -1 ? 0 : '';
                     });
                     change(rows.concat([row]));
                 }}, 'Eintrag hinzufügen'));
