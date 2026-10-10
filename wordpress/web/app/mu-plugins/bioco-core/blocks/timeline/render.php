@@ -49,9 +49,9 @@ $has_header = $eyebrow || ($title && !$heading_already_in_text) || $text;
     <?php if (!empty($items)) : ?>
         <div class="cms-timeline-items">
             <?php foreach ($items as $item) :
-                $item_year = $item['year_eyebrow'] ?? '';
-                $item_title = $item['title'] ?? '';
-                $item_text = $item['text'] ?? '';
+                $item_year = (string) ($item['year_eyebrow'] ?? '');
+                $item_title = (string) ($item['title'] ?? '');
+                $item_text = (string) ($item['text'] ?? '');
                 $item_emphasis = $item['emphasis'] ?? 'normal';
                 if (!$item_year && !$item_title && !$item_text) continue;
             ?>
