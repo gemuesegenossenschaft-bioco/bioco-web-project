@@ -50,6 +50,7 @@ require_once BIOCO_IMPORT_DIR . '/includes/divi-blocks.php';
 require_once BIOCO_IMPORT_DIR . '/includes/divi-composer.php';
 require_once BIOCO_IMPORT_DIR . '/includes/native-migration.php';
 require_once BIOCO_IMPORT_DIR . '/includes/editor-routing.php';
+require_once BIOCO_IMPORT_DIR . '/includes/shell-layouts.php';
 require_once BIOCO_IMPORT_DIR . '/includes/design-system.php';
 
 // WP-CLI is the only place this plugin registers a "command" — every include

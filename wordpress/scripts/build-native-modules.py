@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Compile Divi editorial metadata from the shared ACF field definitions."""
+import argparse
 import copy
 import json
 import re
@@ -36,10 +37,16 @@ def specification(field):
     return spec
 
 
-def build():
+def build(components=None):
+    if components is not None:
+        unknown = set(components) - {component for component, _ in COMPONENTS}
+        if unknown:
+            raise ValueError('Unknown components: ' + ', '.join(sorted(unknown)))
     message_schema = json.loads(subprocess.check_output(['php', '-r', "define('ABSPATH', __DIR__); function add_action(...$args) {} require '" + str(CORE.parent / 'bioco-forms/messages.php') + "'; echo json_encode(bioco_forms_message_schema());"]))
-    schema = {}
+    schema = json.loads((OUT / 'fields.json').read_text()) if components is not None else {}
     for component, slug in COMPONENTS:
+        if components is not None and component not in components:
+            continue
         group = next(g for g in GROUPS if g['key'] == 'group_bioco_block_' + component)
         schema[component] = {f['name']: specification(f) for f in fields_of(group['fields'])}
         meta = {'name': 'bioco-divi/' + slug, 'title': group['title'], 'titles': group['title'], 'category': 'module', 'moduleIcon': TEMPLATE['moduleIcon'], 'moduleClassName': 'bioco_' + component, 'moduleOrderClassName': 'bioco_' + component, 'attributes': {'module': copy.deepcopy(TEMPLATE['attributes']['module'])}, 'settings': {'content': 'auto', 'design': 'auto', 'advanced': 'auto', 'groups': {'contentFields': {'panel': 'content', 'priority': 10, 'groupName': 'contentFields', 'multiElements': True, 'component': {'name': 'divi/composite', 'props': {'groupLabel': 'Inhalt', 'preset': 'content'}}}}}, 'customCssFields': {}}
@@ -61,4 +68,7 @@ def build():
 
 
 if __name__ == '__main__':
-    build()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--components', nargs='+', help='Only rebuild these component names; retain other metadata')
+    args = parser.parse_args()
+    build(args.components)

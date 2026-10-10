@@ -1,0 +1,16 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "bioco/navigation-shell",
+  "title": "Kopfzeile",
+  "category": "bioco",
+  "icon": "menu",
+  "acf": {
+    "mode": "auto",
+    "renderTemplate": "render.php"
+  },
+  "supports": {
+    "anchor": true,
+    "customClassName": true
+  }
+}

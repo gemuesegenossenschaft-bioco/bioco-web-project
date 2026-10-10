@@ -8,6 +8,8 @@ ROOT = Path(__file__).parents[1]
 DYNAMIC_SECTIONS = "wordpress/web/app/mu-plugins/bioco-core/includes/dynamic-sections.php"
 
 COMPONENTS = {
+    "navigation_shell": "bioco/navigation-shell",
+    "footer_shell": "bioco/footer-shell",
     "contact_form": "bioco/contact-form",
     "membership_form": "bioco/membership-form",
     "subscribe_form": "bioco/subscribe-form",
@@ -91,6 +93,8 @@ def _render_preamble() -> str:
         "function get_the_ID() { return 77; }\n"
         "function get_the_title() { return 'Testevent'; }\n"
         "function is_singular($type) { return false; }\n"
+        "function is_page($slug) { return false; }\n"
+        "function is_post_type_archive($type) { return false; }\n"
         "function __($value, $domain = null) { return $value; }\n"
         "function sanitize_text_field($value) { return trim((string)$value); }\n"
         "function wp_unslash($value) { return $value; }\n"
@@ -104,7 +108,9 @@ def _render_preamble() -> str:
         "function add_query_arg($args, $url) { return $url . '?' . http_build_query($args); }\n"
         "function bioco_text_has_heading_html($html) { return false; }\n"
         "function bioco_kses_rich_text($html) { return (string)$html; }\n"
-        "function bioco_navigation_url($url) { return (string)$url; }\n"
+        "function plugins_url($path, $plugin) { return 'https://example.test/plugins/' . $path; }\n"
+        "function wp_kses_post($html) { return (string)$html; }\n"
+        "require 'wordpress/web/app/mu-plugins/bioco-core/includes/navigation.php';\n"
         "function bioco_render_events_list($query, $empty) { if ($empty) echo '<p>' . $empty . '</p>'; }\n"
         "function bioco_render_map_block($locations, $lat, $lng, $zoom, $heading, $route, $empty) {\n"
         "    echo '<div class=map-stub>' . $empty . '</div>';\n"

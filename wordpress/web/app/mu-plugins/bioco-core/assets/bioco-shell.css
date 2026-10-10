@@ -180,6 +180,12 @@ header:has(.bioco-navigation-shell) {
 }
 
 .bioco-menu-toggle { display: none; }
+.bioco-navigation-shell a:focus-visible,
+.bioco-menu-toggle:focus-visible,
+.bioco-site-footer a:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 4px;
+}
 .bioco-primary-nav li.bioco-mobile-utility { display: none; }
 
 main.wp-block-group {
@@ -289,4 +295,84 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
 @media (max-width: 560px) {
   .bioco-site-footer-inner { grid-template-columns: 1fr; }
   .bioco-site-footer { padding-bottom: 148px; }
+}
+
+/* Native shell fields override geometry inside their own template instance. */
+.cms-navigation-shell.bioco-site-header.bioco-editable-header {
+  background: var(--bioco-header-background-color, var(--wp--preset--color--bioco-bg));
+  color: var(--bioco-header-text-color, var(--wp--preset--color--bioco-text));
+}
+.bioco-editable-header .bioco-page-shell {
+  width: min(calc(100% - 2 * var(--bioco-header-inline-padding, var(--bioco-frame-inline))), var(--bioco-header-container-width, var(--bioco-frame-max)));
+}
+.bioco-editable-header .bioco-primary-nav { padding-block: var(--bioco-header-padding-vertical, 16px); }
+.bioco-editable-header .bioco-primary-nav .bioco-logo { width: var(--bioco-header-logo-width, 112px); flex-shrink: 0; }
+.bioco-editable-header .bioco-primary-nav ul { flex-wrap: wrap; justify-content: flex-end; min-width: 0; }
+.bioco-editable-header .bioco-primary-nav ul,
+.bioco-editable-header .bioco-utility-nav ul { gap: var(--bioco-header-gap, clamp(12px, 2vw, 32px)); }
+.bioco-editable-header .bioco-primary-nav li a:not(.bioco-primary-cta) {
+  font-size: var(--bioco-header-font-size, 16px);
+  color: var(--bioco-header-link-color, var(--bioco-header-text-color, var(--wp--preset--color--bioco-text)));
+}
+.bioco-editable-header .bioco-utility-nav a {
+  font-size: calc(var(--bioco-header-font-size, 16px) * .875);
+  color: var(--bioco-header-link-color, var(--bioco-header-text-color, var(--wp--preset--color--bioco-text)));
+}
+.bioco-editable-header .bioco-primary-nav li a:hover { color: var(--wp--preset--color--bioco-green); }
+.bioco-editable-header .bioco-primary-nav li a[aria-current='page']:not(.bioco-primary-cta) { color: var(--wp--preset--color--bioco-green-dark); }
+.bioco-editable-footer {
+  background: var(--bioco-footer-background-color, var(--wp--preset--color--bioco-bg));
+  color: var(--bioco-footer-text-color, var(--wp--preset--color--bioco-text));
+  font-size: var(--bioco-footer-font-size, 16px);
+  padding-top: var(--bioco-footer-padding-vertical, 48px);
+  padding-bottom: var(--bioco-footer-padding-vertical, 20px);
+  padding-inline: var(--bioco-footer-inline-padding, var(--bioco-frame-inline));
+}
+.bioco-editable-footer .bioco-site-footer-inner,
+.bioco-editable-footer .bioco-site-footer-partners { width: min(100%, var(--bioco-footer-container-width, 1227.2px)); }
+.bioco-editable-footer .bioco-site-footer-inner {
+  grid-template-columns: repeat(var(--bioco-footer-columns-desktop, 3), minmax(0, 1fr));
+  gap: var(--bioco-footer-gap, clamp(32px, 7vw, 112px));
+}
+.bioco-editable-footer .bioco-site-footer-column { min-width: 0; overflow-wrap: anywhere; }
+.bioco-editable-footer .bioco-site-footer-column:not(:first-child) ul { display: flex; flex-direction: column; gap: var(--bioco-footer-link-gap, 0px); line-height: inherit; }
+.bioco-editable-footer .bioco-site-footer-column:not(:first-child) ul:not(:empty) { margin-bottom: 8px; }
+.bioco-editable-footer a { color: var(--bioco-footer-link-color, inherit); }
+.bioco-editable-footer .bioco-site-footer-partner-links { list-style: none; padding: 0 0 1em; margin-bottom: 8px; line-height: inherit; }
+@media (min-width: 901px) {
+  /* Preserve the homepage's default geometry while letting saved fields own it. */
+  .home .bioco-site-header.bioco-editable-header { height: auto; min-height: 120px; }
+  .home .bioco-site-header.bioco-editable-header .bioco-page-shell {
+    width: min(calc(100% - 2 * var(--bioco-header-inline-padding, 106.4px)), var(--bioco-header-container-width, 1227.2px));
+    height: auto;
+  }
+  .home .bioco-editable-header .bioco-primary-nav {
+    position: static;
+    height: auto;
+    padding-block: var(--bioco-header-padding-vertical, 4px);
+    background: var(--bioco-header-background-color, var(--wp--preset--color--bioco-bg));
+  }
+  .home .bioco-editable-header .bioco-primary-nav .bioco-logo { width: var(--bioco-header-logo-width, 112px); }
+}
+@media (max-width: 900px) {
+  .bioco-editable-header .bioco-page-shell { width: 100%; }
+  .bioco-editable-header .bioco-primary-nav {
+    padding-block: var(--bioco-header-padding-vertical, 12px);
+    padding-inline: var(--bioco-header-padding-mobile, 20px);
+    background: var(--bioco-header-background-color, var(--wp--preset--color--bioco-bg));
+  }
+  .bioco-editable-header .bioco-primary-nav .bioco-logo { width: var(--bioco-header-logo-width-mobile, 100px); }
+  .bioco-editable-header .bioco-primary-nav li a:not(.bioco-primary-cta) { font-size: var(--bioco-header-font-size-mobile, var(--bioco-header-font-size, 16px)); }
+  .bioco-editable-header .bioco-menu-toggle { width: var(--bioco-header-toggle-size, 44px); height: var(--bioco-header-toggle-size, 44px); }
+  .bioco-editable-header .bioco-menu-toggle span { width: var(--bioco-header-toggle-line-width, 24px); background: var(--bioco-header-toggle-color, var(--bioco-header-text-color, var(--wp--preset--color--bioco-text))); }
+  .bioco-editable-header .bioco-primary-nav.is-open ul {
+    gap: 0;
+    background: var(--bioco-header-background-color, var(--wp--preset--color--bioco-bg));
+  }
+  .bioco-editable-footer { padding-inline: var(--bioco-footer-padding-mobile, 20px); }
+  .bioco-editable-footer .bioco-site-footer-inner { grid-template-columns: repeat(var(--bioco-footer-columns-mobile, 2), minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .bioco-editable-footer { padding-bottom: max(148px, var(--bioco-footer-padding-vertical, 148px)); }
+  .bioco-editable-footer .bioco-site-footer-inner { grid-template-columns: repeat(var(--bioco-footer-columns-mobile, 1), minmax(0, 1fr)); }
 }
