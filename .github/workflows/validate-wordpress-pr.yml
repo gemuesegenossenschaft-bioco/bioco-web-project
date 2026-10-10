@@ -1,0 +1,155 @@
+name: Verify WordPress PR
+
+# No path filter: required checks must report on every PR into wordpress.
+on:
+  pull_request:
+    branches: [wordpress]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wordpress-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  tests:
+    name: WordPress tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BIOCO_APACHE_TESTS: "1"
+      BIOCO_BUTTON_BROWSER_TESTS: "1"
+      BIOCO_FORMS_BROWSER_TESTS: "0"
+      PYTHONDONTWRITEBYTECODE: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.2"
+          extensions: dom
+          coverage: none
+      - name: Install release test dependencies
+        run: python3 -m pip install --require-hashes -r .github/workflows/requirements-ci.txt
+      - name: Install capture browser
+        run: python3 -m playwright install --with-deps chromium
+      - name: Install Apache routing test runtime
+        run: sudo apt-get update && sudo apt-get install -y apache2
+      - name: Run full suite
+        run: |
+          mkdir -p output/pr-gates
+          python3 -m pytest tests -q --junitxml=output/pr-gates/pytest.xml 2>&1 | tee output/pr-gates/pytest.log
+      - name: Run isolated form browsers
+        if: ${{ !cancelled() }}
+        env:
+          BIOCO_FORMS_BROWSER_TESTS: "1"
+        # These three proofs need a separately provisioned WordPress/Divi runtime.
+        # Every remaining form test uses intercepted browser traffic and PHP fixtures.
+        run: |
+          mkdir -p output/pr-gates
+          python3 -m pytest tests/test_wordpress_forms_lifecycle.py -q \
+            --deselect=tests/test_wordpress_forms_lifecycle.py::test_wordpress_runtime_emits_runtime_before_adapters_without_blocking_turnstile \
+            --deselect=tests/test_wordpress_forms_lifecycle.py::test_wordpress_real_page_mounts_runtime_and_adapters \
+            --deselect=tests/test_wordpress_forms_lifecycle.py::test_wordpress_hung_turnstile_blocks_native_get_and_api_submit \
+            --junitxml=output/pr-gates/forms.xml 2>&1 | tee output/pr-gates/forms.log
+      - name: Reject skipped required coverage
+        if: ${{ !cancelled() }}
+        run: |
+          python3 .github/workflows/check-required-tests.py \
+            output/pr-gates/pytest.xml output/pr-gates/forms.xml 2>&1 | tee output/pr-gates/required-tests.log
+      - name: Upload test failure evidence
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wordpress-tests-${{ github.event.pull_request.head.sha }}
+          path: output/
+          retention-days: 14
+          if-no-files-found: warn
+
+  lint:
+    name: WordPress PHP and shell lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.2"
+          coverage: none
+      - name: Lint owned PHP
+        run: |
+          mkdir -p output/pr-gates
+          {
+            for source_dir in wordpress/web/app/mu-plugins wordpress/web/app/themes/bioco-divi; do
+              test -d "$source_dir"
+              while IFS= read -r -d '' php_file; do
+                php -l "$php_file"
+              done < <(find "$source_dir" -type f -name '*.php' -print0)
+            done
+          } 2>&1 | tee output/pr-gates/php-lint.log
+      - name: Lint shell scripts
+        if: ${{ !cancelled() }}
+        run: |
+          mkdir -p output/pr-gates
+          {
+            while IFS= read -r -d '' script; do
+              echo "bash -n $script"
+              bash -n "$script"
+            done < <(find scripts wordpress tests -type f -name '*.sh' -print0)
+          } 2>&1 | tee output/pr-gates/shell-lint.log
+      - name: Upload lint failure evidence
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wordpress-lint-${{ github.event.pull_request.head.sha }}
+          path: output/pr-gates/
+          retention-days: 14
+          if-no-files-found: warn
+
+  conformance:
+    name: WordPress generation and conformance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.12"
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: "8.2"
+          coverage: none
+      - name: Check generation and content contracts
+        run: |
+          mkdir -p output/pr-gates
+          {
+            python3 wordpress/scripts/build-divi-design-system.py --check
+            python3 wordpress/scripts/check-divi-design-system.py
+            php wordpress/scripts/check-hardcoded-content.php
+            php wordpress/scripts/check-seed-plan.php
+            diff -ru wordpress/content-seed cms/content-seed
+          } 2>&1 | tee output/pr-gates/conformance.log
+      - name: Upload conformance failure evidence
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: wordpress-conformance-${{ github.event.pull_request.head.sha }}
+          path: output/pr-gates/
+          retention-days: 14
+          if-no-files-found: warn

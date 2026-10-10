@@ -1,10 +1,7 @@
 name: Claude
 
-# Interactive Claude for this repo: mention @claude in an issue or PR
-# comment (or assign an issue to claude) and it works the task in CI with
-# repo-scoped credentials — independent of any local session's GitHub App
-# permissions. Requires the ANTHROPIC_API_KEY repository secret
-# (Settings -> Secrets and variables -> Actions).
+# A writer can request @claude or assign the designated claude[bot] account.
+# Authorization runs with a read-only token before any agent secret is exposed.
 on:
   issue_comment:
     types: [created, edited]
@@ -16,31 +13,72 @@ on:
     types: [submitted]
 
 permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-  actions: read
+  contents: read
 
 concurrency:
   group: claude-${{ github.event.issue.number || github.event.pull_request.number || github.run_id }}
   cancel-in-progress: false
 
 jobs:
+  authorize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      authorized: ${{ steps.request.outputs.authorized }}
+    steps:
+      - name: Authorize an explicit writer request
+        id: request
+        uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
+        with:
+          script: |
+            core.setOutput('authorized', 'false');
+            const event = context.payload;
+            const sender = event.sender;
+            if (!sender || sender.type !== 'User') return;
+            const assignment = context.eventName === 'issues' && event.action === 'assigned';
+            if (assignment) {
+              if (event.assignee?.login !== 'claude[bot]') return;
+            } else {
+              let request;
+              if (['issue_comment', 'pull_request_review_comment'].includes(context.eventName)
+                  && ['created', 'edited'].includes(event.action)) request = event.comment;
+              if (context.eventName === 'pull_request_review' && event.action === 'submitted') request = event.review;
+              if (context.eventName === 'issues' && event.action === 'opened') request = event.issue;
+              if (!request || !['OWNER', 'MEMBER', 'COLLABORATOR'].includes(request.author_association)) return;
+              if (request.user?.type !== 'User') return;
+              if (!/(^|\s)@claude(?=$|[\s,:;!?])/i.test(request.body || '')) return;
+              // A membership association alone does not establish repository write access.
+              if (request.user.login !== sender.login) return;
+            }
+            try {
+              const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+                ...context.repo, username: sender.login,
+              });
+              if (['write', 'maintain', 'admin'].includes(data.permission)) {
+                core.setOutput('authorized', 'true');
+              }
+            } catch (error) {
+              core.info('Could not establish repository write permission; request denied.');
+            }
+
   claude:
-    # Only run when @claude is actually addressed (or an issue is assigned).
-    if: >-
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || github.event.action == 'assigned'))
+    needs: authorize
+    if: needs.authorize.outputs.authorized == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Run Claude Code
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@1d6de8cb0c237e7c15e9e1bdf973826ebae490cc # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          assignee_trigger: 'claude[bot]'
