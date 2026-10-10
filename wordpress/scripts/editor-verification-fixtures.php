@@ -18,7 +18,7 @@ $ignored_meta = ['_edit_lock', '_edit_last'];
 // Keep the full metadata hashes too. These fields are recomputed on page visits,
 // so distinguish their changes from editorial drift without hiding the evidence.
 $derived_meta = ['_divi_dynamic_assets_cached_modules', '_divi_dynamic_assets_canvases_used',
-    '_divi_dynamic_assets_cached_feature_used'];
+    '_divi_dynamic_assets_cached_feature_used', '_et_builder_post_features_cache'];
 
 if (in_array($action, ['check', 'create'], true)) {
     if (!function_exists('bioco_editor_verification_layouts')

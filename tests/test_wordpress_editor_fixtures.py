@@ -157,13 +157,14 @@ def test_inventory_detects_editorial_metadata_but_ignores_edit_locks():
     assert baseline != changed
 
 
-def test_inventory_keeps_cache_evidence_separate_from_editorial_changes():
+@pytest.mark.parametrize('cache_key', ['_divi_dynamic_assets_canvases_used', '_et_builder_post_features_cache'])
+def test_inventory_keeps_cache_evidence_separate_from_editorial_changes(cache_key):
     baseline = run(['inventory'], meta={'5': {'_et_pb_use_builder': ['on']}})['result'][0]
     cached = run(['inventory'], meta={'5': {'_et_pb_use_builder': ['on'],
-        '_divi_dynamic_assets_canvases_used': ['compiled']}})['result'][0]
+        cache_key: ['compiled']}})['result'][0]
     changed = run(['inventory'], meta={'5': {'_et_pb_use_builder': ['on'],
         '_divi_off_canvas_data': ['edited canvas']}})['result'][0]
     assert baseline['editorial_hash'] == cached['editorial_hash']
     assert baseline['hash'] != cached['hash']
-    assert '_divi_dynamic_assets_canvases_used' in cached['meta_hashes']
+    assert cache_key in cached['meta_hashes']
     assert baseline['editorial_hash'] != changed['editorial_hash']
