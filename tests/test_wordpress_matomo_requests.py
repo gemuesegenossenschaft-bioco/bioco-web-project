@@ -1,5 +1,7 @@
 """Isolated HTTP requests from the real consent/adapter to a tracker transport double.
 
+Keep/Replace/Remove map: tests/README.md.
+
 Every browser request is fulfilled locally. No production host or Matomo service
 is contacted. The double consumes Matomo's command API and uses browser fetch so
 URL fields and the actual HTTP Referer header are both observable.

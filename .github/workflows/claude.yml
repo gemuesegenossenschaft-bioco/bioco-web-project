@@ -46,7 +46,9 @@ jobs:
               if (context.eventName === 'issues' && event.action === 'opened') request = event.issue;
               if (!request || !['OWNER', 'MEMBER', 'COLLABORATOR'].includes(request.author_association)) return;
               if (request.user?.type !== 'User') return;
-              if (!/(^|\s)@claude(?=$|[\s,:;!?])/i.test(request.body || '')) return;
+              const text = context.eventName === 'issues' && event.action === 'opened'
+                ? (request.title || '') + '\n' + (request.body || '') : (request.body || '');
+              if (!/(^|\s)@claude(?=$|[\s.,:;!?])/i.test(text)) return;
               // A membership association alone does not establish repository write access.
               if (request.user.login !== sender.login) return;
             }

@@ -177,13 +177,25 @@ def test_required_report_cannot_hide_a_failure_with_a_later_pass(tmp_path):
     assert result.returncode != 0
 
 
-def test_required_reports_fail_if_junit_is_absent_or_malformed(tmp_path):
-    for contents in (None, "<broken"):
-        report = tmp_path / "missing.xml"
-        if contents:
-            report.write_text(contents)
-        result = subprocess.run([sys.executable, str(WORKFLOWS / "check-required-tests.py"), str(report)], capture_output=True)
-        assert result.returncode != 0
+@pytest.mark.parametrize("contents", [None, "<broken"])
+def test_required_reports_fail_if_junit_is_absent_or_malformed(tmp_path, contents):
+    policy = tmp_path / "policy.json"
+    policy.write_text(json.dumps({
+        "required_modules": ["tests/test_example.py"],
+        "operator_only_nodes": [],
+    }))
+    valid = tmp_path / "valid.xml"
+    write_report(valid, [("test_example", "test_ok", "passed")])
+    args = [sys.executable, str(WORKFLOWS / "check-required-tests.py"),
+            "--policy", str(policy), str(valid)]
+    green = subprocess.run(args, capture_output=True, text=True)
+    assert green.returncode == 0, green.stdout + green.stderr
+    report = tmp_path / "missing.xml"
+    if contents is not None:
+        report.write_text(contents)
+    result = subprocess.run(args + [str(report)], capture_output=True, text=True)
+    assert result.returncode != 0
+    assert f"missing or malformed report {report}:" in result.stdout + result.stderr
 
 
 def test_report_gate_consumes_real_pytest_pass_and_entire_module_skip(tmp_path):
@@ -264,6 +276,23 @@ def test_explicit_writer_requests_authorize_claude(event, kind, action):
     assert authorize(event, payload(kind, action=action))
     assert authorize(event, payload(kind, action=action), "admin")
     assert authorize(event, payload(kind, action=action), "maintain")
+
+
+@pytest.mark.parametrize("body", ["@claude.", "@CLAUDE. Fix this", "@claude, fix",
+                                  "@claude: fix", "@claude; fix", "@claude!", "@claude?"])
+def test_claude_mentions_accept_trailing_punctuation(body):
+    assert authorize("issue_comment", payload(body=body))
+
+
+@pytest.mark.parametrize("title,body", [
+    ("@claude. Fix this", "No mention here"), ("@claude fix this", None),
+    ("Ordinary title", "@claude. Fix this"),
+])
+def test_opened_issues_authorize_mentions_in_title_or_body(title, body):
+    event = payload("issue", body=body, action="opened")
+    event["issue"]["title"] = title
+    assert authorize("issues", event)
+    assert not authorize("issues", event, "triage")
 
 
 @pytest.mark.parametrize("association,permission,body", [

@@ -1,5 +1,7 @@
 """Timeline composition through PHP; local Divi-style layout in Chromium.
 
+Keep/Replace/Remove map: tests/README.md.
+
 The browser adapter covers the native attributes used by this section. It is
 not a WordPress/Visual Builder installation; unpublished-copy parity is separate.
 """

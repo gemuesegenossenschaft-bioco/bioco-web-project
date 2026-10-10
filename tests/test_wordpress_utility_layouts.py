@@ -1,5 +1,7 @@
 """Issue #212: PHP execution with WordPress's real block parser.
 
+Keep/Replace/Remove map: tests/README.md.
+
 The content-filter harness renders native attributes and shortcodes, not licensed
 Divi CSS. Visual Builder persistence/appearance still needs unpublished-copy QA.
 """

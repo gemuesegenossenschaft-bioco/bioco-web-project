@@ -176,6 +176,8 @@ def test_invalid_referrer_is_explicitly_empty(referrer):
      'https://bioco.ch/abos/?utm_medium=email'),
     ('https://bioco.ch/person%40example.test/?token=synthetic', 'https://bioco.ch/'),
     ('https://bioco.ch/person%2540example.test/', 'https://bioco.ch/'),
+    ('https://bioco.ch/abos/%E0%A4%A', 'https://bioco.ch/'),
+    ('https://bioco.ch/%C3%BCber-uns', 'https://bioco.ch/%C3%BCber-uns/'),
     ('https://bioco.ch/?utm_campaign=' + 'a' * 81, 'https://bioco.ch/'),
     ('https://bioco.ch/?utm_medium=public%20label', 'https://bioco.ch/'),
 ])

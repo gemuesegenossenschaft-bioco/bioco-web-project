@@ -22,8 +22,11 @@
     try {
       var url = new URL(value);
       if (url.protocol !== 'https:' && url.protocol !== 'http:') return '';
-      // Email-bearing or nested percent-encoded paths cannot identify a public page safely.
-      if (/[@%]/.test(decodeURIComponent(url.pathname))) return url.origin + '/';
+      // Email-bearing, nested or malformed percent-encoded paths cannot identify
+      // a public page safely. Valid UTF-8 slugs such as umlauts stay intact.
+      var path;
+      try { path = decodeURIComponent(url.pathname); } catch (error) { return url.origin + '/'; }
+      if (/[@%]/.test(path)) return url.origin + '/';
       var kept = [];
       campaigns.concat(['abo', 'shares', 'additional']).sort().forEach(function (key) {
         var values = url.searchParams.getAll(key);

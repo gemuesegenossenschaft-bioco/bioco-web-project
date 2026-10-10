@@ -221,6 +221,10 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 | `test_wordpress_editor_routing_http.py` | new (#199) | Runs the generated routing under real Apache with a symlinked private WordPress fixture. Proves all 32 editor libraries are served, stale root assets lose, private/vendor files remain denied, and the original routing fails. Exercises the shared HTTP probe against real HTTP responses. Release preflight requires Apache; CI installs it. |
 | `test_wordpress_cms_archive.py` | Keep, new | Real CLI helper archives complete JSON, preserves current content/SEO, fills empty fields, validates before writing, previews without writes, and repeats safely. WP metadata is controlled. |
 | `test_wordpress_matomo.py` | Keep, new | Real PHP enqueue/config gating and real native JS command order, cookie disabling, async loading, and inline escaping. No tracker network requests. |
+| `test_wordpress_matomo_requests.py` | Keep, new | Real Chromium executes consent and Matomo scripts against local transport doubles: sanitized URL fields and HTTP Referer, same-origin and cross-origin trackers, one pageview after withdrawal/regrant. No live tracker requests. |
+| `test_wordpress_timeline.py` | Keep, new | Real PHP timeline composition and Chromium layout: seed content, native responsive controls, presets, editor changes, legacy compatibility, overflow and keyboard focus. Divi editor persistence requires separate QA. |
+| `test_wordpress_utility_layouts.py` | Keep, new | Real PHP utility layout import and rendering with the WordPress block parser: preview/apply/repeat, editor preservation, authorization, conflict/rollback handling, search/404 status and SEO. WP storage and queries are controlled. |
+| `test_wordpress_pr_gates.py` | Keep, new | PR workflow contracts, executed Claude authorization and JUnit coverage gates: explicit writer requests, permission failures, missing/malformed reports and required tests skipped or failed. GitHub permission responses are controlled. |
 
 ## Shared catalogs
 
