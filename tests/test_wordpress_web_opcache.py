@@ -27,6 +27,7 @@ def test_probe_invalidates_only_owned_staging_code_and_deletes_itself(tmp_path):
     probe.write_text(PROBE.read_text())
     content = tmp_path / 'wp-content'
     content.mkdir()
+    (tmp_path / 'wp-load.php').write_text('<?php // WordPress bootstrap boundary.\n')
     own = str(content / 'mu-plugins/bioco-core/bioco-core.php')
     unrelated = [str(content / 'plugins/vendor/plugin.php'), str(tmp_path / 'wp-includes/user.php'), str(tmp_path / 'production/wp-content/mu-plugins/bioco-core/bioco-core.php')]
     for path in [own] + unrelated:
@@ -43,7 +44,7 @@ def test_probe_invalidates_only_owned_staging_code_and_deletes_itself(tmp_path):
         extensions = ['-d', 'zend_extension=opcache']
     run = subprocess.run(['php', '-n', *extensions, '-d', 'opcache.enable_cli=1', '-d', 'opcache.file_update_protection=0', '-r', code], capture_output=True, text=True)
     assert run.returncode == 0, run.stdout + run.stderr
-    assert json.loads(run.stdout) == {'ok': True, 'invalidated': 1}
+    assert json.loads(run.stdout) == {'ok': True, 'invalidated': 1, 'security_hook': False}
     assert json.loads(run.stderr) == [False, True, True, True]
     assert not probe.exists()
 
@@ -57,6 +58,7 @@ def test_helper_cleans_temporary_file_after_success_or_http_failure(tmp_path, ht
     ssh.chmod(0o755)
     curl = tmp_path / 'curl'
     curl.write_text('#!/usr/bin/env bash\nset -euo pipefail\n'
+                    'if [[ "${@: -1}" == */wp-json/wp/v2/users ]]; then printf 401; exit 0; fi\n'
                     'probe=("$BIOCO_TEST_WP_ROOT"/bioco-opcache-*.php)\n'
                     'php -l "${probe[0]}" >/dev/null\n'
                     'result="$(php -r \'register_shutdown_function(function(){echo json_encode(["status"=>http_response_code()]);}); include $argv[1];\' "${probe[0]}")"\n'

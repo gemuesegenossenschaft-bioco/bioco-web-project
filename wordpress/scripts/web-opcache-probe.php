@@ -10,6 +10,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'
 header('Content-Type: application/json');
 header('Cache-Control: no-store');
 if (!unlink(__FILE__)) { http_response_code(500); exit; }
+// The host can initialize the application's OPcache only after WordPress has
+// bootstrapped. Inspect that cache, rather than an empty standalone-PHP cache.
+require __DIR__ . '/wp-load.php';
 $count = 0;
 if (function_exists('opcache_get_status')) {
     $status = opcache_get_status(true);
@@ -33,4 +36,5 @@ if (function_exists('opcache_get_status')) {
         }
     }
 }
-echo json_encode(['ok' => true, 'invalidated' => $count]);
+echo json_encode(['ok' => true, 'invalidated' => $count,
+    'security_hook' => function_exists('bioco_security_private_users')]);

@@ -28,6 +28,12 @@ trap 'exit 1' HUP INT TERM
 } | "${ssh_bin}" "${ssh_args[@]}" "set -eu; umask 077; cat > '${probe_path}'"
 "${curl_bin}" -fsS --max-time 30 --request POST \
   -H "X-Bioco-Opcache-Token: ${token}" "${site_url%/}/bioco-opcache-${nonce}.php" \
-  | php -r '$v=json_decode(stream_get_contents(STDIN),true); if(!is_array($v)||($v["ok"]??false)!==true||!is_int($v["invalidated"]??null))exit(1); echo "web-opcache invalidated=".$v["invalidated"].PHP_EOL;'
+  | php -r '$v=json_decode(stream_get_contents(STDIN),true); if(!is_array($v)||($v["ok"]??false)!==true||!is_int($v["invalidated"]??null))exit(1); echo "web-opcache invalidated=".$v["invalidated"]." security-hook=".(int)($v["security_hook"]??false).PHP_EOL;'
 cleanup
 trap - EXIT
+status="$("${curl_bin}" -sS --max-time 30 -o /dev/null -w '%{http_code}' "${site_url%/}/wp-json/wp/v2/users")"
+if [[ "${status}" != 401 ]]; then
+  echo "ERROR: anonymous users endpoint returned ${status}, expected 401." >&2
+  exit 1
+fi
+echo 'web-security anonymous-users=401'
