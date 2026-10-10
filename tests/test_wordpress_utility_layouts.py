@@ -262,7 +262,10 @@ def test_theme_bootstrap_registers_command_and_retains_custom_theme_builder_body
     $posts[100] = $default;
     $export = json_decode(file_get_contents('wordpress/design-system/exports/theme-builder.json'), true);
     $default->post_content = $export['layouts']['301']['data']['301'];
-    $layouts = ['body'=>['id'=>100,'enabled'=>true], 'header'=>['id'=>90,'enabled'=>true]];
+    // Divi keys layouts by post type (theme-builder.php, et_theme_builder_get_template_layouts).
+    $layouts = ['et_template'=>false, 'et_header_layout'=>['id'=>90,'enabled'=>true,'override'=>true],
+        'et_body_layout'=>['id'=>100,'enabled'=>true,'override'=>true],
+        'et_footer_layout'=>['id'=>110,'enabled'=>true,'override'=>true]];
     $fallback = apply_filters('et_theme_builder_template_layouts', $layouts);
     $default->post_content .= '<p>Editor body</p>';
     $custom = apply_filters('et_theme_builder_template_layouts', $layouts);

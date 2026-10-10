@@ -104,7 +104,9 @@ function bioco_utility_is_passthrough(array $blocks): bool {
 
 add_filter('et_theme_builder_template_layouts', function ($layouts) {
     if (!is_search() && !is_404()) return $layouts;
-    $body = $layouts['body'] ?? [];
+    // Divi keys template layouts by post type, not by area name.
+    $key = defined('ET_THEME_BUILDER_BODY_LAYOUT_POST_TYPE') ? ET_THEME_BUILDER_BODY_LAYOUT_POST_TYPE : 'et_body_layout';
+    $body = $layouts[$key] ?? [];
     if (empty($body['id']) || empty($body['enabled'])) return $layouts;
     $post = get_post($body['id']);
     // Default Post Content has no queried post for search/404. Use the child
