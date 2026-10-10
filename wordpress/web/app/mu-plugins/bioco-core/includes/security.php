@@ -2,7 +2,9 @@
 /** Narrow public endpoint and login protection. Editor REST access stays intact. */
 if (!defined('ABSPATH')) exit;
 
-add_filter('rest_pre_dispatch', 'bioco_security_private_users', 10, 3);
+// Enforce the boundary after plugins that provide cached REST responses.
+add_filter('rest_pre_dispatch', 'bioco_security_private_users', PHP_INT_MAX, 3);
+add_filter('rest_request_before_callbacks', 'bioco_security_private_users', PHP_INT_MAX, 3);
 function bioco_security_private_users($result, $server, $request) {
     if (!is_user_logged_in() && preg_match('#^/wp/v2/users(?:/|$)#', $request->get_route())) {
         return new WP_Error('bioco_private_users', 'Anmeldung erforderlich.', ['status' => 401]);

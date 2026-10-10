@@ -8,7 +8,7 @@ PREAMBLE = r'''
 define('ABSPATH','/');define('MINUTE_IN_SECONDS',60);
 $GLOBALS['hooks']=[];$GLOBALS['store']=[];
 class WP_Error {public function __construct(public $code,public $message,public $data=[]) {}}
-function add_filter($key,$callback,...$args) {$GLOBALS['hooks'][$key]=$callback;}
+function add_filter($key,$callback,$priority=10,...$args) {$GLOBALS['hooks'][$key]=$callback;$GLOBALS['filters'][$key][]=[$priority,$callback];}
 function add_action($key,$callback,...$args) {$GLOBALS['hooks'][$key]=$callback;}
 function is_user_logged_in() {return $GLOBALS['logged_in']??false;}
 function wp_salt($scheme) {return 'test-only';}
@@ -67,3 +67,14 @@ def test_tenth_failure_starts_the_full_lockout_without_extending_it():
     ''')
     assert 899 <= result[0] <= 900
     assert result[1] is True
+
+
+def test_anonymous_user_guard_survives_a_later_cached_response_filter():
+    result = php(r'''
+    add_filter('rest_pre_dispatch',function($response){return 'cached-users';},20,3);
+    $request=new class{public function get_route(){return '/wp/v2/users';}};
+    $filters=$GLOBALS['filters']['rest_pre_dispatch'];usort($filters,fn($a,$b)=>$a[0]<=>$b[0]);
+    $response=null;foreach($filters as $filter){$response=$filter[1]($response,null,$request);}
+    echo json_encode($response instanceof WP_Error?$response->data['status']:$response);
+    ''')
+    assert result == 401
