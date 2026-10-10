@@ -7,7 +7,17 @@
   function update() {
     var consent = window.BiocoConsent && window.BiocoConsent.has('analytics');
     if (!consent) {
-      if (loaded && allowed) window._paq.push(['forgetConsentGiven']);
+      if (loaded && allowed) {
+        // Matomo replaces this array with a proxy after initialization. Until
+        // then, remove pending grants/page views before the tracker can drain it.
+        if (Array.isArray(window._paq)) {
+          for (var i = window._paq.length - 1; i >= 0; i--) {
+            var command = window._paq[i];
+            if (Array.isArray(command) && (command[0] === 'setConsentGiven' || command[0] === 'trackPageView')) window._paq.splice(i, 1);
+          }
+        }
+        window._paq.push(['forgetConsentGiven']);
+      }
       allowed = false; return;
     }
     if (allowed) return;

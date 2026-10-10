@@ -1,4 +1,4 @@
-"""Narrow REST denial and login limiting at real hook callbacks."""
+"""Narrow REST denial and login limiting. Coverage map: tests/README.md."""
 import json
 import subprocess
 from pathlib import Path
@@ -40,15 +40,30 @@ def test_only_anonymous_user_rest_routes_are_restricted():
     assert results == [401, 401, 401, 'unchanged', 'unchanged'] + ['unchanged'] * 5
 
 
-def test_login_limit_is_peer_scoped_and_success_clears_it():
+def test_login_limit_is_peer_scoped_and_gates_password_hashing():
     result = php(r'''
     $_SERVER['REMOTE_ADDR']='192.0.2.1';$_SERVER['HTTP_X_FORWARDED_FOR']='attacker-controlled';
     for($i=0;$i<10;$i++)$GLOBALS['hooks']['wp_login_failed']();
     $limited=bioco_security_limit_login('user','name','password');
     $_SERVER['HTTP_X_FORWARDED_FOR']='changed';$same=bioco_security_limit_login('user','name','password');
     $_SERVER['REMOTE_ADDR']='192.0.2.2';$other=bioco_security_limit_login('user','name','password');
-    $_SERVER['REMOTE_ADDR']='192.0.2.1';$GLOBALS['hooks']['wp_login']();
-    echo json_encode([$limited->code,$same->code,$other,bioco_security_limit_login('user','name','password'),$GLOBALS['ttl']]);
+    $_SERVER['REMOTE_ADDR']='192.0.2.1';
+    $early=$GLOBALS['hooks']['wp_authenticate_user']('user','password');
+    echo json_encode([$limited->code,$same->code,$other,$early->code,$GLOBALS['ttl'],isset($GLOBALS['hooks']['wp_login'])]);
     ''')
-    assert result[:4] == ['bioco_login_limited', 'bioco_login_limited', 'user', 'user']
+    assert result[:4] == ['bioco_login_limited', 'bioco_login_limited', 'user', 'bioco_login_limited']
     assert 1 <= result[4] <= 900
+    assert result[5] is False
+
+
+def test_tenth_failure_starts_the_full_lockout_without_extending_it():
+    result = php(r'''
+    $_SERVER['REMOTE_ADDR']='192.0.2.1';
+    $key=bioco_security_login_key();
+    $GLOBALS['store'][$key]=['count'=>9,'until'=>time()+60];
+    $GLOBALS['hooks']['wp_login_failed']();$until=$GLOBALS['store'][$key]['until'];$ttl=$GLOBALS['ttl'];
+    $GLOBALS['hooks']['wp_login_failed']();
+    echo json_encode([$ttl,$GLOBALS['store'][$key]['until']===$until]);
+    ''')
+    assert 899 <= result[0] <= 900
+    assert result[1] is True

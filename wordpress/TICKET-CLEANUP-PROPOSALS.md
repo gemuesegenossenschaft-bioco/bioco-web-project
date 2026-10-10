@@ -142,21 +142,29 @@ contacts, pickup-time decision or approved content/SEO decisions.
 | #176 | Approved PDFs and the 15:00/16:00 decision remain missing. No substitute documents or pickup-time changes invented. |
 | #177 | Approved BG, ELKI and Kräutergruppe contact methods remain missing. No personal contacts invented. |
 
-#216 is an open, unmerged PR at `960a491`. CodeRabbit is successful and the PR is
+PR #216 is open and unmerged at `960a491`. CodeRabbit is successful and the PR is
 mergeable. Production React still returned HTTP 404 at verification, so the
 production acceptance described in its body is incomplete. This pass does not
 merge or extend it because it implements excluded editor work.
 
-#217 is open and incomplete. On production the back button was blue
+Issue #217 is open and incomplete. On production the back button was blue
 (`rgb(46, 163, 242)`) with a 3px radius at 1280px and 390px. The desktop button
 bottom and footer top were both 983.3125px, leaving zero gap. Editable event
 template work depends on excluded #202. No event-template change is claimed.
 
 Local evidence is recorded in the PR: release preflight, captured newsletter
 transport/storage tests, real-browser consent tests, routing tests and CodeRabbit
-review. Final local preflight passed 747 tests (55 skipped), PHP lint, the
+review. Final local preflight passed 756 tests (55 skipped), PHP lint, the
 hardcoded-content gate and the 22-page/111-block seed plan. Composer audit found
 no vulnerability advisories; the existing abandoned `roots/wp-password-bcrypt`
 package still requires a separate compatibility decision.
+The first staging release passed at `10f1b9d` (run 38044168023). All nine
+consent texts were saved and reopened through WordPress admin. On the depot
+page, rejection persisted, map-only opt-in loaded tiles without analytics, and
+withdrawal removed the tiles while preserving addresses. At 390px the banner
+had no horizontal overflow and buttons exceeded 44px. Subsequent requests
+showed stale PHP behavior; the canonical release now invalidates owned staging
+web OPcache before runtime verification. Review fixes also synchronize tabs,
+cancel pending Matomo commands and strengthen the login boundary.
 Staging code release and explicit consent-text setup must be recorded
 before #154 can close. Do not close the broader tickets from source changes alone.

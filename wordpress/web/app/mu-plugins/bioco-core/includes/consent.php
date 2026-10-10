@@ -27,12 +27,14 @@ function bioco_consent_seed_texts(array $seed, bool $apply = false): array {
 
 add_action('init', function () {
     $path = dirname(__DIR__) . '/assets/bioco-consent.js';
+    if (!is_file($path)) return;
     wp_register_script('bioco-consent', plugin_dir_url(dirname(__DIR__) . '/bioco-core.php') . 'assets/bioco-consent.js', [], (string) filemtime($path), true);
 });
 add_action('wp_enqueue_scripts', function () {
     wp_enqueue_script('bioco-consent');
     wp_add_inline_script('bioco-consent', 'window.biocoConsentTexts = ' . wp_json_encode(bioco_consent_texts(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';', 'before');
-    wp_enqueue_style('bioco-consent', plugin_dir_url(dirname(__DIR__) . '/bioco-core.php') . 'assets/bioco-consent.css', [], (string) filemtime(dirname(__DIR__) . '/assets/bioco-consent.css'));
+    $css = dirname(__DIR__) . '/assets/bioco-consent.css';
+    if (is_file($css)) wp_enqueue_style('bioco-consent', plugin_dir_url(dirname(__DIR__) . '/bioco-core.php') . 'assets/bioco-consent.css', [], (string) filemtime($css));
 }, 25);
 
 add_action('admin_menu', function () {

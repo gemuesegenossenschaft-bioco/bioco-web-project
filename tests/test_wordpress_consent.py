@@ -1,4 +1,4 @@
-"""Real browser consent controls and external-resource gates; all traffic is intercepted."""
+"""Real browser consent and resource gates. Coverage map: tests/README.md."""
 import json
 from pathlib import Path
 
@@ -14,7 +14,8 @@ TEXTS = json.loads((CORE / 'content/consent-texts.json').read_text())
 def page():
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
-        page = browser.new_page(viewport={'width': 390, 'height': 844})
+        context = browser.new_context(viewport={'width': 390, 'height': 844})
+        page = context.new_page()
         page.route('https://consent.example.test/**', lambda route: route.fulfill(body='<html><head></head><body></body></html>', content_type='text/html'))
         page.route('https://matomo.example.test/**', lambda route: route.fulfill(body='', content_type='text/javascript'))
         page.goto('https://consent.example.test/')
@@ -103,3 +104,32 @@ def test_missing_editor_configuration_overrides_old_saved_consent(page):
     assert page.evaluate("window.BiocoConsent.has('analytics')") is False
     assert page.evaluate("window.BiocoConsent.has('maps')") is False
     assert page.locator('.bioco-consent-panel').count() == 0
+
+
+def test_revocation_cancels_pending_tracker_commands(page):
+    install(page)
+    page.get_by_role('button', name=TEXTS['accept'], exact=True).click()
+    assert page.evaluate("window._paq.some(row=>row[0]==='trackPageView')") is True
+    page.evaluate('window.BiocoConsent.revoke()')
+    assert page.evaluate("window._paq.some(row=>['setConsentGiven','trackPageView'].includes(row[0]))") is False
+    assert page.evaluate("window._paq.some(row=>row[0]==='requireConsent')") is True
+
+
+def test_consent_and_withdrawal_are_synchronized_across_tabs(page):
+    install(page)
+    other = page.context.new_page()
+    other.route('https://consent.example.test/**', lambda route: route.fulfill(body='<html><body></body></html>', content_type='text/html'))
+    other.route('https://matomo.example.test/**', lambda route: route.fulfill(body='', content_type='text/javascript'))
+    other.goto('https://consent.example.test/')
+    install(other)
+    page.get_by_role('button', name=TEXTS['accept'], exact=True).click()
+    other.wait_for_function("window.BiocoConsent.has('analytics') && window.BiocoConsent.has('maps')")
+    page.evaluate('window.BiocoConsent.revoke()')
+    other.wait_for_function("!window.BiocoConsent.has('analytics') && !window.BiocoConsent.has('maps')")
+    assert other.evaluate("window._paq.some(row=>row[0]==='forgetConsentGiven')") is True
+    page.get_by_role('button', name=TEXTS['settings'], exact=True).click()
+    page.get_by_role('button', name=TEXTS['accept'], exact=True).click()
+    other.wait_for_function("window.BiocoConsent.has('analytics')")
+    page.evaluate("localStorage.setItem('bioco-consent-v1','broken')")
+    other.wait_for_function("!window.BiocoConsent.has('analytics')")
+    assert other.locator('.bioco-consent-panel').is_visible()

@@ -182,6 +182,8 @@ value. Editors can fill the fields under Datenschutz-Texte. Missing configuratio
 keeps maps and analytics disabled. Consent is stored locally for 180 days. The
 visitor can reject both categories, choose either category, or withdraw consent
 through the persistent settings button. Addresses remain visible without maps.
+Changes synchronize across tabs; withdrawal removes pending Matomo grants and
+page views while the tracker is still loading.
 Matomo uses its documented [consent API](https://developer.matomo.org/guides/tracking-consent)
 to stop subsequent tracking after withdrawal.
 
@@ -203,7 +205,10 @@ unsubscribe headers before real bulk sending.
 
 The security module denies anonymous REST user enumeration while retaining
 authenticated editor routes, limits failed login attempts per connected peer,
-and disables XML-RPC authentication. Generated production routing also denies
+and removes WordPress XML-RPC methods. Successful logins do not reset the shared
+peer counter. The tenth failure starts a fixed 15-minute lockout and the
+password-check boundary rejects locked requests before hashing.
+Generated production routing also denies
 executable upload paths. Installing the code does not replace production routing
 or change database grants; verify those independently before closing #163.
 
@@ -214,3 +219,9 @@ production or use the owned-code sync script as a dependency installer. No
 dependency installation on a server is claimed by this change. The locked audit
 reported no vulnerability advisories and the pre-existing abandoned
 `roots/wp-password-bcrypt` package; resolving that warning remains part of #163.
+
+The canonical staging release now invalidates only owned staging PHP in the web
+OPcache. Its authenticated temporary probe expires after five minutes, deletes
+itself on use, and is removed over SSH on success or failure. It leaves core,
+vendor plugins, production code and editorial data untouched. A failed probe or
+cleanup fails the release rather than reporting stale code as healthy.

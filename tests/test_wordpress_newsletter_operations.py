@@ -1,4 +1,4 @@
-"""Execute newsletter handlers with captured transport and isolated WordPress storage."""
+"""Captured newsletter transport/storage. Coverage map: tests/README.md."""
 import csv
 import io
 import json

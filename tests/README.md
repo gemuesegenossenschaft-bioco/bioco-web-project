@@ -109,6 +109,9 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 
 | File | Status | Behaviour |
 | --- | --- | --- |
+| `test_wordpress_consent.py` | new (#154) | Real Chromium executes the consent and Matomo scripts with intercepted traffic: opt-in, category independence, persistence, withdrawal, map teardown, escaped editor copy and missing/expired configuration. No real tracking requests or live form submissions. |
+| `test_wordpress_newsletter_operations.py` | new (#157) | Real PHP callbacks with captured WordPress storage and mail transport: administrator capability/nonce boundaries, confirmed-only CSV and formula neutralization, signed GET/POST unsubscribe, re-opt-in generations, queued batching, recipient rechecks, locking and duplicate-submit protection. Captured transport does not prove inbox delivery or DKIM. |
+| `test_wordpress_security_controls.py` | new (#163) | Real PHP filters/actions prove anonymous users API restriction, authenticated editor access, connected-peer login limits, protection before password hashing and fixed lockout expiry. Successful logins do not reset the peer-wide counter. Production server configuration remains a separate acceptance gate. |
 | `test_wordpress_leaflet_assets.py` | keep | Vendored Leaflet files exist unmodified, registered handles used only by map blocks, marker images resolve inside the vendored dir. |
 | `test_wordpress_membership_handoff.py` | keep (updated #181) | Pricing calculator → membership form selection handoff now runs through the real shared lifecycle runtime plus the real adapter in one minimal DOM context (Node VM); server-side tampering rejection unchanged. The full membership lifecycle matrix lives in the opt-in browser suite — no duplicated VM matrix. |
 | `test_wordpress_forms_turnstile.py` | keep | Turnstile: official test keys only on unconfigured staging. |
@@ -120,6 +123,7 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 
 | File | Status | Behaviour |
 | --- | --- | --- |
+| `test_wordpress_web_opcache.py` | new (#142) | Real PHP OPcache proves invalidation is limited to owned staging code. Unauthorized/expired probes are rejected; the temporary authenticated endpoint deletes itself and the shell helper cleans up after HTTP success or failure. |
 | `test_wordpress_divi_design_system.py` | keep | Design-system checker contract (#134): token-only values, malformed manifest fail-closed behaviour, documented exceptions. |
 | `test_wordpress_divi_foundation.py` | new (#134) | Manifest bundle matches its source; live-value bridge (editor override, archived fallback, stylesheet-injection rejection); seed dry-run/apply semantics against a fake vendor REST boundary: label conflicts report instead of duplicate, conflicted apply performs no write, clean rerun skips satisfied writes, unknown manifest preset titles fail the run. |
 | `test_wordpress_visual_parity.py` | keep | 95% visual parity gate semantics: fail-closed results, masking discipline, threshold validation. |

@@ -4,10 +4,17 @@
   var key = 'bioco-consent-v1';
   var state = {analytics: false, maps: false};
   var saved = false;
+  function read(value) {
+    try {
+      var stored = JSON.parse(value);
+      if (stored && stored.version === 1 && typeof stored.analytics === 'boolean' && typeof stored.maps === 'boolean' &&
+          typeof stored.at === 'number' && stored.at <= Date.now() && Date.now() - stored.at < 180 * 86400000) return stored;
+    } catch (error) { /* Invalid storage revokes consent. */ }
+    return null;
+  }
   try {
-    var stored = JSON.parse(localStorage.getItem(key));
-    if (stored && stored.version === 1 && typeof stored.analytics === 'boolean' && typeof stored.maps === 'boolean' &&
-        typeof stored.at === 'number' && stored.at <= Date.now() && Date.now() - stored.at < 180 * 86400000) {
+    var stored = read(localStorage.getItem(key));
+    if (stored) {
       state = {analytics: stored.analytics, maps: stored.maps}; saved = true;
     }
   } catch (error) { /* A blocked store leaves consent off. */ }
@@ -19,6 +26,17 @@
   function notify() {
     window.dispatchEvent(new CustomEvent('bioco:consent-change', {detail: {analytics: state.analytics, maps: state.maps}}));
   }
+  window.addEventListener('storage', function (event) {
+    if (event.key !== key && event.key !== null) return;
+    var stored = configured ? read(event.newValue) : null;
+    state = stored ? {analytics: stored.analytics, maps: stored.maps} : {analytics: false, maps: false};
+    saved = !!stored;
+    if (panel) {
+      analytics.checked = state.analytics; maps.checked = state.maps;
+      if (!saved) panel.hidden = false;
+    }
+    notify();
+  });
   function open() {
     if (!panel) return;
     returnFocus = document.activeElement;
