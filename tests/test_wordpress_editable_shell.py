@@ -231,6 +231,29 @@ console.log(JSON.stringify({saved,original}));
     assert [row['label'] for row in data['original']] == ['First', 'Second', 'Third']
 
 
+def test_nested_row_group_keeps_individual_control_labels():
+    code = r'''
+const fs = require('fs'), vm = require('vm'), registered = {};
+const fields = JSON.parse(fs.readFileSync(process.argv[1], 'utf8')).footer_shell;
+const React = {createElement:(type,props,...children)=>({type,props:props||{},children:children.flat(Infinity)})};
+const window = {React,BiocoNativeModulesData:{modules:[{component:'footer_shell',metadata:{name:'bioco-divi/footer-shell'},fields}]},divi:{moduleLibrary:{registerModule(){}},fieldLibrary:{registerFieldComponent(f){registered[f.name]=f.component;}}}};
+vm.runInNewContext(fs.readFileSync(process.argv[2],'utf8'),{window,setTimeout(){}});
+const tree = registered['bioco/footer_shell-columns']({value:[{heading:'Extra',text:'',links:[{label:'Visit',url:'/kontakt/'}],link_gap:0}],onChange(){}});
+let invalidLabels = 0, groupNames = [];
+function descendants(node) { return [node,...(node.children||[]).filter(c=>c&&typeof c==='object').flatMap(descendants)]; }
+for (const node of descendants(tree)) {
+  if (node.type === 'label' && descendants(node).slice(1).some(c=>c.type==='label'||c.type==='button')) invalidLabels++;
+  if (node.type === 'fieldset') groupNames.push(...node.children.filter(c=>c.type==='legend').map(c=>c.children.join('')));
+}
+console.log(JSON.stringify({invalidLabels,groupNames}));
+'''
+    result = subprocess.run(['node', '-e', code, CORE + '/native-modules/fields.json', CORE + '/native-modules/editor.js'],
+                            cwd=ROOT, check=True, text=True, capture_output=True)
+    data = json.loads(result.stdout)
+    assert data['invalidLabels'] == 0, 'Nested groups must not override button or input names.'
+    assert 'Links' in data['groupNames']
+
+
 @pytest.mark.parametrize('value,expected', [(None, ''), (0, ''), ('0', ''), (42, 42)])
 def test_logo_control_does_not_request_an_empty_attachment(value, expected):
     code = r'''

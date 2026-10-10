@@ -68,10 +68,15 @@
                 rows.map(function (row, index) {
                     return React.createElement('fieldset', {key: index, style: {border: '1px solid #ccc', padding: '8px', marginBottom: '8px'}},
                         Object.keys(spec.row).map(function (key) {
-                            return React.createElement('label', {key: key, style: {display: 'block'}}, spec.row[key].label,
-                                EditorialControl(spec.row[key], row[key], function (next) {
+                            var field = spec.row[key];
+                            var control = EditorialControl(field, row[key], function (next) {
                                     change(rows.map(function (r, i) { return i === index ? Object.assign({}, r, {[key]: next}) : r; }));
-                                }));
+                                });
+                            if (field.type === 'rows') {
+                                return React.createElement('fieldset', {key: key, style: {border: 0, padding: 0, margin: 0}},
+                                    React.createElement('legend', null, field.label), control);
+                            }
+                            return React.createElement('label', {key: key, style: {display: 'block'}}, field.label, control);
                         }),
                         React.createElement('button', {type: 'button', disabled: index === 0, onClick: function () {change(rowsMove(rows, index, -1));}}, 'Nach oben'),
                         React.createElement('button', {type: 'button', disabled: index === rows.length - 1, onClick: function () {change(rowsMove(rows, index, 1));}}, 'Nach unten'),
