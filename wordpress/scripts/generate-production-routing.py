@@ -52,6 +52,20 @@ def generate_private_child_guard():
     ))
 
 
+def generate_editor_asset_guard():
+    """Staging WordPress owns its document root, so static URLs need no rewrite."""
+    lines = ['# BEGIN bioco editor asset guard', 'Options -Indexes -MultiViews',
+             '<IfModule mod_rewrite.c>', 'RewriteEngine On',
+             'RewriteOptions InheritDownBefore']
+    for pattern in (LEAFLET_PATTERN, CORE_VENDOR_PATTERN, EDITOR_PLUGIN_ASSET_PATTERN):
+        lines += [f'RewriteCond %{{REQUEST_URI}} ^/{pattern}$', 'RewriteRule ^ - [END]']
+    # Inherited rules match paths relative to the descendant directory. Use the
+    # full decoded URI so a nested RewriteEngine cannot hide its vendor prefix.
+    for pattern in DENY_PATTERNS:
+        lines += [f'RewriteCond %{{REQUEST_URI}} {pattern} [NC]', 'RewriteRule ^ - [F,END]']
+    return '\n'.join(lines + ['</IfModule>', '# END bioco editor asset guard', ''])
+
+
 def asset_redirect_rules():
     """Only static PDF redirects under wp-content/uploads need Apache routing."""
     rules = []
@@ -133,7 +147,10 @@ def generate():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--private-child-guard', action='store_true',
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument('--private-child-guard', action='store_true',
                         help='Print the guard required in the private WordPress .htaccess')
+    mode.add_argument('--editor-guard', action='store_true', help='Print the staging static asset guard')
     args = parser.parse_args()
-    print(generate_private_child_guard() if args.private_child_guard else generate(), end="")
+    print(generate_private_child_guard() if args.private_child_guard else
+          generate_editor_asset_guard() if args.editor_guard else generate(), end="")

@@ -41,6 +41,7 @@ case "$*" in
     event=identity
     printf '%s\n%s\n' "$BIOCO_TEST_SITEURL" "$BIOCO_TEST_SITEURL"
     ;;
+  *"wp bioco editor-routing-guard"*) event=editor-routing-guard ;;
   *"wp cache flush"*) event=cache-flush ;;
   *"wp db export"*) event=backup ;;
   *"wp bioco import"*) event=import ;;
@@ -115,6 +116,7 @@ def test_release_pipeline_apply_runs_each_step_in_order(tmp_path):
         "identity",
         "backup",
         "deploy:apply",
+        "editor-routing-guard",
         "cache-flush",
         "runtime-verify",
         "smoke",
@@ -142,6 +144,7 @@ def test_release_pipeline_stops_after_first_failed_step(tmp_path):
         "identity",
         "backup",
         "deploy:apply",
+        "editor-routing-guard",
         "cache-flush",
         "runtime-verify",
     ]

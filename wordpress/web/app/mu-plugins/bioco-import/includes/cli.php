@@ -20,6 +20,28 @@ if (!defined('ABSPATH')) exit;
 
 class Bioco_Import_CLI_Command {
     /**
+     * Internal staging release step. Preserve WordPress and cPanel directives.
+     *
+     * ## OPTIONS
+     *
+     * --backup=<path>
+     * : Private backup file outside the WordPress root.
+     *
+     * [--apply]
+     * : Install the guard atomically. Dry run otherwise.
+     *
+     * @subcommand editor-routing-guard
+     * @when after_wp_load
+     */
+    public function editor_routing_guard($args, $assoc_args) {
+        try {
+            if (wp_get_environment_type() !== 'staging') throw new RuntimeException('Editor routing guard is a staging release step.');
+            $report = bioco_import_install_editor_guard(ABSPATH, (string) ($assoc_args['backup'] ?? ''), !empty($assoc_args['apply']));
+            WP_CLI::success(wp_json_encode($report));
+        } catch (Throwable $error) { WP_CLI::error($error->getMessage()); }
+    }
+
+    /**
      * Initialize shared vegetable/depot catalogs without overwriting editor data.
      *
      * ## OPTIONS

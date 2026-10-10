@@ -256,6 +256,12 @@ rewrite markers. The real Apache suite reproduces how a regenerated child block
 exposes internal URLs without that guard, and checks encoded paths and nested
 rewrite rules with it installed. Rerun the HTTP gate after administration actions;
 a pre-login check alone does not establish that routing stays protected.
+The staging release installs its generated asset guard outside WordPress markers,
+with a private `.htaccess` backup and atomic replacement. It retains cPanel handlers
+and protects vendor sources even when a descendant adds rewrite rules.
+`test_wordpress_editor_guard_install.py` checks real file preservation, dry runs,
+idempotence, private backups and malformed-region rejection. The Apache suite
+executes the shipped guard, including a nested vendor rewrite and encoded paths.
 
 For each family, record its saved block/template identity, editor controls changed,
 rendered desktop/mobile result and cleanup. Keep frozen parity thresholds. A source

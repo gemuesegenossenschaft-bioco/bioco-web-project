@@ -256,3 +256,36 @@ def test_asset_probe_rejects_html_and_private_file_success():
         finally:
             server.shutdown()
             worker.join(timeout=5)
+
+
+def test_staging_guard_matches_generated_policy_and_denies_nested_vendor_sources(apache_site):
+    base, docroot, production_config, gate = apache_site
+    guard = gate.routing.generate_editor_asset_guard()
+    shipped = ROOT / 'wordpress/web/app/mu-plugins/bioco-core/content/editor-asset-guard.conf'
+    assert shipped.read_text() == guard
+    original_child = (docroot / '_bioco_wp/.htaccess').read_text()
+    # Run the same fixture as a vanilla staging root, without production rewrites.
+    prior = []
+    for name in ('wp-content', 'wp-includes'):
+        target = docroot / name
+        if target.exists():
+            target.rename(docroot / (name + '.before-stage-test'))
+            prior.append(name)
+        shutil.copytree(docroot / '_bioco_wp' / name, target)
+    nested = docroot / 'wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/.htaccess'
+    try:
+        (docroot / '.htaccess').write_text(guard + '\n# BEGIN WordPress\nRewriteEngine On\n# END WordPress\n')
+        nested.write_text('RewriteEngine On\nRewriteRule ^ - [L]\n')
+        for path in gate.PUBLIC_ASSETS:
+            assert get(base, path)[0] == 200, path
+        for segment in ('vendor', '%76endor'):
+            status, body, _ = get(base, '/wp-content/plugins/seo-by-rank-math/' + segment + '/cmb2/cmb2/includes/CMB2.php')
+            assert status == 403
+            assert b'PRIVATE_SENTINEL' not in body
+    finally:
+        (docroot / '.htaccess').write_text(production_config)
+        for name in ('wp-content', 'wp-includes'):
+            shutil.rmtree(docroot / name)
+        for name in prior:
+            (docroot / (name + '.before-stage-test')).rename(docroot / name)
+        assert (docroot / '_bioco_wp/.htaccess').read_text() == original_child

@@ -193,6 +193,11 @@ echo "step=${current_step} status=running mode=${mode}"
 "${deploy_script}" "${deploy_args[@]}"
 echo "step=code-sync status=passed mode=${mode}"
 
+current_step="editor-routing-guard"
+echo "step=${current_step} status=running"
+run_remote "cd '${wp_root}'; wp bioco editor-routing-guard --backup='${backup_path}.htaccess' --apply"
+echo "step=${current_step} status=passed"
+
 current_step="cache-flush"
 echo "step=${current_step} status=running"
 run_remote "cd '${wp_root}'; wp cache flush"
