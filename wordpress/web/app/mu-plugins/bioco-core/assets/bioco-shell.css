@@ -350,6 +350,6 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
   .bioco-editable-footer .bioco-site-footer-inner { grid-template-columns: repeat(var(--bioco-footer-columns-mobile, 2), minmax(0, 1fr)); }
 }
 @media (max-width: 560px) {
-  .bioco-editable-footer { padding-bottom: var(--bioco-footer-padding-vertical, 148px); }
+  .bioco-editable-footer { padding-bottom: max(148px, var(--bioco-footer-padding-vertical, 148px)); }
   .bioco-editable-footer .bioco-site-footer-inner { grid-template-columns: repeat(var(--bioco-footer-columns-mobile, 1), minmax(0, 1fr)); }
 }

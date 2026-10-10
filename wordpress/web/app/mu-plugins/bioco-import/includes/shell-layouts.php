@@ -12,7 +12,7 @@ function bioco_import_shell_block(string $slot): array {
             'primaryLabel' => 'primary_label', 'menuOpenLabel' => 'menu_open_label', 'menuCloseLabel' => 'menu_close_label'] as $key => $field) {
             $values[$field] = $site[$key] ?? '';
         }
-        $values['logo_url'] = plugins_url($site['logo'] ?? '', dirname(__DIR__, 2) . '/bioco-core/bioco-core.php');
+        $values['logo_url'] = plugins_url($site['logo'] ?? 'assets/bioco-logo.png', dirname(__DIR__, 2) . '/bioco-core/bioco-core.php');
         foreach (['utility', 'primary'] as $key) $values[$key] = $contract[$key];
         foreach (['label', 'url', 'slug'] as $key) $values['cta_' . $key] = $contract['cta'][$key] ?? '';
     } else {
