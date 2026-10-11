@@ -145,6 +145,7 @@ function wp_enqueue_style($handle, $src = '', $deps = [], $ver = false, $media =
     global $enqueued;
     $enqueued[] = ['handle' => $handle, 'src' => $src, 'deps' => $deps, 'ver' => $ver];
 }
+function wp_enqueue_script(...$args) {}
 require 'wordpress/web/app/themes/bioco-divi/functions.php';
 echo json_encode($enqueued);
 """
@@ -275,7 +276,7 @@ echo json_encode([
     #    after the theme adapter's callback (parent + child already queued).
     assert result["call_order"] == [
         "bioco-tokens", "bioco-blocks", "bioco-navigation",
-        "divi-parent-style", "bioco-divi-style", "bioco-shell",
+        "divi-parent-style", "bioco-divi-style", "bioco-divi-editorial", "bioco-shell",
         "bioco-consent", "bioco-consent",
     ], result["call_order"]
 

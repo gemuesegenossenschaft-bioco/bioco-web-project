@@ -213,6 +213,7 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 
 | File | Keep/Replace/Remove | Evidence |
 | --- | --- | --- |
+| `test_wordpress_editorial_accessibility.py` | Keep, new (#201) | Real child-theme JS/CSS in Chromium: Tab, Enter, Space and click, native heading semantics, expanded/panel state, saved fonts/colours, duplicate initialization and builder exclusion. A title-click boundary replaces licensed Divi; staged and production previews prove actual Divi activation. Required PR coverage. |
 | `test_wordpress_editorial_layouts.py` | Keep, new (#201) | Real PHP migration: saved Divi attribute formats, preserved rich text/documents/anchors/siblings/order, rejected mixed markup and custom designs, idempotence. Required PR coverage. Native rendering and edit/save/reopen need separate unpublished staging/production copies. |
 | `test_wordpress_membership_adapter.py` | Keep, extended | Real PHP REST acceptance, complete local payload, insert-before-mail, overlapping replay, notification false/exception retention, conflicts, storage failure, staging gates. WP storage/mail/CAPTCHA are controlled; no real InnoDB or delivery claim. |
 | `test_wordpress_membership_admin.py` | Keep, new | Real PHP review callback denies non-admins before querying and escapes private records. No public REST hooks. |

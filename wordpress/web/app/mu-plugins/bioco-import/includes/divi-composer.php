@@ -458,7 +458,7 @@ final class Bioco_Import_Divi_Composer {
             'target' => $kind === 'external' ? 'on' : 'off',
         ];
         $attrs['title']['decoration']['font']['font']['desktop']['value'] = [
-            'headingLevel' => 'h3', 'weight' => '700', 'color' => '#1A1A1A',
+            'headingLevel' => 'h3', 'weight' => '700', 'color' => '#333333',
         ];
         $attrs['content']['innerContent']['desktop']['value'] = $text;
         $attrs['content']['decoration']['bodyFont']['body']['font']['desktop']['value'] = ['color' => '#1A1A1A', 'lineHeight' => '1.7em'];
@@ -1112,7 +1112,7 @@ final class Bioco_Import_Divi_Composer {
             if ($title === '' && $body === '') continue;
             $attrs = self::classAttr('bioco-editorial-toggle', (string) ($item['anchor'] ?? ''));
             $attrs['title']['innerContent']['desktop']['value'] = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
-            $attrs['title']['decoration']['font']['font']['desktop']['value'] = ['headingLevel' => 'h3', 'weight' => '600', 'color' => '#1A1A1A'];
+            $attrs['title']['decoration']['font']['font']['desktop']['value'] = ['headingLevel' => 'h3', 'size' => '16px', 'weight' => '600', 'color' => '#1A1A1A'];
             $attrs['content']['innerContent']['desktop']['value'] = $body;
             $attrs['content']['decoration']['bodyFont']['body']['font']['desktop']['value'] = ['color' => '#1A1A1A', 'lineHeight' => '1.7em'];
             $attrs['module']['advanced']['open']['desktop']['value'] = 'off';
