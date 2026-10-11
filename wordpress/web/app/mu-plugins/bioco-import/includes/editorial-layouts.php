@@ -1,6 +1,7 @@
 <?php
 /** Convert known imported editorial structures, using their saved content. */
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/timeline-migration.php';
 
 function bioco_import_editorial_topics(string $html): array {
     if (!preg_match_all('~<h3>([^<]*)</h3>~', $html, $matches, PREG_OFFSET_CAPTURE)) return [];
@@ -194,6 +195,7 @@ function bioco_import_editorial_section(array $section, int &$count): array {
 
 function bioco_import_editorial_tree(array $blocks, int &$count): array {
     foreach ($blocks as &$block) {
+        if (($block['blockName'] ?? '') === 'divi/section') $block = bioco_import_timeline_section($block, $count);
         if (($block['blockName'] ?? '') === 'divi/section') $block = bioco_import_editorial_section($block, $count);
         if (($block['blockName'] ?? '') === 'divi/text' && bioco_import_editorial_has_class($block, 'bioco-divi-accordion-item')) {
             $html = bioco_import_editorial_html($block);
