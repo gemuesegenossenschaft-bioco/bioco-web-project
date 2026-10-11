@@ -192,6 +192,7 @@ def _style(page, sel, pseudo=None):
 
 @pytest.mark.parametrize("viewport", [(1440, 900), (390, 844)])
 def test_native_global_shell_counters_cpt_defaults_without_blocking_divi_design(page, viewport):
+    """Keep: tests/README.md shell coverage; execute the real PHP shell and CSS cascade."""
     from test_wordpress_editable_shell import render
 
     base, pg = page
