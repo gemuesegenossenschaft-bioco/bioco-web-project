@@ -1,0 +1,14 @@
+{
+  "groups": {"": "Veranstaltung", "loop_": "Veranstaltung in der Schleife"},
+  "fields": {
+    "title": ["Titel", "text"],
+    "date": ["Datum", "text"],
+    "time": ["Uhrzeit", "text"],
+    "date_time": ["Datum und Uhrzeit", "text"],
+    "image": ["Bild", "image"],
+    "image_alt": ["Bildbeschreibung", "text"],
+    "description": ["Beschreibung", "text"],
+    "summary": ["Kurzbeschreibung", "text"],
+    "url": ["Link", "url"]
+  }
+}

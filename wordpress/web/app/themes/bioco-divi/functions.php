@@ -24,10 +24,15 @@ add_action('after_setup_theme', function () {
     }
 });
 
-// These singles use the child template's shared shell and native article layout.
-// Leave the saved global Theme Builder template available to all other requests.
+// Posts retain their recovery layout until #230. Events accept an explicit
+// native assignment; the legacy default body is not an event detail template.
 add_filter('et_theme_builder_template_layouts', function ($layouts) {
-    return is_singular(['event', 'post']) ? [] : $layouts;
+    if (is_singular('post')) return [];
+    if (is_singular('event')) {
+        $template = (int) ($layouts['et_template'] ?? 0);
+        if (!$template || get_post_meta($template, '_et_default', true) === '1') return [];
+    }
+    return $layouts;
 });
 
 // The shared single template supplies a native layout at render time. Expose

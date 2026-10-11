@@ -28,6 +28,13 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 
 ## How to run
 
+Event template slice (#202): keep the generated fallback checks until migration;
+add `test_wordpress_event_templates.py` for record context, image/date/body
+behavior and real WordPress block round trips. Extend draft isolation checks to
+matching unassigned event bodies. These tests run without licensed Divi. Native
+edit/save/reopen and public desktop/mobile rendering remain required operator
+evidence on staging and production. This slice does not complete event feeds.
+
 | Command | Needs | Gate |
 | --- | --- | --- |
 | `python3 -m pytest tests/ -q` | python3, php, node, Playwright Chromium | full suite, all green required |
