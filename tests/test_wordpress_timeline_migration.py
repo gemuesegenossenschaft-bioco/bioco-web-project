@@ -1,4 +1,7 @@
-"""Saved timeline conversion; no seed reads, no Visual Builder claims."""
+"""Saved timeline conversion; no seed reads, no Visual Builder claims.
+
+Keep/Replace/Remove evidence map: tests/README.md.
+"""
 import copy
 
 import pytest
