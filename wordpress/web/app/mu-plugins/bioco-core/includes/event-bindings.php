@@ -28,6 +28,7 @@ function bioco_event_binding_record(array $context): int {
             $run = get_post_meta($id, '_bioco_editor_verification', true);
             if ($preview && is_string($run) && preg_match('/^[a-z0-9][a-z0-9-]{7,79}$/D', $run)
                 && $run === get_post_meta($preview, '_bioco_editor_verification', true)
+                && (int) get_post_meta($preview, '_bioco_editor_verification_body', true) === $id
                 && get_post_type($id) === 'et_body_layout'
                 && in_array(get_post_status($id), ['draft', 'auto-draft'], true)
                 && in_array(get_post_status($preview), ['draft', 'auto-draft'], true)

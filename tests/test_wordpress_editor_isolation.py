@@ -56,7 +56,11 @@ def test_standalone_layout_copy_keeps_only_its_own_builder_context():
     ({'meta': {'6':{'_bioco_editor_verification':'other-run', '_bioco_editor_verification_event':5},
                '5':{'_bioco_editor_verification':'qa-20261009','_bioco_editor_verification_body':6}}}, False),
     ({'meta': {'6':{'_bioco_editor_verification':'qa-20261009', '_bioco_editor_verification_event':9},
-               '5':{'_bioco_editor_verification':'qa-20261009','_bioco_editor_verification_body':6}}}, True),
+               '5':{'_bioco_editor_verification':'qa-20261009','_bioco_editor_verification_body':6}}}, False),
+    ({'types': {'5':'event','6':'et_body_layout','9':'event'},
+      'meta': {'6':{'_bioco_editor_verification':'qa-20261009', '_bioco_editor_verification_event':9},
+               '5':{'_bioco_editor_verification':'qa-20261009','_bioco_editor_verification_body':6},
+               '9':{'_bioco_editor_verification':'qa-20261009','_bioco_editor_verification_body':6}}}, True),
     ({'meta': {'5':{'_bioco_editor_verification':'qa-20261009','_bioco_editor_verification_body':6}}}, False),
 ])
 def test_event_preview_accepts_only_a_matching_readable_unassigned_draft_body(mutation, accepted):

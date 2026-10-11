@@ -130,12 +130,16 @@ def test_card_image_falls_back_to_featured_and_missing_media_stays_empty(field):
 
 
 def test_unassigned_template_can_only_preview_its_readable_matching_draft_event():
-    records = {'1':record() | {'status':'draft','meta':{'_bioco_editor_verification':'qa-20261011'}},
+    records = {'1':record() | {'status':'draft','meta':{'_bioco_editor_verification':'qa-20261011',
+                                                    '_bioco_editor_verification_body':2}},
                '2':{'type':'et_body_layout','status':'draft','meta':{
                    '_bioco_editor_verification':'qa-20261011','_bioco_editor_verification_event':1}}}
     context = dict(post_id=2,name='bioco_event_date')
     assert run(records=records,context=context,allowed=[1,2])['value'] == '28.03.2027'
     assert run(records=records,context=context,allowed=[1])['value'] == ''
+    records['1']['meta']['_bioco_editor_verification_body']=9
+    assert run(records=records,context=context,allowed=[1,2])['value'] == ''
+    records['1']['meta']['_bioco_editor_verification_body']=2
     records['2']['meta']['_bioco_editor_verification']='another-run'
     assert run(records=records,context=context,allowed=[1,2])['value'] == ''
 
