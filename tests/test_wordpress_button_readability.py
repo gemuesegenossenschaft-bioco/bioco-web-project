@@ -189,6 +189,56 @@ def _style(page, sel, pseudo=None):
     return data
 
 
+
+@pytest.mark.parametrize("viewport", [(1440, 900), (390, 844)])
+def test_native_global_shell_counters_cpt_defaults_without_blocking_divi_design(page, viewport):
+    from test_wordpress_editable_shell import render
+
+    base, pg = page
+    pg.set_viewport_size({"width": viewport[0], "height": viewport[1]})
+    pg.goto(base)
+    header = render(theme_builder=True)["html"]
+    footer = render("footer", theme_builder=True)["html"]
+    # Reproduce the real caller: Divi's CPT defaults add a scoped gutter,
+    # and its later Theme Builder list rule beats the unscoped footer reset.
+    # These small defaults exercise CSS precedence, not the licensed renderer.
+    pg.set_content(f'''<body class="wp-child-theme-bioco-divi et-db">
+      <link rel="stylesheet" href="{base}/wordpress/web/app/mu-plugins/bioco-core/assets/bioco-tokens.css">
+      <link rel="stylesheet" href="{base}/wordpress/web/app/mu-plugins/bioco-core/assets/bioco-shell.css">
+      <style>
+        .et-db #et-boc .et-l .et_pb_section {{ padding: 4% 0; background: white; }}
+        .et-db #et-boc .et-l .et_pb_row {{ width: 80%; max-width: 1080px; padding: 2% 0; }}
+        .et-l--footer ul {{ list-style: disc; padding: 0 0 23px 1em; line-height: 26px; }}
+      </style>
+      <link rel="stylesheet" href="{base}/wordpress/web/app/themes/bioco-divi/style.css">
+      <div id="et-boc">
+        <header class="et-l et-l--header"><div class="bioco-global-layout bioco-global-header et_pb_section">
+          <div class="et_pb_row"><div class="et_pb_column">{header}</div></div>
+        </div></header>
+        <footer class="et-l et-l--footer"><div class="bioco-global-layout bioco-global-footer et_pb_section">
+          <div class="et_pb_row et_pb_row_0_tb_footer"><div class="et_pb_column">{footer}</div></div>
+        </div></footer>
+      </div></body>''')
+    pg.wait_for_function("getComputedStyle(document.querySelector('.bioco-site-footer')).clear === 'both'")
+    pg.evaluate("document.fonts.ready")
+    for selector in [".bioco-global-layout", ".bioco-global-layout > .et_pb_row",
+                     ".bioco-global-layout > .et_pb_row > .et_pb_column"]:
+        for node in pg.locator(selector).all():
+            actual = node.evaluate("el => ({width:el.getBoundingClientRect().width,padding:getComputedStyle(el).padding})")
+            assert actual["padding"] == "0px"
+            assert actual["width"] == pytest.approx(viewport[0])
+    links = _style(pg, ".bioco-site-footer-column:first-child ul")
+    assert pg.locator(".bioco-site-footer-column:first-child ul").evaluate("el => getComputedStyle(el).listStyleType") == "none"
+    assert links["padding"] == "0px"
+    # Instance-specific spacing must still beat the general list reset.
+    assert pg.locator(".bioco-site-footer-column:first-child ul").evaluate("el => getComputedStyle(el).marginTop") == "16px"
+    assert pg.locator(".bioco-site-footer-partner-links").evaluate("el => parseFloat(getComputedStyle(el).paddingBottom)") == 16
+    # Native Divi's later saved row design remains authoritative.
+    pg.add_style_tag(content=".et-db #et-boc .et-l .et_pb_row_0_tb_footer.et_pb_row {max-width: 300px; padding-top: 17px;}")
+    edited = _style(pg, ".et_pb_row_0_tb_footer")
+    assert edited["padding"].startswith("17px")
+    assert edited["rect"]["w"] == 300
+
 def test_collapsed_utility_navigation_reopens_on_keyboard_focus(page):
     base, browser_page = page
     browser_page.goto(base)

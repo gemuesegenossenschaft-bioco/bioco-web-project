@@ -1734,7 +1734,12 @@ body.home,
 .bioco-global-layout > .et_pb_row,
 .bioco-global-layout > .et_pb_row > .et_pb_column,
 .bioco-global-layout .et_pb_post_content,
-.bioco-global-layout > .et_pb_row > .et_pb_column > .et_pb_text {
+.bioco-global-layout > .et_pb_row > .et_pb_column > .et_pb_text,
+.et-db #et-boc .et-l :where(.bioco-global-layout).et_pb_section,
+.et-db #et-boc .et-l :where(.bioco-global-layout) > .et_pb_row,
+.et-db #et-boc .et-l :where(.bioco-global-layout > .et_pb_row) > .et_pb_column,
+.et-db #et-boc .et-l :where(.bioco-global-layout) .et_pb_post_content,
+.et-db #et-boc .et-l :where(.bioco-global-layout > .et_pb_row > .et_pb_column) > .et_pb_text {
     margin: 0;
     padding: 0;
     width: 100%;
