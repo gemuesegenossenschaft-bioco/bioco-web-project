@@ -2,6 +2,14 @@
 /** Separate, guarded assignment of the verified native event body. Never imports records. */
 if (!defined('ABSPATH')) exit;
 
+function bioco_import_event_template_meta_scope(array $ids): string {
+    global $wpdb;
+    // Native layout creation clears this generated asset inventory on existing
+    // layouts. It carries no saved editorial settings and is rebuilt by Divi.
+    return 'post_id IN (' . implode(',', array_map('intval', $ids)) . ') AND '
+        . $wpdb->prepare('BINARY meta_key != BINARY %s', '_divi_dynamic_assets_canvases_used');
+}
+
 function bioco_import_event_template_snapshot(int $builder): array {
     global $wpdb;
     $templates = array_map('intval', get_post_meta($builder, '_et_template', false));
@@ -16,9 +24,10 @@ function bioco_import_event_template_snapshot(int $builder): array {
     $ids = array_values(array_unique($ids));
     sort($ids);
     $list = implode(',', $ids);
+    $meta_scope = bioco_import_event_template_meta_scope($ids);
     return ['builder' => $builder, 'ids' => $ids, 'templates' => $templates,
         'posts' => $wpdb->get_results("SELECT ID, post_type, post_status, post_title, post_content FROM {$wpdb->posts} WHERE ID IN ($list) ORDER BY ID", ARRAY_A),
-        'meta' => $wpdb->get_results("SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id IN ($list) ORDER BY meta_id", ARRAY_A)];
+        'meta' => $wpdb->get_results("SELECT meta_id, post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE $meta_scope ORDER BY meta_id", ARRAY_A)];
 }
 
 /** One SQL statement checks complete captured rows and appends/removes only our registry row. */
@@ -39,7 +48,7 @@ function bioco_import_event_template_guard(array $state): string {
             }
             $rows[] = '(' . implode(' AND ', $fields) . ')';
         }
-        $scope = $spec['id'] . " IN ($ids)";
+        $scope = $kind === 'meta' ? bioco_import_event_template_meta_scope($state['ids']) : $spec['id'] . " IN ($ids)";
         $guards[] = "(SELECT COUNT(*) FROM {$spec['table']} WHERE $scope) = " . count($rows);
         $guards[] = "NOT EXISTS (SELECT 1 FROM {$spec['table']} WHERE $scope AND NOT (" . ($rows ? implode(' OR ', $rows) : '0') . '))';
     }
