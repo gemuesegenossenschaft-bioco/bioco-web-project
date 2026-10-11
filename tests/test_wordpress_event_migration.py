@@ -13,7 +13,7 @@ import pytest
 
 ROOT = Path(__file__).parents[1]
 PHP = r'''
-define('ABSPATH','/tmp/site/');
+define('ABSPATH','/tmp/site/');define('ARRAY_A','ARRAY_A');
 class Database {
     public $posts='posts'; public $postmeta='meta'; public $options='options';
     function prepare($sql,...$args) {
@@ -21,13 +21,21 @@ class Database {
         return $sql;
     }
     function query($sql) {$GLOBALS['sql']=$sql;return 1;}
+    function get_results($sql,$format) {$GLOBALS['queries'][]=$sql;return [];}
 }
 function clean_post_cache($id) {}
+function get_post_meta($id,$key,$single) {
+    if($id===1 && $key==='_et_template') return [2];
+    return $id===2 && $key==='_et_body_layout_id' ? 3 : '';
+}
 $wpdb=new Database();
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/event-template-migration.php';
 $state=json_decode(stream_get_contents(STDIN),true);
 try {
-    if(isset($state['mode'])) {
+    if(($state['mode'] ?? '')==='snapshot') {
+        $snapshot=bioco_import_event_template_snapshot(1);
+        echo json_encode(['snapshot'=>$snapshot,'queries'=>$GLOBALS['queries']]);
+    } elseif(isset($state['mode'])) {
         bioco_import_event_template_assignment($state,10,$state['mode']==='remove');
         echo json_encode(['sql'=>$GLOBALS['sql']]);
     } else echo json_encode(['guard'=>bioco_import_event_template_guard($state)]);
@@ -62,9 +70,11 @@ def database():
 
 
 def snapshot(db):
-    return dict(builder=1, ids=[1, 2, 3], templates=[2],
-                posts=[dict(r) for r in db.execute('SELECT * FROM posts ORDER BY ID')],
-                meta=[dict(r) for r in db.execute('SELECT * FROM meta ORDER BY meta_id')])
+    captured = guard({'mode': 'snapshot'})
+    state = captured['snapshot']
+    for key, query in zip(['posts', 'meta'], captured['queries'], strict=True):
+        state[key] = [dict(r) for r in db.execute(re.sub(r'\bBINARY\s+', '', query))]
+    return state
 
 
 def append(db, state):
@@ -142,3 +152,28 @@ def test_restoration_removes_only_our_assignment_and_refuses_a_later_edit():
     assert remove(db, applied) == 1
     assert snapshot(db) == before
     assert remove(db, applied) == 0
+
+
+@pytest.mark.parametrize('refresh', [
+    "DELETE FROM meta WHERE meta_key='_divi_dynamic_assets_canvases_used'",
+    "UPDATE meta SET meta_value='new generated assets' WHERE meta_id=8",
+    "INSERT INTO meta VALUES (9,2,'_divi_dynamic_assets_canvases_used','new generated assets')",
+])
+def test_native_asset_cache_changes_do_not_block_assignment_or_restoration(refresh):
+    db = database()
+    db.execute("INSERT INTO meta VALUES (8,3,'_divi_dynamic_assets_canvases_used','generated assets')")
+    before = snapshot(db)
+    assert all(row['meta_key'] != '_divi_dynamic_assets_canvases_used' for row in before['meta'])
+    db.execute(refresh)
+    assert append(db, before) == 1
+    applied = snapshot(db)
+    db.execute("DELETE FROM meta WHERE meta_key='_divi_dynamic_assets_canvases_used'")
+    assert remove(db, applied) == 1
+    assert snapshot(db) == before
+
+
+def test_only_the_exact_generated_cache_key_is_exempt():
+    db = database()
+    state = snapshot(db)
+    db.execute("INSERT INTO meta VALUES (8,3,'_divi_dynamic_assets_canvases_used_editor','Authored setting')")
+    assert append(db, state) == 0
