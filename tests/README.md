@@ -219,6 +219,7 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 ## Production readiness slice
 
 | File | Keep/Replace/Remove | Evidence |
+| `test_wordpress_native_form_composition.py` | Keep, new (#204) | Actual PHP native form parts, native candidate trees and real lifecycle in intercepted Chromium: external form association across reordered columns, duplicate-instance isolation, email validity, accessible field errors, retry, terminal success and missing/wrong controls remaining disabled. No licensed Divi rendering, save/reopen, live mail or production submission claim. Hosted unpublished copies remain required. |
 | --- | --- | --- |
 | `test_wordpress_editorial_accessibility.py` | Keep, new (#201) | Real child-theme JS/CSS in Chromium: Tab, Enter, Space and click, native heading semantics, expanded/panel state, saved fonts/colours, duplicate initialization and builder exclusion. A title-click boundary replaces licensed Divi; staged and production previews prove actual Divi activation. Required PR coverage. |
 | `test_wordpress_editorial_layouts.py` | Keep, new (#201) | Real PHP migration: saved Divi attribute formats, preserved rich text/documents/anchors/siblings/order, rejected mixed markup and custom designs, idempotence. Required PR coverage. Native rendering and edit/save/reopen need separate unpublished staging/production copies. |

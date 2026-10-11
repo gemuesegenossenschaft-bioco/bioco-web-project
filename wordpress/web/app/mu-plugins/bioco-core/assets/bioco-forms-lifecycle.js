@@ -225,9 +225,9 @@
     if (typeof adapter.onPrepare === 'function') adapter.onPrepare(form);
 
     var configName = form.getAttribute('data-config') || adapter.config;
-    var config = window[configName] || {};
-    var messageBox = form.parentNode.querySelector('.form-message');
-    var submitBtn = form.querySelector('[type="submit"]');
+    var config = adapter.configFor ? adapter.configFor(form) : (window[configName] || {});
+    var messageBox = adapter.messageBoxFor ? adapter.messageBoxFor(form) : form.parentNode.querySelector('.form-message');
+    var submitBtn = adapter.submitButtonFor ? adapter.submitButtonFor(form) : form.querySelector('[type="submit"]');
     var captchaContainer = form.querySelector('[data-form-captcha]');
     var captchaToken = '';
     var widgetId = null;
@@ -279,6 +279,7 @@
     renderCaptcha();
 
     function showError(json) {
+      if (adapter.onState) adapter.onState(form, 'error', json);
       if (adapter.onError) adapter.onError(form, json);
       var errorMessage = adapter.errorText
         ? adapter.errorText(json, config.fallbackError)
@@ -299,6 +300,7 @@
     }
 
     function showSuccess(json) {
+      if (adapter.onState) adapter.onState(form, 'success', json);
       if (adapter.onValid) {
         adapter.onValid(form, json, messageBox);
         return;
@@ -347,6 +349,7 @@
       data.captchaToken = captchaToken;
 
       inFlight = true;
+      if (adapter.onState) adapter.onState(form, 'pending');
       if (submitBtn) {
         submitBtn.disabled = true;
         submitBtn.textContent = pendingLabel;
@@ -389,6 +392,8 @@
           showError(null);
         });
     });
+    // Associated native controls are enabled only after this listener exists.
+    form.biocoFormsReady = true;
   }
 
   window.BiocoForms = { mount: mount };

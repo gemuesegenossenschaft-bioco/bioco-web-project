@@ -1,0 +1,8 @@
+/* Layout and decoration come from the saved Divi modules. */
+.bioco-form-field .bioco-form-control { box-sizing: border-box; width: 100%; font: inherit; }
+.bioco-form-label { display: block; }
+.bioco-form-help { margin: 0; }
+.bioco-form-scope [hidden] { display: none !important; }
+.bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-success,
+.bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-error,
+.bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-pending { display: none !important; }
