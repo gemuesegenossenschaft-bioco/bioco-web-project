@@ -66,11 +66,24 @@ function bioco_navigation_links(array $items, $linkClass = '', $itemClass = '') 
     return $markup;
 }
 
+/** WP-CLI can capture an HTTP plugin URL even when the site's home uses HTTPS. */
+function bioco_navigation_logo_url(string $url): string {
+    $home = home_url('/');
+    if (parse_url($home, PHP_URL_SCHEME) === 'https'
+        && strtolower((string) parse_url($url, PHP_URL_SCHEME)) === 'http'
+        && strcasecmp((string) parse_url($home, PHP_URL_HOST), (string) parse_url($url, PHP_URL_HOST)) === 0
+        && parse_url($url, PHP_URL_PORT) === parse_url($home, PHP_URL_PORT)) {
+        return preg_replace('/^http:/i', 'https:', $url, 1) ?? $url;
+    }
+    return $url;
+}
+
 function bioco_render_primary_navigation(?array $contract = null) {
     $contract = $contract ?? bioco_navigation_contract();
     $site = $contract['site'];
     $logo = array_key_exists('logoUrl', $site) ? (string) $site['logoUrl']
         : plugins_url((string) ($site['logo'] ?? 'assets/bioco-logo.png'), dirname(__DIR__) . '/bioco-core.php');
+    $logo = bioco_navigation_logo_url($logo);
     $home_label = (string) ($site['homeLabel'] ?? '');
     $logo_alt = (string) ($site['logoAlt'] ?? '');
     $utility_label = (string) ($site['utilityLabel'] ?? '');
