@@ -21,6 +21,7 @@ PUBLIC_ASSETS = tuple(
 ) + (
     '/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/css/cmb2.min.css',
     '/wp-content/plugins/seo-by-rank-math/vendor/cmb2/cmb2/js/cmb2.min.js',
+    '/wp-content/themes/bioco-divi/editorial.js',
 )
 PRIVATE_PATHS = (
     '/wp-config.php', '/.env', '/vendor/autoload.php',

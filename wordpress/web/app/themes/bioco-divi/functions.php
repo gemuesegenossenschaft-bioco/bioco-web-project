@@ -59,4 +59,6 @@ add_action('wp_enqueue_scripts', function () {
         ['divi-parent-style', 'bioco-tokens', 'bioco-shell'],
         $child_version
     );
+    $editorial_path = get_stylesheet_directory() . '/editorial.js';
+    wp_enqueue_script('bioco-divi-editorial', get_stylesheet_directory_uri() . '/editorial.js', [], (string) filemtime($editorial_path), true);
 });

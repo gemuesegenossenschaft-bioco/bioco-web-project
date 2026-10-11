@@ -1277,6 +1277,34 @@ body.home,
  * Accordion
  * --------------------------------------------------------------------------- */
 
+/* Keep the heading's saved Divi font, colour and alignment on its native button. */
+.bioco-editorial-toggle-trigger {
+    all: unset;
+    display: block;
+    width: 100%;
+    cursor: pointer;
+    text-align: inherit;
+}
+
+.bioco-editorial-toggle-trigger:focus-visible {
+    outline: 3px solid var(--wp--preset--color--bioco-carrot, #FF8C00);
+    outline-offset: 4px;
+}
+
+.bioco-editorial-toggle-title--linked {
+    position: relative;
+    padding-inline-end: 3em;
+}
+
+.bioco-editorial-toggle-trigger--icon {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2em;
+    height: 2em;
+}
+
 .bioco-divi-accordion,
 .demeter-accordion {
     margin-top: var(--wp--preset--spacing--40, 24px);
