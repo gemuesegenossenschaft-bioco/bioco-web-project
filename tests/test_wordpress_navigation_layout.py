@@ -103,6 +103,23 @@ def test_same_saved_header_has_equal_geometry_on_all_routes(page, width):
             assert page.locator('.bioco-primary-nav a[aria-current="page"]').evaluate("el => getComputedStyle(el).textDecorationLine") == "underline"
 
 
+@pytest.mark.parametrize("width", [390, 1440])
+def test_fallback_shell_does_not_reserve_an_absent_fixed_header(page, width):
+    page.set_viewport_size({"width": width, "height": 900})
+    for owned_shell in [True, False]:
+        markup = render(page="event", theme_builder=False)["html"] if owned_shell else '<header class="authored-header">Header</header>'
+        page.set_content('<body class="wp-child-theme-bioco-divi et-db"><div id="page-container">'
+                         + markup + '<main style="height:3000px"></main></div></body>')
+        page.add_style_tag(path=str(CORE / "assets/bioco-tokens.css"))
+        page.add_style_tag(path=str(CORE / "assets/bioco-shell.css"))
+        page.add_style_tag(path=str(THEME / "style.css"))
+        # Captured live Divi offset, emitted after the owned stylesheets.
+        page.add_style_tag(content="#page-container { padding-top:80px; }")
+        expected = 0 if owned_shell else 80
+        assert page.locator("header").bounding_box()["y"] == expected
+        assert page.locator("#page-container").evaluate("e => getComputedStyle(e).paddingTop") == f"{expected}px"
+
+
 @pytest.mark.parametrize("route", ROUTES)
 def test_shared_header_sticks_collapses_and_keeps_keyboard_utility_links_visible(page, route):
     page.set_viewport_size({"width": 1440, "height": 900})
