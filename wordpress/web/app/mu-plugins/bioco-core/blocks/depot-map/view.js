@@ -44,6 +44,15 @@
       if (loc.description) {
         popup += '<br>' + descriptionHtml(loc.description).replace(/\n/g, '<br>');
       }
+      if (loc.website) {
+        try {
+          var website = new URL(loc.website);
+          if (website.protocol === 'https:' || website.protocol === 'http:') {
+            popup += '<br><a href="' + escapeHtml(loc.website) + '" target="_blank" rel="noopener noreferrer">' +
+              escapeHtml(loc.website_label || loc.website) + '</a>';
+          }
+        } catch (error) { /* Invalid public website fields do not create links. */ }
+      }
       marker.bindPopup(popup);
       markers.push(marker);
     }

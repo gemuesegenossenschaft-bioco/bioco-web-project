@@ -300,6 +300,8 @@ function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom, $lo
             'lat' => (float) $l['lat'],
             'lng' => (float) $l['lng'],
             'description' => $l['description'] ?? '',
+            'website' => $l['website'] ?? '',
+            'website_label' => $l['website_label'] ?? '',
         ];
     }, $locations);
     ?>
@@ -321,6 +323,9 @@ function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom, $lo
                         <strong><?php echo esc_html($location['name']); ?></strong>
                         <?php if (!empty($location['description'])) : ?>
                             <p><?php echo bioco_map_description_html($location['description']); ?></p>
+                        <?php endif; ?>
+                        <?php if (!empty($location['website'])) : ?>
+                            <a href="<?php echo esc_url($location['website']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html(($location['website_label'] ?? '') ?: $location['website']); ?></a>
                         <?php endif; ?>
 <?php if ($route_label) : ?>                        <a
                             href="<?php echo esc_url('https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($location['lat'] . ',' . $location['lng'])); ?>"

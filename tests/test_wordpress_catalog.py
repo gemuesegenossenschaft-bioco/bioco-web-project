@@ -21,6 +21,7 @@ function update_option($key,$value,...$args){$GLOBALS['options'][$key]=$value;re
 function delete_option($key){unset($GLOBALS['options'][$key]);}
 function get_posts($args){return array_values(array_filter($GLOBALS['posts'],fn($p)=>$p->post_type===$args['post_type']&&($args['post_status']==='any'||in_array($p->post_status,(array)$args['post_status'],true))));}
 function get_post_meta($id,$key,$single=true){return $GLOBALS['meta'][$id][$key]??'';}
+function metadata_exists($type,$id,$key){return array_key_exists($key,$GLOBALS['meta'][$id]??[]);}
 function update_post_meta($id,$key,$value){$GLOBALS['meta'][$id][$key]=$value;return true;}
 function wp_insert_post($data,$error=false){$id=count($GLOBALS['posts'])+1;$GLOBALS['posts'][$id]=(object)($data+['ID'=>$id]);$GLOBALS['writes']++;foreach($data['meta_input']??[] as $key=>$value)update_post_meta($id,$key,$value);return $id;}
 function is_wp_error($v){return false;}
@@ -67,11 +68,13 @@ echo json_encode(['before'=>$count,'after'=>$writes,'rows'=>$rows,'empty'=>bioco
     assert result['empty']==[]
 
 
-def test_depot_catalog_returns_the_existing_complete_rows():
+def test_depot_catalog_preserves_names_and_coordinates_without_publishing_private_descriptions():
     result=catalog("bioco_catalog_seed('depots',true);echo json_encode(bioco_catalog_rows('depots'));")
     seed=json.loads((ROOT/'wordpress/content-seed/standorte-depots.json').read_text())
     expected=next(s['section_config']['locations'] for s in seed['sections'] if s.get('section_component')=='depot_map')
-    assert result==expected
+    assert [{key: row[key] for key in ['name', 'lat', 'lng']} for row in result] == [
+        {key: row[key] for key in ['name', 'lat', 'lng']} for row in expected]
+    assert all(row['description'] == row['website'] == row['website_label'] == '' for row in result)
 
 
 def test_vegetable_snapshot_preserves_every_existing_name_and_month():
@@ -113,7 +116,35 @@ echo json_encode(['result'=>$r,'count'=>count($posts),'first'=>$posts[1]->post_t
 
 def test_catalog_fields_are_available_independently_of_the_theme():
     root=ROOT/'wordpress/web/app/mu-plugins/bioco-core/acf-json'
-    for kind,names in [('vegetable',{'vegetable_months'}),('depot',{'depot_lat','depot_lng','depot_description'})]:
+    for kind,names in [('vegetable',{'vegetable_months'}),('depot',{'depot_lat','depot_lng','depot_description','depot_public','depot_public_address','depot_website','depot_website_label'})]:
         group=json.loads((root/f'group_bioco_cpt_{kind}.json').read_text())
         assert group['location']==[[{'param':'post_type','operator':'==','value':f'bioco_{kind}'}]]
         assert {f['name'] for f in group['fields']}==names
+
+
+def test_depot_public_projection_preserves_private_storage_and_honors_empty_and_hidden_choices():
+    out = catalog(r'''
+wp_insert_post(['post_type'=>'bioco_depot','post_status'=>'publish','post_title'=>'Existing depot','meta_input'=>[
+    'depot_lat'=>'47.1','depot_lng'=>'8.2','depot_description'=>'PRIVATE CONTACT TOKEN',
+    'depot_public_address'=>'Approved address','depot_website'=>'https://example.test/depot',
+    'depot_website_label'=>'Depot website']]);
+$before=serialize([$posts,$meta]);$rows=bioco_catalog_rows('depots');$preserved=$before===serialize([$posts,$meta]);
+update_post_meta(1,'depot_public_address','');update_post_meta(1,'depot_website','');
+$empty=bioco_catalog_rows('depots');update_post_meta(1,'depot_public',0);$hidden=bioco_catalog_rows('depots');
+echo json_encode(compact('rows','preserved','empty','hidden','meta'));
+''')
+    assert out['preserved'] and out['meta']['1']['depot_description'] == 'PRIVATE CONTACT TOKEN'
+    assert 'PRIVATE CONTACT TOKEN' not in json.dumps(out['rows'])
+    assert out['rows'][0]['description'] == 'Approved address'
+    assert out['rows'][0]['website'] == 'https://example.test/depot'
+    assert out['empty'][0]['description'] == out['empty'][0]['website'] == out['empty'][0]['website_label'] == ''
+    assert out['hidden'] == []
+
+
+def test_depot_public_website_rejects_non_web_destinations():
+    out = catalog(r'''
+wp_insert_post(['post_type'=>'bioco_depot','post_status'=>'publish','post_title'=>'Depot','meta_input'=>[
+    'depot_website'=>'javascript:alert(1)','depot_website_label'=>'Hidden invalid link']]);
+echo json_encode(bioco_catalog_rows('depots'));
+''')
+    assert out[0]['website'] == out[0]['website_label'] == ''
