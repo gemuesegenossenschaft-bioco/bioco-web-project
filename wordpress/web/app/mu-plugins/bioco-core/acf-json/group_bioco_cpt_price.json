@@ -1,0 +1,86 @@
+{
+    "key": "group_bioco_cpt_price",
+    "title": "Abo-Preise",
+    "fields": [
+        {
+            "key": "field_bioco_price_key",
+            "name": "price_key",
+            "label": "Stabiler Rechner-Schlüssel",
+            "type": "text",
+            "required": 1,
+            "instructions": "Den bestehenden Schlüssel bei Preis- oder Namensänderungen beibehalten. Er wird bei der Anmeldung verwendet."
+        },
+        {
+            "key": "field_bioco_price_abo_type",
+            "name": "price_abo_type",
+            "label": "Abo-Typ der Anmeldung",
+            "type": "select",
+            "required": 1,
+            "choices": {
+                "halb": "Halb",
+                "standard": "Standard",
+                "doppel": "Doppel"
+            },
+            "allow_null": 1
+        },
+        {
+            "key": "field_bioco_price_price",
+            "name": "price_price",
+            "label": "Jahrespreis (CHF)",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "required": 1,
+            "default_value": 0
+        },
+        {
+            "key": "field_bioco_price_shares",
+            "name": "price_shares",
+            "label": "Erforderliche Anteilsscheine",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "required": 1,
+            "default_value": 0
+        },
+        {
+            "key": "field_bioco_price_work",
+            "name": "price_work",
+            "label": "Arbeitseinsätze",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "required": 1,
+            "default_value": 0
+        },
+        {
+            "key": "field_bioco_price_persons",
+            "name": "price_persons",
+            "label": "Personen",
+            "type": "number",
+            "min": 0,
+            "step": 1,
+            "required": 1,
+            "default_value": 0
+        },
+        {
+            "key": "field_bioco_price_recommended",
+            "name": "price_recommended",
+            "label": "Empfohlene Stufe",
+            "type": "true_false",
+            "default_value": 0,
+            "ui": 1
+        }
+    ],
+    "location": [
+        [
+            {
+                "param": "post_type",
+                "operator": "==",
+                "value": "bioco_price"
+            }
+        ]
+    ],
+    "active": true,
+    "show_in_rest": 0
+}

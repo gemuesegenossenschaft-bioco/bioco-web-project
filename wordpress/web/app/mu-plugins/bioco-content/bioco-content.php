@@ -8,6 +8,7 @@
 if (!defined('ABSPATH')) exit;
 
 require_once __DIR__ . '/catalog.php';
+require_once __DIR__ . '/prices.php';
 
 /**
  * Events (Aktuelles/Veranstaltungen). Single events live under /aktuelles/<slug>
