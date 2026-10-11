@@ -183,6 +183,45 @@ class Bioco_Import_CLI_Command {
     }
 
     /**
+     * Convert saved accordion items, portal tiles and titled editorial topics.
+     *
+     * ## OPTIONS
+     *
+     * [--post=<id>]
+     * : Limit the plan to one page, including an unpublished QA copy.
+     *
+     * [--apply]
+     * : Apply the validated plan with concurrent-edit protection. Default is dry-run.
+     *
+     * @subcommand editable-editorial
+     * @when after_wp_load
+     */
+    public function editable_editorial($args, $assoc_args) {
+        $query = ['post_type' => 'page', 'post_status' => 'publish', 'numberposts' => -1];
+        if (isset($assoc_args['post'])) {
+            if (!ctype_digit((string) $assoc_args['post']) || (int) $assoc_args['post'] < 1) WP_CLI::error('--post must be a positive numeric page ID.');
+            $target = get_post((int) $assoc_args['post']);
+            if (!$target || $target->post_type !== 'page') WP_CLI::error('--post must identify a page.');
+            $query['include'] = [(int) $assoc_args['post']];
+            $query['post_status'] = 'any';
+        }
+        $plan = [];
+        foreach (get_posts($query) as $post) {
+            try { [$content, $count] = bioco_import_editorial_content($post->post_content); }
+            catch (Throwable $error) { WP_CLI::error($post->post_name . ': ' . $error->getMessage()); }
+            if ($count) $plan[] = [$post, $content, $count];
+        }
+        foreach ($plan as [$post, $content, $count]) {
+            if (!empty($assoc_args['apply'])) {
+                try { bioco_import_native_save($post, $content); }
+                catch (Throwable $error) { WP_CLI::error($error->getMessage()); }
+            }
+            WP_CLI::log((empty($assoc_args['apply']) ? 'would-convert ' : 'converted ') . $post->ID . ': ' . $count);
+        }
+        WP_CLI::success(count($plan) . ' editorial page(s).');
+    }
+
+    /**
      * Importiert die bioco-Inhalte aus den Seed-Dateien in WordPress.
      *
      * Standard ist ein Probelauf (dry-run): es wird NICHTS geschrieben, nur

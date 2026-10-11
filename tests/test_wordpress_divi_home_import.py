@@ -348,6 +348,8 @@ def test_every_seed_serializes_only_native_divi_blocks():
         "divi/heading",
         "divi/image",
         "divi/button",
+        "divi/toggle",
+        "divi/blurb",
     }
     allowed.update("bioco-divi/" + p.parent.name for p in (ROOT / "wordpress/web/app/mu-plugins/bioco-core/native-modules").glob("*/module.json"))
     seed_paths = sorted((ROOT / "wordpress/content-seed").glob("*.json"))

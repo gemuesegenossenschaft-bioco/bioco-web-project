@@ -75,9 +75,10 @@ if ($action === 'create') {
     if (!$source || !in_array($source->post_type, $types, true)) {
         WP_CLI::error('Source must be content or a layout, never a global assignment.');
     }
+    $copy_title = 'BIOCO QA ' . $run . ' ' . $source->ID;
     $copy = wp_insert_post([
         'post_type' => $source->post_type, 'post_status' => 'draft',
-        'post_title' => 'BIOCO QA ' . $run . ' ' . $source->ID,
+        'post_title' => $copy_title,
         'post_name' => 'bioco-qa-' . $run . '-' . $source->ID,
         'post_content' => wp_slash($source->post_content), 'post_excerpt' => wp_slash($source->post_excerpt),
         'post_parent' => 0, 'comment_status' => 'closed', 'ping_status' => 'closed',
@@ -90,6 +91,9 @@ if ($action === 'create') {
         if (in_array($key, array_merge($ignored_meta, ['_bioco_editor_verification', '_wp_old_slug']), true)) {
             continue;
         }
+        // Divi saves this cached page-settings title back into post_title.
+        // Keep the verification identity when an editor reopens the copy.
+        if ($key === '_et_pb_post_settings_title') $values = [$copy_title];
         foreach ($values as $value) {
             add_post_meta($copy, $key, wp_slash(maybe_unserialize($value)));
         }
