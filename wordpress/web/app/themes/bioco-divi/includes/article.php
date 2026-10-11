@@ -3,6 +3,7 @@
 if (!defined('ABSPATH')) exit;
 
 require_once dirname(__DIR__, 3) . '/mu-plugins/bioco-import/includes/divi-blocks.php';
+require_once dirname(__DIR__, 3) . '/mu-plugins/bioco-import/includes/article-back-button.php';
 
 function bioco_divi_render_article(): string {
     $post_id = get_the_ID();
@@ -50,11 +51,7 @@ function bioco_divi_render_article(): string {
         $body = $is_event ? wp_kses_post((string) get_field('event_summary', $post_id)) : '';
     }
     $modules[] = $text($body, 'bioco-article-body');
-    $modules[] = bioco_import_divi_block('divi/button', $class_attrs('bioco-article-back') + [
-        'button' => ['innerContent' => ['desktop' => ['value' => [
-            'text' => 'Zurück zu Aktuelles', 'linkUrl' => home_url('/aktuelles/'), 'linkTarget' => 'off',
-        ]]]],
-    ]);
+    $modules[] = bioco_import_article_back_button();
     $column = bioco_import_divi_block('divi/column', $class_attrs('bioco-article-column'), $modules);
     $column['attrs']['module']['advanced']['type'] = ['desktop' => ['value' => '4_4']];
     $row = bioco_import_divi_block('divi/row', $class_attrs('bioco-article-row'), [$column]);

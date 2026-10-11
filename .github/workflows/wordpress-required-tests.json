@@ -23,6 +23,7 @@
     "tests/test_wordpress_editorial_layouts.py",
     "tests/test_wordpress_editorial_accessibility.py",
     "tests/test_wordpress_event_templates.py",
+    "tests/test_wordpress_event_back_button.py",
     "tests/test_wordpress_editor_isolation.py",
     "tests/test_wordpress_event_migration.py"
   ],

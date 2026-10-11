@@ -1,6 +1,7 @@
 <?php
 /** A saved native event body; values remain bound to the current event record. */
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/article-back-button.php';
 
 function bioco_import_event_variable(string $field): string {
     return '$variable(' . wp_json_encode(['type' => 'content', 'value' => [
@@ -36,11 +37,7 @@ function bioco_import_event_template_blocks(): array {
         'innerContent' => $value(bioco_import_event_variable('description')),
         'decoration' => ['font' => $font(['size' => '18px', 'lineHeight' => '1.8em'])],
     ]]);
-    // The button remains an ordinary native module; its visual redesign is #217.
-    $back = $module('divi/button', 'Zurück zu Aktuelles', ['button' => [
-        'innerContent' => $value(['text' => 'Zurück zu Aktuelles',
-            'linkUrl' => home_url('/aktuelles/'), 'linkTarget' => 'off']),
-    ]], ['spacing' => $spacing(['margin' => ['top' => '48px']])]);
+    $back = bioco_import_article_back_button();
     $column = bioco_import_divi_block('divi/column', ['module' => [
         'advanced' => ['type' => $value('4_4')],
     ]], [$title, $date, $image, $body, $back]);
