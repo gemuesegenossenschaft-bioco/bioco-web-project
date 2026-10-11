@@ -99,7 +99,23 @@ function bioco_utility_is_passthrough(array $blocks): bool {
     ], [$row]);
     // Compare the seed's complete attributes, including container styling.
     // Even an editor's spacing/preset change keeps their Theme Builder body.
-    return $blocks == parse_blocks(serialize_blocks([$section]));
+    return bioco_utility_block_shape($blocks) == bioco_utility_block_shape(parse_blocks(serialize_blocks([$section])));
+}
+
+/** Saved structure only. Divi's parser adds per-parse counters (index, id, ...) that differ every call. */
+function bioco_utility_block_shape(array $blocks): array {
+    $shape = [];
+    foreach ($blocks as $block) {
+        $block = (array) $block;
+        if (($block['blockName'] ?? null) === null && trim((string) ($block['innerHTML'] ?? '')) === '') continue;
+        $shape[] = [
+            'blockName' => $block['blockName'] ?? null,
+            'attrs' => (array) ($block['attrs'] ?? []),
+            'innerHTML' => trim((string) ($block['innerHTML'] ?? '')),
+            'innerBlocks' => bioco_utility_block_shape((array) ($block['innerBlocks'] ?? [])),
+        ];
+    }
+    return $shape;
 }
 
 add_filter('et_theme_builder_template_layouts', function ($layouts) {

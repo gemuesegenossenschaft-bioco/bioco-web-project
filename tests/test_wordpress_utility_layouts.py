@@ -359,6 +359,28 @@ def test_editor_modified_default_body_container_is_not_bypassed():
     assert out['original'] and not out['edited']
 
 
+def test_passthrough_ignores_divi_parser_runtime_metadata():
+    # Divi's BlockParser adds per-parse counters (index, id, orderIndex, storeInstance).
+    # Observed on staging 2026-10-10: two parses of the same body never compare equal.
+    out = php(LOAD + r"""
+    $export = json_decode(file_get_contents('wordpress/design-system/exports/theme-builder.json'), true);
+    $tag = function (array $blocks, int $run) use (&$tag) {
+        foreach ($blocks as $i => &$block) {
+            $block += ['orderIndex' => $run, 'index' => $run * 10 + $i, 'id' => $block['blockName'] . '-' . $run,
+                'storeInstance' => $run, 'layout_type' => 'default'];
+            $block['innerBlocks'] = $tag($block['innerBlocks'], $run);
+        }
+        return $blocks;
+    };
+    $blocks = $tag(parse_blocks($export['layouts']['301']['data']['301']), 7);
+    $original = bioco_utility_is_passthrough($blocks);
+    $blocks[0]['attrs']['module']['decoration']['spacing']['desktop']['value']['padding']['top'] = '80px';
+    $edited = bioco_utility_is_passthrough($blocks);
+    echo json_encode(compact('original', 'edited'));
+    """)
+    assert out['original'] and not out['edited']
+
+
 @pytest.mark.parametrize('post_status', ['draft', 'private', 'trash'])
 def test_nonpublished_library_content_never_leaks_to_search(post_status):
     out = php(LOAD + INIT + r"""
