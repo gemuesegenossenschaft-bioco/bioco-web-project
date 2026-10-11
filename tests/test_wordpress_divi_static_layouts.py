@@ -256,6 +256,8 @@ ALLOWED_BLOCKS = {
     "divi/text",
     "divi/image",
     "divi/button",
+    "divi/toggle",
+    "divi/blurb",
 }
 
 
@@ -282,29 +284,15 @@ def test_text_columns_is_native_and_preserves_content_order():
     assert _class(tree) == (
         "bioco-divi-section bioco-divi-text-columns bioco-divi-width-lg"
     )
-    children = _column(tree)["innerBlocks"]
-    assert [child["blockName"] for child in children] == [
-        "divi/text",
-        "divi/text",
-        "divi/image",
-        "divi/button",
-    ]
-
-    eyebrow = children[0]
-    assert _class(eyebrow) == "bioco-divi-eyebrow"
-
-    body = children[1]
-    assert _class(body) == (
-        "bioco-divi-text bioco-divi-text-columns-body bioco-divi-columns-2 bioco-divi-gap-lg"
-    )
-    assert body["attrs"]["content"]["innerContent"]["desktop"]["value"] == (
-        "<h3>Solidarität</h3><p>Wir teilen Arbeit.</p><h3>Nachhaltigkeit</h3><p>Demeter.</p>"
-    )
-
-    image = children[2]
-    assert image["blockName"] == "divi/image"
-    assert _class(image) == "bioco-divi-text-columns-image"
-
+    assert _column(tree)['innerBlocks'][0]['attrs']['content']['innerContent']['desktop']['value'] == 'Mission'
+    topics = tree['innerBlocks'][1]
+    cards = [column['innerBlocks'][0] for column in topics['innerBlocks']]
+    assert [card['blockName'] for card in cards] == ['divi/blurb', 'divi/blurb']
+    assert [card['attrs']['title']['innerContent']['desktop']['value']['text'] for card in cards] == ['Solidarität', 'Nachhaltigkeit']
+    assert [card['attrs']['content']['innerContent']['desktop']['value'] for card in cards] == ['<p>Wir teilen Arbeit.</p>', '<p>Demeter.</p>']
+    tail = tree['innerBlocks'][2]['innerBlocks'][0]['innerBlocks']
+    assert [block['blockName'] for block in tail] == ['divi/image', 'divi/button']
+    assert _class(tail[0]) == 'bioco-divi-text-columns-image'
     assert set(_all_names(tree)) <= ALLOWED_BLOCKS
 
 
@@ -610,7 +598,7 @@ def test_accordion_is_native_and_uses_only_allowlist_blocks():
     assert set(_all_names(tree)) <= ALLOWED_BLOCKS
 
 
-def test_accordion_one_text_module_per_item():
+def test_accordion_one_native_toggle_per_item():
     tree = _compose(
         {
             "block": "accordion",
@@ -625,10 +613,10 @@ def test_accordion_one_text_module_per_item():
     )
 
     children = _column(tree)["innerBlocks"]
-    assert [child["blockName"] for child in children] == ["divi/text", "divi/text", "divi/text"]
+    assert [child["blockName"] for child in children] == ["divi/toggle", "divi/toggle", "divi/toggle"]
 
 
-def test_accordion_each_module_has_semantic_details_summary_div():
+def test_accordion_title_and_body_use_separate_native_fields():
     tree = _compose(
         {
             "block": "accordion",
@@ -640,12 +628,10 @@ def test_accordion_each_module_has_semantic_details_summary_div():
         }
     )
 
-    html = _column(tree)["innerBlocks"][0]["attrs"]["content"]["innerContent"]["desktop"]["value"]
-    assert html.startswith("<details>")
-    assert "<summary>" in html
-    assert "</summary>" in html
-    assert "<div>" in html and "</div>" in html
-    assert "</details>" in html
+    attrs = _column(tree)['innerBlocks'][0]['attrs']
+    assert attrs['title']['innerContent']['desktop']['value'] == 'Titel'
+    assert attrs['content']['innerContent']['desktop']['value'] == '<p>Rich body.</p>'
+    assert attrs['module']['advanced']['open']['desktop']['value'] == 'off'
 
 
 def test_accordion_preserves_group_order():
@@ -662,14 +648,9 @@ def test_accordion_preserves_group_order():
         }
     )
 
-    children = _column(tree)["innerBlocks"]
-    htmls = [
-        child["attrs"]["content"]["innerContent"]["desktop"]["value"]
-        for child in children
-    ]
-    assert "Alpha" in htmls[0]
-    assert "Beta" in htmls[1]
-    assert "Gamma" in htmls[2]
+    children = _column(tree)['innerBlocks']
+    assert [child['attrs']['title']['innerContent']['desktop']['value'] for child in children] == ['Alpha', 'Beta', 'Gamma']
+    assert [child['attrs']['content']['innerContent']['desktop']['value'] for child in children] == ['<p>1</p>', '<p>2</p>', '<p>3</p>']
 
 
 def test_accordion_title_is_escaped_and_body_html_preserved():
@@ -689,7 +670,7 @@ def test_accordion_title_is_escaped_and_body_html_preserved():
 
     html = _column(tree)["innerBlocks"][0]["attrs"]["content"]["innerContent"]["desktop"]["value"]
     assert "<script>" not in html
-    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html
+    assert _column(tree)["innerBlocks"][0]["attrs"]["title"]["innerContent"]["desktop"]["value"] == "&lt;script&gt;alert(1)&lt;/script&gt;"
     assert "<p><strong>Bold</strong> und <a href=\"/link\">Link</a>.</p>" in html
 
 
@@ -710,7 +691,8 @@ def test_accordion_omits_blank_items():
     children = _column(tree)["innerBlocks"]
     assert len(children) == 1
     html = children[0]["attrs"]["content"]["innerContent"]["desktop"]["value"]
-    assert "Gültig" in html
+    assert children[0]["attrs"]["title"]["innerContent"]["desktop"]["value"] == "Gültig"
+    assert html == "<p>Ja.</p>"
 
 
 def test_accordion_empty_items_omit_section_content():
@@ -729,7 +711,7 @@ def test_accordion_empty_items_omit_section_content():
     assert children == []
 
 
-def test_accordion_has_legacy_editable_class_names():
+def test_accordion_retains_section_spacing_without_legacy_item_css():
     tree = _compose(
         {
             "block": "accordion",
@@ -743,7 +725,7 @@ def test_accordion_has_legacy_editable_class_names():
     assert "bioco-divi-accordion" in section_class
     assert "demeter-accordion" in section_class
     body_class = _class(_column(tree)["innerBlocks"][0])
-    assert "bioco-divi-accordion-item" in body_class
+    assert body_class == "bioco-editorial-toggle"
 
 
 def test_steps_are_numbered_and_skip_blank_items():
@@ -804,20 +786,16 @@ def test_link_tiles_render_portal_markup_and_preserve_href_or_div():
     )
 
     assert _class(tree) == "bioco-divi-section bioco-divi-link-tiles"
-    children = _column(tree)["innerBlocks"]
-    assert [child["blockName"] for child in children] == ["divi/heading", "divi/text"]
-
-    html = children[1]["attrs"]["content"]["innerContent"]["desktop"]["value"]
-    assert '<div class="portal-gateway">' in html
-    assert (
-        '<a class="portal-tile" href="https://portal.example.com" target="_blank" rel="noopener noreferrer">'
-        in html
-    )
-    assert '<div class="portal-tile">' in html
-    assert '<div class="portal-icon">🦆</div>' in html
-    assert '<h3>Mitglieder-Portal</h3>' in html
-    assert '<p>Extern</p>' in html
-    assert 'No title' not in html
+    assert _column(tree)['innerBlocks'][0]['blockName'] == 'divi/heading'
+    tiles = tree['innerBlocks'][1]['innerBlocks']
+    assert len(tiles) == 2
+    for tile in tiles:
+        icon, card = tile['innerBlocks']
+        assert icon['attrs']['content']['innerContent']['desktop']['value'] == '🦆'
+        assert card['blockName'] == 'divi/blurb'
+        assert card['attrs']['content']['innerContent']['desktop']['value'] == '<p>Extern</p>'
+    assert tiles[0]['innerBlocks'][1]['attrs']['title']['innerContent']['desktop']['value'] == {'text':'Mitglieder-Portal', 'url':'https://portal.example.com', 'target':'on'}
+    assert tiles[1]['innerBlocks'][1]['attrs']['title']['innerContent']['desktop']['value']['url'] == ''
     assert set(_all_names(tree)) <= ALLOWED_BLOCKS
 
 
@@ -845,20 +823,9 @@ def test_link_tiles_reject_unsafe_hrefs_and_mark_external_links_safe():
         }
     )
 
-    html = _column(tree)["innerBlocks"][1]["attrs"]["content"]["innerContent"]["desktop"]["value"]
-    assert '<div class="portal-tile"><h3>Unsafe javascript</h3>' in html
-    assert 'href="javascript:alert(1)"' not in html
-    relative_start = html.find('<a class="portal-tile" href="/kundenportal">')
-    assert relative_start != -1
-    relative_end = html.find('</a>', relative_start) + 4
-    relative_tile = html[relative_start:relative_end]
-    assert 'target=' not in relative_tile
-    assert 'rel=' not in relative_tile
-
-    assert (
-        '<a class="portal-tile" href="https://example.org" target="_blank" rel="noopener noreferrer">'
-        in html
-    )
+    titles = [col['innerBlocks'][0]['attrs']['title']['innerContent']['desktop']['value'] for col in tree['innerBlocks'][1]['innerBlocks']]
+    assert [title['url'] for title in titles] == ['', '/kundenportal', 'https://example.org']
+    assert [title['target'] for title in titles] == ['off', 'off', 'on']
 
 
 def test_composer_exposes_only_one_public_method():

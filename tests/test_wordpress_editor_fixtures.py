@@ -115,6 +115,15 @@ def test_global_assignment_can_never_be_duplicated_as_fixture():
     assert result['events'] == []
 
 
+def test_divi_page_settings_cannot_restore_the_published_title_into_a_qa_copy():
+    result = run(['create', '5', 'qa-20261009'], meta={'5': {
+        '_et_pb_post_settings_title': ['Original'], '_et_pb_post_settings_excerpt': ['Original excerpt'],
+    }})
+    assert ['meta', '_et_pb_post_settings_title', 'BIOCO QA qa-20261009 5'] in result['events']
+    assert ['meta', '_et_pb_post_settings_title', 'Original'] not in result['events']
+    assert ['meta', '_et_pb_post_settings_excerpt', 'Original excerpt'] in result['events']
+
+
 @pytest.mark.parametrize('type', ['event', 'group'])
 def test_registered_record_types_are_inventoried_and_copied(type):
     assert run(['inventory'], posts=[post(type=type)])['result'][0]['type'] == type

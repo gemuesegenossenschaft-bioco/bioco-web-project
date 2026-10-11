@@ -7,6 +7,7 @@
  */
 
 if (!defined('ABSPATH')) exit;
+require_once __DIR__ . '/editorial-layouts.php';
 
 final class Bioco_Import_Divi_Composer {
 
@@ -360,11 +361,23 @@ final class Bioco_Import_Divi_Composer {
             $children[] = self::headingBlock($title, 'h2', 'bioco-divi-title');
         }
 
-        if ($text !== '') {
-            $children[] = self::textBlock(
-                $text,
-                "bioco-divi-text bioco-divi-text-columns-body bioco-divi-columns-{$columns} bioco-divi-gap-{$gap}"
-            );
+        $topics = bioco_import_editorial_topics($text);
+        if ($text !== '' && !$topics) {
+            $children[] = self::textBlock($text, "bioco-divi-text bioco-divi-text-columns-body bioco-divi-columns-{$columns} bioco-divi-gap-{$gap}");
+        }
+        $rows = [];
+        if ($topics) {
+            if ($children) $rows = self::singleColumnSection('', 'bioco-divi-content', $children)['innerBlocks'];
+            $children = [];
+            $topicColumns = [];
+            // Column-major order retains the original newspaper layout and mobile reading order.
+            foreach (array_chunk($topics, (int) ceil(count($topics) / (int) $columns)) as $group) {
+                $cards = array_map(static fn(array $topic): array => self::editorialBlurb($topic['title'], $topic['text']), $group);
+                foreach ($cards as &$card) $card['attrs']['module']['decoration']['spacing']['desktop']['value']['margin']['bottom'] = '12px';
+                unset($card);
+                $topicColumns[] = self::editorialColumn($cards);
+            }
+            $rows[] = self::editorialRow($topicColumns, count($topicColumns), ['sm' => '16px', 'md' => '24px', 'lg' => '32px', 'xl' => '48px'][$gap], 'bioco-editorial-topics-row');
         }
 
         $image = self::imageBlock(
@@ -382,6 +395,10 @@ final class Bioco_Import_Divi_Composer {
             if ($block) $children[] = $block;
         }
 
+        if ($topics) {
+            if ($children) $rows = array_merge($rows, self::singleColumnSection('', 'bioco-divi-content', $children)['innerBlocks']);
+            return self::withChildren(bioco_import_divi_block('divi/section', self::classAttr("bioco-divi-section bioco-divi-text-columns bioco-divi-width-{$container}")), $rows);
+        }
         return self::singleColumnSection(
             "bioco-divi-section bioco-divi-text-columns bioco-divi-width-{$container}",
             'bioco-divi-content',
@@ -432,52 +449,79 @@ final class Bioco_Import_Divi_Composer {
         );
     }
 
-    private static function linkTilesSection(array $values): array {
-        $children = [];
+    private static function editorialBlurb(string $title, string $text, string $href = ''): array {
+        $kind = self::hrefKind($href);
+        $attrs = self::classAttr('bioco-editorial-card');
+        $attrs['title']['innerContent']['desktop']['value'] = [
+            'text' => htmlspecialchars($title, ENT_QUOTES, 'UTF-8'),
+            'url' => $kind === 'unsafe' ? '' : $href,
+            'target' => $kind === 'external' ? 'on' : 'off',
+        ];
+        $attrs['title']['decoration']['font']['font']['desktop']['value'] = [
+            'headingLevel' => 'h3', 'weight' => '700', 'color' => '#1A1A1A',
+        ];
+        $attrs['content']['innerContent']['desktop']['value'] = $text;
+        $attrs['content']['decoration']['bodyFont']['body']['font']['desktop']['value'] = ['color' => '#1A1A1A', 'lineHeight' => '1.7em'];
+        $attrs['contentContainer']['decoration']['sizing']['desktop']['value']['maxWidth'] = '100%';
+        $attrs['module']['decoration']['spacing']['desktop']['value']['margin']['bottom'] = '0px';
+        $attrs['module']['meta']['adminLabel']['desktop']['value'] = $title;
+        return bioco_import_divi_block('divi/blurb', $attrs);
+    }
 
-        $title = trim((string) ($values['title'] ?? ''));
-        if ($title !== '') {
-            $children[] = self::headingBlock($title, 'h2', 'bioco-divi-link-tiles-title');
+    private static function editorialRow(array $columns, int $count, string $gap, string $class): array {
+        $attrs = self::rowAttr(implode(',', array_fill(0, count($columns), '4_4')), $class);
+        $attrs['module']['decoration'] = [
+            'sizing' => ['desktop' => ['value' => ['width' => '100%', 'maxWidth' => '1080px', 'alignment' => 'center']]],
+            'layout' => [
+                'desktop' => ['value' => ['display' => 'grid', 'gridColumnWidths' => 'manual', 'gridTemplateColumns' => 'repeat(' . $count . ', minmax(0, 1fr))', 'columnGap' => $gap, 'rowGap' => $gap]],
+                'tablet' => ['value' => ['gridTemplateColumns' => 'minmax(0, 1fr)']],
+                'phone' => ['value' => ['gridTemplateColumns' => 'minmax(0, 1fr)']],
+            ],
+            'spacing' => ['desktop' => ['value' => ['padding' => ['top' => '0px', 'bottom' => '0px', 'left' => '0px', 'right' => '0px']]]],
+        ];
+        return self::withChildren(bioco_import_divi_block('divi/row', $attrs), $columns);
+    }
+
+    private static function editorialColumn(array $children, bool $tile = false): array {
+        $attrs = self::columnAttr('4_4', $tile ? 'bioco-editorial-tile' : 'bioco-editorial-topics');
+        $attrs['module']['decoration'] = [
+            'sizing' => ['desktop' => ['value' => ['width' => '100%', 'maxWidth' => '100%']]],
+            'spacing' => ['desktop' => ['value' => ['margin' => ['bottom' => '0px', 'right' => '0px']]]],
+        ];
+        if ($tile) {
+            $attrs['module']['decoration']['background']['desktop']['value']['color'] = '#FFFFFF';
+            $attrs['module']['decoration']['spacing']['desktop']['value']['padding'] = ['top' => '24px', 'bottom' => '24px', 'left' => '24px', 'right' => '24px'];
+            $attrs['module']['decoration']['border']['desktop']['value']['radius'] = ['topLeft' => '16px', 'topRight' => '16px', 'bottomLeft' => '16px', 'bottomRight' => '16px'];
+            $attrs['module']['decoration']['boxShadow']['desktop']['value'] = ['style' => 'preset1', 'horizontal' => '0px', 'vertical' => '1px', 'blur' => '3px', 'spread' => '0px', 'color' => 'rgba(31,42,27,0.08)'];
         }
+        return self::withChildren(bioco_import_divi_block('divi/column', $attrs), $children);
+    }
 
-        $tiles = [];
+    private static function linkTilesSection(array $values): array {
+        $rows = [];
+        $title = trim((string) ($values['title'] ?? ''));
+        if ($title !== '') $rows = self::singleColumnSection('', 'bioco-divi-content', [self::headingBlock($title, 'h2', 'bioco-divi-link-tiles-title')])['innerBlocks'];
+        $columns = [];
         foreach ($values['tiles'] ?? [] as $tile) {
             if (!is_array($tile)) continue;
-            $tileTitle = trim((string) ($tile['title'] ?? ''));
-            if ($tileTitle === '') continue;
-            $tiles[] = [
-                'title' => $tileTitle,
-                'text'  => trim((string) ($tile['text'] ?? '')),
-                'href'  => trim((string) ($tile['href'] ?? '')),
-                'icon'  => trim((string) ($tile['icon'] ?? '')),
-            ];
-        }
-
-        if ($tiles) {
-            $html = '<div class="portal-gateway">';
-            foreach ($tiles as $tile) {
-                $tagAttrs = self::linkTileTagAttrs($tile['href']);
-                $tag  = $tagAttrs['tag'];
-                $attrs = $tagAttrs['attrs'];
-                $html .= '<' . $tag . ' ' . $attrs . '>';
-                if ($tile['icon'] !== '') {
-                    $html .= '<div class="portal-icon">' . htmlspecialchars($tile['icon'], ENT_QUOTES, 'UTF-8') . '</div>';
-                }
-                $html .= '<h3>' . htmlspecialchars($tile['title'], ENT_QUOTES, 'UTF-8') . '</h3>';
-                if ($tile['text'] !== '') {
-                    $html .= '<p>' . htmlspecialchars($tile['text'], ENT_QUOTES, 'UTF-8') . '</p>';
-                }
-                $html .= '</' . $tag . '>';
+            $title = trim((string) ($tile['title'] ?? ''));
+            if ($title === '') continue;
+            $children = [];
+            $icon = trim((string) ($tile['icon'] ?? ''));
+            if ($icon !== '') {
+                // Retain the authored emoji; editors can also choose a native image/icon in the blurb.
+                $block = self::textBlock(htmlspecialchars($icon, ENT_QUOTES, 'UTF-8'), 'bioco-editorial-tile-icon');
+                $block['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']['size'] = '2rem';
+                $block['attrs']['module']['decoration']['spacing']['desktop']['value']['margin']['bottom'] = '12px';
+                $children[] = $block;
             }
-            $html .= '</div>';
-            $children[] = self::textBlock($html, 'bioco-divi-link-tiles-body');
+            $text = trim((string) ($tile['text'] ?? ''));
+            $children[] = self::editorialBlurb($title, $text === '' ? '' : '<p>' . htmlspecialchars($text, ENT_QUOTES, 'UTF-8') . '</p>', trim((string) ($tile['href'] ?? '')));
+            $children[count($children) - 1]['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']['color'] = '#4A4A4A';
+            $columns[] = self::editorialColumn($children, true);
         }
-
-        return self::singleColumnSection(
-            'bioco-divi-section bioco-divi-link-tiles',
-            'bioco-divi-content',
-            $children
-        );
+        if ($columns) $rows[] = self::editorialRow($columns, min(2, count($columns)), '24px', 'bioco-editorial-tiles-row');
+        return self::withChildren(bioco_import_divi_block('divi/section', self::classAttr('bioco-divi-section bioco-divi-link-tiles')), $rows);
     }
 
     private static function singleColumnSection(string $sectionClass, string $columnClass, array $children): array {
@@ -1066,24 +1110,23 @@ final class Bioco_Import_Divi_Composer {
             $title = trim((string) ($item['title'] ?? ''));
             $body = trim((string) ($item['body'] ?? ''));
             if ($title === '' && $body === '') continue;
-            $html = '<details>';
-            $html .= '<summary>' . htmlspecialchars($title, ENT_QUOTES, 'UTF-8') . '</summary>';
-            if ($body !== '') {
-                $html .= '<div>' . $body . '</div>';
-            }
-            $html .= '</details>';
-            $children[] = self::textBlock(
-                $html,
-                'bioco-divi-accordion-item',
-                (string) ($item['anchor'] ?? '')
-            );
+            $attrs = self::classAttr('bioco-editorial-toggle', (string) ($item['anchor'] ?? ''));
+            $attrs['title']['innerContent']['desktop']['value'] = htmlspecialchars($title, ENT_QUOTES, 'UTF-8');
+            $attrs['title']['decoration']['font']['font']['desktop']['value'] = ['headingLevel' => 'h3', 'weight' => '600', 'color' => '#1A1A1A'];
+            $attrs['content']['innerContent']['desktop']['value'] = $body;
+            $attrs['content']['decoration']['bodyFont']['body']['font']['desktop']['value'] = ['color' => '#1A1A1A', 'lineHeight' => '1.7em'];
+            $attrs['module']['advanced']['open']['desktop']['value'] = 'off';
+            $attrs['module']['meta']['adminLabel']['desktop']['value'] = $title;
+            $attrs['module']['decoration'] = [
+                'background' => ['desktop' => ['value' => ['color' => '#F5F1E8']]],
+                'spacing' => ['desktop' => ['value' => ['padding' => ['top' => '24px', 'bottom' => '24px', 'left' => '24px', 'right' => '24px'], 'margin' => ['bottom' => '20px']]]],
+                'border' => ['desktop' => ['value' => ['radius' => ['topLeft' => '16px', 'topRight' => '16px', 'bottomLeft' => '16px', 'bottomRight' => '16px'], 'styles' => ['all' => ['width' => '0px']]]]],
+                'boxShadow' => ['desktop' => ['value' => ['style' => 'preset1', 'horizontal' => '0px', 'vertical' => '4px', 'blur' => '12px', 'spread' => '0px', 'color' => 'rgba(31,42,27,0.12)']]],
+            ];
+            foreach (['openToggleIcon', 'closedToggleIcon'] as $icon) $attrs[$icon]['decoration']['icon']['desktop']['value']['color'] = '#2e7d32';
+            $children[] = bioco_import_divi_block('divi/toggle', $attrs);
         }
-
-        return self::singleColumnSection(
-            'bioco-divi-section bioco-divi-accordion demeter-accordion',
-            'bioco-divi-content',
-            $children
-        );
+        return self::singleColumnSection('bioco-divi-section bioco-divi-accordion demeter-accordion', 'bioco-divi-content', $children);
     }
 
     private static function withChildren(array $parent, array $children): array {

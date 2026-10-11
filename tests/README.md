@@ -213,6 +213,7 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 
 | File | Keep/Replace/Remove | Evidence |
 | --- | --- | --- |
+| `test_wordpress_editorial_layouts.py` | Keep, new (#201) | Real PHP migration: saved Divi attribute formats, preserved rich text/documents/anchors/siblings/order, rejected mixed markup and custom designs, idempotence. Required PR coverage. Native rendering and edit/save/reopen need separate unpublished staging/production copies. |
 | `test_wordpress_membership_adapter.py` | Keep, extended | Real PHP REST acceptance, complete local payload, insert-before-mail, overlapping replay, notification false/exception retention, conflicts, storage failure, staging gates. WP storage/mail/CAPTCHA are controlled; no real InnoDB or delivery claim. |
 | `test_wordpress_membership_admin.py` | Keep, new | Real PHP review callback denies non-admins before querying and escapes private records. No public REST hooks. |
 | `test_wordpress_production_routing.py` | keep | Real generator plus limited rule evaluator covers route precedence, internal rounds, deny policy, canonical slash, hosts, handler choice and print-only behavior. Actual Apache behavior is covered below. |
