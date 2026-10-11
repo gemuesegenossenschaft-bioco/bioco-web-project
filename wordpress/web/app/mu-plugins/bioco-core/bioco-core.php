@@ -10,6 +10,7 @@ if (!defined('ABSPATH')) exit;
 define('BIOCO_CORE_DIR', __DIR__);
 
 require_once BIOCO_CORE_DIR . '/includes/helpers.php';
+require_once BIOCO_CORE_DIR . '/includes/event-bindings.php';
 require_once BIOCO_CORE_DIR . '/includes/navigation.php';
 require_once BIOCO_CORE_DIR . '/includes/redirects.php';
 require_once BIOCO_CORE_DIR . '/includes/dynamic-sections.php';

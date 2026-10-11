@@ -40,7 +40,7 @@ function has_post_thumbnail($id) { global $fixture; return !empty($fixture['thum
 function get_the_post_thumbnail_url($id, $size) { global $fixture; return $fixture['thumbnail']; }
 function get_post_thumbnail_id($id) { return 7; }
 function wp_get_attachment_image_url($id, $size) { return ''; }
-function get_post_meta($id, $key, $single) { return 'Article thumbnail'; }
+function get_post_meta($id, $key, $single) { global $fixture; return $key === '_et_default' ? ($fixture['default_template'] ?? '1') : 'Article thumbnail'; }
 function home_url($path) { return 'https://example.test' . $path; }
 function add_filter($hook, $callback, $priority = 10, $args = 1) { $GLOBALS['filters'][$hook] = $callback; $GLOBALS['filter_args'][$hook] = $args; }
 function add_action($hook, $callback) {}
@@ -71,7 +71,7 @@ require 'wordpress/web/app/themes/bioco-divi/functions.php';
 require 'wordpress/web/app/themes/bioco-divi/' . (get_post_type(42) === 'event' ? 'single-event.php' : 'single.php');
 $html = ob_get_clean();
 $metadata_filter = $GLOBALS['filters']['get_post_metadata'];
-$theme_layouts = ['header' => ['id' => 101, 'enabled' => true], 'body' => ['id' => 102, 'enabled' => true], 'footer' => ['id' => 103, 'enabled' => true]];
+$theme_layouts = ['et_template' => 100, 'header' => ['id' => 101, 'enabled' => true], 'body' => ['id' => 102, 'enabled' => true], 'footer' => ['id' => 103, 'enabled' => true]];
 $theme_layouts_filter = $GLOBALS['filters']['et_theme_builder_template_layouts'];
 echo json_encode(['html' => $html, 'calls' => $calls, 'layout' => $GLOBALS['layout'],
     'original_theme_layouts' => $theme_layouts, 'filtered_theme_layouts' => $theme_layouts_filter($theme_layouts),
@@ -205,12 +205,18 @@ def test_image_url_stays_raw_in_native_attributes_without_double_encoding():
 
 
 @pytest.mark.parametrize('post_type', ['event', 'post'])
-def test_article_singles_bypass_global_theme_builder_layouts(post_type):
+def test_legacy_article_singles_keep_fallback_until_the_event_template_is_assigned(post_type):
     result = render(post_type=post_type)
     assert result['filtered_theme_layouts'] == []
     assert result['original_theme_layouts']['body']['id'] == 102
     assert 'Shared navigation' in result['html']
     assert 'Shared footer' in result['html']
+
+
+def test_explicit_native_event_template_is_honoured_but_posts_keep_their_fallback():
+    result = render(default_template='0')
+    assert result['filtered_theme_layouts'] == result['original_theme_layouts']
+    assert render(post_type='post', default_template='0')['filtered_theme_layouts'] == []
 
 
 @pytest.mark.parametrize('post_type,archive', [

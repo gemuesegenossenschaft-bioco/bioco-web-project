@@ -21,7 +21,9 @@
     "tests/test_wordpress_editor_routing_http.py",
     "tests/test_wordpress_editor_guard_install.py",
     "tests/test_wordpress_editorial_layouts.py",
-    "tests/test_wordpress_editorial_accessibility.py"
+    "tests/test_wordpress_editorial_accessibility.py",
+    "tests/test_wordpress_event_templates.py",
+    "tests/test_wordpress_editor_isolation.py"
   ],
   "operator_only_nodes": [
     "tests/test_wordpress_forms_lifecycle.py::test_wordpress_runtime_emits_runtime_before_adapters_without_blocking_turnstile",
