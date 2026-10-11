@@ -222,6 +222,42 @@ class Bioco_Import_CLI_Command {
     }
 
     /**
+     * Assign the verified native event body without changing event records.
+     *
+     * ## OPTIONS
+     *
+     * [--apply]
+     * : Append the assignment. Default is a read-only preview.
+     *
+     * [--expect=<sha256>]
+     * : Required preview fingerprint for --apply.
+     *
+     * [--backup=<path>]
+     * : Required private receipt path for --apply.
+     *
+     * [--restore=<path>]
+     * : Guardedly remove the assignment using its private receipt.
+     *
+     * @subcommand editable-events
+     * @when after_wp_load
+     */
+    public function editable_events($args, $assoc_args) {
+        try {
+            if (isset($assoc_args['restore'])) {
+                if (!empty($assoc_args['apply']) || isset($assoc_args['expect']) || isset($assoc_args['backup'])) throw new RuntimeException('Restore cannot be combined with apply options.');
+                if (!current_user_can('edit_others_posts')) throw new RuntimeException('An authorized WordPress user is required.');
+                $result = bioco_import_event_template_restore($assoc_args['restore']);
+            } else {
+                $plan = bioco_import_event_template_plan();
+                $result = empty($assoc_args['apply'])
+                    ? ['fingerprint' => $plan['fingerprint'], 'already_applied' => (bool) $plan['existing'], 'writes' => 0]
+                    : bioco_import_event_template_apply($plan, $assoc_args['expect'] ?? '', $assoc_args['backup'] ?? '');
+            }
+            WP_CLI::line(wp_json_encode($result));
+        } catch (Throwable $error) { WP_CLI::error($error->getMessage()); }
+    }
+
+    /**
      * Importiert die bioco-Inhalte aus den Seed-Dateien in WordPress.
      *
      * Standard ist ein Probelauf (dry-run): es wird NICHTS geschrieben, nur

@@ -79,6 +79,28 @@ Importing content is a separate, explicit operation: `wp bioco import` (dry-run 
 backup). Its seed-parity check `wp bioco verify` remains the acceptance gate for the first import;
 section 6 of `RUNBOOK-SOFTACULOUS.md` documents it.
 
+Saved event details use native Heading, Text, Image and Button modules with event
+record bindings. Activate them separately, after native save/reopen verification
+on unpublished copies in staging and production:
+
+```bash
+wp bioco editable-events
+wp --user=<authorized-editor> bioco editable-events --apply \
+  --expect=<fingerprint-from-preview> \
+  --backup=/home/bioco/backups/event-templates/before-assignment.json
+```
+
+The backup directory must already exist with mode 700. The command creates a
+private receipt, adds an All Events assignment and preserves event records and
+the global header/footer. It refuses existing custom assignments and concurrent
+template edits. Repeating a preview after activation reports `already_applied`;
+an apply with that current fingerprint preserves later edits to the saved body.
+Restore with `wp --user=<authorized-editor> bioco editable-events
+--restore=<receipt-path>`. Restoration removes only the added assignment if its
+captured state is unchanged. Both saved layouts remain available for recovery.
+An interrupted apply keeps its private receipt and any created, unassigned
+layout IDs for inspection. Event feeds/cards are a separate #202 slice.
+
 GitHub Actions requires `STAGING_SSH_HOST`, `STAGING_SSH_USER`, `STAGING_SSH_KEY`,
 `STAGING_SSH_KNOWN_HOSTS` (pinned host-key line), and `STAGING_WP_CONTENT` (the absolute
 Softaculous `wp-content` path). `STAGING_SSH_PORT` is optional.
