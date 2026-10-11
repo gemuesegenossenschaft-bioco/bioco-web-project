@@ -342,10 +342,6 @@ def test_home_desktop_geometry_tracks_live_site_baseline():
     """Critical desktop geometry stays aligned with the 1440px live baseline."""
     css = _style_css()
     for token in (
-        ".home .bioco-site-header",
-        "height: 120px",
-        ".home .bioco-primary-nav",
-        "top: 40px",
         ".home .bioco-home-hero-row",
         "height: 585px",
         ".home .bioco-home-hero + .bioco-home-feature",

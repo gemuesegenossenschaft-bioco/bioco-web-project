@@ -206,6 +206,8 @@ function makeEnv({
     dataset: { openLabel: 'Menü öffnen', closeLabel: 'Menü schliessen' },
   });
   const nav = makeNode('NAV', { attrs: { 'aria-label': 'Hauptnavigation' } });
+  nav.style = { setProperty() {} };
+  nav.getBoundingClientRect = () => ({ height: PRIMARY_HEIGHT });
   nav.querySelector = (sel) => {
     if (sel === '.bioco-menu-toggle') return menuWithoutToggle ? null : menuToggle;
     if (sel === '#bioco-primary-menu a') return menuLink;

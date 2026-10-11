@@ -5,6 +5,7 @@
     "tests/test_wordpress_button_readability.py",
     "tests/test_wordpress_forms_lifecycle.py",
     "tests/test_wordpress_navigation_scroll.py",
+    "tests/test_wordpress_navigation_layout.py",
     "tests/test_wordpress_visual_contract.py",
     "tests/test_wordpress_visual_parity.py",
     "tests/test_wordpress_issue_completion.py",
