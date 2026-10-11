@@ -92,7 +92,9 @@ wp --user=<authorized-editor> bioco editable-events --apply \
 
 The backup directory must already exist with mode 700. The command creates a
 private receipt, adds an All Events assignment and preserves event records and
-the global header/footer. It refuses existing custom assignments and concurrent
+the global header/footer. The event assignment references the default template's
+saved header/footer IDs and enabled settings, so their native edits reach event
+pages too. It refuses existing custom assignments and concurrent
 template edits. Repeating a preview after activation reports `already_applied`;
 an apply with that current fingerprint preserves later edits to the saved body.
 Restore with `wp --user=<authorized-editor> bioco editable-events
