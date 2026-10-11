@@ -21,8 +21,8 @@ function is_post_type_archive($type) { return false; }
 function esc_html($value) { return htmlspecialchars((string) $value, ENT_QUOTES); }
 function esc_attr($value) { return esc_html($value); }
 function esc_url($value) { return (string) $value; }
-function home_url($path) { return 'https://example.test' . $path; }
-function plugins_url($path, $file) { return 'https://example.test/wp-content/mu-plugins/bioco-core/' . $path; }
+function home_url($path) { return ($GLOBALS['state']['home_scheme'] ?? 'https') . '://example.test' . $path; }
+function plugins_url($path, $file) { return ($GLOBALS['state']['plugin_scheme'] ?? 'https') . '://example.test/wp-content/mu-plugins/bioco-core/' . $path; }
 function wp_get_attachment_image_url($id, $size) { return 'https://example.test/media/' . $id . '.png'; }
 function wp_kses_post($value) { return strip_tags($value, '<p><strong><br><a>'); }
 function wp_enqueue_style(...$args) {}
@@ -49,9 +49,9 @@ else {
 '''
 
 
-def render(slot='header', page='', navigation_path=None, theme_builder=False, **values):
+def render(slot='header', page='', navigation_path=None, theme_builder=False, home_scheme='https', plugin_scheme='https', **values):
     result = subprocess.run(['php', '-r', HARNESS], cwd=ROOT, check=True, capture_output=True, text=True,
-                            env=os.environ | {'BIOCO_SHELL_STATE': json.dumps(dict(slot=slot, page=page, values=values, theme_builder=theme_builder)),
+                            env=os.environ | {'BIOCO_SHELL_STATE': json.dumps(dict(slot=slot, page=page, values=values, theme_builder=theme_builder, home_scheme=home_scheme, plugin_scheme=plugin_scheme)),
                                               'BIOCO_SHELL_NAVIGATION': str(navigation_path or ROOT / CORE / 'includes/navigation.php')})
     return json.loads(result.stdout)
 
@@ -62,6 +62,21 @@ def test_header_seed_keeps_confirmed_links_and_logo():
     assert 'assets/bioco-logo.png' in html
     assert html.startswith('<header ') and html.endswith('</header>')
     assert 'BIOCÒ WERDEN' in html
+
+
+def test_cli_seed_captures_https_logo_on_https_site():
+    result = render(plugin_scheme='http')
+    assert result['values']['logo_url'].startswith('https://example.test/')
+
+
+@pytest.mark.parametrize('home_scheme,logo_url,expected', [
+    ('https', 'http://example.test/logo.png', 'https://example.test/logo.png'),
+    ('https', 'http://EXAMPLE.test/logo.png', 'https://EXAMPLE.test/logo.png'),
+    ('https', 'http://cdn.test/logo.png', 'http://cdn.test/logo.png'),
+    ('http', 'http://example.test/logo.png', 'http://example.test/logo.png'),
+])
+def test_saved_logo_upgrades_only_local_images_on_https_sites(home_scheme, logo_url, expected):
+    assert 'src="' + expected + '"' in render(home_scheme=home_scheme, logo_url=logo_url)['html']
 
 
 @pytest.mark.parametrize('slot', ['header', 'footer'])
@@ -143,6 +158,7 @@ require 'wordpress/web/app/mu-plugins/bioco-core/includes/dynamic-sections.php';
 function esc_html($value) { return htmlspecialchars((string) $value, ENT_QUOTES); }
 function esc_attr($value) { return esc_html($value); }
 function plugins_url($path, $file) { return 'https://example.test/wp-content/mu-plugins/bioco-core/' . $path; }
+function home_url($path) { return 'https://example.test' . $path; }
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/navigation.php';
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/divi-blocks.php';
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/shell-layouts.php';
