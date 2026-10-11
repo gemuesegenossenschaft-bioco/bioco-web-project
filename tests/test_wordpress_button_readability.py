@@ -274,23 +274,32 @@ def _outline_pixels_outside(page, sel, band=8):
             .filter(animation => Number.isFinite(animation.effect.getComputedTiming().endTime))
             .map(animation => animation.finished.catch(() => {})));
     }""")
-    box = page.locator(sel).first.bounding_box()
     margin = band + 12
-    shot = page.screenshot(
-        clip={"x": box["x"] - margin, "y": box["y"] - margin,
-              "width": box["width"] + 2 * margin, "height": box["height"] + 2 * margin})
+    for _ in range(3):
+        box = page.locator(sel).first.bounding_box()
+        # A button can touch the viewport edge. Chromium clamps negative crop
+        # coordinates, so use that actual origin when classifying its pixels.
+        origin = {axis: max(0, box[axis] - margin) for axis in ("x", "y")}
+        shot = page.screenshot(animations="disabled", clip={
+            **origin, "width": box["x"] + box["width"] + margin - origin["x"],
+            "height": box["y"] + box["height"] + margin - origin["y"]})
+        after = page.locator(sel).first.bounding_box()
+        if all(abs(box[key] - after[key]) < 0.1 for key in box):
+            break
+    else:
+        pytest.fail("focus target kept moving during pixel capture")
     img = Image.open(io.BytesIO(shot)).convert("RGB")
 
     def is_carrot(px):
         return all(abs(px[i] - CARROT[i]) <= 60 for i in range(3))
 
-    # Screenshot-local coordinates: the border box starts at (margin, margin).
+    # Translate the measured border box into the actual screenshot crop.
     # Count carrot pixels strictly OUTSIDE the border box (the enclosing ring).
-    m = margin
+    left, top = box["x"] - origin["x"], box["y"] - origin["y"]
     count = 0
     for y in range(img.height):
         for x in range(img.width):
-            inside_box = (m <= x < m + box["width"]) and (m <= y < m + box["height"])
+            inside_box = (left <= x < left + box["width"]) and (top <= y < top + box["height"])
             if not inside_box and is_carrot(img.getpixel((x, y))):
                 count += 1
     return count
@@ -496,6 +505,22 @@ class TestSharedBtnFamily:
         assert painted >= 200, (
             f"focus ring not painted outside the border box ({painted} px)"
         )
+
+    def test_pixel_probe_detects_a_clipped_ring_at_the_viewport_edge(self, page):
+        base, pg = page
+        pg.goto(f"{base}/tests/fixtures/button-readability/bioco-werden.html", wait_until="load")
+        selector = "a.bioco-divi-button--primary"
+        pg.locator(selector).evaluate("el => Object.assign(el.style, {position:'fixed', left:'0px', top:'220px', margin:'0px'})")
+        _focus_via_keyboard(pg, selector)
+        assert pg.locator(selector).bounding_box()["x"] == 0
+        assert _outline_pixels_outside(pg, selector) >= 200
+        # Recreate the actual outline-clipping fault. Computed outline remains
+        # solid, but no pixels may be painted outside the element's border box.
+        pg.locator(selector).evaluate("el => el.style.setProperty('clip-path', 'inset(0)', 'important')")
+        # Orange pixels inside the clipped box must not count as its outline.
+        pg.locator(selector).evaluate("el => el.style.backgroundColor = '#FF8C00'")
+        assert _style(pg, selector)["outlineStyle"] == "solid"
+        assert _outline_pixels_outside(pg, selector) < 200
 
     def test_btn_orange_keeps_its_surface(self, page):
         """Root review: hiding ::before removed the orange surface entirely.
