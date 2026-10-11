@@ -510,11 +510,15 @@ class TestSharedBtnFamily:
         base, pg = page
         pg.goto(f"{base}/tests/fixtures/button-readability/bioco-werden.html", wait_until="load")
         selector = "a.bioco-divi-button--primary"
+        pg.locator(selector).evaluate("el => Object.assign(el.style, {position:'fixed', left:'0px', top:'220px', margin:'0px'})")
         _focus_via_keyboard(pg, selector)
+        assert pg.locator(selector).bounding_box()["x"] == 0
         assert _outline_pixels_outside(pg, selector) >= 200
         # Recreate the actual outline-clipping fault. Computed outline remains
         # solid, but no pixels may be painted outside the element's border box.
         pg.locator(selector).evaluate("el => el.style.setProperty('clip-path', 'inset(0)', 'important')")
+        # Orange pixels inside the clipped box must not count as its outline.
+        pg.locator(selector).evaluate("el => el.style.backgroundColor = '#FF8C00'")
         assert _style(pg, selector)["outlineStyle"] == "solid"
         assert _outline_pixels_outside(pg, selector) < 200
 
