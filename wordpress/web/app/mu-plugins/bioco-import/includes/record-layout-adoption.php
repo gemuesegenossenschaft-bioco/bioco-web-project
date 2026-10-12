@@ -193,7 +193,10 @@ function bioco_record_adoption_replace(array $section, string $kind, array &$rep
         unset($row);
         if ($values['vegetable_column_label'] !== null) $nativeRows[0]['innerBlocks'][0]['innerBlocks'][0]['attrs']['content']['innerContent']['desktop']['value'] = esc_html($values['vegetable_column_label']);
         if ($empty !== null) $nativeRows[1]['innerBlocks'][0]['innerBlocks'][1]['attrs']['content']['innerContent']['desktop']['value'] = '<p>' . esc_html($empty) . '</p>';
+        $headerLayout = $nativeRows[0]['attrs']['module']['decoration']['layout']['desktop']['value'];
         $nativeRows[0]['attrs'] = array_replace_recursive($nativeRows[0]['attrs'], $rows[0]['attrs']);
+        $headLayout =& $nativeRows[0]['attrs']['module']['decoration']['layout']['desktop']['value'];
+        $headLayout = array_replace($headLayout, $headerLayout);
         $nativeRows[0]['attrs']['module']['advanced']['columnStructure']['desktop']['value'] = implode(',', array_fill(0, count($nativeRows[0]['innerBlocks']), '4_4'));
         bioco_record_adoption_class($nativeRows[0]['attrs'], 'bioco-calendar-head');
         bioco_record_adoption_role($nativeRows[0]['attrs'], 'row');
@@ -225,8 +228,9 @@ function bioco_record_adoption_tree(array $blocks, string $kind, array &$report,
         $at = [...$path, $index];
         $target = $kind === 'group' ? 'bioco-divi/group-cards' : 'bioco-divi/saisonkalender';
         if (($block['blockName'] ?? '') === 'divi/section' && bioco_record_adoption_contains($block, $target)) {
+            $converted = count($report);
             $block = bioco_record_adoption_replace($block, $kind, $report, $at);
-            if (!count($report)) throw new RuntimeException('Record leaf shares an unsupported section.');
+            if (count($report) !== $converted + 1) throw new RuntimeException('Record leaf shares an unsupported section.');
         }
         elseif (!empty($block['innerBlocks'])) $block['innerBlocks'] = bioco_record_adoption_tree($block['innerBlocks'], $kind, $report, $at);
     }

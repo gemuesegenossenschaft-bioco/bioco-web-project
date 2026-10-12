@@ -100,7 +100,11 @@ def test_group_conversion_preserves_saved_empty_copy_limit_design_and_siblings()
 def test_calendar_uses_saved_month_order_and_labels_and_archives_stale_rows():
     vals = {'vegetables': [{'name': 'old row', 'months': [1]}], 'empty_message': 'Nichts da',
             'vegetable_column_label': 'Sorte', 'month_columns': [{'number': 12, 'label': 'Dezember'}, {'number': 1, 'label': 'Januar'}]}
-    result = run('calendar', fixture('calendar', vals))
+    source = fixture('calendar', vals)
+    source_row = source[1]['innerBlocks'][0]
+    source_row['attrs']['module']['decoration'] = {'layout': {
+        'desktop': {'value': {'display': 'block'}}, 'tablet': {'value': {'rowGap': '12px'}}}}
+    result = run('calendar', source)
     assert 'error' not in result, result
     assert result['plan']['report'][0]['archived_vegetable_rows'] == 1
     assert result['blocks'][0] == result['before'][0]
@@ -109,6 +113,13 @@ def test_calendar_uses_saved_month_order_and_labels_and_archives_stale_rows():
     head, body = section['innerBlocks']
     assert len(head['innerBlocks']) == len(body['innerBlocks']) == 3
     assert head['attrs']['module']['advanced']['columnStructure']['desktop']['value'] == '4_4,4_4,4_4'
+    head_design = head['attrs']['module']['decoration']
+    assert head_design['layout']['desktop']['value']['display'] == 'grid'
+    assert head_design['layout']['desktop']['value']['gridColumnWidths'] == 'manual'
+    assert head_design['layout']['desktop']['value']['gridTemplateColumns'] == 'minmax(180px, 2fr) repeat(2, minmax(54px, 1fr))'
+    assert head_design['layout']['tablet']['value']['rowGap'] == '12px'
+    assert head_design['sizing']['desktop']['value']['minWidth'] == '1000px'
+    assert body['attrs']['module']['decoration']['layout']['desktop']['value']['display'] == 'grid'
     assert 'bioco-calendar-name' in json.dumps(head['innerBlocks'][0]['attrs'])
     assert [value(n['innerBlocks'][0]) for n in head['innerBlocks']] == ['Sorte', 'Dezember', 'Januar']
     assert 'month_12' in json.dumps(body['innerBlocks'][1]) and 'month_1' in json.dumps(body['innerBlocks'][2])
@@ -152,3 +163,15 @@ def test_cas_apply_restore_and_conflicts_preserve_other_columns():
     assert '100%' in result['apply']
     assert 'error' in run(mode='sql', plan=plan | {'after_content': 'bad'}, expected=plan['fingerprint'])
     assert 'error' in run(blocks=fixture(), snapshot_site='https://other.example/')
+
+
+def test_second_target_section_must_pass_its_own_structure_check():
+    blocks = fixture()
+    unsupported = copy.deepcopy(blocks[1])
+    column = unsupported['innerBlocks'][0]['innerBlocks'][0]
+    column['innerBlocks'].append(block('divi/text'))
+    column['innerContent'].append(None)
+    blocks.append(unsupported)
+    result = run(blocks=blocks)
+    assert 'error' in result
+    assert 'unsupported section' in result['error']
