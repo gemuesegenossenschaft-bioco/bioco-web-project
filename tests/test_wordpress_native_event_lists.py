@@ -19,6 +19,7 @@ function current_time($format) { return '2026-10-12 08:00:00'; }
 function wp_json_encode($v,$flags=0) { return json_encode($v,$flags); }
 function wp_generate_uuid4() { static $n=0; return 'unique-'.++$n; }
 function esc_html($v) { return htmlspecialchars($v,ENT_QUOTES,'UTF-8'); }
+function __($v,$domain='') { return $v; }
 function bioco_navigation_url($v) { return $v; }
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/helpers.php';
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/native-loop-empty.php';
