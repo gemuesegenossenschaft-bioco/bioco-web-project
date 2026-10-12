@@ -206,7 +206,8 @@ function bioco_price_adoption_calculator_layout(array $attrs): array {
     $rows = [$choice, $none, $invoiceHead, $abo, $shares, $total, $info, $actions];
     foreach (range(2, count($rows) - 1) as $index) {
         foreach (['desktop', 'tablet', 'phone'] as $device) {
-            $rows[$index]['attrs']['module']['decoration']['layout'][$device]['value']['gridColumn'] = '1 / -1';
+            $rows[$index]['attrs']['module']['decoration']['sizing'][$device]['value']['gridColumnStart'] = '1';
+            $rows[$index]['attrs']['module']['decoration']['sizing'][$device]['value']['gridColumnEnd'] = '-1';
         }
     }
     $section = bioco_price_layout_section($rows, 'bioco-price-calculator');

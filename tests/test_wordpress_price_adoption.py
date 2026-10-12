@@ -243,7 +243,11 @@ def test_saved_calculator_has_native_four_choice_grid_and_invoice_columns():
     assert [len(row['innerBlocks']) for row in rows[2:6]] == [5, 5, 5, 5]
     for row in rows[2:]:
         for device in ('desktop', 'tablet', 'phone'):
-            assert row['attrs']['module']['decoration']['layout'][device]['value']['gridColumn'] == '1 / -1'
+            decoration = row['attrs']['module']['decoration']
+            sizing = decoration['sizing'][device]['value']
+            assert sizing['gridColumnStart'] == '1'
+            assert sizing['gridColumnEnd'] == '-1'
+            assert 'gridColumn' not in decoration.get('layout', {}).get(device, {}).get('value', {})
     header = [col['innerBlocks'][0]['attrs']['title']['innerContent']['desktop']['value']
               for col in rows[2]['innerBlocks'][:4]]
     assert header == [copy[key]['innerContent']['desktop']['value']
@@ -281,13 +285,19 @@ def test_native_calculator_grid_controls_keep_invoice_below_choices_in_browser()
     section = next(node for node in walk(result['blocks'][0]) if node['blockName'] == 'divi/section'
                    and 'bioco-price-calculator' in native_class(node).split())
     layout = section['attrs']['module']['decoration']['layout']
+    invoice = section['innerBlocks'][2]
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         for width in (1280, 390):
             page = browser.new_page(viewport={'width': width, 'height': 700})
-            columns = layout['phone' if width < 640 else 'desktop']['value']['gridTemplateColumns']
+            device = 'phone' if width < 640 else 'desktop'
+            columns = layout[device]['value']['gridTemplateColumns']
+            sizing = invoice['attrs']['module']['decoration']['sizing'][device]['value']
+            # Divi's Sizing declaration emits grid-column from these two fields.
+            span = sizing['gridColumnStart'] + '/' + sizing['gridColumnEnd']
             page.set_content('<style>html,body{margin:0}.calculator{display:grid;grid-template-columns:' + columns
-                + ';gap:16px;width:100%;box-sizing:border-box;overflow-x:auto}.card{min-height:80px}.invoice{grid-column:1/-1;min-width:914px;min-height:80px}</style>'
+                + ';gap:16px;width:100%;box-sizing:border-box;overflow-x:auto}.card{min-height:80px}.invoice{grid-column:' + span
+                + ';min-width:914px;min-height:80px}</style>'
                 + '<div class="calculator"><div class="card">1</div><div class="card">2</div><div class="card">3</div>'
                 + '<div class="card">Kein Abo</div><div class="invoice">Rechnung</div></div>')
             positions = page.evaluate('''() => {
@@ -295,13 +305,16 @@ def test_native_calculator_grid_controls_keep_invoice_below_choices_in_browser()
               const invoice = document.querySelector('.invoice').getBoundingClientRect();
               const box = document.querySelector('.calculator');
               return {cards: cards.map(rect => [Math.round(rect.left), Math.round(rect.top)]),
-                invoiceTop: Math.round(invoice.top), pageWidth: document.documentElement.scrollWidth,
+                invoiceTop: Math.round(invoice.top), invoiceLeft: Math.round(invoice.left),
+                invoiceWidth: Math.round(invoice.width), pageWidth: document.documentElement.scrollWidth,
                 boxWidth: box.clientWidth, contentWidth: box.scrollWidth};
             }''')
             assert positions['invoiceTop'] > max(card[1] for card in positions['cards'])
+            assert positions['invoiceLeft'] == positions['cards'][0][0]
             assert positions['pageWidth'] == width
             if width == 1280:
                 assert len({card[1] for card in positions['cards']}) == 1
+                assert positions['invoiceWidth'] == positions['boxWidth']
             else:
                 assert len({card[1] for card in positions['cards']}) == 4
                 assert positions['contentWidth'] > positions['boxWidth']
