@@ -57,7 +57,8 @@ def fixture(tmp_path):
         path = script.parent / name
         path.write_text('#!/bin/sh\n'
             'echo ' + name + ' >> "$BIOCO_TEST_EVENTS"\n'
-            + ('if [ "${BIOCO_RELEASE_ROLLBACK:-0}" = 1 ]; then cp "$BIOCO_TEST_BASELINE" "$BIOCO_TEST_PROD_MANIFEST"; else cp "$BIOCO_TEST_CANDIDATE" "$BIOCO_TEST_PROD_MANIFEST"; fi\n' if name == 'deploy-wp-code.sh' else ''))
+            + ('echo "rollback=${BIOCO_RELEASE_ROLLBACK:-0}" >> "$BIOCO_TEST_EVENTS"\n'
+               'if [ "${BIOCO_RELEASE_ROLLBACK:-0}" = 1 ]; then cp "$BIOCO_TEST_BASELINE" "$BIOCO_TEST_PROD_MANIFEST"; else cp "$BIOCO_TEST_CANDIDATE" "$BIOCO_TEST_PROD_MANIFEST"; fi\n' if name == 'deploy-wp-code.sh' else ''))
         path.chmod(0o755)
     smoke = repo / 'tests/wordpress-staging-render-gate.sh'
     smoke.parent.mkdir(parents=True)
@@ -170,7 +171,8 @@ def test_code_only_rollback_restores_baseline_without_database_restore(tmp_path)
     assert json.loads(marker.read_text())['commit'] == baseline
     assert json.loads(Path(env['BIOCO_TEST_PROD_MANIFEST']).read_text()) == json.loads(Path(env['BIOCO_TEST_BASELINE']).read_text())
     rollback_events = events.read_text()[len(before):]
-    assert 'flock -n' in rollback_events and 'rollback-code-sync' not in rollback_events
+    assert 'flock -n' in rollback_events and 'deploy-wp-code.sh' in rollback_events
+    assert 'rollback=1' in rollback_events and 'rollback=0' not in rollback_events
     assert 'wp db export' not in rollback_events and 'wp db import' not in rollback_events
 
 
