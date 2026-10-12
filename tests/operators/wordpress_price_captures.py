@@ -27,6 +27,7 @@ def test_captured_saved_page(environment, kind, sha):
     assert path.is_file(), f'Required private saved page snapshot missing: {path}'
     records = json.loads(path.read_text())
     record = next(row for row in records if str(row['ID']) == ('6' if kind == 'table' else '10'))
+    record = {**record, 'ID': int(record['ID'])}
     result = run(kind, source=record, body_hash=sha,
         site='https://bioco.ch/' if environment == 'production' else 'https://staging.bioco.ch/')
     assert 'error' not in result, result
