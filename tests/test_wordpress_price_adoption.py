@@ -248,14 +248,180 @@ def test_saved_calculator_has_native_four_choice_grid_and_invoice_columns():
             assert sizing['gridColumnStart'] == '1'
             assert sizing['gridColumnEnd'] == '-1'
             assert 'gridColumn' not in decoration.get('layout', {}).get(device, {}).get('value', {})
+    for row in rows[2:6]:
+        assert row['attrs']['module']['decoration']['sizing']['desktop']['value']['minWidth'] == '914px'
+        for device in ('tablet', 'phone'):
+            decoration = row['attrs']['module']['decoration']
+            assert decoration['sizing'][device]['value']['minWidth'] == '0px'
+            assert decoration['layout'][device]['value']['gridTemplateColumns'] == 'repeat(2, minmax(0, 1fr))'
+            for index, column in enumerate(row['innerBlocks']):
+                responsive = column['attrs']['module']['decoration']
+                assert responsive['spacing']['phone']['value']['padding'] == {
+                    'top': '8px', 'bottom': '8px', 'left': '16px', 'right': '16px'}
+                if row is rows[2]:
+                    assert responsive['spacing']['desktop']['value']['padding'] == {
+                        'top': '16px', 'bottom': '16px', 'left': '24px', 'right': '24px'}
+                blank_text = (len(column['innerBlocks']) == 1
+                    and column['innerBlocks'][0]['blockName'] == 'divi/text'
+                    and column['innerBlocks'][0]['attrs']['content']['innerContent']['desktop']['value'] == '')
+                if not column['innerBlocks'] or blank_text:
+                    assert responsive['layout'][device]['value']['display'] == 'none'
+                else:
+                    sizing = responsive['sizing'][device]['value']
+                    assert (sizing['gridColumnStart'], sizing['gridColumnEnd']) == (
+                        (('1', '2') if index % 2 == 0 else ('2', '3')) if row is rows[2]
+                        else ('1', '2') if index == 1 else ('2', '3') if index == 2 else ('1', '-1'))
+    assert rows[2]['innerBlocks'][4]['innerBlocks'] == []
+    assert rows[3]['innerBlocks'][4]['innerBlocks'] == []
     header = [col['innerBlocks'][0]['attrs']['title']['innerContent']['desktop']['value']
               for col in rows[2]['innerBlocks'][:4]]
+    assert rows[2]['innerBlocks'][0]['attrs']['module']['decoration']['spacing']['desktop']['value']['padding']['top'] == '16px'
     assert header == [copy[key]['innerContent']['desktop']['value']
         for key in ('article_label', 'quantity_label', 'unit_price_label', 'total_label')]
+    for column in rows[2]['innerBlocks'][:4]:
+        font_attrs = column['innerBlocks'][0]['attrs']['title']['decoration']['font']['font']
+        font = font_attrs['desktop']['value']
+        assert font == {'headingLevel': 'h3', 'size': '16px', 'lineHeight': '1.6em',
+                        'weight': '500', 'color': '#ffffff'}
+        assert font_attrs['phone']['value'] == {'size': '14px', 'lineHeight': '1.6em'}
+    for row_index, column_index in [(3, 2), (3, 3), (4, 3), (5, 3)]:
+        column = rows[row_index]['innerBlocks'][column_index]
+        assert len(column['innerBlocks']) == 3
+        for device in ('desktop', 'tablet', 'phone'):
+            layout = column['attrs']['module']['decoration']['layout'][device]['value']
+            assert {key: layout[key] for key in ('display', 'flexDirection', 'alignItems', 'columnGap', 'rowGap')} == {
+                'display': 'flex', 'flexDirection': 'row', 'alignItems': 'baseline',
+                'columnGap': '0px', 'rowGap': '0px'}
+        prefix, value, suffix = column['innerBlocks']
+        assert prefix['attrs']['content']['innerContent']['desktop']['value'] == 'CHF'
+        assert prefix['attrs']['module']['decoration']['spacing']['desktop']['value']['margin']['right'] == '4px'
+        assert 'bioco-price-value-' in native_class(value)
+        assert suffix['attrs']['content']['innerContent']['desktop']['value'] == '.-'
+        for module in (prefix, value, suffix):
+            font = module['attrs']['content']['decoration']['bodyFont']['body']['font']
+            assert font['desktop']['value']['size'] == '16px'
+            assert font['desktop']['value']['weight'] == '700'
+            assert font['phone']['value'] == {'size': '14px', 'lineHeight': '1.6em'}
+    article = rows[3]['innerBlocks'][0]
+    shares_description = rows[4]['innerBlocks'][0]
+    for device in ('desktop', 'tablet', 'phone'):
+        article_layout = article['attrs']['module']['decoration']['layout'][device]['value']
+        assert {key: article_layout[key] for key in ('display','flexDirection','flexWrap','columnGap','rowGap')} == {
+            'display':'flex','flexDirection':'row','flexWrap':'wrap','columnGap':'4px','rowGap':'4px'}
+        shares_layout = shares_description['attrs']['module']['decoration']['layout'][device]['value']
+        assert (shares_layout['display'], shares_layout['flexDirection'], shares_layout['rowGap']) == ('flex','column','4px')
+        assert rows[4]['innerBlocks'][4]['attrs']['module']['decoration']['layout'][device]['value']['rowGap'] == '4px'
+    assert len(article['innerBlocks']) == 5 and len(shares_description['innerBlocks']) == 3
+    for index, module in enumerate(article['innerBlocks']):
+        font = module['attrs']['content']['decoration']['bodyFont']['body']['font']
+        assert font['desktop']['value']['size'] == ('16px' if index == 0 else '14px')
+        assert font['desktop']['value']['weight'] == '700'
+        assert font['phone']['value'] == {'size': '14px', 'lineHeight': '1.6em'}
+        if index < 2:
+            assert all(module['attrs']['module']['decoration']['sizing'][device]['value']['width'] == '100%'
+                for device in ('desktop','tablet','phone'))
+    assert article['innerBlocks'][2]['attrs']['module']['decoration']['spacing']['desktop']['value']['margin']['top'] == '4px'
+    assert article['innerBlocks'][1]['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']['color'] == 'var(--wp--preset--color--bioco-green)'
+    assert shares_description['innerBlocks'][1]['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']['color'] == 'var(--wp--preset--color--bioco-beet)'
+    actions = rows[4]['innerBlocks'][4]['innerBlocks']
+    assert [m['blockName'] for m in actions] == ['divi/text','divi/button','divi/button','divi/text']
+    label = actions[0]['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']
+    count = actions[3]['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']
+    assert (label['size'], label['lineHeight'], label['weight'], label['color']) == ('12px','1.6em','600','#4A4A4A')
+    assert (count['size'], count['lineHeight']) == ('14px','1.6em')
+    for action in actions[1:3]:
+        font = action['attrs']['button']['decoration']['font']['font']['desktop']['value']
+        padding = action['attrs']['module']['decoration']['spacing']['desktop']['value']['padding']
+        assert (font['size'], font['lineHeight']) == ('14px','1.6em')
+        assert padding == {'top':'11px','bottom':'11px','left':'16px','right':'16px'}
+    total_font = rows[5]['innerBlocks'][0]['innerBlocks'][0]['attrs']['title']['decoration']['font']['font']
+    assert total_font['desktop']['value'] == {'headingLevel':'h3','size':'16px','lineHeight':'1.6em','weight':'700','color':'#1A1A1A'}
+    assert total_font['phone']['value'] == {'size':'14px','lineHeight':'1.6em'}
     for marker in ('bioco-price-value-name', 'bioco-price-value-price', 'bioco-price-value-work',
                    'bioco-price-value-shares', 'bioco-price-value-share-cost', 'bioco-price-value-total',
                    'bioco-price-signup', 'bioco-price-no-selection'):
         assert marker in json.dumps(rows)
+
+
+def test_native_invoice_header_defaults_fit_each_cell_in_browser():
+    from playwright.sync_api import sync_playwright
+    result = run('calculator', blocks=fixture('calculator'))
+    section = next(node for node in walk(result['blocks'][0]) if node['blockName'] == 'divi/section'
+                   and 'bioco-price-calculator' in native_class(node).split())
+    header = section['innerBlocks'][2]
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        for width, device in [(1440, 'desktop'), (390, 'phone')]:
+            row_layout = header['attrs']['module']['decoration']['layout'][device]['value']
+            cell_markup = ''
+            cell_css = ''
+            for index, column in enumerate(header['innerBlocks'][:4], 1):
+                heading = column['innerBlocks'][0]
+                label = heading['attrs']['title']['innerContent']['desktop']['value']
+                font = heading['attrs']['title']['decoration']['font']['font']['desktop']['value']
+                font = {**font, **heading['attrs']['title']['decoration']['font']['font'].get(device, {}).get('value', {})}
+                responsive = column['attrs']['module']['decoration']['sizing'].get(device, {}).get('value', {})
+                span = (f'grid-column:{responsive["gridColumnStart"]}/{responsive["gridColumnEnd"]};'
+                        if 'gridColumnStart' in responsive else '')
+                cell_css += (f'.cell:nth-child({index}){{{span}}}'
+                             f'.cell:nth-child({index}) h3{{font-size:{font.get("size", "40px")};'
+                             f'line-height:{font.get("lineHeight", "1.2em")};'
+                             f'font-weight:{font.get("weight", "700")};color:{font.get("color", "#1a1a1a")}}}')
+                cell_markup += f'<div class="cell"><h3>{label}</h3></div>'
+            page = browser.new_page(viewport={'width': width, 'height': 700})
+            pad = '8px 16px' if device == 'phone' else '16px 24px'
+            page.set_content('<style>html,body{margin:0}*{box-sizing:border-box}'
+                f'.row{{display:grid;width:100%;grid-template-columns:{row_layout["gridTemplateColumns"]};'
+                f'column-gap:{row_layout["columnGap"]};row-gap:{row_layout.get("rowGap", "0px")}}}'
+                f'.cell{{padding:{pad};min-width:0}}h3{{margin:0;padding-bottom:10px}}'
+                + cell_css + '</style><div class="row">' + cell_markup + '</div>')
+            bounds = page.evaluate('''() => [...document.querySelectorAll('.cell')].map(cell => {
+                const range = document.createRange(); range.selectNodeContents(cell.querySelector('h3'));
+                const text = range.getBoundingClientRect(), box = cell.getBoundingClientRect();
+                return {label: cell.textContent, left: text.left, right: text.right,
+                    cellLeft: box.left, cellRight: box.right};
+              })''')
+            assert [item['label'] for item in bounds] == ['Artikel', 'Anzahl', 'Einzelpreis', 'Total']
+            assert all(item['left'] >= item['cellLeft'] and item['right'] <= item['cellRight'] for item in bounds)
+            assert page.evaluate('document.documentElement.scrollWidth') == width
+            page.close()
+        browser.close()
+
+
+def test_native_invoice_amount_fragments_share_one_line_in_browser():
+    from playwright.sync_api import sync_playwright
+    result = run('calculator', blocks=fixture('calculator'))
+    section = next(node for node in walk(result['blocks'][0]) if node['blockName'] == 'divi/section'
+                   and 'bioco-price-calculator' in native_class(node).split())
+    column = section['innerBlocks'][3]['innerBlocks'][2]
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        for width, device in [(1440, 'desktop'), (390, 'phone')]:
+            layout = column['attrs']['module']['decoration']['layout'][device]['value']
+            pad = column['attrs']['module']['decoration']['spacing'][device]['value']['padding']
+            prefix_margin = column['innerBlocks'][0]['attrs']['module']['decoration']['spacing']['desktop']['value']['margin']['right']
+            page = browser.new_page(viewport={'width': width, 'height': 700})
+            page.set_content('<style>html,body{margin:0}*{box-sizing:border-box}'
+                f'.amount{{width:{"150px" if device == "desktop" else "189px"};display:{layout["display"]};'
+                f'flex-direction:{layout["flexDirection"]};align-items:{layout["alignItems"]};'
+                f'column-gap:{layout["columnGap"]};row-gap:{layout["rowGap"]};'
+                f'padding:{pad["top"]} {pad["right"]} {pad["bottom"]} {pad["left"]}}}'
+                f'.part:first-child{{margin-right:{prefix_margin}}}p{{margin:0}}</style>'
+                '<div class="amount"><div class="part"><p>CHF</p></div><div class="part">750</div>'
+                '<div class="part"><p>.-</p></div></div>')
+            positions = page.evaluate('''() => {
+                const cell = document.querySelector('.amount').getBoundingClientRect();
+                return {cellRight: cell.right, parts: [...document.querySelectorAll('.part')]
+                    .map(el => ({left: el.getBoundingClientRect().left,
+                        right: el.getBoundingClientRect().right,
+                        top: el.getBoundingClientRect().top}))};
+              }''')
+            assert len({round(part['top']) for part in positions['parts']}) == 1
+            assert positions['parts'][0]['right'] < positions['parts'][1]['left']
+            assert positions['parts'][1]['right'] == positions['parts'][2]['left']
+            assert positions['parts'][-1]['right'] <= positions['cellRight']
+            page.close()
+        browser.close()
 
 
 @pytest.mark.parametrize('saved_class', ['', 'bioco-dynamic-section'])
@@ -295,11 +461,24 @@ def test_native_calculator_grid_controls_keep_invoice_below_choices_in_browser()
             sizing = invoice['attrs']['module']['decoration']['sizing'][device]['value']
             # Divi's Sizing declaration emits grid-column from these two fields.
             span = sizing['gridColumnStart'] + '/' + sizing['gridColumnEnd']
+            min_width = sizing.get('minWidth', invoice['attrs']['module']['decoration']['sizing']['desktop']['value']['minWidth'])
+            invoice_grid = invoice['attrs']['module']['decoration']['layout'][device]['value']['gridTemplateColumns']
+            cell_css = ''
+            for index, column in enumerate(invoice['innerBlocks'], 1):
+                decoration = column['attrs']['module']['decoration']
+                cell_layout = decoration.get('layout', {}).get(device, {}).get('value', {})
+                cell_sizing = decoration.get('sizing', {}).get(device, {}).get('value', {})
+                if cell_layout.get('display') == 'none' or not column['innerBlocks']:
+                    cell_css += f'.invoice>div:nth-child({index}){{display:none}}'
+                elif 'gridColumnStart' in cell_sizing:
+                    cell_css += f'.invoice>div:nth-child({index}){{grid-column:{cell_sizing["gridColumnStart"]}/{cell_sizing["gridColumnEnd"]}}}'
             page.set_content('<style>html,body{margin:0}.calculator{display:grid;grid-template-columns:' + columns
                 + ';gap:16px;width:100%;box-sizing:border-box;overflow-x:auto}.card{min-height:80px}.invoice{grid-column:' + span
-                + ';min-width:914px;min-height:80px}</style>'
+                + ';min-width:' + min_width + ';display:grid;grid-template-columns:' + invoice_grid + ';gap:12px;min-height:80px}'
+                + cell_css + '</style>'
                 + '<div class="calculator"><div class="card">1</div><div class="card">2</div><div class="card">3</div>'
-                + '<div class="card">Kein Abo</div><div class="invoice">Rechnung</div></div>')
+                + '<div class="card">Kein Abo</div><div class="invoice"><div>Artikel</div>'
+                + '<div>Anzahl</div><div>Einzelpreis</div><div>Total</div><div></div></div></div>')
             positions = page.evaluate('''() => {
               const cards = [...document.querySelectorAll('.card')].map(el => el.getBoundingClientRect());
               const invoice = document.querySelector('.invoice').getBoundingClientRect();
@@ -317,7 +496,9 @@ def test_native_calculator_grid_controls_keep_invoice_below_choices_in_browser()
                 assert positions['invoiceWidth'] == positions['boxWidth']
             else:
                 assert len({card[1] for card in positions['cards']}) == 4
-                assert positions['contentWidth'] > positions['boxWidth']
+                assert positions['invoiceWidth'] == positions['boxWidth']
+                assert positions['contentWidth'] == positions['boxWidth']
+                assert page.locator('.invoice').evaluate('(node) => [...node.children].every(cell => cell.getBoundingClientRect().right <= innerWidth)')
             page.close()
         browser.close()
 

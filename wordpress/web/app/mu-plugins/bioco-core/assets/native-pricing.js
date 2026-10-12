@@ -19,8 +19,10 @@
     var display = new WeakMap();
     function visibility(selector, visible) {
       root.querySelectorAll(selector).forEach(function (el) {
-        if (!display.has(el)) display.set(el, el.style.display);
-        el.hidden = !visible; el.style.display = visible ? display.get(el) : 'none';
+        var wrapper = el.matches('a.et_pb_button') && el.closest('.et_pb_button_module_wrapper');
+        var target = wrapper && root.contains(wrapper) ? wrapper : el;
+        if (!display.has(target)) display.set(target, target.style.display);
+        target.hidden = !visible; target.style.display = visible ? display.get(target) : 'none';
       });
     }
     function number(value) { return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, "'"); }

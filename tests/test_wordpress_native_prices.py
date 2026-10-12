@@ -182,6 +182,30 @@ def test_wrapped_legacy_signup_anchor_still_receives_handoff():
         browser.close()
 
 
+def test_native_button_visibility_hides_divi_wrapper_without_extra_grid_gap():
+    source = catalog(records() + "$options['bioco_pricing_enabled']=true;echo json_encode(bioco_price_catalog());")
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page()
+        page.set_content('<base href="https://example.test/">' + native_dom(layouts()['calculator'], source))
+        page.locator('a.bioco-price-remove').evaluate('''anchor => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'et_pb_button_module_wrapper';
+          anchor.replaceWith(wrapper); wrapper.append(anchor);
+        }''')
+        page.add_script_tag(path=str(ROOT / 'wordpress/web/app/mu-plugins/bioco-core/assets/native-pricing.js'))
+        root = page.locator('[data-bioco-prices]')
+        remove = root.locator('a.bioco-price-remove')
+        wrapper = root.locator('.et_pb_button_module_wrapper')
+        assert not wrapper.is_visible()
+        assert not remove.is_visible()
+        root.locator('a[href="#bioco-share-add"]').click()
+        assert wrapper.is_visible() and remove.is_visible()
+        root.locator('a[href="#bioco-share-remove"]').click()
+        assert not wrapper.is_visible() and not remove.is_visible()
+        browser.close()
+
+
 def test_native_query_is_scoped_and_invalid_catalog_never_lists_partial_prices():
     out = catalog(records() + r'''
 function add_filter(...$args){}function bioco_native_extract_wrapper($attrs){return ['className'=>$attrs['class']??''];}
