@@ -37,7 +37,7 @@ function bioco_event_loop_order_options(array $options): array {
     foreach ($options as $option) {
         if (($option['value'] ?? '') === 'meta_value') return $options;
     }
-    $options[] = ['value' => 'meta_value', 'label' => 'Veranstaltungsdatum'];
+    $options[] = ['value' => 'meta_value', 'label' => __('Veranstaltungsdatum', 'bioco')];
     return $options;
 }
 add_filter('et_builder_loop_order_by_options_event', 'bioco_event_loop_order_options');

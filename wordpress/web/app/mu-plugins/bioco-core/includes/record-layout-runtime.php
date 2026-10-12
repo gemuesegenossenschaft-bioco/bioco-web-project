@@ -1,7 +1,7 @@
 <?php
 /** Readable record routing and native collection query boundaries. */
 if (!defined('ABSPATH')) exit;
-require_once dirname(__DIR__, 2) . '/bioco-import/includes/record-layouts.php';
+require_once __DIR__ . '/record-library.php';
 
 function bioco_record_native_has_class(array $attrs, string $class): bool {
     return in_array($class, preg_split('/\s+/', bioco_native_extract_wrapper($attrs)['className'], -1, PREG_SPLIT_NO_EMPTY), true);

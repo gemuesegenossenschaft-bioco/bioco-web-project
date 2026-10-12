@@ -13,3 +13,5 @@ Use the second option. Backend code resolves readable records and published coll
 Calendar header order is the presentation source for repeated record cells. A scoped browser adapter aligns their columns and accessible header references; it adds no visible copy or CSS. Native row/column sizing and contained overflow remain editable saved attributes. The template has no local vegetable-data form: WordPress's Gemüse records own names, order and months.
 
 Code and parser/browser checks do not establish licensed native rendering or UI persistence. The release owner must verify an unpublished copy before adopting public presentation.
+
+The runtime's saved-layout lookup lives in `bioco-core/includes/record-library.php`, shared with the importer. Loading all import composers on each public request created an unnecessary dependency and broke core-only asset verification. Keeping the full import package as a runtime dependency, deferring that dependency until rendering, and sharing only the lookup were compared. The shared lookup keeps runtime reads independent of presentation generation.

@@ -2,6 +2,7 @@
 /** Saved native group and calendar starters. No records or assignments are written. */
 if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/utility-layouts.php';
+require_once dirname(__DIR__, 2) . '/bioco-core/includes/record-library.php';
 
 function bioco_record_variable(string $field): string {
     return '$variable(' . wp_json_encode(['type' => 'content', 'value' => [
@@ -117,11 +118,6 @@ function bioco_record_layout_definitions(): array {
             bioco_utility_section([bioco_utility_heading('Saisonkalender', 'h2'), bioco_utility_text('<p>●: in Saison</p>')]), $calendar,
         ])],
     ];
-}
-
-function bioco_record_library_posts(string $key): array {
-    return get_posts(['post_type' => 'et_pb_layout', 'name' => 'bioco-record-' . $key,
-        'post_status' => array_values(get_post_stati()), 'posts_per_page' => 2]);
 }
 
 /** Missing library entries only; existing drafts and editorial changes are kept. */
