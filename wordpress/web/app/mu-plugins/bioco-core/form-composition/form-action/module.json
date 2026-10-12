@@ -119,6 +119,32 @@
           "spacing": {}
         }
       }
+    },
+    "action": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "action.innerContent",
+            "label": "Aktion",
+            "priority": 100,
+            "render": true,
+            "component": {
+              "name": "bioco/form-action-type",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
     }
   },
   "settings": {

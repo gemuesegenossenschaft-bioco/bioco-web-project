@@ -165,6 +165,58 @@
           }
         }
       }
+    },
+    "commitment_count": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "commitment_count.innerContent",
+            "label": "Anzahl Pflicht-Zustimmungen",
+            "priority": 100,
+            "render": true,
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
+    },
+    "thank_you_url": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "thank_you_url.innerContent",
+            "label": "Seite nach Anmeldung",
+            "priority": 110,
+            "render": true,
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
     }
   },
   "settings": {

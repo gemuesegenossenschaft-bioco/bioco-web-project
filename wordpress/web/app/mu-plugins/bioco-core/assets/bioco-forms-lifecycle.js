@@ -242,6 +242,11 @@
       ? (submitBtn.getAttribute('data-submit-label') || originalLabel)
       : '';
 
+    function publishMessage(text, error) {
+      if (adapter.messageText) text = adapter.messageText(form, text, error);
+      if (messageBox) showMessage(messageBox, text, error);
+    }
+
     function renderCaptcha() {
       if (!captchaContainer || !config.turnstileSiteKey) return;
       loadTurnstileScript().then(function () {
@@ -271,7 +276,8 @@
         // reload copy (a completed error stays retryable on the next
         // submit, so no premature copy here).
         if (messageBox && turnstileTransportFailed) {
-          showMessage(messageBox, config.transportError, true);
+          if (adapter.onState) adapter.onState(form, 'error', {error: config.transportError});
+          publishMessage(config.transportError, true);
         }
       });
     }
@@ -284,7 +290,7 @@
       var errorMessage = adapter.errorText
         ? adapter.errorText(json, config.fallbackError)
         : ((json && json.error) || config.fallbackError);
-      if (messageBox) showMessage(messageBox, errorMessage, true);
+      publishMessage(errorMessage, true);
       inFlight = false;
       if (submitBtn) {
         submitBtn.disabled = false;
@@ -306,7 +312,7 @@
         return;
       }
       form.hidden = true;
-      if (messageBox) showMessage(messageBox, config.successMessage, false);
+      publishMessage(config.successMessage, false);
     }
 
     form.addEventListener('submit', function (event) {
@@ -335,11 +341,13 @@
             // no global arrived since: say exactly that instead of
             // pretending a retry exists. Values and caption stay
             // untouched, nothing reloads or re-submits itself.
-            showMessage(messageBox, config.transportError, true);
+            if (adapter.onState) adapter.onState(form, 'error', {error: config.transportError});
+            publishMessage(config.transportError, true);
           } else {
             // The widget is rendering or a token is awaited (also the
             // truthful transitional copy right after a late recovery).
-            showMessage(messageBox, config.captchaError, true);
+            if (adapter.onState) adapter.onState(form, 'error', {error: config.captchaError});
+            publishMessage(config.captchaError, true);
           }
         }
         return;

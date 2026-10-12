@@ -22,7 +22,7 @@ The HTML tree is direct. Editors must learn another container hierarchy, and arb
 
 ## Approach C. Ordinary Divi layout with associated controls
 
-`renderFormPart(kind, values, mode)` renders one controller, field or action. `connectForm(scope)` associates controls with the controller's HTML form. `composeForm(type, values)` builds native Section/Row/Column trees without writing them.
+`renderFormPart(kind, values, mode)` renders one controller, field or action. `connectForm(scope)` associates controls with the controller's HTML form. `composeForm(type, values, fields)` builds native Section/Row/Column trees without writing them.
 
 Caller: place one controller in a native section marked `bioco-form-scope`, then add/move native field/action modules and ordinary text/heading/row/column modules. A native row marked `bioco-form-step` is a wizard step.
 
@@ -44,3 +44,11 @@ C. The functional module owns backend identities and submission state. Saved Div
 4. Remove the membership exact-six assumption and traverse native step rows.
 5. Add explicit Divi outcome states and preserve existing message text before retiring presentation overrides.
 6. Verify native save/reopen on private copies after the release owner stages the reviewed candidate.
+
+## Membership review and confirmation
+
+The same design uses independently arranged Form Value modules for review fields. Ordinary native rows marked `bioco-form-step` define wizard order; information-only rows are valid. Traversal validates the active row and returns to the affected row on server errors. No fixed step count remains.
+
+Confirmation rows keep their ordinary native children and explicit outcome classes. `bioco_doi_outcome(request, verifyNonce, confirm)` separates HTTP/nonce policy from the existing one-time-token backend. GET never calls `confirm`; POST calls it only after nonce verification. The request caches one outcome so duplicate native controllers cannot consume twice. Native builders prepare content without saving it.
+
+Presentation-message retirement is conditional data adoption. Effective text is captured before each accepted native replacement; an explicit group opt-in removes the old editor controls and override behavior while preserving the archived values for rollback. Shared validation and mail text stays under backend ownership. Code deployment does not set this opt-in.

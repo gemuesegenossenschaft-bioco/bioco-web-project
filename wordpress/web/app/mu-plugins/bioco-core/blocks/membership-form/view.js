@@ -1,4 +1,4 @@
-/** Six-step membership wizard with stable retry identity. */
+/** Membership wizard with editable native steps and stable retry identity. */
 (function () {
   'use strict';
 
@@ -24,6 +24,12 @@
       'standard-2-3-personen': 'standard',
       'doppel-4-6-personen': 'doppel'
     };
+    if (form.hasAttribute('data-bioco-instance-config')) {
+      try {
+        var config = JSON.parse(form.getAttribute('data-bioco-instance-config'));
+        if (Object.prototype.hasOwnProperty.call(config, 'aboTypes')) aboTypes = config.aboTypes || {};
+      } catch (error) {return;}
+    }
 
     if (selected === 'kein') {
       setHiddenValue(form, 'membershipType', 'shares-only');
@@ -33,7 +39,7 @@
       return;
     }
 
-    if (!aboTypes[selected]) return;
+    if (!Object.prototype.hasOwnProperty.call(aboTypes, selected) || ['halb','standard','doppel'].indexOf(aboTypes[selected]) < 0) return;
     setHiddenValue(form, 'membershipType', 'abo');
     setHiddenValue(form, 'aboType', aboTypes[selected]);
     setHiddenValue(form, 'additionalShares', nonNegativeInteger(params.get('additional')));
@@ -42,13 +48,18 @@
 
   function prepareWizard(form) {
     applyCalculatorSelection(form);
-    var steps = form.querySelectorAll ? Array.from(form.querySelectorAll('.form-step')) : [];
-    if (steps.length !== 6) return;
+    var scope = form.biocoFormScope || form;
+    function owned(selector) {
+      return Array.from(scope.querySelectorAll(selector)).filter(function (element) {return !form.biocoFormScope || element.closest('.bioco-form-scope') === scope;});
+    }
+    var steps = scope.querySelectorAll ? Array.from(scope.querySelectorAll('.form-step, .bioco-form-step')).filter(function (step) {return !form.biocoFormScope || step.closest('.bioco-form-scope') === scope;}) : [];
+    if (steps.length === 0) return;
     var current = 0;
-    var back = form.querySelector('[data-wizard-back]');
-    var next = form.querySelector('[data-wizard-next]');
-    var submit = form.querySelector('[type="submit"]');
-    var progress = form.querySelector('[data-wizard-progress]');
+    var back = owned('[data-wizard-back]')[0];
+    var next = owned('[data-wizard-next]')[0];
+    var submit = owned('[type="submit"]').filter(function (button) {return button.form === form;})[0];
+    var progress = owned('[data-wizard-progress]')[0];
+    if (!back || !next || !submit || !progress) return;
     var identity = form.querySelector('[name="submissionId"]');
     if (identity && !identity.value) {
       var bytes = new Uint8Array(16);
@@ -57,11 +68,12 @@
     }
 
     function summary() {
-      var target = form.querySelector('[data-membership-summary]');
+      var target = owned('[data-membership-summary]')[0];
       if (!target) return;
       target.replaceChildren();
-      steps.slice(0, 5).forEach(function (step) {
+      steps.filter(function (step) {return !target || !step.contains(target);}).forEach(function (step) {
         step.querySelectorAll('input,select,textarea').forEach(function (input) {
+          if (input.form !== form) return;
           if (input.type === 'hidden' || ((input.type === 'checkbox' || input.type === 'radio') && !input.checked) || !input.value) return;
           var label = input.labels && input.labels[0];
           if (!label) return;
@@ -81,16 +93,16 @@
       next.hidden = current === steps.length - 1;
       submit.hidden = current !== steps.length - 1;
       progress.textContent = (progress.getAttribute('data-label') || '').replace('{current}', current + 1).replace('{total}', steps.length);
-      if (current === steps.length - 1) summary();
+      summary();
       if (focus) {
-        var heading = steps[current].querySelector('h3') || steps[current];
+        var heading = steps[current].querySelector('h1,h2,h3,h4,h5,h6') || steps[current];
         heading.setAttribute('tabindex', '-1');
         heading.focus();
       }
     }
 
     function advance() {
-      var fields = Array.from(steps[current].querySelectorAll('input,select,textarea'));
+      var fields = Array.from(steps[current].querySelectorAll('input,select,textarea')).filter(function (input) {return input.form === form;});
       for (var i = 0; i < fields.length; i++) {
         if (!fields[i].reportValidity()) return;
       }
@@ -106,7 +118,7 @@
       }
     }, true);
     // Reveal a previously completed step if browser or server validation fails.
-    form.addEventListener('invalid', function (event) {
+    scope.addEventListener('invalid', function (event) {
       var index = steps.findIndex(function (step) {return step.contains(event.target);});
       if (index >= 0 && index !== current) show(index, false);
     }, true);
@@ -157,6 +169,8 @@
     });
     return;
   }
+
+  window.BiocoMembership = {prepare: prepareWizard};
 
   window.BiocoForms.mount({
     scope: SCOPE,

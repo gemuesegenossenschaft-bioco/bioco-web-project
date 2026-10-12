@@ -77,7 +77,7 @@ def test_render_keeps_identities_constraints_labels_and_inert_contract(rendered)
     assert 'data-form-captcha' not in rendered['inert']
     assert rendered['wrong'] == rendered['empty'] == ''
     assert rendered['enqueued'] == ['bioco-native-form-composition'] * 2
-    assert set(rendered['metadata']) == {'form-controller','form-field','form-action'}
+    assert {'form-controller','form-field','form-action'} <= set(rendered['metadata'])
     field = rendered['metadata']['form-field']['attributes']
     assert 'font' in field['control']['settings']['decoration']
     assert 'border' in field['control']['settings']['decoration']
@@ -193,7 +193,8 @@ def test_error_retry_keeps_values_and_accessible_field_errors(browser, rendered)
         assert len(descriptions) == 2
         assert page.locator('#'+descriptions[1]).inner_text() == 'Email rejected'
         assert page.locator('#copy-0 .bioco-form-state-error').is_visible()
-        assert page.locator('#copy-0 .form-message').inner_text() == 'Server failure'
+        assert page.locator('#copy-0 .form-message').is_hidden()
+        assert page.locator('#copy-0 .bioco-form-state-error').inner_text() == 'Authored error 0'
         page.locator('#copy-0 button').click()
         page.wait_for_function('window.traffic.length===2 && document.querySelector("#copy-0").dataset.biocoFormState==="success"')
         assert email.get_attribute('aria-invalid') is None

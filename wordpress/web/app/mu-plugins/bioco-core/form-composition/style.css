@@ -6,3 +6,4 @@
 .bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-success,
 .bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-error,
 .bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-pending { display: none !important; }
+.bioco-form-field input[type="checkbox"], .bioco-form-field input[type="radio"] { width: auto; }

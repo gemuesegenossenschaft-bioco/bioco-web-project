@@ -161,6 +161,58 @@
           "spacing": {}
         }
       }
+    },
+    "options": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "options.innerContent",
+            "label": "Bestätigte Auswahlwerte",
+            "priority": 100,
+            "render": true,
+            "component": {
+              "name": "bioco/form-options",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
+    },
+    "choice_value": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "choice_value.innerContent",
+            "label": "Wert der Auswahl",
+            "priority": 110,
+            "render": true,
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
     }
   },
   "settings": {
