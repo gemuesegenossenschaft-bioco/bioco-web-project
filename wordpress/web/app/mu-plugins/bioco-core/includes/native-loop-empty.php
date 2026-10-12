@@ -3,7 +3,7 @@
 if (!defined('ABSPATH')) exit;
 
 final class Bioco_Native_Loop_Empty {
-    private static int $projecting = 0;
+    private static array $projecting = [];
 
     public static function has_class(array $attrs, string $class): bool {
         $value = $attrs['module']['advanced']['htmlAttributes']['desktop']['value'] ?? [];
@@ -25,6 +25,9 @@ final class Bioco_Native_Loop_Empty {
     /** Clone ancestor paths and complete saved empty branches, retaining IDs/context. */
     public static function select(WP_Block $block): ?WP_Block {
         if (self::has_class($block->parsed_block['attrs'] ?? [], 'bioco-loop-empty')) return self::copy_branch($block);
+        // Another record loop owns its own empty branch. Do not harvest it for
+        // this loop; a selected outer empty subtree is copied whole above.
+        if (self::has_class($block->parsed_block['attrs'] ?? [], 'bioco-record-loop')) return null;
         $children = [];
         foreach ($block->inner_blocks as $child) {
             $selected = self::select($child);
@@ -41,21 +44,27 @@ final class Bioco_Native_Loop_Empty {
         return $copy;
     }
 
-    private static function in_record_loop(WP_Block $block): bool {
+    private static function loop_key(string $id, $instance): string {
+        return json_encode([$id, $instance]);
+    }
+
+    private static function record_loop_owner(WP_Block $block): ?string {
         $store = '\\ET\\Builder\\FrontEnd\\BlockParser\\BlockParserStore';
-        if (!class_exists($store)) return false;
+        if (!class_exists($store)) return null;
         $id = $block->parsed_block['id'] ?? '';
         $instance = $block->parsed_block['storeInstance'] ?? null;
         $seen = [];
         while ($id !== '' && !isset($seen[$id])) {
             $seen[$id] = true;
             $parent = $store::get_parent($id, $instance);
-            if (!$parent) return false;
+            if (!$parent) return null;
             $attrs = (array) ($parent->attrs ?? []);
-            if (self::has_class($attrs, 'bioco-record-loop') && !empty($attrs['__loop_source_id'])) return true;
+            if (self::has_class($attrs, 'bioco-record-loop')) {
+                return !empty($attrs['__loop_source_id']) ? self::loop_key((string) $parent->id, $instance) : null;
+            }
             $id = (string) ($parent->id ?? '');
         }
-        return false;
+        return null;
     }
 
     public static function filter_output(string $output, array $attrs, WP_Block $block, $elements, array $defaults): string {
@@ -64,20 +73,23 @@ final class Bioco_Native_Loop_Empty {
             $renderer = '\\ET\\Builder\\Packages\\ModuleLibrary\\Row\\RowModule';
             if (!class_exists($renderer)) return $output;
             $content = '';
-            self::$projecting++;
+            self::$projecting[] = self::loop_key((string) ($block->parsed_block['id'] ?? ''), $block->parsed_block['storeInstance'] ?? null);
             try {
                 foreach ($block->inner_blocks as $column) {
                     $selected = self::select($column);
                     if ($selected !== null) $content .= $selected->render();
                 }
-            } finally { self::$projecting--; }
+            } finally { array_pop(self::$projecting); }
             if ($content === '') return '';
             // Module::render replaces no-result children a second time. Use the
             // same native row callback with that runtime flag removed; no fixed markup.
             unset($attrs['__loop_no_results']);
             return $renderer::render_callback($attrs, $content, $block, $elements, $defaults);
         }
-        if (self::$projecting === 0 && self::has_class($attrs, 'bioco-loop-empty') && self::in_record_loop($block)) return '';
+        if (self::has_class($attrs, 'bioco-loop-empty')) {
+            $owner = self::record_loop_owner($block);
+            if ($owner !== null && !in_array($owner, self::$projecting, true)) return '';
+        }
         return $output;
     }
 }

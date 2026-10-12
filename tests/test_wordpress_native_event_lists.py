@@ -1,4 +1,7 @@
-"""Native saved event trees and shared query semantics; hosted Divi editing is separate."""
+"""Native saved event trees and shared query semantics; hosted Divi editing is separate.
+
+Keep/Replace/Remove evidence map: tests/README.md.
+"""
 import json
 import subprocess
 from pathlib import Path
@@ -28,7 +31,9 @@ function parse_blocks($html) { return (new WP_Block_Parser())->parse($html); }
 ''') + WP_SERIALIZER_STUB + r'''
 $state=json_decode(stream_get_contents(STDIN),true);
 try {
-    if (isset($state['query'])) {
+    if (isset($state['order_options'])) {
+        echo json_encode(bioco_event_loop_order_options($state['order_options']));
+    } elseif (isset($state['query'])) {
         $attrs=['module'=>['advanced'=>['htmlAttributes'=>['desktop'=>['value'=>['class'=>$state['classes']]]],
             'loop'=>['desktop'=>['value'=>['postPerPage'=>$state['count'] ?? 3]]]]]];
         echo json_encode(bioco_event_loop_query($state['query'],$attrs));
@@ -38,8 +43,10 @@ try {
         $attrs=[];
         foreach($values as $field=>$value) $attrs[$field]=['innerContent'=>['desktop'=>['value'=>$value]]];
         $attrs['module']['advanced']['htmlAttributes']['desktop']['value']=['id'=>'module-id','class'=>'bioco-native-component'];
+        if ($state['default_anchor'] ?? false) $attrs['module']['advanced']['htmlAttributes']['desktop']['value']['id']='';
         if($state['responsive'] ?? false) $attrs['empty_message']['innerContent']['phone']['value']='different';
         if($state['design'] ?? false) $attrs['module']['decoration']['spacing']['desktop']['value']=['padding'=>['top'=>'73px']];
+        if($state['unknown_control'] ?? false) $attrs['module']['advanced']['future_control']=['desktop'=>['value'=>'Keep me']];
         if($state['unknown'] ?? false) $attrs['future_field']=['innerContent'=>['desktop'=>['value'=>'Keep me']]];
         $source=bioco_import_divi_block('bioco-divi/'.str_replace('_','-',$component),$attrs);
         $htmlattrs=fn($class,$id)=>['module'=>['advanced'=>['htmlAttributes'=>['desktop'=>['value'=>['class'=>$class,'id'=>$id]]]]]];
@@ -48,7 +55,9 @@ try {
         $row=bioco_import_divi_block('divi/row',$htmlattrs('bioco-divi-row','row-id'),[$column]);
         $sibling=bioco_import_divi_block('divi/row',['module'=>['decoration'=>['sizing'=>['phone'=>['value'=>['width'=>'73%']]]]]]);
         $section=bioco_import_divi_block('divi/section',['module'=>['decoration'=>['background'=>['desktop'=>['value'=>['color'=>'#aabbcc']]]]]],[$sibling,$row]);
-        [$content,$count]=bioco_import_event_lists_content(serialize_blocks([$section]));
+        $unrelated=bioco_import_divi_block('divi/section',[],[$sibling]);
+        $unrelated['innerContent']=['<p>KEEP_STATIC</p>',null]; $unrelated['innerHTML']='<p>KEEP_STATIC</p>';
+        [$content,$count]=bioco_import_event_lists_content(serialize_blocks([$unrelated,$section]));
         [$again,$repeat]=bioco_import_event_lists_content($content);
         echo json_encode(['blocks'=>parse_blocks($content),'count'=>$count,'repeat'=>$repeat,'stable'=>$again===$content,
             'sibling'=>parse_blocks(serialize_blocks([$sibling]))[0],'values'=>bioco_native_extract_values($component,$attrs)]);
@@ -71,7 +80,7 @@ def walk(blocks):
 
 
 def loops(result):
-    return [b for b in walk(result['blocks']) if 'loop' in b['attrs'].get('module', {}).get('advanced', {})]
+    return [b for b in walk(result['blocks']) if 'loop' in (b['attrs'] or {}).get('module', {}).get('advanced', {})]
 
 
 def query(classes='bioco-event-loop bioco-event-upcoming bioco-event-general', **extra):
@@ -93,6 +102,13 @@ def test_native_filters_count_and_sort_remain_owned_by_the_saved_loop():
     assert '2026-10-12 08:00:00' in text and 'NOT EXISTS' in text and 'general' in text
 
 
+def test_native_order_selector_retains_other_options_and_exposes_event_date_once():
+    original = [{'value': 'date', 'label': 'Published'}, {'value': 'title', 'label': 'Title'}]
+    selected = run(order_options=original)
+    assert selected == original + [{'value': 'meta_value', 'label': 'Veranstaltungsdatum'}]
+    assert run(order_options=selected) == selected
+
+
 def test_ambiguous_semantics_and_explicit_zero_do_not_fall_back_to_all_records():
     assert query(count=0)['query_args']['post__in']==[-1]
     assert query(classes='bioco-event-loop')['query_args']['post__in']==[-1]
@@ -106,7 +122,7 @@ def test_conversion_is_idempotent_preserves_siblings_wrappers_and_source_anchors
     result=run(values={'limit':0,'include_schnuppertage':False,'standard_title':'0','empty_message':'','archive_url':'/archiv/','standard_link_label':'Archiv'})
     assert 'error' not in result
     assert result['count']==1 and result['repeat']==0 and result['stable']
-    section=result['blocks'][0]
+    section=result['blocks'][1]
     assert section['attrs']['module']['decoration']['background']['desktop']['value']['color']=='#aabbcc'
     assert section['innerBlocks'][0]==result['sibling']
     assert section['innerBlocks'][1]['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['id']=='row-id'
@@ -117,7 +133,7 @@ def test_conversion_is_idempotent_preserves_siblings_wrappers_and_source_anchors
     assert 'bioco-event-general' in loop['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['class']
     blocks=list(walk(result['blocks']))
     assert all(b['blockName'].startswith('divi/') for b in blocks)
-    assert any(b['attrs'].get('button',{}).get('innerContent',{}).get('desktop',{}).get('value',{}).get('linkUrl')=='/archiv/' for b in blocks)
+    assert any((b['attrs'] or {}).get('button',{}).get('innerContent',{}).get('desktop',{}).get('value',{}).get('linkUrl')=='/archiv/' for b in blocks)
     assert 'loop_bioco_event_url' in json.dumps(blocks)
 
 
@@ -144,7 +160,48 @@ def test_visit_information_labels_and_explicit_blank_values_are_preserved():
     assert 'loop_bioco_event_image' not in data
 
 
-@pytest.mark.parametrize('state', [{'responsive':True},{'design':True},{'unknown':True},{'shared':True}])
+@pytest.mark.parametrize('variant', ['standard', 'banner'])
+def test_every_upcoming_feed_retains_native_image_summary_and_more_link(variant):
+    result = run(values={'variant': variant, 'title': 'Banner', 'standard_title': 'Events',
+                         'schnuppertage_title': 'Besuche'})
+    upcoming = [b for b in loops(result) if 'bioco-event-upcoming' in b['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['class']]
+    assert len(upcoming) == (1 if variant == 'banner' else 2)
+    for loop in upcoming:
+        data = json.dumps(loop, ensure_ascii=False)
+        assert 'loop_bioco_event_image_alt' in data and 'loop_bioco_event_summary' in data
+        buttons = [b for b in walk([loop]) if b['blockName'] == 'divi/button']
+        assert buttons[0]['attrs']['button']['innerContent']['desktop']['value']['text'] == 'Mehr erfahren →'
+        assert 'loop_bioco_event_url' in buttons[0]['attrs']['button']['innerContent']['desktop']['value']['linkUrl']
+    if variant == 'banner':
+        heading = next(b for b in walk(result['blocks']) if b['blockName'] == 'divi/heading')
+        assert heading['attrs']['title']['decoration']['font']['font']['desktop']['value']['headingLevel'] == 'h2'
+
+
+def test_unsupported_negative_count_refuses_conversion_without_truncating_records():
+    assert 'error' in run(values={'limit': -1})
+
+
+@pytest.mark.parametrize('component', ['events_feed', 'schnuppertage'])
+def test_legacy_default_fragment_targets_survive_on_the_static_wrapper(component):
+    result = run(component=component, default_anchor=True)
+    ids = [(b['attrs'] or {}).get('module', {}).get('advanced', {}).get('htmlAttributes', {}).get('desktop', {}).get('value', {}).get('id') for b in walk(result['blocks'])]
+    assert ids.count(component.replace('_', '-')) == 1
+
+
+@pytest.mark.parametrize('state', [{'responsive':True},{'unknown':True},{'unknown_control':True}])
 def test_converter_refuses_unknown_values_or_authored_layout_instead_of_overwriting(state):
     result=run(values={'empty_message':'Keep this'},**state)
     assert 'error' in result
+
+
+def test_shared_rows_authored_design_and_unrelated_html_survive_direct_leaf_replacement():
+    result=run(values={'empty_message':'Keep this'},shared=True,design=True)
+    assert 'error' not in result and result['count']==1
+    assert result['blocks'][0]['innerContent'][0]=='<p>KEEP_STATIC</p>'
+    source_column=result['blocks'][1]['innerBlocks'][1]['innerBlocks'][0]
+    assert [b['blockName'] for b in source_column['innerBlocks']]==['divi/row','divi/text']
+    wrapper=source_column['innerBlocks'][0]
+    assert wrapper['attrs']['module']['decoration']['spacing']['desktop']['value']['padding']['top']=='73px'
+    ids=[(b['attrs'] or {}).get('module',{}).get('advanced',{}).get('htmlAttributes',{}).get('desktop',{}).get('value',{}).get('id') for b in walk(result['blocks'])]
+    assert ids.count('module-id')==1
+    assert all((b['attrs'] or {}).get('module',{}).get('advanced',{}).get('htmlAttributes',{}).get('desktop',{}).get('value',{}).get('id')!='module-id' for b in loops(result))

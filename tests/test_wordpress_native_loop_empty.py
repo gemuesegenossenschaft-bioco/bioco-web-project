@@ -1,6 +1,7 @@
 """Own branch selection/lifecycle at external boundaries; no licensed Divi emulation.
 
 The installed native renderer is verified separately with a read-only operator probe.
+Keep/Replace/Remove evidence map: tests/README.md.
 """
 import json
 import subprocess
@@ -59,6 +60,20 @@ namespace {
     $column = block('column','divi/column','', '',[$card,$empty,$empty2]);
     $row = block('row','divi/row','bioco-record-loop','',[$column]);
     if ($state['active'] ?? true) {
+        \ET\Builder\FrontEnd\BlockParser\BlockParserStore::$parents['column']->attrs['__loop_source_id']='saved-loop';
+    }
+    if (isset($state['nested'])) {
+        $innerEmpty = block('inner-empty','divi/text','bioco-loop-empty','INNER_EMPTY');
+        $innerCard = block('inner-card','divi/text','','INNER_CARD');
+        $innerColumn = block('inner-column','divi/column','','',[$innerCard,$innerEmpty]);
+        $innerRow = block('inner-row','divi/row','bioco-record-loop','',[$innerColumn]);
+        $innerRow->parsed_block['attrs']['__loop_source_id']='inner-loop';
+        \ET\Builder\FrontEnd\BlockParser\BlockParserStore::$parents['inner-column']->attrs['__loop_source_id']='inner-loop';
+        if ($state['nested'] === 'empty') $innerRow->parsed_block['attrs']['__loop_no_results']=true;
+        $children = $state['nested'] === 'card' ? [$innerRow,$empty2]
+            : [block('empty','divi/column','bioco-loop-empty','OUTER_EMPTY',[$innerRow])];
+        $column = block('column','divi/column','','',$children);
+        $row = block('row','divi/row','bioco-record-loop','',[$column]);
         \ET\Builder\FrontEnd\BlockParser\BlockParserStore::$parents['column']->attrs['__loop_source_id']='saved-loop';
     }
     $before = inspect($row);
@@ -130,3 +145,19 @@ def test_render_exception_restores_projection_state_and_allows_retry():
     assert result['caught'] == 'Boundary failure'
     assert result['normal'] == '' and result['output'] == 'EMPTY_AEMPTY_CHILDEMPTY_B'
     assert result['original_unchanged'] is True
+
+
+def test_outer_projection_does_not_select_a_nested_cards_empty_branch():
+    result = run(nested='card')
+    assert result['output'] == 'EMPTY_B'
+    assert [b['id'] for b in result['selected']['children']] == ['empty2']
+    assert result['original_unchanged'] is True
+
+
+def test_nested_populated_and_empty_loops_keep_their_own_state_in_an_outer_empty_branch():
+    populated = run(nested='populated')
+    assert populated['output'] == 'OUTER_EMPTYINNER_CARD'
+    assert populated['original_unchanged'] is True
+    empty = run(nested='empty')
+    assert empty['output'] == 'OUTER_EMPTYINNER_EMPTY'
+    assert empty['original_unchanged'] is True

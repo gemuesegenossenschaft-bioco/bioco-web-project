@@ -20,10 +20,10 @@ function bioco_import_event_list_element(string $name, string $label, array $att
     return bioco_import_divi_block($name, $attrs);
 }
 
-function bioco_import_event_list_text(string $text, string $label, bool $heading = false): array {
+function bioco_import_event_list_text(string $text, string $label, bool $heading = false, string $level = 'h3'): array {
     $field = $heading ? 'title' : 'content';
     $decoration = ['font' => ['font' => bioco_import_event_list_value($heading
-        ? ['headingLevel' => 'h3', 'size' => $label === 'Veranstaltungstitel' ? '18px' : '24px', 'weight' => '700']
+        ? ['headingLevel' => $level, 'size' => $label === 'Veranstaltungstitel' ? '18px' : '24px', 'weight' => '700']
         : ['size' => '16px', 'lineHeight' => '1.6em'])]];
     return bioco_import_event_list_element($heading ? 'divi/heading' : 'divi/text', $label, [
         $field => ['innerContent' => bioco_import_event_list_value($text), 'decoration' => $decoration],
@@ -89,19 +89,20 @@ function bioco_import_event_list_blocks(string $component, array $values): array
     $row = 'bioco_import_event_list_row';
     $loop = 'bioco_import_event_list_loop';
     $limit = array_key_exists('limit', $values) ? (int) $values['limit'] : 3;
+    if ($limit < 0) throw new RuntimeException('Native event loops require a nonnegative count; unlimited lists need manual adoption.');
     $rows = [];
-    $heading = static function (string $title, string $body = '') use (&$rows, $text, $row): void {
+    $heading = static function (string $title, string $body = '', string $level = 'h3') use (&$rows, $text, $row): void {
         $children = [];
-        if ($title !== '') $children[] = $text(esc_html($title), 'Listenüberschrift', true);
+        if ($title !== '') $children[] = $text(esc_html($title), 'Listenüberschrift', true, $level);
         if ($body !== '') $children[] = $text($body, 'Listenbeschreibung');
         if ($children) $rows[] = $row($children);
     };
     if ($component === 'events_feed') {
         $banner = ($values['variant'] ?? 'standard') === 'banner';
-        $heading((string) ($values[$banner ? 'title' : 'standard_title'] ?? ''));
+        $heading((string) ($values[$banner ? 'title' : 'standard_title'] ?? ''), '', $banner ? 'h2' : 'h3');
         $include = $values['include_schnuppertage'] ?? false;
         $rows[] = $loop('upcoming', $include ? null : 'general', $limit,
-            (string) ($values['empty_message'] ?? ''), '', '', !$banner);
+            (string) ($values['empty_message'] ?? ''), 'Mehr erfahren →');
         $link = (string) ($values[$banner ? 'banner_link_label' : 'standard_link_label'] ?? '');
         $url = (string) ($values['archive_url'] ?? '');
         if ($link !== '' && $url !== '') $rows[] = $row([bioco_import_event_list_element('divi/button', 'Archivlink', [
@@ -109,7 +110,7 @@ function bioco_import_event_list_blocks(string $component, array $values): array
         ])]);
         if (!$banner && !$include && (string) ($values['schnuppertage_title'] ?? '') !== '') {
             $heading((string) $values['schnuppertage_title']);
-            $rows[] = $loop('upcoming', 'schnuppertag', $limit, (string) ($values['schnuppertage_empty_message'] ?? ''), '', '', false);
+            $rows[] = $loop('upcoming', 'schnuppertag', $limit, (string) ($values['schnuppertage_empty_message'] ?? ''), 'Mehr erfahren →');
         }
         if (!$banner && (string) ($values['past_title'] ?? '') !== '') {
             // A native one-record loop owns this heading's visibility. The shared
@@ -125,7 +126,7 @@ function bioco_import_event_list_blocks(string $component, array $values): array
             $rows[] = $loop('past', null, 4, '', (string) ($values['past_link_label'] ?? ''));
         }
     } else {
-        $heading((string) ($values['title'] ?? ''), (string) ($values['text'] ?? ''));
+        $heading((string) ($values['title'] ?? ''), (string) ($values['text'] ?? ''), 'h2');
         $information = [];
         if ((string) ($values['list_label'] ?? '') !== '') $information[] = $text(esc_html((string) $values['list_label']), 'Listenbezeichnung');
         foreach ($values['items'] ?? [] as $item) {
@@ -133,7 +134,7 @@ function bioco_import_event_list_blocks(string $component, array $values): array
         }
         if ((string) ($values['closing'] ?? '') !== '') $information[] = $text((string) $values['closing'], 'Abschlusstext');
         if ($information) $rows[] = $row($information);
-        $heading((string) ($values['schedule_title'] ?? ''));
+        $heading((string) ($values['schedule_title'] ?? ''), '', 'h4');
         $type = (string) ($values['event_type'] ?? 'schnuppertag');
         $signup = (string) ($values['signup_anchor'] ?? '');
         $rows[] = $loop('upcoming', in_array($type, ['general', 'schnuppertag'], true) ? $type : 'schnuppertag', $limit,

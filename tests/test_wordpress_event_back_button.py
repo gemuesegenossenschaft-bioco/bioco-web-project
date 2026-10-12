@@ -4,6 +4,7 @@ PHP executes both real layout generators and the WordPress block parser.
 Chromium checks the shared wrapping/focus CSS against the observed Divi anchor
 and wrapper shape. It does not emulate Divi's preset/style renderer; native
 save/reopen and the rendered preset remain hosted operator checks.
+Keep/Replace/Remove evidence map: tests/README.md.
 """
 import json
 from hashlib import sha256

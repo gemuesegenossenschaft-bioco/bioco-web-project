@@ -110,5 +110,8 @@ function bioco_import_back_button_sql(array $plan, string $expected, bool $resto
         $guards[] = $wpdb->prepare("BINARY `$column` = BINARY %s", (string) $value);
     }
     $content = $restore ? $plan['before']['post_content'] : $plan['after_content'];
-    return $wpdb->prepare("UPDATE {$wpdb->posts} SET post_content = %s WHERE ", $content) . implode(' AND ', $guards);
+    $sql = $wpdb->prepare("UPDATE {$wpdb->posts} SET post_content = %s WHERE ", $content) . implode(' AND ', $guards);
+    // wpdb normally removes its temporary percent tokens through query filters.
+    // This SQL is exported for a separate operator, outside those filters.
+    return $wpdb->remove_placeholder_escape($sql);
 }

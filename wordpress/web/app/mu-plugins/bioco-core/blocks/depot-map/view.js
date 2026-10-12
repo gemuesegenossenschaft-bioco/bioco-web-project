@@ -48,7 +48,7 @@
         try {
           var website = new URL(loc.website);
           if (website.protocol === 'https:' || website.protocol === 'http:') {
-            popup += '<br><a href="' + escapeHtml(loc.website) + '" target="_blank" rel="noopener noreferrer">' +
+            popup += '<br><a href="' + escapeAttribute(website.href) + '" target="_blank" rel="noopener noreferrer">' +
               escapeHtml(loc.website_label || loc.website) + '</a>';
           }
         } catch (error) { /* Invalid public website fields do not create links. */ }
@@ -70,6 +70,10 @@
     return div.innerHTML;
   }
 
+  function escapeAttribute(value) {
+    return escapeHtml(value).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function descriptionHtml(value) {
     var parts = String(value).split(/(https?:\/\/[^\s<>"']+)/gi);
     return parts.map(function (part, index) {
@@ -78,7 +82,7 @@
         try {
           var parsed = new URL(url);
           if ((parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.hostname) {
-            return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' +
+            return '<a href="' + escapeAttribute(parsed.href) + '" target="_blank" rel="noopener noreferrer">' +
               escapeHtml(url) + '</a>' + escapeHtml(part.slice(url.length));
           }
         } catch (error) { /* Keep malformed URLs as text. */ }

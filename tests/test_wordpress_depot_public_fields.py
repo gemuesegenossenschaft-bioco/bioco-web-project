@@ -99,3 +99,30 @@ def test_actual_popup_script_uses_only_the_projected_public_values():
         assert page.locator('#popups a').get_attribute('href') == 'https://example.test/depot'
         assert page.locator('#popups a').inner_text() == 'Depot & website'
         browser.close()
+
+
+def test_popup_links_use_normalized_http_urls_without_attribute_injection():
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page()
+        for url in ['https://example.test/" onclick="alert(1)', 'https://example.test/a/../depot?q=1&next=2',
+                    'https://example.test/\npath', 'javascript:alert(1)', 'data:text/html,hi', '/relative']:
+            page.set_content('<div class="cms-depot-map"><div class="map-wrapper"></div></div><div id="popups"></div>')
+            page.evaluate("""url => {
+              document.querySelector('.map-wrapper').dataset.locations = JSON.stringify([
+                {name: 'Depot',lat:47.4,lng:8.3,website:url,website_label:'Public depot'}]);
+              window.BiocoConsent = {mountMap:(wrapper,start)=>start(wrapper)};
+              window.L = {map:()=>({setView(){return this;}}),tileLayer:()=>({addTo(){}}),
+                marker:()=>({addTo(){return this;},bindPopup(html){document.querySelector('#popups').innerHTML=html;}})};
+            }""", url)
+            page.add_script_tag(path=str(ROOT / 'wordpress/web/app/mu-plugins/bioco-core/blocks/depot-map/view.js'))
+            links = page.locator('#popups a')
+            if url.startswith('https:'):
+                assert links.count() == 1
+                expected = page.evaluate('url => new URL(url).href', url)
+                assert links.get_attribute('href') == expected
+                assert links.get_attribute('onclick') is None
+                assert links.inner_text() == 'Public depot'
+            else:
+                assert links.count() == 0
+        browser.close()

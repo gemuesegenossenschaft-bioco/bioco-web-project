@@ -2,6 +2,7 @@
 
 The small Divi boundary models the later Theme Builder list defaults observed
 on an event. It does not replace native editor save/reopen or release QA.
+Keep/Replace/Remove evidence map: tests/README.md.
 """
 import base64
 import json

@@ -3,6 +3,7 @@
 The legacy button shape matches the private staging/production snapshots. The
 test content is synthetic. SQLite exercises the generated SQL with binary
 comparison; hosted MySQL/operator verification remains a separate release check.
+Keep/Replace/Remove evidence map: tests/README.md.
 """
 import copy
 import json
@@ -24,9 +25,10 @@ function home_url($path) { return $GLOBALS['state']['site'] . ltrim($path, '/');
 class Database {
     public $posts = 'posts';
     function prepare($sql, ...$args) {
-        foreach ($args as $arg) $sql = preg_replace('/%s/', "'" . str_replace("'", "''", (string) $arg) . "'", $sql, 1);
-        return $sql;
+        foreach ($args as $arg) $sql = preg_replace_callback('/%s/', fn()=>"'" . str_replace("'", "''", (string) $arg) . "'", $sql, 1);
+        return str_replace('%', '{wpdb-placeholder-test}', $sql);
     }
+    function remove_placeholder_escape($sql) { return str_replace('{wpdb-placeholder-test}', '%', $sql); }
 }
 $wpdb = new Database();
 function parse_blocks($value) { return (new WP_Block_Parser())->parse($value); }
@@ -200,6 +202,21 @@ def test_atomic_apply_and_restore_are_idempotent_and_restore_exact_original_byte
     assert applied[:index] + applied[index + 1:] == before[:index] + before[index + 1:]
     assert execute(db, result['restore']) == 1 and execute(db, result['restore']) == 0
     assert db.execute('SELECT * FROM posts').fetchone() == before
+
+
+def test_exported_sql_preserves_literal_percent_values_and_guards():
+    blocks = fixture()
+    back(blocks)['attrs']['button']['innerContent']['desktop']['value']['text'] = '100% aktuell'
+    result = run(blocks, record={'ID': 42, 'post_type': 'et_body_layout', 'post_status': 'draft',
+                                'post_title': '100% Ä', 'post_content': '',
+                                'post_modified_gmt': '2026-10-12 05:00:00'})
+    assert '{wpdb-placeholder-test}' not in result['apply'] + result['restore']
+    assert '100%' in result['apply'] and '87%' in result['apply']
+    db = database(result['plan'])
+    assert execute(db, result['apply']) == 1
+    assert db.execute('SELECT post_content FROM posts').fetchone()[0] == result['plan']['after_content']
+    assert execute(db, result['restore']) == 1
+    assert db.execute('SELECT post_content FROM posts').fetchone()[0] == result['plan']['before']['post_content']
 
 
 @pytest.mark.parametrize('column,value', [

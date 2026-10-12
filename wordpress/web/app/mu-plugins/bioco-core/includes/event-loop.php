@@ -31,3 +31,13 @@ function bioco_event_loop_query(array $data, array $attrs): array {
 }
 
 add_filter('divi_loop_data_after_execution', 'bioco_event_loop_query', 30, 2);
+
+/** The installed native selector needs an explicit event-date option. */
+function bioco_event_loop_order_options(array $options): array {
+    foreach ($options as $option) {
+        if (($option['value'] ?? '') === 'meta_value') return $options;
+    }
+    $options[] = ['value' => 'meta_value', 'label' => 'Veranstaltungsdatum'];
+    return $options;
+}
+add_filter('et_builder_loop_order_by_options_event', 'bioco_event_loop_order_options');
