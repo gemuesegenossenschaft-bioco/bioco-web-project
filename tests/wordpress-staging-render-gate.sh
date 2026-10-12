@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_url=${BIOCO_STAGING_URL:-https://staging.bioco.ch}
-resolve=${BIOCO_STAGING_RESOLVE:-staging.bioco.ch:443:193.33.128.160}
+base_url=${BIOCO_RELEASE_RENDER_URL:-${BIOCO_STAGING_URL:-https://staging.bioco.ch}}
+resolve=${BIOCO_RELEASE_RENDER_RESOLVE-${BIOCO_STAGING_RESOLVE:-staging.bioco.ch:443:193.33.128.160}}
 routes=(
   / /abos/ /aktuelles/ /anmeldung/ /anmeldung-danke/ /bioco-werden/
   /datenschutz/ /gemuese/ /impressum/ /kontakt/ /kundenportal/ /mitmachen/
