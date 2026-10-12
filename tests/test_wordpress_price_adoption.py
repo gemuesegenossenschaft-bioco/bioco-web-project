@@ -93,6 +93,17 @@ def walk(node):
     for child in node.get('innerBlocks', []): yield from walk(child)
 
 
+def native_class(node):
+    attrs = node['attrs'] if isinstance(node['attrs'], dict) else {}
+    return attrs.get('module', {}).get('advanced', {}).get('htmlAttributes', {}).get('desktop', {}).get('value', {}).get('class', '')
+
+
+def native_role(node):
+    attrs = node['attrs'] if isinstance(node['attrs'], dict) else {}
+    return next((item['value'] for item in attrs.get('module', {}).get('decoration', {}).get('attributes', {})
+        .get('desktop', {}).get('value', {}).get('attributes', []) if item.get('name') == 'role'), None)
+
+
 @pytest.mark.parametrize('kind', ['table', 'calculator'])
 def test_saved_public_copy_converts_to_native_parser_roundtrip(kind):
     result = run(kind, blocks=fixture(kind))
@@ -116,6 +127,149 @@ def test_saved_public_copy_converts_to_native_parser_roundtrip(kind):
         for field in ['cta_label','cta_note','shares_only_info','no_subscription_label','work_suffix','total_label']:
             assert copy[field]['innerContent']['desktop']['value'] in output
         assert copy['signup_url']['innerContent']['desktop']['value'] in output
+
+
+def test_saved_price_table_keeps_five_native_columns_and_authored_cells():
+    result = run(blocks=fixture('table'))
+    assert result['roundtrip']
+    table = next(node for node in walk(result['blocks'][0]) if 'bioco-price-table' in native_class(node).split()
+                 and node['blockName'] == 'divi/section')
+    assert native_role(table) == 'table'
+    assert table['attrs']['module']['decoration']['overflow']['desktop']['value']['x'] == 'auto'
+    header, data = table['innerBlocks']
+    assert native_role(header) == native_role(data) == 'row'
+    assert len(header['innerBlocks']) == len(data['innerBlocks']) == 5
+    assert [native_role(col) for col in header['innerBlocks']] == ['columnheader'] * 5
+    assert [native_role(col) for col in data['innerBlocks']] == ['cell'] * 5
+    for row in (header, data):
+        attrs = row['attrs']['module']
+        assert attrs['advanced']['columnStructure']['desktop']['value'] == '4_4,4_4,4_4,4_4,4_4'
+        assert attrs['decoration']['layout']['desktop']['value']['display'] == 'grid'
+        assert attrs['decoration']['sizing']['desktop']['value']['minWidth'] == '914px'
+    assert 'loop' not in header['attrs']['module']['advanced']
+    assert data['attrs']['module']['advanced']['loop']['desktop']['value']['loopId'] == 'bioco-price-table'
+    header_values = [col['innerBlocks'][0]['attrs']['title']['innerContent']['desktop']['value'] for col in header['innerBlocks']]
+    assert header_values == ['Gemüsekorb', 'Personen', 'Jahrespreis', 'Anteilsscheine Kosten', 'Mitarbeit pro Jahr']
+    cells = data['innerBlocks']
+    assert ['loop_bioco_price_table_label', 'loop_bioco_price_shares_label'] == [
+        json.loads(module['attrs'][key]['innerContent']['desktop']['value'][len('$variable('):-2])['value']['name']
+        for module, key in [(cells[0]['innerBlocks'][0], 'title'), (cells[0]['innerBlocks'][1], 'content')]]
+    image = cells[1]['innerBlocks'][0]
+    assert image['blockName'] == 'divi/image'
+    assert 'loop_bioco_price_persons_icon' in json.dumps(image)
+    assert 'loop_bioco_price_persons_accessible' in json.dumps(image)
+    for cell, binding in [(cells[2], 'loop_bioco_price_price_table'), (cells[3], 'loop_bioco_price_share_cost_table')]:
+        contents = [module['attrs']['content']['innerContent']['desktop']['value'] for module in cell['innerBlocks']]
+        assert len(contents) == 1 and contents[0].startswith('CHF $variable(') and contents[0].endswith(')$.-')
+        assert binding in contents[0]
+    work = [module['attrs']['content']['innerContent']['desktop']['value'] for module in cells[4]['innerBlocks']]
+    assert len(work) == 1 and 'loop_bioco_price_work' in work[0]
+    assert work[0].endswith(' Arbeitseinsätze<br>à 2 Stunden')
+    assert 'loop_bioco_price_persons_range' not in json.dumps(table)
+    assert [row['icons'] for row in result['plan']['report']['table']['rows']] == [1, 2, 4]
+    assert [row['price'] for row in result['plan']['report']['table']['rows']] == ['CHF 750.-', "CHF 1'280.-", "CHF 2'350.-"]
+
+
+def test_native_price_table_grid_controls_contain_mobile_overflow_in_browser():
+    from playwright.sync_api import sync_playwright
+    result = run(blocks=fixture('table'))
+    table = next(node for node in walk(result['blocks'][0]) if node['blockName'] == 'divi/section'
+                 and 'bioco-price-table' in native_class(node).split())
+    rows = table['innerBlocks']
+    grid = rows[0]['attrs']['module']['decoration']['layout']['desktop']['value']
+    min_width = rows[0]['attrs']['module']['decoration']['sizing']['desktop']['value']['minWidth']
+    markup = '<div id="table">' + ''.join(
+        '<div class="row">' + ''.join(f'<div class="cell">{index}</div>' for index in range(5)) + '</div>'
+        for _ in rows) + '</div>'
+    style = (f'html,body{{margin:0}}body{{width:100%}}#table{{width:100%;max-width:1100px;overflow-x:auto}}'
+             f'.row{{display:{grid["display"]};grid-template-columns:{grid["gridTemplateColumns"]};'
+             f'column-gap:{grid["columnGap"]};min-width:{min_width};box-sizing:border-box}}'
+             '.cell{box-sizing:border-box;padding:12px}')
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        for width in (1280, 390):
+            page = browser.new_page(viewport={'width': width, 'height': 700})
+            page.set_content(f'<style>{style}</style>{markup}')
+            measurements = page.evaluate('''() => {
+              const table = document.querySelector('#table');
+              const rows = [...table.querySelectorAll('.row')];
+              return {pageWidth: document.documentElement.scrollWidth,
+                tableWidth: table.clientWidth, contentWidth: table.scrollWidth,
+                columns: rows.map(row => [...row.children].map(cell => Math.round(cell.getBoundingClientRect().left)))};
+            }''')
+            assert measurements['columns'][0] == measurements['columns'][1]
+            assert measurements['pageWidth'] == width
+            if width == 390:
+                assert measurements['contentWidth'] > measurements['tableWidth']
+                page.locator('#table').evaluate('(node) => node.scrollLeft = node.scrollWidth')
+                assert page.locator('#table').evaluate('(node) => node.scrollLeft') > 0
+            page.close()
+        browser.close()
+
+
+def test_saved_calculator_has_native_four_choice_grid_and_invoice_columns():
+    result = run('calculator', blocks=fixture('calculator'))
+    assert result['roundtrip']
+    section = next(node for node in walk(result['blocks'][0]) if node['blockName'] == 'divi/section'
+                   and 'bioco-price-calculator' in native_class(node).split())
+    rows = section['innerBlocks']
+    assert len(rows) == 8
+    grid = section['attrs']['module']['decoration']['layout']
+    assert grid['desktop']['value']['gridTemplateColumns'] == 'repeat(4, minmax(0, 1fr))'
+    assert grid['phone']['value']['gridTemplateColumns'] == 'minmax(0, 1fr)'
+    assert 'bioco-price-loop' in native_class(rows[0]).split()
+    assert rows[0]['attrs']['module']['advanced']['loop']['desktop']['value']['loopId'] == 'bioco-price-calculator'
+    assert 'loop_bioco_price_name' in json.dumps(rows[0])
+    assert 'loop_bioco_price_price_table' in json.dumps(rows[0])
+    assert 'bioco-price-none-card' in native_class(rows[1]).split()
+    assert '#bioco-price-kein' in json.dumps(rows[1])
+    assert [len(row['innerBlocks']) for row in rows[2:6]] == [5, 5, 5, 5]
+    for row in rows[2:]:
+        for device in ('desktop', 'tablet', 'phone'):
+            assert row['attrs']['module']['decoration']['layout'][device]['value']['gridColumn'] == '1 / -1'
+    header = [col['innerBlocks'][0]['attrs']['title']['innerContent']['desktop']['value']
+              for col in rows[2]['innerBlocks'][:4]]
+    copy = PUBLIC['calculator_attrs']
+    assert header == [copy[key]['innerContent']['desktop']['value']
+        for key in ('article_label', 'quantity_label', 'unit_price_label', 'total_label')]
+    for marker in ('bioco-price-value-name', 'bioco-price-value-price', 'bioco-price-value-work',
+                   'bioco-price-value-shares', 'bioco-price-value-share-cost', 'bioco-price-value-total',
+                   'bioco-price-signup', 'bioco-price-no-selection'):
+        assert marker in json.dumps(rows)
+
+
+def test_native_calculator_grid_controls_keep_invoice_below_choices_in_browser():
+    from playwright.sync_api import sync_playwright
+    result = run('calculator', blocks=fixture('calculator'))
+    section = next(node for node in walk(result['blocks'][0]) if node['blockName'] == 'divi/section'
+                   and 'bioco-price-calculator' in native_class(node).split())
+    layout = section['attrs']['module']['decoration']['layout']
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        for width in (1280, 390):
+            page = browser.new_page(viewport={'width': width, 'height': 700})
+            columns = layout['phone' if width < 640 else 'desktop']['value']['gridTemplateColumns']
+            page.set_content('<style>html,body{margin:0}.calculator{display:grid;grid-template-columns:' + columns
+                + ';gap:16px;width:100%;box-sizing:border-box;overflow-x:auto}.card{min-height:80px}.invoice{grid-column:1/-1;min-width:914px;min-height:80px}</style>'
+                + '<div class="calculator"><div class="card">1</div><div class="card">2</div><div class="card">3</div>'
+                + '<div class="card">Kein Abo</div><div class="invoice">Rechnung</div></div>')
+            positions = page.evaluate('''() => {
+              const cards = [...document.querySelectorAll('.card')].map(el => el.getBoundingClientRect());
+              const invoice = document.querySelector('.invoice').getBoundingClientRect();
+              const box = document.querySelector('.calculator');
+              return {cards: cards.map(rect => [Math.round(rect.left), Math.round(rect.top)]),
+                invoiceTop: Math.round(invoice.top), pageWidth: document.documentElement.scrollWidth,
+                boxWidth: box.clientWidth, contentWidth: box.scrollWidth};
+            }''')
+            assert positions['invoiceTop'] > max(card[1] for card in positions['cards'])
+            assert positions['pageWidth'] == width
+            if width == 1280:
+                assert len({card[1] for card in positions['cards']}) == 1
+            else:
+                assert len({card[1] for card in positions['cards']}) == 4
+                assert positions['contentWidth'] > positions['boxWidth']
+            page.close()
+        browser.close()
 
 
 def test_changed_content_site_and_fingerprint_refused():

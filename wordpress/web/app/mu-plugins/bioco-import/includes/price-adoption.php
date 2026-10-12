@@ -50,34 +50,72 @@ function bioco_price_adoption_table_spec(string $html): array {
 }
 
 function bioco_price_adoption_table_layout(array $spec): array {
-    $labels = bioco_price_layout_section([
-        bioco_price_layout_row(array_map('bioco_utility_heading', $spec['headers'])),
-    ], 'bioco-price-table-headings');
     $icon = bioco_import_divi_block('divi/image', ['image' => ['innerContent' => ['desktop' => ['value' => [
         'src' => bioco_price_variable('loop_bioco_price_persons_icon'),
         'alt' => bioco_price_variable('loop_bioco_price_persons_accessible'),
     ]]]]]);
-    $modules = [
-        bioco_utility_heading(bioco_price_variable('loop_bioco_price_table_label'), 'h3'),
-        bioco_utility_text(bioco_price_variable('loop_bioco_price_shares_label')),
-        $icon,
-        bioco_utility_text(bioco_price_variable('loop_bioco_price_persons_range')),
+    $header = bioco_price_adoption_table_row(array_map(
+        static function ($label) {
+            $heading = bioco_utility_heading($label, 'h3');
+            $heading['attrs']['title']['decoration']['font']['font']['desktop']['value']['color'] = 'var(--wp--preset--color--bioco-surface)';
+            return [$heading];
+        }, $spec['headers']), 'bioco-price-table-head', false, true);
+    $empty = bioco_price_layout_class(bioco_utility_text('<p>Zurzeit sind keine Abopreise verfügbar.</p>'), 'bioco-loop-empty');
+    $columns = [
+        [bioco_utility_heading(bioco_price_variable('loop_bioco_price_table_label'), 'h3'),
+            bioco_utility_text(bioco_price_variable('loop_bioco_price_shares_label')), $empty],
+        [$icon],
+        bioco_price_adoption_amount('loop_bioco_price_price_table'),
+        bioco_price_adoption_amount('loop_bioco_price_share_cost_table'),
+        [bioco_utility_text(bioco_price_variable('loop_bioco_price_work')
+            . ' Arbeitseinsätze<br>' . esc_html($spec['work_suffix']))],
     ];
-    foreach (['price' => $spec['headers'][2], 'share_cost' => $spec['headers'][3], 'work' => $spec['headers'][4]] as $field => $label) {
-        $modules[] = bioco_utility_text('<p>' . esc_html($label) . '</p>');
-        if ($field !== 'work') $modules[] = bioco_utility_text('<p>CHF</p>');
-        $modules[] = bioco_utility_text(bioco_price_variable('loop_bioco_price_' . ($field === 'price' || $field === 'share_cost' ? $field . '_table' : $field)));
-        $modules[] = bioco_utility_text('<p>' . ($field === 'work' ? 'Arbeitseinsätze ' . esc_html($spec['work_suffix']) : '.-') . '</p>');
+    $data = bioco_price_adoption_table_row($columns, 'bioco-record-loop bioco-price-loop bioco-price-table-data', true);
+    $section = bioco_price_adoption_role(bioco_price_layout_section([$header, $data], 'bioco-price-table'), 'table');
+    $section['attrs']['module']['decoration']['overflow']['desktop']['value'] = ['x' => 'auto', 'y' => 'visible'];
+    return [$section];
+}
+
+/** Installed Divi resolves a dynamic token between static Text fragments. */
+function bioco_price_adoption_amount(string $binding): array {
+    return [bioco_utility_text('CHF ' . bioco_price_variable($binding) . '.-')];
+}
+
+function bioco_price_adoption_role(array $block, string $role): array {
+    $block['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][] = [
+        'id' => 'bioco-price-table-' . $role, 'name' => 'role', 'value' => $role, 'adminLabel' => 'Role'];
+    return $block;
+}
+
+function bioco_price_adoption_table_row(array $cells, string $class, bool $loop = false, bool $header = false): array {
+    if (count($cells) !== 5) throw new RuntimeException('Expected five native price table columns.');
+    $columns = [];
+    foreach ($cells as $index => $modules) {
+        $column = bioco_import_divi_block('divi/column', [
+            'module' => ['advanced' => ['type' => ['desktop' => ['value' => '4_4']]]],
+        ], $modules);
+        $column['attrs']['module']['decoration']['spacing'] = [
+            'desktop' => ['value' => ['padding' => ['top' => $header ? '20px' : '24px',
+                'bottom' => $header ? '20px' : '24px', 'left' => '24px', 'right' => '24px']]],
+            'phone' => ['value' => ['padding' => ['top' => '12px', 'bottom' => '12px', 'left' => '20px', 'right' => '20px']]],
+        ];
+        $columns[] = bioco_price_adoption_role($column, $header ? 'columnheader' : 'cell');
     }
-    $loop = bioco_price_layout_loop($modules, 'bioco-price-table');
-    $section = bioco_price_layout_section([$loop], 'bioco-price-table');
-    $section['attrs']['module']['decoration']['layout'] = [
-        'desktop' => ['value' => ['display' => 'grid', 'gridColumnWidths' => 'manual',
-            'gridTemplateColumns' => 'repeat(3, minmax(0, 1fr))', 'columnGap' => '28px', 'rowGap' => '28px']],
-        'tablet' => ['value' => ['gridTemplateColumns' => 'minmax(0, 1fr)']],
-        'phone' => ['value' => ['gridTemplateColumns' => 'minmax(0, 1fr)']],
+    $row = bioco_price_layout_class(bioco_import_divi_block('divi/row', [
+        'modulePreset' => [bioco_utility_preset('BIOCO Content Row')],
+        'module' => ['advanced' => ['columnStructure' => ['desktop' => ['value' => implode(',', array_fill(0, 5, '4_4'))]]],
+            'decoration' => ['layout' => ['desktop' => ['value' => ['display' => 'grid',
+                'gridColumnWidths' => 'manual', 'gridTemplateColumns' => 'minmax(200px, 1.4fr) 120px 150px 190px 190px',
+                'columnGap' => '16px', 'alignItems' => 'center']]],
+                'sizing' => ['desktop' => ['value' => ['width' => '100%', 'maxWidth' => '100%', 'minWidth' => '914px']]]]],
+    ], $columns), $class);
+    $row['attrs']['module']['decoration']['background']['desktop']['value']['color'] = $header
+        ? 'var(--wp--preset--color--bioco-green)' : 'var(--wp--preset--color--bioco-surface)';
+    if ($loop) $row['attrs']['module']['advanced']['loop']['desktop']['value'] = [
+        'enable' => 'on', 'queryType' => 'post_types', 'subTypes' => [['value' => 'bioco_price', 'label' => 'Preise']],
+        'postPerPage' => 20, 'orderBy' => 'menu_order', 'order' => 'ASC', 'loopId' => 'bioco-price-table',
     ];
-    return [$labels, $section];
+    return bioco_price_adoption_role($row, 'row');
 }
 
 function bioco_price_adoption_calculator_layout(array $attrs): array {
@@ -98,29 +136,93 @@ function bioco_price_adoption_calculator_layout(array $attrs): array {
         || bioco_price_adoption_value($attrs, 'share_price') !== 250) {
         throw new RuntimeException('Saved calculator amounts changed.');
     }
-    $choice = bioco_utility_button(bioco_price_variable('loop_bioco_price_name'), bioco_price_variable('loop_bioco_price_select_url'));
-    $summary = [];
-    foreach (['name' => $copy['article_label'], 'price' => $copy['annual_contribution_label'],
-        'work' => $copy['work_label'], 'shares' => $copy['share_certificates_label'],
-        'additional' => $copy['additional_shares_label'], 'share-cost' => $copy['one_time_payment_label'],
-        'total' => $copy['total_label']] as $field => $label) {
-        $summary[] = bioco_utility_text('<p>' . esc_html($label) . '</p>');
-        $summary[] = bioco_price_layout_class(bioco_utility_text('0'), 'bioco-price-value-' . $field);
-    }
-    foreach (['shares_only_label', 'quantity_label', 'unit_price_label', 'required_label', 'without_basket_label',
-        'additional_label', 'work_suffix', 'recommended_label'] as $field) {
-        $summary[] = bioco_price_layout_class(bioco_utility_text('<p>' . esc_html($copy[$field]) . '</p>'), 'bioco-price-copy-' . $field);
-    }
-    $summary[] = bioco_utility_button('+ Anteilsschein', '#bioco-share-add');
-    $summary[] = bioco_price_layout_class(bioco_utility_button('− Anteilsschein', '#bioco-share-remove'), 'bioco-price-remove');
-    $summary[] = bioco_price_layout_class(bioco_utility_text($copy['shares_only_info']), 'bioco-price-no-selection');
-    $summary[] = bioco_price_layout_class(bioco_utility_button($copy['cta_label'], $copy['signup_url']), 'bioco-price-signup');
-    $summary[] = bioco_utility_text('<p>' . esc_html($copy['cta_note']) . '</p>');
-    return bioco_price_layout_section([
-        bioco_price_layout_loop([$choice], 'bioco-price-calculator'),
-        bioco_price_layout_row([bioco_utility_button($copy['no_subscription_label'], '#bioco-price-kein')]),
-        bioco_price_layout_row($summary),
+    $choice = bioco_price_layout_loop([
+        bioco_utility_button(bioco_price_variable('loop_bioco_price_name'), bioco_price_variable('loop_bioco_price_select_url')),
+        bioco_utility_text('CHF ' . bioco_price_variable('loop_bioco_price_price_table') . '.-'),
     ], 'bioco-price-calculator');
+    $choice['attrs']['module']['decoration']['background']['desktop']['value']['color'] = 'var(--wp--preset--color--bioco-bg)';
+    $choice['attrs']['module']['decoration']['spacing']['desktop']['value']['padding'] = [
+        'top' => '24px', 'bottom' => '24px', 'left' => '24px', 'right' => '24px'];
+    $none = bioco_price_layout_row([
+        bioco_utility_button($copy['no_subscription_label'], '#bioco-price-kein'),
+        bioco_price_adoption_copy($copy, 'shares_only_label'),
+        bioco_price_adoption_copy($copy, 'without_basket_label'),
+    ], 'bioco-price-none-card');
+    $none['attrs']['module']['decoration']['background']['desktop']['value']['color'] = 'var(--wp--preset--color--bioco-bg)';
+    $none['attrs']['module']['decoration']['spacing']['desktop']['value']['padding'] = [
+        'top' => '24px', 'bottom' => '24px', 'left' => '24px', 'right' => '24px'];
+
+    $invoiceHead = bioco_price_adoption_table_row([
+        [bioco_utility_heading($copy['article_label'], 'h3')],
+        [bioco_utility_heading($copy['quantity_label'], 'h3')],
+        [bioco_utility_heading($copy['unit_price_label'], 'h3')],
+        [bioco_utility_heading($copy['total_label'], 'h3')],
+        [bioco_utility_text('')],
+    ], 'bioco-price-invoice-head', false, true);
+    $abo = bioco_price_adoption_table_row([
+        [bioco_price_adoption_live_value('name'), bioco_utility_text('<p>' . esc_html($copy['annual_contribution_label']) . '</p>'),
+            bioco_price_adoption_copy($copy, 'work_label'), bioco_price_adoption_live_value('work'),
+            bioco_price_adoption_copy($copy, 'work_suffix')],
+        [bioco_utility_text('1')],
+        bioco_price_adoption_live_amount('price'),
+        bioco_price_adoption_live_amount('price'),
+        [bioco_utility_text('')],
+    ], 'bioco-price-invoice-abo');
+    $shares = bioco_price_adoption_table_row([
+        [bioco_utility_text('<p>' . esc_html($copy['share_certificates_label']) . '</p>'),
+            bioco_utility_text('<p>' . esc_html($copy['one_time_payment_label']) . '</p>'),
+            bioco_price_adoption_copy($copy, 'required_label')],
+        [bioco_price_adoption_live_value('shares')],
+        [bioco_utility_text('CHF ' . bioco_price_variable('bioco_price_share_price') . '.-')],
+        bioco_price_adoption_live_amount('share-cost'),
+        [bioco_price_adoption_copy($copy, 'additional_label'),
+            bioco_utility_button('+ Anteilsschein', '#bioco-share-add'),
+            bioco_price_layout_class(bioco_utility_button('− Anteilsschein', '#bioco-share-remove'), 'bioco-price-remove'),
+            bioco_price_adoption_live_value('additional')],
+    ], 'bioco-price-invoice-shares');
+    $total = bioco_price_adoption_table_row([
+        [bioco_utility_heading($copy['total_label'], 'h3')], [], [],
+        bioco_price_adoption_live_amount('total'), [],
+    ], 'bioco-price-invoice-total');
+    $recommended = bioco_price_adoption_copy($copy, 'recommended_label');
+    foreach (['desktop', 'tablet', 'phone'] as $device) {
+        $recommended['attrs']['module']['decoration']['layout'][$device]['value']['display'] = 'none';
+    }
+    $info = bioco_price_layout_row([
+        bioco_price_layout_class(bioco_utility_text($copy['shares_only_info']), 'bioco-price-no-selection'),
+        $recommended,
+    ]);
+    $actions = bioco_price_layout_row([
+        bioco_price_layout_class(bioco_utility_button($copy['cta_label'], $copy['signup_url']), 'bioco-price-signup'),
+        bioco_utility_text('<p>' . esc_html($copy['cta_note']) . '</p>'),
+    ]);
+    $rows = [$choice, $none, $invoiceHead, $abo, $shares, $total, $info, $actions];
+    foreach (range(2, count($rows) - 1) as $index) {
+        foreach (['desktop', 'tablet', 'phone'] as $device) {
+            $rows[$index]['attrs']['module']['decoration']['layout'][$device]['value']['gridColumn'] = '1 / -1';
+        }
+    }
+    $section = bioco_price_layout_section($rows, 'bioco-price-calculator');
+    $section['attrs']['module']['decoration']['layout'] = [
+        'desktop' => ['value' => ['display' => 'grid', 'gridColumnWidths' => 'manual',
+            'gridTemplateColumns' => 'repeat(4, minmax(0, 1fr))', 'columnGap' => '16px', 'rowGap' => '16px']],
+        'tablet' => ['value' => ['gridTemplateColumns' => 'repeat(4, minmax(0, 1fr))']],
+        'phone' => ['value' => ['gridTemplateColumns' => 'minmax(0, 1fr)']],
+    ];
+    $section['attrs']['module']['decoration']['overflow']['desktop']['value'] = ['x' => 'auto', 'y' => 'visible'];
+    return $section;
+}
+
+function bioco_price_adoption_copy(array $copy, string $field): array {
+    return bioco_price_layout_class(bioco_utility_text('<p>' . esc_html($copy[$field]) . '</p>'), 'bioco-price-copy-' . $field);
+}
+
+function bioco_price_adoption_live_value(string $field): array {
+    return bioco_price_layout_class(bioco_utility_text('0'), 'bioco-price-value-' . $field);
+}
+
+function bioco_price_adoption_live_amount(string $field): array {
+    return [bioco_utility_text('CHF'), bioco_price_adoption_live_value($field), bioco_utility_text('.-')];
 }
 
 function bioco_price_adoption_replace_table(array $blocks, array &$report): array {
