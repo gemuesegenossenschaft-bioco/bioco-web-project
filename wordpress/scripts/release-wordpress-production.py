@@ -214,15 +214,7 @@ def require_lock(alive):
 
 def fingerprint(target):
     root = target['CONTENT'].removesuffix('/wp-content')
-    code = ("$ids=get_posts(['post_type'=>'any','post_status'=>'any','numberposts'=>-1,'fields'=>'ids']);"
-            "sort($ids,SORT_NUMERIC);$h=hash_init('sha256');foreach($ids as $id){"
-            "$p=get_post($id);if(in_array($p->post_type,['revision','attachment'],true))continue;"
-            "$m=get_post_meta($id);unset($m['_edit_lock'],$m['_edit_last'],"
-            "$m['_divi_dynamic_assets_cached_modules'],$m['_divi_dynamic_assets_canvases_used'],"
-            "$m['_divi_dynamic_assets_cached_feature_used'],$m['_et_builder_post_features_cache']);"
-            "ksort($m);hash_update($h,serialize([$id,$p->post_type,$p->post_status,$p->post_title,"
-            "$p->post_name,$p->post_content,$p->post_excerpt,$p->post_parent,$p->menu_order,$m]));}"
-            "echo hash_final($h);")
+    code = (ROOT / 'wordpress/scripts/editorial-fingerprint.php').read_text().removeprefix('<?php')
     value = ssh(target, f'cd {q(root)}; wp eval {q(code)}')
     if not re.fullmatch(r'[0-9a-f]{64}', value): fail('Invalid editorial fingerprint.')
     return value
