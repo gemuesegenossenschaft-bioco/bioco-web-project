@@ -20,6 +20,8 @@ $state = json_decode(stream_get_contents(STDIN), true);
 function home_url($path) { return $GLOBALS['state']['site'] . ltrim($path, '/'); }
 function wp_json_encode($v, $options=0) { return json_encode($v, $options); }
 function esc_html($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+function add_filter(...$args) {}
+function add_action(...$args) {}
 class Database {
     public $posts = 'posts';
     function prepare($sql, ...$args) {
@@ -33,6 +35,8 @@ function parse_blocks($value) { return (new WP_Block_Parser())->parse($value); }
 require 'tests/fixtures/wp-block-parser/class-wp-block-parser.php';
 WP_SERIALIZER
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/price-adoption.php';
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/native-modules.php';
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/price-runtime.php';
 try {
     if (($state['mode'] ?? '') === 'sql') {
         echo json_encode(['sql'=>bioco_price_adoption_sql($state['plan'], $state['expected'], $state['restore'] ?? false)]);
@@ -42,6 +46,9 @@ try {
         $plan=bioco_price_adoption_plan($source, $state['kind'], $state['snapshot_site'] ?? $state['site'], $state['body_hash'] ?? hash('sha256', $source['post_content']));
         echo json_encode(['plan'=>$plan, 'before_blocks'=>parse_blocks($source['post_content']),
             'blocks'=>parse_blocks($plan['after_content']),
+            'wrappers'=>array_map(static fn($section)=>bioco_native_extract_wrapper($section['attrs']) +
+                ['calculator'=>bioco_price_native_has_class($section['attrs'], 'bioco-price-calculator')],
+                parse_blocks($plan['after_content'])[0]['innerBlocks']),
             'roundtrip'=>serialize_blocks(parse_blocks($plan['after_content'])) === $plan['after_content'],
             'apply'=>bioco_price_adoption_sql($plan,$plan['fingerprint']),
             'restore'=>bioco_price_adoption_sql($plan,$plan['fingerprint'],true)]);
@@ -245,6 +252,27 @@ def test_saved_calculator_has_native_four_choice_grid_and_invoice_columns():
                    'bioco-price-value-shares', 'bioco-price-value-share-cost', 'bioco-price-value-total',
                    'bioco-price-signup', 'bioco-price-no-selection'):
         assert marker in json.dumps(rows)
+
+
+@pytest.mark.parametrize('saved_class', ['', 'bioco-dynamic-section'])
+def test_saved_decoration_class_keeps_calculator_runtime_marker(saved_class):
+    blocks = fixture('calculator')
+    section = blocks[0]['innerBlocks'][0]
+    section['attrs'] = {'module': {
+        'advanced': {'htmlAttributes': {'desktop': {'value': {'class': 'stale-class'}}}},
+        'decoration': {
+            'attributes': {'desktop': {'value': {'attributes': [
+                {'name': 'id', 'value': 'authored-calculator'},
+                {'name': 'class', 'value': saved_class}]} }},
+            'spacing': {'phone': {'value': {'padding': {'top': '12px'}}}}}}}
+    result = run('calculator', blocks=blocks)
+    assert result['roundtrip']
+    wrapper = result['wrappers'][0]
+    assert wrapper['calculator'], 'The real runtime must recognize the converted saved Section.'
+    assert wrapper['anchor'] == 'authored-calculator'
+    assert wrapper['className'].split() == saved_class.split() + ['bioco-price-calculator']
+    converted = result['blocks'][0]['innerBlocks'][0]
+    assert converted['attrs']['module']['decoration']['spacing'] == section['attrs']['module']['decoration']['spacing']
 
 
 def test_native_calculator_grid_controls_keep_invoice_below_choices_in_browser():

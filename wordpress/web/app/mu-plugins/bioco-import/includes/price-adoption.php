@@ -306,6 +306,14 @@ function bioco_price_adoption_replace_calculator(array $blocks, array &$report):
             }
             $native = bioco_price_adoption_calculator_layout($modules[0]['attrs'] ?? []);
             $native['attrs']['module'] = array_replace_recursive($section['attrs']['module'] ?? [], $native['attrs']['module']);
+            // Saved Decoration classes override Advanced classes in the runtime.
+            // Keep the authored classes and attach the controller marker there too.
+            foreach ($native['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'] ?? [] as $index => $attribute) {
+                if (($attribute['name'] ?? '') !== 'class') continue;
+                $classes = preg_split('/\s+/', (string) ($attribute['value'] ?? ''), -1, PREG_SPLIT_NO_EMPTY);
+                if (!in_array('bioco-price-calculator', $classes, true)) $classes[] = 'bioco-price-calculator';
+                $native['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][$index]['value'] = implode(' ', $classes);
+            }
             $section = $native;
             $count++;
             $report['calculator'] = 'native-price-loop-and-saved-copy';
