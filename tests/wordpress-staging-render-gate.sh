@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-base_url=${BIOCO_RELEASE_RENDER_URL:-${BIOCO_STAGING_URL:-https://staging.bioco.ch}}
-resolve=${BIOCO_RELEASE_RENDER_RESOLVE-${BIOCO_STAGING_RESOLVE:-staging.bioco.ch:443:193.33.128.160}}
+if [[ -n ${BIOCO_RELEASE_RENDER_URL:-} ]]; then
+  base_url=${BIOCO_RELEASE_RENDER_URL}
+  resolve=${BIOCO_RELEASE_RENDER_RESOLVE:-}
+else
+  base_url=${BIOCO_STAGING_URL:-https://staging.bioco.ch}
+  resolve=${BIOCO_STAGING_RESOLVE:-staging.bioco.ch:443:193.33.128.160}
+fi
 routes=(
   / /abos/ /aktuelles/ /anmeldung/ /anmeldung-danke/ /bioco-werden/
   /datenschutz/ /gemuese/ /impressum/ /kontakt/ /kundenportal/ /mitmachen/
@@ -64,4 +69,4 @@ done
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 python3 "${script_dir}/../wordpress/scripts/check-editor-assets.py" --url "${base_url}"
 
-echo "WORDPRESS_STAGING_RENDER_GATE: PASS (${#routes[@]} routes, editor assets)"
+echo "WORDPRESS_RENDER_GATE: PASS (${#routes[@]} routes, editor assets)"
