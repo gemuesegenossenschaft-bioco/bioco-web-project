@@ -95,6 +95,30 @@ def test_gallery_filter_validation_enforces_canonical_unique_keys_and_one_all():
         assert message in results[case]
 
 
+def test_gallery_acf_image_categories_share_native_validation_and_keep_prior_errors():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    $FILTERS = [];
+    function add_filter($hook, $callback) { $GLOBALS['FILTERS'][$hook] = $callback; }
+    function add_action($hook, $callback) {}
+    function __($text, $domain = null) { return $text; }
+    require 'wordpress/web/app/mu-plugins/bioco-core/bioco-core.php';
+    $validate = $FILTERS['acf/validate_value/key=field_bioco_gallery_item_category'];
+    $result = [];
+    foreach (['feld', 'ernte_2026', 'mit-menschen', 'all', 'Bad Key', 'ernte/2026', '', null, 42] as $value) {
+        $result[] = $validate(true, $value);
+    }
+    $result[] = $validate('Earlier field error', 'feld');
+    echo json_encode($result);
+    '''
+    result = subprocess.run(['php', '-r', php], cwd=ROOT, text=True, capture_output=True, check=True)
+    assert result.stderr == ''
+    values = json.loads(result.stdout)
+    assert values[:3] == [True, True, True]
+    assert all(isinstance(value, str) and 'Bildkategorien' in value for value in values[3:9])
+    assert values[9] == 'Earlier field error'
+
+
 def test_doi_get_never_consumes_and_post_requires_a_valid_nonce():
     php = r'''
     define('ABSPATH', __DIR__);

@@ -2,8 +2,8 @@
 /** Request-only native Divi layout; never replaces the stored editor body. */
 if (!defined('ABSPATH')) exit;
 
-require_once dirname(__DIR__, 3) . '/mu-plugins/bioco-import/includes/divi-blocks.php';
-require_once dirname(__DIR__, 3) . '/mu-plugins/bioco-import/includes/article-back-button.php';
+require_once WPMU_PLUGIN_DIR . '/bioco-import/includes/divi-blocks.php';
+require_once WPMU_PLUGIN_DIR . '/bioco-import/includes/article-back-button.php';
 
 function bioco_divi_render_article(): string {
     $post_id = get_the_ID();

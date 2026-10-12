@@ -55,6 +55,7 @@ function bioco_record_binding_value($value, array $context) {
     $id = bioco_record_binding_id($context, 'bioco_' . $kind, $loop !== '');
     if (!$id) return '';
     if ($kind === 'depot') {
+        if (post_password_required($id)) return '';
         if (metadata_exists('post', $id, 'depot_public') && !get_post_meta($id, 'depot_public', true)) return '';
         if ($field === 'name') return esc_html(get_the_title($id));
         if ($field === 'address') return esc_html((string) get_post_meta($id, 'depot_public_address', true));

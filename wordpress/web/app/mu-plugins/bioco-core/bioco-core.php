@@ -87,6 +87,14 @@ add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($vali
     return $valid;
 }, 10, 2);
 
+add_filter('acf/validate_value/key=field_bioco_gallery_item_category', function ($valid, $value) {
+    if ($valid !== true) return $valid;
+    if (!is_string($value) || $value === 'all' || !preg_match('/^[a-z][a-z0-9_-]*$/D', $value)) {
+        return __('Bildkategorien müssen mit einem Kleinbuchstaben beginnen und dürfen nur Kleinbuchstaben, Zahlen, Bindestriche und Unterstriche enthalten. "all" ist für den Gesamtfilter reserviert.', 'bioco');
+    }
+    return true;
+}, 10, 2);
+
 /**
  * Custom "bioco" block category. Moved here in full (not duplicated in the
  * theme) — unlike the ACF path filter and the block-registration glob below,

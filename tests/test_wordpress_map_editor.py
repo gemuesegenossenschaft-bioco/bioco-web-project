@@ -26,6 +26,7 @@ function esc_url_raw($v){return $v;}
 function wp_json_encode($v){return json_encode($v);}
 function get_post_type($id){return $GLOBALS['state']['records'][$id]['type']??'page';}
 function get_post_status($id){return $GLOBALS['state']['records'][$id]['status']??'publish';}
+function post_password_required($id){return $GLOBALS['state']['records'][$id]['protected']??false;}
 function current_user_can($cap,$id){return false;}
 function get_queried_object_id(){return 999;}
 function get_the_title($id){return $GLOBALS['state']['records'][$id]['title'];}
@@ -82,6 +83,16 @@ echo json_encode(compact('query','bound','private','draft','unrelated'));
     reordered = records()
     reordered['1']['order'] = 0
     assert php(code, {'records': reordered})['query']['query_args']['post__in'] == [1, 2]
+
+
+@pytest.mark.parametrize('field', ['name', 'address', 'website', 'website_label', 'route_url'])
+def test_password_protected_published_depot_does_not_expose_binding_values(field):
+    data = records()
+    data['1']['protected'] = True
+    code = BASE + "echo json_encode(bioco_record_binding_value('original',['name'=>'loop_bioco_depot_' . $state['field'],'loop_id'=>1]));"
+    assert php(code, {'records': data, 'field': field}) == ''
+    data['1']['protected'] = False
+    assert php(code, {'records': data, 'field': field}) != ''
 
 
 def test_bad_website_is_not_a_divi_button_destination():
