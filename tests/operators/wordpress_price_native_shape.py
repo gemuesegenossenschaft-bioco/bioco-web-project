@@ -1,6 +1,7 @@
 """Explicit read-only gate against the installed staging WordPress block parser.
 
-Run: BIOCO_PRICE_QA_PLAN=~/.cache/bioco-content-editor/private-price-invoice-qa-plan-v7-20261013.json \
+Run: BIOCO_PRICE_WP_HOST=YOUR_STAGING_SSH_HOST BIOCO_PRICE_WP_CLI='YOUR_WP_CLI_WITH_PATH_AND_USER' \
+  BIOCO_PRICE_QA_PLAN=~/.cache/bioco-content-editor/private-price-invoice-qa-plan-v7-20261013.json \
   python3 -m pytest -q tests/operators/wordpress_price_native_shape.py
 
 The operator must also inspect the exact candidate SHA, owned draft state, and browser.
@@ -15,12 +16,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).parents[2]
 SOURCE = ROOT / 'wordpress/web/app/mu-plugins/bioco-import/includes/price-adoption.php'
-HOST = os.environ.get('BIOCO_PRICE_WP_HOST', 'bioco@193.33.128.160')
-WP = os.environ.get('BIOCO_PRICE_WP_CLI',
-    '/home/bioco/bin/wp --path=/home/bioco/staging.bioco.ch --user=7')
+HOST = os.environ.get('BIOCO_PRICE_WP_HOST', '')
+WP = os.environ.get('BIOCO_PRICE_WP_CLI', '')
 
 
 def installed_eval(code: str, payload: str) -> dict | list:
+    if not HOST or not WP:
+        raise RuntimeError('Set BIOCO_PRICE_WP_HOST and BIOCO_PRICE_WP_CLI for the reviewed staging runtime.')
     command = ['ssh', '-T', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=12', HOST,
                f'{WP} eval {shlex.quote(code)}']
     result = subprocess.run(command, input=payload, text=True, capture_output=True, timeout=45, check=True)
