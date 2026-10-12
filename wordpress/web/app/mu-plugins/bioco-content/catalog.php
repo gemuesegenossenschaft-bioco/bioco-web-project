@@ -13,7 +13,7 @@ add_action('init', function () {
         register_post_type(bioco_catalog_type($kind), [
             'labels' => ['name' => __($labels[0], 'bioco'), 'singular_name' => __($labels[1], 'bioco'), 'edit_item' => __($labels[1] . ' bearbeiten', 'bioco')],
             'public' => false, 'show_ui' => true, 'show_in_rest' => false,
-            'menu_icon' => 'dashicons-' . $labels[2], 'supports' => ['title'],
+            'menu_icon' => 'dashicons-' . $labels[2], 'supports' => ['title', 'page-attributes'],
             'rewrite' => false,
         ]);
     }
