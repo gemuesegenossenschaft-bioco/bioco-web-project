@@ -413,7 +413,7 @@ class TestGalleryValidation:
     def test_invalid_category_is_rejected(self):
         payload = _json_php(
             _preamble()
-            + "$values = ['items' => [['image' => 7, 'category' => 'hacked']],\n"
+            + "$values = ['items' => [['image' => 7, 'category' => 'Bad key']],\n"
             + "  'filters' => [['key' => 'all', 'label' => 'Alle']]];\n"
             + "$result = bioco_native_validate_values('gallery', $values);\n"
             + "echo json_encode(['rejected' => $result instanceof WP_Error, 'status' => $result->status]);"
@@ -425,7 +425,7 @@ class TestGalleryValidation:
             "no_all": "[['key' => 'koerbe', 'label' => 'K']]",
             "two_all": "[['key' => 'all', 'label' => 'A1'], ['key' => 'all', 'label' => 'A2']]",
             "duplicate_key": "[['key' => 'all', 'label' => 'A'], ['key' => 'koerbe', 'label' => 'K'], ['key' => 'koerbe', 'label' => 'K2']]",
-            "unknown_key": "[['key' => 'all', 'label' => 'A'], ['key' => 'sonst', 'label' => 'S']]",
+            "non_canonical_key": "[['key' => 'all', 'label' => 'A'], ['key' => 'Bad Key', 'label' => 'S']]",
         }
         for label, filters in cases.items():
             payload = _json_php(

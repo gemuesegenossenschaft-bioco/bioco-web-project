@@ -35,6 +35,30 @@ an unpublished copy. Use `--apply` only after reviewing the plan. Mixed editoria
 text aborts validation; concurrent changes prevent the corresponding save.
 Production acceptance uses tagged draft copies and never saves active assignments.
 
+## Gallery
+
+The Galerie module's Content panel owns image rows, captions, category keys,
+filter labels/order, initial count, more/less labels and the empty-category text.
+Images use Divi's Media Library picker; row controls add, remove and reorder them.
+Category keys may contain lowercase letters, numbers, hyphens and underscores,
+starting with a letter. `all` is reserved for the filter that shows every image.
+Additional filters may remain empty without creating images.
+
+The same panel controls desktop/tablet/mobile columns, image fit/ratio/corners
+and grid gap. Standard Divi controls own the module's surrounding design.
+A count of zero shows every image. Clearing the more label disables the limit;
+clearing the less label permits expansion without a collapse action. An older
+saved module that has no less-label field retains its existing collapse wording.
+Media IDs and alt metadata remain unchanged. Captions are escaped as plain text.
+
+For hosted acceptance, make an unpublished, unassigned copy of the Gemüse page.
+Add a temporary image and category, edit its caption, reorder it and its filter,
+change the count/labels and mobile columns, then save and reopen. Check the copy's
+frontend at mobile and desktop widths, including keyboard focus and the empty
+category. Restore the copy's values, then delete the copy. Preserve the public
+page and active global templates. Local parser/control/browser tests do not
+replace this licensed Divi save/reopen proof.
+
 ## Existing pages
 
 Fresh imports compose native modules. To convert existing marker leaves without
