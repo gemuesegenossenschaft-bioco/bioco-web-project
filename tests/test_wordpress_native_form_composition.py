@@ -95,6 +95,31 @@ def test_candidate_is_native_ordered_and_refuses_missing_or_duplicate_fields(ren
     assert rendered['refused'] == [True,True]
 
 
+def test_style_callbacks_do_not_request_undefined_module_attributes():
+    code = PHP[:PHP.index('$copies = [];')] + r'''
+eval('namespace ET\\Builder\\FrontEnd\\Module; class Style {static function add($args) {}}');
+class Elements {
+ public $kind; public $calls=[];
+ function __construct($kind) {$this->kind=$kind;}
+ function style($args) {
+  if(!isset(bioco_form_metadata()[$this->kind]['attributes'][$args['attrName']]['settings']['decoration']))throw new RuntimeException('Missing decoration metadata');
+  $this->calls[]=$args['attrName'];return '';
+ }
+}
+$result=[];
+foreach(array_keys(bioco_form_metadata()) as $kind){
+ $elements=new Elements($kind);bioco_form_module_styles(['name'=>'bioco-divi/'.$kind,'elements'=>$elements,'id'=>'fixture','orderIndex'=>0,'storeInstance'=>0]);$result[$kind]=$elements->calls;
+}
+echo json_encode($result);
+'''
+    result = subprocess.run(['php','-r',code],cwd=ROOT,text=True,capture_output=True)
+    assert result.returncode == 0, result.stderr
+    calls=json.loads(result.stdout)
+    assert calls['form-controller']==calls['doi-controller']==['module']
+    assert calls['form-field']==calls['form-action']==['module','control','label','help']
+    assert calls['form-value']==['module','control','label']
+
+
 @pytest.fixture()
 def browser():
     from playwright.sync_api import sync_playwright

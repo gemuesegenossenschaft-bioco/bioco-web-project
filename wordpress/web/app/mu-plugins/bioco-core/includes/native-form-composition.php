@@ -151,7 +151,11 @@ function bioco_form_render_block($attrs, $content, $block, $elements, $default_p
 
 function bioco_form_module_styles(array $args): void {
     $styles = [];
-    foreach (['module', 'control', 'label', 'help'] as $attr) $styles[] = $args['elements']->style(['attrName' => $attr]);
+    $kind = substr($args['name'], strlen('bioco-divi/'));
+    $attributes = bioco_form_metadata()[$kind]['attributes'] ?? [];
+    foreach (['module', 'control', 'label', 'help'] as $attr) {
+        if (isset($attributes[$attr]['settings']['decoration'])) $styles[] = $args['elements']->style(['attrName' => $attr]);
+    }
     ET\Builder\FrontEnd\Module\Style::add([
         'id' => $args['id'], 'name' => $args['name'], 'orderIndex' => $args['orderIndex'],
         'storeInstance' => $args['storeInstance'], 'styles' => $styles,
@@ -159,6 +163,8 @@ function bioco_form_module_styles(array $args): void {
 }
 
 function bioco_form_metadata(): array {
+    static $modules;
+    if ($modules !== null) return $modules;
     $modules = [];
     foreach (['form-controller', 'form-field', 'form-action', 'form-value', 'doi-controller'] as $kind) {
         $modules[$kind] = json_decode(file_get_contents(__DIR__ . '/../form-composition/' . $kind . '/module.json'), true, 512, JSON_THROW_ON_ERROR);

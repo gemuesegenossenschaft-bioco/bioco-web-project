@@ -24,9 +24,12 @@
         entries.map(function (entry) {return React.createElement('option', {key: entry, value: entry}, entry);}));
     };
   }
-  function styles(props) {
-    return React.createElement(window.divi.module.StyleContainer, {mode: props.mode, state: props.state, noStyleTag: props.noStyleTag},
-      ['module','control','label','help'].map(function (name) {return props.elements.style({attrName: name});}));
+  function styles(kind) {
+    return function (props) {
+      var attrs = data().modules[kind].attributes;
+      return React.createElement(window.divi.module.StyleContainer, {mode: props.mode, state: props.state, noStyleTag: props.noStyleTag},
+        ['module','control','label','help'].filter(function (name) {return attrs[name] && attrs[name].settings && attrs[name].settings.decoration;}).map(function (name) {return props.elements.style({attrName: name});}));
+    };
   }
   function edit(kind) {
     return function (props) {
@@ -54,7 +57,7 @@
       return React.createElement(window.divi.module.ModuleContainer, {
         attrs: props.attrs, defaultPrintedStyleAttrs: props.defaultPrintedStyleAttrs, domRef: domRef, elements: props.elements,
         id: props.id, isFirst: props.isFirst, isLast: props.isLast, name: props.name,
-        stylesComponent: styles,
+        stylesComponent: styles(kind),
         scriptDataComponent: function (args) {return React.createElement(React.Fragment, null, args.elements.scriptData({attrName: 'module'}));},
         classnamesFunction: function (args) {args.classnamesInstance.add(window.divi.module.elementClassnames({attrs: (args.attrs.module || {}).decoration || {}, breakpoint: args.breakpoint, state: args.state}));},
         isLooped: props.isLooped, loopIndex: props.loopIndex,
