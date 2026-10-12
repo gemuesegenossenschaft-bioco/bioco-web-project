@@ -18,6 +18,13 @@ $intro = bioco_field('intro');
 $locations = bioco_field('locations');
 $catalog_rows = function_exists('bioco_catalog_rows') ? bioco_catalog_rows('depots') : null;
 if ($catalog_rows !== null) $locations = $catalog_rows;
+elseif (is_array($locations)) {
+    // An unmigrated local row is not approval to republish recovered details.
+    $locations = array_map(static function ($row) {
+        if (is_array($row)) $row['description'] = '';
+        return $row;
+    }, $locations);
+}
 $locations_heading = bioco_field('locations_heading');
 $route_label = bioco_field('route_label');
 $empty_message = bioco_field('empty_message');

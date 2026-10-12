@@ -24,11 +24,44 @@
         },
         {
             "name": "depot_description",
-            "label": "Adresse, Kontakt und Hinweise",
+            "label": "Private Hinweise",
             "type": "textarea",
             "new_lines": "",
             "required": 0,
-            "key": "field_bioco_depot_description"
+            "key": "field_bioco_depot_description",
+            "instructions": "Diese gespeicherten Angaben werden nicht öffentlich ausgegeben. Öffentliche Adressen und Website-Links stehen in den eigenen Feldern unten."
+        },
+        {
+            "key": "field_bioco_depot_public",
+            "name": "depot_public",
+            "label": "Auf der öffentlichen Karte anzeigen",
+            "type": "true_false",
+            "default_value": 1,
+            "ui": 1,
+            "instructions": "Name und Kartenkoordinaten sind öffentlich. Private Hinweise bleiben verborgen."
+        },
+        {
+            "key": "field_bioco_depot_public_address",
+            "name": "depot_public_address",
+            "label": "Öffentliche Adresse",
+            "type": "textarea",
+            "default_value": "",
+            "instructions": "Nur freigegebene Angaben eintragen. Dieses Feld erscheint in der Karte und im Adressbereich."
+        },
+        {
+            "key": "field_bioco_depot_website",
+            "name": "depot_website",
+            "label": "Öffentliche Website",
+            "type": "url",
+            "default_value": "",
+            "instructions": "Freigegebener HTTP- oder HTTPS-Link. Private Kontaktangaben gehören in die privaten Hinweise."
+        },
+        {
+            "key": "field_bioco_depot_website_label",
+            "name": "depot_website_label",
+            "label": "Website-Linktext",
+            "type": "text",
+            "default_value": ""
         }
     ],
     "location": [
