@@ -35,6 +35,13 @@ function the_post() {}
 function get_the_ID() { return 42; }
 function get_the_title($id = null) { global $fixture; return $fixture['title']; }
 function get_post_field($field, $id) { global $fixture; return $fixture['body']; }
+function get_post($id) { global $fixture; return (object) ['ID' => $id, 'post_type' => get_post_type($id),
+    'post_status' => $fixture['status'] ?? 'publish', 'post_content' => $fixture['body']]; }
+function get_posts($args) { global $fixture; return array_map(static fn($body) => (object) [
+    'post_status' => 'publish', 'post_content' => $body], $fixture['group_library'] ?? []); }
+function get_post_stati() { return ['publish' => [], 'draft' => []]; }
+function post_password_required($id) { return false; }
+function current_user_can($cap, $id) { return false; }
 function get_field($field, $id) { global $fixture; return $fixture[$field] ?? null; }
 function get_post_type($id) { global $fixture; return $fixture['post_type'] ?? 'event'; }
 function get_the_date($format, $id) { return '01.10.2026'; }
@@ -44,12 +51,19 @@ function get_post_thumbnail_id($id) { return 7; }
 function wp_get_attachment_image_url($id, $size) { return ''; }
 function get_post_meta($id, $key, $single) { global $fixture; return $key === '_et_default' ? ($fixture['default_template'] ?? '1') : 'Article thumbnail'; }
 function home_url($path) { return 'https://example.test' . $path; }
-function add_filter($hook, $callback, $priority = 10, $args = 1) { $GLOBALS['filters'][$hook] = $callback; $GLOBALS['filter_args'][$hook] = $args; }
+function add_filter($hook, $callback, $priority = 10, $args = 1) {
+    $GLOBALS['filters'][$hook] = $callback; $GLOBALS['filter_args'][$hook] = $args;
+    $GLOBALS['filter_registry'][$hook][$priority][] = $callback;
+}
 function add_action($hook, $callback) {}
 function is_singular($types) { global $fixture; return !($fixture['archive'] ?? false) && in_array(get_post_type(42), (array) $types, true); }
 function get_queried_object_id() { return 42; }
 function apply_filters($hook, $value) {
     global $calls;
+    $registered = $GLOBALS['filter_registry'][$hook] ?? [];
+    ksort($registered);
+    foreach ($registered as $callbacks) foreach ($callbacks as $callback) $value = $callback($value);
+    if ($value === '') return '';
     $GLOBALS['layout_input'] = $value;
     $calls[] = 'native_layout_content_filters';
     return '<div>Native layout renderer result</div>';
@@ -64,10 +78,17 @@ function wp_date($format, $ts) { return (new DateTimeImmutable('@' . $ts))->setT
 function esc_html($value) { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
 function esc_attr($value) { return esc_html($value); }
 function esc_url_raw($value) { return str_starts_with($value, 'https://') ? $value : ''; }
-function the_content() { global $calls; $calls[] = 'the_content'; echo '<p>Editor rendered with content filters.</p>'; }
+function the_content() { global $calls, $fixture; $calls[] = 'the_content';
+    if (get_post_type(42) === 'bioco_group') {
+        echo apply_filters('the_content', $fixture['body']);
+        return;
+    }
+    echo '<p>Editor rendered with content filters.</p>';
+}
 // A sanitizer spy: verifies that fallback HTML passes through WP's sanitizer.
 function wp_kses_post($value) { global $calls; $calls[] = ['wp_kses_post', $value]; return '<p>Safe <strong>summary</strong>.</p>'; }
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/helpers.php';
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/record-layout-runtime.php';
 ob_start();
 require 'wordpress/web/app/themes/bioco-divi/functions.php';
 require 'wordpress/web/app/themes/bioco-divi/' . (get_post_type(42) === 'event' ? 'single-event.php' : 'single.php');
@@ -75,9 +96,9 @@ $html = ob_get_clean();
 $metadata_filter = $GLOBALS['filters']['get_post_metadata'];
 $theme_layouts = ['et_template' => 100, 'header' => ['id' => 101, 'enabled' => true], 'body' => ['id' => 102, 'enabled' => true], 'footer' => ['id' => 103, 'enabled' => true]];
 $theme_layouts_filter = $GLOBALS['filters']['et_theme_builder_template_layouts'];
-echo json_encode(['html' => $html, 'calls' => $calls, 'layout' => $GLOBALS['layout'],
+echo json_encode(['html' => $html, 'calls' => $calls, 'layout' => $GLOBALS['layout'] ?? null,
     'original_theme_layouts' => $theme_layouts, 'filtered_theme_layouts' => $theme_layouts_filter($theme_layouts),
-    'layout_input' => $GLOBALS['layout_input'], 'fixture' => $fixture,
+    'layout_input' => $GLOBALS['layout_input'] ?? null, 'fixture' => $fixture,
     'metadata' => array_map(static function ($key) use ($metadata_filter) {
         return [
             'single' => $metadata_filter(null, 42, $key, true),
@@ -183,6 +204,33 @@ def test_empty_post_does_not_use_event_summary():
     result = render(post_type='post', card_image=None)
     assert text_value(modules(result)[2]) == ''
     assert result['calls'] == ['native_layout_content_filters']
+
+
+def test_blank_group_uses_one_published_native_detail_layout_without_article_shell():
+    body = '<!-- wp:divi/section {"qa":"native"} /-->'
+    result = render(post_type='bioco_group', body='', group_library=[body])
+    assert result['layout'] is None
+    assert result['layout_input'] == body
+    assert result['calls'] == ['the_content', 'native_layout_content_filters']
+    assert 'Native layout renderer result' in result['html']
+    assert 'Shared navigation' in result['html'] and 'Shared footer' in result['html']
+    assert '01.10.2026' not in result['html']
+    assert 'Zurück zu Aktuelles' not in result['html']
+
+
+def test_authored_group_body_wins_over_saved_detail_layout():
+    result = render(post_type='bioco_group', body='<p>Editor body</p>', group_library=['saved body'])
+    assert result['layout_input'] == '<p>Editor body</p>'
+    assert result['calls'] == ['the_content', 'native_layout_content_filters']
+
+
+def test_missing_or_ambiguous_group_library_keeps_blank_body():
+    for layouts in ([], ['first', 'second']):
+        result = render(post_type='bioco_group', body='', group_library=layouts)
+        assert result['layout'] is None
+        assert result['calls'] == ['the_content']
+        assert 'Native layout renderer result' not in result['html']
+        assert 'Zurück zu Aktuelles' not in result['html']
 
 
 def test_article_helpers_use_the_configured_mu_plugin_directory(tmp_path):

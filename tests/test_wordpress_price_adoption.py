@@ -393,8 +393,8 @@ def test_saved_calculator_browser_handoff_uses_authored_cta_and_new_tier():
         root = page.locator('[data-bioco-prices]')
         root.locator('a[href="#bioco-price-neu"]').click()
         assert root.locator('.bioco-price-value-total').inner_text() == "1'400"
-        assert root.locator('.bioco-price-signup a').inner_text() == 'Jetzt mitmachen!'
-        assert 'abo=neu' in root.locator('.bioco-price-signup a').get_attribute('href')
+        assert root.locator('a.bioco-price-signup').inner_text() == 'Jetzt mitmachen!'
+        assert 'abo=neu' in root.locator('a.bioco-price-signup').get_attribute('href')
         root.locator('a[href="#bioco-price-kein"]').click()
         assert root.locator('.bioco-price-signup').is_hidden()
         root.locator('a[href="#bioco-share-add"]').click()
