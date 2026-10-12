@@ -35,11 +35,11 @@ add_filter('et_theme_builder_template_layouts', function ($layouts) {
     return $layouts;
 });
 
-// The shared single template supplies a native layout at render time. Expose
-// the same builder marker used by imported pages to Divi's frontend bootstrap,
-// without changing the post's saved body or metadata.
+// The shared single template supplies native event/article and group layouts at
+// render time. Divi needs the builder marker on the queried record to add its
+// layout wrappers and generate the saved module styles. Keep metadata untouched.
 add_filter('get_post_metadata', function ($value, $post_id, $key, $single) {
-    if (is_singular(['event', 'post']) && (int) $post_id === (int) get_queried_object_id()) {
+    if (is_singular(['event', 'post', 'bioco_group']) && (int) $post_id === (int) get_queried_object_id()) {
         if ($key === '_et_pb_use_builder') return $single ? 'on' : ['on'];
         if ($key === '_et_pb_page_layout') return $single ? 'et_full_width_page' : ['et_full_width_page'];
     }

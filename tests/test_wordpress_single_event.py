@@ -49,7 +49,13 @@ function has_post_thumbnail($id) { global $fixture; return !empty($fixture['thum
 function get_the_post_thumbnail_url($id, $size) { global $fixture; return $fixture['thumbnail']; }
 function get_post_thumbnail_id($id) { return 7; }
 function wp_get_attachment_image_url($id, $size) { return ''; }
-function get_post_meta($id, $key, $single) { global $fixture; return $key === '_et_default' ? ($fixture['default_template'] ?? '1') : 'Article thumbnail'; }
+function get_post_meta($id, $key, $single) { global $fixture;
+    if (in_array($key, ['_et_pb_use_builder', '_et_pb_page_layout'], true)) {
+        return $GLOBALS['filters']['get_post_metadata'](null, $id, $key, $single);
+    }
+    return $key === '_et_default' ? ($fixture['default_template'] ?? '1') : 'Article thumbnail';
+}
+function et_pb_is_pagebuilder_used($id) { return get_post_meta($id, '_et_pb_use_builder', true) === 'on'; }
 function home_url($path) { return 'https://example.test' . $path; }
 function add_filter($hook, $callback, $priority = 10, $args = 1) {
     $GLOBALS['filters'][$hook] = $callback; $GLOBALS['filter_args'][$hook] = $args;
@@ -66,7 +72,12 @@ function apply_filters($hook, $value) {
     if ($value === '') return '';
     $GLOBALS['layout_input'] = $value;
     $calls[] = 'native_layout_content_filters';
-    return '<div>Native layout renderer result</div>';
+    $rendered = '<div>Native layout renderer result</div>';
+    if (et_pb_is_pagebuilder_used(42)) {
+        $rendered = '<div id="et-boc" class="et-boc"><div class="et-l et-l--post">'
+            . '<div class="et_builder_inner_content">' . $rendered . '</div></div></div>';
+    }
+    return $rendered;
 }
 function serialize_blocks($blocks) {
     $GLOBALS['layout'] = $blocks;
@@ -216,12 +227,15 @@ def test_blank_group_uses_one_published_native_detail_layout_without_article_she
     assert 'Shared navigation' in result['html'] and 'Shared footer' in result['html']
     assert '01.10.2026' not in result['html']
     assert 'Zurück zu Aktuelles' not in result['html']
+    assert 'id="et-boc"' in result['html']
+    assert 'class="et-l et-l--post"' in result['html']
 
 
 def test_authored_group_body_wins_over_saved_detail_layout():
     result = render(post_type='bioco_group', body='<p>Editor body</p>', group_library=['saved body'])
     assert result['layout_input'] == '<p>Editor body</p>'
     assert result['calls'] == ['the_content', 'native_layout_content_filters']
+    assert 'id="et-boc"' in result['html']
 
 
 def test_missing_or_ambiguous_group_library_keeps_blank_body():
@@ -231,6 +245,7 @@ def test_missing_or_ambiguous_group_library_keeps_blank_body():
         assert result['calls'] == ['the_content']
         assert 'Native layout renderer result' not in result['html']
         assert 'Zurück zu Aktuelles' not in result['html']
+        assert 'id="et-boc"' not in result['html']
 
 
 def test_article_helpers_use_the_configured_mu_plugin_directory(tmp_path):
@@ -244,7 +259,7 @@ def test_article_helpers_use_the_configured_mu_plugin_directory(tmp_path):
 
 
 def test_frontend_builder_marker_is_request_only_and_scoped_to_queried_single():
-    for post_type in ('event', 'post', 'page'):
+    for post_type in ('event', 'post', 'bioco_group', 'page'):
         result = render(post_type=post_type)
         assert result['accepted_args'] == 4
         for metadata, value in zip(result['metadata'], ('on', 'et_full_width_page')):
