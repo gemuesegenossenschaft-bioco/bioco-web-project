@@ -99,6 +99,21 @@ echo json_encode(['state'=>$result['state'],'calls'=>$calls,'writes'=>$GLOBALS['
     assert data == {'state': 'failure', 'calls': 1, 'writes': [], 'mail': []}
 
 
+def test_native_success_type_copy_and_backend_error_detail_preserve_routing():
+    data = php(r'''
+$token=str_repeat('a',64);fixture_pending($token);$_SERVER['REQUEST_METHOD']='POST';$_POST=fixture_post($token)['post'];$_GET=[];
+$typed=[];foreach(['subscribe','visit','waiting_list','contact']as$type)$typed[$type]=bioco_doi_visible_layout('Saved '.$type,['attrs'=>bioco_form_layout_attrs('bioco-doi-type-'.$type)]);
+$GLOBALS['admin']=true;$editable=bioco_doi_visible_layout('Editable visit',['attrs'=>bioco_form_layout_attrs('bioco-doi-type-visit')]);
+echo json_encode(['typed'=>$typed,'editable'=>$editable,'writes'=>count($GLOBALS['inserts'])]);
+''')
+    assert data == {'typed': {'subscribe': 'Saved subscribe', 'visit': '', 'waiting_list': '', 'contact': ''}, 'editable': 'Editable visit', 'writes': 1}
+    data = php(r'''
+$_SERVER['REQUEST_METHOD']='POST';$_POST=fixture_post(str_repeat('b',64))['post'];$_GET=[];
+echo json_encode(['state'=>bioco_doi_current_outcome()['state'],'detail'=>bioco_form_render_part('form-action',['action'=>'doi-error-details'],'public'),'writes'=>$GLOBALS['inserts']]);
+''')
+    assert data == {'state': 'invalid', 'detail': '<p class="bioco-form-error-detail">Captured invalid_token</p>', 'writes': []}
+
+
 def test_duplicated_controllers_evaluate_current_post_once_and_filter_native_rows():
     data = php(r'''
 $token=str_repeat('e',64);fixture_pending($token);$_SERVER['REQUEST_METHOD']='POST';$_POST=fixture_post($token)['post'];$_GET=[];

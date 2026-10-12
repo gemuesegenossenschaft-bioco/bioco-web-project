@@ -58,6 +58,7 @@ require_once BIOCO_IMPORT_DIR . '/includes/event-template-migration.php';
 require_once BIOCO_IMPORT_DIR . '/includes/price-layouts.php';
 require_once BIOCO_IMPORT_DIR . '/includes/record-layout-adoption.php';
 require_once BIOCO_IMPORT_DIR . '/includes/design-system.php';
+require_once BIOCO_IMPORT_DIR . '/includes/form-adoption.php';
 
 // WP-CLI is the only place this plugin registers a "command" — every include
 // above is plain functions, callable/unit-reviewable without a WP-CLI
@@ -65,4 +66,5 @@ require_once BIOCO_IMPORT_DIR . '/includes/design-system.php';
 if (defined('WP_CLI') && WP_CLI) {
     require_once BIOCO_IMPORT_DIR . '/includes/cli.php';
     WP_CLI::add_command('bioco', 'Bioco_Import_CLI_Command');
+    require_once BIOCO_IMPORT_DIR . '/includes/form-adoption-cli.php';
 }

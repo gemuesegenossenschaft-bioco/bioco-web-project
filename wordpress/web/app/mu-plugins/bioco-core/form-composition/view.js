@@ -74,13 +74,18 @@
     if (!contract || !configFor(form).restUrl || (type === 'membership' && !window.BiocoMembership)) return;
     var fields = own(scope, '[data-bioco-field]');
     var seen = {};
+    var choiceGroups = {};
     var valid = fields.every(function (input) {
       var identity = input.getAttribute('data-bioco-field').split('.');
       var name = identity[1];
       if (!Object.prototype.hasOwnProperty.call(contract, name)) return false;
       var spec = contract[name];
       var inputType = ['TEXTAREA','SELECT'].indexOf(input.tagName) >= 0 ? input.tagName.toLowerCase() : input.type;
-      if (!input.hasAttribute('data-native-form-control') || identity[0] !== type || (seen[name] && !spec.array) || input.name !== name + (spec.array ? '[]' : '') || input.required !== spec.required || inputType !== spec.type || !!spec.boolean !== input.hasAttribute('data-bool-array')) return false;
+      var group = inputType === 'radio' && input.closest('[data-bioco-choice-group]');
+      var radio = group && group.getAttribute('data-bioco-choice-group') === identity.join('.') && (spec.presentations || []).indexOf('radio') >= 0;
+      if (radio && choiceGroups[name] && choiceGroups[name] !== group) return false;
+      if (!input.hasAttribute('data-native-form-control') || identity[0] !== type || (seen[name] && !spec.array && !(radio && choiceGroups[name] === group)) || input.name !== name + (spec.array ? '[]' : '') || input.required !== spec.required || (inputType !== spec.type && !radio) || !!spec.boolean !== input.hasAttribute('data-bool-array')) return false;
+      if (radio) choiceGroups[name] = group;
       seen[name] = (seen[name] || 0) + 1;
       return true;
     });
