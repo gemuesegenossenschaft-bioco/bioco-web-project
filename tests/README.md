@@ -35,6 +35,11 @@ matching unassigned event bodies. These tests run without licensed Divi. Native
 edit/save/reopen and public desktop/mobile rendering remain required operator
 evidence on staging and production. This slice does not complete event feeds.
 
+The #217 back-button checks execute both native layout generators, round-trip
+label/link/responsive style edits through the WordPress parser, and check the
+child theme's focus/wrapping rules in Chromium. They require no server writes.
+The licensed preset rendering and native save/reopen still need hosted proof.
+
 | Command | Needs | Gate |
 | --- | --- | --- |
 | `python3 -m pytest tests/ -q` | python3, php, node, Playwright Chromium | full suite, all green required |

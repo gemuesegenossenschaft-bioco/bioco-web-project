@@ -1754,7 +1754,13 @@ body.home,
 #bioco-main-content #et-boc .bioco-article-body h3 { font-size: var(--wp--preset--font-size--xl); }
 #bioco-main-content #et-boc .bioco-article-body h2,
 #bioco-main-content #et-boc .bioco-article-body h3 { margin: 1.8em 0 .7em; line-height: 1.2; }
-#bioco-main-content #et-boc .bioco-article-back { margin-top: 48px; }
+/* Divi owns back-button colours, border, sizing and spacing. Only wrapping and
+   keyboard focus need shared CSS; native instance styles remain free to win. */
+.bioco-article-back { overflow-wrap: anywhere; }
+.bioco-article-back:focus-visible {
+    outline: 3px solid var(--wp--preset--color--bioco-carrot);
+    outline-offset: 3px;
+}
 
 /* Keep feed headings distinct from card titles and leave room for the next section. */
 #bioco-main-content .cms-events-feed .events-banner > h2,
