@@ -129,6 +129,43 @@ def browser():
         instance.close()
 
 
+@pytest.mark.parametrize('editor', [False, True])
+@pytest.mark.parametrize('state', ['success', 'error', 'pending'])
+def test_authored_state_rows_are_visible_in_editor_only_before_controller(browser, editor, state):
+    """Use the actual stylesheet and saved flex layout, including native duplicates."""
+    context = browser.new_context()
+    context.route('**/*', lambda route: route.abort())
+    page = context.new_page()
+    try:
+        css = (CORE / 'form-composition/style.css').read_text()
+        page.set_content(
+            '<!doctype html><html><head><style>'
+            '.et_pb_row {display:flex;} ' + css + '</style></head>'
+            f'<body class="{"et-fb" if editor else ""}">'
+            '<section class="bioco-form-scope">'
+            f'<div class="et_pb_row bioco-form-state-{state}"><p>Authored copy</p></div>'
+            f'<div class="et_pb_row bioco-form-state-{state}"><p>Duplicated copy</p></div>'
+            '</section>'
+            f'<div id="unrelated" class="et_pb_row bioco-form-state-{state}">Unrelated layout</div>'
+            '</body></html>'
+        )
+        rows = page.locator('.bioco-form-scope .et_pb_row')
+        assert rows.count() == 2
+        for row in rows.all():
+            assert row.is_visible() is editor
+            assert row.evaluate('(element) => getComputedStyle(element).display') == ('flex' if editor else 'none')
+        assert page.locator('#unrelated').is_visible()
+        if not editor:
+            # After initialization the controller owns the chosen outcome through hidden.
+            page.locator('.bioco-form-scope').evaluate(
+                '(scope, state) => {scope.dataset.biocoFormState=state; scope.lastElementChild.hidden=true;}', state
+            )
+            assert rows.first.is_visible()
+            assert rows.last.is_hidden()
+    finally:
+        context.close()
+
+
 def html_page(rendered, change='', omit_runtime=False):
     parts = ['<!doctype html><html><head><meta charset="utf-8"><style>',(CORE/'form-composition/style.css').read_text(),'</style></head><body>']
     for index, copy in enumerate(rendered['copies']):

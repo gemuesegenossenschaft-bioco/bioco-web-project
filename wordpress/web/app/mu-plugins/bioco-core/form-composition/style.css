@@ -3,7 +3,8 @@
 .bioco-form-label { display: block; }
 .bioco-form-help { margin: 0; }
 .bioco-form-scope [hidden] { display: none !important; }
-.bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-success,
-.bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-error,
-.bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-pending { display: none !important; }
+/* Divi's inert canvas exposes every authored outcome for editing. */
+body:not(.et-fb) .bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-success,
+body:not(.et-fb) .bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-error,
+body:not(.et-fb) .bioco-form-scope:not([data-bioco-form-state]) .bioco-form-state-pending { display: none !important; }
 .bioco-form-field input[type="checkbox"], .bioco-form-field input[type="radio"] { width: auto; }
