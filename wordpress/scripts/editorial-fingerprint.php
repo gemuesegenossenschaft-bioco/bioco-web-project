@@ -34,6 +34,7 @@ foreach ($tables as [$table, $order]) {
                     'sidebars_widgets', 'nav_menu_options', 'et_divi', 'et_pb_builder_options',
                     'et_divi_builder_global_presets_d5', 'et_divi_builder_global_presets_ng',
                     'et_divi_global_variables', 'bioco_form_messages', 'bioco_membership_adapter',
+                    'bioco_pricing_enabled', 'bioco_share_price', 'bioco_divi_form_message_groups',
                 ], true)) {
                 continue;
             }

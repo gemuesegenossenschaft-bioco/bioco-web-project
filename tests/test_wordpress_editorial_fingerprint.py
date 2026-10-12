@@ -50,6 +50,9 @@ def base_rows():
         {'option_name': 'theme_mods_bioco-divi', 'option_value': 'Before'},
         {'option_name': 'bioco_form_messages', 'option_value': 'Before'},
         {'option_name': 'bioco_release_marker', 'option_value': 'Before'},
+        {'option_name': 'bioco_pricing_enabled', 'option_value': '0'},
+        {'option_name': 'bioco_share_price', 'option_value': '250'},
+        {'option_name': 'bioco_divi_form_message_groups', 'option_value': '[]'},
     ]
     return rows
 
@@ -75,6 +78,9 @@ def digest(tmp_path, rows):
     ('termmeta', 0, 'meta_value', 'Updated taxonomy meta'),
     ('options', 0, 'option_value', 'Updated theme settings'),
     ('options', 1, 'option_value', 'Updated form copy'),
+    ('options', 3, 'option_value', '1'),
+    ('options', 4, 'option_value', '300'),
+    ('options', 5, 'option_value', '["contact-form"]'),
 ])
 def test_editorial_fingerprint_catches_owned_data_changes(tmp_path, table, index, key, value):
     original = base_rows()
