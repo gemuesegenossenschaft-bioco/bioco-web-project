@@ -12,7 +12,8 @@ if (!defined('WP_CLI') || !WP_CLI) {
 }
 
 $action = $args[0] ?? '';
-$types = ['page', 'post', 'event', 'group', 'et_header_layout', 'et_footer_layout', 'et_body_layout'];
+$types = ['page', 'post', 'event', 'group', 'bioco_group', 'bioco_depot', 'bioco_vegetable', 'bioco_price',
+    'et_pb_layout', 'et_header_layout', 'et_footer_layout', 'et_body_layout'];
 $template_types = ['et_template', 'et_theme_builder'];
 $ignored_meta = ['_edit_lock', '_edit_last'];
 // Keep the full metadata hashes too. These fields are recomputed on page visits,
