@@ -42,7 +42,21 @@ function bioco_forms_divi_message_groups() {return [];}
 function bioco_forms_message_values($group,$values) {return array_merge($values,$GLOBALS['state']['effective_messages']??[]);}
 function bioco_render_dynamic_component($component,$values,$context) {$GLOBALS['captured_context']=$context;return $GLOBALS['state']['capture_html']??'';}
 function has_block($name,$content) {return str_contains($content,'wp:'.$name);}
-function parse_blocks($value) {return (new WP_Block_Parser())->parse($value);}
+function parse_blocks($value) {
+ $blocks=(new WP_Block_Parser())->parse($value);
+ if(!empty($GLOBALS['state']['generated_parser_metadata'])){
+  static $generation=0; ++$generation;
+  $enrich=function($items,$parent='')use(&$enrich,$generation){
+   foreach($items as $index=>&$item){
+    // The installed Divi parser changes these five top-level values on every parse.
+    $item['orderIndex']=$generation*100+$index;$item['index']=$generation*100+$index;
+    $item['id']='generated-'.$generation.'-'.$index;$item['parentId']=$parent;
+    $item['storeInstance']='runtime-'.$generation;
+    $item['innerBlocks']=$enrich($item['innerBlocks'],$item['id']);
+   }unset($item);return $items;
+  };$blocks=$enrich($blocks);
+ }return $blocks;
+}
 class Database {
  public $posts='posts'; public $options='options';
  function prepare($sql,...$args) {foreach($args as $arg)$sql=preg_replace_callback('/%[sd]/',fn()=>"'".str_replace("'","''",(string)$arg)."'",$sql,1);return str_replace('%','{wpdb-test}',$sql);}
@@ -76,6 +90,7 @@ try {
  }else{
   $record=$state['record'];if(isset($state['blocks']))$record['post_content']=serialize_blocks($state['blocks']);
   $capture=static function($group,$block){$v=$GLOBALS['state']['captures'][$group];$v['source']=hash('sha256',wp_json_encode($block));return $v;};
+  if(!empty($state['actual_capture']))$capture=null;
   $p=bioco_import_form_plan($record,$state['snapshot_site']??$state['site'],$state['options'],$capture);
   echo json_encode(['plan'=>$p,'before_blocks'=>parse_blocks($record['post_content']),'blocks'=>parse_blocks($p['after_content']),
    'html'=>render_native_fixture(parse_blocks($p['after_content'])), 'apply'=>bioco_import_form_sql($p,$p['fingerprint']),'restore'=>bioco_import_form_sql($p,$p['fingerprint'],true)]);
@@ -191,6 +206,45 @@ def test_content_cas_restores_exact_bytes_and_refuses_repeat_edits_and_option_ch
     assert execute(db, result['apply']) == 0
     assert 'error' in run(mode='sql', plan=result['plan'] | {'after_content': 'tampered'}, expected=result['plan']['fingerprint'])
     assert 'error' in run(mode='sql', plan=result['plan'], expected='wrong')
+
+
+def test_actual_capture_replays_with_divi_generated_metadata_and_keeps_exact_content_cas():
+    blocks, captures = contact()
+    result = run(blocks=blocks, generated_parser_metadata=True, actual_capture=True,
+                 capture_html=captures['contact-form']['html'],
+                 effective_messages=captures['contact-form']['values'])
+    assert 'error' not in result, result
+    plan = result['plan']
+    assert plan['changed'] == 1
+    db = database(plan)
+    original = db.execute('SELECT post_content FROM posts').fetchone()[0]
+    assert original == plan['before']['post_content']
+    assert execute(db, result['apply']) == 1
+    assert execute(db, result['restore']) == 1
+    assert db.execute('SELECT post_content FROM posts').fetchone()[0] == original
+    db.execute('UPDATE posts SET post_content=?', (original + '<!-- authored edit -->',))
+    assert execute(db, result['apply']) == 0
+
+
+def test_capture_hash_ignores_only_proven_top_level_parser_values():
+    original = block('bioco-divi/contact-form', {
+        'phone_label': {'innerContent': {'desktop': {'value': 'Saved phone'}}},
+        'module': {'advanced': {'htmlAttributes': {'desktop': {'value': {'id': 'authored-anchor'}}}}},
+    }) | {'orderIndex': 1, 'index': 2, 'id': 'generated-one', 'parentId': 'parent-one',
+         'storeInstance': 'runtime-one', 'other_metadata': 'preserved'}
+    def captured_source(selected):
+        result = run(mode='capture', group='contact-form', block=selected,
+                     capture_html='<section></section>')
+        assert 'error' not in result, result
+        return result['capture']['source']
+    baseline = captured_source(original)
+    regenerated = original | {'orderIndex': 99, 'index': 100, 'id': 'generated-two',
+                              'parentId': 'parent-two', 'storeInstance': 'runtime-two'}
+    assert captured_source(regenerated) == baseline
+    for changed in [original | {'other_metadata': 'changed'},
+                    original | {'attrs': original['attrs'] | {'phone_label': {'innerContent': {'desktop': {'value': ''}}}}},
+                    original | {'attrs': original['attrs'] | {'module': {'advanced': {'htmlAttributes': {'desktop': {'value': {'id': 'different-anchor'}}}}}}}]:
+        assert captured_source(changed) != baseline
 
 
 @pytest.mark.parametrize('mutation', ['unknown', 'missing', 'populated'])

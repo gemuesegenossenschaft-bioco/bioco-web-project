@@ -368,8 +368,9 @@ body.home,
     display: none;
 }
 
-.bioco-divi-section .bioco-divi-title .et_pb_module_header,
-.bioco-divi-section .bioco-divi-page-intro .et_pb_module_header {
+/* Legacy PHP composer defaults stay below saved Divi Heading controls. */
+:where(.bioco-divi-section .bioco-divi-title) .et_pb_module_header,
+:where(.bioco-divi-section .bioco-divi-page-intro) .et_pb_module_header {
     color: var(--wp--preset--color--bioco-text, #1A1A1A);
     font-family: inherit;
     font-size: inherit;

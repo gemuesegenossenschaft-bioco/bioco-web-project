@@ -49,7 +49,12 @@ function has_post_thumbnail($id) { global $fixture; return !empty($fixture['thum
 function get_the_post_thumbnail_url($id, $size) { global $fixture; return $fixture['thumbnail']; }
 function get_post_thumbnail_id($id) { return 7; }
 function wp_get_attachment_image_url($id, $size) { return ''; }
-function get_post_meta($id, $key, $single) { global $fixture; return $key === '_et_default' ? ($fixture['default_template'] ?? '1') : 'Article thumbnail'; }
+function get_post_meta($id, $key, $single) { global $fixture;
+    if (in_array($key, ['_et_pb_use_builder', '_et_pb_page_layout'], true)) {
+        return $GLOBALS['filters']['get_post_metadata'](null, $id, $key, $single);
+    }
+    return $key === '_et_default' ? ($fixture['default_template'] ?? '1') : 'Article thumbnail';
+}
 function home_url($path) { return 'https://example.test' . $path; }
 function add_filter($hook, $callback, $priority = 10, $args = 1) {
     $GLOBALS['filters'][$hook] = $callback; $GLOBALS['filter_args'][$hook] = $args;
@@ -244,7 +249,7 @@ def test_article_helpers_use_the_configured_mu_plugin_directory(tmp_path):
 
 
 def test_frontend_builder_marker_is_request_only_and_scoped_to_queried_single():
-    for post_type in ('event', 'post', 'page'):
+    for post_type in ('event', 'post', 'bioco_group', 'page'):
         result = render(post_type=post_type)
         assert result['accepted_args'] == 4
         for metadata, value in zip(result['metadata'], ('on', 'et_full_width_page')):

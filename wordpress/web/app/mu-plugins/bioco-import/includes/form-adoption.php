@@ -7,6 +7,12 @@ function bioco_import_form_groups(): array {
         'waiting-list-form' => 'waiting-list', 'event-signup-form' => 'event-signup', 'membership-form' => 'membership', 'doi-confirm' => 'doi'];
 }
 
+/** Divi adds these changing parser values; saved attributes and markup stay exact. */
+function bioco_import_form_source_hash(array $block): string {
+    unset($block['orderIndex'], $block['index'], $block['id'], $block['parentId'], $block['storeInstance']);
+    return hash('sha256', wp_json_encode($block));
+}
+
 function bioco_import_form_capture(string $group, array $block): array {
     if (!isset(bioco_import_form_groups()[$group])) throw new RuntimeException('Unknown form group.');
     $component = str_replace('-', '_', $group);
@@ -28,7 +34,7 @@ function bioco_import_form_capture(string $group, array $block): array {
     $values = bioco_native_extract_values($component, $attrs);
     if (is_wp_error($values)) throw new RuntimeException($values->get_error_message());
     $values = bioco_form_capture_presentation($group, array_merge($values, bioco_native_extract_wrapper($attrs)));
-    return ['source' => hash('sha256', wp_json_encode($block)), 'values' => $values,
+    return ['source' => bioco_import_form_source_hash($block), 'values' => $values,
         'html' => bioco_render_dynamic_component($component, $values, ['mode' => 'inert'])];
 }
 
@@ -307,7 +313,7 @@ function bioco_import_form_plan(array $record, string $site, array $options, ?ca
                 if ($group === 'event-signup-form' && in_array($record['post_type'], ['et_body_layout', 'et_pb_layout'], true)) throw new RuntimeException('Event signup in a reusable layout requires explicit manual event-context conversion.');
                 $current = $capture($group, $block);
                 if (!is_array($current['values'] ?? null) || !is_string($current['html'] ?? null)) throw new RuntimeException('Invalid form capture.');
-                if (($current['source'] ?? '') !== hash('sha256', wp_json_encode($block))) throw new RuntimeException('Capture does not match saved source.');
+                if (($current['source'] ?? '') !== bioco_import_form_source_hash($block)) throw new RuntimeException('Capture does not match saved source.');
                 $captures[implode('.', $at)] = $current;
                 $block = bioco_import_form_layout($group, $current, $block, $record['post_type'] === 'event');
                 $report[] = ['path' => $at, 'group' => $group, 'action' => 'convert'];
@@ -352,7 +358,7 @@ function bioco_import_form_sql(array $plan, string $expected, bool $restore = fa
     if (($plan['kind'] ?? '') !== 'form-content') throw new RuntimeException('Invalid form content plan.');
     $unused = $plan['captures'] ?? [];
     $capture = static function (string $group, array $block) use (&$unused): array {
-        $source = hash('sha256', wp_json_encode($block));
+        $source = bioco_import_form_source_hash($block);
         foreach ($unused as $path => $value) if (($value['source'] ?? '') === $source) { unset($unused[$path]); return $value; }
         throw new RuntimeException('Missing saved capture.');
     };
