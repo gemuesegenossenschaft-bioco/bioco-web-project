@@ -2,6 +2,15 @@
   const initMenus = () => document.querySelectorAll('.bioco-primary-nav').forEach((nav) => {
     const toggle = nav.querySelector('.bioco-menu-toggle');
     if (!toggle) return;
+    const syncMenuHeight = () => nav.style.setProperty(
+      '--bioco-primary-nav-height', `${Math.ceil(nav.getBoundingClientRect().height)}px`,
+    );
+    syncMenuHeight();
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(syncMenuHeight).observe(nav, { box: 'border-box' });
+    } else {
+      window.addEventListener('resize', syncMenuHeight);
+    }
     const close = () => {
       nav.classList.remove('is-open');
       toggle.setAttribute('aria-expanded', 'false');
@@ -12,7 +21,10 @@
       nav.classList.toggle('is-open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
       toggle.setAttribute('aria-label', open ? toggle.dataset.closeLabel : toggle.dataset.openLabel);
-      if (open) nav.querySelector('#bioco-primary-menu a')?.focus();
+      if (open) {
+        syncMenuHeight();
+        nav.querySelector('#bioco-primary-menu a')?.focus();
+      }
     });
     nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', close));
     nav.addEventListener('keydown', (event) => {

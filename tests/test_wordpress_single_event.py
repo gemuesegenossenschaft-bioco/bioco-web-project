@@ -3,6 +3,7 @@
 WordPress functions are stubbed; this does not emulate the licensed Divi renderer.
 """
 import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -16,6 +17,7 @@ THEME = 'wordpress/web/app/themes/bioco-divi/'
 HARNESS = r'''
 define('ABSPATH', __DIR__);
 $fixture = json_decode(stream_get_contents(STDIN), true);
+define('WPMU_PLUGIN_DIR', $fixture['mu_dir'] ?? __DIR__ . '/wordpress/web/app/mu-plugins');
 $calls = [];
 function get_header() { require 'wordpress/web/app/themes/bioco-divi/header.php'; }
 function get_footer() { require 'wordpress/web/app/themes/bioco-divi/footer.php'; }
@@ -181,6 +183,16 @@ def test_empty_post_does_not_use_event_summary():
     result = render(post_type='post', card_image=None)
     assert text_value(modules(result)[2]) == ''
     assert result['calls'] == ['native_layout_content_filters']
+
+
+def test_article_helpers_use_the_configured_mu_plugin_directory(tmp_path):
+    includes = tmp_path / 'relocated-mu' / 'bioco-import' / 'includes'
+    includes.mkdir(parents=True)
+    for filename in ('divi-blocks.php', 'article-back-button.php'):
+        shutil.copyfile(ROOT / 'wordpress/web/app/mu-plugins/bioco-import/includes' / filename, includes / filename)
+    result = render(mu_dir=str(includes.parent.parent))
+    assert modules(result)[-1]['blockName'] == 'divi/button'
+    assert 'Native layout renderer result' in result['html']
 
 
 def test_frontend_builder_marker_is_request_only_and_scoped_to_queried_single():

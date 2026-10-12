@@ -140,12 +140,12 @@ def test_preview_apply_repeat_and_cli_default_do_not_modify_pages():
     ''')
     assert out['preview_writes'] == []
     assert all(row['action'] == 'would-create' for row in out['preview'])
-    assert len(out['report']) == 7
+    assert len(out['report']) == 8
     assert all(row['action'] == 'created' for row in out['report'])
     assert out['writes'] == []
     assert all(row['action'] == 'unchanged' for row in out['again'])
     inserts = [w[1] for w in out['first'] if w[0] == 'insert']
-    assert len(inserts) == 7
+    assert len(inserts) == 8
     assert {p['post_type'] for p in inserts} == {'et_pb_layout'}
     assert all(p['meta_input']['_et_pb_use_builder'] == 'on' for p in inserts)
     assert all(p['meta_input']['_et_pb_built_for_post_type'] == 'page' for p in inserts)

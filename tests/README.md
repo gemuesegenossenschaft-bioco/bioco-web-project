@@ -35,6 +35,11 @@ matching unassigned event bodies. These tests run without licensed Divi. Native
 edit/save/reopen and public desktop/mobile rendering remain required operator
 evidence on staging and production. This slice does not complete event feeds.
 
+The #217 back-button checks execute both native layout generators, round-trip
+label/link/responsive style edits through the WordPress parser, and check the
+child theme's focus/wrapping rules in Chromium. They require no server writes.
+The licensed preset rendering and native save/reopen still need hosted proof.
+
 | Command | Needs | Gate |
 | --- | --- | --- |
 | `python3 -m pytest tests/ -q` | python3, php, node, Playwright Chromium | full suite, all green required |
@@ -220,6 +225,17 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 
 | File | Keep/Replace/Remove | Evidence |
 | --- | --- | --- |
+| `test_wordpress_navigation_layout.py` | Keep, new (#249) | Real PHP saved-header renderer and Chromium CSS/JS prove equal header geometry on home, inner pages and a CPT boundary; desktop/mobile overflow, logo bounds, sticky utility collapse, keyboard menu/focus and saved design variables. The later Divi list rule is a controlled boundary. Actual Divi save/reopen and staging/production route parity remain separate release proofs. Required PR coverage. |
+| `test_wordpress_event_back_button.py` | Keep, new (#217) | Real saved-layout generators, WordPress parser and Chromium wrapping/focus checks. Licensed preset rendering and native save/reopen remain hosted checks. |
+| `test_wordpress_back_button_adoption.py` | Keep, new (#217) | Actual converter and exported SQL exercise percent escaping, byte-exact conditional apply/restore, idempotence and editor-conflict refusal. SQLite replaces MySQL execution; installed WordPress and hosted adoption remain operator checks. |
+| `test_wordpress_native_event_lists.py` | Keep, new (#202) | Native trees retain labels, image/summary/link bindings, default fragment targets, source wrappers, unrelated HTML and siblings. Actual query adapter retains native filters, counts and sorting. Hosted rendering and save/reopen remain separate checks. |
+| `test_wordpress_native_loop_empty.py` | Keep, new (#202) | Actual adapter covers copied native branches, nested-loop ownership, editor visibility and exception recovery. Licensed rendering remains a separate read-only installed-renderer proof. |
+| `test_wordpress_record_layouts.py` | Keep, new (#203, #210) | Actual native group/calendar trees, dynamic record bindings, readable draft isolation, query boundaries and accessible calendar ordering. Licensed native editing and published record routes remain hosted checks. |
+| `test_wordpress_record_adoption.py` | Keep, new (#203, #210) | WordPress block parser verifies one-section native adoption with saved labels, month order, design and neighboring blocks intact; conditional SQL apply/restore and conflict refusal run locally. Installed Divi save/reopen and hosted CAS remain release checks. |
+| `test_wordpress_gallery_editor.py` | Keep, new (#211) | Actual gallery PHP/schema and Chromium filtering, arbitrary saved categories, limits, captions, empty states and responsive controls. Native Divi save/reopen remains a hosted check. |
+| `test_wordpress_native_form_composition.py` | Keep, new (#204) | Actual PHP native form parts, native candidate trees and real lifecycle in intercepted Chromium: external form association across reordered columns, duplicate-instance isolation, email validity, accessible field errors, retry, terminal success and missing/wrong controls remaining disabled. No licensed Divi rendering, save/reopen, live mail or production submission claim. Hosted unpublished copies remain required. |
+| `test_wordpress_native_form_flows.py` | Keep, new (#205, #206) | Actual PHP controls and intercepted Chromium cover four signup payloads, seven ordinary membership steps, calculator prefill, back navigation, independent review values, server-error step selection, retry identity and saved thank-you routing. Pure native builders and catalog adoption stay explicit. Hosted Divi editing remains required. |
+| `test_wordpress_native_form_outcomes.py` | Keep, new (#207) | Real confirmation backend with local storage/mail adapters covers GET and nonce rejection, invalid/expired/used tokens, one-time confirmation, exception state, duplicate controllers, cache headers and explicit browser POST. Native state builders plus opt-in message capture, archive preservation and rollback. No hosted subscriber token or licensed save/reopen claim. |
 | `test_wordpress_editorial_accessibility.py` | Keep, new (#201) | Real child-theme JS/CSS in Chromium: Tab, Enter, Space and click, native heading semantics, expanded/panel state, saved fonts/colours, duplicate initialization and builder exclusion. A title-click boundary replaces licensed Divi; staged and production previews prove actual Divi activation. Required PR coverage. |
 | `test_wordpress_editorial_layouts.py` | Keep, new (#201) | Real PHP migration: saved Divi attribute formats, preserved rich text/documents/anchors/siblings/order, rejected mixed markup and custom designs, idempotence. Required PR coverage. Native rendering and edit/save/reopen need separate unpublished staging/production copies. |
 | `test_wordpress_membership_adapter.py` | Keep, extended | Real PHP REST acceptance, complete local payload, insert-before-mail, overlapping replay, notification false/exception retention, conflicts, storage failure, staging gates. WP storage/mail/CAPTCHA are controlled; no real InnoDB or delivery claim. |
@@ -233,6 +249,9 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 | `test_wordpress_matomo_requests.py` | Keep, new | Real Chromium executes consent and Matomo scripts against local transport doubles: sanitized URL fields and HTTP Referer, same-origin and cross-origin trackers, one pageview after withdrawal/regrant. No live tracker requests. |
 | `test_wordpress_timeline.py` | Keep, new | Real PHP timeline composition and Chromium layout: seed content, native responsive controls, presets, editor changes, legacy compatibility, overflow and keyboard focus. Divi editor persistence requires separate QA. |
 | `test_wordpress_timeline_migration.py` | Keep, new (#213) | Real saved-content PHP conversion: current modules and order, rich links, normalized Divi attributes, responsive typography, anchors, conflict refusal and idempotence. No seed read or Visual Builder persistence claim. |
+| `test_wordpress_depot_public_fields.py` | Keep, new (#209) | Actual catalog projection, depot PHP renderer, embedded JSON and popup JS; approved public fields appear, private details and hidden records do not. Stored private data remains unchanged. External Leaflet is replaced at its boundary. |
+| `test_wordpress_prices.py` | Keep, new (#208) | Actual price catalog and PHP table/calculator consumers; explicit activation, stable handoff keys, new tiers, preserved totals, invalid-source refusal, empty catalogs and meaningful divergent/zero-value regressions. Native table migration and save/reopen remain separate. |
+| `test_wordpress_native_prices.py` | Keep, new (#208) | Real WordPress block parsing, missing-only library import, native binding payloads, scoped catalog loop query and actual browser controller for totals, new tiers, zero, optional controls and handoff. The native DOM adapter replaces Divi render/query transport; UI save/reopen and licensed styling remain release gates. |
 | `test_wordpress_utility_layouts.py` | Keep, new | Real PHP utility layout import and rendering with the WordPress block parser: preview/apply/repeat, editor preservation, authorization, conflict/rollback handling, search/404 status and SEO. WP storage and queries are controlled. |
 | `test_wordpress_pr_gates.py` | Keep, new | PR workflow contracts, executed Claude authorization and JUnit coverage gates: explicit writer requests, permission failures, missing/malformed reports and required tests skipped or failed. GitHub permission responses are controlled. |
 
@@ -304,3 +323,13 @@ that excludes only Divi's three generated asset-cache fields. Page visits can
 recompute those fields. Keep their raw differences as evidence, and investigate
 any content, assignment or editorial-metadata change. Concurrent editor revisions
 must be preserved; never restore a stale database to make a comparison pass.
+
+`test_wordpress_native_loop_empty.py` exercises the shared conditional adapter's
+branch cloning, active-loop scope, editor visibility and exception recovery at
+external boundaries. It does not emulate licensed Divi rendering. Run the
+read-only installed-renderer probe and native save/reopen checks separately.
+
+`test_wordpress_native_event_lists.py` checks native tree round trips and guarded
+conversion, saved labels/links/anchors, explicit blank/false/zero values, editable
+count/order/filter preservation, date-based query semantics and conflict refusal.
+Hosted native editing and generated responsive CSS remain operator checks.

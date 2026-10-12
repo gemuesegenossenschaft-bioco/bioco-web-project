@@ -13,7 +13,7 @@ add_action('init', function () {
         register_post_type(bioco_catalog_type($kind), [
             'labels' => ['name' => __($labels[0], 'bioco'), 'singular_name' => __($labels[1], 'bioco'), 'edit_item' => __($labels[1] . ' bearbeiten', 'bioco')],
             'public' => false, 'show_ui' => true, 'show_in_rest' => false,
-            'menu_icon' => 'dashicons-' . $labels[2], 'supports' => ['title'],
+            'menu_icon' => 'dashicons-' . $labels[2], 'supports' => ['title', 'page-attributes'],
             'rewrite' => false,
         ]);
     }
@@ -29,12 +29,22 @@ function bioco_catalog_rows(string $kind): ?array {
     }
     $rows = [];
     foreach ($posts as $post) {
+        if ($kind === 'depots' && metadata_exists('post', $post->ID, 'depot_public')
+            && !get_post_meta($post->ID, 'depot_public', true)) continue;
         $row = ['name' => $post->post_title];
         if ($kind === 'vegetables') {
             $months = array_map('intval', (array) get_post_meta($post->ID, 'vegetable_months', true));
             $row['months'] = array_values(array_unique(array_filter($months, static fn($month) => $month >= 1 && $month <= 12)));
         } else {
-            $row += ['lat' => (float) get_post_meta($post->ID, 'depot_lat', true), 'lng' => (float) get_post_meta($post->ID, 'depot_lng', true), 'description' => (string) get_post_meta($post->ID, 'depot_description', true)];
+            // Recovered descriptions remain private. Anonymous output may use
+            // only fields an editor explicitly maintains as public content.
+            $website = (string) get_post_meta($post->ID, 'depot_website', true);
+            if (!filter_var($website, FILTER_VALIDATE_URL) || !in_array(strtolower((string) parse_url($website, PHP_URL_SCHEME)), ['http', 'https'], true)) $website = '';
+            $row += ['lat' => (float) get_post_meta($post->ID, 'depot_lat', true),
+                'lng' => (float) get_post_meta($post->ID, 'depot_lng', true),
+                'description' => (string) get_post_meta($post->ID, 'depot_public_address', true),
+                'website' => $website,
+                'website_label' => $website === '' ? '' : (string) get_post_meta($post->ID, 'depot_website_label', true)];
         }
         $rows[] = $row;
     }

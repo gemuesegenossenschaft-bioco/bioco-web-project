@@ -30,7 +30,7 @@ FORMS_PLUGIN = (
 )
 
 
-def membership_selection(search):
+def membership_selection(search, config=None):
     """Runs the REAL shared runtime (the adapter's registered dependency)
     and then the REAL membership adapter in one minimal DOM context, so the
     calculator selection keeps being exercised through the actual shipped
@@ -50,7 +50,8 @@ def membership_selection(search):
         .map(name => [name, { name, value: '' }])
     );
     const form = {
-      getAttribute: () => '',
+      getAttribute: name => name === 'data-bioco-instance-config' && process.argv[4] !== 'null' ? process.argv[4] : '',
+      hasAttribute: name => name === 'data-bioco-instance-config' && process.argv[4] !== 'null',
       parentNode: { querySelector: () => ({}) },
       querySelector: selector => {
         const match = selector.match(/^\[name="([^"]+)"\]$/);
@@ -73,7 +74,7 @@ def membership_selection(search):
     process.stdout.write(JSON.stringify(inputs));
     '''
     return json.loads(subprocess.run(
-        ["node", "-e", script, str(RUNTIME_JS), str(MEMBERSHIP_JS), search],
+        ["node", "-e", script, str(RUNTIME_JS), str(MEMBERSHIP_JS), search, json.dumps(config)],
         cwd=ROOT,
         text=True,
         capture_output=True,
@@ -115,6 +116,16 @@ def test_membership_form_receives_calculator_selection():
     source = MEMBERSHIP_JS.read_text()
     assert "'/anmeldung-danke/'" in source
     assert "'/anmeldung/danke'" not in source
+
+
+def test_membership_catalog_handoff_uses_explicit_mapping_and_empty_adoption():
+    configured = membership_selection('?abo=stable-custom-key&additional=2', {'aboTypes': {'stable-custom-key': 'halb'}})
+    assert configured['aboType']['value'] == 'halb'
+    assert configured['additionalShares']['value'] == '2'
+    empty = membership_selection('?abo=doppel-4-6-personen', {'aboTypes': {}})
+    assert empty['aboType']['value'] == ''
+    for selected in ('toString', 'unknown'):
+        assert membership_selection('?abo=' + selected)['aboType']['value'] == ''
 
 
 def membership_contract(data):

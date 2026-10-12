@@ -103,6 +103,28 @@ captured state is unchanged. Both saved layouts remain available for recovery.
 An interrupted apply keeps its private receipt and any created, unassigned
 layout IDs for inspection. Event feeds/cards are a separate #202 slice.
 
+For older saved event bodies, `bioco-import/includes/article-back-button-adoption.php`
+provides a preview-only back-button converter. It is not registered as a CLI command
+and performs no writes. Require it explicitly, capture one selected `et_body_layout`
+row with `ID`, `post_type`, `post_status`, `post_title`, `post_content` and
+`post_modified_gmt`, then call `bioco_import_back_button_plan($record, home_url('/'))`.
+Only a back button in a column with both event title and description bindings is
+eligible. Saved presets, style IDs, custom CSS, button decoration, additional HTML
+attributes and module design settings make the converter preserve that button.
+For eligible buttons, saved attributes win over added native secondary-button
+defaults, including the existing label, destination, IDs and responsive settings.
+
+`bioco_import_back_button_sql($plan, $plan['fingerprint'])` returns conditional
+content-only SQL. The third argument `true` generates restoration SQL. The guards
+compare every captured column byte for byte; a concurrent edit must affect zero
+rows. Save the complete plan privately before any separately coordinated execution.
+An apply and its immediate repetition must affect one and zero rows, respectively.
+Restore only against the unchanged converted row and verify the original content
+bytes. This path leaves timestamps, post metadata, assignments and presets intact.
+The release owner must refresh WordPress/Divi caches after an applied change and
+verify native save/reopen on an unpublished, unassigned copy before adopting a
+saved body. Local PHP/SQLite tests do not establish hosted MySQL or editor proof.
+
 GitHub Actions requires `STAGING_SSH_HOST`, `STAGING_SSH_USER`, `STAGING_SSH_KEY`,
 `STAGING_SSH_KNOWN_HOSTS` (pinned host-key line), and `STAGING_WP_CONTENT` (the absolute
 Softaculous `wp-content` path). `STAGING_SSH_PORT` is optional.

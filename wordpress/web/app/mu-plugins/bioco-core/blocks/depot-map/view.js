@@ -13,6 +13,9 @@
     var lat = parseFloat(wrapper.getAttribute('data-center-lat'));
     var lng = parseFloat(wrapper.getAttribute('data-center-lng'));
     var zoom = parseInt(wrapper.getAttribute('data-zoom'), 10) || 12;
+    var interaction = wrapper.getAttribute('data-map-interaction') || 'static';
+    var canDrag = interaction === 'drag' || interaction === 'full';
+    var full = interaction === 'full';
     var raw = wrapper.getAttribute('data-locations');
     var locations = [];
     try {
@@ -22,13 +25,13 @@
     }
 
     var map = window.L.map(wrapper, {
-      dragging: false,
-      touchZoom: false,
-      doubleClickZoom: false,
-      scrollWheelZoom: false,
-      boxZoom: false,
-      keyboard: false,
-      zoomControl: false,
+      dragging: canDrag,
+      touchZoom: canDrag,
+      doubleClickZoom: full,
+      scrollWheelZoom: full,
+      boxZoom: full,
+      keyboard: full,
+      zoomControl: canDrag,
     }).setView([lat, lng], zoom);
 
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -44,11 +47,20 @@
       if (loc.description) {
         popup += '<br>' + descriptionHtml(loc.description).replace(/\n/g, '<br>');
       }
+      if (loc.website) {
+        try {
+          var website = new URL(loc.website);
+          if (website.protocol === 'https:' || website.protocol === 'http:') {
+            popup += '<br><a href="' + escapeAttribute(website.href) + '" target="_blank" rel="noopener noreferrer">' +
+              escapeHtml(loc.website_label || loc.website) + '</a>';
+          }
+        } catch (error) { /* Invalid public website fields do not create links. */ }
+      }
       marker.bindPopup(popup);
       markers.push(marker);
     }
 
-    if (markers.length > 1) {
+    if (markers.length > 1 && wrapper.getAttribute('data-map-view') !== 'fixed') {
       var group = window.L.featureGroup(markers);
       map.fitBounds(group.getBounds().pad(0.1));
     }
@@ -61,6 +73,10 @@
     return div.innerHTML;
   }
 
+  function escapeAttribute(value) {
+    return escapeHtml(value).replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
   function descriptionHtml(value) {
     var parts = String(value).split(/(https?:\/\/[^\s<>"']+)/gi);
     return parts.map(function (part, index) {
@@ -69,7 +85,7 @@
         try {
           var parsed = new URL(url);
           if ((parsed.protocol === 'http:' || parsed.protocol === 'https:') && parsed.hostname) {
-            return '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer">' +
+            return '<a href="' + escapeAttribute(parsed.href) + '" target="_blank" rel="noopener noreferrer">' +
               escapeHtml(url) + '</a>' + escapeHtml(part.slice(url.length));
           }
         } catch (error) { /* Keep malformed URLs as text. */ }

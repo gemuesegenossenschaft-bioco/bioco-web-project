@@ -103,6 +103,11 @@ function bioco_utility_layout_definitions(): array {
             bioco_utility_section([bioco_utility_heading($subheading, 'h2'), bioco_utility_text($body), $actions[2]]),
         ])];
     }
+    $layouts['article-basic'] = ['title' => 'BIOCO Artikel', 'content' => serialize_blocks([
+        bioco_utility_section([bioco_utility_heading('Artikeltitel'), bioco_utility_text('<p>Einleitung zum Artikel.</p>')]),
+        bioco_utility_section([bioco_utility_heading('Zwischentitel', 'h2'), bioco_utility_text('<p>Hier steht der Artikeltext.</p>')]),
+        bioco_utility_section([bioco_utility_button('Zurück zu Aktuelles', home_url('/aktuelles/'))]),
+    ])];
     return $layouts;
 }
 

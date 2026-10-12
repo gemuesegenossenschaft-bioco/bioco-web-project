@@ -11,10 +11,19 @@ define('BIOCO_CORE_DIR', __DIR__);
 
 require_once BIOCO_CORE_DIR . '/includes/helpers.php';
 require_once BIOCO_CORE_DIR . '/includes/event-bindings.php';
+require_once BIOCO_CORE_DIR . '/includes/native-loop-empty.php';
+require_once BIOCO_CORE_DIR . '/includes/event-loop.php';
+require_once BIOCO_CORE_DIR . '/includes/price-bindings.php';
+require_once BIOCO_CORE_DIR . '/includes/record-bindings.php';
 require_once BIOCO_CORE_DIR . '/includes/navigation.php';
 require_once BIOCO_CORE_DIR . '/includes/redirects.php';
 require_once BIOCO_CORE_DIR . '/includes/dynamic-sections.php';
 require_once BIOCO_CORE_DIR . '/includes/native-modules.php';
+require_once BIOCO_CORE_DIR . '/includes/native-form-composition.php';
+require_once BIOCO_CORE_DIR . '/includes/native-form-templates.php';
+require_once BIOCO_CORE_DIR . '/includes/native-form-outcomes.php';
+require_once BIOCO_CORE_DIR . '/includes/price-runtime.php';
+require_once BIOCO_CORE_DIR . '/includes/record-layout-runtime.php';
 require_once BIOCO_CORE_DIR . '/includes/design-system.php';
 require_once BIOCO_CORE_DIR . '/includes/editor-verification.php';
 require_once BIOCO_CORE_DIR . '/includes/matomo.php';
@@ -32,7 +41,7 @@ add_filter('acf/settings/load_json', fn() => [BIOCO_CORE_DIR . '/acf-json']);
 /**
  * Gallery filter validation: the repeater must contain exactly one "all" row
  * and every technical key must be unique. These invariants are enforced by the
- * UI choices, but server-side validation guards against import/JSON-sync edge
+ * editor, while server-side validation guards against import/JSON-sync edge
  * cases and keeps the filter JavaScript from receiving ambiguous configuration.
  */
 add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($valid, $value) {
@@ -40,7 +49,6 @@ add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($vali
         return $valid;
     }
 
-    $allowed_keys = ['all', 'koerbe', 'feld', 'portraits'];
     if ($value === false || $value === null || $value === '') {
         return __('Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.', 'bioco');
     }
@@ -59,8 +67,8 @@ add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($vali
         $raw_key = $row['field_bioco_gallery_filter_key'] ?? ($row['key'] ?? '');
         $key = is_string($raw_key) ? $raw_key : '';
 
-        if (!in_array($key, $allowed_keys, true)) {
-            return __('Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.', 'bioco');
+        if (!preg_match('/^[a-z][a-z0-9_-]*$/D', $key)) {
+            return __('Filter-Schlüssel müssen mit einem Kleinbuchstaben beginnen und dürfen nur Kleinbuchstaben, Zahlen, Bindestriche und Unterstriche enthalten.', 'bioco');
         }
         if (isset($seen[$key])) {
             return __('Jeder Filter-Schlüssel darf nur einmal vorkommen.', 'bioco');
@@ -77,6 +85,14 @@ add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($vali
     }
 
     return $valid;
+}, 10, 2);
+
+add_filter('acf/validate_value/key=field_bioco_gallery_item_category', function ($valid, $value) {
+    if ($valid !== true) return $valid;
+    if (!is_string($value) || $value === 'all' || !preg_match('/^[a-z][a-z0-9_-]*$/D', $value)) {
+        return __('Bildkategorien müssen mit einem Kleinbuchstaben beginnen und dürfen nur Kleinbuchstaben, Zahlen, Bindestriche und Unterstriche enthalten. "all" ist für den Gesamtfilter reserviert.', 'bioco');
+    }
+    return true;
 }, 10, 2);
 
 /**

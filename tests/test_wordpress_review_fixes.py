@@ -36,7 +36,7 @@ def test_doi_confirmation_has_no_public_rest_route():
     assert "bioco/v1/doi-confirm" not in routes
 
 
-def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
+def test_gallery_filter_validation_enforces_canonical_unique_keys_and_one_all():
     php = r'''
     define('ABSPATH', __DIR__);
     $FILTERS = [];
@@ -60,7 +60,7 @@ def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
         'empty' => [],
         'missing_all' => [['key' => 'feld']],
         'duplicate' => [['key' => 'all'], ['key' => 'all']],
-        'unsupported' => [['key' => 'all'], ['key' => 'custom']],
+        'custom' => [['key' => 'all'], ['key' => 'ernte_2026']],
         'non_canonical' => [['key' => 'all'], ['key' => 'por traits']],
         'invalid_row' => [['key' => 'all'], 'not-a-row'],
     ];
@@ -82,17 +82,41 @@ def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
 
     assert results["valid_field_keys"] is True
     assert results["valid_names"] is True
+    assert results["custom"] is True
     expected_errors = {
         "empty": 'Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.',
         "missing_all": 'Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.',
         "duplicate": "Jeder Filter-Schlüssel darf nur einmal vorkommen.",
-        "unsupported": "Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.",
-        "non_canonical": "Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.",
+        "non_canonical": "Filter-Schlüssel müssen mit einem Kleinbuchstaben beginnen und dürfen nur Kleinbuchstaben, Zahlen, Bindestriche und Unterstriche enthalten.",
         "invalid_row": "Die Filterkonfiguration ist ungültig.",
     }
     for case, message in expected_errors.items():
         assert isinstance(results[case], str)
         assert message in results[case]
+
+
+def test_gallery_acf_image_categories_share_native_validation_and_keep_prior_errors():
+    php = r'''
+    define('ABSPATH', __DIR__);
+    $FILTERS = [];
+    function add_filter($hook, $callback) { $GLOBALS['FILTERS'][$hook] = $callback; }
+    function add_action($hook, $callback) {}
+    function __($text, $domain = null) { return $text; }
+    require 'wordpress/web/app/mu-plugins/bioco-core/bioco-core.php';
+    $validate = $FILTERS['acf/validate_value/key=field_bioco_gallery_item_category'];
+    $result = [];
+    foreach (['feld', 'ernte_2026', 'mit-menschen', 'all', 'Bad Key', 'ernte/2026', '', null, 42] as $value) {
+        $result[] = $validate(true, $value);
+    }
+    $result[] = $validate('Earlier field error', 'feld');
+    echo json_encode($result);
+    '''
+    result = subprocess.run(['php', '-r', php], cwd=ROOT, text=True, capture_output=True, check=True)
+    assert result.stderr == ''
+    values = json.loads(result.stdout)
+    assert values[:3] == [True, True, True]
+    assert all(isinstance(value, str) and 'Bildkategorien' in value for value in values[3:9])
+    assert values[9] == 'Earlier field error'
 
 
 def test_doi_get_never_consumes_and_post_requires_a_valid_nonce():

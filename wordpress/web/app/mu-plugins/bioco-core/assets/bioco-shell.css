@@ -52,6 +52,7 @@ header:has(.bioco-navigation-shell) {
   top: 0;
   z-index: 100;
   background: var(--wp--preset--color--bioco-bg);
+  line-height: 1.6;
 }
 
 .bioco-navigation-shell { position: relative; }
@@ -101,6 +102,16 @@ header:has(.bioco-navigation-shell) {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+/* Divi's later Theme Builder list defaults also apply to custom post types.
+   Keep the header's lists neutral without changing editable menu geometry. */
+.bioco-navigation-shell .bioco-utility-nav ul,
+.bioco-navigation-shell .bioco-primary-nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  line-height: inherit;
 }
 
 .bioco-utility-nav a {
@@ -248,7 +259,7 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
   }
   .bioco-primary-nav.is-open ul {
     position: absolute;
-    top: 76px;
+    top: 100%;
     left: 0;
     right: 0;
     display: flex;
@@ -257,8 +268,8 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
     gap: 0;
     padding: 12px 20px 24px;
     background: var(--wp--preset--color--bioco-bg);
-    max-height: calc(100vh - 76px);
-    max-height: calc(100dvh - 76px);
+    max-height: calc(100vh - var(--bioco-primary-nav-height, 77px));
+    max-height: calc(100dvh - var(--bioco-primary-nav-height, 77px));
     overflow-y: auto;
     overscroll-behavior: contain;
   }
@@ -340,21 +351,6 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
 .bioco-editable-footer .bioco-site-footer-column:not(:first-child) ul:not(:empty) { margin-bottom: 8px; }
 .bioco-editable-footer a { color: var(--bioco-footer-link-color, inherit); }
 .bioco-editable-footer .bioco-site-footer-partner-links { list-style: none; padding: 0 0 1em; margin-bottom: 8px; line-height: inherit; }
-@media (min-width: 901px) {
-  /* Preserve the homepage's default geometry while letting saved fields own it. */
-  .home .bioco-site-header.bioco-editable-header { height: auto; min-height: 120px; }
-  .home .bioco-site-header.bioco-editable-header .bioco-page-shell {
-    width: min(calc(100% - 2 * var(--bioco-header-inline-padding, 106.4px)), var(--bioco-header-container-width, 1227.2px));
-    height: auto;
-  }
-  .home .bioco-editable-header .bioco-primary-nav {
-    position: static;
-    height: auto;
-    padding-block: var(--bioco-header-padding-vertical, 4px);
-    background: var(--bioco-header-background-color, var(--wp--preset--color--bioco-bg));
-  }
-  .home .bioco-editable-header .bioco-primary-nav .bioco-logo { width: var(--bioco-header-logo-width, 112px); }
-}
 @media (max-width: 900px) {
   .bioco-editable-header .bioco-page-shell { width: 100%; }
   .bioco-editable-header .bioco-primary-nav {
@@ -367,6 +363,8 @@ main.wp-block-group > .wp-block-post-content { margin: 0; }
   .bioco-editable-header .bioco-menu-toggle { width: var(--bioco-header-toggle-size, 44px); height: var(--bioco-header-toggle-size, 44px); }
   .bioco-editable-header .bioco-menu-toggle span { width: var(--bioco-header-toggle-line-width, 24px); background: var(--bioco-header-toggle-color, var(--bioco-header-text-color, var(--wp--preset--color--bioco-text))); }
   .bioco-editable-header .bioco-primary-nav.is-open ul {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
     gap: 0;
     background: var(--bioco-header-background-color, var(--wp--preset--color--bioco-bg));
   }

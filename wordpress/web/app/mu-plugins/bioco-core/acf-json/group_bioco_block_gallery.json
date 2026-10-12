@@ -53,8 +53,8 @@
                     "label": "Kategorie",
                     "name": "category",
                     "aria-label": "",
-                    "type": "select",
-                    "instructions": "",
+                    "type": "text",
+                    "instructions": "Kategorie wie im zugehörigen Filter, zum Beispiel feld oder ernte.",
                     "required": 0,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -62,18 +62,16 @@
                         "class": "",
                         "id": ""
                     },
-                    "choices": {
-                        "koerbe": "Körbe",
-                        "feld": "Feld",
-                        "portraits": "Portraits"
-                    },
                     "default_value": "feld",
-                    "return_format": "value",
-                    "multiple": 0,
-                    "allow_null": 0,
-                    "ui": 1,
-                    "ajax": 0,
                     "placeholder": ""
+                },
+                {
+                    "key": "field_bioco_gallery_item_caption",
+                    "name": "caption",
+                    "label": "Bildunterschrift",
+                    "type": "text",
+                    "required": 0,
+                    "default_value": ""
                 }
             ]
         },
@@ -164,8 +162,8 @@
                     "label": "Technischer Schlüssel",
                     "name": "key",
                     "aria-label": "",
-                    "type": "select",
-                    "instructions": "",
+                    "type": "text",
+                    "instructions": "all zeigt alle Bilder. Weitere Kategorien frei benennen, mit Kleinbuchstaben, Zahlen, Bindestrich oder Unterstrich.",
                     "required": 1,
                     "conditional_logic": 0,
                     "wrapper": {
@@ -173,18 +171,7 @@
                         "class": "",
                         "id": ""
                     },
-                    "choices": {
-                        "all": "Alle",
-                        "koerbe": "Körbe",
-                        "feld": "Feld",
-                        "portraits": "Portraits"
-                    },
                     "default_value": false,
-                    "return_format": "value",
-                    "multiple": 0,
-                    "allow_null": 0,
-                    "ui": 1,
-                    "ajax": 0,
                     "placeholder": ""
                 },
                 {
@@ -208,6 +195,137 @@
                     "append": ""
                 }
             ]
+        },
+        {
+            "key": "field_bioco_gallery_show_less_label",
+            "name": "show_less_label",
+            "label": "Text des Weniger-anzeigen-Buttons",
+            "type": "text",
+            "required": 0,
+            "default_value": ""
+        },
+        {
+            "key": "field_bioco_gallery_empty_filter_label",
+            "name": "empty_filter_label",
+            "label": "Text für eine leere Kategorie",
+            "type": "text",
+            "required": 0,
+            "default_value": ""
+        },
+        {
+            "key": "field_bioco_gallery_initial_count",
+            "name": "initial_count",
+            "label": "Anfangs sichtbare Bilder (0 = alle)",
+            "type": "number",
+            "required": 0,
+            "default_value": "",
+            "min": 0,
+            "max": 500,
+            "step": 1
+        },
+        {
+            "key": "field_bioco_gallery_columns_desktop",
+            "name": "columns_desktop",
+            "label": "Spalten Desktop",
+            "type": "select",
+            "required": 0,
+            "default_value": "",
+            "choices": {
+                "0": "Automatisch",
+                "1": "1",
+                "2": "2",
+                "3": "3",
+                "4": "4",
+                "5": "5",
+                "6": "6"
+            }
+        },
+        {
+            "key": "field_bioco_gallery_columns_tablet",
+            "name": "columns_tablet",
+            "label": "Spalten Tablet",
+            "type": "select",
+            "required": 0,
+            "default_value": "",
+            "choices": {
+                "0": "Automatisch",
+                "1": "1",
+                "2": "2",
+                "3": "3",
+                "4": "4"
+            }
+        },
+        {
+            "key": "field_bioco_gallery_columns_mobile",
+            "name": "columns_mobile",
+            "label": "Spalten Mobil",
+            "type": "select",
+            "required": 0,
+            "default_value": "",
+            "choices": {
+                "0": "Automatisch",
+                "1": "1",
+                "2": "2"
+            }
+        },
+        {
+            "key": "field_bioco_gallery_grid_gap",
+            "name": "grid_gap",
+            "label": "Bildabstand (px)",
+            "type": "number",
+            "required": 0,
+            "default_value": "",
+            "min": 0,
+            "max": 96,
+            "step": 1
+        },
+        {
+            "key": "field_bioco_gallery_image_fit",
+            "name": "image_fit",
+            "label": "Bildeinpassung",
+            "type": "select",
+            "required": 0,
+            "default_value": "",
+            "choices": {
+                "cover": "Füllen",
+                "contain": "Einpassen"
+            }
+        },
+        {
+            "key": "field_bioco_gallery_image_ratio",
+            "name": "image_ratio",
+            "label": "Bildformat",
+            "type": "select",
+            "required": 0,
+            "default_value": "",
+            "choices": {
+                "4_3": "4:3",
+                "1_1": "1:1",
+                "16_9": "16:9",
+                "original": "Original"
+            }
+        },
+        {
+            "key": "field_bioco_gallery_image_radius",
+            "name": "image_radius",
+            "label": "Bildecken",
+            "type": "select",
+            "required": 0,
+            "default_value": "",
+            "choices": {
+                "0": "Eckig",
+                "8": "8 px",
+                "16": "16 px",
+                "24": "24 px"
+            }
+        },
+        {
+            "key": "field_bioco_gallery_filter_select_label",
+            "name": "filter_select_label",
+            "label": "Name der Kategorieauswahl",
+            "type": "text",
+            "required": 0,
+            "default_value": ""
         }
     ],
     "location": [

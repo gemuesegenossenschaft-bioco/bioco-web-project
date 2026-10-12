@@ -570,12 +570,11 @@
         },
         "category": {
           "type": "text",
-          "label": "Kategorie",
-          "choices": {
-            "koerbe": "Körbe",
-            "feld": "Feld",
-            "portraits": "Portraits"
-          }
+          "label": "Kategorie"
+        },
+        "caption": {
+          "type": "text",
+          "label": "Bildunterschrift"
         }
       }
     },
@@ -598,13 +597,7 @@
         "key": {
           "type": "text",
           "label": "Technischer Schlüssel",
-          "required": true,
-          "choices": {
-            "all": "Alle",
-            "koerbe": "Körbe",
-            "feld": "Feld",
-            "portraits": "Portraits"
-          }
+          "required": true
         },
         "label": {
           "type": "text",
@@ -612,6 +605,87 @@
           "required": true
         }
       }
+    },
+    "show_less_label": {
+      "type": "text",
+      "label": "Text des Weniger-anzeigen-Buttons"
+    },
+    "empty_filter_label": {
+      "type": "text",
+      "label": "Text für eine leere Kategorie"
+    },
+    "initial_count": {
+      "type": "number",
+      "label": "Anfangs sichtbare Bilder (0 = alle)"
+    },
+    "columns_desktop": {
+      "type": "text",
+      "label": "Spalten Desktop",
+      "choices": {
+        "0": "Automatisch",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4",
+        "5": "5",
+        "6": "6"
+      }
+    },
+    "columns_tablet": {
+      "type": "text",
+      "label": "Spalten Tablet",
+      "choices": {
+        "0": "Automatisch",
+        "1": "1",
+        "2": "2",
+        "3": "3",
+        "4": "4"
+      }
+    },
+    "columns_mobile": {
+      "type": "text",
+      "label": "Spalten Mobil",
+      "choices": {
+        "0": "Automatisch",
+        "1": "1",
+        "2": "2"
+      }
+    },
+    "grid_gap": {
+      "type": "number",
+      "label": "Bildabstand (px)"
+    },
+    "image_fit": {
+      "type": "text",
+      "label": "Bildeinpassung",
+      "choices": {
+        "cover": "Füllen",
+        "contain": "Einpassen"
+      }
+    },
+    "image_ratio": {
+      "type": "text",
+      "label": "Bildformat",
+      "choices": {
+        "4_3": "4:3",
+        "1_1": "1:1",
+        "16_9": "16:9",
+        "original": "Original"
+      }
+    },
+    "image_radius": {
+      "type": "text",
+      "label": "Bildecken",
+      "choices": {
+        "0": "Eckig",
+        "8": "8 px",
+        "16": "16 px",
+        "24": "24 px"
+      }
+    },
+    "filter_select_label": {
+      "type": "text",
+      "label": "Name der Kategorieauswahl"
     }
   },
   "pricing_calculator": {
@@ -938,31 +1012,6 @@
       "type": "text",
       "label": "Hinweistext"
     },
-    "locations": {
-      "type": "rows",
-      "label": "Standorte",
-      "row": {
-        "name": {
-          "type": "text",
-          "label": "Name",
-          "required": true
-        },
-        "lat": {
-          "type": "number",
-          "label": "Breitengrad (lat)",
-          "required": true
-        },
-        "lng": {
-          "type": "number",
-          "label": "Längengrad (lng)",
-          "required": true
-        },
-        "description": {
-          "type": "textarea",
-          "label": "Beschreibung"
-        }
-      }
-    },
     "locations_heading": {
       "type": "text",
       "label": "Titel über den Standorten"
@@ -974,6 +1023,59 @@
     "empty_message": {
       "type": "text",
       "label": "Hinweis ohne Standorte"
+    },
+    "center_lat": {
+      "type": "number",
+      "label": "Kartenmitte: Breitengrad"
+    },
+    "center_lng": {
+      "type": "number",
+      "label": "Kartenmitte: Längengrad"
+    },
+    "zoom": {
+      "type": "number",
+      "label": "Zoomstufe"
+    },
+    "map_view": {
+      "type": "text",
+      "label": "Kartenausschnitt",
+      "choices": {
+        "fit": "Alle Marker zeigen",
+        "fixed": "Gespeicherte Mitte und Zoom"
+      }
+    },
+    "interaction": {
+      "type": "text",
+      "label": "Kartenbedienung",
+      "choices": {
+        "static": "Ohne Kartenbedienung",
+        "drag": "Verschieben und Zoomtasten",
+        "full": "Verschieben, Mausrad und Tastatur"
+      }
+    },
+    "map_height": {
+      "type": "number",
+      "label": "Kartenhöhe in Pixel"
+    },
+    "arrangement": {
+      "type": "text",
+      "label": "Karte und Adressen",
+      "choices": {
+        "stacked": "Unter der Karte",
+        "side_by_side": "Neben der Karte ab Desktopbreite"
+      }
+    },
+    "card_order": {
+      "type": "text",
+      "label": "Reihenfolge der Adressangaben",
+      "choices": {
+        "name_first": "Name vor Adresse",
+        "address_first": "Adresse vor Name"
+      }
+    },
+    "show_address_list": {
+      "type": "toggle",
+      "label": "Eingebaute Adressliste anzeigen"
     }
   },
   "geisshof_map": {
@@ -1013,6 +1115,55 @@
     "empty_message": {
       "type": "text",
       "label": "Hinweis ohne Standorte"
+    },
+    "center_lat": {
+      "type": "number",
+      "label": "Kartenmitte: Breitengrad"
+    },
+    "center_lng": {
+      "type": "number",
+      "label": "Kartenmitte: Längengrad"
+    },
+    "zoom": {
+      "type": "number",
+      "label": "Zoomstufe"
+    },
+    "map_view": {
+      "type": "text",
+      "label": "Kartenausschnitt",
+      "choices": {
+        "fit": "Alle Marker zeigen",
+        "fixed": "Gespeicherte Mitte und Zoom"
+      }
+    },
+    "interaction": {
+      "type": "text",
+      "label": "Kartenbedienung",
+      "choices": {
+        "static": "Ohne Kartenbedienung",
+        "drag": "Verschieben und Zoomtasten",
+        "full": "Verschieben, Mausrad und Tastatur"
+      }
+    },
+    "map_height": {
+      "type": "number",
+      "label": "Kartenhöhe in Pixel"
+    },
+    "arrangement": {
+      "type": "text",
+      "label": "Karte und Adressen",
+      "choices": {
+        "stacked": "Unter der Karte",
+        "side_by_side": "Neben der Karte ab Desktopbreite"
+      }
+    },
+    "card_order": {
+      "type": "text",
+      "label": "Reihenfolge der Adressangaben",
+      "choices": {
+        "name_first": "Name vor Adresse",
+        "address_first": "Adresse vor Name"
+      }
     }
   },
   "navigation_shell": {

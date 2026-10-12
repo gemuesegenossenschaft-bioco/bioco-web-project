@@ -169,6 +169,303 @@
           }
         }
       }
+    },
+    "show_less_label": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "show_less_label.innerContent",
+            "label": "Text des Weniger-anzeigen-Buttons",
+            "category": "basic_option",
+            "priority": 60,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "empty_filter_label": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "empty_filter_label.innerContent",
+            "label": "Text für eine leere Kategorie",
+            "category": "basic_option",
+            "priority": 70,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "initial_count": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "initial_count.innerContent",
+            "label": "Anfangs sichtbare Bilder (0 = alle)",
+            "category": "basic_option",
+            "priority": 80,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/gallery-initial_count",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "columns_desktop": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "columns_desktop.innerContent",
+            "label": "Spalten Desktop",
+            "category": "basic_option",
+            "priority": 90,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/gallery-columns_desktop",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "columns_tablet": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "columns_tablet.innerContent",
+            "label": "Spalten Tablet",
+            "category": "basic_option",
+            "priority": 100,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/gallery-columns_tablet",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "columns_mobile": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "columns_mobile.innerContent",
+            "label": "Spalten Mobil",
+            "category": "basic_option",
+            "priority": 110,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/gallery-columns_mobile",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "grid_gap": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "grid_gap.innerContent",
+            "label": "Bildabstand (px)",
+            "category": "basic_option",
+            "priority": 120,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/gallery-grid_gap",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "image_fit": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "image_fit.innerContent",
+            "label": "Bildeinpassung",
+            "category": "basic_option",
+            "priority": 130,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/gallery-image_fit",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "image_ratio": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "image_ratio.innerContent",
+            "label": "Bildformat",
+            "category": "basic_option",
+            "priority": 140,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/gallery-image_ratio",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "image_radius": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "image_radius.innerContent",
+            "label": "Bildecken",
+            "category": "basic_option",
+            "priority": 150,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "bioco/gallery-image_radius",
+              "type": "field"
+            }
+          }
+        }
+      }
+    },
+    "filter_select_label": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "filter_select_label.innerContent",
+            "label": "Name der Kategorieauswahl",
+            "category": "basic_option",
+            "priority": 160,
+            "render": true,
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            },
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            }
+          }
+        }
+      }
     }
   },
   "settings": {

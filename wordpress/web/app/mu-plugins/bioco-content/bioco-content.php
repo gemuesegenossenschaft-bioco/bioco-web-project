@@ -8,6 +8,7 @@
 if (!defined('ABSPATH')) exit;
 
 require_once __DIR__ . '/catalog.php';
+require_once __DIR__ . '/prices.php';
 
 /**
  * Events (Aktuelles/Veranstaltungen). Single events live under /aktuelles/<slug>
@@ -62,7 +63,7 @@ add_action('init', function () {
         'public' => true,
         'show_in_rest' => true,
         'menu_icon' => 'dashicons-groups',
-        'supports' => ['title', 'thumbnail'],
+        'supports' => ['title', 'editor', 'thumbnail', 'page-attributes'],
         'has_archive' => false,
         'rewrite' => false,
     ]);
