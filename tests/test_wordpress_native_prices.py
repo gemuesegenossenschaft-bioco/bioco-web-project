@@ -105,7 +105,7 @@ def native_dom(blocks, source):
             content = '<h3>' + html.escape(variable(attrs['title']['innerContent']['desktop']['value'], tier)) + '</h3>'
         elif block['blockName'] == 'divi/button':
             value = attrs['button']['innerContent']['desktop']['value']
-            content = '<a href="' + html.escape(variable(value['linkUrl'], tier), quote=True) + '">' + html.escape(variable(value['text'], tier)) + '</a>'
+            return '<a class="et_pb_button ' + cls + '" href="' + html.escape(variable(value['linkUrl'], tier), quote=True) + '">' + html.escape(variable(value['text'], tier)) + '</a>'
         data = ' data-bioco-prices="' + html.escape(json.dumps(source), quote=True) + '"' if 'bioco-price-calculator' in cls else ''
         return '<div class="' + cls + '"' + data + '>' + content + '</div>'
     return ''.join(render(block) for block in blocks)
@@ -123,23 +123,31 @@ def test_native_calculator_all_totals_new_tier_zero_none_and_editable_copy():
         page.set_content('<base href="https://example.test/">' + dom + dom)
         page.add_script_tag(path=str(ROOT / 'wordpress/web/app/mu-plugins/bioco-core/assets/native-pricing.js'))
         root = page.locator('[data-bioco-prices]').first
-        for key, amount in [('halb-1-person', "1'000"), ('standard-2-3-personen', "1'780"), ('doppel-4-6-personen', "3'350"), ('add', "1'400")]:
+        for key, amount, shares in [('halb-1-person', "1'000", 1), ('standard-2-3-personen', "1'780", 2),
+                                    ('doppel-4-6-personen', "3'350", 4), ('add', "1'400", 2)]:
             root.locator('a[href="#bioco-price-' + key + '"]').click()
             assert root.locator('.bioco-price-value-total').inner_text() == amount
+            href = root.locator('a.bioco-price-signup').get_attribute('href')
+            assert 'abo=' + key in href and 'shares=' + str(shares) in href and 'additional=0' in href
+            assert 'campaign=site' in href and href.endswith('#step')
         root.locator('a[href="#bioco-share-add"]').click()
         assert root.locator('.bioco-price-value-shares').inner_text() == '3'
-        href = root.locator('.bioco-price-signup a').get_attribute('href')
+        cta = root.locator('a.bioco-price-signup')
+        assert cta.count() == 1
+        href = cta.get_attribute('href')
         assert 'abo=add' in href and 'shares=3' in href and 'additional=1' in href
         assert 'campaign=site' in href and href.endswith('#step')
-        assert root.locator('.bioco-price-signup a').inner_text() == 'Mein geänderter Button'
+        assert cta.inner_text() == 'Mein geänderter Button'
         root.locator('a[href="#bioco-share-remove"]').click()
         assert root.locator('.bioco-price-value-shares').inner_text() == '2'
         root.locator('a[href="#bioco-price-kein"]').click()
         assert root.locator('.bioco-price-signup').is_hidden()
         assert root.locator('.bioco-price-value-total').inner_text() == '0'
+        assert 'abo=kein' in cta.get_attribute('href')
         root.locator('a[href="#bioco-share-add"]').click()
         assert root.locator('.bioco-price-signup').is_visible()
         assert root.locator('.bioco-price-value-total').inner_text() == '250'
+        assert 'abo=kein' in cta.get_attribute('href') and 'shares=1' in cta.get_attribute('href')
         assert page.locator('[data-bioco-prices]').nth(1).locator('.bioco-price-value-total').inner_text() == "1'000"
         # Missing/deleted optional controls must not prevent amounts from updating.
         root.locator('.bioco-price-signup').evaluate('(el)=>el.remove()')
@@ -151,6 +159,26 @@ def test_native_calculator_all_totals_new_tier_zero_none_and_editable_copy():
         root.locator('a[href="#bioco-price-standard-2-3-personen"]').click()
         root.locator('a[href="#bioco-share-add"]').click()
         assert root.locator('.bioco-price-value-total').inner_text() == "1'280"
+        browser.close()
+
+
+def test_wrapped_legacy_signup_anchor_still_receives_handoff():
+    source = catalog(records() + "$options['bioco_pricing_enabled']=true;echo json_encode(bioco_price_catalog());")
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch()
+        page = browser.new_page()
+        page.set_content('<base href="https://example.test/">' + native_dom(layouts()['calculator'], source))
+        page.locator('a.bioco-price-signup').evaluate('''anchor => {
+          const wrapper = document.createElement('div');
+          wrapper.className = 'bioco-price-signup';
+          anchor.classList.remove('bioco-price-signup');
+          anchor.replaceWith(wrapper);
+          wrapper.append(anchor);
+        }''')
+        page.add_script_tag(path=str(ROOT / 'wordpress/web/app/mu-plugins/bioco-core/assets/native-pricing.js'))
+        root = page.locator('[data-bioco-prices]')
+        root.locator('a[href="#bioco-price-doppel-4-6-personen"]').click()
+        assert 'abo=doppel-4-6-personen' in root.locator('.bioco-price-signup a').get_attribute('href')
         browser.close()
 
 

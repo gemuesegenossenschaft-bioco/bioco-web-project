@@ -14,7 +14,7 @@
     var choices = root.querySelectorAll('a[href^="#bioco-price-"]');
     var selected = catalog.tiers[0] || { key: 'kein', name: '', price: 0, shares: 0, work: 0, persons: 0 };
     var additional = 0;
-    var cta = root.querySelector('.bioco-price-signup a');
+    var cta = root.querySelector('a.bioco-price-signup, .bioco-price-signup a');
     var destination = cta && cta.getAttribute('href');
     var display = new WeakMap();
     function visibility(selector, visible) {
