@@ -29,7 +29,13 @@
     "tests/test_wordpress_editor_isolation.py",
     "tests/test_wordpress_event_migration.py",
     "tests/test_wordpress_native_loop_empty.py",
-    "tests/test_wordpress_native_event_lists.py"
+    "tests/test_wordpress_native_event_lists.py",
+    "tests/test_wordpress_native_form_composition.py",
+    "tests/test_wordpress_native_form_flows.py",
+    "tests/test_wordpress_native_form_outcomes.py",
+    "tests/test_wordpress_prices.py",
+    "tests/test_wordpress_native_prices.py",
+    "tests/test_wordpress_depot_public_fields.py"
   ],
   "operator_only_nodes": [
     "tests/test_wordpress_forms_lifecycle.py::test_wordpress_runtime_emits_runtime_before_adapters_without_blocking_turnstile",
