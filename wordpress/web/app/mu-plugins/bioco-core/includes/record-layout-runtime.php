@@ -9,12 +9,26 @@ function bioco_record_native_has_class(array $attrs, string $class): bool {
 
 function bioco_record_native_query(array $data, array $attrs): array {
     $type = bioco_record_native_has_class($attrs, 'bioco-group-loop') ? 'bioco_group'
-        : (bioco_record_native_has_class($attrs, 'bioco-vegetable-loop') ? 'bioco_vegetable' : '');
+        : (bioco_record_native_has_class($attrs, 'bioco-vegetable-loop') ? 'bioco_vegetable'
+        : (bioco_record_native_has_class($attrs, 'bioco-depot-loop') ? 'bioco_depot' : ''));
     if ($type === '') return $data;
     $args = $data['query_args'] ?? [];
     $args['post_type'] = $type; $args['post_status'] = 'publish'; $args['ignore_sticky_posts'] = true;
+    if ($type === 'bioco_depot') {
+        // Match the map's public catalog, including its editor-defined order.
+        $posts = get_posts(['post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1,
+            'orderby' => ['menu_order' => 'ASC', 'title' => 'ASC']]);
+        $public_ids = [];
+        foreach ($posts as $post) {
+            if (metadata_exists('post', $post->ID, 'depot_public') && !get_post_meta($post->ID, 'depot_public', true)) continue;
+            $public_ids[] = (int) $post->ID;
+        }
+        $args['post__in'] = $public_ids ?: [0];
+        $args['orderby'] = 'post__in';
+        $args['posts_per_page'] = -1;
+    }
     $ids = array_map('intval', (array) ($args['post__in'] ?? []));
-    if ($ids && bioco_native_render_mode() === 'inert') {
+    if ($ids && $type !== 'bioco_depot' && bioco_native_render_mode() === 'inert') {
         $readable = array_filter($ids, static fn($id) => get_post_type($id) === $type && current_user_can('read_post', $id));
         $args['post__in'] = $readable ? array_values($readable) : [0];
         $args['post_status'] = ['publish', 'draft', 'private'];
@@ -37,7 +51,9 @@ function bioco_group_record_content(string $content): string {
 function bioco_record_native_wrapper(string $output, array $args): string {
     $attrs = $args['attrs'] ?? [];
     if (!class_exists('WP_HTML_Tag_Processor')) return $output;
-    if (($args['name'] ?? '') === 'divi/button' && bioco_record_native_has_class($attrs, 'bioco-group-contact-action')) {
+    if (($args['name'] ?? '') === 'divi/button' && (bioco_record_native_has_class($attrs, 'bioco-group-contact-action')
+        || bioco_record_native_has_class($attrs, 'bioco-depot-website-action')
+        || bioco_record_native_has_class($attrs, 'bioco-depot-route-action'))) {
         $html = new WP_HTML_Tag_Processor($output);
         if (!$html->next_tag('a') || !preg_match('~^(?:https?://|mailto:|tel:|/(?!/))~i', (string) $html->get_attribute('href'))) return '';
     }
@@ -51,4 +67,4 @@ function bioco_record_native_wrapper(string $output, array $args): string {
 add_filter('divi_module_wrapper_render', 'bioco_record_native_wrapper', 20, 2);
 add_filter('divi_loop_data_after_execution', 'bioco_record_native_query', 20, 2);
 add_filter('the_content', 'bioco_group_record_content', 7);
-add_filter('et_builder_third_party_post_types', static fn(array $types): array => array_values(array_unique(array_merge($types, ['bioco_vegetable']))), 20);
+add_filter('et_builder_third_party_post_types', static fn(array $types): array => array_values(array_unique(array_merge($types, ['bioco_vegetable', 'bioco_depot']))), 20);

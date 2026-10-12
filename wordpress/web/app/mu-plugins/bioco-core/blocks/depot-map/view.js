@@ -13,6 +13,9 @@
     var lat = parseFloat(wrapper.getAttribute('data-center-lat'));
     var lng = parseFloat(wrapper.getAttribute('data-center-lng'));
     var zoom = parseInt(wrapper.getAttribute('data-zoom'), 10) || 12;
+    var interaction = wrapper.getAttribute('data-map-interaction') || 'static';
+    var canDrag = interaction === 'drag' || interaction === 'full';
+    var full = interaction === 'full';
     var raw = wrapper.getAttribute('data-locations');
     var locations = [];
     try {
@@ -22,13 +25,13 @@
     }
 
     var map = window.L.map(wrapper, {
-      dragging: false,
-      touchZoom: false,
-      doubleClickZoom: false,
-      scrollWheelZoom: false,
-      boxZoom: false,
-      keyboard: false,
-      zoomControl: false,
+      dragging: canDrag,
+      touchZoom: canDrag,
+      doubleClickZoom: full,
+      scrollWheelZoom: full,
+      boxZoom: full,
+      keyboard: full,
+      zoomControl: canDrag,
     }).setView([lat, lng], zoom);
 
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -57,7 +60,7 @@
       markers.push(marker);
     }
 
-    if (markers.length > 1) {
+    if (markers.length > 1 && wrapper.getAttribute('data-map-view') !== 'fixed') {
       var group = window.L.featureGroup(markers);
       map.fitBounds(group.getBounds().pad(0.1));
     }

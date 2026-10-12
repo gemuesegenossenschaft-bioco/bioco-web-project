@@ -1427,8 +1427,9 @@ a.portal-tile:hover {
 
 .map-container {
   width: 100%;
-  min-height: 300px;
-  max-height: 300px;
+  box-sizing: border-box;
+  min-width: 0;
+  height: var(--bioco-map-height, 300px);
   margin-top: var(--wp--preset--spacing--40);
   margin-bottom: var(--wp--preset--spacing--40);
   border-radius: var(--wp--custom--radius--md);
@@ -1441,8 +1442,18 @@ a.portal-tile:hover {
 .map-wrapper {
   width: 100%;
   height: 100%;
-  min-height: 300px;
-  max-height: 300px;
+}
+
+@media (min-width: 981px) {
+  .bioco-map-layout--side_by_side {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--wp--preset--spacing--40);
+  }
+  .bioco-map-layout--side_by_side .map-container,
+  .bioco-map-layout--side_by_side .location-info-box { margin-top: 0; }
+  .bioco-map-layout--side_by_side .location-addresses .address-list { grid-template-columns: 1fr; }
 }
 
 .location-info-box {

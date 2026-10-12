@@ -59,6 +59,31 @@ category. Restore the copy's values, then delete the copy. Preserve the public
 page and active global templates. Local parser/control/browser tests do not
 replace this licensed Divi save/reopen proof.
 
+## Depot maps and cards
+
+Depot records in WordPress own the public name, coordinates, approved address,
+website and website label. The Depot-Karte module reads those records in their
+WordPress menu order. Its old local location rows are no longer offered in Divi
+because edits to them were overridden by the catalog. Geisshof-Karte keeps its
+own editable location rows.
+
+Both map modules expose center, zoom, marker fitting, interaction, height and
+map/address arrangement. Existing Depot-Karte address cards stay visible until
+an editor replaces them on a page copy. For a fully editable card layout, turn
+off **Eingebaute Adressliste anzeigen**, add a native Divi Loop with class
+`bioco-depot-loop`, and place ordinary Divi Heading, Text and Button modules
+inside each card. Bind them to `loop_bioco_depot_name`, `_address`, `_website`,
+`_website_label` and `_route_url`. Divi controls the field order, link text,
+card spacing and responsive columns. Only published, public depot records enter
+the loop. Invalid or unapproved website destinations yield no link. Keep the
+website button hidden when its URL binding is empty.
+
+For acceptance, use an unpublished, unassigned page copy and a temporary depot
+record. Change its menu order, approved address and website label, then check
+marker/pop-up order and the native card loop. Save and reopen the copy after
+changing map center, zoom and layout. Remove the temporary record and copy.
+The code tests cannot prove licensed Divi save/reopen.
+
 ## Existing pages
 
 Fresh imports compose native modules. To convert existing marker leaves without
