@@ -309,3 +309,8 @@ must be preserved; never restore a stale database to make a comparison pass.
 branch cloning, active-loop scope, editor visibility and exception recovery at
 external boundaries. It does not emulate licensed Divi rendering. Run the
 read-only installed-renderer probe and native save/reopen checks separately.
+
+`test_wordpress_native_event_lists.py` checks native tree round trips and guarded
+conversion, saved labels/links/anchors, explicit blank/false/zero values, editable
+count/order/filter preservation, date-based query semantics and conflict refusal.
+Hosted native editing and generated responsive CSS remain operator checks.

@@ -132,7 +132,7 @@ function bioco_render_person_icons($count) {
 // so a status-only filter pinned past-dated events into upcoming feeds.
 // Upcoming/past is always decided by the date; an explicit event_status=past
 // (the Rückblick flow) still retires a future-dated event early.
-function bioco_query_events($status, $limit, $event_type = null) {
+function bioco_event_query_args($status, $limit, $event_type = null): array {
     // event_date is a naive local datetime, so compare it against the site's
     // wall-clock now, not against a UTC instant.
     $now = current_time('Y-m-d H:i:s');
@@ -169,7 +169,7 @@ function bioco_query_events($status, $limit, $event_type = null) {
         $meta_query[] = ['key' => 'event_type', 'value' => $event_type, 'compare' => '='];
     }
 
-    return new WP_Query([
+    return [
         'post_type' => 'event',
         'post_status' => 'publish',
         'posts_per_page' => (int) $limit,
@@ -177,7 +177,11 @@ function bioco_query_events($status, $limit, $event_type = null) {
         'orderby' => 'meta_value',
         'order' => $status === 'past' ? 'DESC' : 'ASC',
         'meta_query' => $meta_query,
-    ]);
+    ];
+}
+
+function bioco_query_events($status, $limit, $event_type = null) {
+    return new WP_Query(bioco_event_query_args($status, $limit, $event_type));
 }
 
 // Returns [url, alt] using the event's card_image field, falling back to the

@@ -52,6 +52,8 @@ require_once BIOCO_IMPORT_DIR . '/includes/native-migration.php';
 require_once BIOCO_IMPORT_DIR . '/includes/editor-routing.php';
 require_once BIOCO_IMPORT_DIR . '/includes/shell-layouts.php';
 require_once BIOCO_IMPORT_DIR . '/includes/event-template.php';
+require_once BIOCO_IMPORT_DIR . '/includes/event-lists.php';
+require_once BIOCO_IMPORT_DIR . '/includes/event-list-migration.php';
 require_once BIOCO_IMPORT_DIR . '/includes/event-template-migration.php';
 require_once BIOCO_IMPORT_DIR . '/includes/design-system.php';
 

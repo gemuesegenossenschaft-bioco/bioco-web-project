@@ -25,7 +25,8 @@
     "tests/test_wordpress_event_templates.py",
     "tests/test_wordpress_editor_isolation.py",
     "tests/test_wordpress_event_migration.py",
-    "tests/test_wordpress_native_loop_empty.py"
+    "tests/test_wordpress_native_loop_empty.py",
+    "tests/test_wordpress_native_event_lists.py"
   ],
   "operator_only_nodes": [
     "tests/test_wordpress_forms_lifecycle.py::test_wordpress_runtime_emits_runtime_before_adapters_without_blocking_turnstile",

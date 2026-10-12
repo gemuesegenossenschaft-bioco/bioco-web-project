@@ -76,5 +76,8 @@ keeps every branch visible in the native editor.
 Four boundary tests cover branch selection, scope, editor behavior and exception
 recovery. A read-only installed-renderer probe confirmed native columns, authored
 empty text with no cards, and populated cards with no empty text. It wrote no
-content or global assignment. Query adaptation, saved-list conversion and hosted
-save/reopen evidence remain required. This does not complete #202 or #229.
+content or global assignment. Query adaptation and saved-list conversion now pass boundary and real WordPress
+parser checks. A read-only installed-renderer probe resolves actual published
+event titles/links, suppresses the empty message when records exist, and hides
+the recap heading with no records. Native grid classes are emitted; generated
+responsive CSS and hosted save/reopen evidence remain required. This does not complete #202 or #229.

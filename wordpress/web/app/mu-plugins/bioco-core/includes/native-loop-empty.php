@@ -71,6 +71,7 @@ final class Bioco_Native_Loop_Empty {
                     if ($selected !== null) $content .= $selected->render();
                 }
             } finally { self::$projecting--; }
+            if ($content === '') return '';
             // Module::render replaces no-result children a second time. Use the
             // same native row callback with that runtime flag removed; no fixed markup.
             unset($attrs['__loop_no_results']);
