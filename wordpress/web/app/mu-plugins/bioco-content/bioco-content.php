@@ -63,7 +63,7 @@ add_action('init', function () {
         'public' => true,
         'show_in_rest' => true,
         'menu_icon' => 'dashicons-groups',
-        'supports' => ['title', 'thumbnail'],
+        'supports' => ['title', 'editor', 'thumbnail', 'page-attributes'],
         'has_archive' => false,
         'rewrite' => false,
     ]);

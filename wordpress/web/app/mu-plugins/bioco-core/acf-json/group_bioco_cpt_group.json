@@ -66,6 +66,15 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_bioco_group_contact_url",
+            "label": "Kontakt-Link",
+            "name": "group_contact_url",
+            "type": "url",
+            "instructions": "Nur eine bestätigte Kontaktadresse eintragen. Ohne Link bleibt die Kontaktperson als Text erhalten; kein Ziel wird aus dem Namen abgeleitet.",
+            "required": 0,
+            "default_value": ""
         }
     ],
     "location": [
