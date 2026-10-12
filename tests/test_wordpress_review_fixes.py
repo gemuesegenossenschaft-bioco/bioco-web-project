@@ -36,7 +36,7 @@ def test_doi_confirmation_has_no_public_rest_route():
     assert "bioco/v1/doi-confirm" not in routes
 
 
-def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
+def test_gallery_filter_validation_enforces_canonical_unique_keys_and_one_all():
     php = r'''
     define('ABSPATH', __DIR__);
     $FILTERS = [];
@@ -60,7 +60,7 @@ def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
         'empty' => [],
         'missing_all' => [['key' => 'feld']],
         'duplicate' => [['key' => 'all'], ['key' => 'all']],
-        'unsupported' => [['key' => 'all'], ['key' => 'custom']],
+        'custom' => [['key' => 'all'], ['key' => 'ernte_2026']],
         'non_canonical' => [['key' => 'all'], ['key' => 'por traits']],
         'invalid_row' => [['key' => 'all'], 'not-a-row'],
     ];
@@ -82,12 +82,12 @@ def test_gallery_filter_validation_enforces_supported_unique_keys_and_one_all():
 
     assert results["valid_field_keys"] is True
     assert results["valid_names"] is True
+    assert results["custom"] is True
     expected_errors = {
         "empty": 'Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.',
         "missing_all": 'Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.',
         "duplicate": "Jeder Filter-Schlüssel darf nur einmal vorkommen.",
-        "unsupported": "Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.",
-        "non_canonical": "Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.",
+        "non_canonical": "Filter-Schlüssel müssen mit einem Kleinbuchstaben beginnen und dürfen nur Kleinbuchstaben, Zahlen, Bindestriche und Unterstriche enthalten.",
         "invalid_row": "Die Filterkonfiguration ist ungültig.",
     }
     for case, message in expected_errors.items():

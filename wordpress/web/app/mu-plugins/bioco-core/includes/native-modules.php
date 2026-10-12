@@ -331,17 +331,21 @@ function bioco_native_validate_row($row, array $row_spec) {
 
 /**
  * Cross-field invariants per component, mirroring the existing ACF gallery
- * validation (bioco-core.php): item categories and filter keys stay in their
- * enum sets, filter keys are unique, and exactly one "all" row exists.
+ * validation (bioco-core.php): categories use canonical keys, filter keys
+ * are unique, and exactly one "all" row exists.
  */
 function bioco_native_validate_component_rules(string $component, array $values) {
     if ($component !== 'gallery') {
         return $values;
     }
 
-    $allowed_categories = ['koerbe', 'feld', 'portraits'];
+    foreach (['initial_count' => 500, 'grid_gap' => 96] as $field => $maximum) {
+        if (isset($values[$field]) && ($values[$field] < 0 || $values[$field] > $maximum || floor($values[$field]) !== (float) $values[$field])) {
+            return new WP_Error('bioco_native_invalid_value', "Invalid gallery setting: {$field}", ['status' => 400]);
+        }
+    }
     foreach ($values['items'] ?? [] as $row) {
-        if (!in_array($row['category'] ?? null, $allowed_categories, true)) {
+        if (!preg_match('/^[a-z][a-z0-9_-]*$/D', $row['category'] ?? '') || ($row['category'] ?? '') === 'all') {
             return new WP_Error('bioco_native_invalid_value', 'Invalid item category.', ['status' => 400]);
         }
         // Attachment usability is the renderer's resolution concern: an
@@ -361,11 +365,10 @@ function bioco_native_validate_component_rules(string $component, array $values)
             return $values;
         }
 
-        $allowed_keys = ['all', 'koerbe', 'feld', 'portraits'];
         $seen = [];
         $all_count = 0;
         foreach ($values['filters'] as $row) {
-            if (!in_array($row['key'], $allowed_keys, true)) {
+            if (!preg_match('/^[a-z][a-z0-9_-]*$/D', $row['key'])) {
                 return new WP_Error('bioco_native_invalid_value', 'Invalid filter key.', ['status' => 400]);
             }
             if (isset($seen[$row['key']])) {

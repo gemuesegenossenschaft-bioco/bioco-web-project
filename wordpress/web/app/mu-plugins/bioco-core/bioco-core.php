@@ -41,7 +41,7 @@ add_filter('acf/settings/load_json', fn() => [BIOCO_CORE_DIR . '/acf-json']);
 /**
  * Gallery filter validation: the repeater must contain exactly one "all" row
  * and every technical key must be unique. These invariants are enforced by the
- * UI choices, but server-side validation guards against import/JSON-sync edge
+ * editor, while server-side validation guards against import/JSON-sync edge
  * cases and keeps the filter JavaScript from receiving ambiguous configuration.
  */
 add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($valid, $value) {
@@ -49,7 +49,6 @@ add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($vali
         return $valid;
     }
 
-    $allowed_keys = ['all', 'koerbe', 'feld', 'portraits'];
     if ($value === false || $value === null || $value === '') {
         return __('Es muss genau ein Filter mit dem Schlüssel "all" vorhanden sein.', 'bioco');
     }
@@ -68,8 +67,8 @@ add_filter('acf/validate_value/key=field_bioco_gallery_filters', function ($vali
         $raw_key = $row['field_bioco_gallery_filter_key'] ?? ($row['key'] ?? '');
         $key = is_string($raw_key) ? $raw_key : '';
 
-        if (!in_array($key, $allowed_keys, true)) {
-            return __('Filter-Schlüssel müssen all, koerbe, feld oder portraits sein.', 'bioco');
+        if (!preg_match('/^[a-z][a-z0-9_-]*$/D', $key)) {
+            return __('Filter-Schlüssel müssen mit einem Kleinbuchstaben beginnen und dürfen nur Kleinbuchstaben, Zahlen, Bindestriche und Unterstriche enthalten.', 'bioco');
         }
         if (isset($seen[$key])) {
             return __('Jeder Filter-Schlüssel darf nur einmal vorkommen.', 'bioco');
