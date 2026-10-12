@@ -12,6 +12,21 @@
     return stored && Array.isArray(stored.value) ? stored.value : [];
   }
   function data() {return window.BiocoFormCompositionData || {};}
+  function safeLabel(html) {
+    var doc = new DOMParser().parseFromString(html, 'text/html');
+    var allowed = ['H1','H2','H3','H4','H5','H6','P','DIV','SPAN','STRONG','EM','B','I','BR','A','UL','OL','LI','IMG'];
+    Array.from(doc.body.querySelectorAll('*')).forEach(function (element) {
+      if (allowed.indexOf(element.tagName) < 0) {element.remove(); return;}
+      Array.from(element.attributes).forEach(function (attribute) {
+        if (['href','src','alt','title','class'].indexOf(attribute.name) < 0) {element.removeAttribute(attribute.name); return;}
+        if (attribute.name === 'href' || attribute.name === 'src') {
+          try {if (['http:','https:','mailto:','tel:'].indexOf(new URL(attribute.value, window.location.href).protocol) < 0) element.removeAttribute(attribute.name);}
+          catch (error) {element.removeAttribute(attribute.name);}
+        }
+      });
+    });
+    return doc.body.innerHTML;
+  }
   function choices(identity) {
     var entries = [];
     Object.keys(data().contracts || {}).forEach(function (type) {
@@ -42,16 +57,19 @@
           React.createElement('p', null, kind === 'doi-controller' ? 'Status-Zeilen und Bestätigungsbutton in einer Divi-Sektion mit der CSS-Klasse bioco-doi-scope anordnen.' : 'Felder und Buttons in derselben Divi-Sektion mit der CSS-Klasse bioco-form-scope anordnen.'));
       } else if (kind === 'form-action') {
         var action = value(props.attrs, 'action') || 'submit';
-        child = ['progress','summary','error-details'].indexOf(action) >= 0 ? React.createElement('p', null, label || action) : React.createElement('button', {type: 'button', disabled: true, className: 'bioco-form-control bioco-form-action'}, label);
+        child = ['progress','summary','error-details','doi-error-details'].indexOf(action) >= 0 ? React.createElement('p', null, label || action) : React.createElement('button', {type: 'button', disabled: true, className: 'bioco-form-control bioco-form-action'}, label);
       } else if (kind === 'form-value') {
         child = React.createElement('div', {className:'bioco-form-value'}, React.createElement('span', {className:'bioco-form-label'},label), React.createElement('output',{className:'bioco-form-control'},value(props.attrs,'field')));
       } else {
         var identity = value(props.attrs, 'field').split('.');
         var spec = ((data().contracts || {})[identity[0]] || {})[identity[1]];
         var type = spec ? spec.type : 'text';
+        var radio = type === 'select' && value(props.attrs, 'choice_layout') === 'radio' && (spec.presentations || []).indexOf('radio') >= 0;
+        var richLabel = value(props.attrs, 'label_html');
+        if (radio) type = 'radio';
         child = React.createElement('div', {className: 'bioco-form-field'},
-          React.createElement('label', {className: 'bioco-form-label'}, label),
-          React.createElement(['textarea','select'].indexOf(type) >= 0 ? type : 'input', {type: ['textarea','select'].indexOf(type) >= 0 ? undefined : type, className: 'bioco-form-control', disabled: true, placeholder: value(props.attrs, 'placeholder')}, type === 'select' ? options(props.attrs).map(function (option, index) {return React.createElement('option', {key: index, value: option.value}, option.label);}) : null),
+          React.createElement('label', richLabel ? {className: 'bioco-form-label', dangerouslySetInnerHTML: {__html: safeLabel(richLabel)}} : {className: 'bioco-form-label'}, richLabel ? undefined : label),
+          radio ? React.createElement('fieldset', null, options(props.attrs).map(function (option, index) {return React.createElement('label', {key:index}, React.createElement('input', {type:'radio', disabled:true, checked: option.value === value(props.attrs,'default_value'), readOnly:true}), option.label);})) : React.createElement(['textarea','select'].indexOf(type) >= 0 ? type : 'input', {type: ['textarea','select'].indexOf(type) >= 0 ? undefined : type, className: 'bioco-form-control', disabled: true, defaultValue: type === 'select' ? value(props.attrs,'default_value') : undefined, defaultChecked: type === 'checkbox' ? value(props.attrs,'checked') === 'on' : undefined, placeholder: value(props.attrs, 'placeholder')}, type === 'select' ? options(props.attrs).map(function (option, index) {return React.createElement('option', {key: index, value: option.value}, option.label);}) : null),
           React.createElement('p', {className: 'bioco-form-help'}, value(props.attrs, 'help')));
       }
       return React.createElement(window.divi.module.ModuleContainer, {
@@ -73,7 +91,7 @@
     fields.registerFieldComponent({name: 'bioco/form-identity', component: choices(true)});
     fields.registerFieldComponent({name: 'bioco/form-action-type', component: function (props) {
       return React.createElement('select', {value: props.value || 'submit', onChange: function (event) {props.onChange({inputValue: event.target.value});}},
-        ['submit','next','back','progress','summary','confirm','error-details'].map(function (key) {return React.createElement('option', {key:key,value:key},key);}));
+        ['submit','next','back','progress','summary','confirm','error-details','doi-error-details'].map(function (key) {return React.createElement('option', {key:key,value:key},key);}));
     }});
     fields.registerFieldComponent({name: 'bioco/form-options', component: function (props) {
       var rows = Array.isArray(props.value) ? props.value : [];

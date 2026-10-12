@@ -13,8 +13,8 @@ function bioco_doi_outcome(array $request, callable $verify_nonce, callable $con
     $nonce = $request['post']['bioco_doi_nonce'] ?? '';
     if (!is_string($nonce) || !$verify_nonce(sanitize_text_field(wp_unslash($nonce)), 'bioco_doi_confirm_' . $token)) return ['state' => 'invalid', 'token' => $token, 'form_type' => ''];
     try { $result = $confirm($token); }
-    catch (Throwable $error) { return ['state' => 'failure', 'token' => $token, 'form_type' => '']; }
-    return ['state' => !empty($result['success']) ? 'success' : 'invalid', 'token' => $token, 'form_type' => is_string($result['form_type'] ?? null) ? $result['form_type'] : ''];
+    catch (Throwable $error) { return ['state' => 'failure', 'token' => $token, 'form_type' => '', 'error' => bioco_forms_message('shared', 'generic')]; }
+    return ['state' => !empty($result['success']) ? 'success' : 'invalid', 'token' => $token, 'form_type' => is_string($result['form_type'] ?? null) ? $result['form_type'] : '', 'error' => is_string($result['error'] ?? null) ? $result['error'] : ''];
 }
 
 function bioco_doi_disable_cache(): void {
@@ -59,9 +59,12 @@ function bioco_doi_render_controller(string $mode): string {
 function bioco_doi_visible_layout(string $html, array $block): string {
     if (bioco_native_render_mode() !== 'public') return $html;
     $class = bioco_native_extract_wrapper($block['attrs'] ?? [])['className'];
-    if (!preg_match('/(?:^|\s)bioco-doi-state-(missing|prompt|success|invalid|failure)(?:\s|$)/', $class, $matches)) return $html;
+    $typed = preg_match('/(?:^|\s)bioco-doi-type-(subscribe|visit|waiting_list|contact)(?:\s|$)/', $class, $type_matches);
+    if (!$typed && !preg_match('/(?:^|\s)bioco-doi-state-(missing|prompt|success|invalid|failure)(?:\s|$)/', $class, $matches)) return $html;
     $post = get_post();
     if (!$post || !has_block('bioco-divi/doi-controller', $post->post_content)) return $html;
-    return bioco_doi_current_outcome()['state'] === $matches[1] ? $html : '';
+    $outcome = bioco_doi_current_outcome();
+    if ($typed) return $outcome['state'] === 'success' && $outcome['form_type'] === $type_matches[1] ? $html : '';
+    return $outcome['state'] === $matches[1] ? $html : '';
 }
 add_filter('render_block', 'bioco_doi_visible_layout', 25, 2);
