@@ -146,3 +146,27 @@ def test_calculator_uses_shared_prices_for_all_totals_increments_none_and_handof
         assert page.locator('[data-pc-field="shares-count"]').inner_text() == '0'
         assert page.locator('[data-pc-field="total"]').inner_text() == 'CHF 0.-'
         browser.close()
+
+
+def test_native_price_bindings_use_loop_records_and_the_same_zero_share_source():
+    out = catalog(records() + r'''
+function add_filter(...$args){}
+function get_post_type($id){return $GLOBALS['posts'][$id]->post_type??'page';}
+function get_post_status($id){return $GLOBALS['posts'][$id]->post_status??'publish';}
+function get_queried_object_id(){return 99;}
+function current_user_can(...$args){return false;}
+function get_the_title($id){return $GLOBALS['posts'][$id]->post_title;}
+function esc_html($v){return htmlspecialchars((string)$v,ENT_QUOTES);}
+function number_format_i18n($v){return number_format($v,0,'.',"'");}
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/price-bindings.php';
+$options['bioco_pricing_enabled']=true;$options['bioco_share_price']=0;
+$values=[];foreach(['name','price','shares','share_cost','work','persons']as$field)
+    $values[$field]=bioco_price_binding_value('untouched',['name'=>'loop_bioco_price_'.$field,'post_id'=>99,'loop_id'=>2]);
+$values['global']=bioco_price_binding_value('', ['name'=>'bioco_price_share_price']);
+$values['missing']=bioco_price_binding_value('', ['name'=>'loop_bioco_price_price','post_id'=>99]);
+$posts[2]->post_status='draft';$values['draft']=bioco_price_binding_value('', ['name'=>'loop_bioco_price_price','loop_id'=>2]);
+echo json_encode(['values'=>$values,'options'=>bioco_price_binding_fields(['existing'=>['label'=>'Existing']])]);
+''')
+    assert out['values'] == {'name': 'Standard (2-3 Personen)', 'price': '1&#039;280', 'shares': '2',
+        'share_cost': '0', 'work': '20', 'persons': '2', 'global': '0', 'missing': '', 'draft': ''}
+    assert 'existing' in out['options'] and 'loop_bioco_price_share_cost' in out['options']

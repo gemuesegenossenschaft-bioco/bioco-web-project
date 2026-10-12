@@ -1,0 +1,49 @@
+<?php
+/** Price record values for ordinary Divi headings, text and native loops. */
+if (!defined('ABSPATH')) exit;
+
+function bioco_price_binding_fields(array $options): array {
+    foreach (['name' => 'Name', 'key' => 'Rechner-Schlüssel', 'price' => 'Jahrespreis',
+        'shares' => 'Anteilsscheine', 'share_cost' => 'Anteilsscheine Kosten',
+        'work' => 'Arbeitseinsätze', 'persons' => 'Personen'] as $field => $label) {
+        foreach (['' => 'Abo-Preis', 'loop_' => 'Abo-Preis in der Schleife'] as $prefix => $group) {
+            $name = $prefix . 'bioco_price_' . $field;
+            $options[$name] = ['id' => $name, 'label' => $group . ': ' . $label,
+                'type' => 'text', 'custom' => false, 'group' => $group];
+        }
+    }
+    $name = 'bioco_price_share_price';
+    $options[$name] = ['id' => $name, 'label' => 'Abo-Preis: Preis pro Anteilsschein',
+        'type' => 'text', 'custom' => false, 'group' => 'Abo-Preis'];
+    return $options;
+}
+
+function bioco_price_binding_value($value, array $context) {
+    $name = $context['name'] ?? '';
+    if ($name === 'bioco_price_share_price') {
+        $catalog = function_exists('bioco_price_catalog') ? bioco_price_catalog() : null;
+        return $catalog !== null && empty($catalog['error']) ? esc_html(number_format_i18n($catalog['share_price'])) : '';
+    }
+    if (!is_string($name) || !preg_match('/^(loop_)?bioco_price_(name|key|price|shares|share_cost|work|persons)$/D', $name, $match)) return $value;
+    $loop = (int) ($context['loop_id'] ?? 0);
+    $id = $loop ?: (int) ($context['post_id'] ?? 0);
+    // A missing loop record must not use the enclosing editorial page.
+    if (!$loop && empty($match[1]) && get_post_type($id) !== 'bioco_price') $id = (int) get_queried_object_id();
+    if (get_post_type($id) !== 'bioco_price'
+        || (get_post_status($id) !== 'publish' && !current_user_can('read_post', $id))) return '';
+    $field = $match[2];
+    if ($field === 'name') return esc_html(get_the_title($id));
+    if ($field === 'key') return esc_html((string) get_post_meta($id, 'price_key', true));
+    if (!function_exists('bioco_price_integer')) return '';
+    if ($field === 'share_cost') {
+        $shares = bioco_price_integer(get_post_meta($id, 'price_shares', true));
+        $catalog = bioco_price_catalog();
+        return $shares !== null && $catalog !== null && empty($catalog['error'])
+            ? esc_html(number_format_i18n($shares * $catalog['share_price'])) : '';
+    }
+    $number = bioco_price_integer(get_post_meta($id, 'price_' . $field, true));
+    return $number === null ? '' : esc_html(number_format_i18n($number));
+}
+
+add_filter('divi_module_dynamic_content_options', 'bioco_price_binding_fields', 20);
+add_filter('divi_module_dynamic_content_resolved_value', 'bioco_price_binding_value', 20, 2);

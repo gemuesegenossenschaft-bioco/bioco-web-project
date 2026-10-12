@@ -66,8 +66,6 @@ function bioco_price_sanitize_share_price($value) {
 add_action('admin_init', function () {
     register_setting('bioco_pricing', 'bioco_share_price', ['type' => 'integer',
         'sanitize_callback' => 'bioco_price_sanitize_share_price', 'default' => 250]);
-    register_setting('bioco_pricing', 'bioco_pricing_enabled', ['type' => 'boolean',
-        'sanitize_callback' => static fn($value): bool => (string) $value === '1', 'default' => false]);
 });
 
 add_action('admin_menu', function () {
@@ -82,8 +80,9 @@ function bioco_price_settings_page(): void {
     echo '<form method="post" action="options.php">';
     settings_fields('bioco_pricing');
     echo '<p><label>' . esc_html__('Preis pro Anteilsschein (CHF)', 'bioco') . ' <input type="number" min="0" step="1" name="bioco_share_price" value="' . esc_attr(get_option('bioco_share_price', 250)) . '"></label></p>';
-    echo '<p><label><input type="checkbox" name="bioco_pricing_enabled" value="1" ' . checked(get_option('bioco_pricing_enabled', false), true, false) . '> ' . esc_html__('Gemeinsamen Preis-Katalog verwenden', 'bioco') . '</label></p>';
-    echo '<p>' . esc_html__('Erst nach dem geprüften Übernehmen der bestehenden Preise aktivieren. Ein leerer aktivierter Katalog bleibt leer.', 'bioco') . '</p>';
+    if (!get_option('bioco_pricing_enabled', false)) {
+        echo '<p>' . esc_html__('Die bestehenden Website-Preise bleiben bis zur geprüften Übernahme erhalten. Dieser Katalog wird noch nicht auf der Website verwendet.', 'bioco') . '</p>';
+    }
     submit_button();
     echo '</form></div>';
 }
