@@ -24,7 +24,7 @@ function bioco_price_binding_value($value, array $context) {
         $catalog = function_exists('bioco_price_catalog') ? bioco_price_catalog() : null;
         return $catalog !== null && empty($catalog['error']) ? esc_html(number_format_i18n($catalog['share_price'])) : '';
     }
-    if (!is_string($name) || !preg_match('/^(loop_)?bioco_price_(name|table_label|key|select_url|price|shares|share_cost|work|persons)$/D', $name, $match)) return $value;
+    if (!is_string($name) || !preg_match('/^(loop_)?bioco_price_(name|table_label|key|select_url|price|price_table|shares|share_cost|share_cost_table|shares_label|work|persons|persons_range|persons_accessible|persons_icon)$/D', $name, $match)) return $value;
     $loop = (int) ($context['loop_id'] ?? 0);
     $id = $loop ?: (int) ($context['post_id'] ?? 0);
     // A missing loop record must not use the enclosing editorial page.
@@ -43,14 +43,34 @@ function bioco_price_binding_value($value, array $context) {
         return preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/D', $key) && $key !== 'kein' ? '#bioco-price-' . $key : '';
     }
     if (!function_exists('bioco_price_integer')) return '';
-    if ($field === 'share_cost') {
+    if ($field === 'persons_range') {
+        $range = trim((string) get_post_meta($id, 'price_persons_range', true));
+        $persons = bioco_price_integer(get_post_meta($id, 'price_persons', true));
+        if ($range === '' && preg_match('/\(([^()]+ Personen?)\)$/u', get_the_title($id), $matched)) $range = $matched[1];
+        return esc_html($range !== '' ? $range : ($persons === 1 ? '1 Person' : (string) $persons . ' Personen'));
+    }
+    if ($field === 'persons_accessible') {
+        $persons = bioco_price_integer(get_post_meta($id, 'price_persons', true));
+        return $persons === null ? '' : esc_attr($persons === 1 ? '1 Person' : (string) $persons . ' Personen');
+    }
+    if ($field === 'persons_icon') {
+        $persons = bioco_price_integer(get_post_meta($id, 'price_persons', true));
+        return $persons !== null && $persons >= 1 && $persons <= 12
+            ? esc_url_raw(plugins_url('assets/price-person-icons/persons-' . $persons . '.svg', dirname(__DIR__) . '/bioco-core.php')) : '';
+    }
+    if ($field === 'shares_label') {
+        $shares = bioco_price_integer(get_post_meta($id, 'price_shares', true));
+        return $shares === null ? '' : esc_html(number_format_i18n($shares) . ($shares === 1 ? ' Anteilsschein' : ' Anteilsscheine'));
+    }
+    if ($field === 'share_cost' || $field === 'share_cost_table') {
         $shares = bioco_price_integer(get_post_meta($id, 'price_shares', true));
         if ($shares !== null && !empty($catalog['share_price']) && $shares > intdiv(9007199254740991, $catalog['share_price'])) return '';
         return $shares !== null && $catalog !== null && empty($catalog['error'])
-            ? esc_html(number_format_i18n($shares * $catalog['share_price'])) : '';
+            ? esc_html($field === 'share_cost_table' ? number_format($shares * $catalog['share_price'], 0, '.', "'")
+                : number_format_i18n($shares * $catalog['share_price'])) : '';
     }
-    $number = bioco_price_integer(get_post_meta($id, 'price_' . $field, true));
-    return $number === null ? '' : esc_html(number_format_i18n($number));
+    $number = bioco_price_integer(get_post_meta($id, $field === 'price_table' ? 'price_price' : 'price_' . $field, true));
+    return $number === null ? '' : esc_html($field === 'price_table' ? number_format($number, 0, '.', "'") : number_format_i18n($number));
 }
 
 add_filter('divi_module_dynamic_content_options', 'bioco_price_binding_fields', 20);

@@ -1,0 +1,220 @@
+{
+    "table_html": "<div class=\"pricing-table\"><table><thead><tr><th scope=\"col\">Gemüsekorb<\/th><th scope=\"col\">Personen<\/th><th scope=\"col\">Jahrespreis<\/th><th scope=\"col\">Anteilsscheine Kosten<\/th><th scope=\"col\">Mitarbeit pro Jahr<\/th><\/tr><\/thead><tbody><tr><td><strong>Halb<\/strong><div class=\"cms-pricing-table-shares\">1 Anteilsschein<\/div><\/td><td><div class=\"person-icons\" role=\"img\" aria-label=\"1 Person\"><div class=\"person-icons-row\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" class=\"person-icon\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"var(--wp--preset--color--bioco-green)\" stroke=\"var(--wp--preset--color--bioco-green-dark)\" stroke-width=\"1\"\/><path d=\"M6 20C6 16 8 14 12 14C16 14 18 16 18 20\" stroke=\"var(--wp--preset--color--bioco-green)\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"\/><\/svg><\/div><\/div><\/td><td>CHF 750.-<\/td><td>CHF 250.-<\/td><td>10 Arbeitseinsätze<br \/><span class=\"cms-pricing-table-work-suffix\">à 2 Stunden<\/span><\/td><\/tr><tr><td><strong>Standard<\/strong><div class=\"cms-pricing-table-shares\">2 Anteilsscheine<\/div><\/td><td><div class=\"person-icons\" role=\"img\" aria-label=\"2 Personen\"><div class=\"person-icons-row\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" class=\"person-icon\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"var(--wp--preset--color--bioco-green)\" stroke=\"var(--wp--preset--color--bioco-green-dark)\" stroke-width=\"1\"\/><path d=\"M6 20C6 16 8 14 12 14C16 14 18 16 18 20\" stroke=\"var(--wp--preset--color--bioco-green)\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"\/><\/svg><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" class=\"person-icon\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"var(--wp--preset--color--bioco-green)\" stroke=\"var(--wp--preset--color--bioco-green-dark)\" stroke-width=\"1\"\/><path d=\"M6 20C6 16 8 14 12 14C16 14 18 16 18 20\" stroke=\"var(--wp--preset--color--bioco-green)\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"\/><\/svg><\/div><\/div><\/td><td>CHF 1&#039;280.-<\/td><td>CHF 500.-<\/td><td>20 Arbeitseinsätze<br \/><span class=\"cms-pricing-table-work-suffix\">à 2 Stunden<\/span><\/td><\/tr><tr><td><strong>Doppel<\/strong><div class=\"cms-pricing-table-shares\">4 Anteilsscheine<\/div><\/td><td><div class=\"person-icons\" role=\"img\" aria-label=\"4 Personen\"><div class=\"person-icons-row\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" class=\"person-icon\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"var(--wp--preset--color--bioco-green)\" stroke=\"var(--wp--preset--color--bioco-green-dark)\" stroke-width=\"1\"\/><path d=\"M6 20C6 16 8 14 12 14C16 14 18 16 18 20\" stroke=\"var(--wp--preset--color--bioco-green)\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"\/><\/svg><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" class=\"person-icon\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"var(--wp--preset--color--bioco-green)\" stroke=\"var(--wp--preset--color--bioco-green-dark)\" stroke-width=\"1\"\/><path d=\"M6 20C6 16 8 14 12 14C16 14 18 16 18 20\" stroke=\"var(--wp--preset--color--bioco-green)\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"\/><\/svg><\/div><div class=\"person-icons-row\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" class=\"person-icon\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"var(--wp--preset--color--bioco-green)\" stroke=\"var(--wp--preset--color--bioco-green-dark)\" stroke-width=\"1\"\/><path d=\"M6 20C6 16 8 14 12 14C16 14 18 16 18 20\" stroke=\"var(--wp--preset--color--bioco-green)\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"\/><\/svg><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http:\/\/www.w3.org\/2000\/svg\" class=\"person-icon\" aria-hidden=\"true\" focusable=\"false\"><circle cx=\"12\" cy=\"8\" r=\"4\" fill=\"var(--wp--preset--color--bioco-green)\" stroke=\"var(--wp--preset--color--bioco-green-dark)\" stroke-width=\"1\"\/><path d=\"M6 20C6 16 8 14 12 14C16 14 18 16 18 20\" stroke=\"var(--wp--preset--color--bioco-green)\" stroke-width=\"2\" stroke-linecap=\"round\" fill=\"none\"\/><\/svg><\/div><\/div><\/td><td>CHF 2&#039;350.-<\/td><td>CHF 1&#039;000.-<\/td><td>40 Arbeitseinsätze<br \/><span class=\"cms-pricing-table-work-suffix\">à 2 Stunden<\/span><\/td><\/tr><\/tbody><\/table><\/div>",
+    "narratives": [
+        "<h3>Anteilsscheine<\/h3>\n\n<p><strong>Anteilsscheine:<\/strong> Jeder Anteilsschein kostet CHF 250.- und ist eine Bedingung für den Bezug eines Gemüsekorbes. Du kannst zusätzliche Anteilsscheine erwerben, um die Genossenschaft stärker zu unterstützen.<\/p>\n\n<p><strong>💡 Tipp:<\/strong> Geteilte Körbe sparen CHF 110 pro Jahr und reduzieren Logistikaufwand. Wir empfehlen, Körbe zu teilen!<\/p>",
+        "<h2>Anteilsscheine ohne Gemüsekorb<\/h2>\n\n<p>Du möchtest biocò unterstützen, ohne ein Gemüseabo zu beziehen? Das ist möglich!<\/p>\n\n<p><strong>Vorteile:<\/strong><\/p>\n\n<ul>\n\t<li>Unterstützung der Genossenschaft<\/li>\n\t<li>Vorrang auf der Warteliste für einen Gemüsekorb<\/li>\n\t<li>Mitspracherecht in der Genossenschaft<\/li>\n<\/ul>\n\n<p><strong>Kosten:<\/strong> CHF 250.- pro Anteilsschein<\/p>"
+    ],
+    "calculator_attrs": {
+        "module": {
+            "advanced": {
+                "htmlAttributes": {
+                    "desktop": {
+                        "value": {
+                            "class": "",
+                            "id": ""
+                        }
+                    }
+                }
+            },
+            "decoration": {
+                "attributes": {
+                    "desktop": {
+                        "value": {
+                            "attributes": [
+                                {
+                                    "id": "b020e9c5-d0d4-4dd5-a4af-2372acc5d0c6",
+                                    "name": "id",
+                                    "value": "pricing-calculator",
+                                    "adminLabel": "CSS ID"
+                                },
+                                {
+                                    "id": "a7d3b5e1-4feb-4d95-b44a-11121b08a760",
+                                    "name": "class",
+                                    "value": "bioco-dynamic-text",
+                                    "adminLabel": "CSS Class"
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "share_price": {
+            "innerContent": {
+                "desktop": {
+                    "value": 250
+                }
+            }
+        },
+        "work_suffix": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Arbeitseinsätze à 2 Stunden"
+                }
+            }
+        },
+        "signup_url": {
+            "innerContent": {
+                "desktop": {
+                    "value": "\/anmeldung"
+                }
+            }
+        },
+        "shares_only_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Nur Anteilsscheine"
+                }
+            }
+        },
+        "annual_contribution_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Jährlicher Beitrag"
+                }
+            }
+        },
+        "work_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Mitarbeit pro Jahr:"
+                }
+            }
+        },
+        "one_time_payment_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Einmalige Zahlung"
+                }
+            }
+        },
+        "additional_shares_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Zusätzliche Anteilsscheine hinzufügen:"
+                }
+            }
+        },
+        "cta_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Jetzt mitmachen!"
+                }
+            }
+        },
+        "cta_note": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Deine Auswahl wird automatisch ins Anmeldeformular übernommen"
+                }
+            }
+        },
+        "tiers": {
+            "innerContent": {
+                "desktop": {
+                    "value": [
+                        {
+                            "name": "Halb (1 Person)",
+                            "price": 750,
+                            "shares": 1,
+                            "work": 10,
+                            "recommended": false
+                        },
+                        {
+                            "name": "Standard (2-3 Personen)",
+                            "price": 1280,
+                            "shares": 2,
+                            "work": 20,
+                            "recommended": true
+                        },
+                        {
+                            "name": "Doppel (4-6 Personen)",
+                            "price": 2350,
+                            "shares": 4,
+                            "work": 40,
+                            "recommended": false
+                        }
+                    ]
+                }
+            }
+        },
+        "recommended_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Empfohlen"
+                }
+            }
+        },
+        "no_subscription_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Kein Abo"
+                }
+            }
+        },
+        "article_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Artikel"
+                }
+            }
+        },
+        "quantity_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Anzahl"
+                }
+            }
+        },
+        "unit_price_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Einzelpreis"
+                }
+            }
+        },
+        "share_certificates_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Anteilsscheine"
+                }
+            }
+        },
+        "required_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "erforderlich"
+                }
+            }
+        },
+        "shares_only_info": {
+            "innerContent": {
+                "desktop": {
+                    "value": "<strong>💡 Info:<\/strong> Du kannst Anteilsscheine auch ohne Gemüsekorb erwerben. Genossenschafter\/innen haben Vorrang auf der Warteliste für einen Gemüsekorb."
+                }
+            }
+        },
+        "without_basket_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "ohne Gemüsekorb"
+                }
+            }
+        },
+        "additional_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "zusätzlich"
+                }
+            }
+        },
+        "total_label": {
+            "innerContent": {
+                "desktop": {
+                    "value": "Total"
+                }
+            }
+        },
+        "builderVersion": "5.0.0-public-alpha.23"
+    }
+}

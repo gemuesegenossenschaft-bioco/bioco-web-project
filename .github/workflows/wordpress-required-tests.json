@@ -36,6 +36,7 @@
     "tests/test_wordpress_native_form_outcomes.py",
     "tests/test_wordpress_prices.py",
     "tests/test_wordpress_native_prices.py",
+    "tests/test_wordpress_price_adoption.py",
     "tests/test_wordpress_record_layouts.py",
     "tests/test_wordpress_utility_layouts.py",
     "tests/test_wordpress_depot_public_fields.py"
