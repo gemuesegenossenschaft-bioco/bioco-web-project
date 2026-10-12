@@ -16,13 +16,25 @@ class FakeDB {
     public $posts='posts', $postmeta='postmeta', $terms='terms';
     public $term_taxonomy='term_taxonomy', $term_relationships='term_relationships';
     public $termmeta='termmeta', $options='options';
+    public $last_error='';
     private $rows;
     function __construct($rows) {$this->rows=$rows;}
     function get_results($sql, $format) {
-        if (!preg_match('/SELECT \\* FROM ([a-z_]+) ORDER BY /', $sql, $match)) {
+        if (!preg_match('/SELECT \\* FROM ([a-z_]+) ORDER BY (.+) LIMIT (\\d+) OFFSET (\\d+)/', $sql, $match)) {
             throw new Exception('Unexpected query');
         }
-        return $this->rows[$match[1]] ?? null;
+        $this->last_error='';
+        if (($this->rows['__error_table'] ?? null) === $match[1]) {
+            $this->last_error='synthetic database error';
+            return [];
+        }
+        $rows=$this->rows[$match[1]] ?? [];
+        if ($match[1] === 'term_relationships') {
+            if ($match[2] !== 'object_id, term_taxonomy_id') throw new Exception('Wrong relationship order');
+            usort($rows, fn($a,$b) => ($a['object_id'] <=> $b['object_id'])
+                ?: ($a['term_taxonomy_id'] <=> $b['term_taxonomy_id']));
+        }
+        return array_slice($rows, (int)$match[4], (int)$match[3]);
     }
 }
 $wpdb=new FakeDB(json_decode(file_get_contents($argv[1]), true));
@@ -65,6 +77,47 @@ def digest(tmp_path, rows):
     assert result.returncode == 0, result.stderr
     assert len(result.stdout) == 64
     return result.stdout
+
+
+def test_large_table_matches_single_pass_digest(tmp_path):
+    rows = {table: [] for table in TABLES}
+    rows['posts'] = [
+        {'ID': index, 'post_type': 'bioco_depot', 'post_status': 'publish',
+         'post_content': f'Depot {index}'} for index in range(1, 1004)
+    ]
+    rows['term_relationships'] = [
+        {'object_id': index // 3, 'term_taxonomy_id': index % 3}
+        for index in reversed(range(1, 1004))
+    ]
+    fixture = tmp_path / 'rows.json'
+    fixture.write_text(json.dumps(rows))
+    reference = '''
+    $rows=json_decode(file_get_contents($argv[1]),true);
+    $hash=hash_init('sha256');
+    foreach (['posts','postmeta','terms','term_taxonomy','term_relationships','termmeta','options'] as $table) {
+        hash_update($hash,$table."\\n");
+        foreach ($rows[$table] as $row) hash_update($hash,serialize($row));
+    }
+    echo hash_final($hash);
+    '''
+    reference_rows = copy.deepcopy(rows)
+    reference_rows['term_relationships'].sort(
+        key=lambda row: (row['object_id'], row['term_taxonomy_id']))
+    fixture.write_text(json.dumps(reference_rows))
+    expected = subprocess.run(['php', '-r', reference, str(fixture)],
+                              check=True, capture_output=True, text=True).stdout
+    assert digest(tmp_path, rows) == expected
+
+
+def test_empty_result_with_database_error_aborts_fingerprint(tmp_path):
+    rows = base_rows() | {'__error_table': 'terms'}
+    fixture = tmp_path / 'rows.json'
+    fixture.write_text(json.dumps(rows))
+    result = subprocess.run(['php', '-r', HARNESS + SOURCE.read_text().removeprefix('<?php'),
+                             str(fixture)], text=True, capture_output=True)
+    assert result.returncode != 0
+    assert 'Could not read editorial table terms' in result.stderr
+    assert len(result.stdout) != 64
 
 
 @pytest.mark.parametrize('table,index,key,value', [
