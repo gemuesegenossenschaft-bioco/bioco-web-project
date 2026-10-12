@@ -7,6 +7,8 @@ function bioco_import_article_back_button(): array {
     $value = static fn(array $values): array => ['desktop' => ['value' => $values]];
     $token = static function (string $css_var, string $type = 'content'): string {
         $id = ($type === 'color' ? 'gcid-' : 'gvid-') . 'bioco-' . substr(hash('sha256', $css_var), 0, 16);
+        // Divi resolves content bindings before styling; numeric globals use CSS variables.
+        if ($type !== 'color') return 'var(--' . $id . ')';
         return '$variable(' . json_encode(['type' => $type, 'value' => [
             'name' => $id, 'settings' => new stdClass(),
         ]]) . ')$';

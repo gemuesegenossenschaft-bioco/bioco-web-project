@@ -27,6 +27,9 @@ def native_back():
 
 
 def assert_native_token(value, css_var, token_type):
+    if token_type != 'color':
+        assert value == 'var(--gvid-bioco-' + sha256(css_var.encode()).hexdigest()[:16] + ')'
+        return
     assert value.startswith('$variable(') and value.endswith(')$')
     payload = json.loads(value[len('$variable('):-2])
     prefix = 'gcid-' if token_type == 'color' else 'gvid-'
