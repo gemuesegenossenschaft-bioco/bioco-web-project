@@ -238,6 +238,9 @@ def rollback(prod, candidate_sha, baseline_sha, baseline_manifest, candidate_man
     print(json.dumps({'mode': 'rollback-apply' if apply else 'rollback-dry-run',
         'target': SITE, 'current_marker': previous, 'current_manifest': digest(current),
         'rollback_to': baseline_sha, 'baseline_manifest': digest(baseline_manifest)}, sort_keys=True), flush=True)
+    if (previous or {}).get('commit') == baseline_sha and current == baseline_manifest:
+        print('rollback-already-baseline remote-mutations=0')
+        return
     if not apply:
         print('rollback-dry-run-complete remote-mutations=0')
         return

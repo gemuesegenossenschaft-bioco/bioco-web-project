@@ -174,6 +174,18 @@ def test_code_only_rollback_restores_baseline_without_database_restore(tmp_path)
     assert 'wp db export' not in rollback_events and 'wp db import' not in rollback_events
 
 
+def test_rollback_at_accepted_baseline_preserves_marker_without_remote_write(tmp_path):
+    script, env, candidate, baseline, review, events, marker = fixture(tmp_path)
+    before = marker.read_text()
+    result = promote(script, env, candidate, baseline, review, apply=True, rollback=True)
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert 'rollback-already-baseline remote-mutations=0' in result.stdout
+    assert marker.read_text() == before
+    assert 'flock -n' not in events.read_text()
+    assert 'wp option update' not in events.read_text()
+    assert 'deploy-wp-code.sh' not in events.read_text()
+
+
 def test_first_unmarked_promotion_requires_explicit_bootstrap_and_exact_baseline(tmp_path):
     script, env, candidate, baseline, review, events, marker = fixture(tmp_path)
     marker.write_text('null')
