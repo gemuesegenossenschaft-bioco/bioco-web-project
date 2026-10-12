@@ -162,7 +162,9 @@ def test_conversion_preserves_exact_parent_siblings_geometry_and_native_copy():
     field = next(b for b in walk(result['blocks']) if b['blockName'] == 'bioco-divi/form-field')
     control = field['attrs']['control']['decoration']
     assert control['font']['font']['desktop']['value']['size'] == 'var(--gvid-bioco-c414983b8148bf2f)'
-    assert all(v.startswith('var(--gvid-bioco-') for v in control['border']['desktop']['value']['radius'].values())
+    radius = control['border']['desktop']['value']['radius']
+    assert set(radius) == {'topLeft', 'topRight', 'bottomLeft', 'bottomRight'}
+    assert all(v.startswith('var(--gvid-bioco-') for v in radius.values())
     assert control['font']['font']['desktop']['value']['color'].startswith('$variable({"type":"color"')
     again = run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']}, captures={})
     assert again['plan']['changed'] == 0 and again['plan']['after_content'] == result['plan']['after_content']

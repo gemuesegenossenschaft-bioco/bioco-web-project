@@ -74,6 +74,7 @@ def installed():
 def test_native_article_radius_survives_frontend_parse_and_real_style_generation(installed):
     part = installed['parts'][0]
     token = 'var(--gvid-bioco-185ab2cb8778665c)'
+    assert set(part['radius']) == {'topLeft', 'topRight', 'bottomLeft', 'bottomRight'}, part
     assert set(part['radius'].values()) == {token}, part
     for corner in ['top-left', 'top-right', 'bottom-left', 'bottom-right']:
         assert f'border-{corner}-radius: {token}' in part['control_css'], part
@@ -83,10 +84,13 @@ def test_native_article_radius_survives_frontend_parse_and_real_style_generation
 
 def test_native_form_numeric_defaults_survive_frontend_parse_and_real_style_generation(installed):
     field, action = installed['parts'][1:]
-    assert all(field['radius'].values()), field
-    assert all(action['radius'].values()), action
     for part in [field, action]:
-        assert 'border-top-left-radius: var(--gvid-bioco-' in part['control_css'], part
+        assert set(part['radius']) == {'topLeft', 'topRight', 'bottomLeft', 'bottomRight'}, part
+        for key, corner in [('topLeft','top-left'), ('topRight','top-right'),
+                            ('bottomLeft','bottom-left'), ('bottomRight','bottom-right')]:
+            token = part['radius'][key]
+            assert token.startswith('var(--gvid-bioco-') and token.endswith(')'), part
+            assert f'border-{corner}-radius: {token}' in part['control_css'], part
         assert 'padding-left: var(--gvid-bioco-' in part['control_css'], part
         assert 'padding-right: var(--gvid-bioco-' in part['control_css'], part
         assert 'var(--gcid-bioco-' in part['control_css'], part
