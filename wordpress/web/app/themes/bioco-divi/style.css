@@ -31,6 +31,12 @@ Version: 1.0.0
     color: var(--wp--preset--color--bioco-green, #2e7d32);
 }
 
+/* The fallback shell is in normal flow; Divi's default fixed-header offset
+   otherwise leaves an empty strip above article navigation on mobile. */
+.wp-child-theme-bioco-divi #page-container:has(> .bioco-site-header) {
+    padding-top: 0;
+}
+
 /* Homepage cream canvas — scoped to .home so it does not leak to other pages. */
 body.home,
 .home .et_pb_page_container,
@@ -1376,42 +1382,6 @@ body.home,
         font-size: 16px;
     }
 
-    .home .bioco-site-header {
-        position: relative;
-        height: 120px;
-        background: var(--wp--preset--color--bioco-bg, #F5F1E8);
-        overflow: visible;
-    }
-
-    .home .bioco-site-header .bioco-page-shell {
-        width: min(calc(100% - 212.8px), 1227.2px);
-        height: 120px;
-        padding-top: 0;
-        overflow: visible;
-    }
-
-    .home .bioco-utility-nav {
-        height: 40px;
-    }
-
-    .home .bioco-primary-nav {
-        position: absolute;
-        top: 40px;
-        left: 0;
-        width: 100%;
-        min-height: 60px;
-        height: 60px;
-        padding: 4px 0;
-        border: 0;
-        background: var(--wp--preset--color--bioco-bg, #F5F1E8);
-        z-index: 10;
-    }
-
-    .home .bioco-primary-nav .bioco-logo {
-        width: 112px;
-        height: 52px;
-    }
-
     .home .bioco-home-hero {
         width: calc(100% - 40px);
         height: 585px;
@@ -1577,12 +1547,6 @@ body.home,
 @media (max-width: 560px) {
     .home #page-container {
         padding-top: 0;
-    }
-
-    .home .bioco-site-header,
-    .home .bioco-primary-nav {
-        min-height: 60px;
-        height: 60px;
     }
 
     .home .bioco-home-hero {
