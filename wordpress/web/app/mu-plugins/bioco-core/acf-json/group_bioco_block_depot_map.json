@@ -23,110 +23,6 @@
             "append": ""
         },
         {
-            "key": "field_bioco_depot_map_locations",
-            "label": "Standorte",
-            "name": "locations",
-            "aria-label": "",
-            "type": "repeater",
-            "instructions": "",
-            "required": 0,
-            "conditional_logic": 0,
-            "wrapper": {
-                "width": "",
-                "class": "",
-                "id": ""
-            },
-            "layout": "block",
-            "min": 0,
-            "max": 0,
-            "collapsed": "field_bioco_depot_map_location_name",
-            "button_label": "Standort hinzufügen",
-            "rows_per_page": 20,
-            "sub_fields": [
-                {
-                    "key": "field_bioco_depot_map_location_name",
-                    "label": "Name",
-                    "name": "name",
-                    "aria-label": "",
-                    "type": "text",
-                    "instructions": "",
-                    "required": 1,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "40",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "maxlength": "",
-                    "placeholder": "",
-                    "prepend": "",
-                    "append": ""
-                },
-                {
-                    "key": "field_bioco_depot_map_location_lat",
-                    "label": "Breitengrad (lat)",
-                    "name": "lat",
-                    "aria-label": "",
-                    "type": "number",
-                    "instructions": "",
-                    "required": 1,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "20",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "min": "",
-                    "max": "",
-                    "step": "0.000001",
-                    "placeholder": "47.4734"
-                },
-                {
-                    "key": "field_bioco_depot_map_location_lng",
-                    "label": "Längengrad (lng)",
-                    "name": "lng",
-                    "aria-label": "",
-                    "type": "number",
-                    "instructions": "",
-                    "required": 1,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "20",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "min": "",
-                    "max": "",
-                    "step": "0.000001",
-                    "placeholder": "8.3089"
-                },
-                {
-                    "key": "field_bioco_depot_map_location_description",
-                    "label": "Beschreibung",
-                    "name": "description",
-                    "aria-label": "",
-                    "type": "textarea",
-                    "instructions": "Adresse, Abholtag, Kontakt/Website und Hinweise als Freitext.",
-                    "required": 0,
-                    "conditional_logic": 0,
-                    "wrapper": {
-                        "width": "",
-                        "class": "",
-                        "id": ""
-                    },
-                    "default_value": "",
-                    "maxlength": "",
-                    "rows": 3,
-                    "placeholder": "",
-                    "new_lines": ""
-                }
-            ],
-            "default_value": []
-        },
-        {
             "key": "field_bioco_depot_map_locations_heading",
             "label": "Titel über den Standorten",
             "name": "locations_heading",
@@ -185,6 +81,108 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_bioco_depot_map_center_lat",
+            "name": "center_lat",
+            "label": "Kartenmitte: Breitengrad",
+            "type": "number",
+            "default_value": 47.4734,
+            "required": 0,
+            "min": -90,
+            "max": 90,
+            "step": "any"
+        },
+        {
+            "key": "field_bioco_depot_map_center_lng",
+            "name": "center_lng",
+            "label": "Kartenmitte: Längengrad",
+            "type": "number",
+            "default_value": 8.3089,
+            "required": 0,
+            "min": -180,
+            "max": 180,
+            "step": "any"
+        },
+        {
+            "key": "field_bioco_depot_map_zoom",
+            "name": "zoom",
+            "label": "Zoomstufe",
+            "type": "number",
+            "default_value": 12,
+            "required": 0,
+            "min": 1,
+            "max": 19,
+            "step": 1
+        },
+        {
+            "key": "field_bioco_depot_map_map_view",
+            "name": "map_view",
+            "label": "Kartenausschnitt",
+            "type": "select",
+            "default_value": "fit",
+            "required": 0,
+            "choices": {
+                "fit": "Alle Marker zeigen",
+                "fixed": "Gespeicherte Mitte und Zoom"
+            }
+        },
+        {
+            "key": "field_bioco_depot_map_interaction",
+            "name": "interaction",
+            "label": "Kartenbedienung",
+            "type": "select",
+            "default_value": "static",
+            "required": 0,
+            "choices": {
+                "static": "Ohne Kartenbedienung",
+                "drag": "Verschieben und Zoomtasten",
+                "full": "Verschieben, Mausrad und Tastatur"
+            }
+        },
+        {
+            "key": "field_bioco_depot_map_map_height",
+            "name": "map_height",
+            "label": "Kartenhöhe in Pixel",
+            "type": "number",
+            "default_value": 300,
+            "required": 0,
+            "min": 200,
+            "max": 800,
+            "step": 1
+        },
+        {
+            "key": "field_bioco_depot_map_arrangement",
+            "name": "arrangement",
+            "label": "Karte und Adressen",
+            "type": "select",
+            "default_value": "stacked",
+            "required": 0,
+            "choices": {
+                "stacked": "Unter der Karte",
+                "side_by_side": "Neben der Karte ab Desktopbreite"
+            }
+        },
+        {
+            "key": "field_bioco_depot_map_card_order",
+            "name": "card_order",
+            "label": "Reihenfolge der Adressangaben",
+            "type": "select",
+            "default_value": "name_first",
+            "required": 0,
+            "choices": {
+                "name_first": "Name vor Adresse",
+                "address_first": "Adresse vor Name"
+            }
+        },
+        {
+            "key": "field_bioco_depot_map_show_address_list",
+            "name": "show_address_list",
+            "label": "Eingebaute Adressliste anzeigen",
+            "type": "true_false",
+            "default_value": 1,
+            "required": 0,
+            "ui": 1
         }
     ],
     "location": [
@@ -203,7 +201,7 @@
     "instruction_placement": "label",
     "hide_on_screen": "",
     "active": true,
-    "description": "Felder für den Depot-Karte-Block (W9 interactive blocks, Issue #96). Vereinfachtes Schema (name/lat/lng/description) statt der vollen DepotLocation-Form aus DepotMap.tsx (day/contact/website/notes/hideAddress werden als Freitext in description gepflegt).",
+    "description": "Depot records own the public markers. Divi owns map settings; a native depot loop can replace the built-in address list.",
     "show_in_rest": 0,
     "modified": 1783814400
 }

@@ -293,7 +293,7 @@ function bioco_map_description_html($description) {
  * always renders so the block is fully usable without any map library.
  * $locations: array of ['name'=>, 'lat'=>, 'lng'=>, 'description'=>].
  */
-function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom, $locations_heading, $route_label, $empty_message) {
+function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom, $locations_heading, $route_label, $empty_message, array $options = []) {
     $locations = is_array($locations) ? array_values(array_filter($locations, function ($l) {
         return !empty($l['name']) && isset($l['lat']) && isset($l['lng']) && $l['lat'] !== '' && $l['lng'] !== '';
     })) : [];
@@ -308,26 +308,37 @@ function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom, $lo
             'website_label' => $l['website_label'] ?? '',
         ];
     }, $locations);
+    $view = in_array($options['map_view'] ?? '', ['fit', 'fixed'], true) ? $options['map_view'] : 'fixed';
+    $interaction = in_array($options['interaction'] ?? '', ['static', 'drag', 'full'], true) ? $options['interaction'] : 'static';
+    $height = max(200, min(800, (int) ($options['map_height'] ?? 300)));
+    $arrangement = ($options['arrangement'] ?? '') === 'side_by_side' ? 'side_by_side' : 'stacked';
+    $card_order = ($options['card_order'] ?? '') === 'address_first' ? 'address_first' : 'name_first';
+    $show_addresses = ($options['show_address_list'] ?? true) !== false;
     ?>
+    <div class="bioco-map-layout bioco-map-layout--<?php echo esc_attr($arrangement); ?>" style="--bioco-map-height:<?php echo esc_attr($height); ?>px">
     <div class="map-container">
         <div
             class="map-wrapper"
             data-center-lat="<?php echo esc_attr($center_lat); ?>"
             data-center-lng="<?php echo esc_attr($center_lng); ?>"
             data-zoom="<?php echo esc_attr($zoom); ?>"
+            data-map-view="<?php echo esc_attr($view); ?>"
+            data-map-interaction="<?php echo esc_attr($interaction); ?>"
             data-locations="<?php echo esc_attr(wp_json_encode($map_points)); ?>"
         ></div>
     </div>
+    <?php if ($show_addresses) : ?>
     <div class="location-info-box">
         <div class="location-addresses">
 <?php if ($locations_heading) : ?>            <h4><?php echo esc_html($locations_heading); ?></h4><?php endif; ?>
             <div class="address-list">
                 <?php foreach ($locations as $location) : ?>
                     <div class="address-item">
-                        <strong><?php echo esc_html($location['name']); ?></strong>
+                        <?php if ($card_order === 'name_first') : ?><strong><?php echo esc_html($location['name']); ?></strong><?php endif; ?>
                         <?php if (!empty($location['description'])) : ?>
                             <p><?php echo bioco_map_description_html($location['description']); ?></p>
                         <?php endif; ?>
+                        <?php if ($card_order === 'address_first') : ?><strong><?php echo esc_html($location['name']); ?></strong><?php endif; ?>
                         <?php if (!empty($location['website'])) : ?>
                             <a href="<?php echo esc_url($location['website']); ?>" target="_blank" rel="noopener noreferrer"><?php echo esc_html(($location['website_label'] ?? '') ?: $location['website']); ?></a>
                         <?php endif; ?>
@@ -345,6 +356,8 @@ function bioco_render_map_block($locations, $center_lat, $center_lng, $zoom, $lo
                 <?php endif; ?>
             </div>
         </div>
+    </div>
+    <?php endif; ?>
     </div>
     <?php
 }

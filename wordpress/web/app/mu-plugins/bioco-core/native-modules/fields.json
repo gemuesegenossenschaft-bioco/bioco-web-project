@@ -1012,31 +1012,6 @@
       "type": "text",
       "label": "Hinweistext"
     },
-    "locations": {
-      "type": "rows",
-      "label": "Standorte",
-      "row": {
-        "name": {
-          "type": "text",
-          "label": "Name",
-          "required": true
-        },
-        "lat": {
-          "type": "number",
-          "label": "Breitengrad (lat)",
-          "required": true
-        },
-        "lng": {
-          "type": "number",
-          "label": "Längengrad (lng)",
-          "required": true
-        },
-        "description": {
-          "type": "textarea",
-          "label": "Beschreibung"
-        }
-      }
-    },
     "locations_heading": {
       "type": "text",
       "label": "Titel über den Standorten"
@@ -1048,6 +1023,59 @@
     "empty_message": {
       "type": "text",
       "label": "Hinweis ohne Standorte"
+    },
+    "center_lat": {
+      "type": "number",
+      "label": "Kartenmitte: Breitengrad"
+    },
+    "center_lng": {
+      "type": "number",
+      "label": "Kartenmitte: Längengrad"
+    },
+    "zoom": {
+      "type": "number",
+      "label": "Zoomstufe"
+    },
+    "map_view": {
+      "type": "text",
+      "label": "Kartenausschnitt",
+      "choices": {
+        "fit": "Alle Marker zeigen",
+        "fixed": "Gespeicherte Mitte und Zoom"
+      }
+    },
+    "interaction": {
+      "type": "text",
+      "label": "Kartenbedienung",
+      "choices": {
+        "static": "Ohne Kartenbedienung",
+        "drag": "Verschieben und Zoomtasten",
+        "full": "Verschieben, Mausrad und Tastatur"
+      }
+    },
+    "map_height": {
+      "type": "number",
+      "label": "Kartenhöhe in Pixel"
+    },
+    "arrangement": {
+      "type": "text",
+      "label": "Karte und Adressen",
+      "choices": {
+        "stacked": "Unter der Karte",
+        "side_by_side": "Neben der Karte ab Desktopbreite"
+      }
+    },
+    "card_order": {
+      "type": "text",
+      "label": "Reihenfolge der Adressangaben",
+      "choices": {
+        "name_first": "Name vor Adresse",
+        "address_first": "Adresse vor Name"
+      }
+    },
+    "show_address_list": {
+      "type": "toggle",
+      "label": "Eingebaute Adressliste anzeigen"
     }
   },
   "geisshof_map": {
@@ -1087,6 +1115,55 @@
     "empty_message": {
       "type": "text",
       "label": "Hinweis ohne Standorte"
+    },
+    "center_lat": {
+      "type": "number",
+      "label": "Kartenmitte: Breitengrad"
+    },
+    "center_lng": {
+      "type": "number",
+      "label": "Kartenmitte: Längengrad"
+    },
+    "zoom": {
+      "type": "number",
+      "label": "Zoomstufe"
+    },
+    "map_view": {
+      "type": "text",
+      "label": "Kartenausschnitt",
+      "choices": {
+        "fit": "Alle Marker zeigen",
+        "fixed": "Gespeicherte Mitte und Zoom"
+      }
+    },
+    "interaction": {
+      "type": "text",
+      "label": "Kartenbedienung",
+      "choices": {
+        "static": "Ohne Kartenbedienung",
+        "drag": "Verschieben und Zoomtasten",
+        "full": "Verschieben, Mausrad und Tastatur"
+      }
+    },
+    "map_height": {
+      "type": "number",
+      "label": "Kartenhöhe in Pixel"
+    },
+    "arrangement": {
+      "type": "text",
+      "label": "Karte und Adressen",
+      "choices": {
+        "stacked": "Unter der Karte",
+        "side_by_side": "Neben der Karte ab Desktopbreite"
+      }
+    },
+    "card_order": {
+      "type": "text",
+      "label": "Reihenfolge der Adressangaben",
+      "choices": {
+        "name_first": "Name vor Adresse",
+        "address_first": "Adresse vor Name"
+      }
     }
   },
   "navigation_shell": {

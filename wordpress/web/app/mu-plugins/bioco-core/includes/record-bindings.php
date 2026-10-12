@@ -46,13 +46,28 @@ function bioco_record_binding_id(array $context, string $type, bool $loop): int 
 
 function bioco_record_binding_value($value, array $context) {
     $name = $context['name'] ?? '';
-    if (!is_string($name) || !preg_match('/^(loop_)?bioco_(group|vegetable)_(.+)$/D', $name, $match)) return $value;
+    if (!is_string($name) || !preg_match('/^(loop_)?bioco_(group|vegetable|depot)_(.+)$/D', $name, $match)) return $value;
     [$all, $loop, $kind, $field] = $match;
     $allowed = $kind === 'group' ? ['title', 'description', 'image', 'image_alt', 'contact', 'contact_url', 'url']
-        : array_merge(['name'], array_map(static fn($n) => 'month_' . $n, range(1, 12)));
+        : ($kind === 'depot' ? ['name', 'address', 'website', 'website_label', 'route_url']
+        : array_merge(['name'], array_map(static fn($n) => 'month_' . $n, range(1, 12))));
     if (!in_array($field, $allowed, true)) return $value;
-    $id = bioco_record_binding_id($context, $kind === 'group' ? 'bioco_group' : 'bioco_vegetable', $loop !== '');
+    $id = bioco_record_binding_id($context, 'bioco_' . $kind, $loop !== '');
     if (!$id) return '';
+    if ($kind === 'depot') {
+        if (metadata_exists('post', $id, 'depot_public') && !get_post_meta($id, 'depot_public', true)) return '';
+        if ($field === 'name') return esc_html(get_the_title($id));
+        if ($field === 'address') return esc_html((string) get_post_meta($id, 'depot_public_address', true));
+        if ($field === 'route_url') {
+            $lat = get_post_meta($id, 'depot_lat', true); $lng = get_post_meta($id, 'depot_lng', true);
+            if (!is_numeric($lat) || !is_numeric($lng) || abs((float) $lat) > 90 || abs((float) $lng) > 180) return '';
+            return esc_url_raw('https://www.google.com/maps/dir/?api=1&destination=' . rawurlencode($lat . ',' . $lng));
+        }
+        $website = (string) get_post_meta($id, 'depot_website', true);
+        if (!filter_var($website, FILTER_VALIDATE_URL) || !in_array(strtolower((string) parse_url($website, PHP_URL_SCHEME)), ['http', 'https'], true)) return '';
+        return $field === 'website' ? esc_url_raw($website)
+            : esc_html((string) get_post_meta($id, 'depot_website_label', true) ?: $website);
+    }
     if ($field === 'title' || $field === 'name') return esc_html(get_the_title($id));
     if ($kind === 'group' && $field === 'url') return esc_url_raw(get_permalink($id));
     if (post_password_required($id)) return '';

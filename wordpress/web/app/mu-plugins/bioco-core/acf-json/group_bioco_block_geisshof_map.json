@@ -165,6 +165,99 @@
             "placeholder": "",
             "prepend": "",
             "append": ""
+        },
+        {
+            "key": "field_bioco_geisshof_map_center_lat",
+            "name": "center_lat",
+            "label": "Kartenmitte: Breitengrad",
+            "type": "number",
+            "default_value": 47.4741684,
+            "required": 0,
+            "min": -90,
+            "max": 90,
+            "step": "any"
+        },
+        {
+            "key": "field_bioco_geisshof_map_center_lng",
+            "name": "center_lng",
+            "label": "Kartenmitte: Längengrad",
+            "type": "number",
+            "default_value": 8.2456318,
+            "required": 0,
+            "min": -180,
+            "max": 180,
+            "step": "any"
+        },
+        {
+            "key": "field_bioco_geisshof_map_zoom",
+            "name": "zoom",
+            "label": "Zoomstufe",
+            "type": "number",
+            "default_value": 14,
+            "required": 0,
+            "min": 1,
+            "max": 19,
+            "step": 1
+        },
+        {
+            "key": "field_bioco_geisshof_map_map_view",
+            "name": "map_view",
+            "label": "Kartenausschnitt",
+            "type": "select",
+            "default_value": "fixed",
+            "required": 0,
+            "choices": {
+                "fit": "Alle Marker zeigen",
+                "fixed": "Gespeicherte Mitte und Zoom"
+            }
+        },
+        {
+            "key": "field_bioco_geisshof_map_interaction",
+            "name": "interaction",
+            "label": "Kartenbedienung",
+            "type": "select",
+            "default_value": "static",
+            "required": 0,
+            "choices": {
+                "static": "Ohne Kartenbedienung",
+                "drag": "Verschieben und Zoomtasten",
+                "full": "Verschieben, Mausrad und Tastatur"
+            }
+        },
+        {
+            "key": "field_bioco_geisshof_map_map_height",
+            "name": "map_height",
+            "label": "Kartenhöhe in Pixel",
+            "type": "number",
+            "default_value": 300,
+            "required": 0,
+            "min": 200,
+            "max": 800,
+            "step": 1
+        },
+        {
+            "key": "field_bioco_geisshof_map_arrangement",
+            "name": "arrangement",
+            "label": "Karte und Adressen",
+            "type": "select",
+            "default_value": "stacked",
+            "required": 0,
+            "choices": {
+                "stacked": "Unter der Karte",
+                "side_by_side": "Neben der Karte ab Desktopbreite"
+            }
+        },
+        {
+            "key": "field_bioco_geisshof_map_card_order",
+            "name": "card_order",
+            "label": "Reihenfolge der Adressangaben",
+            "type": "select",
+            "default_value": "name_first",
+            "required": 0,
+            "choices": {
+                "name_first": "Name vor Adresse",
+                "address_first": "Adresse vor Name"
+            }
         }
     ],
     "location": [

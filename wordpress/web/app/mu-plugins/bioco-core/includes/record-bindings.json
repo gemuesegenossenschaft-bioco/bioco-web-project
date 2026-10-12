@@ -3,6 +3,10 @@
     "groups": {"": "Gruppe", "loop_": "Gruppe in der Schleife"},
     "fields": {"title": ["Titel", "text"], "description": ["Beschreibung", "text"], "image": ["Bild", "image"], "image_alt": ["Bildbeschreibung", "text"], "contact": ["Kontakt", "text"], "contact_url": ["Kontakt-Link", "url"], "url": ["Detailseite", "url"]}
   },
+  "depot": {
+    "groups": {"": "Depot", "loop_": "Depot in der Schleife"},
+    "fields": {"name": ["Name", "text"], "address": ["Öffentliche Adresse", "text"], "website": ["Geprüfte Website", "url"], "website_label": ["Website-Linktext", "text"], "route_url": ["Route", "url"]}
+  },
   "vegetable": {
     "groups": {"": "Gemüse", "loop_": "Gemüse in der Schleife"},
     "fields": {"name": ["Name", "text"], "month_1": ["Januar", "text"], "month_2": ["Februar", "text"], "month_3": ["März", "text"], "month_4": ["April", "text"], "month_5": ["Mai", "text"], "month_6": ["Juni", "text"], "month_7": ["Juli", "text"], "month_8": ["August", "text"], "month_9": ["September", "text"], "month_10": ["Oktober", "text"], "month_11": ["November", "text"], "month_12": ["Dezember", "text"]}
