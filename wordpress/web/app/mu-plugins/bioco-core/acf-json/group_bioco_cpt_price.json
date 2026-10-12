@@ -73,6 +73,15 @@
             "default_value": 0
         },
         {
+            "key": "field_bioco_price_persons_range",
+            "name": "price_persons_range",
+            "label": "Personenbereich als Text",
+            "type": "text",
+            "instructions": "Sichtbarer Bereich, z. B. 2-3 Personen. Ohne Eintrag wird die Mindestzahl verwendet.",
+            "required": 0,
+            "default_value": ""
+        },
+        {
             "key": "field_bioco_price_recommended",
             "name": "price_recommended",
             "label": "Empfohlene Stufe",

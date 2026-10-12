@@ -59,6 +59,7 @@ require_once BIOCO_IMPORT_DIR . '/includes/price-layouts.php';
 require_once BIOCO_IMPORT_DIR . '/includes/record-layout-adoption.php';
 require_once BIOCO_IMPORT_DIR . '/includes/depot-layouts.php';
 require_once BIOCO_IMPORT_DIR . '/includes/depot-adoption.php';
+require_once BIOCO_IMPORT_DIR . '/includes/price-adoption.php';
 require_once BIOCO_IMPORT_DIR . '/includes/design-system.php';
 
 // WP-CLI is the only place this plugin registers a "command" — every include
