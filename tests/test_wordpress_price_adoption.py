@@ -1,11 +1,13 @@
 """Saved price conversion, parser round trips and one-page conditional SQL."""
 import copy
-import hashlib
 import json
+import os
 import re
 import sqlite3
 import subprocess
+import sys
 from pathlib import Path
+from xml.etree import ElementTree as ET
 
 import pytest
 from test_wordpress_verify_runtime import WP_SERIALIZER_STUB
@@ -317,19 +319,20 @@ def test_apply_restore_sql_guard_all_saved_columns_and_percent():
     assert db.execute('SELECT post_content FROM posts').fetchone()[0] == plan['before']['post_content']
 
 
-@pytest.mark.parametrize('environment', ['staging', 'production'])
-@pytest.mark.parametrize('kind,sha', [('table','d2c2b7dbc54c38295e698de0e4e0d5e4a34c8571fef5b3ec5e2855a4c7bd7d3c'),
-    ('calculator','b02c4e235128e159438277ac2601e5944cb0d7c64af521fd84fa9f478fec39e2')])
-def test_captured_page_when_private_snapshot_available(environment, kind, sha):
-    path = Path.home()/f'.cache/bioco-editor-202/{environment}-price-pages.json'
-    if not path.exists(): pytest.skip('Private saved page snapshot unavailable')
-    records = json.loads(path.read_text())
-    record = next(row for row in records if row['ID'] == (6 if kind == 'table' else 10))
-    result = run(kind, source=record, body_hash=sha,
-                 site='https://bioco.ch/' if environment == 'production' else 'https://staging.bioco.ch/')
-    assert 'error' not in result, result
-    assert result['roundtrip']
-    assert hashlib.sha256(record['post_content'].encode()).hexdigest() == sha
+def test_private_capture_operator_requires_both_snapshots(tmp_path):
+    report = tmp_path / 'operator.xml'
+    result = subprocess.run([
+        sys.executable, '-m', 'pytest', 'tests/operators/wordpress_price_captures.py',
+        '-q', f'--junitxml={report}',
+    ], cwd=ROOT, text=True, capture_output=True,
+        env=os.environ | {'BIOCO_PRICE_CAPTURE_DIR': str(tmp_path / 'missing-captures')})
+    assert result.returncode == 1, result.stdout + result.stderr
+    cases = list(ET.parse(report).iter('testcase'))
+    assert len(cases) == 4
+    assert all(case.find('failure') is not None and case.find('skipped') is None for case in cases)
+    for environment in ['staging', 'production']:
+        assert f'{environment}-price-pages.json' in result.stdout
+    assert 'Required private saved page snapshot missing' in result.stdout
 
 
 def test_saved_calculator_browser_handoff_uses_authored_cta_and_new_tier():

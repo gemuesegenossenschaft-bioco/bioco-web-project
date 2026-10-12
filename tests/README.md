@@ -255,10 +255,26 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 | `test_wordpress_depot_public_fields.py` | Keep, new (#209) | Actual catalog projection, depot PHP renderer, embedded JSON and popup JS; approved public fields appear, private details and hidden records do not. Stored private data remains unchanged. External Leaflet is replaced at its boundary. |
 | `test_wordpress_prices.py` | Keep, new (#208) | Actual price catalog and PHP table/calculator consumers; explicit activation, stable handoff keys, new tiers, preserved totals, invalid-source refusal, empty catalogs and meaningful divergent/zero-value regressions. Native table migration and save/reopen remain separate. |
 | `test_wordpress_native_prices.py` | Keep, new (#208) | Real WordPress block parsing, missing-only library import, native binding payloads, scoped catalog loop query and actual browser controller for totals, new tiers, zero, optional controls and handoff. The native DOM adapter replaces Divi render/query transport; UI save/reopen and licensed styling remain release gates. |
+| `test_wordpress_price_adoption.py` | Keep, required (#208) | Synthetic saved table/calculator conversion, parser round trips, preserved copy, conditional SQL and intercepted browser handoff. The missing-capture regression executes the separate operator gate and requires four failures, never skips. |
+| `operators/wordpress_price_captures.py` | Keep, operator only (#208) | Explicitly selected checks convert the private staging/production table and calculator snapshots. Captures are mandatory; these four cases are outside automatic CI discovery. |
 | `test_wordpress_utility_layouts.py` | Keep, new | Real PHP utility layout import and rendering with the WordPress block parser: preview/apply/repeat, editor preservation, authorization, conflict/rollback handling, search/404 status and SEO. WP storage and queries are controlled. |
 | `test_wordpress_pr_gates.py` | Keep, new | PR workflow contracts, executed Claude authorization and JUnit coverage gates: explicit writer requests, permission failures, missing/malformed reports and required tests skipped or failed. GitHub permission responses are controlled. |
 
 ## Shared catalogs
+
+Run the private price-capture gate explicitly from the repository root:
+
+```sh
+BIOCO_PRICE_CAPTURE_DIR="$HOME/.cache/bioco-editor-202" \
+  python3 -m pytest tests/operators/wordpress_price_captures.py -q
+```
+
+Both `staging-price-pages.json` and `production-price-pages.json` must contain the
+captured saved records for table page 6 and calculator page 10. Keep these captures
+private and outside git. Missing or malformed files, changed body hashes and
+refused conversion fail the operator gate; it never skips. Its local parser and
+converter checks do not establish licensed Divi save/reopen or hosted adoption.
+The synthetic adoption module remains required in CI with no capture dependency.
 
 `wp bioco catalog` reports the one-time vegetable/depot import without writing.
 After a staging backup and code release, `wp bioco catalog --apply --user=<administrator>`
