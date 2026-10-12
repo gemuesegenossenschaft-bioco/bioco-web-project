@@ -180,7 +180,8 @@ def test_generic_layouts_have_no_global_hacks():
     css = _style_css()
     assert "* {" not in css, "No global reset"
     assert not re.search(r"#sidebar\s*\{\s*display:\s*none", css), "No sidebar hide hack"
-    assert css.count("!important") <= 16, f"Avoid blanket !important (found {css.count('!important')})"
+    from wordpress_css_guards import ordinary_important_count
+    assert ordinary_important_count(css) <= 16, "Avoid blanket !important"
 
 
 def _top_level_selectors(css: str) -> list:

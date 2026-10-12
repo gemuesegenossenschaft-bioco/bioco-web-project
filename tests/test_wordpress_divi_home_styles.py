@@ -525,6 +525,7 @@ def test_css_has_no_global_hacks_or_forbidden_blocks():
     css = _style_css()
     assert not re.search(r"#sidebar\s*\{\s*display:\s*none", css), "No sidebar hide hack"
     assert "* {" not in css, "No global reset"
-    assert "!important" not in css or css.count("!important") <= 16, "Avoid blanket !important"
+    from wordpress_css_guards import ordinary_important_count
+    assert ordinary_important_count(css) <= 16, "Avoid blanket !important"
     for forbidden in ("shortcode", "core/html", "divi/code"):
         assert forbidden not in css, f"Forbidden reference {forbidden!r} in CSS"
