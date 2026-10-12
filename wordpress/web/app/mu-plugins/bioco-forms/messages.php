@@ -17,7 +17,19 @@ function bioco_forms_message_schema() {
     ];
 }
 
+/** Only the guarded content adoption writes this opt-in after exporting effective copy. */
+function bioco_forms_divi_message_groups(): array {
+    $groups = function_exists('get_option') ? get_option('bioco_divi_form_message_groups', []) : [];
+    if (!is_array($groups)) return [];
+    return array_values(array_intersect(array_filter($groups, 'is_string'), array_diff(array_keys(bioco_forms_message_schema()), ['shared'])));
+}
+
+function bioco_forms_editor_message_schema(): array {
+    return array_diff_key(bioco_forms_message_schema(), array_flip(bioco_forms_divi_message_groups()));
+}
+
 function bioco_forms_message($group, $key, $existing = '') {
+    if (in_array($group, bioco_forms_divi_message_groups(), true)) return (string) $existing;
     $messages = function_exists('get_option') ? get_option('bioco_form_messages', []) : [];
     $values = is_array($messages) && isset($messages[$group]) && is_array($messages[$group]) ? $messages[$group] : [];
     return array_key_exists($key, $values) && is_string($values[$key]) ? $values[$key] : (string) $existing;
@@ -32,10 +44,17 @@ function bioco_forms_message_values($group, array $values) {
 
 function bioco_forms_sanitize_messages($input) {
     $clean = [];
+    $archived = function_exists('get_option') ? get_option('bioco_form_messages', []) : [];
+    $retired = bioco_forms_divi_message_groups();
     foreach (bioco_forms_message_schema() as $group => $keys) {
         foreach ($keys as $key) {
-            $value = is_array($input) ? ($input[$group][$key] ?? '') : '';
-            $clean[$group][$key] = is_string($value) ? sanitize_textarea_field($value) : '';
+            if (in_array($group, $retired, true)) {
+                $value = is_array($archived) ? ($archived[$group][$key] ?? '') : '';
+                $clean[$group][$key] = is_string($value) ? $value : '';
+            } else {
+                $value = is_array($input) ? ($input[$group][$key] ?? '') : '';
+                $clean[$group][$key] = is_string($value) ? sanitize_textarea_field($value) : '';
+            }
         }
     }
     return $clean;
@@ -46,6 +65,7 @@ function bioco_forms_seed_messages(array $defaults) {
     $saved = get_option('bioco_form_messages', []);
     if (!is_array($saved)) $saved = [];
     foreach (bioco_forms_message_schema() as $group => $keys) {
+        if (in_array($group, bioco_forms_divi_message_groups(), true)) continue;
         if (!isset($saved[$group]) || !is_array($saved[$group])) $saved[$group] = [];
         $source = $group === 'shared' ? ($defaults['formMessages']['shared'] ?? []) : ($defaults['blocks'][$group] ?? []);
         foreach ($keys as $key) {
@@ -69,7 +89,7 @@ function bioco_forms_messages_page() {
     echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
     echo '<input type="hidden" name="action" value="bioco_save_form_messages">';
     wp_nonce_field('bioco_save_form_messages');
-    foreach (bioco_forms_message_schema() as $group => $keys) {
+    foreach (bioco_forms_editor_message_schema() as $group => $keys) {
         echo '<h2>' . esc_html($groups[$group]) . '</h2><table class="form-table">';
         foreach ($keys as $key) {
             $id = $group . '-' . $key;
@@ -87,7 +107,7 @@ add_action('admin_post_bioco_save_form_messages', function () {
     if (!current_user_can('edit_pages')) wp_die('Keine Berechtigung.', '', ['response' => 403]);
     check_admin_referer('bioco_save_form_messages');
     $messages = bioco_forms_sanitize_messages(wp_unslash($_POST['messages'] ?? []));
-    foreach (['confirmation_prompt', 'confirmation_button_label'] as $key) {
+    foreach (in_array('doi-confirm', bioco_forms_divi_message_groups(), true) ? [] : ['confirmation_prompt', 'confirmation_button_label'] as $key) {
         if (trim($messages['doi-confirm'][$key]) === '') {
             wp_die('Bestätigungsaufforderung und Button-Text dürfen nicht leer sein.', '', ['response' => 400]);
         }
