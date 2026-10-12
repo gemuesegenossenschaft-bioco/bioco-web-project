@@ -44,6 +44,10 @@ function bioco_form_part_values(array $attrs): array {
 
 /** This is also the fixture seam. Inert mode never contains endpoints or CAPTCHA configuration. */
 function bioco_form_render_part(string $kind, array $values, string $mode = 'inert'): string {
+    if ($kind === 'form-controller' && ($values['form_type'] ?? '') === 'membership') {
+        $count = $values['commitment_count'] ?? '';
+        if ((!is_string($count) && !is_int($count)) || !ctype_digit((string) $count) || (int) $count < 1 || (int) $count > 100) return '';
+    }
     if ($mode === 'public') wp_enqueue_style('bioco-native-form-composition');
     if ($kind === 'doi-controller') return bioco_doi_render_controller($mode);
     if ($kind === 'form-controller') {
@@ -78,8 +82,6 @@ function bioco_form_render_part(string $kind, array $values, string $mode = 'ine
             $html .= '<input type="hidden" name="eventId" value="' . esc_attr($event ? (string) get_the_ID() : '') . '"><input type="hidden" name="eventTitle" value="' . esc_attr($event ? get_the_title() : '') . '">';
         }
         if ($type === 'membership') {
-            $count = $values['commitment_count'] ?? '';
-            if (!ctype_digit((string) $count) || (int) $count < 1 || (int) $count > 100) return '';
             $hidden = ['submissionId' => '', 'commitmentCount' => $count, 'commitmentSignature' => bioco_forms_commitment_signature((int) $count), 'membershipType' => 'abo', 'aboType' => 'standard', 'additionalShares' => '0', 'sharesOnly' => '0'];
             foreach ($hidden as $key => $value) $html .= '<input type="hidden" name="' . esc_attr($key) . '" value="' . esc_attr($value) . '">';
         }
