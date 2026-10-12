@@ -20,6 +20,8 @@ $state = json_decode(stream_get_contents(STDIN), true);
 function home_url($path) { return $GLOBALS['state']['site'] . ltrim($path, '/'); }
 function wp_json_encode($v, $options=0) { return json_encode($v, $options); }
 function esc_html($v) { return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
+function add_filter(...$args) {}
+function add_action(...$args) {}
 class Database {
     public $posts = 'posts';
     function prepare($sql, ...$args) {
@@ -33,6 +35,8 @@ function parse_blocks($value) { return (new WP_Block_Parser())->parse($value); }
 require 'tests/fixtures/wp-block-parser/class-wp-block-parser.php';
 WP_SERIALIZER
 require 'wordpress/web/app/mu-plugins/bioco-import/includes/price-adoption.php';
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/native-modules.php';
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/price-runtime.php';
 try {
     if (($state['mode'] ?? '') === 'sql') {
         echo json_encode(['sql'=>bioco_price_adoption_sql($state['plan'], $state['expected'], $state['restore'] ?? false)]);
@@ -42,6 +46,9 @@ try {
         $plan=bioco_price_adoption_plan($source, $state['kind'], $state['snapshot_site'] ?? $state['site'], $state['body_hash'] ?? hash('sha256', $source['post_content']));
         echo json_encode(['plan'=>$plan, 'before_blocks'=>parse_blocks($source['post_content']),
             'blocks'=>parse_blocks($plan['after_content']),
+            'wrappers'=>array_map(static fn($section)=>bioco_native_extract_wrapper($section['attrs']) +
+                ['calculator'=>bioco_price_native_has_class($section['attrs'], 'bioco-price-calculator')],
+                parse_blocks($plan['after_content'])[0]['innerBlocks']),
             'roundtrip'=>serialize_blocks(parse_blocks($plan['after_content'])) === $plan['after_content'],
             'apply'=>bioco_price_adoption_sql($plan,$plan['fingerprint']),
             'restore'=>bioco_price_adoption_sql($plan,$plan['fingerprint'],true)]);
@@ -236,7 +243,11 @@ def test_saved_calculator_has_native_four_choice_grid_and_invoice_columns():
     assert [len(row['innerBlocks']) for row in rows[2:6]] == [5, 5, 5, 5]
     for row in rows[2:]:
         for device in ('desktop', 'tablet', 'phone'):
-            assert row['attrs']['module']['decoration']['layout'][device]['value']['gridColumn'] == '1 / -1'
+            decoration = row['attrs']['module']['decoration']
+            sizing = decoration['sizing'][device]['value']
+            assert sizing['gridColumnStart'] == '1'
+            assert sizing['gridColumnEnd'] == '-1'
+            assert 'gridColumn' not in decoration.get('layout', {}).get(device, {}).get('value', {})
     header = [col['innerBlocks'][0]['attrs']['title']['innerContent']['desktop']['value']
               for col in rows[2]['innerBlocks'][:4]]
     assert header == [copy[key]['innerContent']['desktop']['value']
@@ -247,19 +258,46 @@ def test_saved_calculator_has_native_four_choice_grid_and_invoice_columns():
         assert marker in json.dumps(rows)
 
 
+@pytest.mark.parametrize('saved_class', ['', 'bioco-dynamic-section'])
+def test_saved_decoration_class_keeps_calculator_runtime_marker(saved_class):
+    blocks = fixture('calculator')
+    section = blocks[0]['innerBlocks'][0]
+    section['attrs'] = {'module': {
+        'advanced': {'htmlAttributes': {'desktop': {'value': {'class': 'stale-class'}}}},
+        'decoration': {
+            'attributes': {'desktop': {'value': {'attributes': [
+                {'name': 'id', 'value': 'authored-calculator'},
+                {'name': 'class', 'value': saved_class}]} }},
+            'spacing': {'phone': {'value': {'padding': {'top': '12px'}}}}}}}
+    result = run('calculator', blocks=blocks)
+    assert result['roundtrip']
+    wrapper = result['wrappers'][0]
+    assert wrapper['calculator'], 'The real runtime must recognize the converted saved Section.'
+    assert wrapper['anchor'] == 'authored-calculator'
+    assert wrapper['className'].split() == saved_class.split() + ['bioco-price-calculator']
+    converted = result['blocks'][0]['innerBlocks'][0]
+    assert converted['attrs']['module']['decoration']['spacing'] == section['attrs']['module']['decoration']['spacing']
+
+
 def test_native_calculator_grid_controls_keep_invoice_below_choices_in_browser():
     from playwright.sync_api import sync_playwright
     result = run('calculator', blocks=fixture('calculator'))
     section = next(node for node in walk(result['blocks'][0]) if node['blockName'] == 'divi/section'
                    and 'bioco-price-calculator' in native_class(node).split())
     layout = section['attrs']['module']['decoration']['layout']
+    invoice = section['innerBlocks'][2]
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
         for width in (1280, 390):
             page = browser.new_page(viewport={'width': width, 'height': 700})
-            columns = layout['phone' if width < 640 else 'desktop']['value']['gridTemplateColumns']
+            device = 'phone' if width < 640 else 'desktop'
+            columns = layout[device]['value']['gridTemplateColumns']
+            sizing = invoice['attrs']['module']['decoration']['sizing'][device]['value']
+            # Divi's Sizing declaration emits grid-column from these two fields.
+            span = sizing['gridColumnStart'] + '/' + sizing['gridColumnEnd']
             page.set_content('<style>html,body{margin:0}.calculator{display:grid;grid-template-columns:' + columns
-                + ';gap:16px;width:100%;box-sizing:border-box;overflow-x:auto}.card{min-height:80px}.invoice{grid-column:1/-1;min-width:914px;min-height:80px}</style>'
+                + ';gap:16px;width:100%;box-sizing:border-box;overflow-x:auto}.card{min-height:80px}.invoice{grid-column:' + span
+                + ';min-width:914px;min-height:80px}</style>'
                 + '<div class="calculator"><div class="card">1</div><div class="card">2</div><div class="card">3</div>'
                 + '<div class="card">Kein Abo</div><div class="invoice">Rechnung</div></div>')
             positions = page.evaluate('''() => {
@@ -267,13 +305,16 @@ def test_native_calculator_grid_controls_keep_invoice_below_choices_in_browser()
               const invoice = document.querySelector('.invoice').getBoundingClientRect();
               const box = document.querySelector('.calculator');
               return {cards: cards.map(rect => [Math.round(rect.left), Math.round(rect.top)]),
-                invoiceTop: Math.round(invoice.top), pageWidth: document.documentElement.scrollWidth,
+                invoiceTop: Math.round(invoice.top), invoiceLeft: Math.round(invoice.left),
+                invoiceWidth: Math.round(invoice.width), pageWidth: document.documentElement.scrollWidth,
                 boxWidth: box.clientWidth, contentWidth: box.scrollWidth};
             }''')
             assert positions['invoiceTop'] > max(card[1] for card in positions['cards'])
+            assert positions['invoiceLeft'] == positions['cards'][0][0]
             assert positions['pageWidth'] == width
             if width == 1280:
                 assert len({card[1] for card in positions['cards']}) == 1
+                assert positions['invoiceWidth'] == positions['boxWidth']
             else:
                 assert len({card[1] for card in positions['cards']}) == 4
                 assert positions['contentWidth'] > positions['boxWidth']
