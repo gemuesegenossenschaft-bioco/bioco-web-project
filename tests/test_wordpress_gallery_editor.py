@@ -3,6 +3,7 @@
 Runs the real shared editor controls, PHP validation/rendering, block parser,
 CSS and gallery script with synthetic media. Hosted Divi save/reopen remains
 an operator check on an unpublished, unassigned copy.
+Keep/Replace/Remove evidence map: tests/README.md.
 """
 import json
 import subprocess
