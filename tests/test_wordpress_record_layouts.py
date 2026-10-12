@@ -102,15 +102,21 @@ def test_native_query_keeps_editor_order_and_limit_and_private_preview_is_explic
     code = r'''
 $data=['query_args'=>['orderby'=>'title','order'=>'DESC','posts_per_page'=>2,'post__in'=>[1,2]],'query_type'=>'post_types'];
 $attrs=['module'=>['advanced'=>['htmlAttributes'=>['desktop'=>['value'=>['class'=>'bioco-group-loop']]]]]];
-echo json_encode(['scoped'=>bioco_record_native_query($data,$attrs),'ordinary'=>bioco_record_native_query($data,[])]);
+$decorated=['module'=>['advanced'=>['htmlAttributes'=>['desktop'=>['value'=>['class'=>'']]]],
+    'decoration'=>['attributes'=>['desktop'=>['value'=>['attributes'=>[['name'=>'class','value'=>'bioco-record-loop bioco-group-loop']]]]]]]];
+echo json_encode(['scoped'=>bioco_record_native_query($data,$attrs),
+    'decorated'=>bioco_record_native_query($data,$decorated),
+    'ordinary'=>bioco_record_native_query($data,[])]);
 '''
     records = {'1': group(), '2': group(status='draft')}
     public = run(code, records=records)
     assert public['scoped']['query_args']['post_status'] == 'publish'
     assert public['scoped']['query_args']['order'] == 'DESC' and public['scoped']['query_args']['posts_per_page'] == 2
+    assert public['decorated'] == public['scoped']
     private = run(code, records=records, inert=True, allowed=[2])
     assert private['scoped']['query_args']['post__in'] == [2]
     assert private['scoped']['query_args']['post_status'] == ['publish', 'draft', 'private']
+    assert private['decorated'] == private['scoped']
     assert 'post_status' not in public['ordinary']['query_args']
 
 
