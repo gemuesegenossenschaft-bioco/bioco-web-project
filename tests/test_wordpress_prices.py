@@ -75,6 +75,8 @@ echo json_encode(['catalog'=>bioco_price_catalog(),'existing'=>bioco_price_abo_t
     ("update_post_meta(1,'price_key','kein');", 'invalid-tier-key'),
     ("update_post_meta(1,'price_abo_type','invented');", 'invalid-tier-key'),
     ("update_post_meta(2,'price_key','halb-1-person');", 'invalid-tier-key'),
+    ("update_post_meta(1,'price_price','9007199254740992');", 'invalid-tier-amount'),
+    ("update_post_meta(1,'price_price','9007199254740991');", 'invalid-tier-total'),
 ])
 def test_invalid_or_duplicate_catalog_does_not_offer_inconsistent_partial_prices(mutation, error):
     out = catalog(records() + "$options['bioco_pricing_enabled']=true;" + mutation + "echo json_encode(bioco_price_catalog());")

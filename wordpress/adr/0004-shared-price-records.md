@@ -38,4 +38,6 @@ Choose B. One read interface handles both price consumers, explicit empty catalo
 2. Validate a private adoption plan against the currently saved table and calculator values. Refuse divergence; preserve each current calculator slug and backend type.
 3. Bind native table and calculator layouts to that source. Do not remove legacy rendering until native save/reopen and production behavior pass.
 
-Steps 2 and 3 require their own implementation and release evidence. This design record does not establish those capabilities.
+Step 3 now has ordinary Divi table/calculator library starters and an arithmetic controller. The controller attaches data and updates amounts; it supplies no visible markup or copy. Labels, currency text, buttons, arrangement and responsive design remain saved modules.
+
+Step 2 and native save/reopen, appearance and release evidence remain required. The existing public table is literal native Text content; adding a catalog reader does not connect that table. No editor activation toggle is offered before both consumers are adopted.

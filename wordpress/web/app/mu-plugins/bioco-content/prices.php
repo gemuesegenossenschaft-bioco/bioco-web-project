@@ -13,9 +13,9 @@ add_action('init', function () {
 
 /** Null means absent/invalid, and a stored integer zero stays zero. */
 function bioco_price_integer($value): ?int {
-    if (is_int($value)) return $value >= 0 ? $value : null;
+    if (is_int($value)) return $value >= 0 && $value <= 9007199254740991 ? $value : null;
     if (!is_string($value) || !preg_match('/^(?:0|[1-9][0-9]*)$/D', $value)) return null;
-    $number = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]);
+    $number = filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 9007199254740991]]);
     return $number === false ? null : $number;
 }
 
@@ -39,6 +39,9 @@ function bioco_price_catalog(): ?array {
             $number = bioco_price_integer(get_post_meta($record->ID, 'price_' . $field, true));
             if ($number === null) return ['share_price' => $share, 'tiers' => [], 'error' => 'invalid-tier-amount'];
             $tier[$field] = $number;
+        }
+        if ($share && $tier['shares'] > intdiv(9007199254740991 - $tier['price'], $share)) {
+            return ['share_price' => $share, 'tiers' => [], 'error' => 'invalid-tier-total'];
         }
         $keys[$key] = true;
         $tiers[] = $tier;
