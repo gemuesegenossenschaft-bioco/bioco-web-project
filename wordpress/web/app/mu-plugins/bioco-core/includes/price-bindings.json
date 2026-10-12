@@ -63,6 +63,10 @@
     "shares_label": [
       "Anteilsscheine als Text",
       "text"
+    ],
+    "recommended_marker": [
+      "Empfehlungsstatus",
+      "text"
     ]
   },
   "share_price": [

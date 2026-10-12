@@ -219,8 +219,16 @@ def test_saved_calculator_has_native_four_choice_grid_and_invoice_columns():
     assert grid['phone']['value']['gridTemplateColumns'] == 'minmax(0, 1fr)'
     assert 'bioco-price-loop' in native_class(rows[0]).split()
     assert rows[0]['attrs']['module']['advanced']['loop']['desktop']['value']['loopId'] == 'bioco-price-calculator'
+    copy = PUBLIC['calculator_attrs']
     assert 'loop_bioco_price_name' in json.dumps(rows[0])
     assert 'loop_bioco_price_price_table' in json.dumps(rows[0])
+    badge = next(node for node in walk(rows[0]) if 'bioco-price-recommended-badge' in native_class(node).split())
+    assert badge['blockName'] == 'divi/text'
+    assert 'loop_bioco_price_recommended_marker' in badge['attrs']['content']['innerContent']['desktop']['value']
+    assert badge['attrs']['content']['innerContent']['desktop']['value'].endswith(
+        copy['recommended_label']['innerContent']['desktop']['value'])
+    assert badge['attrs']['module']['decoration']['background']['desktop']['value']['color'] == 'var(--wp--preset--color--bioco-carrot)'
+    assert badge['attrs']['module']['decoration']['sizing']['desktop']['value']['width'] == 'fit-content'
     assert 'bioco-price-none-card' in native_class(rows[1]).split()
     assert '#bioco-price-kein' in json.dumps(rows[1])
     assert [len(row['innerBlocks']) for row in rows[2:6]] == [5, 5, 5, 5]
@@ -229,7 +237,6 @@ def test_saved_calculator_has_native_four_choice_grid_and_invoice_columns():
             assert row['attrs']['module']['decoration']['layout'][device]['value']['gridColumn'] == '1 / -1'
     header = [col['innerBlocks'][0]['attrs']['title']['innerContent']['desktop']['value']
               for col in rows[2]['innerBlocks'][:4]]
-    copy = PUBLIC['calculator_attrs']
     assert header == [copy[key]['innerContent']['desktop']['value']
         for key in ('article_label', 'quantity_label', 'unit_price_label', 'total_label')]
     for marker in ('bioco-price-value-name', 'bioco-price-value-price', 'bioco-price-value-work',
@@ -383,3 +390,40 @@ echo json_encode($values);
     for count in [1, 2, 4]:
         svg = (ROOT / f'wordpress/web/app/mu-plugins/bioco-core/assets/price-person-icons/persons-{count}.svg').read_text()
         assert svg.count('<circle') == count and svg.count('<path') == count
+
+
+def test_editable_recommended_badge_uses_record_context_and_public_visibility():
+    from test_wordpress_catalog import catalog
+    from test_wordpress_prices import records
+    out = catalog(records() + r'''
+function add_filter(...$args){}
+function esc_html($v){return htmlspecialchars((string)$v,ENT_QUOTES);}
+function esc_attr($v){return esc_html($v);}
+function esc_url_raw($v){return $v;}
+function number_format_i18n($v){return number_format($v);}
+function get_post_type($id){return $GLOBALS['posts'][$id]->post_type??'';}
+function get_post_status($id){return $GLOBALS['posts'][$id]->post_status??'';}
+function current_user_can(...$args){return false;}
+function get_the_title($id){return $GLOBALS['posts'][$id]->post_title;}
+function get_queried_object_id(){return 0;}
+function bioco_native_extract_wrapper($attrs){return ['className'=>$attrs['module']['advanced']['htmlAttributes']['desktop']['value']['class']??''];}
+function bioco_native_render_mode(){return $GLOBALS['mode'];}
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/price-bindings.php';
+require 'wordpress/web/app/mu-plugins/bioco-core/includes/price-runtime.php';
+$options['bioco_pricing_enabled']=true;
+$attrs=['module'=>['advanced'=>['htmlAttributes'=>['desktop'=>['value'=>['class'=>'bioco-price-recommended-badge']]]]]];
+$results=[];
+foreach([1,2,3] as $id){
+  $marker=bioco_price_binding_value('', ['name'=>'loop_bioco_price_recommended_marker','loop_id'=>$id]);
+  $html='<div>'.$marker.'Empfohlen</div>';
+  $GLOBALS['mode']='public';
+  $public=bioco_price_native_wrapper($html,['name'=>'divi/text','attrs'=>$attrs]);
+  $GLOBALS['mode']='inert';
+  $editor=bioco_price_native_wrapper($html,['name'=>'divi/text','attrs'=>$attrs]);
+  $results[]=compact('id','marker','public','editor');
+}
+echo json_encode($results);
+''')
+    assert [row['marker'] for row in out] == ['', 'BIOCO_PRICE_RECOMMENDED_OK', '']
+    assert [row['public'] for row in out] == ['', '<div>Empfohlen</div>', '']
+    assert all(row['editor'].endswith('Empfohlen</div>') for row in out)

@@ -136,9 +136,21 @@ function bioco_price_adoption_calculator_layout(array $attrs): array {
         || bioco_price_adoption_value($attrs, 'share_price') !== 250) {
         throw new RuntimeException('Saved calculator amounts changed.');
     }
+    $badge = bioco_price_layout_class(bioco_utility_text(
+        bioco_price_variable('loop_bioco_price_recommended_marker') . esc_html($copy['recommended_label'])),
+        'bioco-price-recommended-badge');
+    $badge['attrs']['module']['decoration']['background']['desktop']['value']['color'] = 'var(--wp--preset--color--bioco-carrot)';
+    $badge['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']['color'] = 'var(--wp--preset--color--bioco-surface)';
+    $badge['attrs']['module']['decoration']['spacing']['desktop']['value']['padding'] = [
+        'top' => '2px', 'bottom' => '2px', 'left' => '8px', 'right' => '8px'];
+    $badge['attrs']['module']['decoration']['spacing']['desktop']['value']['margin']['left'] = 'auto';
+    $badge['attrs']['module']['decoration']['sizing']['desktop']['value']['width'] = 'fit-content';
+    $badge['attrs']['module']['decoration']['border']['desktop']['value']['radius'] = [
+        'topLeft' => '999px', 'topRight' => '999px', 'bottomLeft' => '999px', 'bottomRight' => '999px'];
     $choice = bioco_price_layout_loop([
         bioco_utility_button(bioco_price_variable('loop_bioco_price_name'), bioco_price_variable('loop_bioco_price_select_url')),
         bioco_utility_text('CHF ' . bioco_price_variable('loop_bioco_price_price_table') . '.-'),
+        $badge,
     ], 'bioco-price-calculator');
     $choice['attrs']['module']['decoration']['background']['desktop']['value']['color'] = 'var(--wp--preset--color--bioco-bg)';
     $choice['attrs']['module']['decoration']['spacing']['desktop']['value']['padding'] = [
@@ -184,13 +196,8 @@ function bioco_price_adoption_calculator_layout(array $attrs): array {
         [bioco_utility_heading($copy['total_label'], 'h3')], [], [],
         bioco_price_adoption_live_amount('total'), [],
     ], 'bioco-price-invoice-total');
-    $recommended = bioco_price_adoption_copy($copy, 'recommended_label');
-    foreach (['desktop', 'tablet', 'phone'] as $device) {
-        $recommended['attrs']['module']['decoration']['layout'][$device]['value']['display'] = 'none';
-    }
     $info = bioco_price_layout_row([
         bioco_price_layout_class(bioco_utility_text($copy['shares_only_info']), 'bioco-price-no-selection'),
-        $recommended,
     ]);
     $actions = bioco_price_layout_row([
         bioco_price_layout_class(bioco_utility_button($copy['cta_label'], $copy['signup_url']), 'bioco-price-signup'),

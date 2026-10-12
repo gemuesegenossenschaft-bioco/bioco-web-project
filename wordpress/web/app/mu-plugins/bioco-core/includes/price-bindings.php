@@ -24,7 +24,7 @@ function bioco_price_binding_value($value, array $context) {
         $catalog = function_exists('bioco_price_catalog') ? bioco_price_catalog() : null;
         return $catalog !== null && empty($catalog['error']) ? esc_html(number_format_i18n($catalog['share_price'])) : '';
     }
-    if (!is_string($name) || !preg_match('/^(loop_)?bioco_price_(name|table_label|key|select_url|price|price_table|shares|share_cost|share_cost_table|shares_label|work|persons|persons_range|persons_accessible|persons_icon)$/D', $name, $match)) return $value;
+    if (!is_string($name) || !preg_match('/^(loop_)?bioco_price_(name|table_label|key|select_url|price|price_table|shares|share_cost|share_cost_table|shares_label|work|persons|persons_range|persons_accessible|persons_icon|recommended_marker)$/D', $name, $match)) return $value;
     $loop = (int) ($context['loop_id'] ?? 0);
     $id = $loop ?: (int) ($context['post_id'] ?? 0);
     // A missing loop record must not use the enclosing editorial page.
@@ -35,6 +35,12 @@ function bioco_price_binding_value($value, array $context) {
     if ($catalog === null || !empty($catalog['error'])
         || !in_array($id, array_column($catalog['tiers'], 'ID'), true)) return '';
     $field = $match[2];
+    if ($field === 'recommended_marker') {
+        foreach ($catalog['tiers'] as $tier) {
+            if ($tier['ID'] === $id) return !empty($tier['recommended']) ? 'BIOCO_PRICE_RECOMMENDED_OK' : '';
+        }
+        return '';
+    }
     if ($field === 'name') return esc_html(get_the_title($id));
     if ($field === 'table_label') return esc_html((string) get_post_meta($id, 'price_table_label', true) ?: get_the_title($id));
     if ($field === 'key') return esc_html((string) get_post_meta($id, 'price_key', true));

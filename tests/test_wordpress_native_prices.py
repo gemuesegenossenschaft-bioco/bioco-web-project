@@ -68,11 +68,25 @@ def classes(block):
 def native_dom(blocks, source):
     """Only Divi rendering/query transport is replaced; no arithmetic in this adapter."""
     def variable(value, tier):
-        if not isinstance(value, str) or not value.startswith('$variable('):
+        if not isinstance(value, str) or '$variable(' not in value:
             return value
-        name = json.loads(value[len('$variable('):-2])['value']['name']
-        field = name.removeprefix('loop_bioco_price_')
-        return '#bioco-price-' + tier['key'] if field == 'select_url' else str(tier[field])
+        result = ''
+        while '$variable(' in value:
+            start = value.index('$variable(')
+            result += value[:start]
+            encoded = value[start + len('$variable('):]
+            payload, length = json.JSONDecoder().raw_decode(encoded)
+            assert encoded[length:length + 2] == ')$'
+            name = payload['value']['name']
+            field = name.removeprefix('loop_bioco_price_')
+            if name == 'bioco_price_share_price': resolved = str(source['share_price'])
+            elif field == 'select_url': resolved = '#bioco-price-' + tier['key']
+            elif field == 'price_table': resolved = format(tier['price'], ',').replace(',', "'")
+            elif field == 'recommended_marker': resolved = 'BIOCO_PRICE_RECOMMENDED_OK' if tier.get('recommended') else ''
+            else: resolved = str(tier[field])
+            result += resolved
+            value = encoded[length + 2:]
+        return result + value
 
     def render(block, tier=None):
         cls = classes(block)
@@ -84,6 +98,9 @@ def native_dom(blocks, source):
         content = ''.join(render(child, tier) for child in block['innerBlocks'])
         if block['blockName'] == 'divi/text':
             content = '<div class="et_pb_text_inner">' + variable(attrs['content']['innerContent']['desktop']['value'], tier) + '</div>'
+            if 'bioco-price-recommended-badge' in cls:
+                if 'BIOCO_PRICE_RECOMMENDED_OK' not in content: return ''
+                content = content.replace('BIOCO_PRICE_RECOMMENDED_OK', '')
         elif block['blockName'] == 'divi/heading':
             content = '<h3>' + html.escape(variable(attrs['title']['innerContent']['desktop']['value'], tier)) + '</h3>'
         elif block['blockName'] == 'divi/button':
