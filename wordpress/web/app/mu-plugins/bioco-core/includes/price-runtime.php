@@ -29,7 +29,14 @@ function bioco_price_native_query(array $data, array $attrs): array {
 
 /** Attach data only. All visible controls and copy are saved ordinary Divi modules. */
 function bioco_price_native_wrapper(string $output, array $args): string {
-    if (!bioco_price_native_has_class($args['attrs'] ?? [], 'bioco-price-calculator')
+    $attrs = $args['attrs'] ?? [];
+    if (($args['name'] ?? '') === 'divi/text'
+        && bioco_price_native_has_class($attrs, 'bioco-price-recommended-badge')) {
+        if (bioco_native_render_mode() !== 'public') return str_replace('BIOCO_PRICE_RECOMMENDED_OK', '', $output);
+        return str_contains($output, 'BIOCO_PRICE_RECOMMENDED_OK')
+            ? str_replace('BIOCO_PRICE_RECOMMENDED_OK', '', $output) : '';
+    }
+    if (!bioco_price_native_has_class($attrs, 'bioco-price-calculator')
         || bioco_native_render_mode() !== 'public' || !class_exists('WP_HTML_Tag_Processor')) return $output;
     $catalog = bioco_price_catalog();
     if ($catalog === null || !empty($catalog['error'])) return $output;

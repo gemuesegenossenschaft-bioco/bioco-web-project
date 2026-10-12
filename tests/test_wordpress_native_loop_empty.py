@@ -59,6 +59,15 @@ namespace {
     $card = block('card','divi/text','', 'CARD');
     $column = block('column','divi/column','', '',[$card,$empty,$empty2]);
     $row = block('row','divi/row','bioco-record-loop','',[$column]);
+    if ($state['decorated'] ?? false) {
+        // Imported Divi rows can carry their visible class through the native
+        // decoration attribute while htmlAttributes contains an empty class.
+        $row->parsed_block['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['class'] = '';
+        $row->parsed_block['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'] = [
+            ['name'=>'class','value'=>'bioco-record-loop bioco-group-loop'],
+        ];
+        \ET\Builder\FrontEnd\BlockParser\BlockParserStore::$parents['column']->attrs = $row->parsed_block['attrs'];
+    }
     if ($state['active'] ?? true) {
         \ET\Builder\FrontEnd\BlockParser\BlockParserStore::$parents['column']->attrs['__loop_source_id']='saved-loop';
     }
@@ -96,6 +105,11 @@ namespace {
         $test=['module'=>['advanced'=>['htmlAttributes'=>['desktop'=>['value'=>$value]]]]];
         $classes[] = \Bioco_Native_Loop_Empty::has_class($test,'bioco-loop-empty');
     }
+    foreach (['bioco-loop-empty other','bioco-loop-emptyish',['bioco-loop-empty']] as $value) {
+        $test=attrs('');
+        $test['module']['decoration']['attributes']['desktop']['value']['attributes'] = [['name'=>'class','value'=>$value]];
+        $classes[] = \Bioco_Native_Loop_Empty::has_class($test,'bioco-loop-empty');
+    }
     echo json_encode(['selected'=>$selected_before,'output'=>$output,'normal'=>$normal,'outside'=>$outside_output,'unrelated'=>$unrelated,
         'original_unchanged'=>inspect($row)===$before,'row_calls'=>\ET\Builder\Packages\ModuleLibrary\Row\RowModule::$calls,
         'classes'=>$classes,'hook'=>$GLOBALS['registered'],'caught'=>$caught ?? null]);
@@ -130,7 +144,7 @@ def test_only_active_marked_record_loops_hide_empty_branches():
     assert run(active=False)['normal'] == 'VISIBLE'
     result = run()
     assert result['outside'] == 'OUTSIDE' and result['unrelated'] == 'OTHER'
-    assert result['classes'] == [True, True, False, False, False]
+    assert result['classes'] == [True, True, False, False, False, True, False, False]
     assert result['hook'] == ['divi_loop_rendered_output', 30, 5]
 
 
@@ -138,6 +152,13 @@ def test_editor_keeps_all_branches_visible_and_uses_the_original_renderer_output
     result = run(editor=True)
     assert result['output'] == 'ORIGINAL' and result['normal'] == 'VISIBLE'
     assert result['row_calls'] == [] and result['original_unchanged'] is True
+
+
+def test_saved_divi_decoration_class_selects_the_native_empty_branch():
+    result = run(decorated=True)
+    assert result['output'] == 'EMPTY_AEMPTY_CHILDEMPTY_B'
+    assert result['normal'] == ''
+    assert result['row_calls'][0][0]['module']['decoration']['attributes']['desktop']['value']['attributes'][0]['value'] == 'bioco-record-loop bioco-group-loop'
 
 
 def test_render_exception_restores_projection_state_and_allows_retry():

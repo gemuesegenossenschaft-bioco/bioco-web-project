@@ -24,6 +24,10 @@
       "Jahrespreis",
       "text"
     ],
+    "price_table": [
+      "Jahrespreis mit Tabellenformat",
+      "text"
+    ],
     "shares": [
       "Anteilsscheine",
       "text"
@@ -32,12 +36,36 @@
       "Anteilsscheine Kosten",
       "text"
     ],
+    "share_cost_table": [
+      "Anteilsscheine Kosten mit Tabellenformat",
+      "text"
+    ],
     "work": [
       "Arbeitseinsätze",
       "text"
     ],
     "persons": [
       "Personen",
+      "text"
+    ],
+    "persons_range": [
+      "Personenbereich",
+      "text"
+    ],
+    "persons_accessible": [
+      "Personen als Bildbeschreibung",
+      "text"
+    ],
+    "persons_icon": [
+      "Personensymbol",
+      "image"
+    ],
+    "shares_label": [
+      "Anteilsscheine als Text",
+      "text"
+    ],
+    "recommended_marker": [
+      "Empfehlungsstatus",
       "text"
     ]
   },

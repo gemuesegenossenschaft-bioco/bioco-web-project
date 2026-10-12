@@ -64,7 +64,7 @@
     },
     "label": {
       "type": "object",
-      "selector": "{{selector}} .bioco-form-label",
+      "selector": "{{selector}} .bioco-form-label, {{selector}} .bioco-form-label h1, {{selector}} .bioco-form-label h2, {{selector}} .bioco-form-label h3, {{selector}} .bioco-form-label h4, {{selector}} .bioco-form-label h5, {{selector}} .bioco-form-label h6, {{selector}} .bioco-form-label p, {{selector}} .bioco-form-label strong, {{selector}} .bioco-form-label em, {{selector}} .bioco-form-label a",
       "settings": {
         "innerContent": {
           "groupType": "group-item",
@@ -199,6 +199,162 @@
             "attrName": "choice_value.innerContent",
             "label": "Wert der Auswahl",
             "priority": 110,
+            "render": true,
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
+    },
+    "label_html": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "label_html.innerContent",
+            "label": "Formatierte Beschriftung",
+            "priority": 120,
+            "render": true,
+            "component": {
+              "name": "divi/richtext",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
+    },
+    "allow_blank_label": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "allow_blank_label.innerContent",
+            "label": "Leere Beschriftung zulassen (on)",
+            "priority": 121,
+            "render": true,
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
+    },
+    "choice_layout": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "choice_layout.innerContent",
+            "label": "Auswahl als Radiobuttons (radio)",
+            "priority": 122,
+            "render": true,
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
+    },
+    "default_value": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "default_value.innerContent",
+            "label": "Vorausgewählter Wert",
+            "priority": 123,
+            "render": true,
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
+    },
+    "checked": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "checked.innerContent",
+            "label": "Checkbox vorausgewählt (on)",
+            "priority": 124,
+            "render": true,
+            "component": {
+              "name": "divi/text",
+              "type": "field"
+            },
+            "features": {
+              "responsive": false,
+              "hover": false,
+              "sticky": false,
+              "preset": "content"
+            }
+          }
+        }
+      }
+    },
+    "exact_options": {
+      "type": "object",
+      "selector": "{{selector}}",
+      "settings": {
+        "innerContent": {
+          "groupType": "group-item",
+          "item": {
+            "groupSlug": "contentFields",
+            "attrName": "exact_options.innerContent",
+            "label": "Auswahlwerte genau übernehmen (on)",
+            "priority": 125,
             "render": true,
             "component": {
               "name": "divi/text",

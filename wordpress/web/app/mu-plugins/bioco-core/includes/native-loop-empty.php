@@ -8,8 +8,16 @@ final class Bioco_Native_Loop_Empty {
     public static function has_class(array $attrs, string $class): bool {
         $value = $attrs['module']['advanced']['htmlAttributes']['desktop']['value'] ?? [];
         if (is_string($value)) $value = json_decode($value, true) ?: [];
-        return is_array($value) && is_string($value['class'] ?? null)
-            && in_array($class, preg_split('/\s+/', $value['class'], -1, PREG_SPLIT_NO_EMPTY), true);
+        $classes = [];
+        if (is_array($value) && is_string($value['class'] ?? null)) $classes[] = $value['class'];
+        foreach ($attrs['module']['decoration']['attributes']['desktop']['value']['attributes'] ?? [] as $attribute) {
+            if (is_array($attribute) && ($attribute['name'] ?? null) === 'class'
+                && is_string($attribute['value'] ?? null)) $classes[] = $attribute['value'];
+        }
+        foreach ($classes as $tokens) {
+            if (in_array($class, preg_split('/\s+/', $tokens, -1, PREG_SPLIT_NO_EMPTY), true)) return true;
+        }
+        return false;
     }
 
     /** Rendering must not alter the saved branch's children or runtime context. */

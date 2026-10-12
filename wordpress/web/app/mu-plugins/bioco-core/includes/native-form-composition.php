@@ -16,7 +16,7 @@ function bioco_form_contracts(): array {
             'firstName' => ['type' => 'text', 'required' => true], 'lastName' => ['type' => 'text', 'required' => true],
             'address' => ['type' => 'text', 'required' => true], 'zip' => ['type' => 'text', 'required' => true], 'city' => ['type' => 'text', 'required' => true],
             'email' => ['type' => 'email', 'required' => true], 'phone' => ['type' => 'tel', 'required' => false], 'mobilePhone' => ['type' => 'tel', 'required' => false], 'birthday' => ['type' => 'date', 'required' => false],
-            'depot' => ['type' => 'select', 'required' => false], 'paymentType' => ['type' => 'select', 'required' => false],
+            'depot' => ['type' => 'select', 'required' => false], 'paymentType' => ['type' => 'select', 'required' => false, 'presentations' => ['radio']],
             'preferredDays' => ['type' => 'checkbox', 'required' => false, 'array' => true], 'preferredTimes' => ['type' => 'checkbox', 'required' => false, 'array' => true],
             'activityAreas' => ['type' => 'checkbox', 'required' => false, 'array' => true], 'zusatzabos' => ['type' => 'checkbox', 'required' => false, 'array' => true],
             'otherActivity' => $notes, 'weitereProdukte' => $notes, 'comment' => $notes, 'privacyAccept' => $privacy,
@@ -33,7 +33,7 @@ function bioco_form_contracts(): array {
 
 function bioco_form_part_values(array $attrs): array {
     $values = [];
-    foreach (['form_type', 'field', 'label', 'help', 'placeholder', 'pending_label', 'success_message', 'fallback_error', 'captcha_error', 'transport_error', 'action', 'progress_label', 'thank_you_url', 'commitment_count', 'choice_value'] as $key) {
+    foreach (['form_type', 'field', 'label', 'help', 'placeholder', 'pending_label', 'success_message', 'fallback_error', 'captcha_error', 'transport_error', 'action', 'progress_label', 'thank_you_url', 'commitment_count', 'choice_value', 'label_html', 'allow_blank_label', 'choice_layout', 'default_value', 'checked', 'exact_options'] as $key) {
         $value = $attrs[$key]['innerContent']['desktop']['value'] ?? null;
         if (is_string($value)) $values[$key] = $value;
     }
@@ -90,6 +90,10 @@ function bioco_form_render_part(string $kind, array $values, string $mode = 'ine
     }
     if ($kind === 'form-action') {
         $action = $values['action'] ?? 'submit';
+        if ($action === 'doi-error-details') {
+            $text = $mode === 'public' ? (bioco_doi_current_outcome()['error'] ?? '') : ($values['label'] ?? '');
+            return '<p class="bioco-form-error-detail">' . esc_html($text) . '</p>';
+        }
         if ($action === 'confirm') return ($values['label'] ?? '') === '' ? '' : '<button type="submit" class="bioco-form-control bioco-form-action" data-bioco-doi-confirm disabled>' . esc_html($values['label']) . '</button>';
         if ($action === 'error-details') return '<p data-bioco-form-error-detail role="alert"></p>';
         if ($action === 'summary') return '<dl data-membership-summary></dl>';
@@ -104,7 +108,7 @@ function bioco_form_render_part(string $kind, array $values, string $mode = 'ine
     $parts = explode('.', $identity, 2);
     $spec = bioco_form_contracts()[$parts[0] ?? ''][$parts[1] ?? ''] ?? null;
     $label = $values['label'] ?? '';
-    if ($spec === null || ($kind === 'form-field' && $label === '')) return '';
+    if ($spec === null || ($kind === 'form-field' && $label === '' && ($values['label_html'] ?? '') === '' && ($values['allow_blank_label'] ?? '') !== 'on')) return '';
     if ($kind === 'form-value') return '<div class="bioco-form-value">' . ($label === '' ? '' : '<span class="bioco-form-label">' . esc_html($label) . '</span>') . '<output class="bioco-form-control" data-bioco-review-field="' . esc_attr($identity) . '"></output></div>';
     $id = wp_unique_id('bioco-native-field-');
     $help = $values['help'] ?? '';
@@ -116,18 +120,37 @@ function bioco_form_render_part(string $kind, array $values, string $mode = 'ine
     elseif (($values['choice_value'] ?? '') !== '') $attributes .= ' value="' . esc_attr($values['choice_value']) . '"';
     if ($help !== '') $attributes .= ' aria-describedby="' . esc_attr($id . '-help') . '"';
     if (($values['placeholder'] ?? '') !== '') $attributes .= ' placeholder="' . esc_attr($values['placeholder']) . '"';
-    $html = '<div class="bioco-form-field"><label class="bioco-form-label" for="' . esc_attr($id) . '">' . esc_html($label) . '</label>';
+    $label_html = ($values['label_html'] ?? '') !== '' ? wp_kses_post($values['label_html']) : esc_html($label);
+    $html = '<div class="bioco-form-field"><label class="bioco-form-label" for="' . esc_attr($id) . '">' . $label_html . '</label>';
     if ($spec['type'] === 'select') {
         $options = $values['options'] ?? [];
-        if (!array_is_list($options)) return '';
-        $html .= '<select' . $attributes . '><option value="">' . esc_html($values['placeholder'] ?? '') . '</option>';
+        $radio = ($values['choice_layout'] ?? '') === 'radio';
+        if (!array_is_list($options) || ($radio && !in_array('radio', $spec['presentations'] ?? [], true))) return '';
+        $exact = ($values['exact_options'] ?? '') === 'on';
         foreach ($options as $option) {
-            if (!is_array($option) || !is_string($option['value'] ?? null) || !is_string($option['label'] ?? null) || $option['value'] === '' || $option['label'] === '') return '';
-            $html .= '<option value="' . esc_attr($option['value']) . '">' . esc_html($option['label']) . '</option>';
+            if (!is_array($option) || !is_string($option['value'] ?? null) || !is_string($option['label'] ?? null)
+                || (!$exact && ($option['value'] === '' || $option['label'] === ''))) return '';
         }
+        $default = $values['default_value'] ?? '';
+        if ($default !== '' && !in_array($default, array_column($options, 'value'), true)) return '';
         if ($spec['required'] && !$options) return '';
-        $html .= '</select>';
+        if ($radio) {
+            if (!$options) return '';
+            $html = '<div class="bioco-form-field" data-bioco-choice-group="' . esc_attr($identity) . '"><fieldset><legend class="bioco-form-label">' . $label_html . '</legend>';
+            foreach ($options as $index => $option) {
+                $radio_id = $id . '-' . $index;
+                $attrs = str_replace('id="' . esc_attr($id) . '"', 'id="' . esc_attr($radio_id) . '"', $attributes);
+                $html .= '<label class="bioco-form-label" for="' . esc_attr($radio_id) . '"><input type="radio"' . $attrs . ' value="' . esc_attr($option['value']) . '"' . ($default === $option['value'] ? ' checked' : '') . '>' . esc_html($option['label']) . '</label>';
+            }
+            $html .= '</fieldset>';
+        } else {
+            $html .= '<select' . $attributes . '>';
+            if (!$exact) $html .= '<option value="">' . esc_html($values['placeholder'] ?? '') . '</option>';
+            foreach ($options as $option) $html .= '<option value="' . esc_attr($option['value']) . '"' . ($default === $option['value'] ? ' selected' : '') . '>' . esc_html($option['label']) . '</option>';
+            $html .= '</select>';
+        }
     } else {
+        if ($spec['type'] === 'checkbox' && ($values['checked'] ?? '') === 'on') $attributes .= ' checked';
         $html .= $spec['type'] === 'textarea' ? '<textarea' . $attributes . ' rows="6"></textarea>' : '<input type="' . esc_attr($spec['type']) . '"' . $attributes . '>';
     }
     if ($help !== '') $html .= '<p class="bioco-form-help" id="' . esc_attr($id . '-help') . '">' . esc_html($help) . '</p>';

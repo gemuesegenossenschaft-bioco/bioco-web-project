@@ -124,11 +124,25 @@ def test_divi_page_settings_cannot_restore_the_published_title_into_a_qa_copy():
     assert ['meta', '_et_pb_post_settings_excerpt', 'Original excerpt'] in result['events']
 
 
-@pytest.mark.parametrize('type', ['event', 'group'])
+@pytest.mark.parametrize('type', ['event', 'group', 'bioco_group', 'bioco_depot', 'bioco_vegetable', 'bioco_price', 'et_pb_layout'])
 def test_registered_record_types_are_inventoried_and_copied(type):
     assert run(['inventory'], posts=[post(type=type)])['result'][0]['type'] == type
     result = run(['create', '5', 'qa-20261009'], posts=[post(type=type)])
     assert result['events'][0][1]['post_type'] == type
+
+
+def test_owned_library_and_record_cleanup_never_deletes_published_or_foreign_copies():
+    types = ['et_pb_layout', 'bioco_group', 'bioco_depot', 'bioco_vegetable', 'bioco_price']
+    posts = [post(id=i + 20, type=kind, status='draft', title=f'BIOCO QA qa-20261009 {i + 20}')
+             for i, kind in enumerate(types)]
+    posts.append(post(id=40, type='et_pb_layout', status='draft', title='Another editor copy'))
+    meta = {str(p['ID']): {'_bioco_editor_verification': ['qa-20261009']} for p in posts[:-1]}
+    result = run(['cleanup', 'qa-20261009'], posts=posts, meta=meta)
+    assert [event[1] for event in result['events']] == [20, 21, 22, 23, 24]
+    published = posts + [post(id=41, type='bioco_depot', status='publish', title='BIOCO QA qa-20261009 41')]
+    meta['41'] = {'_bioco_editor_verification': ['qa-20261009']}
+    blocked = run(['cleanup', 'qa-20261009'], posts=published, meta=meta)
+    assert 'Refusing to delete' in blocked['result']['error'] and blocked['events'] == []
 
 
 def test_cleanup_validates_all_candidates_before_deleting_anything():
