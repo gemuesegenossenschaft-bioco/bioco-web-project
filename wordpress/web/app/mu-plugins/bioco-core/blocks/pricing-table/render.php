@@ -17,6 +17,15 @@ $buttons = get_field('buttons');
 $container_width = get_field('container_width') ?: 'xl';
 $work_suffix = get_field('work_suffix');
 $tiers = get_field('tiers');
+$catalog = function_exists('bioco_price_catalog') ? bioco_price_catalog() : null;
+if ($catalog !== null) {
+    $tiers = array_map(static function (array $tier) use ($catalog): array {
+        return array_replace($tier, ['name' => $tier['table_label'],
+            'sharecost' => 'CHF ' . number_format_i18n($tier['shares'] * $catalog['share_price']) . '.-']);
+    }, $catalog['tiers']);
+    foreach ($tiers as &$tier) $tier['price'] = 'CHF ' . number_format_i18n($tier['price']) . '.-';
+    unset($tier);
+}
 $basket_column_label = get_field('basket_column_label');
 $persons_column_label = get_field('persons_column_label');
 $annual_price_column_label = get_field('annual_price_column_label');

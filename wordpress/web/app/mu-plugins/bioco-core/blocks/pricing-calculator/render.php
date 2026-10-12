@@ -14,7 +14,10 @@ if (!defined('ABSPATH')) exit;
 $eyebrow = bioco_field('eyebrow');
 $title = bioco_field('title');
 $text = bioco_field('text');
-$share_price = (int) (bioco_field('share_price') ?: 250);
+$catalog = function_exists('bioco_price_catalog') ? bioco_price_catalog() : null;
+$stored_share_price = bioco_field('share_price');
+$share_price = $catalog !== null ? $catalog['share_price']
+    : (($stored_share_price === null || $stored_share_price === false || $stored_share_price === '') ? 250 : (int) $stored_share_price);
 $work_suffix = bioco_field('work_suffix');
 $signup_url = bioco_field('signup_url');
 $shares_only_label = bioco_field('shares_only_label');
@@ -35,7 +38,7 @@ $required_label = bioco_field('required_label');
 $shares_only_info = bioco_field('shares_only_info');
 $without_basket_label = bioco_field('without_basket_label');
 $additional_label = bioco_field('additional_label');
-$tiers = bioco_field('tiers');
+$tiers = $catalog !== null ? $catalog['tiers'] : bioco_field('tiers');
 $tiers = is_array($tiers) ? array_values(array_filter($tiers, function ($tier) {
     return !empty($tier['name']);
 })) : [];
@@ -50,7 +53,7 @@ $heading_already_in_text = bioco_text_has_heading_html($text);
 
 $first_tier = !empty($tiers) ? $tiers[0] : [];
 $first_name = $first_tier['name'] ?? '';
-$first_slug = sanitize_title($first_name);
+$first_slug = $first_tier['key'] ?? sanitize_title($first_name);
 $first_price = (int) ($first_tier['price'] ?? 0);
 $first_shares = (int) ($first_tier['shares'] ?? 0);
 $first_work = (int) ($first_tier['work'] ?? 0);
@@ -74,7 +77,7 @@ $grand_total = $first_price + $shares_total;
             <div class="abo-buttons">
                 <?php foreach ($tiers as $index => $tier) :
                     $tier_name = $tier['name'] ?? '';
-                    $tier_slug = sanitize_title($tier_name);
+                    $tier_slug = $tier['key'] ?? sanitize_title($tier_name);
                     $tier_price = (int) ($tier['price'] ?? 0);
                     $tier_shares = (int) ($tier['shares'] ?? 0);
                     $tier_work = (int) ($tier['work'] ?? 0);
