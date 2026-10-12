@@ -43,7 +43,7 @@ function bioco_price_layout_section(array $rows, string $class = ''): array {
 }
 
 function bioco_price_layout_definitions(): array {
-    $table = [bioco_utility_heading(bioco_price_variable('loop_bioco_price_name'), 'h3')];
+    $table = [bioco_utility_heading(bioco_price_variable('loop_bioco_price_table_label'), 'h3')];
     foreach (['price' => 'Jahresabo (CHF)', 'shares' => 'Anteilsscheine', 'share_cost' => 'Anteilsscheine Kosten (CHF)',
         'work' => 'Arbeitseinsätze', 'persons' => 'Personen'] as $field => $label) {
         $table[] = bioco_utility_text('<p>' . $label . '</p>');

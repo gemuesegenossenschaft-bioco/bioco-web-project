@@ -166,9 +166,14 @@ $values=[];foreach(['name','price','shares','share_cost','work','persons']as$fie
     $values[$field]=bioco_price_binding_value('untouched',['name'=>'loop_bioco_price_'.$field,'post_id'=>99,'loop_id'=>2]);
 $values['global']=bioco_price_binding_value('', ['name'=>'bioco_price_share_price']);
 $values['missing']=bioco_price_binding_value('', ['name'=>'loop_bioco_price_price','post_id'=>99]);
+$options['bioco_pricing_enabled']=false;$values['inactive']=bioco_price_binding_value('', ['name'=>'bioco_price_price','post_id'=>2]);
+$options['bioco_pricing_enabled']=true;update_post_meta(1,'price_price','invalid');
+$values['invalid']=bioco_price_binding_value('', ['name'=>'bioco_price_price','post_id'=>2]);
+update_post_meta(1,'price_price',750);update_post_meta(2,'price_table_label','Standard');
+$values['short']=bioco_price_binding_value('', ['name'=>'bioco_price_table_label','post_id'=>2]);
 $posts[2]->post_status='draft';$values['draft']=bioco_price_binding_value('', ['name'=>'loop_bioco_price_price','loop_id'=>2]);
 echo json_encode(['values'=>$values,'options'=>bioco_price_binding_fields(['existing'=>['label'=>'Existing']])]);
 ''')
     assert out['values'] == {'name': 'Standard (2-3 Personen)', 'price': '1&#039;280', 'shares': '2',
-        'share_cost': '0', 'work': '20', 'persons': '2', 'global': '0', 'missing': '', 'draft': ''}
+        'share_cost': '0', 'work': '20', 'persons': '2', 'global': '0', 'missing': '', 'inactive': '', 'invalid': '', 'short': 'Standard', 'draft': ''}
     assert 'existing' in out['options'] and 'loop_bioco_price_share_cost' in out['options']

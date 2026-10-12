@@ -35,6 +35,7 @@ function bioco_price_catalog(): ?array {
         }
         $tier = ['ID' => (int) $record->ID, 'key' => $key, 'abo_type' => $type,
             'name' => $record->post_title, 'recommended' => (bool) get_post_meta($record->ID, 'price_recommended', true)];
+        $tier['table_label'] = (string) get_post_meta($record->ID, 'price_table_label', true) ?: $record->post_title;
         foreach (['price', 'shares', 'work', 'persons'] as $field) {
             $number = bioco_price_integer(get_post_meta($record->ID, 'price_' . $field, true));
             if ($number === null) return ['share_price' => $share, 'tiers' => [], 'error' => 'invalid-tier-amount'];

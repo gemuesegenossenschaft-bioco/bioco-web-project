@@ -1,0 +1,48 @@
+{
+  "groups": {
+    "": "Abo-Preis",
+    "loop_": "Abo-Preis in der Schleife"
+  },
+  "fields": {
+    "name": [
+      "Name",
+      "text"
+    ],
+    "table_label": [
+      "Tabellenname",
+      "text"
+    ],
+    "key": [
+      "Rechner-Schlüssel",
+      "text"
+    ],
+    "select_url": [
+      "Rechner-Auswahl",
+      "url"
+    ],
+    "price": [
+      "Jahrespreis",
+      "text"
+    ],
+    "shares": [
+      "Anteilsscheine",
+      "text"
+    ],
+    "share_cost": [
+      "Anteilsscheine Kosten",
+      "text"
+    ],
+    "work": [
+      "Arbeitseinsätze",
+      "text"
+    ],
+    "persons": [
+      "Personen",
+      "text"
+    ]
+  },
+  "share_price": [
+    "Abo-Preis: Preis pro Anteilsschein",
+    "Abo-Preis"
+  ]
+}

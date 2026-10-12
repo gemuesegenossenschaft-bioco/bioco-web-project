@@ -56,7 +56,7 @@ def test_starters_use_native_modules_and_bound_prices_without_literal_duplicate_
         assert settings['enable'] == 'on' and settings['loopId'] == 'bioco-price-' + key
         assert any('bioco-loop-empty' in classes(node) for node in nodes)
     table = json.dumps(definitions['table'])
-    for field in ['name', 'price', 'shares', 'share_cost', 'work', 'persons']:
+    for field in ['table_label', 'price', 'shares', 'share_cost', 'work', 'persons']:
         assert 'loop_bioco_price_' + field in table
     assert not any(str(amount) in table for amount in [750, 1280, 2350])
 

@@ -137,7 +137,7 @@ def test_event_singles_keep_aktuelles_prefix_without_shadowing_page():
     php = r'''
     define('ABSPATH', __DIR__);
     $registered = [];
-    function add_action($hook, $callback) { $callback(); }
+    function add_action($hook, $callback) { if ($hook === 'init') $callback(); }
     function register_post_type($name, $args) {
         global $registered;
         $registered[$name] = $args;

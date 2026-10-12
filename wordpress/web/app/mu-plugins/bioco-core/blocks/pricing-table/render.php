@@ -20,7 +20,8 @@ $tiers = get_field('tiers');
 $catalog = function_exists('bioco_price_catalog') ? bioco_price_catalog() : null;
 if ($catalog !== null) {
     $tiers = array_map(static function (array $tier) use ($catalog): array {
-        return $tier + ['sharecost' => 'CHF ' . number_format_i18n($tier['shares'] * $catalog['share_price']) . '.-'];
+        return array_replace($tier, ['name' => $tier['table_label'],
+            'sharecost' => 'CHF ' . number_format_i18n($tier['shares'] * $catalog['share_price']) . '.-']);
     }, $catalog['tiers']);
     foreach ($tiers as &$tier) $tier['price'] = 'CHF ' . number_format_i18n($tier['price']) . '.-';
     unset($tier);
