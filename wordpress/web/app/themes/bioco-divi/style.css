@@ -1700,11 +1700,11 @@ body.home,
 .bioco-global-layout > .et_pb_row > .et_pb_column,
 .bioco-global-layout .et_pb_post_content,
 .bioco-global-layout > .et_pb_row > .et_pb_column > .et_pb_text,
-.et-db #et-boc .et-l :where(.bioco-global-layout).et_pb_section,
-.et-db #et-boc .et-l :where(.bioco-global-layout) > .et_pb_row,
-.et-db #et-boc .et-l :where(.bioco-global-layout > .et_pb_row) > .et_pb_column,
-.et-db #et-boc .et-l :where(.bioco-global-layout) .et_pb_post_content,
-.et-db #et-boc .et-l :where(.bioco-global-layout > .et_pb_row > .et_pb_column) > .et_pb_text {
+.et-db #et-boc .et-l .bioco-global-layout.et_pb_section,
+.et-db #et-boc .et-l .bioco-global-layout > .et_pb_row,
+.et-db #et-boc .et-l .bioco-global-layout > .et_pb_row > .et_pb_column,
+.et-db #et-boc .et-l .bioco-global-layout .et_pb_post_content,
+.et-db #et-boc .et-l .bioco-global-layout > .et_pb_row > .et_pb_column > .et_pb_text {
     margin: 0;
     padding: 0;
     width: 100%;
@@ -1717,6 +1717,14 @@ body.home,
     top: 0;
     z-index: 100;
 }
+
+/* Divi's animation runtime can leave these inline overflow declarations on
+   editorial pages. They create a scroll container above the sticky header.
+   Keep containment on the viewport; native module overflow controls still
+   apply inside the page. Instance styles remain stronger than the shell
+   wrapper defaults above. */
+body.et-db:has(.bioco-global-header) { overflow-x: clip !important; }
+.et-db #page-container:has(.bioco-global-header) { overflow: visible !important; }
 
 /* Native single-article modules share one comfortable reading column. */
 #bioco-main-content #et-boc .bioco-article-section.et_pb_section {

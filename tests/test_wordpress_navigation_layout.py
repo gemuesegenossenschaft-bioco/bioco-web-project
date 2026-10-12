@@ -21,6 +21,10 @@ ROUTES = ["wir", "home", "abos", "aktuelles", "event"]
 DIVI_LIST_DEFAULTS = """
 .et-l--header ul { list-style-type: disc; padding: 0 0 23px 1em; line-height: 26px; }
 """
+DIVI_WRAPPER_DEFAULTS = """
+.et-db #et-boc .et-l .et_pb_section { padding:54px 0; }
+.et-db #et-boc .et-l .et_pb_row { width:80%; max-width:1080px; margin:auto; padding:27px 0; }
+"""
 
 
 @pytest.fixture(scope="module")
@@ -197,3 +201,31 @@ def test_short_mobile_menu_follows_saved_bar_height_and_keeps_last_link_visible(
     page.locator(".bioco-editable-header").evaluate("el => el.style.setProperty('--bioco-header-padding-vertical', '28px')")
     page.wait_for_function("document.querySelector('.bioco-primary-nav').style.getPropertyValue('--bioco-primary-nav-height') === '121px'")
     assert abs(menu.bounding_box()["y"] - page.locator(".bioco-primary-nav").bounding_box()["height"]) <= 1
+
+
+@pytest.mark.parametrize("width", [390, 1440])
+def test_late_divi_wrapper_defaults_and_inline_overflow_keep_the_shared_header(page, width):
+    page.set_viewport_size({"width": width, "height": 900})
+    install(page, "home")
+    expected = page.locator(".bioco-logo").bounding_box()
+    # Actual published event header ancestry, with Divi's late default CSS.
+    markup = ('<div id="page-container"><div id="et-boc"><header class="et-l et-l--header">'
+              '<div class="et_builder_inner_content"><div class="et_pb_section bioco-global-layout bioco-global-header">'
+              '<div class="et_pb_row"><div class="et_pb_column">' + header("event")
+              + '</div></div></div></div></header><main style="height:3000px"></main></div></div>')
+    page.set_content('<body class="et-db">' + markup + '</body>')
+    page.add_style_tag(path=str(CORE / "assets/bioco-tokens.css"))
+    page.add_style_tag(path=str(CORE / "assets/bioco-shell.css"))
+    page.add_style_tag(path=str(THEME / "style.css"))
+    page.add_style_tag(content=DIVI_WRAPPER_DEFAULTS)
+    actual = page.locator(".bioco-logo").bounding_box()
+    assert actual == expected
+    # Captured on /wir/: Divi's runtime writes these after initial layout.
+    page.evaluate("document.body.style.overflowX='hidden';document.querySelector('#page-container').style.overflowY='hidden'")
+    page.evaluate("window.scrollTo(0, 500)")
+    assert page.locator("header").bounding_box()["y"] == 0
+    assert page.locator("#page-container").evaluate("el=>getComputedStyle(el).overflow") == "visible"
+    assert page.locator("body").evaluate("el=>getComputedStyle(el).overflowX") == "clip"
+    # A generated native instance still wins over the fallback wrapper reset.
+    page.add_style_tag(content="body.et-db #page-container #et-boc .et-l .bioco-global-layout.et_pb_section {padding:20px 0}")
+    assert page.locator(".bioco-global-layout").evaluate("el=>getComputedStyle(el).paddingTop") == "20px"

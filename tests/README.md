@@ -352,3 +352,21 @@ read-only installed-renderer probe and native save/reopen checks separately.
 conversion, saved labels/links/anchors, explicit blank/false/zero values, editable
 count/order/filter preservation, date-based query semantics and conflict refusal.
 Hosted native editing and generated responsive CSS remain operator checks.
+# Installed numeric token gate
+
+Run this explicit read-only operator test against installed Divi 5. It evaluates
+the candidate's two default helpers in memory, runs the installed frontend block
+parser in its `et_builder_render_layout` context, then generates CSS with the real
+Divi `ElementStyle`. It does not render a page, write records or flush CSS caches.
+Missing host/path or installed APIs fails; this operator is outside automatic CI.
+
+```sh
+BIOCO_DIVI_NATIVE_SSH=bioco@193.33.128.160 \
+BIOCO_DIVI_NATIVE_WP_PATH=/home/bioco/staging.bioco.ch \
+python3 -m pytest -q tests/operators/wordpress_numeric_tokens.py
+```
+
+To reproduce the dropped numeric defaults with the same installed APIs, add
+`BIOCO_NUMERIC_SOURCE_REF=63914c0428e0cd5ba8edd1db1356d5f056a9a31d`.
+Both cases must fail on empty radius values before the fix. Local adoption tests
+verify payload and preservation contracts; they do not prove Divi CSS rendering.

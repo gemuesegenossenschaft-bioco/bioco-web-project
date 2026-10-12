@@ -194,6 +194,8 @@ function bioco_import_form_doi(array $values): array {
 /** Initial legacy defaults become saved controls; authored wrapper design wins. */
 function bioco_import_form_design(array $blocks): array {
     $token = static function (string $css, string $type = 'content'): string {
+        // A content token is emptied by Divi's frontend parser before design CSS is generated.
+        if ($type !== 'color') return 'var(--gvid-bioco-' . substr(hash('sha256', $css), 0, 16) . ')';
         return '$variable(' . wp_json_encode(['type' => $type, 'value' => ['name' => ($type === 'color' ? 'gcid-' : 'gvid-') . 'bioco-' . substr(hash('sha256', $css), 0, 16), 'settings' => new stdClass()]]) . ')$';
     };
     $desktop = static fn(array $value): array => ['desktop' => ['value' => $value]];

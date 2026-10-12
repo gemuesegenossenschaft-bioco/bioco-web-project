@@ -132,6 +132,7 @@ def test_only_the_known_unstyled_button_changes_and_original_attributes_survive(
     assert saved['module']['decoration']['spacing'] == attrs['module']['decoration']['spacing']
     assert saved['module']['id'] == 'native-button-id' and saved['builderVersion'] == '5.11.0'
     assert saved['modulePreset'] == ['bioco-5f12512a732ddec5']
+    assert set(saved['button']['decoration']['border']['desktop']['value']['radius'].values()) == {'var(--gvid-bioco-185ab2cb8778665c)'}
     assert back(result['blocks'])['innerContent'] == back(blocks)['innerContent']
     assert run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']})['plan']['changed'] == 0
 

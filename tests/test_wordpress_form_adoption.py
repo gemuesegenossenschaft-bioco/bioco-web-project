@@ -158,6 +158,12 @@ def test_conversion_preserves_exact_parent_siblings_geometry_and_native_copy():
     assert '<h2>Kontakt</h2>' in result['html'] and '<strong>Hinweis</strong>' in result['html']
     fields = [values(b) for b in walk(result['blocks']) if b['blockName'] == 'bioco-divi/form-field']
     assert [f['field'] for f in fields] == ['contact.name', 'contact.email', 'contact.subject', 'contact.message', 'contact.phone']
+    # Payload preservation only. Installed FE parser/style proof is the explicit operator gate.
+    field = next(b for b in walk(result['blocks']) if b['blockName'] == 'bioco-divi/form-field')
+    control = field['attrs']['control']['decoration']
+    assert control['font']['font']['desktop']['value']['size'] == 'var(--gvid-bioco-c414983b8148bf2f)'
+    assert all(v.startswith('var(--gvid-bioco-') for v in control['border']['desktop']['value']['radius'].values())
+    assert control['font']['font']['desktop']['value']['color'].startswith('$variable({"type":"color"')
     again = run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']}, captures={})
     assert again['plan']['changed'] == 0 and again['plan']['after_content'] == result['plan']['after_content']
 
