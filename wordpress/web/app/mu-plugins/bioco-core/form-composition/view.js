@@ -119,7 +119,14 @@
       onValid: function (target, json, message) {
         if (type === 'membership') {
           var url = configFor(target).thankYouUrl;
-          if (url) window.location.assign(url);
+          if (typeof url === 'string' && url.trim()) {
+            try {
+              var destination = new URL(url, window.location.href);
+              if (['http:', 'https:'].indexOf(destination.protocol) >= 0 && destination.origin === window.location.origin) {
+                window.location.assign(destination.href);
+              }
+            } catch (error) { /* Keep the native success state for an invalid destination. */ }
+          }
         }
         target.hidden = true;
         if (own(scope, '.bioco-form-state-success').length === 0 && message) {

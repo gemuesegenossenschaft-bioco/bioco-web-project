@@ -199,6 +199,42 @@ def test_membership_candidate_allows_information_steps_and_independent_review_va
     assert rendered['refused-membership']==[True,True]
 
 
+@pytest.mark.parametrize('destination,allowed', [
+    ('/custom-thanks/',True), ('custom-thanks/',True),
+    (ORIGIN+'/custom-thanks/',True), ('//native-flows.test/custom-thanks/',True),
+    ('',False), ('   ',False), (None,False), (False,False), ({'url':'/custom-thanks/'},False),
+    ('https://foreign.test/custom-thanks/',False), ('//foreign.test/custom-thanks/',False),
+    ('http://native-flows.test/custom-thanks/',False), ('https://[invalid',False),
+    ('javascript:window.redirectExecuted=true',False), ('data:text/html,foreign',False),
+    ('mailto:fixture@example.test',False),
+])
+def test_membership_success_redirect_accepts_only_same_origin_http_destinations(browser,rendered,destination,allowed):
+    page,ctx=open_page(browser,rendered,'membership')
+    try:
+        page.evaluate('''destination=>{
+            var form=document.querySelector('form[data-native-controller]');
+            var config=JSON.parse(form.getAttribute('data-bioco-instance-config'));
+            config.thankYouUrl=destination;
+            form.setAttribute('data-bioco-instance-config',JSON.stringify(config));
+            Array.from(form.elements).forEach(input=>{
+                if (input.type==='checkbox') input.checked=true;
+                else if (input.required) input.value=input.type==='email'?'fixture@example.test':'Fixture';
+            });
+        }''',destination)
+        for _ in range(6): page.locator('[data-wizard-next]').click()
+        page.locator('[type="submit"]').click()
+        if allowed:
+            page.wait_for_url(ORIGIN+'/custom-thanks/')
+            assert page.locator('h1').inner_text()=='Captured thank-you page'
+        else:
+            page.wait_for_function('document.querySelector(".bioco-form-scope").getAttribute("data-bioco-form-state")==="success"')
+            assert page.url==ORIGIN+'/?abo=standard-2-3-personen&shares=4&additional=2'
+            assert page.locator('.bioco-form-state-success').is_visible()
+            assert page.evaluate('window.redirectExecuted===undefined')
+            assert page.evaluate('window.traffic.length')==1
+    finally: ctx.close()
+
+
 def test_native_membership_catalog_mapping_preserves_explicit_empty_adoption(rendered):
     from html.parser import HTMLParser
     class Config(HTMLParser):
