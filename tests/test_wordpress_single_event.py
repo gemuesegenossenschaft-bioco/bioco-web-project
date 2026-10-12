@@ -51,12 +51,19 @@ function get_post_thumbnail_id($id) { return 7; }
 function wp_get_attachment_image_url($id, $size) { return ''; }
 function get_post_meta($id, $key, $single) { global $fixture; return $key === '_et_default' ? ($fixture['default_template'] ?? '1') : 'Article thumbnail'; }
 function home_url($path) { return 'https://example.test' . $path; }
-function add_filter($hook, $callback, $priority = 10, $args = 1) { $GLOBALS['filters'][$hook] = $callback; $GLOBALS['filter_args'][$hook] = $args; }
+function add_filter($hook, $callback, $priority = 10, $args = 1) {
+    $GLOBALS['filters'][$hook] = $callback; $GLOBALS['filter_args'][$hook] = $args;
+    $GLOBALS['filter_registry'][$hook][$priority][] = $callback;
+}
 function add_action($hook, $callback) {}
 function is_singular($types) { global $fixture; return !($fixture['archive'] ?? false) && in_array(get_post_type(42), (array) $types, true); }
 function get_queried_object_id() { return 42; }
 function apply_filters($hook, $value) {
     global $calls;
+    $registered = $GLOBALS['filter_registry'][$hook] ?? [];
+    ksort($registered);
+    foreach ($registered as $callbacks) foreach ($callbacks as $callback) $value = $callback($value);
+    if ($value === '') return '';
     $GLOBALS['layout_input'] = $value;
     $calls[] = 'native_layout_content_filters';
     return '<div>Native layout renderer result</div>';
@@ -73,8 +80,7 @@ function esc_attr($value) { return esc_html($value); }
 function esc_url_raw($value) { return str_starts_with($value, 'https://') ? $value : ''; }
 function the_content() { global $calls, $fixture; $calls[] = 'the_content';
     if (get_post_type(42) === 'bioco_group') {
-        $body = bioco_group_record_content($fixture['body']);
-        if ($body !== '') echo apply_filters('the_content', $body);
+        echo apply_filters('the_content', $fixture['body']);
         return;
     }
     echo '<p>Editor rendered with content filters.</p>';
