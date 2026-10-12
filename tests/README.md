@@ -304,3 +304,8 @@ that excludes only Divi's three generated asset-cache fields. Page visits can
 recompute those fields. Keep their raw differences as evidence, and investigate
 any content, assignment or editorial-metadata change. Concurrent editor revisions
 must be preserved; never restore a stale database to make a comparison pass.
+
+`test_wordpress_native_loop_empty.py` exercises the shared conditional adapter's
+branch cloning, active-loop scope, editor visibility and exception recovery at
+external boundaries. It does not emulate licensed Divi rendering. Run the
+read-only installed-renderer probe and native save/reopen checks separately.
