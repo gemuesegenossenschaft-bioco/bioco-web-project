@@ -26,8 +26,22 @@ $wp_query = (object) ['posts' => array_map(fn($p) => (object)$p, $input['results
 function add_filter($name, $fn, $priority = 10, $argc = 1) { $GLOBALS['hooks'][$name][] = $fn; }
 function add_action($name, $fn, $priority = 10, $argc = 1) { add_filter($name, $fn, $priority, $argc); }
 function add_shortcode($name, $fn) { $GLOBALS['shortcodes'][$name] = $fn; }
-function get_header() { require 'wordpress/web/app/themes/bioco-divi/header.php'; }
-function get_footer() { require 'wordpress/web/app/themes/bioco-divi/footer.php'; }
+define('ET_THEME_BUILDER_HEADER_LAYOUT_POST_TYPE', 'et_header_layout');
+define('ET_THEME_BUILDER_FOOTER_LAYOUT_POST_TYPE', 'et_footer_layout');
+function et_theme_builder_overrides_layout($key) { return $GLOBALS['input']['shell_overrides'][$key] ?? false; }
+function get_header() {
+    // Native Divi hooks both partials when either header OR footer overrides.
+    $native = et_theme_builder_overrides_layout('et_header_layout') || et_theme_builder_overrides_layout('et_footer_layout');
+    if ($native) ob_start();
+    require 'wordpress/web/app/themes/bioco-divi/header.php';
+    if ($native) { ob_end_clean(); echo '<html><body><header>Native header</header>'; }
+}
+function get_footer() {
+    $native = et_theme_builder_overrides_layout('et_header_layout') || et_theme_builder_overrides_layout('et_footer_layout');
+    if ($native) ob_start();
+    require 'wordpress/web/app/themes/bioco-divi/footer.php';
+    if ($native) { ob_end_clean(); echo '<footer>Native footer</footer></body></html>'; }
+}
 function language_attributes() { echo 'lang="de"'; }
 function bloginfo($key) { echo 'UTF-8'; }
 function wp_head() {}
@@ -491,3 +505,35 @@ def test_native_saved_passthrough_accepts_only_approved_neutral_body_domains():
     echo json_encode(compact('accepted','authored'));
     """)
     assert out['accepted'] and not out['authored']
+
+
+@pytest.mark.parametrize('request_kind,results,heading', [
+    ('search', [], 'Keine Treffer gefunden'),
+    ('search', [{'post_title': 'Gemüseabo', 'url': 'https://example.test/abos/'}], 'Suchergebnisse'),
+    ('404', [], 'Seite nicht gefunden'),
+])
+@pytest.mark.parametrize('header,footer', [(False, False), (True, False), (False, True), (True, True)])
+def test_utility_templates_keep_one_main_with_native_or_fallback_shell(request_kind, results, heading, header, footer):
+    out = php(LOAD + INIT + r'''
+    ob_start();
+    require 'wordpress/web/app/themes/bioco-divi/' . (is_404() ? '404.php' : 'search.php');
+    $html=ob_get_clean();
+    echo json_encode(['html'=>$html]);
+    ''', request=request_kind, results=results,
+        shell_overrides={'et_header_layout': header, 'et_footer_layout': footer})
+    html = out['html']
+    assert html.count('<main id="bioco-main-content">') == 1
+    assert html.count('</main>') == 1
+    before, body = html.split('<main id="bioco-main-content">')
+    content, after = body.split('</main>')
+    assert heading in content and '<form' in content
+    assert '<main' not in content and '<header' not in content and '<footer' not in content
+    assert '<header' in before and '<footer' in after
+    if header or footer:
+        assert 'Native header' in before and 'Native footer' in after
+        assert 'Navigation' not in html and 'bioco-site-header' not in html
+    else:
+        assert 'Navigation' in before and 'Footer' in after
+        assert 'Native header' not in html and 'Native footer' not in html
+    if results:
+        assert 'https://example.test/abos/' in content
