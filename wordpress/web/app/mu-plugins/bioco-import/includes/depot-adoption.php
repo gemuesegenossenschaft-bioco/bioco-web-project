@@ -88,8 +88,9 @@ function bioco_depot_adoption_existing(array $blocks): ?array {
     $leaf = bioco_depot_adoption_map_leaf($map['block']);
     $copy = bioco_depot_adoption_source($leaf);
     $transitioned = $copy['intro'] === '' && bioco_record_adoption_value($leaf['attrs'], 'show_address_list', null) === false;
+    $mapClasses = preg_split('/\s+/', bioco_record_adoption_named_attribute($map['block']['attrs']['module'] ?? [], 'class'), -1, PREG_SPLIT_NO_EMPTY);
     if (!$found['cards'] && !$found['loops']) {
-        if ($transitioned) throw new RuntimeException('Native depot cards are missing from a transitioned map.');
+        if (in_array('bioco-native-depot-map-transition', $mapClasses, true)) throw new RuntimeException('Native depot cards are missing from a transitioned map.');
         return null;
     }
     if (!$transitioned || count($found['cards']) !== 1 || count($found['loops']) !== 1) throw new RuntimeException('Mixed or duplicate native depot card transition.');
@@ -125,6 +126,7 @@ function bioco_depot_adoption_tree(array $blocks, array &$report, array $path = 
             $columns[0]['innerBlocks'] = $leaves;
             $rows[0]['innerBlocks'] = $columns;
             $block['innerBlocks'] = $rows;
+            bioco_record_adoption_class($block['attrs'], 'bioco-native-depot-map-transition');
             [$intro, $heading, $cards] = bioco_depot_card_blocks($copy);
             $result[] = $intro;
             $result[] = $block;

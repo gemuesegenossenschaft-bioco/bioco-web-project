@@ -144,6 +144,27 @@ def test_repeat_conversion_keeps_exact_native_body_and_has_no_sql():
     assert sum('bioco-native-depot-cards' in json.dumps(n['attrs']) for n in walk(repeated['blocks'])) == 1
 
 
+def test_empty_intro_and_hidden_address_list_are_valid_first_adoption_values():
+    source = fixture({'intro': '', 'show_address_list': False, 'locations_heading': 'Depots'})
+    result = run(blocks=source)
+    assert 'error' not in result, result
+    assert result['plan']['report'][0]['action'] == 'insert-native-cards'
+    repeated = run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']})
+    assert 'error' not in repeated, repeated
+    assert repeated['plan']['after_content'] == result['plan']['after_content']
+    assert repeated['apply'] == repeated['restore'] == ''
+
+
+def test_pre_marker_completed_adoption_keeps_native_cards_and_source_bytes():
+    native = run(blocks=fixture())['blocks']
+    section = native[0]['innerBlocks'][2]
+    del section['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['class']
+    result = run(blocks=native)
+    assert 'error' not in result, result
+    assert result['blocks'] == result['before']
+    assert result['apply'] == result['restore'] == ''
+
+
 def test_repeat_preserves_editor_copy_module_order_and_responsive_controls():
     native = run(blocks=fixture())['blocks']
     siblings = native[0]['innerBlocks']
