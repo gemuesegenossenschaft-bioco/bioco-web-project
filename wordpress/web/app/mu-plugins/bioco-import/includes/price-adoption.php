@@ -73,6 +73,11 @@ function bioco_price_adoption_table_layout(array $spec): array {
     $data = bioco_price_adoption_table_row($columns, 'bioco-record-loop bioco-price-loop bioco-price-table-data', true);
     $section = bioco_price_adoption_role(bioco_price_layout_section([$header, $data], 'bioco-price-table'), 'table');
     $section['attrs']['module']['decoration']['overflow']['desktop']['value'] = ['x' => 'auto', 'y' => 'visible'];
+    // Centered flex children wider than the scrollport hide the first columns.
+    // Native Section controls keep both edges reachable at every container width.
+    foreach (['desktop', 'tablet', 'phone'] as $device) {
+        $section['attrs']['module']['decoration']['layout'][$device]['value']['alignItems'] = 'flex-start';
+    }
     return [$section];
 }
 

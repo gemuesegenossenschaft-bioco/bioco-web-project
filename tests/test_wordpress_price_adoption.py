@@ -179,7 +179,7 @@ def test_saved_price_table_keeps_five_native_columns_and_authored_cells():
     assert [row['price'] for row in result['plan']['report']['table']['rows']] == ['CHF 750.-', "CHF 1'280.-", "CHF 2'350.-"]
 
 
-def test_native_price_table_grid_controls_contain_mobile_overflow_in_browser():
+def test_native_price_table_scroll_reaches_both_edges_inside_narrow_containers():
     from playwright.sync_api import sync_playwright
     result = run(blocks=fixture('table'))
     table = next(node for node in walk(result['blocks'][0]) if node['blockName'] == 'divi/section'
@@ -187,31 +187,48 @@ def test_native_price_table_grid_controls_contain_mobile_overflow_in_browser():
     rows = table['innerBlocks']
     grid = rows[0]['attrs']['module']['decoration']['layout']['desktop']['value']
     min_width = rows[0]['attrs']['module']['decoration']['sizing']['desktop']['value']['minWidth']
+    section_layout = table['attrs']['module']['decoration'].get('layout', {})
     markup = '<div id="table">' + ''.join(
         '<div class="row">' + ''.join(f'<div class="cell">{index}</div>' for index in range(5)) + '</div>'
         for _ in rows) + '</div>'
-    style = (f'html,body{{margin:0}}body{{width:100%}}#table{{width:100%;max-width:1100px;overflow-x:auto}}'
-             f'.row{{display:{grid["display"]};grid-template-columns:{grid["gridTemplateColumns"]};'
-             f'column-gap:{grid["columnGap"]};min-width:{min_width};box-sizing:border-box}}'
-             '.cell{box-sizing:border-box;padding:12px}')
     with sync_playwright() as pw:
         browser = pw.chromium.launch()
-        for width in (1280, 390):
+        for width, container_width, device in [(1280, 1100, 'desktop'), (1024, 640, 'desktop'),
+                                               (820, 820, 'tablet'), (767, 767, 'phone'), (390, 390, 'phone')]:
+            # The installed native Section is a centered column flexbox before local overrides.
+            # Native local Section controls must override it; block-layout-only tests miss clipped left columns.
+            desktop = section_layout.get('desktop', {}).get('value', {})
+            responsive = section_layout.get(device, {}).get('value', {})
+            alignment = responsive.get('alignItems', desktop.get('alignItems', 'center'))
+            style = (f'html,body{{margin:0}}body{{width:100%}}#table{{width:{container_width}px;'
+                     f'display:flex;flex-direction:column;align-items:{alignment};overflow-x:auto}}'
+                     f'.row{{display:{grid["display"]};grid-template-columns:{grid["gridTemplateColumns"]};'
+                     f'column-gap:{grid["columnGap"]};width:100%;max-width:100%;min-width:{min_width};box-sizing:border-box}}'
+                     '.cell{box-sizing:border-box;padding:12px}')
             page = browser.new_page(viewport={'width': width, 'height': 700})
             page.set_content(f'<style>{style}</style>{markup}')
             measurements = page.evaluate('''() => {
               const table = document.querySelector('#table');
               const rows = [...table.querySelectorAll('.row')];
               return {pageWidth: document.documentElement.scrollWidth,
-                tableWidth: table.clientWidth, contentWidth: table.scrollWidth,
-                columns: rows.map(row => [...row.children].map(cell => Math.round(cell.getBoundingClientRect().left)))};
+                tableLeft: table.getBoundingClientRect().left, tableRight: table.getBoundingClientRect().right,
+                tableWidth: table.clientWidth, contentWidth: table.scrollWidth, scrollLeft: table.scrollLeft,
+                columns: rows.map(row => [...row.children].map(cell => cell.getBoundingClientRect().left))};
             }''')
             assert measurements['columns'][0] == measurements['columns'][1]
             assert measurements['pageWidth'] == width
-            if width == 390:
+            assert measurements['scrollLeft'] == 0
+            assert all(columns[0] >= measurements['tableLeft'] - 0.5 for columns in measurements['columns'])
+            if container_width < 914:
                 assert measurements['contentWidth'] > measurements['tableWidth']
                 page.locator('#table').evaluate('(node) => node.scrollLeft = node.scrollWidth')
-                assert page.locator('#table').evaluate('(node) => node.scrollLeft') > 0
+                edges = page.evaluate('''() => {
+                    const table=document.querySelector('#table');
+                    return {scrollLeft:table.scrollLeft, right:table.getBoundingClientRect().right,
+                        finalCells:[...table.querySelectorAll('.row')].map(row=>row.lastElementChild.getBoundingClientRect().right)};
+                }''')
+                assert edges['scrollLeft'] >= 914 - container_width - 0.5
+                assert all(abs(right - edges['right']) <= 0.5 for right in edges['finalCells'])
             page.close()
         browser.close()
 
