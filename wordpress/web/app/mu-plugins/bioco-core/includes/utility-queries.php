@@ -188,8 +188,8 @@ add_filter('et_theme_builder_template_layouts', function ($layouts) {
     if ($post && $post->post_name === 'bioco-global-body'
         && bioco_utility_is_passthrough(parse_blocks($post->post_content))) {
         // Divi independently overrides header/footer through get_header/get_footer.
-        // Drop only the empty body so utility pages keep the editor's shared shell.
-        unset($layouts[$key]);
+        // Keep Divi's complete slot shape; its frontend indexes override directly.
+        $layouts[$key] = array_replace($body, ['id' => 0, 'enabled' => false, 'override' => false]);
     }
     return $layouts;
 }, 20);
