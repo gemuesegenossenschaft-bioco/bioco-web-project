@@ -50,18 +50,74 @@ function bioco_depot_adoption_markers(array $content, int $children, array $inse
     return $result;
 }
 
+function bioco_depot_adoption_map_leaf(array $section): array {
+    $rows = bioco_record_adoption_children($section);
+    if (count($rows) !== 1 || ($rows[0]['blockName'] ?? '') !== 'divi/row') throw new RuntimeException('Depot map shares a section.');
+    $columns = bioco_record_adoption_children($rows[0]);
+    if (count($columns) !== 1 || ($columns[0]['blockName'] ?? '') !== 'divi/column') throw new RuntimeException('Depot map shares a row.');
+    $leaves = bioco_record_adoption_children($columns[0]);
+    if (count($leaves) !== 1) throw new RuntimeException('Depot map shares a column.');
+    return $leaves[0];
+}
+
+function bioco_depot_adoption_inventory(array $blocks, array &$found, array $path = []): void {
+    foreach ($blocks as $index => $block) {
+        $at = [...$path, $index];
+        $entry = ['path' => $at, 'block' => $block];
+        if (($block['blockName'] ?? '') === 'bioco-divi/depot-map') $found['maps'][] = $entry;
+        if (($block['blockName'] ?? '') === 'divi/section' && bioco_record_adoption_contains($block, 'bioco-divi/depot-map')) $found['sections'][] = $entry;
+        $classes = preg_split('/\s+/', bioco_record_adoption_named_attribute($block['attrs']['module'] ?? [], 'class'), -1, PREG_SPLIT_NO_EMPTY);
+        if (in_array('bioco-native-depot-cards', $classes, true)) $found['cards'][] = $entry;
+        if (in_array('bioco-depot-loop', $classes, true)) $found['loops'][] = $entry;
+        if (!empty($block['innerBlocks'])) bioco_depot_adoption_inventory($block['innerBlocks'], $found, $at);
+    }
+}
+
+function bioco_depot_adoption_native_tree(array $block): bool {
+    if (!str_starts_with((string) ($block['blockName'] ?? ''), 'divi/')) return false;
+    foreach ($block['innerBlocks'] ?? [] as $child) if (!bioco_depot_adoption_native_tree($child)) return false;
+    return true;
+}
+
+/** Recognize the completed transition without rebuilding editor-owned native modules. */
+function bioco_depot_adoption_existing(array $blocks): ?array {
+    $found = ['maps' => [], 'sections' => [], 'cards' => [], 'loops' => []];
+    bioco_depot_adoption_inventory($blocks, $found);
+    if (count($found['maps']) !== 1 || count($found['sections']) !== 1) throw new RuntimeException('Expected exactly one isolated depot map section.');
+    $map = $found['sections'][0];
+    $leaf = bioco_depot_adoption_map_leaf($map['block']);
+    $copy = bioco_depot_adoption_source($leaf);
+    $transitioned = $copy['intro'] === '' && bioco_record_adoption_value($leaf['attrs'], 'show_address_list', null) === false;
+    if (!$found['cards'] && !$found['loops']) {
+        if ($transitioned) throw new RuntimeException('Native depot cards are missing from a transitioned map.');
+        return null;
+    }
+    if (!$transitioned || count($found['cards']) !== 1 || count($found['loops']) !== 1) throw new RuntimeException('Mixed or duplicate native depot card transition.');
+    $cards = $found['cards'][0]; $loop = $found['loops'][0];
+    $query = $loop['block']['attrs']['module']['advanced']['loop']['desktop']['value'] ?? [];
+    $classes = preg_split('/\s+/', bioco_record_adoption_named_attribute($loop['block']['attrs']['module'] ?? [], 'class'), -1, PREG_SPLIT_NO_EMPTY);
+    if (($cards['block']['blockName'] ?? '') !== 'divi/section' || !bioco_depot_adoption_native_tree($cards['block'])
+        || array_slice($cards['path'], 0, -1) !== array_slice($map['path'], 0, -1)
+        || array_slice($loop['path'], 0, count($cards['path'])) !== $cards['path']
+        || ($loop['block']['blockName'] ?? '') !== 'divi/row' || empty($loop['block']['innerBlocks'])
+        || array_filter($loop['block']['innerBlocks'], static fn($child) => ($child['blockName'] ?? '') !== 'divi/column')
+        || !in_array('bioco-record-loop', $classes, true) || !is_array($query)
+        || ($query['enable'] ?? '') !== 'on' || ($query['queryType'] ?? '') !== 'post_types'
+        || array_column((array) ($query['subTypes'] ?? []), 'value') !== ['bioco_depot']) {
+        throw new RuntimeException('Unsupported native depot card structure.');
+    }
+    return ['path' => $map['path'], 'action' => 'already-adopted',
+        'preserved_map_id' => bioco_record_adoption_named_attribute($leaf['attrs']['module'] ?? [], 'id')];
+}
+
 function bioco_depot_adoption_tree(array $blocks, array &$report, array $path = [], array &$insertions = []): array {
     $result = [];
     foreach ($blocks as $index => $block) {
         $at = [...$path, $index];
         if (($block['blockName'] ?? '') === 'divi/section' && bioco_record_adoption_contains($block, 'bioco-divi/depot-map')) {
-            $rows = bioco_record_adoption_children($block);
-            if (count($rows) !== 1 || ($rows[0]['blockName'] ?? '') !== 'divi/row') throw new RuntimeException('Depot map shares a section.');
-            $columns = bioco_record_adoption_children($rows[0]);
-            if (count($columns) !== 1 || ($columns[0]['blockName'] ?? '') !== 'divi/column') throw new RuntimeException('Depot map shares a row.');
-            $leaves = bioco_record_adoption_children($columns[0]);
-            if (count($leaves) !== 1) throw new RuntimeException('Depot map shares a column.');
-            $copy = bioco_depot_adoption_source($leaves[0]);
+            $leaf = bioco_depot_adoption_map_leaf($block);
+            $copy = bioco_depot_adoption_source($leaf);
+            $rows = $block['innerBlocks']; $columns = $rows[0]['innerBlocks']; $leaves = [$leaf];
             // Only presentation fragments move; functional marker/view settings and
             // the module's saved ID stay on this same map leaf.
             $leaves[0]['attrs']['intro'] = ['innerContent' => ['desktop' => ['value' => '']]];
@@ -100,10 +156,13 @@ function bioco_depot_adoption_plan(array $record, string $site): array {
         throw new RuntimeException('Expected one complete published depot page snapshot.');
     }
     foreach (array_diff($columns, ['ID']) as $column) if (!is_string($record[$column])) throw new RuntimeException('Invalid depot snapshot value.');
-    $report = [];
-    $blocks = bioco_depot_adoption_tree(parse_blocks($record['post_content']), $report);
+    $report = []; $blocks = parse_blocks($record['post_content']);
+    $existing = bioco_depot_adoption_existing($blocks);
+    if ($existing !== null) $report[] = $existing;
+    else $blocks = bioco_depot_adoption_tree($blocks, $report);
     if (count($report) !== 1) throw new RuntimeException('Expected exactly one depot map section.');
-    $plan = ['version' => 1, 'site' => $site, 'before' => $record, 'after_content' => serialize_blocks($blocks), 'report' => $report];
+    $plan = ['version' => 1, 'site' => $site, 'before' => $record,
+        'after_content' => $existing !== null ? $record['post_content'] : serialize_blocks($blocks), 'report' => $report];
     $plan['fingerprint'] = hash('sha256', json_encode($plan));
     return $plan;
 }
@@ -113,6 +172,7 @@ function bioco_depot_adoption_sql(array $plan, string $expected, bool $restore =
     if (($plan['version'] ?? null) !== 1 || !isset($plan['before']) || !is_array($plan['before'])) throw new RuntimeException('Invalid depot adoption plan.');
     $verified = bioco_depot_adoption_plan($plan['before'], $plan['site'] ?? '');
     if ($verified !== $plan || !hash_equals($verified['fingerprint'], $expected)) throw new RuntimeException('Depot adoption preview changed.');
+    if ($plan['after_content'] === $plan['before']['post_content']) return '';
     $guards = [];
     foreach ($plan['before'] as $column => $value) {
         if ($restore && $column === 'post_content') $value = $plan['after_content'];
