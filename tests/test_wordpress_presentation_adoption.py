@@ -1,4 +1,6 @@
-"""Native Button and intro saved-content conversion, without hosted writes."""
+"""Native Button and intro saved-content conversion, without hosted writes.
+See the Keep/Replace/Remove map in tests/README.md. Presentation preview, required fixture and separate captured content adoption gate.
+"""
 import copy
 import json
 import re
@@ -394,3 +396,10 @@ def test_preview_keeps_opaque_markup_native_ids_and_unrelated_attributes():
                  for key, value in entry.items() if key != 'attrs'} for entry in blocks]
 
     assert structure(after) == structure(before)
+
+
+def test_noncanonical_serialization_preserves_exact_source_without_adoption():
+    source = serialize(fixture()).replace('<!-- wp:divi/section ', '<!-- wp:divi/section  ', 1)
+    result = run(content=source)
+    assert result == {'content': source, 'changed': 0, 'report': [
+        {'path': [], 'action': 'preserve', 'reason': 'non-roundtrip-content'}]}

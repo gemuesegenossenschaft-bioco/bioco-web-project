@@ -1,4 +1,6 @@
-"""Native CTA/topic previews preserve saved blocks and refuse unknown styles."""
+"""Native CTA/topic previews preserve saved blocks and refuse unknown styles.
+See the Keep/Replace/Remove map in tests/README.md. CTA preview, required fixture and separate native save/reopen gate.
+"""
 import copy
 import json
 import subprocess
@@ -167,3 +169,13 @@ def test_phone_legacy_class_and_authored_heading_css_require_review():
     del heading['attrs']['css']
     heading['attrs']['module']['advanced'] = {'htmlAttributes': {'phone': {'value': {'class': 'bioco-divi-title'}}}}
     assert 'separate review' in run(source)['error']
+
+
+def test_missing_measured_rounded_class_refuses_without_changing_source():
+    source = fixture()
+    source[0]['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][0]['value'] = (
+        source[0]['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][0]['value']
+        .replace('bioco-divi-rounded-xl', '').strip())
+    result = run(source)
+    assert result['error'] == 'Incomplete measured CTA/text-column variant.'
+    assert result['input'] == source

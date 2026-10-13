@@ -256,8 +256,14 @@ function bioco_import_presentation_tree(array $blocks, array &$report, array $pa
 }
 
 function bioco_import_presentation_content(string $content): array {
+    $parsed = parse_blocks($content);
+    if (serialize_blocks($parsed) !== $content) {
+        return ['content' => $content, 'changed' => 0, 'report' => [
+            ['path' => [], 'action' => 'preserve', 'reason' => 'non-roundtrip-content'],
+        ]];
+    }
     $report = [];
-    $blocks = bioco_import_presentation_tree(parse_blocks($content), $report);
+    $blocks = bioco_import_presentation_tree($parsed, $report);
     $changed = count(array_filter($report, static fn($row) => in_array($row['action'], ['button', 'intro'], true)));
     return ['content' => $changed ? serialize_blocks($blocks) : $content, 'changed' => $changed, 'report' => $report];
 }

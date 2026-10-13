@@ -87,6 +87,7 @@ function bioco_editorial_cta_native_visit(array &$blocks, array &$report): void 
                 throw new RuntimeException('Unmeasured CTA/text-column variant.');
             }
         }
+        if (array_diff($expected, $classes)) throw new RuntimeException('Incomplete measured CTA/text-column variant.');
         $rows =& $section['innerBlocks'];
         if (!is_array($rows) || !$rows || ($cta && count($rows) !== 1)) throw new RuntimeException('Unexpected CTA/text-column rows.');
         bioco_editorial_cta_fill($section, ['module','decoration','background'], ['color'=>$cta ? '#FFFFFF' : '#F5F1E8']);

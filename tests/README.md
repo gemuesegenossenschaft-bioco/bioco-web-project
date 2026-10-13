@@ -249,6 +249,14 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 
 | File | Keep/Replace/Remove | Evidence |
 | --- | --- | --- |
+| `test_wordpress_home_presentation_preview.py` | Keep, required (#214, #220) | Missing-only native homepage controls preserve authored values and refuse unknown variants. Installed style and GUI save/reopen checks remain separate. |
+| `test_wordpress_editorial_cards_preview.py` | Keep, required (#214) | Real pure cards/gallery conversion preserves saved content, responsive values and preset conflicts. Installed styles and GUI persistence remain separate. |
+| `test_wordpress_editorial_cta_preview.py` | Keep, required (#214) | Real pure CTA/topic conversion preserves exact content and refuses unmeasured class sets and presets. Native save/reopen remains separate. |
+| `test_wordpress_editorial_presentation_preview.py` | Keep, required (#214) | Executed PHP media/rich preview guards preserve authored styles, content and responsive inheritance. Hosted GUI persistence remains separate. |
+| `test_wordpress_presentation_adoption.py` | Keep, required (#214) | Presentation preview gate uses actual parser and conditional SQL to preserve source bytes, explicit values and editor conflicts. Full metadata/site guards and public adoption remain separate operator checks. |
+| `test_wordpress_shell_wrapper_adoption.py` | Keep, required (#249) | Private snapshot plans preserve module settings, assignments, preset defaults and global values. Installed style/operator and native GUI checks remain separate. |
+| `test_wordpress_steps_native_preview.py` | Keep, required (#214) | Bounded structural conversion creates native step cards from measured saved HTML, preserves paragraph/anchor bytes and refuses authored variants. Installed module styles and GUI expansion remain separate. |
+| `test_wordpress_secondary_presentation_preview.py` | Keep, required (#214) | Measured accordion and portal defaults preserve exact modules, links, native values and controller classes; opaque steps are refused. Installed style and save/reopen checks remain separate. |
 | `test_wordpress_navigation_layout.py` | Keep, new (#249) | Real PHP saved-header renderer and Chromium CSS/JS prove equal header geometry on home, inner pages and a CPT boundary; desktop/mobile overflow, logo bounds, sticky utility collapse, keyboard menu/focus and saved design variables. The later Divi list rule is a controlled boundary. Actual Divi save/reopen and staging/production route parity remain separate release proofs. Required PR coverage. |
 | `test_wordpress_event_back_button.py` | Keep, new (#217) | Real saved-layout generators, WordPress parser and Chromium wrapping/focus checks. Licensed preset rendering and native save/reopen remain hosted checks. |
 | `test_wordpress_back_button_adoption.py` | Keep, new (#217) | Actual converter and exported SQL exercise percent escaping, byte-exact conditional apply/restore, idempotence and editor-conflict refusal. SQLite replaces MySQL execution; installed WordPress and hosted adoption remain operator checks. |
@@ -395,3 +403,5 @@ To reproduce the dropped numeric defaults with the same installed APIs, add
 `BIOCO_NUMERIC_SOURCE_REF=63914c0428e0cd5ba8edd1db1356d5f056a9a31d`.
 Both cases must fail on empty radius values before the fix. Local adoption tests
 verify payload and preservation contracts; they do not prove Divi CSS rendering.
+
+The measured accordion and portal defaults have a separate pure preview in `secondary-presentation-preview.php`. Its required tests preserve explicit responsive values, controller classes, content and links, and refuse opaque step HTML. The installed native module style check and later save/reopen proof remain separate from fixture tests.

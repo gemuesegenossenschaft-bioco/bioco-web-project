@@ -1,4 +1,6 @@
-"""Run the native media/rich-text preservation checks in the normal PR gate."""
+"""Run the native media/rich-text preservation checks in the normal PR gate.
+See the Keep/Replace/Remove map in tests/README.md. Media/rich preview, required fixture and separate native save/reopen gate.
+"""
 import subprocess
 from pathlib import Path
 

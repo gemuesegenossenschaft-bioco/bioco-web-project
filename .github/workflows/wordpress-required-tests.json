@@ -53,7 +53,9 @@
     "tests/test_wordpress_editorial_cta_preview.py",
     "tests/test_wordpress_editorial_presentation_preview.py",
     "tests/test_wordpress_shell_wrapper_adoption.py",
-    "tests/test_wordpress_presentation_adoption.py"
+    "tests/test_wordpress_presentation_adoption.py",
+    "tests/test_wordpress_secondary_presentation_preview.py",
+    "tests/test_wordpress_steps_native_preview.py"
   ],
   "operator_only_nodes": [
     "tests/test_wordpress_forms_lifecycle.py::test_wordpress_runtime_emits_runtime_before_adapters_without_blocking_turnstile",

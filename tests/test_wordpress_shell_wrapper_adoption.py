@@ -2,6 +2,8 @@
 
 Content is synthetic. Installed Divi parser/style proof is an explicit operator
 check; SQLite's binary comparison is not evidence of a hosted MySQL write.
+
+See tests/README.md Keep/Replace/Remove map: shell wrappers, private snapshot and installed operator gate.
 """
 import copy
 import json
@@ -170,6 +172,29 @@ def test_global_default_preset_is_preserved_without_expansion_or_registry_change
     result = run(fixture(), ctx=ctx)
     assert result['plan']['changed'] == 4
     assert wrappers(result['blocks'])[1]['attrs'] == wrappers(result['before_blocks'])[1]['attrs']
+    assert result['plan']['context']['presets'] == ctx['presets']
+
+
+@pytest.mark.parametrize('domain', ['sizing', 'spacing'])
+def test_group_default_preserves_inherited_domain_without_blocking_other_defaults(domain):
+    ctx = context()
+    preset_id = 'qa-' + domain
+    inherited = {'width': '80%'} if domain == 'sizing' else {'padding': {'top': '28px'}}
+    ctx['presets']['group'] = {'divi/' + domain: {
+        'default': preset_id,
+        'items': {preset_id: {'type': 'group', 'name': 'QA ' + domain,
+                              'moduleName': 'divi/section', 'groupName': 'divi/' + domain,
+                              'groupId': 'module.decoration.' + domain,
+                              'attrs': {'module': {'decoration': {domain: {'desktop': {'value': inherited}}}}}}}
+    }}
+    result = run(fixture(), ctx=ctx)
+    assert result['plan']['changed'] == 3
+    other = 'spacing' if domain == 'sizing' else 'sizing'
+    for path, node in zip(([0], [0, 0], [0, 0, 0]), wrappers(result['blocks'])):
+        assert domain not in node['attrs']['module']['decoration']
+        assert other in node['attrs']['module']['decoration']
+        assert {'path': path, 'domain': domain, 'action': 'preserve',
+                'reason': 'global-default-group-preset'} in result['plan']['report']
     assert result['plan']['context']['presets'] == ctx['presets']
 
 

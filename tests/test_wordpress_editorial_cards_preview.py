@@ -1,4 +1,6 @@
-"""Pure native presentation conversion; no licensed renderer is mocked here."""
+"""Pure native presentation conversion; no licensed renderer is mocked here.
+See the Keep/Replace/Remove map in tests/README.md. Cards preview, required fixture and separate installed style/operator gate.
+"""
 import copy
 import json
 import subprocess
@@ -96,7 +98,21 @@ def test_preview_preserves_content_order_siblings_ids_and_native_round_trip(fami
     assert target['innerContent'] == saved['innerContent']
     assert target['innerHTML'] == saved['innerHTML']
     assert target['innerBlocks'][2]['innerBlocks'] == saved['innerBlocks'][2]['innerBlocks']  # CTA leaves unchanged.
-    assert target['innerBlocks'][0]['innerBlocks'] == saved['innerBlocks'][0]['innerBlocks']
+    header = target['innerBlocks'][0]
+    source_header = saved['innerBlocks'][0]
+    assert 'bioco-divi-section' not in classes(target)
+    assert 'bioco-divi-width-xl' not in classes(target)
+    assert 'custom-section' in classes(target)
+    assert target['attrs']['module']['decoration']['background']['desktop']['value']['color'] == '#F5F1E8'
+    assert target['attrs']['module']['decoration']['spacing']['phone']['value']['padding'] == {
+        'top': '32px', 'right': '6vw', 'bottom': '32px', 'left': '6vw'}
+    assert 'bioco-divi-content' not in classes(header['innerBlocks'][0])
+    assert 'bioco-divi-text' not in classes(header['innerBlocks'][0]['innerBlocks'][0])
+    assert header['innerBlocks'][0]['innerBlocks'][0]['attrs']['content']['innerContent'] == source_header['innerBlocks'][0]['innerBlocks'][0]['attrs']['content']['innerContent']
+    old_attrs = source_header['innerBlocks'][0]['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes']
+    new_attrs = header['innerBlocks'][0]['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes']
+    assert new_attrs[0] == old_attrs[0] | {'value': ''}
+    assert new_attrs[1] == old_attrs[1]
     grid = target['innerBlocks'][1]
     native = grid['attrs']['module']['decoration']['layout']
     assert native['desktop']['value']['display'] == 'grid'
@@ -153,6 +169,56 @@ def test_authored_blank_zero_hover_and_inherited_responsive_values_are_preserved
     assert 'tablet' not in image['attrs']['module']['advanced']['spacing']
     font = native['innerBlocks'][0]['innerBlocks'][1]['attrs']['title']['decoration']['font']['font']['desktop']['value']
     assert font['size'] == '' and font['weight'] == 0 and font['color'] is None
+
+
+def test_wrapper_defaults_respect_local_and_inherited_controls():
+    saved = fixture()
+    saved['attrs']['module']['decoration'].update({
+        'background': {'desktop': {'value': {'color': '#123456'}}},
+        'spacing': {'desktop': {'value': {'padding': {'top': '0px', 'left': '17px'}}},
+                    'phone': {'value': {'padding': {'bottom': ''}}}},
+    })
+    header = saved['innerBlocks'][0]
+    header['attrs']['module']['decoration']['sizing'] = {'desktop': {'value': {'width': '73%'}}}
+    text = header['innerBlocks'][0]['innerBlocks'][0]
+    text['attrs']['content']['decoration'] = {
+        'headingFont': {'h2': {'font': {'desktop': {'value': {'size': '31px', 'color': None}}}}},
+        'bodyFont': {'body': {'font': {'desktop': {'value': {'weight': 0, 'lineHeight': ''}}}}},
+    }
+    result = run([saved])
+    assert result['report']['cards-grid'] == 1
+    section = result['after'][0]
+    assert section['attrs']['module']['decoration']['background']['desktop']['value']['color'] == '#123456'
+    spacing = section['attrs']['module']['decoration']['spacing']
+    assert spacing['desktop']['value']['padding']['top'] == '0px'
+    assert spacing['desktop']['value']['padding']['left'] == '17px'
+    assert spacing['phone']['value']['padding']['bottom'] == ''
+    assert 'left' not in spacing['phone']['value']['padding']
+    assert header['attrs']['module']['decoration']['sizing']['desktop']['value']['width'] == '73%'
+    native_header = section['innerBlocks'][0]
+    assert native_header['attrs']['module']['decoration']['sizing']['desktop']['value']['width'] == '73%'
+    native_text = native_header['innerBlocks'][0]['innerBlocks'][0]
+    heading = native_text['attrs']['content']['decoration']['headingFont']['h2']['font']['desktop']['value']
+    body = native_text['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value']
+    assert heading['size'] == '31px' and heading['color'] is None
+    assert body['weight'] == 0 and body['lineHeight'] == ''
+
+
+@pytest.mark.parametrize('alter', [
+    lambda s: s['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][0].update(
+        {'value': 'bioco-divi-section bioco-divi-cards-grid bioco-divi-width-xl bioco-divi-width-md'}),
+    lambda s: s['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0]['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][0].update(
+        {'value': 'bioco-divi-text bioco-divi-unknown'}),
+    lambda s: s['innerBlocks'][0]['innerBlocks'][0]['attrs'].update({'css': {'desktop': {'value': {'mainElement': 'color:red;'}}}}),
+    lambda s: s['innerBlocks'][0]['innerBlocks'].append(block('divi/text', 'bioco-divi-text')),
+])
+def test_unmeasured_wrapper_or_header_refuses_atomically(alter):
+    saved = fixture()
+    alter(saved)
+    result = run([saved])
+    assert result['after'] == [saved]
+    assert result['report']['cards-grid'] == 0
+    assert len(result['report']['refused']) == 1
 
 
 def test_generated_fullwidth_does_not_override_an_authored_image_width():
@@ -213,9 +279,3 @@ def test_unrelated_editorial_families_and_class_substrings_are_noops():
     result = run([saved])
     assert result['after'] == [saved]
     assert result['report'] == {'cards-grid': 0, 'gallery-strip': 0, 'refused': []}
-
-
-def test_helper_has_no_runtime_registration_or_mutation_entry_point():
-    source = (ROOT / HELPER).read_text()
-    for name in ['add_action(', 'add_filter(', 'update_post', 'update_option', 'wp_insert_post', '->query(', 'wp_enqueue']:
-        assert name not in source

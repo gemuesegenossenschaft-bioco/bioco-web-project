@@ -1,92 +1,27 @@
 <?php
 /** Pure native preview for saved cards-grid/gallery-strip presentation. */
 if (!defined('ABSPATH')) exit;
-require_once __DIR__ . '/editorial-layouts.php';
-
-/** Missing means absent: explicit blank, null, zero and false remain authored. */
-function bioco_cards_preview_missing(array $saved, array $defaults): array {
-    foreach ($defaults as $key => $value) {
-        if (!array_key_exists($key, $saved)) $saved[$key] = $value;
-        elseif (is_array($saved[$key]) && is_array($value)) $saved[$key] = bioco_cards_preview_missing($saved[$key], $value);
-    }
-    return $saved;
-}
-
-/** Do not create a responsive fallback which masks an authored inherited value. */
-function bioco_cards_preview_inherited(array $defaults, array $inherited): array {
-    foreach ($defaults as $key => $value) {
-        if (!array_key_exists($key, $inherited)) continue;
-        if (is_array($value) && is_array($inherited[$key])) {
-            $defaults[$key] = bioco_cards_preview_inherited($value, $inherited[$key]);
-            if (!$defaults[$key]) unset($defaults[$key]);
-        } else unset($defaults[$key]);
-    }
-    return $defaults;
-}
+require_once __DIR__ . '/editorial-native-preview-values.php';
 
 function bioco_cards_preview_fill(array &$block, array $path, array $devices): void {
-    $node =& $block['attrs'];
-    foreach ($path as $key) {
-        if (!is_array($node)) throw new RuntimeException('Unsupported saved native attribute shape.');
-        if (!array_key_exists($key, $node)) $node[$key] = [];
-        $node =& $node[$key];
-    }
-    if (!is_array($node)) throw new RuntimeException('Unsupported saved native control.');
-    $original = $node;
-    foreach ($devices as $device => $defaults) {
-        $inherited = [];
-        foreach (['desktop', 'tablet', 'phone'] as $ancestor) {
-            if ($ancestor === $device) break;
-            if (isset($original[$ancestor]['value'])) {
-                if (!is_array($original[$ancestor]['value'])) throw new RuntimeException('Unsupported responsive native value.');
-                $inherited = array_replace_recursive($inherited, $original[$ancestor]['value']);
-            }
-        }
-        $defaults = bioco_cards_preview_inherited($defaults, $inherited);
-        if (!$defaults) continue;
-        if (!array_key_exists($device, $node)) $node[$device] = [];
-        if (!is_array($node[$device])) throw new RuntimeException('Unsupported saved native breakpoint.');
-        if (!array_key_exists('value', $node[$device])) $node[$device]['value'] = [];
-        if (!is_array($node[$device]['value'])) throw new RuntimeException('Unsupported saved native value.');
-        $node[$device]['value'] = bioco_cards_preview_missing($node[$device]['value'], $defaults);
-    }
+    bioco_editorial_native_fill($block, $path, $devices);
 }
 
-/** Remove only exact reviewed tokens; retain attribute IDs, unrelated classes and IDs. */
 function bioco_cards_preview_remove(array &$block, array $remove): void {
-    foreach (['advanced' => 'htmlAttributes', 'decoration' => 'attributes'] as $group => $control) {
-        foreach ($block['attrs']['module'][$group][$control] ?? [] as $device => $states) {
-            foreach ($states as $state => $value) {
-                if ($device === 'desktop' && $state === 'value') continue;
-                $classes = $group === 'advanced' ? [$value['class'] ?? ''] : array_column(array_filter($value['attributes'] ?? [], static fn($a) => ($a['name'] ?? '') === 'class'), 'value');
-                foreach ($classes as $class) {
-                    if (!is_string($class)) throw new RuntimeException('Unsupported saved class value.');
-                    if (array_intersect($remove, preg_split('/\s+/', $class, -1, PREG_SPLIT_NO_EMPTY))) throw new RuntimeException('Responsive or state-specific legacy classes require separate review.');
-                }
-            }
-        }
-    }
-    $classes = preg_split('/\s+/', bioco_import_editorial_class($block), -1, PREG_SPLIT_NO_EMPTY);
-    $class = implode(' ', array_values(array_diff($classes, $remove)));
-    // Do not manufacture a second class control when only the editable list exists.
-    if (array_key_exists('class', $block['attrs']['module']['advanced']['htmlAttributes']['desktop']['value'] ?? [])) {
-        $block['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['class'] = $class;
-    }
-    foreach ($block['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'] ?? [] as $index => $attribute) {
-        if (($attribute['name'] ?? '') === 'class') $block['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][$index]['value'] = $class;
-    }
+    bioco_editorial_native_remove($block, $remove);
 }
 
 function bioco_cards_preview_presets(array $block): void {
-    $hasPreset = static function(array $values) use (&$hasPreset): bool {
-        foreach ($values as $key => $value) {
-            if (in_array($key, ['modulePreset', 'groupPreset', 'presetId'], true) && !empty($value)) return true;
-            if (is_array($value) && $hasPreset($value)) return true;
+    bioco_editorial_native_presets($block);
+}
+
+function bioco_cards_preview_known_classes(array $block, array $known): void {
+    $classes = preg_split('/\s+/', bioco_import_editorial_class($block), -1, PREG_SPLIT_NO_EMPTY);
+    foreach ($classes as $class) {
+        if (str_starts_with($class, 'bioco-divi-') && !in_array($class, $known, true)) {
+            throw new RuntimeException('Unmeasured family presentation class.');
         }
-        return false;
-    };
-    if ($hasPreset($block['attrs'] ?? [])) throw new RuntimeException('Effective shared preset capture is required before presentation conversion.');
-    foreach ($block['innerBlocks'] ?? [] as $child) bioco_cards_preview_presets($child);
+    }
 }
 
 /** The exact old composer block placeholder is not an authored layout choice. */
@@ -105,6 +40,40 @@ function bioco_cards_preview_row(array &$row): void {
         'margin' => ['top' => '0px', 'bottom' => '0px'],
     ]]);
     bioco_cards_preview_remove($row, ['bioco-divi-row']);
+}
+
+/** The saved cards/gallery header is one Text module containing an h2 and paragraph. */
+function bioco_cards_preview_header(array &$row, string $base): void {
+    $children = $row['innerBlocks'] ?? [];
+    if (count($children) !== 1 || ($children[0]['blockName'] ?? '') !== 'divi/column'
+        || count($children[0]['innerBlocks'] ?? []) !== 1
+        || ($children[0]['innerBlocks'][0]['blockName'] ?? '') !== 'divi/text'
+        || !empty($children[0]['innerBlocks'][0]['innerBlocks'])
+        || !bioco_import_editorial_has_class($children[0], 'bioco-divi-content')
+        || !bioco_import_editorial_has_class($children[0]['innerBlocks'][0], 'bioco-divi-text')) {
+        throw new RuntimeException('Unmeasured family header structure.');
+    }
+    $column =& $row['innerBlocks'][0];
+    $text =& $column['innerBlocks'][0];
+    if (!is_string($text['attrs']['content']['innerContent']['desktop']['value'] ?? null)) {
+        throw new RuntimeException('Unmeasured family header content.');
+    }
+    foreach ([$row, $column, $text] as $part) {
+        if (!empty($part['attrs']['css'])) throw new RuntimeException('Authored family header CSS requires native review.');
+    }
+    bioco_cards_preview_known_classes($row, [$base . '-header']);
+    bioco_cards_preview_known_classes($column, ['bioco-divi-content']);
+    bioco_cards_preview_known_classes($text, ['bioco-divi-text']);
+    bioco_cards_preview_fill($column, ['module', 'decoration', 'sizing'], ['desktop' => ['width' => '100%']]);
+    bioco_cards_preview_fill($text, ['content', 'decoration', 'bodyFont', 'body', 'font'], ['desktop' => [
+        'family' => 'DM Sans', 'size' => '16px', 'weight' => '500', 'lineHeight' => '1.7em', 'color' => '#1A1A1A',
+    ]]);
+    bioco_cards_preview_fill($text, ['content', 'decoration', 'headingFont', 'h2', 'font'], ['desktop' => [
+        'family' => 'DM Sans', 'size' => '26px', 'weight' => '500', 'lineHeight' => '1em', 'color' => '#333333',
+    ]]);
+    bioco_cards_preview_remove($column, ['bioco-divi-content']);
+    bioco_cards_preview_remove($text, ['bioco-divi-text']);
+    bioco_cards_preview_remove($row, [$base . '-header']);
 }
 
 function bioco_cards_preview_image(array &$image, array $ratio, string $radius, bool $card): void {
@@ -131,6 +100,11 @@ function bioco_cards_preview_image(array &$image, array $ratio, string $radius, 
 function bioco_cards_preview_section(array $section, string $family): array {
     bioco_cards_preview_presets($section);
     $base = 'bioco-divi-' . $family;
+    if (($section['blockName'] ?? '') !== 'divi/section' || !bioco_import_editorial_has_class($section, 'bioco-divi-section')
+        || !bioco_import_editorial_has_class($section, 'bioco-divi-width-xl') || !empty($section['attrs']['css'])) {
+        throw new RuntimeException('Unmeasured family section wrapper.');
+    }
+    bioco_cards_preview_known_classes($section, ['bioco-divi-section', 'bioco-divi-width-xl', $base]);
     $grids = [];
     foreach ($section['innerBlocks'] ?? [] as $index => $row) if (bioco_import_editorial_has_class($row, $base . '-row')) $grids[] = $index;
     if (count($grids) !== 1) throw new RuntimeException('Expected exactly one family grid row.');
@@ -205,11 +179,18 @@ function bioco_cards_preview_section(array $section, string $family): array {
         else {
             $roles = array_intersect([$base . '-header', $base . '-actions'], preg_split('/\s+/', bioco_import_editorial_class($row), -1, PREG_SPLIT_NO_EMPTY));
             if (count($roles) !== 1) throw new RuntimeException('Unrecognized family sibling row.');
-            bioco_cards_preview_remove($row, array_values($roles));
+            if (in_array($base . '-header', $roles, true)) bioco_cards_preview_header($row, $base);
+            else bioco_cards_preview_remove($row, array_values($roles));
         }
     }
     unset($row);
-    bioco_cards_preview_remove($section, [$base]);
+    bioco_cards_preview_fill($section, ['module', 'decoration', 'background'], ['desktop' => ['color' => '#F5F1E8']]);
+    bioco_cards_preview_fill($section, ['module', 'decoration', 'sizing'], ['desktop' => ['width' => '100%', 'maxWidth' => 'none']]);
+    bioco_cards_preview_fill($section, ['module', 'decoration', 'spacing'], [
+        'desktop' => ['padding' => ['top' => '54px', 'right' => '0px', 'bottom' => '54px', 'left' => '0px']],
+        'phone' => ['padding' => ['top' => '32px', 'right' => '6vw', 'bottom' => '32px', 'left' => '6vw']],
+    ]);
+    bioco_cards_preview_remove($section, ['bioco-divi-section', 'bioco-divi-width-xl', $base]);
     return $section;
 }
 

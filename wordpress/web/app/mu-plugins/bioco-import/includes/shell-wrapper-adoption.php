@@ -66,6 +66,10 @@ function bioco_shell_wrapper_defaults(array &$block, array $path, string $slot, 
     foreach (['sizing' => ['width' => '100%', 'maxWidth' => 'none'],
         'spacing' => ['margin' => array_fill_keys(['top', 'right', 'bottom', 'left'], '0px'),
                       'padding' => array_fill_keys(['top', 'right', 'bottom', 'left'], '0px')]] as $domain => $values) {
+        if (!empty($presets['group']['divi/' . $domain]['default'])) {
+            $report[] = ['path' => $path, 'domain' => $domain, 'action' => 'preserve', 'reason' => 'global-default-group-preset'];
+            continue;
+        }
         if (array_key_exists($domain, $attrs['module']['decoration'] ?? [])) {
             $report[] = ['path' => $path, 'domain' => $domain, 'action' => 'preserve', 'reason' => 'authored-domain'];
             continue;

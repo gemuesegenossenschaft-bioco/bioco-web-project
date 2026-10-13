@@ -22,7 +22,9 @@ def probe():
     host = os.environ.get('BIOCO_DIVI_NATIVE_SSH')
     path = os.environ.get('BIOCO_DIVI_NATIVE_WP_PATH')
     assert host and path, 'Installed WordPress/Divi SSH host and path are mandatory for this explicit gate.'
-    candidate = HELPER.read_text().removeprefix('<?php').replace("require_once __DIR__ . '/editorial-layouts.php';", '')
+    candidate = HELPER.read_text().removeprefix('<?php').replace("require_once __DIR__ . '/editorial-native-preview-values.php';", '')
+    shared = (HELPER.parent / 'editorial-native-preview-values.php').read_text().removeprefix('<?php').replace("require_once __DIR__ . '/editorial-layouts.php';", '')
+    candidate = shared + '\n' + candidate
     code = r'''
 if(!function_exists('bioco_import_editorial_class'))require WPMU_PLUGIN_DIR.'/bioco-import/includes/editorial-layouts.php';
 ''' + "eval(base64_decode('" + base64.b64encode(candidate.encode()).decode() + "'));" + r'''
