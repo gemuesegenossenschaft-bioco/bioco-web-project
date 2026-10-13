@@ -271,7 +271,7 @@ def test_theme_bootstrap_registers_command_and_retains_custom_theme_builder_body
     $custom = apply_filters('et_theme_builder_template_layouts', $layouts);
     echo json_encode(['fallback'=>$fallback, 'custom'=>$custom, 'original'=>$layouts, 'commands'=>array_keys($commands)]);
     ''', request='search')
-    assert out['fallback'] == []
+    assert out['fallback'] == {key: value for key, value in out['original'].items() if key != 'et_body_layout'}
     assert out['custom'] == out['original']
     assert 'bioco utility-layouts' in out['commands']
 
@@ -404,7 +404,8 @@ def test_actual_native_saved_default_body_delegates_to_published_utility(mode, r
     out = php(LOAD + INIT + r"""
     $body = file_get_contents('tests/fixtures/production-native-body-301.html');
     $posts[301] = (object)['ID'=>301, 'post_type'=>'et_body_layout', 'post_status'=>'publish', 'post_name'=>'bioco-global-body', 'post_content'=>$body];
-    $layouts = ['et_body_layout'=>['id'=>301, 'enabled'=>true], 'et_header_layout'=>['id'=>299, 'enabled'=>true]];
+    $layouts = ['et_template'=>298, 'et_body_layout'=>['id'=>301, 'enabled'=>true],
+      'et_header_layout'=>['id'=>299, 'enabled'=>true], 'et_footer_layout'=>['id'=>303, 'enabled'=>true]];
     $before = $posts[301]->post_content;
     // The old raw-shape comparison rejects the normal editor save and leaves a
     // Post Content module with no queried post: its projected body is blank.
@@ -419,11 +420,12 @@ def test_actual_native_saved_default_body_delegates_to_published_utility(mode, r
     }
     $writes = [];
     $delegated = apply_filters('et_theme_builder_template_layouts', $layouts);
-    $html = $delegated === [] ? bioco_utility_render() : render_native(parse_blocks($body));
+    $html = empty($delegated['et_body_layout']['enabled']) ? bioco_utility_render() : render_native(parse_blocks($body));
     echo json_encode(compact('old_match','old_projection','delegated','html','before','body','writes','layouts'));
     """, request=mode, results=results)
     assert not out['old_match'] and out['old_projection'] == ''
-    assert out['delegated'] == [] and expected in out['html']
+    assert out['delegated'] == {key: value for key, value in out['layouts'].items() if key != 'et_body_layout'}
+    assert expected in out['html']
     assert out['before'] == out['body'] and out['writes'] == []
     assert out['layouts']['et_body_layout']['id'] == 301
     if results:

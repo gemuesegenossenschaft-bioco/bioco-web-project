@@ -186,7 +186,11 @@ add_filter('et_theme_builder_template_layouts', function ($layouts) {
     // Default Post Content has no queried post for search/404. Use the child
     // template and existing shared shell only for that known fallback body.
     if ($post && $post->post_name === 'bioco-global-body'
-        && bioco_utility_is_passthrough(parse_blocks($post->post_content))) return [];
+        && bioco_utility_is_passthrough(parse_blocks($post->post_content))) {
+        // Divi independently overrides header/footer through get_header/get_footer.
+        // Drop only the empty body so utility pages keep the editor's shared shell.
+        unset($layouts[$key]);
+    }
     return $layouts;
 }, 20);
 
