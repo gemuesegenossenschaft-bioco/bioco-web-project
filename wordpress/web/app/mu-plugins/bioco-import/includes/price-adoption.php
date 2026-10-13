@@ -118,6 +118,154 @@ function bioco_price_adoption_table_row(array $cells, string $class, bool $loop 
     return bioco_price_adoption_role($row, 'row');
 }
 
+/** Add only responsive layout attributes; also applies to owned QA copies of saved rows. */
+function bioco_price_adoption_invoice_responsive(array $row, bool $header = false): array {
+    if (count($row['innerBlocks'] ?? []) !== 5) throw new RuntimeException('Expected five native invoice cells.');
+    foreach (['tablet', 'phone'] as $device) {
+        $defaults = [
+            'gridTemplateColumns' => 'repeat(2, minmax(0, 1fr))', 'columnGap' => '12px', 'rowGap' => '8px',
+        ];
+        foreach ($defaults as $key => $value) {
+            $row['attrs']['module']['decoration']['layout'][$device]['value'][$key] ??= $value;
+        }
+        $row['attrs']['module']['decoration']['sizing'][$device]['value']['minWidth'] ??= '0px';
+        foreach ($row['innerBlocks'] as $index => &$column) {
+            if ($device === 'phone') {
+                $padding = &$column['attrs']['module']['decoration']['spacing']['phone']['value']['padding'];
+                foreach (['top' => '8px', 'bottom' => '8px', 'left' => '16px', 'right' => '16px'] as $side => $value) {
+                    $generic = in_array($side, ['top', 'bottom'], true) ? '12px' : '20px';
+                    if (!isset($padding[$side]) || $padding[$side] === $generic) $padding[$side] = $value;
+                }
+                unset($padding);
+            }
+            if ($header) {
+                $padding = &$column['attrs']['module']['decoration']['spacing']['desktop']['value']['padding'];
+                foreach (['top', 'bottom'] as $side)
+                    if (!isset($padding[$side]) || $padding[$side] === '20px') $padding[$side] = '16px';
+                unset($padding);
+            }
+            $cells = $column['innerBlocks'] ?? [];
+            $blank = !$cells || (count($cells) === 1
+                && ($cells[0]['blockName'] ?? '') === 'divi/text'
+                && ($cells[0]['attrs']['content']['innerContent']['desktop']['value'] ?? null) === '');
+            if ($blank) {
+                $column['attrs']['module']['decoration']['layout'][$device]['value']['display'] ??= 'none';
+                continue;
+            }
+            [$start, $end] = $header ? ($index % 2 === 0 ? ['1', '2'] : ['2', '3']) : match ($index) {
+                1 => ['1', '2'], 2 => ['2', '3'], default => ['1', '-1'],
+            };
+            $column['attrs']['module']['decoration']['sizing'][$device]['value']['gridColumnStart'] ??= $start;
+            $column['attrs']['module']['decoration']['sizing'][$device]['value']['gridColumnEnd'] ??= $end;
+        }
+        unset($column);
+    }
+    return $row;
+}
+
+/** Invoice rows use the same five editable cells, but stack within a phone/tablet viewport. */
+function bioco_price_adoption_invoice_row(array $cells, string $class, bool $header = false, array $amountColumns = []): array {
+    $row = bioco_price_adoption_invoice_responsive(bioco_price_adoption_table_row($cells, $class, false, $header), $header);
+    foreach ($amountColumns as $index) {
+        if (count($row['innerBlocks'][$index]['innerBlocks'] ?? []) !== 3)
+            throw new RuntimeException('Invoice amount needs editable prefix, value and suffix Text modules.');
+        foreach (['desktop', 'tablet', 'phone'] as $device) {
+            $layout = &$row['innerBlocks'][$index]['attrs']['module']['decoration']['layout'][$device]['value'];
+            foreach (['display' => 'flex', 'flexDirection' => 'row', 'alignItems' => 'baseline',
+                'columnGap' => '0px', 'rowGap' => '0px'] as $key => $value) $layout[$key] ??= $value;
+            unset($layout);
+        }
+    }
+    return $row;
+}
+
+/** Match the authored invoice's compact description groups using saved Divi layout/font controls. */
+function bioco_price_adoption_invoice_description(array $row, string $kind): array {
+    $styles = $kind === 'abo'
+        ? [
+            ['size'=>'16px','weight'=>'700','color'=>'#1A1A1A'],
+            ['size'=>'14px','weight'=>'700','color'=>'var(--wp--preset--color--bioco-green)'],
+            ['size'=>'14px','weight'=>'700','color'=>'#4A4A4A'],
+            ['size'=>'14px','weight'=>'700','color'=>'#4A4A4A'],
+            ['size'=>'14px','weight'=>'700','color'=>'#4A4A4A'],
+        ]
+        : [
+            ['size'=>'16px','weight'=>'700','color'=>'#1A1A1A'],
+            ['size'=>'14px','weight'=>'700','color'=>'var(--wp--preset--color--bioco-beet)'],
+            ['size'=>'14px','weight'=>'700','color'=>'#4A4A4A'],
+        ];
+    if (count($row['innerBlocks'][0]['innerBlocks'] ?? []) !== count($styles))
+        throw new RuntimeException('Invoice description module structure changed.');
+    foreach (['desktop','tablet','phone'] as $device) {
+        $layout = &$row['innerBlocks'][0]['attrs']['module']['decoration']['layout'][$device]['value'];
+        $defaults = $kind === 'abo'
+            ? ['display'=>'flex','flexDirection'=>'row','flexWrap'=>'wrap','alignItems'=>'baseline','columnGap'=>'4px','rowGap'=>'4px']
+            : ['display'=>'flex','flexDirection'=>'column','rowGap'=>'4px'];
+        foreach ($defaults as $key=>$value) $layout[$key] ??= $value;
+        unset($layout);
+    }
+    foreach ($styles as $index=>$font) {
+        $module = &$row['innerBlocks'][0]['innerBlocks'][$index];
+        foreach ($font + ['lineHeight'=>'1.6em'] as $key=>$value)
+            $module['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value'][$key] ??= $value;
+        foreach (['size'=>'14px','lineHeight'=>'1.6em'] as $key=>$value)
+            $module['attrs']['content']['decoration']['bodyFont']['body']['font']['phone']['value'][$key] ??= $value;
+        if ($kind === 'abo' && $index < 2)
+            foreach (['desktop','tablet','phone'] as $device)
+                $module['attrs']['module']['decoration']['sizing'][$device]['value']['width'] ??= '100%';
+        if ($kind === 'abo' && $index === 2)
+            $module['attrs']['module']['decoration']['spacing']['desktop']['value']['margin']['top'] ??= '4px';
+        unset($module);
+    }
+    if ($kind === 'shares') {
+        $actions = &$row['innerBlocks'][4];
+        if (count($actions['innerBlocks'] ?? []) !== 4) throw new RuntimeException('Invoice share actions changed.');
+        foreach (['desktop','tablet','phone'] as $device)
+            $actions['attrs']['module']['decoration']['layout'][$device]['value']['rowGap'] ??= '4px';
+        foreach ([0=>['size'=>'12px','weight'=>'600','color'=>'#4A4A4A'],
+                  3=>['size'=>'14px']] as $index=>$font) {
+            if (($actions['innerBlocks'][$index]['blockName'] ?? '') !== 'divi/text')
+                throw new RuntimeException('Invoice share action Text changed.');
+            foreach ($font + ['lineHeight'=>'1.6em'] as $key=>$value)
+                $actions['innerBlocks'][$index]['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value'][$key] ??= $value;
+        }
+        foreach ([1,2] as $index) {
+            if (($actions['innerBlocks'][$index]['blockName'] ?? '') !== 'divi/button')
+                throw new RuntimeException('Invoice share action Button changed.');
+            $button = &$actions['innerBlocks'][$index]['attrs'];
+            foreach (['size'=>'14px','lineHeight'=>'1.6em'] as $key=>$value)
+                $button['button']['decoration']['font']['font']['desktop']['value'][$key] ??= $value;
+            foreach (['top'=>'11px','bottom'=>'11px','left'=>'16px','right'=>'16px'] as $key=>$value)
+                $button['module']['decoration']['spacing']['desktop']['value']['padding'][$key] ??= $value;
+            unset($button);
+        }
+        unset($actions);
+    }
+    return $row;
+}
+
+/** The legacy invoice headers are compact table labels, not display headings. */
+function bioco_price_adoption_invoice_heading(string $label): array {
+    $heading = bioco_utility_heading($label, 'h3');
+    $font = &$heading['attrs']['title']['decoration']['font']['font']['desktop']['value'];
+    foreach (['size' => '16px', 'lineHeight' => '1.6em', 'weight' => '500', 'color' => '#ffffff'] as $key => $value) {
+        $font[$key] ??= $value;
+    }
+    $phone = &$heading['attrs']['title']['decoration']['font']['font']['phone']['value'];
+    $phone['size'] ??= '14px';
+    $phone['lineHeight'] ??= '1.6em';
+    return $heading;
+}
+
+function bioco_price_adoption_invoice_total_heading(string $label): array {
+    $heading = bioco_utility_heading($label, 'h3');
+    foreach (['size'=>'16px','lineHeight'=>'1.6em','weight'=>'700','color'=>'#1A1A1A'] as $key=>$value)
+        $heading['attrs']['title']['decoration']['font']['font']['desktop']['value'][$key] ??= $value;
+    foreach (['size'=>'14px','lineHeight'=>'1.6em'] as $key=>$value)
+        $heading['attrs']['title']['decoration']['font']['font']['phone']['value'][$key] ??= $value;
+    return $heading;
+}
+
 function bioco_price_adoption_calculator_layout(array $attrs): array {
     $required = ['work_suffix', 'signup_url', 'shares_only_label', 'annual_contribution_label', 'work_label',
         'one_time_payment_label', 'additional_shares_label', 'cta_label', 'cta_note', 'recommended_label',
@@ -164,23 +312,24 @@ function bioco_price_adoption_calculator_layout(array $attrs): array {
     $none['attrs']['module']['decoration']['spacing']['desktop']['value']['padding'] = [
         'top' => '24px', 'bottom' => '24px', 'left' => '24px', 'right' => '24px'];
 
-    $invoiceHead = bioco_price_adoption_table_row([
-        [bioco_utility_heading($copy['article_label'], 'h3')],
-        [bioco_utility_heading($copy['quantity_label'], 'h3')],
-        [bioco_utility_heading($copy['unit_price_label'], 'h3')],
-        [bioco_utility_heading($copy['total_label'], 'h3')],
-        [bioco_utility_text('')],
-    ], 'bioco-price-invoice-head', false, true);
-    $abo = bioco_price_adoption_table_row([
+    $invoiceHead = bioco_price_adoption_invoice_row([
+        [bioco_price_adoption_invoice_heading($copy['article_label'])],
+        [bioco_price_adoption_invoice_heading($copy['quantity_label'])],
+        [bioco_price_adoption_invoice_heading($copy['unit_price_label'])],
+        [bioco_price_adoption_invoice_heading($copy['total_label'])],
+        [],
+    ], 'bioco-price-invoice-head', true);
+    $abo = bioco_price_adoption_invoice_row([
         [bioco_price_adoption_live_value('name'), bioco_utility_text('<p>' . esc_html($copy['annual_contribution_label']) . '</p>'),
             bioco_price_adoption_copy($copy, 'work_label'), bioco_price_adoption_live_value('work'),
             bioco_price_adoption_copy($copy, 'work_suffix')],
         [bioco_utility_text('1')],
         bioco_price_adoption_live_amount('price'),
         bioco_price_adoption_live_amount('price'),
-        [bioco_utility_text('')],
-    ], 'bioco-price-invoice-abo');
-    $shares = bioco_price_adoption_table_row([
+        [],
+    ], 'bioco-price-invoice-abo', false, [2, 3]);
+    $abo = bioco_price_adoption_invoice_description($abo, 'abo');
+    $shares = bioco_price_adoption_invoice_row([
         [bioco_utility_text('<p>' . esc_html($copy['share_certificates_label']) . '</p>'),
             bioco_utility_text('<p>' . esc_html($copy['one_time_payment_label']) . '</p>'),
             bioco_price_adoption_copy($copy, 'required_label')],
@@ -191,11 +340,12 @@ function bioco_price_adoption_calculator_layout(array $attrs): array {
             bioco_utility_button('+ Anteilsschein', '#bioco-share-add'),
             bioco_price_layout_class(bioco_utility_button('− Anteilsschein', '#bioco-share-remove'), 'bioco-price-remove'),
             bioco_price_adoption_live_value('additional')],
-    ], 'bioco-price-invoice-shares');
-    $total = bioco_price_adoption_table_row([
-        [bioco_utility_heading($copy['total_label'], 'h3')], [], [],
+    ], 'bioco-price-invoice-shares', false, [3]);
+    $shares = bioco_price_adoption_invoice_description($shares, 'shares');
+    $total = bioco_price_adoption_invoice_row([
+        [bioco_price_adoption_invoice_total_heading($copy['total_label'])], [], [],
         bioco_price_adoption_live_amount('total'), [],
-    ], 'bioco-price-invoice-total');
+    ], 'bioco-price-invoice-total', false, [3]);
     $info = bioco_price_layout_row([
         bioco_price_layout_class(bioco_utility_text($copy['shares_only_info']), 'bioco-price-no-selection'),
     ]);
@@ -230,7 +380,17 @@ function bioco_price_adoption_live_value(string $field): array {
 }
 
 function bioco_price_adoption_live_amount(string $field): array {
-    return [bioco_utility_text('CHF'), bioco_price_adoption_live_value($field), bioco_utility_text('.-')];
+    $prefix = bioco_utility_text('CHF');
+    $prefix['attrs']['module']['decoration']['spacing']['desktop']['value']['margin']['right'] = '4px';
+    $modules = [$prefix, bioco_price_adoption_live_value($field), bioco_utility_text('.-')];
+    foreach ($modules as &$module) {
+        foreach (['size'=>'16px','weight'=>'700','lineHeight'=>'1.6em'] as $key=>$value)
+            $module['attrs']['content']['decoration']['bodyFont']['body']['font']['desktop']['value'][$key] ??= $value;
+        foreach (['size'=>'14px','lineHeight'=>'1.6em'] as $key=>$value)
+            $module['attrs']['content']['decoration']['bodyFont']['body']['font']['phone']['value'][$key] ??= $value;
+    }
+    unset($module);
+    return $modules;
 }
 
 function bioco_price_adoption_replace_table(array $blocks, array &$report): array {
