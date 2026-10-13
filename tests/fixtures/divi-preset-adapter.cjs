@@ -1,8 +1,14 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
-// Exact installed Divi 5.11.0 export: reproduces the incorrect map.items check.
-const nativeSource = "({moduleName:e,moduleLabel:t,selectStore:r=a.select})=>{let i=r(\"divi/global-data\").getModulePresetsList({moduleName:e});if(!(i&&Object.keys(i?.items??{}).length>0)){const n=Date.now(),o=r(\"divi/settings\").getSetting([\"version\"]);(0,a.dispatch)(\"divi/global-data\").addDefaultModulePreset({moduleName:e,moduleLabel:`${t} Preset`,presetType:\"module\",version:o,created:n,updated:n}),i=r(\"divi/global-data\").getModulePresetsList({moduleName:e})}return i}";
+// Exact captured exports from Divi 5.11.0 (staging) and 5.15.0 (production).
+const nativeSources = {
+  staging: "({moduleName:e,moduleLabel:t,selectStore:r=a.select})=>{let i=r(\"divi/global-data\").getModulePresetsList({moduleName:e});if(!(i&&Object.keys(i?.items??{}).length>0)){const n=Date.now(),o=r(\"divi/settings\").getSetting([\"version\"]);(0,a.dispatch)(\"divi/global-data\").addDefaultModulePreset({moduleName:e,moduleLabel:`${t} Preset`,presetType:\"module\",version:o,created:n,updated:n}),i=r(\"divi/global-data\").getModulePresetsList({moduleName:e})}return i}",
+  production: "({moduleName:t,moduleLabel:r,selectStore:n=e.select})=>{let i=n(\"divi/global-data\").getModulePresetsList({moduleName:t});if(!(i&&Object.keys(i?.items??{}).length>0)){const o=Date.now(),a=n(\"divi/settings\").getSetting([\"version\"]);(0,e.dispatch)(\"divi/global-data\").addDefaultModulePreset({moduleName:t,moduleLabel:`${r} Preset`,presetType:\"module\",version:a,created:o,updated:o}),i=n(\"divi/global-data\").getModulePresetsList({moduleName:t})}return i}",
+};
+const build = process.argv[3] || "staging";
+assert.ok(Object.hasOwn(nativeSources, build));
+const nativeSource = nativeSources[build];
 let cases = 0;
 function fixture(items, options = {}) {
   if (arguments.length === 0) items = {existing: {id: 'existing'}};
@@ -11,7 +17,7 @@ function fixture(items, options = {}) {
     getModulePresetsList: () => items,
     getSetting: () => 'native-version',
   }; };
-  const native = new Function('a', `return (${nativeSource});`)({
+  const native = new Function(build === 'production' ? 'e' : 'a', `return (${nativeSource});`)({
     select, dispatch: () => ({addDefaultModulePreset: () => { calls++; }}),
   });
   const original = {};
@@ -93,4 +99,4 @@ check('invalid explicit selector keeps native error behavior', () => {
   const f=fixture();assert.throws(()=>f.divi.moduleUtils.ensureDefaultModulePresetExists({moduleName:'divi/heading',selectStore:null}));
   assert.equal(f.calls(),0);
 });
-console.log(JSON.stringify({cases}));
+console.log(JSON.stringify({build, cases}));

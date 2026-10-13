@@ -3,19 +3,24 @@ import json
 import subprocess
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 CORE = ROOT / "wordpress/web/app/mu-plugins/bioco-core"
 JS = CORE / "assets/divi-preset-adapter.js"
 PHP = CORE / "includes/divi-preset-adapter.php"
 
 
-def test_native_namespace_behavior_and_boot_guards():
+@pytest.mark.parametrize("build", ["staging", "production"])
+def test_native_namespace_behavior_and_boot_guards(build):
     result = subprocess.run(
-        ["node", str(ROOT / "tests/fixtures/divi-preset-adapter.cjs"), str(JS)],
+        ["node", str(ROOT / "tests/fixtures/divi-preset-adapter.cjs"), str(JS), build],
         capture_output=True, text=True,
     )
     assert result.returncode == 0, result.stderr
-    assert json.loads(result.stdout)["cases"] >= 12
+    evidence = json.loads(result.stdout)
+    assert evidence["build"] == build
+    assert evidence["cases"] >= 15
 
 
 def test_php_builder_authorization_fingerprint_and_dependency_order():
@@ -26,7 +31,9 @@ def test_php_builder_authorization_fingerprint_and_dependency_order():
     $base = ['app'=>true,'allowed'=>true,'fingerprint'=>
       '6b977ad2a9adfffcce73584b13eb5f471e765db181a21efdc8f4afa2fd19ed7c',
       'registered'=>true,'printed'=>false];
-    $results = ['valid'=>bioco_divi_preset_adapter_guard($base)];
+    $production=$base;$production['fingerprint']='cbb43621ff0d4089a180c822b5ae0b2253246b4a3a6577947ea29fb88168d808';
+    $results = ['valid'=>bioco_divi_preset_adapter_guard($base),
+      'production'=>bioco_divi_preset_adapter_guard($production)];
     foreach (['app','allowed','registered'] as $key) {
       $context=$base;$context[$key]=false;
       $results[$key]=bioco_divi_preset_adapter_guard($context);
@@ -53,6 +60,7 @@ def test_php_builder_authorization_fingerprint_and_dependency_order():
     assert result.returncode == 0, result.stderr
     evidence = json.loads(result.stdout)
     assert evidence["guards"]["valid"] == ""
+    assert evidence["guards"]["production"] == ""
     assert all(evidence["guards"][key] for key in
                ("app", "allowed", "registered", "fingerprint", "printed"))
     assert evidence["hook"][0] == "divi_visual_builder_assets_after_enqueue_app_window_scripts"

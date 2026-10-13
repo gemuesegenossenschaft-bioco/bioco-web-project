@@ -5,7 +5,11 @@ if (!defined('ABSPATH')) exit;
 /** Empty string means supported; other values explain why native code stays unchanged. */
 function bioco_divi_preset_adapter_guard(array $context): string {
     if (!$context['app'] || !$context['allowed']) return 'unauthorized-builder';
-    if ($context['fingerprint'] !== '6b977ad2a9adfffcce73584b13eb5f471e765db181a21efdc8f4afa2fd19ed7c') {
+    // Captured module-utils builds: Divi 5.11.0 staging and 5.15.0 production.
+    if (!in_array($context['fingerprint'], [
+        '6b977ad2a9adfffcce73584b13eb5f471e765db181a21efdc8f4afa2fd19ed7c',
+        'cbb43621ff0d4089a180c822b5ae0b2253246b4a3a6577947ea29fb88168d808',
+    ], true)) {
         return 'unsupported-build';
     }
     if (!$context['registered'] || $context['printed']) return 'unsupported-script-order';

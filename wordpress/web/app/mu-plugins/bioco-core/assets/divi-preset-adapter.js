@@ -1,4 +1,4 @@
-/* Divi 5.11.0 returns an items map, not a wrapper with an items member. */
+/* Verified Divi 5.11.0 and 5.15.0 helpers misread the native items map. */
 (function () {
   'use strict';
   const divi = window.divi;
@@ -11,8 +11,11 @@
   if (divi.module || divi.modalLibrary) return diagnostic('late-consumer-binding');
   const namespace = divi.moduleUtils;
   const original = namespace?.ensureDefaultModulePresetExists;
-  const supportedSource = "({moduleName:e,moduleLabel:t,selectStore:r=a.select})=>{let i=r(\"divi/global-data\").getModulePresetsList({moduleName:e});if(!(i&&Object.keys(i?.items??{}).length>0)){const n=Date.now(),o=r(\"divi/settings\").getSetting([\"version\"]);(0,a.dispatch)(\"divi/global-data\").addDefaultModulePreset({moduleName:e,moduleLabel:`${t} Preset`,presetType:\"module\",version:o,created:n,updated:n}),i=r(\"divi/global-data\").getModulePresetsList({moduleName:e})}return i}";
-  if (typeof original !== 'function' || Function.prototype.toString.call(original) !== supportedSource) {
+  const supportedSources = [
+    "({moduleName:e,moduleLabel:t,selectStore:r=a.select})=>{let i=r(\"divi/global-data\").getModulePresetsList({moduleName:e});if(!(i&&Object.keys(i?.items??{}).length>0)){const n=Date.now(),o=r(\"divi/settings\").getSetting([\"version\"]);(0,a.dispatch)(\"divi/global-data\").addDefaultModulePreset({moduleName:e,moduleLabel:`${t} Preset`,presetType:\"module\",version:o,created:n,updated:n}),i=r(\"divi/global-data\").getModulePresetsList({moduleName:e})}return i}",
+    "({moduleName:t,moduleLabel:r,selectStore:n=e.select})=>{let i=n(\"divi/global-data\").getModulePresetsList({moduleName:t});if(!(i&&Object.keys(i?.items??{}).length>0)){const o=Date.now(),a=n(\"divi/settings\").getSetting([\"version\"]);(0,e.dispatch)(\"divi/global-data\").addDefaultModulePreset({moduleName:t,moduleLabel:`${r} Preset`,presetType:\"module\",version:a,created:o,updated:o}),i=n(\"divi/global-data\").getModulePresetsList({moduleName:t})}return i}",
+  ];
+  if (typeof original !== 'function' || !supportedSources.includes(Function.prototype.toString.call(original))) {
     return diagnostic('unsupported-helper');
   }
   const rootDescriptor = Object.getOwnPropertyDescriptor(divi, 'moduleUtils');
