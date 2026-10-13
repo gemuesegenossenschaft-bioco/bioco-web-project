@@ -40,6 +40,30 @@ label/link/responsive style edits through the WordPress parser, and check the
 child theme's focus/wrapping rules in Chromium. They require no server writes.
 The licensed preset rendering and native save/reopen still need hosted proof.
 
+The #214/#220 presentation previews preserve saved content and native controls
+while replacing measured legacy classes. The required PR gate covers homepage,
+cards, CTA, media/rich text, shell wrappers and button/intro conversions. These
+checks use saved block fixtures and conditional SQL; they do not establish
+hosted appearance, shared preset editing or production adoption.
+
+Installed Divi checks are explicit, read-only operator runs. Configure
+`BIOCO_DIVI_NATIVE_SSH` and `BIOCO_DIVI_NATIVE_WP_PATH`; the homepage also requires
+`BIOCO_HOME_ACCEPTED_SHA`, and the shell wrapper requires a private
+`BIOCO_SHELL_WRAPPER_SNAPSHOT`. Missing configuration fails. Run:
+
+```sh
+python3 -m pytest -q tests/operators/wordpress_home_native.py
+python3 -m pytest -q tests/operators/wordpress_editorial_cards_native.py
+python3 -m pytest -q tests/operators/wordpress_shell_wrapper_adoption.py
+```
+
+The homepage check calls actual ButtonModule and ColumnModule style pipelines,
+including a negative unsupported button-padding group. Card and wrapper checks
+exercise installed parsing and style APIs. Normal browser rendering and native
+save/reopen remain separate checks on unpublished, unassigned copies in each
+environment. Keep private before exports, full row/metadata conflict guards and
+actual restoration receipts for any later content adoption.
+
 | Command | Needs | Gate |
 | --- | --- | --- |
 | `python3 -m pytest tests/ -q` | python3, php, node, Playwright Chromium | full suite, all green required |
