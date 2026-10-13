@@ -19,6 +19,7 @@ require_once BIOCO_CORE_DIR . '/includes/navigation.php';
 require_once BIOCO_CORE_DIR . '/includes/redirects.php';
 require_once BIOCO_CORE_DIR . '/includes/dynamic-sections.php';
 require_once BIOCO_CORE_DIR . '/includes/native-modules.php';
+require_once BIOCO_CORE_DIR . '/includes/divi-preset-adapter.php';
 require_once BIOCO_CORE_DIR . '/includes/native-form-composition.php';
 require_once BIOCO_CORE_DIR . '/includes/native-form-templates.php';
 require_once BIOCO_CORE_DIR . '/includes/native-form-outcomes.php';
