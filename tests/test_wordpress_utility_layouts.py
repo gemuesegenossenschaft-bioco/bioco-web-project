@@ -393,3 +393,91 @@ def test_nonpublished_library_content_never_leaks_to_search(post_status):
     """, request='search', post_status=post_status)
     assert 'Private Redaktionsnotiz' not in out['html']
     assert 'Keine Treffer gefunden' in out['html'] and out['writes'] == []
+
+
+@pytest.mark.parametrize('mode,results,expected', [
+    ('search', [{'post_title': 'Gemüseabo', 'url': 'https://example.test/abos/'}], 'Editor Suchergebnisse'),
+    ('search', [], 'Editor Keine Treffer'),
+    ('404', [], 'Editor Nicht gefunden'),
+])
+def test_actual_native_saved_default_body_delegates_to_published_utility(mode, results, expected):
+    out = php(LOAD + INIT + r"""
+    $body = file_get_contents('tests/fixtures/production-native-body-301.html');
+    $posts[301] = (object)['ID'=>301, 'post_type'=>'et_body_layout', 'post_status'=>'publish', 'post_name'=>'bioco-global-body', 'post_content'=>$body];
+    $layouts = ['et_body_layout'=>['id'=>301, 'enabled'=>true], 'et_header_layout'=>['id'=>299, 'enabled'=>true]];
+    $before = $posts[301]->post_content;
+    // The old raw-shape comparison rejects the normal editor save and leaves a
+    // Post Content module with no queried post: its projected body is blank.
+    $export = json_decode(file_get_contents('wordpress/design-system/exports/theme-builder.json'), true);
+    $old_match = bioco_utility_block_shape(parse_blocks($body)) == bioco_utility_block_shape(parse_blocks($export['layouts']['301']['data']['301']));
+    $old_projection = render_native(parse_blocks($body));
+    bioco_import_utility_layouts(true);
+    foreach ($posts as $post) {
+        if (($post->post_type ?? '') !== 'et_pb_layout') continue;
+        $post->post_content = str_replace(['Suchergebnisse', 'Keine Treffer gefunden', 'Seite nicht gefunden'],
+            ['Editor Suchergebnisse', 'Editor Keine Treffer', 'Editor Nicht gefunden'], $post->post_content);
+    }
+    $writes = [];
+    $delegated = apply_filters('et_theme_builder_template_layouts', $layouts);
+    $html = $delegated === [] ? bioco_utility_render() : render_native(parse_blocks($body));
+    echo json_encode(compact('old_match','old_projection','delegated','html','before','body','writes','layouts'));
+    """, request=mode, results=results)
+    assert not out['old_match'] and out['old_projection'] == ''
+    assert out['delegated'] == [] and expected in out['html']
+    assert out['before'] == out['body'] and out['writes'] == []
+    assert out['layouts']['et_body_layout']['id'] == 301
+    if results:
+        assert 'Gemüseabo' in out['html'] and 'https://example.test/abos/' in out['html']
+
+
+@pytest.mark.parametrize('mutation', ['content', 'extra-column', 'extra-placeholder', 'unknown', 'font', 'preset',
+                                    'spacing', 'class', 'id', 'layout', 'null-decoration', 'leaf-content'])
+def test_native_saved_passthrough_refuses_authored_or_unknown_body(mutation):
+    out = php(LOAD + r"""
+    $blocks = parse_blocks(file_get_contents('tests/fixtures/production-native-body-301.html'));
+    $section = &$blocks[0]['innerBlocks'][0];
+    $leaf = &$section['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0];
+    switch ($input['mutation']) {
+        case 'content': $leaf['blockName'] = 'divi/text'; break;
+        case 'extra-column': $section['innerBlocks'][0]['innerBlocks'][] = $section['innerBlocks'][0]['innerBlocks'][0]; $section['innerBlocks'][0]['innerContent'][] = null; break;
+        case 'extra-placeholder': $blocks = [['blockName'=>'divi/placeholder','attrs'=>[],'innerHTML'=>'','innerContent'=>[null],'innerBlocks'=>$blocks]]; break;
+        case 'unknown': $section['attrs']['unknownControl'] = true; break;
+        case 'font': $section['attrs']['module']['decoration']['font'] = ['desktop'=>['value'=>['size'=>'30px']]]; break;
+        case 'preset': $section['attrs']['modulePreset'] = ['editor-preset']; break;
+        case 'spacing': $section['attrs']['module']['decoration']['spacing'] = ['desktop'=>['value'=>['padding'=>['top'=>'80px']]]]; break;
+        case 'class': $section['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][0]['value'] .= ' editor-class'; break;
+        case 'id': $section['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['id'] = 'editor-id'; break;
+        case 'layout': $section['attrs']['module']['decoration']['layout']['desktop']['value']['display'] = 'flex'; break;
+        case 'null-decoration': $section['attrs']['module']['decoration'] = null; break;
+        case 'leaf-content': $leaf['innerHTML'] = '<p>Editor content</p>'; $leaf['innerContent'] = ['<p>Editor content</p>']; break;
+    }
+    unset($section, $leaf);
+    $before = $blocks;
+    $accepted = bioco_utility_is_passthrough($blocks);
+    $posts[301]=(object)['ID'=>301,'post_name'=>'bioco-global-body','post_content'=>serialize_blocks($blocks)];
+    $layouts=['et_body_layout'=>['id'=>301,'enabled'=>true]];
+    $kept=apply_filters('et_theme_builder_template_layouts',$layouts);
+    echo json_encode(['accepted'=>$accepted,'unchanged'=>$before===$blocks,'layouts_kept'=>$kept===$layouts]);
+    """, mutation=mutation, request='search')
+    assert not out['accepted'] and out['unchanged'] and out['layouts_kept']
+
+
+def test_native_saved_passthrough_accepts_only_approved_neutral_body_domains():
+    out = php(LOAD + r"""
+    $blocks = parse_blocks(file_get_contents('tests/fixtures/production-native-body-301.html'));
+    $node = &$blocks[0]['innerBlocks'][0];
+    for ($i=0; $i<4; $i++) {
+        $node['attrs']['module']['decoration']['sizing'] = ['desktop'=>['value'=>['width'=>'100%','maxWidth'=>'none']]];
+        $node['attrs']['module']['decoration']['spacing'] = ['desktop'=>['value'=>[
+            'margin'=>array_fill_keys(['top','right','bottom','left'],'0px'),
+            'padding'=>array_fill_keys(['top','right','bottom','left'],'0px')]]];
+        $node['attrs']['module']['decoration']['background'] = ['desktop'=>['value'=>['color'=>'transparent']]];
+        if ($i<3) $node = &$node['innerBlocks'][0];
+    }
+    unset($node);
+    $before=$blocks; $accepted=bioco_utility_is_passthrough($blocks);
+    $blocks[0]['innerBlocks'][0]['attrs']['module']['decoration']['background']['desktop']['value']['color']='#fff';
+    $authored=bioco_utility_is_passthrough($blocks);
+    echo json_encode(compact('accepted','authored'));
+    """)
+    assert out['accepted'] and not out['authored']
