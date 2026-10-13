@@ -165,3 +165,35 @@ def test_private_qa_patch_keeps_installed_block_tree_balanced():
         assert row['total_heading_font']['phone']['value']['size'] == '14px'
         assert all(row['action_layout'][device]['value']['rowGap'] == '4px' for device in ('desktop','tablet','phone'))
         assert row['action_button_padding'] == {'top':'11px','bottom':'11px','left':'16px','right':'16px'}
+
+
+def test_live_price_table_keeps_native_scroll_alignment_and_emits_installed_css():
+    code = r'''
+    eval(file_get_contents('php://stdin'));
+    $p=get_post(6);
+    if (!$p || $p->post_type!=='page' || $p->post_status!=='publish') throw new RuntimeException('Wrong legacy table source.');
+    $before=hash('sha256',$p->post_content);
+    $source=['ID'=>6,'post_type'=>$p->post_type,'post_status'=>$p->post_status,
+        'post_title'=>$p->post_title,'post_content'=>$p->post_content,'post_modified_gmt'=>$p->post_modified_gmt];
+    $plan=bioco_candidate_price_adoption_plan($source,'table',home_url('/'),$before);
+    $table=null;
+    $visit=function($blocks)use(&$visit,&$table){foreach($blocks as $block){
+        if(($block['blockName']??'')==='divi/section' && bioco_price_native_has_class($block['attrs']??[],'bioco-price-table')) $table=$block;
+        $visit($block['innerBlocks']??[]);
+    }};
+    $visit(parse_blocks($plan['after_content']));
+    if (!$table) throw new RuntimeException('Missing native table section.');
+    $layout=$table['attrs']['module']['decoration']['layout'];
+    $css=ET\Builder\Packages\Module\Options\Layout\LayoutStyle::style([
+        'selector'=>'.candidate-table','attr'=>$layout,'returnType'=>'string']);
+    echo wp_json_encode(['source_sha'=>$before,'source_after_sha'=>hash('sha256',get_post(6)->post_content),
+        'layout'=>$layout,'css'=>$css,
+        'candidate_sha'=>hash('sha256',$plan['after_content'])]);
+    '''
+    out = installed_eval(code, candidate_source())
+    assert out['source_sha'] == out['source_after_sha']
+    for device in ('desktop', 'tablet', 'phone'):
+        assert out['layout'][device]['value']['alignItems'] == 'flex-start'
+    assert out['css'].count('align-items: flex-start') == 3
+    assert out['css'].count('@media') == 2
+    assert 'align-items: center' not in out['css']
