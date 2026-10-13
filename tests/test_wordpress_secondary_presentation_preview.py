@@ -1,4 +1,4 @@
-"""Bounded native accordion and portal defaults; opaque steps remain a migration gap."""
+"""Bounded native accordion and portal defaults; steps use their separate native preview."""
 import copy
 import json
 import subprocess
@@ -155,14 +155,14 @@ def test_authored_native_design_and_inherited_spacing_win_over_defaults():
     assert heading['attrs']['title']['decoration']['font']['font']['phone'] == {'value': {'color': '#123456'}}
 
 
-def test_steps_are_reported_as_an_unresolved_structural_migration():
+def test_steps_are_preserved_and_reported_for_the_separate_native_preview():
     before = block('divi/section', classes('bioco-divi-section', 'bioco-divi-steps'),
                    [block('divi/row', classes('bioco-divi-row'), [block('divi/column', classes('bioco-divi-content'),
                     [block('divi/text', classes('bioco-divi-steps-body') | {'content': {'innerContent': {
                         'desktop': {'value': '<div class="next-steps">Keep exact authored HTML</div>'}}}})])])])
     result = run([before])
     assert result['blocks'] == [before]
-    assert result['report'][0] == {'path': [0], 'action': 'preserve', 'reason': 'Steps are opaque HTML; native item migration is required.'}
+    assert result['report'][0] == {'path': [0], 'action': 'preserve', 'reason': 'Steps are handled by bioco_steps_native_preview in steps-native-preview.php.'}
 
 
 def test_unrelated_dynamic_native_modules_and_opaque_structure_are_unchanged():

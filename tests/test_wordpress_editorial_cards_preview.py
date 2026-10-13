@@ -221,6 +221,26 @@ def test_unmeasured_wrapper_or_header_refuses_atomically(alter):
     assert len(result['report']['refused']) == 1
 
 
+@pytest.mark.parametrize('family', ['cards-grid', 'gallery-strip'])
+@pytest.mark.parametrize('html', [
+    '<h3>Saved heading</h3><p>Keep paragraph</p>',
+    '<h1>Saved heading</h1><p>Keep paragraph</p>',
+    '<h2>Saved heading</h2>',
+    '<p>Keep paragraph</p><h2>Saved heading</h2>',
+    '<h2>Saved heading</h2><p>Keep paragraph</p><p>Extra paragraph</p>',
+    '<h2>Saved <h3>nested heading</h3></h2><p>Keep paragraph</p>',
+])
+def test_unmeasured_header_html_preserves_the_entire_saved_family(family, html):
+    saved = fixture(family=family, desktop=3 if family == 'cards-grid' else 4)
+    text = saved['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0]
+    text['attrs']['content']['innerContent']['desktop']['value'] = html
+    result = run([saved])
+    assert result['after'] == [saved]
+    assert result['report'][family] == 0
+    assert result['report']['refused'] == [{'path': [0], 'family': family,
+                                           'reason': 'Unmeasured family header content.'}]
+
+
 def test_generated_fullwidth_does_not_override_an_authored_image_width():
     saved = fixture()
     image = saved['innerBlocks'][1]['innerBlocks'][0]['innerBlocks'][0]

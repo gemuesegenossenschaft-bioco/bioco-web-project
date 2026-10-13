@@ -133,7 +133,7 @@ function bioco_secondary_presentation_preview(array $blocks, array $path = []): 
             $family = bioco_secondary_preview_has($block, 'bioco-divi-accordion') ? 'accordion'
                 : (bioco_secondary_preview_has($block, 'bioco-divi-link-tiles') ? 'portal' : '');
             if (bioco_secondary_preview_has($block, 'bioco-divi-steps')) {
-                $report[] = ['path' => $at, 'action' => 'preserve', 'reason' => 'Steps are opaque HTML; native item migration is required.'];
+                $report[] = ['path' => $at, 'action' => 'preserve', 'reason' => 'Steps are handled by bioco_steps_native_preview in steps-native-preview.php.'];
                 continue;
             }
             if ($family !== '') {

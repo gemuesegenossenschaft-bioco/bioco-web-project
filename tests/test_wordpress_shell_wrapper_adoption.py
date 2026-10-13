@@ -190,7 +190,7 @@ def test_group_default_preserves_inherited_domain_without_blocking_other_default
     result = run(fixture(), ctx=ctx)
     assert result['plan']['changed'] == 3
     other = 'spacing' if domain == 'sizing' else 'sizing'
-    for path, node in zip(([0], [0, 0], [0, 0, 0]), wrappers(result['blocks'])):
+    for path, node in zip(([0], [0, 0], [0, 0, 0]), wrappers(result['blocks']), strict=True):
         assert domain not in node['attrs']['module']['decoration']
         assert other in node['attrs']['module']['decoration']
         assert {'path': path, 'domain': domain, 'action': 'preserve',

@@ -42,7 +42,7 @@ function bioco_cards_preview_row(array &$row): void {
     bioco_cards_preview_remove($row, ['bioco-divi-row']);
 }
 
-/** The saved cards/gallery header is one Text module containing an h2 and paragraph. */
+/** Measured header HTML is exactly one plain h2, whitespace, then one plain paragraph. */
 function bioco_cards_preview_header(array &$row, string $base): void {
     $children = $row['innerBlocks'] ?? [];
     if (count($children) !== 1 || ($children[0]['blockName'] ?? '') !== 'divi/column'
@@ -55,7 +55,8 @@ function bioco_cards_preview_header(array &$row, string $base): void {
     }
     $column =& $row['innerBlocks'][0];
     $text =& $column['innerBlocks'][0];
-    if (!is_string($text['attrs']['content']['innerContent']['desktop']['value'] ?? null)) {
+    $html = $text['attrs']['content']['innerContent']['desktop']['value'] ?? null;
+    if (!is_string($html) || !preg_match('~\A<h2>[^<>]*</h2>\s*<p>[^<>]*</p>\z~s', $html)) {
         throw new RuntimeException('Unmeasured family header content.');
     }
     foreach ([$row, $column, $text] as $part) {
