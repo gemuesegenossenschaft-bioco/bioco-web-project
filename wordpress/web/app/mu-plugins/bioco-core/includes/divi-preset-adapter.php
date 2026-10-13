@@ -16,6 +16,20 @@ function bioco_divi_preset_adapter_guard(array $context): string {
     return '';
 }
 
+/** Resolve the actual native registration through Divi's asset integration API. */
+function bioco_divi_preset_adapter_fingerprint(): string {
+    if (!defined('ET_BUILDER_5_DIR') || !defined('ET_BUILDER_5_URI')
+        || !is_string(ET_BUILDER_5_DIR) || !is_string(ET_BUILDER_5_URI)) return '';
+    $scripts = wp_scripts();
+    $registered = $scripts->registered['divi-module-utils'] ?? null;
+    $src = rtrim(ET_BUILDER_5_URI, '/') . '/visual-builder/build/module-utils.js';
+    if (!$registered || $registered->src !== $src) return '';
+    $build = rtrim(ET_BUILDER_5_DIR, '/\\') . '/visual-builder/build/module-utils.js';
+    if (!is_file($build)) return '';
+    $hash = hash_file('sha256', $build);
+    return is_string($hash) ? $hash : '';
+}
+
 function bioco_divi_preset_adapter_enqueue(): void {
     $conditions = 'ET\\Builder\\Framework\\Utility\\Conditions';
     $roles = 'ET\\Builder\\Framework\\UserRole\\UserRole';
@@ -23,7 +37,6 @@ function bioco_divi_preset_adapter_enqueue(): void {
         || !is_user_logged_in() || !current_user_can('edit_theme_options')
         || !class_exists($roles) || !$roles::can_current_user_use_visual_builder()) return;
 
-    $build = get_template_directory() . '/includes/builder-5/visual-builder/build/module-utils.js';
     $handles = ['divi-module-utils', 'divi-module', 'divi-modal-library'];
     $registered = true;
     $printed = false;
@@ -33,7 +46,7 @@ function bioco_divi_preset_adapter_enqueue(): void {
     }
     $reason = bioco_divi_preset_adapter_guard([
         'app' => true, 'allowed' => true,
-        'fingerprint' => is_file($build) ? hash_file('sha256', $build) : '',
+        'fingerprint' => bioco_divi_preset_adapter_fingerprint(),
         'registered' => $registered, 'printed' => $printed,
     ]);
     if ($reason !== '') {
