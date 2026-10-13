@@ -63,9 +63,11 @@ function bioco_shell_wrapper_defaults(array &$block, array $path, string $slot, 
         $report[] = ['path' => $path, 'action' => 'preserve', 'reason' => $reason];
         return;
     }
-    foreach (['sizing' => ['width' => '100%', 'maxWidth' => 'none'],
+    $defaults = ['sizing' => ['width' => '100%', 'maxWidth' => 'none'],
         'spacing' => ['margin' => array_fill_keys(['top', 'right', 'bottom', 'left'], '0px'),
-                      'padding' => array_fill_keys(['top', 'right', 'bottom', 'left'], '0px')]] as $domain => $values) {
+                      'padding' => array_fill_keys(['top', 'right', 'bottom', 'left'], '0px')]];
+    if ($slot === 'body') $defaults['background'] = ['color' => 'transparent'];
+    foreach ($defaults as $domain => $values) {
         if (!empty($presets['group']['divi/' . $domain]['default'])) {
             $report[] = ['path' => $path, 'domain' => $domain, 'action' => 'preserve', 'reason' => 'global-default-group-preset'];
             continue;
@@ -80,6 +82,7 @@ function bioco_shell_wrapper_defaults(array &$block, array $path, string $slot, 
 }
 
 function bioco_shell_wrapper_tree(array $blocks, string $slot, array $presets, array &$report, array $path = []): array {
+    if (!in_array($slot, ['header', 'body', 'footer'], true)) throw new RuntimeException('Unknown shell slot.');
     foreach ($blocks as $index => &$section) {
         $at = [...$path, $index];
         $classes = bioco_shell_wrapper_classes($section['attrs'] ?? []);
@@ -89,16 +92,18 @@ function bioco_shell_wrapper_tree(array $blocks, string $slot, array $presets, a
         $rows = $section['innerBlocks'] ?? [];
         $columns = $rows[0]['innerBlocks'] ?? [];
         $children = $columns[0]['innerBlocks'] ?? [];
-        $shell_name = 'bioco-divi/' . ($slot === 'header' ? 'navigation-shell' : 'footer-shell');
+        $shell_name = $slot === 'body' ? 'divi/post-content' : 'bioco-divi/' . ($slot === 'header' ? 'navigation-shell' : 'footer-shell');
         $shells = array_filter($children, static fn(array $child): bool => ($child['blockName'] ?? '') === $shell_name);
         if (count($rows) !== 1 || ($rows[0]['blockName'] ?? '') !== 'divi/row'
-            || count($columns) !== 1 || ($columns[0]['blockName'] ?? '') !== 'divi/column' || count($shells) !== 1) {
+            || count($columns) !== 1 || ($columns[0]['blockName'] ?? '') !== 'divi/column' || count($shells) !== 1
+            || ($slot === 'body' && (count($children) !== 1 || !empty($children[0]['innerBlocks'])))) {
             $report[] = ['path' => $at, 'action' => 'preserve', 'reason' => 'authored-shell-structure'];
             continue;
         }
         bioco_shell_wrapper_defaults($section, $at, $slot, $presets, $report);
         bioco_shell_wrapper_defaults($section['innerBlocks'][0], [...$at, 0], $slot, $presets, $report);
         bioco_shell_wrapper_defaults($section['innerBlocks'][0]['innerBlocks'][0], [...$at, 0, 0], $slot, $presets, $report);
+        if ($slot === 'body') bioco_shell_wrapper_defaults($section['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0], [...$at, 0, 0, 0], $slot, $presets, $report);
     }
     unset($section);
     return $blocks;
@@ -109,7 +114,7 @@ function bioco_shell_wrapper_plan(array $record, string $site, array $context): 
     $columns = bioco_shell_wrapper_post_columns();
     if (array_diff(array_keys($record), $columns) || array_diff($columns, array_keys($record))
         || !is_int($record['ID']) || $record['ID'] < 1
-        || !in_array($record['post_type'], ['et_header_layout', 'et_footer_layout'], true)) throw new RuntimeException('Expected one complete saved shell record.');
+        || !in_array($record['post_type'], ['et_header_layout', 'et_body_layout', 'et_footer_layout'], true)) throw new RuntimeException('Expected one complete saved shell record.');
     foreach (array_diff($columns, ['ID']) as $column) if (!is_string($record[$column])) throw new RuntimeException('Invalid shell snapshot value.');
     $context_keys = ['site', 'presets', 'options', 'meta', 'assignments_sha256'];
     if (array_diff(array_keys($context), [...$context_keys, 'raw_post']) || array_diff($context_keys, array_keys($context))
@@ -141,7 +146,7 @@ function bioco_shell_wrapper_plan(array $record, string $site, array $context): 
         if (!in_array($row['meta_key'], bioco_shell_wrapper_volatile_meta(), true)) $stable_meta[] = $row;
     }
     $context['meta'] = $stable_meta;
-    $slot = $record['post_type'] === 'et_header_layout' ? 'header' : 'footer';
+    $slot = ['et_header_layout' => 'header', 'et_body_layout' => 'body', 'et_footer_layout' => 'footer'][$record['post_type']];
     $report = [];
     $blocks = bioco_shell_wrapper_tree(parse_blocks($record['post_content']), $slot, $context['presets'], $report);
     $changed = count(array_filter($report, static fn(array $row): bool => $row['action'] === 'adopt'));

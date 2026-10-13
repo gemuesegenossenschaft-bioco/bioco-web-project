@@ -240,8 +240,9 @@ def execute(db, sql):
     return db.execute('SELECT changes()').fetchone()[0]
 
 
-def test_conditional_apply_restore_are_idempotent_and_leave_other_rows_untouched():
-    result = run(fixture())
+@pytest.mark.parametrize('slot', ['header', 'body', 'footer'])
+def test_conditional_apply_restore_are_idempotent_and_leave_other_rows_untouched(slot):
+    result = run(body_fixture() if slot == 'body' else fixture(slot), record=post_record(post_type='et_' + slot + '_layout'))
     db = database(result['plan'])
     before = db.execute('SELECT * FROM posts').fetchall()
     meta = db.execute('SELECT * FROM postmeta').fetchall()
@@ -375,3 +376,57 @@ def test_incomplete_or_ambiguous_context_fails_closed(bad):
     else:
         ctx['meta'][0]['post_id'] = '99'
     assert 'error' in run(fixture(), ctx=ctx)
+
+
+def body_fixture():
+    blocks = fixture('body')
+    wrappers(blocks)[-1]['innerBlocks'] = [block('divi/post-content', {'saved': 'do not expand page content'})]
+    return blocks
+
+
+def test_body_post_content_seam_has_native_neutral_values_and_cas_round_trip():
+    result = run(body_fixture(), record=post_record(post_type='et_body_layout'))
+    assert 'error' not in result
+    assert result['plan']['changed'] == 12
+    section, row, column = wrappers(result['blocks'])
+    for b in [section, row, column, column['innerBlocks'][0]]:
+        native = b['attrs']['module']['decoration']
+        assert native['sizing']['desktop']['value'] == {'width': '100%', 'maxWidth': 'none'}
+        assert native['spacing']['desktop']['value']['padding'] == dict.fromkeys(['top', 'right', 'bottom', 'left'], '0px')
+        assert native['background']['desktop']['value']['color'] == 'transparent'
+    assert column['innerBlocks'][0]['attrs']['saved'] == 'do not expand page content'
+    assert 'post_content' in result['apply'] and 'post_content' in result['restore']
+    repeated = run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']})
+    assert repeated['plan']['changed'] == 0
+    assert repeated['plan']['after_content'] == result['plan']['after_content']
+
+
+@pytest.mark.parametrize('domain,value', [('background', None), ('sizing', {'phone': {'value': {'width': '0px'}}}), ('spacing', {})])
+def test_body_authored_post_content_domains_are_preserved(domain, value):
+    blocks = body_fixture()
+    leaf = wrappers(blocks)[-1]['innerBlocks'][0]
+    leaf['attrs']['module'] = {'decoration': {domain: value}}
+    result = run(blocks, record=post_record(post_type='et_body_layout'))
+    assert result['plan']['changed'] == 11
+    assert wrappers(result['blocks'])[-1]['innerBlocks'][0]['attrs']['module']['decoration'][domain] == wrappers(result['before_blocks'])[-1]['innerBlocks'][0]['attrs']['module']['decoration'][domain]
+
+
+@pytest.mark.parametrize('change', ['extra-module', 'nested-page', 'wrong-module', 'extra-row'])
+def test_body_seam_unknown_structure_is_byte_exact_and_generates_no_sql(change):
+    blocks = body_fixture()
+    column = wrappers(blocks)[-1]
+    if change == 'extra-module':
+        column['innerBlocks'].append(block('divi/text', {'authored': 'keep'}))
+        column['innerContent'].append(None)
+    elif change == 'nested-page':
+        column['innerBlocks'][0]['innerBlocks'] = [block('divi/section', {'page': 'untouched'})]
+        column['innerBlocks'][0]['innerContent'] = [None]
+    elif change == 'wrong-module': column['innerBlocks'][0]['blockName'] = 'bioco-divi/footer-shell'
+    else:
+        blocks[0]['innerBlocks'].append(block('divi/row'))
+        blocks[0]['innerContent'].append(None)
+    result = run(blocks, record=post_record(post_type='et_body_layout'))
+    assert result['plan']['changed'] == 0
+    assert result['plan']['after_content'] == result['plan']['before']['post_content']
+    assert result['apply'] == result['restore'] == ''
+    assert result['plan']['report'][0]['reason'] == 'authored-shell-structure'

@@ -650,3 +650,28 @@ class TestPlainLinksKeepLook:
         assert style["clipPath"] == "none", style["clipPath"]
         assert style["boxShadow"] == "none", style["boxShadow"]
         assert style["borderRadius"] == "0px", style["borderRadius"]
+
+
+@pytest.mark.parametrize('viewport', ['desktop', 'mobile'])
+@pytest.mark.parametrize('body_class', ['home', 'page owned-qa-copy'])
+def test_native_live_shape_does_not_override_changed_font_or_padding(page, viewport, body_class):
+    """Actual theme cascade proof; installed Divi serialization remains an operator gate."""
+    from test_wordpress_home_presentation_preview import run, native_live, column
+    base, pg = page
+    attrs = column(run([native_live()])['after'][0])['innerBlocks'][1]['attrs']
+    class_tokens = attrs['module']['decoration']['attributes']['desktop']['value']['attributes'][0]['value']
+    pg.set_viewport_size(dict(zip(['width', 'height'], VIEWPORTS[viewport])))
+    pg.goto(base)
+    pg.set_content(f'''<link rel="stylesheet" href="{base}/wordpress/web/app/themes/bioco-divi/style.css">
+      <body class="{body_class}"><a class="et_pb_button {class_tokens}" href="#saved"
+        style="font-size:31px;line-height:37px;padding:19px 33px;background:#2E7D32;color:#FFF;
+        box-shadow:0 8px 16px rgba(0,0,0,.12)">Native edited action</a></body>''')
+    pg.wait_for_function("getComputedStyle(document.querySelector('a')).clipPath.startsWith('polygon')")
+    styles = pg.locator('a').evaluate('el => {const c=getComputedStyle(el);return {font:c.fontSize,padding:c.padding,clip:c.clipPath,shadow:c.boxShadow}}')
+    assert styles['font'] == '31px' and styles['padding'] == '19px 33px'
+    assert styles['clip'] == REF_POLYGON
+    assert styles['shadow'] != 'none'
+    pg.keyboard.press('Tab')
+    assert pg.locator('a').evaluate('el => el === document.activeElement')
+    focus = pg.locator('a').evaluate('el => {const c=getComputedStyle(el);return {clip:c.clipPath,outline:c.outlineWidth,font:c.fontSize,padding:c.padding}}')
+    assert focus == {'clip': 'none', 'outline': '3px', 'font': '31px', 'padding': '19px 33px'}

@@ -118,13 +118,15 @@ def content_projection(blocks):
 def test_saved_content_links_image_identity_and_functional_sections_stay_exact():
     before = fixture()
     result = run(before)
-    assert result['report'] == {'hero': 1, 'feature': 2, 'cta': 1, 'refused': []}
+    assert {k: result['report'][k] for k in ['hero', 'feature', 'cta', 'live', 'events']} == {'hero': 1, 'feature': 2, 'cta': 1, 'live': 0, 'events': 0}
+    assert len(result['report']['refused']) == 2
     assert content_projection(result['after']) == content_projection(before)
     assert sections(result)[3] == before[0]['innerBlocks'][3]
     assert sections(result)[5] == before[0]['innerBlocks'][5]
     assert column(sections(result)[1])['innerBlocks'][3] == column(before[0]['innerBlocks'][1])['innerBlocks'][3]
     assert result['repeat'] == result['after']
-    assert result['repeatReport'] == {'hero': 0, 'feature': 0, 'cta': 0, 'refused': []}
+    assert all(result['repeatReport'][k] == 0 for k in ['hero', 'feature', 'cta', 'live', 'events'])
+    assert len(result['repeatReport']['refused']) == 2
 
 
 def test_overlay_insertion_keeps_every_existing_fragment_and_child_order():
@@ -270,3 +272,101 @@ def test_authored_native_button_padding_and_phone_flow_are_preserved():
     assert saved['desktop']['value']['padding']['left'] == '0px'
     assert saved['desktop']['value']['padding']['right'] == '17px'
     assert saved['phone']['value']['padding']['left'] == '8px'
+
+
+def native_live():
+    query = block('divi/row', 'bioco-home-live-visits', attrs={'savedQuery': {
+        'post_type': 'bioco_event', 'post__in': [0], 'empty': None}, 'modulePreset': ['query-owned']})
+    return block('divi/section', 'bioco-home-live', [block('divi/row', 'bioco-home-live-row', [
+        block('divi/column', 'bioco-home-live-column', [heading('bioco-home-live-title'), button(True), query])])])
+
+
+def native_events():
+    query = block('divi/row', 'bioco-dynamic-text bioco-record-loop bioco-event-loop', attrs={
+        'query': {'post_type': 'bioco_event', 'status': 'past'}, 'modulePreset': ['query-owned']})
+    return block('divi/section', 'bioco-dynamic-section', [block('divi/row', 'bioco-dynamic-row', [
+        block('divi/column', 'bioco-dynamic-column', [heading('bioco-dynamic-section-title'), query])])])
+
+
+def test_native_live_and_home_events_adopt_measured_values_without_touching_queries():
+    before = [native_live(), native_events()]
+    result = run(before)
+    assert result['report']['live'] == result['report']['events'] == 1
+    assert result['report']['refused'] == []
+    assert content_projection(result['after']) == content_projection(before)
+    assert result['repeat'] == result['after']
+    for index, at in [(0, 2), (1, 1)]:
+        assert column(result['after'][index])['innerBlocks'][at] == column(before[index])['innerBlocks'][at]
+    live, events = result['after']
+    assert live['attrs']['module']['decoration']['sizing']['phone']['value']['width'] == 'calc(100% - 46.8px)'
+    assert events['innerBlocks'][0]['attrs']['module']['decoration']['sizing']['phone']['value']['width'] == 'calc(100% - 93.6px)'
+    title = column(live)['innerBlocks'][0]['attrs']
+    assert title['title']['decoration']['font']['font']['phone']['value']['size'] == '22.4px'
+    assert title['css']['phone']['value']['mainElement'] == 'padding-bottom:0px;'
+    action = column(live)['innerBlocks'][1]['attrs']
+    assert action['button']['decoration']['background']['desktop']['value']['color'] == '#2E7D32'
+    assert action['button']['decoration']['font']['font']['desktop']['value']['color'] == '#FFFFFF'
+    assert action['button']['decoration']['boxShadow']['desktop']['value']['blur'] == '16px'
+    assert action['button']['decoration']['background']['desktop']['hover']['color'] == '#2E7D32'
+    assert action['button']['decoration']['font']['font']['desktop']['hover']['color'] == '#FFFFFF'
+    assert action['button']['decoration']['border']['desktop']['hover']['styles']['all']['color'] == '#2E7D32'
+    assert 'phone' not in action['button']['decoration']['sizing']
+    classes = action['module']['decoration']['attributes']['desktop']['value']['attributes'][0]['value'].split()
+    assert 'bioco-home-live-shape' in classes and 'author-class' in classes
+    assert 'bioco-home-button' not in classes and 'bioco-home-button--secondary' not in classes
+    parsed_action = column(result['parsed'][0])['innerBlocks'][1]
+    assert parsed_action['attrs'] == action
+    assert 'advanced' not in action['module']  # Do not manufacture a second class control.
+
+
+def test_generic_event_wrapper_outside_home_context_is_byte_exact():
+    before = [native_events()]
+    result = run(before)
+    assert result['after'] == before
+    assert result['report']['events'] == 0
+
+
+@pytest.mark.parametrize('value', ['', None, 0, False, '17px'])
+def test_native_live_authored_and_inherited_leaf_values_survive(value):
+    before = [native_live()]
+    before[0]['attrs']['module']['decoration']['spacing'] = {'desktop': {'value': {'padding': {'left': value}}}}
+    action = column(before[0])['innerBlocks'][1]
+    action['attrs']['button']['decoration'] = {'font': {'font': {'desktop': {'value': {'size': value}}, 'tablet': {'value': {'weight': '900'}}, 'phone': {'hover': {'size': '23px'}}}}}
+    result = run(before)
+    assert result['report']['refused'] == []
+    spacing = result['after'][0]['attrs']['module']['decoration']['spacing']
+    assert spacing['desktop']['value']['padding']['left'] == value
+    assert 'left' not in spacing['phone']['value']['padding']
+    font = column(result['after'][0])['innerBlocks'][1]['attrs']['button']['decoration']['font']['font']
+    assert font['desktop']['value']['size'] == value
+    assert font['tablet']['value']['weight'] == '900'
+    assert font['phone']['hover']['size'] == '23px'
+
+
+@pytest.mark.parametrize('change', ['extra-row', 'duplicate-title', 'preset', 'null-domain', 'responsive-class', 'css'])
+def test_native_live_new_route_refuses_atomically(change):
+    before = [native_live()]
+    if change == 'extra-row': before[0]['innerBlocks'].append(block('divi/row'))
+    elif change == 'duplicate-title': column(before[0])['innerBlocks'].append(heading('bioco-home-live-title'))
+    elif change == 'preset': column(before[0])['innerBlocks'][1]['attrs']['modulePreset'] = ['uncaptured']
+    elif change == 'null-domain': before[0]['attrs']['module']['decoration']['sizing'] = None
+    elif change == 'responsive-class': before[0]['attrs']['module']['advanced'] = {'htmlAttributes': {'phone': {'value': {'class': 'bioco-home-live'}}}}
+    else: before[0]['attrs']['css'] = {'desktop': {'value': {'mainElement': 'width:4px;'}}}
+    result = run(before)
+    assert result['after'] == before
+    assert result['report']['live'] == 0 and len(result['report']['refused']) == 1
+
+
+@pytest.mark.parametrize('value', ['', None, 0, False, '#456789'])
+def test_native_live_hover_authored_leaf_values_remain_exact(value):
+    before = [native_live()]
+    action = column(before[0])['innerBlocks'][1]
+    action['attrs']['button']['decoration'] = {
+        'font': {'font': {'desktop': {'hover': {'color': value}}}},
+        'background': {'desktop': {'hover': {'color': value}}},
+        'border': {'desktop': {'hover': {'styles': {'all': {'color': value}}}}}}
+    result = run(before)
+    native = column(result['after'][0])['innerBlocks'][1]['attrs']['button']['decoration']
+    assert native['font']['font']['desktop']['hover']['color'] == value
+    assert native['background']['desktop']['hover']['color'] == value
+    assert native['border']['desktop']['hover']['styles']['all']['color'] == value

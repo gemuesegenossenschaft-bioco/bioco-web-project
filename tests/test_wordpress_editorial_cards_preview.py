@@ -299,3 +299,30 @@ def test_unrelated_editorial_families_and_class_substrings_are_noops():
     result = run([saved])
     assert result['after'] == [saved]
     assert result['report'] == {'cards-grid': 0, 'gallery-strip': 0, 'refused': []}
+
+
+@pytest.mark.parametrize('width', ['missing', '', None, 0, False, '73%'])
+def test_empty_gallery_actions_column_stays_in_place_with_absent_only_native_width(width):
+    before = fixture('gallery-strip')
+    actions = before['innerBlocks'][2]['innerBlocks'][0]
+    actions['innerBlocks'] = []
+    actions['innerContent'] = ['opaque empty authored column']
+    if width != 'missing': actions['attrs']['module']['decoration']['sizing'] = {'desktop': {'value': {'width': width}}}
+    result = run([before])
+    assert result['report']['refused'] == []
+    after = result['after'][0]['innerBlocks'][2]['innerBlocks'][0]
+    assert after['innerBlocks'] == [] and after['innerContent'] == actions['innerContent']
+    assert after['attrs']['module']['decoration']['sizing']['desktop']['value']['width'] == ('100%' if width == 'missing' else width)
+    assert 'bioco-divi-content' not in classes(after)
+    assert result['repeat'] == result['after']
+    assert result['parsed'][0]['innerBlocks'][2]['innerBlocks'][0]['attrs'] == after['attrs']
+
+
+def test_empty_gallery_actions_null_control_refuses_entire_section_before_marker_removal():
+    before = fixture('gallery-strip')
+    action = before['innerBlocks'][2]['innerBlocks'][0]
+    action['innerBlocks'] = []
+    action['attrs']['module']['decoration']['sizing'] = None
+    result = run([before])
+    assert result['after'] == [before]
+    assert len(result['report']['refused']) == 1

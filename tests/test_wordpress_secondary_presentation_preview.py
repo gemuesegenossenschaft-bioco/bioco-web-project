@@ -7,14 +7,14 @@ import pytest
 from test_wordpress_presentation_adoption import ROOT, PHP, WP_SERIALIZER_STUB, block, classes, tokens
 
 
-def run(blocks):
+def run(blocks, presets=None):
     script = PHP.replace('WP_SERIALIZER', WP_SERIALIZER_STUB).replace(
         "require 'wordpress/web/app/mu-plugins/bioco-import/includes/presentation-adoption.php';",
         "require 'wordpress/web/app/mu-plugins/bioco-import/includes/secondary-presentation-preview.php';")
     script = script.replace(
         "$result['blocks'] = bioco_import_presentation_tree($input['blocks'], $result['report']);",
-        "[$result['blocks'], $result['report']] = bioco_secondary_presentation_preview($input['blocks']);")
-    process = subprocess.run(['php', '-r', script], input=json.dumps({'blocks': blocks}),
+        "[$result['blocks'], $result['report']] = bioco_secondary_presentation_preview($input['blocks'], [], $input['presets'] ?? null);")
+    process = subprocess.run(['php', '-r', script], input=json.dumps({'blocks': blocks, 'presets': presets}),
                              text=True, capture_output=True, cwd=ROOT, check=True)
     assert process.stderr == ''
     return json.loads(process.stdout)
@@ -182,3 +182,93 @@ def test_unrelated_dynamic_native_modules_and_opaque_structure_are_unchanged():
         return [{k: shape(v) if k == 'innerBlocks' else v for k, v in b.items() if k != 'attrs'} for b in blocks]
 
     assert shape([after]) == shape([before])
+
+
+def timeline_presets():
+    return {'module': {
+        'divi/section': {'default': '', 'items': {'authored-section-preset': {'moduleName': 'divi/section', 'attrs': {'module': {'decoration': {'spacing': {'desktop': {'value': {'padding': {'top': '54px'}}}}}}}}}},
+        'divi/row': {'default': '', 'items': {'authored-row-preset': {'moduleName': 'divi/row', 'attrs': {'module': {'decoration': {'sizing': {'desktop': {'value': {'width': '100%'}}}}}}}}}},
+        'group': {}}
+
+
+def native_timeline():
+    title = block('divi/heading', classes('bioco-divi-title') | {
+        'title': {'innerContent': {'desktop': {'value': 'Saved Timeline'}},
+                  'decoration': {'font': {'font': {'desktop': {'value': {'headingLevel': 'h2'}}}}}}})
+    header = block('divi/row', classes('bioco-timeline-header') | {'modulePreset': ['authored-row-preset']}, [
+        block('divi/column', classes('bioco-timeline-header-content'), [title])])
+    item = block('divi/row', classes('bioco-timeline-item-row'), [block('divi/column', {'record': 'preserve exactly'})])
+    return block('divi/section', classes('bioco-timeline-section') | {'modulePreset': ['authored-section-preset']}, [header, item])
+
+
+def test_native_timeline_heading_defaults_preserve_ancestor_presets_and_items():
+    before = native_timeline()
+    result = run([before], timeline_presets())
+    after = result['blocks'][0]
+    assert result['report'] == [{'path': [0], 'action': 'timeline-heading'}]
+    assert after['attrs'] == before['attrs']
+    assert after['innerBlocks'][0]['attrs'] == before['innerBlocks'][0]['attrs']
+    assert after['innerBlocks'][1] == before['innerBlocks'][1]
+    title = after['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0]
+    assert title['attrs']['title']['decoration']['font']['font']['desktop']['value'] == {
+        'headingLevel': 'h2', 'size': '26px', 'weight': '500', 'lineHeight': '1em', 'color': '#333333'}
+    assert title['attrs']['css']['desktop']['value']['mainElement'] == 'padding-bottom:10px;'
+    assert run([after]) == {'blocks': [after], 'report': []}
+
+
+@pytest.mark.parametrize('value', ['', None, 0, False, '41px'])
+def test_timeline_heading_authored_font_and_responsive_values_are_not_masked(value):
+    before = native_timeline()
+    title = before['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0]
+    title['attrs']['title']['decoration']['font']['font'] = {'desktop': {'value': {'size': value}},
+        'tablet': {'value': {'weight': '700'}}, 'phone': {'value': {'lineHeight': '2em'}, 'hover': {'color': '#F00'}}}
+    result = run([before], timeline_presets())
+    font = result['blocks'][0]['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0]['attrs']['title']['decoration']['font']['font']
+    assert font['desktop']['value']['size'] == value
+    assert font['tablet'] == title['attrs']['title']['decoration']['font']['font']['tablet']
+    assert font['phone'] == title['attrs']['title']['decoration']['font']['font']['phone']
+
+
+@pytest.mark.parametrize('change', ['extra-header', 'extra-module', 'heading-preset', 'null-control', 'css', 'responsive-class'])
+def test_timeline_heading_unknown_native_controls_refuse_atomically(change):
+    before = native_timeline()
+    title = before['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0]
+    if change == 'extra-header': before['innerBlocks'].append(copy.deepcopy(before['innerBlocks'][0]))
+    elif change == 'extra-module': before['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'].append(block('divi/text', {'authored': 'keep'}))
+    elif change == 'heading-preset': title['attrs']['modulePreset'] = ['uncaptured-font']
+    elif change == 'null-control': title['attrs']['title']['decoration']['font'] = None
+    elif change == 'css': title['attrs']['css'] = {'phone': {'value': {'mainElement': 'width:75px;'}}}
+    else: title['attrs']['module']['advanced']['htmlAttributes']['phone'] = {'value': {'class': 'bioco-divi-title'}}
+    result = run([before])
+    assert result['blocks'] == [before]
+    assert result['report'][0]['action'] == 'preserve'
+
+
+@pytest.mark.parametrize('change', ['missing', 'unknown', 'same-id-font', 'group-font', 'default-module-font', 'default-group-font', 'ancestor-local-font', 'cycle'])
+def test_timeline_requires_effective_capture_and_refuses_inherited_font_domains(change):
+    before = native_timeline()
+    presets = timeline_presets()
+    if change == 'missing': presets = None
+    elif change == 'unknown': presets['module']['divi/section']['items'] = {}
+    elif change == 'same-id-font':
+        presets['module']['divi/section']['items']['authored-section-preset']['attrs']['module']['decoration']['font'] = {'desktop': {'value': {'size': '41px'}}}
+    elif change == 'group-font':
+        presets['module']['divi/section']['items']['authored-section-preset']['groupPresets'] = {'module.decoration.font': {'groupName': 'divi/font', 'presetId': ['font-shared']}}
+    elif change == 'default-module-font':
+        presets['module']['divi/heading'] = {'default': 'shared-heading', 'items': {'shared-heading': {'attrs': {'title': {'decoration': {'font': {'font': {'desktop': {'value': {'size': '43px'}}}}}}}}}}
+    elif change == 'default-group-font': presets['group']['divi/font'] = {'default': 'shared-font', 'items': {}}
+    elif change == 'ancestor-local-font': before['attrs']['module']['decoration']['font'] = None
+    else: presets['module']['divi/section']['items']['authored-section-preset']['modulePreset'] = ['authored-section-preset']
+    result = run([before], presets)
+    assert result['blocks'] == [before]
+    assert result['report'][0]['action'] == 'preserve'
+
+
+def test_timeline_effective_spacing_group_capture_is_resolved_without_font_override():
+    presets = timeline_presets()
+    presets['module']['divi/section']['items']['authored-section-preset']['groupPresets'] = {
+        'module.decoration.spacing': {'groupName': 'divi/spacing', 'presetId': ['shared-spacing']}}
+    presets['group']['divi/spacing'] = {'default': '', 'items': {'shared-spacing': {
+        'groupName': 'divi/spacing', 'attrs': {'module': {'decoration': {'spacing': {'desktop': {'value': {'padding': {'top': '4px'}}}}}}}}}}
+    result = run([native_timeline()], presets)
+    assert result['report'][0]['action'] == 'timeline-heading'
