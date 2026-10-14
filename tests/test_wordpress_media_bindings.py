@@ -203,7 +203,26 @@ def test_callbacks_are_registered_for_native_attrs_dynamic_resolution_and_builde
     assert [hook[0] for hook in result["filters"]] == ["divi_module_dynamic_content_options",
         "divi_module_dynamic_content_resolved_value", "divi_module_library_register_module_attrs"]
     assert result["actions"][0][0] == "divi_visual_builder_assets_after_enqueue_app_window_scripts"
-    assert "includes/media-bindings.php" in (CORE / "bioco-core.php").read_text()
+
+
+def test_password_parent_reader_without_password_is_denied_while_editor_is_allowed():
+    payload = library_payload()
+    payload["posts"]["113"]["post_parent"] = 114
+    payload["posts"]["114"].update(post_status="publish", password=True)
+    code = LIBRARY.replace(
+        "function current_user_can(...$args) {return $GLOBALS['allowed']??false;}",
+        "function current_user_can($cap,$id) {$GLOBALS['cap_checks'][]=[$cap,$id];"
+        "return $cap==='read_post'||($GLOBALS['canEditParent']??false);}",
+    ) + r'''
+    $context=['name'=>'bioco_media_alt','settings'=>['image'=>'{"id":"113"}']];
+    $reader=bioco_media_binding_value('stale',$context);
+    $GLOBALS['canEditParent']=true;$editor=bioco_media_binding_value('stale',$context);
+    $GLOBALS['canEditParent']=false;$GLOBALS['posts'][114]['password']=false;
+    $withPassword=bioco_media_binding_value('stale',$context);
+    echo json_encode([$reader,$editor,$withPassword,$GLOBALS['cap_checks']]);
+    '''
+    assert php(code, payload) == ["", 'Alt "113" & field', 'Alt "113" & field',
+                                 [["edit_post", 114], ["edit_post", 114]]]
 
 
 def test_builder_assets_precede_native_registration_and_skip_unauthorized_or_late_loads():

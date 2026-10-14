@@ -23,8 +23,10 @@ function bioco_media_binding_value($value, array $context) {
     $post = get_post($id);
     if (!$post || $post->post_type !== 'attachment' || !wp_attachment_is_image($id)) return '';
     if ($post->post_status !== 'inherit' && !current_user_can('read_post', $id)) return '';
-    if ($post->post_parent && (get_post_status($post->post_parent) !== 'publish'
-        || post_password_required($post->post_parent)) && !current_user_can('read_post', $id)) return '';
+    if ($post->post_parent && get_post_status($post->post_parent) !== 'publish'
+        && !current_user_can('read_post', $id)) return '';
+    if ($post->post_parent && post_password_required($post->post_parent)
+        && !current_user_can('edit_post', $post->post_parent)) return '';
     // The native image renderer escapes attribute values. Keep the underlying
     // text intact, including an intentional empty alt and ordinary ampersands.
     return $name === 'bioco_media_alt' ? (string) get_post_meta($id, '_wp_attachment_image_alt', true)
