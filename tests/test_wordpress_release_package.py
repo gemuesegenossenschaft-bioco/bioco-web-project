@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tarfile
 import zipfile
+from xml.etree import ElementTree as ET
 
 import pytest
 
@@ -114,6 +115,26 @@ def test_build_pins_preflight_to_the_packaged_checkout(tmp_path):
     result = command(repo, env, 'build', '--commit', commit, '--output', str(tmp_path / 'package'))
     assert result.returncode == 0, result.stderr
     assert Path(env['TEST_VALIDATION_ROOT']).read_text().strip() == str(repo)
+
+
+@pytest.mark.parametrize('scenario', ['missing', 'skipped'])
+def test_required_coverage_rejects_absent_package_checks(tmp_path, scenario):
+    policy = json.loads((ROOT / '.github/workflows/wordpress-required-tests.json').read_text())
+    required_path = 'tests/test_wordpress_release_package.py'
+    suite = ET.Element('testsuite')
+    for path in policy['required_modules']:
+        if path != required_path:
+            ET.SubElement(suite, 'testcase', classname=path[:-3].replace('/', '.'), name='test_fixture')
+    if scenario == 'skipped':
+        case = ET.SubElement(suite, 'testcase', classname=required_path[:-3].replace('/', '.'),
+                             name='test_package_fixture')
+        ET.SubElement(case, 'skipped')
+    report = tmp_path / 'report.xml'
+    ET.ElementTree(suite).write(report, encoding='unicode')
+    result = subprocess.run([sys.executable, str(ROOT / '.github/workflows/check-required-tests.py'),
+                             str(report)], text=True, capture_output=True)
+    assert result.returncode != 0, result.stdout
+    assert required_path in result.stdout
 
 
 @pytest.mark.parametrize('change', ['tracked-secret', 'ignored-source', 'symlink'])
