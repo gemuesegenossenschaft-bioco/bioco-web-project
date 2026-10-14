@@ -15,6 +15,7 @@ require_once BIOCO_CORE_DIR . '/includes/native-loop-empty.php';
 require_once BIOCO_CORE_DIR . '/includes/event-loop.php';
 require_once BIOCO_CORE_DIR . '/includes/price-bindings.php';
 require_once BIOCO_CORE_DIR . '/includes/record-bindings.php';
+require_once BIOCO_CORE_DIR . '/includes/media-bindings.php';
 require_once BIOCO_CORE_DIR . '/includes/navigation.php';
 require_once BIOCO_CORE_DIR . '/includes/redirects.php';
 require_once BIOCO_CORE_DIR . '/includes/dynamic-sections.php';
