@@ -25,7 +25,7 @@ Mark each missing check as missing. Fixture results do not establish live Divi o
 
 Production apply and production rollback each require explicit user approval for the concrete packet. A prior forward-release approval does not approve rollback. An approval for another SHA, baseline, environment or action does not transfer. If approval already covers the unchanged packet, continue without asking again.
 
-Immediately before apply, recheck holds, owner, target identity, candidate, accepted baseline and evidence. Acquire the canonical server lease; CI concurrency alone does not cover local writers. A lease grants exclusive execution, not user approval. If another release changed the baseline, prepare a new packet. Use only the inspected canonical entry point. Keep code promotion separate from seed imports, saved-template changes and database recovery.
+Immediately before apply, recheck holds, owner, target identity, candidate, accepted baseline and evidence. Acquire the server lease provided by the canonical route. Where the current route has no lease, follow its documented owner coordination and report lock enforcement as unavailable. CI concurrency alone does not cover local writers. A lease grants exclusive execution, not user approval. If another release changed the baseline, prepare a new packet. Use only the inspected canonical entry point. Keep code promotion separate from seed imports, saved-template changes and database recovery.
 
 ## Preserve edits through failure
 
