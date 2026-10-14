@@ -412,7 +412,8 @@ def test_body_authored_post_content_domains_are_preserved(domain, value):
 
 
 @pytest.mark.parametrize('change', ['extra-module', 'nested-page', 'wrong-module', 'extra-row'])
-def test_body_seam_unknown_structure_is_byte_exact_and_generates_no_sql(change):
+@pytest.mark.parametrize('placeholder', [False, True])
+def test_body_seam_unknown_structure_is_byte_exact_and_generates_no_sql(change, placeholder):
     blocks = body_fixture()
     column = wrappers(blocks)[-1]
     if change == 'extra-module':
@@ -425,8 +426,61 @@ def test_body_seam_unknown_structure_is_byte_exact_and_generates_no_sql(change):
     else:
         blocks[0]['innerBlocks'].append(block('divi/row'))
         blocks[0]['innerContent'].append(None)
+    if placeholder:
+        blocks = [block('divi/placeholder', {'saved': 'preserve'}, blocks)]
     result = run(blocks, record=post_record(post_type='et_body_layout'))
     assert result['plan']['changed'] == 0
     assert result['plan']['after_content'] == result['plan']['before']['post_content']
     assert result['apply'] == result['restore'] == ''
     assert result['plan']['report'][0]['reason'] == 'authored-shell-structure'
+
+
+def test_production_body_placeholder_adopts_defaults_preserving_saved_tree_and_repeat():
+    source = (ROOT / 'tests/fixtures/production-native-body-301.html').read_text()
+    result = run(record=post_record(post_type='et_body_layout', post_content=source))
+    assert result['plan']['changed'] == 12
+    expected = copy.deepcopy(result['before_blocks'])
+    nodes = wrappers(expected[0]['innerBlocks'])
+    nodes.append(nodes[-1]['innerBlocks'][0])
+    for node in nodes:
+        if node['attrs'] == []:
+            node['attrs'] = {}
+        node['attrs'].setdefault('module', {}).setdefault('decoration', {}).update({
+            'sizing': {'desktop': {'value': {'width': '100%', 'maxWidth': 'none'}}},
+            'spacing': {'desktop': {'value': {key: dict.fromkeys(['top', 'right', 'bottom', 'left'], '0px')
+                                            for key in ['margin', 'padding']}}},
+            'background': {'desktop': {'value': {'color': 'transparent'}}},
+        })
+    assert result['blocks'] == expected
+    assert {tuple(row['path']) for row in result['plan']['report']} == {
+        (0, 0), (0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0, 0)}
+    assert result['plan']['before']['post_content'] == source
+    repeated = run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']})
+    assert repeated['plan']['changed'] == 0
+    assert repeated['plan']['after_content'] == result['plan']['after_content']
+    assert repeated['apply'] == repeated['restore'] == ''
+    db = database(result['plan'])
+    assert execute(db, result['apply']) == 1
+    assert execute(db, result['restore']) == 1
+    assert db.execute('SELECT post_content FROM posts').fetchone()[0] == source
+
+
+@pytest.mark.parametrize('domain,value', [('background', None), ('sizing', {'phone': {'value': {'width': '0px'}}}), ('spacing', {})])
+def test_placeholder_keeps_authored_wrapper_and_descendant_domains(domain, value):
+    blocks = [block('divi/placeholder', {'saved': 'keep wrapper'}, body_fixture())]
+    nodes = wrappers(blocks[0]['innerBlocks'])
+    nodes[1]['attrs']['module']['decoration'] = {domain: value}
+    result = run(blocks, record=post_record(post_type='et_body_layout'))
+    assert result['plan']['changed'] == 11
+    before = result['before_blocks'][0]
+    after = result['blocks'][0]
+    assert {key: value for key, value in after.items() if key != 'innerBlocks'} == {
+        key: value for key, value in before.items() if key != 'innerBlocks'}
+    assert wrappers(after['innerBlocks'])[1]['attrs']['module']['decoration'][domain] == wrappers(before['innerBlocks'])[1]['attrs']['module']['decoration'][domain]
+
+
+def test_unknown_container_is_not_treated_as_a_native_placeholder():
+    result = run([block('unknown/container', {}, body_fixture())], record=post_record(post_type='et_body_layout'))
+    assert result['plan']['changed'] == 0
+    assert result['plan']['after_content'] == result['plan']['before']['post_content']
+    assert result['apply'] == result['restore'] == ''

@@ -85,6 +85,10 @@ function bioco_shell_wrapper_tree(array $blocks, string $slot, array $presets, a
     if (!in_array($slot, ['header', 'body', 'footer'], true)) throw new RuntimeException('Unknown shell slot.');
     foreach ($blocks as $index => &$section) {
         $at = [...$path, $index];
+        if (($section['blockName'] ?? '') === 'divi/placeholder') {
+            $section['innerBlocks'] = bioco_shell_wrapper_tree($section['innerBlocks'] ?? [], $slot, $presets, $report, $at);
+            continue;
+        }
         $classes = bioco_shell_wrapper_classes($section['attrs'] ?? []);
         if (($section['blockName'] ?? '') !== 'divi/section'
             || !in_array('bioco-global-layout', $classes, true)
