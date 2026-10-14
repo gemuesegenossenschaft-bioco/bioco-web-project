@@ -2,6 +2,7 @@
 /** Pure preview for the measured native accordion and two-tile portal families. */
 if (!defined('ABSPATH')) exit;
 require_once __DIR__ . '/presentation-adoption.php';
+require_once __DIR__ . '/editorial-native-preview-values.php';
 
 function bioco_secondary_preview_has(array $block, string $class): bool {
     return in_array($class, bioco_import_presentation_tokens($block['attrs'] ?? []), true);
@@ -124,12 +125,97 @@ function bioco_secondary_preview_portal(array &$section): void {
     bioco_secondary_preview_wrappers($section, false);
 }
 
+/** A heading fallback must not mask a saved or inherited font/preset domain. */
+function bioco_secondary_preview_timeline_presets(array $ancestors, ?array $presets): void {
+    if ($presets === null || !is_array($presets['module'] ?? null) || !is_array($presets['group'] ?? null)) {
+        throw new RuntimeException('Effective inherited timeline preset capture is required.');
+    }
+    $seen = [];
+    $inspect = null;
+    $resolve = static function(string $kind, string $name, $ids) use (&$seen, $presets, &$inspect): void {
+        if (is_string($ids)) $ids = [$ids];
+        if (!is_array($ids)) throw new RuntimeException('Unsupported inherited timeline preset reference.');
+        foreach ($ids as $id) {
+            if (!is_string($id) || $id === '') throw new RuntimeException('Unsupported inherited timeline preset ID.');
+            $key = $kind . '/' . $name . '/' . $id;
+            if (isset($seen[$key])) throw new RuntimeException('Cyclic inherited timeline preset reference.');
+            $preset = $presets[$kind][$name]['items'][$id] ?? null;
+            if (!is_array($preset)) throw new RuntimeException('Effective inherited timeline preset capture is required.');
+            $seen[$key] = true;
+            $inspect($preset, $name);
+            unset($seen[$key]);
+        }
+    };
+    $inspect = static function(array $node, string $name) use (&$inspect, &$resolve): void {
+        foreach ($node as $key => $value) {
+            if (stripos((string) $key, 'font') !== false
+                || (in_array($key, ['groupName', 'groupId'], true) && is_string($value) && stripos($value, 'font') !== false)) {
+                throw new RuntimeException('Inherited timeline font domain requires native review.');
+            }
+            if ($key === 'modulePreset' && !empty($value)) $resolve('module', $name, $value);
+            if ($key === 'presetId' && !empty($value)) {
+                if (!is_string($node['groupName'] ?? null)) throw new RuntimeException('Unknown inherited timeline group preset.');
+                $resolve('group', $node['groupName'], $value);
+            }
+            if (($key === 'css' || $key === 'styleIds') && !empty($value)) throw new RuntimeException('Authored inherited timeline style requires native review.');
+            if (is_array($value)) $inspect($value, $node['moduleName'] ?? $name);
+        }
+    };
+    foreach ($ancestors as $block) {
+        $name = $block['blockName'];
+        $inspect($block['attrs'] ?? [], $name);
+        if (!empty($presets['module'][$name]['default'])) $resolve('module', $name, $presets['module'][$name]['default']);
+    }
+    if (!empty($presets['module']['divi/heading']['default'])) $resolve('module', 'divi/heading', $presets['module']['divi/heading']['default']);
+    foreach ($presets['group'] ?? [] as $name => $group) {
+        if (!empty($group['default']) && stripos((string) $name, 'font') !== false) throw new RuntimeException('Default timeline font domain requires native review.');
+    }
+}
+
+/** The already native timeline's header is the only remaining legacy heading. */
+function bioco_secondary_preview_timeline_heading(array &$section, ?array $presets): bool {
+    $headers = [];
+    foreach ($section['innerBlocks'] ?? [] as $index => $row) {
+        if (bioco_secondary_preview_has($row, 'bioco-timeline-header')) $headers[] = $index;
+    }
+    if (count($headers) !== 1) throw new RuntimeException('Unmeasured native timeline header.');
+    $row =& $section['innerBlocks'][$headers[0]];
+    if (($row['blockName'] ?? '') !== 'divi/row' || count($row['innerBlocks'] ?? []) !== 1) throw new RuntimeException('Unmeasured native timeline header row.');
+    $column =& $row['innerBlocks'][0];
+    if (($column['blockName'] ?? '') !== 'divi/column' || !bioco_secondary_preview_has($column, 'bioco-timeline-header-content')
+        || count($column['innerBlocks'] ?? []) !== 1) throw new RuntimeException('Unmeasured native timeline header column.');
+    $heading =& $column['innerBlocks'][0];
+    if (!bioco_secondary_preview_has($heading, 'bioco-divi-title')) return false;
+    bioco_secondary_preview_timeline_presets([$section, $row, $column], $presets);
+    bioco_secondary_preview_known($heading, 'divi/heading', ['bioco-divi-title']);
+    if (!empty($heading['innerBlocks'])) throw new RuntimeException('Unmeasured native timeline heading.');
+    bioco_editorial_native_presets($heading);
+    bioco_editorial_native_fill($heading, ['title', 'decoration', 'font', 'font'], ['desktop' => [
+        'size' => '26px', 'weight' => '500', 'lineHeight' => '1em', 'color' => '#333333',
+    ]]);
+    bioco_editorial_native_fill($heading, ['css'], ['desktop' => ['mainElement' => 'padding-bottom:10px;']]);
+    bioco_editorial_native_remove($heading, ['bioco-divi-title']);
+    return true;
+}
+
 /** Atomic per recognized section. Opaque steps and other families remain unchanged. */
-function bioco_secondary_presentation_preview(array $blocks, array $path = []): array {
+function bioco_secondary_presentation_preview(array $blocks, array $path = [], ?array $presets = null): array {
     $report = [];
     foreach ($blocks as $index => &$block) {
         $at = [...$path, $index];
         if (($block['blockName'] ?? '') === 'divi/section') {
+            if (bioco_secondary_preview_has($block, 'bioco-timeline-section')) {
+                $candidate = $block;
+                try {
+                    if (bioco_secondary_preview_timeline_heading($candidate, $presets)) {
+                        $block = $candidate;
+                        $report[] = ['path' => $at, 'action' => 'timeline-heading'];
+                    }
+                } catch (RuntimeException $error) {
+                    $report[] = ['path' => $at, 'action' => 'preserve', 'reason' => $error->getMessage()];
+                }
+                continue;
+            }
             $family = bioco_secondary_preview_has($block, 'bioco-divi-accordion') ? 'accordion'
                 : (bioco_secondary_preview_has($block, 'bioco-divi-link-tiles') ? 'portal' : '');
             if (bioco_secondary_preview_has($block, 'bioco-divi-steps')) {
@@ -151,7 +237,7 @@ function bioco_secondary_presentation_preview(array $blocks, array $path = []): 
             }
         }
         if (!empty($block['innerBlocks'])) {
-            [$block['innerBlocks'], $children] = bioco_secondary_presentation_preview($block['innerBlocks'], $at);
+            [$block['innerBlocks'], $children] = bioco_secondary_presentation_preview($block['innerBlocks'], $at, $presets);
             $report = [...$report, ...$children];
         }
     }

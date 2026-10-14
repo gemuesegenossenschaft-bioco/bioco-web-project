@@ -181,7 +181,20 @@ function bioco_cards_preview_section(array $section, string $family): array {
             $roles = array_intersect([$base . '-header', $base . '-actions'], preg_split('/\s+/', bioco_import_editorial_class($row), -1, PREG_SPLIT_NO_EMPTY));
             if (count($roles) !== 1) throw new RuntimeException('Unrecognized family sibling row.');
             if (in_array($base . '-header', $roles, true)) bioco_cards_preview_header($row, $base);
-            else bioco_cards_preview_remove($row, array_values($roles));
+            else {
+                $children = $row['innerBlocks'] ?? [];
+                if (count($children) !== 1 || ($children[0]['blockName'] ?? '') !== 'divi/column'
+                    || !bioco_import_editorial_has_class($children[0], 'bioco-divi-content')) {
+                    throw new RuntimeException('Unmeasured family actions column.');
+                }
+                if ($family === 'gallery-strip' && empty($children[0]['innerBlocks'])) {
+                    bioco_cards_preview_known_classes($children[0], ['bioco-divi-content']);
+                    if (!empty($children[0]['attrs']['css'])) throw new RuntimeException('Authored empty actions CSS requires separate review.');
+                    bioco_cards_preview_fill($row['innerBlocks'][0], ['module', 'decoration', 'sizing'], ['desktop' => ['width' => '100%']]);
+                    bioco_cards_preview_remove($row['innerBlocks'][0], ['bioco-divi-content']);
+                }
+                bioco_cards_preview_remove($row, array_values($roles));
+            }
         }
     }
     unset($row);

@@ -26,8 +26,22 @@ $wp_query = (object) ['posts' => array_map(fn($p) => (object)$p, $input['results
 function add_filter($name, $fn, $priority = 10, $argc = 1) { $GLOBALS['hooks'][$name][] = $fn; }
 function add_action($name, $fn, $priority = 10, $argc = 1) { add_filter($name, $fn, $priority, $argc); }
 function add_shortcode($name, $fn) { $GLOBALS['shortcodes'][$name] = $fn; }
-function get_header() { require 'wordpress/web/app/themes/bioco-divi/header.php'; }
-function get_footer() { require 'wordpress/web/app/themes/bioco-divi/footer.php'; }
+define('ET_THEME_BUILDER_HEADER_LAYOUT_POST_TYPE', 'et_header_layout');
+define('ET_THEME_BUILDER_FOOTER_LAYOUT_POST_TYPE', 'et_footer_layout');
+function et_theme_builder_overrides_layout($key) { return $GLOBALS['input']['shell_overrides'][$key] ?? false; }
+function get_header() {
+    // Native Divi hooks both partials when either header OR footer overrides.
+    $native = et_theme_builder_overrides_layout('et_header_layout') || et_theme_builder_overrides_layout('et_footer_layout');
+    if ($native) ob_start();
+    require 'wordpress/web/app/themes/bioco-divi/header.php';
+    if ($native) { ob_end_clean(); echo '<html><body><header>Native header</header>'; }
+}
+function get_footer() {
+    $native = et_theme_builder_overrides_layout('et_header_layout') || et_theme_builder_overrides_layout('et_footer_layout');
+    if ($native) ob_start();
+    require 'wordpress/web/app/themes/bioco-divi/footer.php';
+    if ($native) { ob_end_clean(); echo '<footer>Native footer</footer></body></html>'; }
+}
 function language_attributes() { echo 'lang="de"'; }
 function bloginfo($key) { echo 'UTF-8'; }
 function wp_head() {}
@@ -271,7 +285,9 @@ def test_theme_bootstrap_registers_command_and_retains_custom_theme_builder_body
     $custom = apply_filters('et_theme_builder_template_layouts', $layouts);
     echo json_encode(['fallback'=>$fallback, 'custom'=>$custom, 'original'=>$layouts, 'commands'=>array_keys($commands)]);
     ''', request='search')
-    assert out['fallback'] == []
+    expected = out['original'] | {'et_body_layout': out['original']['et_body_layout'] | {
+        'id': 0, 'enabled': False, 'override': False}}
+    assert out['fallback'] == expected
     assert out['custom'] == out['original']
     assert 'bioco utility-layouts' in out['commands']
 
@@ -393,3 +409,131 @@ def test_nonpublished_library_content_never_leaks_to_search(post_status):
     """, request='search', post_status=post_status)
     assert 'Private Redaktionsnotiz' not in out['html']
     assert 'Keine Treffer gefunden' in out['html'] and out['writes'] == []
+
+
+@pytest.mark.parametrize('mode,results,expected', [
+    ('search', [{'post_title': 'Gemüseabo', 'url': 'https://example.test/abos/'}], 'Editor Suchergebnisse'),
+    ('search', [], 'Editor Keine Treffer'),
+    ('404', [], 'Editor Nicht gefunden'),
+])
+def test_actual_native_saved_default_body_delegates_to_published_utility(mode, results, expected):
+    out = php(LOAD + INIT + r"""
+    $body = file_get_contents('tests/fixtures/production-native-body-301.html');
+    $posts[301] = (object)['ID'=>301, 'post_type'=>'et_body_layout', 'post_status'=>'publish', 'post_name'=>'bioco-global-body', 'post_content'=>$body];
+    $layouts = ['et_template'=>298, 'et_body_layout'=>['id'=>301, 'enabled'=>true, 'override'=>true],
+      'et_header_layout'=>['id'=>299, 'enabled'=>true], 'et_footer_layout'=>['id'=>303, 'enabled'=>true]];
+    $before = $posts[301]->post_content;
+    // The old raw-shape comparison rejects the normal editor save and leaves a
+    // Post Content module with no queried post: its projected body is blank.
+    $export = json_decode(file_get_contents('wordpress/design-system/exports/theme-builder.json'), true);
+    $old_match = bioco_utility_block_shape(parse_blocks($body)) == bioco_utility_block_shape(parse_blocks($export['layouts']['301']['data']['301']));
+    $old_projection = render_native(parse_blocks($body));
+    bioco_import_utility_layouts(true);
+    foreach ($posts as $post) {
+        if (($post->post_type ?? '') !== 'et_pb_layout') continue;
+        $post->post_content = str_replace(['Suchergebnisse', 'Keine Treffer gefunden', 'Seite nicht gefunden'],
+            ['Editor Suchergebnisse', 'Editor Keine Treffer', 'Editor Nicht gefunden'], $post->post_content);
+    }
+    $writes = [];
+    $delegated = apply_filters('et_theme_builder_template_layouts', $layouts);
+    // Native Divi frontend indexes each layout's override flag directly.
+    set_error_handler(function($severity,$message){throw new RuntimeException($message);});
+    $body_override = $delegated['et_body_layout']['override'];
+    restore_error_handler();
+    $html = empty($delegated['et_body_layout']['enabled']) ? bioco_utility_render() : render_native(parse_blocks($body));
+    echo json_encode(compact('old_match','old_projection','delegated','html','before','body','writes','layouts','body_override'));
+    """, request=mode, results=results)
+    assert not out['old_match'] and out['old_projection'] == ''
+    assert out['delegated'] == out['layouts'] | {'et_body_layout': {
+        'id': 0, 'enabled': False, 'override': False}}
+    assert out['body_override'] is False
+    assert expected in out['html']
+    assert out['before'] == out['body'] and out['writes'] == []
+    assert out['layouts']['et_body_layout']['id'] == 301
+    if results:
+        assert 'Gemüseabo' in out['html'] and 'https://example.test/abos/' in out['html']
+
+
+@pytest.mark.parametrize('mutation', ['content', 'extra-column', 'extra-placeholder', 'unknown', 'font', 'preset',
+                                    'spacing', 'class', 'id', 'layout', 'null-decoration', 'leaf-content'])
+def test_native_saved_passthrough_refuses_authored_or_unknown_body(mutation):
+    out = php(LOAD + r"""
+    $blocks = parse_blocks(file_get_contents('tests/fixtures/production-native-body-301.html'));
+    $section = &$blocks[0]['innerBlocks'][0];
+    $leaf = &$section['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0];
+    switch ($input['mutation']) {
+        case 'content': $leaf['blockName'] = 'divi/text'; break;
+        case 'extra-column': $section['innerBlocks'][0]['innerBlocks'][] = $section['innerBlocks'][0]['innerBlocks'][0]; $section['innerBlocks'][0]['innerContent'][] = null; break;
+        case 'extra-placeholder': $blocks = [['blockName'=>'divi/placeholder','attrs'=>[],'innerHTML'=>'','innerContent'=>[null],'innerBlocks'=>$blocks]]; break;
+        case 'unknown': $section['attrs']['unknownControl'] = true; break;
+        case 'font': $section['attrs']['module']['decoration']['font'] = ['desktop'=>['value'=>['size'=>'30px']]]; break;
+        case 'preset': $section['attrs']['modulePreset'] = ['editor-preset']; break;
+        case 'spacing': $section['attrs']['module']['decoration']['spacing'] = ['desktop'=>['value'=>['padding'=>['top'=>'80px']]]]; break;
+        case 'class': $section['attrs']['module']['decoration']['attributes']['desktop']['value']['attributes'][0]['value'] .= ' editor-class'; break;
+        case 'id': $section['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['id'] = 'editor-id'; break;
+        case 'layout': $section['attrs']['module']['decoration']['layout']['desktop']['value']['display'] = 'flex'; break;
+        case 'null-decoration': $section['attrs']['module']['decoration'] = null; break;
+        case 'leaf-content': $leaf['innerHTML'] = '<p>Editor content</p>'; $leaf['innerContent'] = ['<p>Editor content</p>']; break;
+    }
+    unset($section, $leaf);
+    $before = $blocks;
+    $accepted = bioco_utility_is_passthrough($blocks);
+    $posts[301]=(object)['ID'=>301,'post_name'=>'bioco-global-body','post_content'=>serialize_blocks($blocks)];
+    $layouts=['et_body_layout'=>['id'=>301,'enabled'=>true]];
+    $kept=apply_filters('et_theme_builder_template_layouts',$layouts);
+    echo json_encode(['accepted'=>$accepted,'unchanged'=>$before===$blocks,'layouts_kept'=>$kept===$layouts]);
+    """, mutation=mutation, request='search')
+    assert not out['accepted'] and out['unchanged'] and out['layouts_kept']
+
+
+def test_native_saved_passthrough_accepts_only_approved_neutral_body_domains():
+    out = php(LOAD + r"""
+    $blocks = parse_blocks(file_get_contents('tests/fixtures/production-native-body-301.html'));
+    $node = &$blocks[0]['innerBlocks'][0];
+    for ($i=0; $i<4; $i++) {
+        $node['attrs']['module']['decoration']['sizing'] = ['desktop'=>['value'=>['width'=>'100%','maxWidth'=>'none']]];
+        $node['attrs']['module']['decoration']['spacing'] = ['desktop'=>['value'=>[
+            'margin'=>array_fill_keys(['top','right','bottom','left'],'0px'),
+            'padding'=>array_fill_keys(['top','right','bottom','left'],'0px')]]];
+        $node['attrs']['module']['decoration']['background'] = ['desktop'=>['value'=>['color'=>'transparent']]];
+        if ($i<3) $node = &$node['innerBlocks'][0];
+    }
+    unset($node);
+    $before=$blocks; $accepted=bioco_utility_is_passthrough($blocks);
+    $blocks[0]['innerBlocks'][0]['attrs']['module']['decoration']['background']['desktop']['value']['color']='#fff';
+    $authored=bioco_utility_is_passthrough($blocks);
+    echo json_encode(compact('accepted','authored'));
+    """)
+    assert out['accepted'] and not out['authored']
+
+
+@pytest.mark.parametrize('request_kind,results,heading', [
+    ('search', [], 'Keine Treffer gefunden'),
+    ('search', [{'post_title': 'Gemüseabo', 'url': 'https://example.test/abos/'}], 'Suchergebnisse'),
+    ('404', [], 'Seite nicht gefunden'),
+])
+@pytest.mark.parametrize('header,footer', [(False, False), (True, False), (False, True), (True, True)])
+def test_utility_templates_keep_one_main_with_native_or_fallback_shell(request_kind, results, heading, header, footer):
+    out = php(LOAD + INIT + r'''
+    ob_start();
+    require 'wordpress/web/app/themes/bioco-divi/' . (is_404() ? '404.php' : 'search.php');
+    $html=ob_get_clean();
+    echo json_encode(['html'=>$html]);
+    ''', request=request_kind, results=results,
+        shell_overrides={'et_header_layout': header, 'et_footer_layout': footer})
+    html = out['html']
+    assert html.count('<main id="bioco-main-content">') == 1
+    assert html.count('</main>') == 1
+    before, body = html.split('<main id="bioco-main-content">')
+    content, after = body.split('</main>')
+    assert heading in content and '<form' in content
+    assert '<main' not in content and '<header' not in content and '<footer' not in content
+    assert '<header' in before and '<footer' in after
+    if header or footer:
+        assert 'Native header' in before and 'Native footer' in after
+        assert 'Navigation' not in html and 'bioco-site-header' not in html
+    else:
+        assert 'Navigation' in before and 'Footer' in after
+        assert 'Native header' not in html and 'Native footer' not in html
+    if results:
+        assert 'https://example.test/abos/' in content

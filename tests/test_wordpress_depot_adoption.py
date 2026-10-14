@@ -1,5 +1,6 @@
 """Native depot card layout and conditional page adoption through the WP parser."""
 import json
+from copy import deepcopy
 import subprocess
 from pathlib import Path
 
@@ -131,3 +132,103 @@ def test_depot_cas_apply_restore_and_edit_conflicts():
         assert execute(db, result['apply']) == 0
     assert 'error' in run(mode='sql', plan=plan | {'after_content': 'tampered'}, expected=plan['fingerprint'])
     assert 'error' in run(blocks=fixture(), snapshot_site='https://wrong.test/')
+
+
+def test_repeat_conversion_keeps_exact_native_body_and_has_no_sql():
+    first = run(blocks=fixture())['plan']
+    repeated = run(record=first['before'] | {'post_content': first['after_content']})
+    assert 'error' not in repeated, repeated
+    assert repeated['plan']['after_content'] == first['after_content']
+    assert repeated['plan']['report'][0]['action'] == 'already-adopted'
+    assert repeated['apply'] == repeated['restore'] == ''
+    assert sum('bioco-native-depot-cards' in json.dumps(n['attrs']) for n in walk(repeated['blocks'])) == 1
+
+
+def test_empty_intro_and_hidden_address_list_are_valid_first_adoption_values():
+    source = fixture({'intro': '', 'show_address_list': False, 'locations_heading': 'Depots'})
+    result = run(blocks=source)
+    assert 'error' not in result, result
+    assert result['plan']['report'][0]['action'] == 'insert-native-cards'
+    repeated = run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']})
+    assert 'error' not in repeated, repeated
+    assert repeated['plan']['after_content'] == result['plan']['after_content']
+    assert repeated['apply'] == repeated['restore'] == ''
+
+
+def test_pre_marker_completed_adoption_keeps_native_cards_and_source_bytes():
+    native = run(blocks=fixture())['blocks']
+    section = native[0]['innerBlocks'][2]
+    del section['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['class']
+    result = run(blocks=native)
+    assert 'error' not in result, result
+    assert result['blocks'] == result['before']
+    assert result['apply'] == result['restore'] == ''
+
+
+def test_repeat_preserves_editor_copy_module_order_and_responsive_controls():
+    native = run(blocks=fixture())['blocks']
+    siblings = native[0]['innerBlocks']
+    cards = siblings.pop(4)
+    siblings.insert(1, cards)  # Native section order belongs to the editor.
+    cards['attrs']['module']['decoration']['layout']['phone'] = {
+        'value': {'gridTemplateColumns': 'repeat(2, minmax(0, 1fr))', 'rowGap': '41px'}}
+    cards['attrs']['module']['decoration']['attributes'] = {'desktop': {'value': {'attributes': [{
+        'name': 'class', 'value': 'editor-card-class bioco-native-depot-cards'}]}}}
+    cards['innerBlocks'][0]['attrs']['module']['advanced']['loop']['desktop']['value'].update({
+        'order': 'DESC', 'postPerPage': 7})
+    column = cards['innerBlocks'][0]['innerBlocks'][0]
+    column['innerBlocks'].reverse()
+    column['innerBlocks'].insert(0, block('divi/text', {
+        'content': {'innerContent': {'desktop': {'value': '<p>Editor introduction</p>'}}}}))
+    column['innerContent'] = [None] * len(column['innerBlocks'])
+    text = next(n for n in walk([cards]) if n['blockName'] == 'divi/button')
+    text['attrs']['button']['innerContent']['desktop']['value']['text'] = 'Unsere neue Route'
+    result = run(blocks=native)
+    assert 'error' not in result, result
+    assert result['blocks'] == result['before']
+    assert result['plan']['report'][0]['action'] == 'already-adopted'
+    assert result['apply'] == result['restore'] == ''
+
+
+@pytest.mark.parametrize('change', [
+    'duplicate-cards', 'missing-loop', 'missing-cards-marker', 'wrong-loop-type',
+    'legacy-with-native-cards', 'missing-native-cards', 'map-presentation-restored',
+    'different-parent', 'opaque-card-child', 'disabled-loop', 'wrong-loop-child',
+])
+def test_partial_or_ambiguous_native_adoption_refuses(change):
+    native = run(blocks=fixture())['blocks']
+    siblings = native[0]['innerBlocks']; cards = siblings[4]
+    loop = cards['innerBlocks'][0]
+    if change == 'duplicate-cards': siblings.append(deepcopy(cards))
+    if change == 'missing-loop': loop['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['class'] = ''
+    if change == 'missing-cards-marker': cards['attrs']['module']['advanced']['htmlAttributes']['desktop']['value']['class'] = 'bioco-native-depot-cards-copy'
+    if change == 'wrong-loop-type': loop['attrs']['module']['advanced']['loop']['desktop']['value']['subTypes'][0]['value'] = 'event'
+    if change == 'disabled-loop': loop['attrs']['module']['advanced']['loop']['desktop']['value']['enable'] = 'off'
+    if change == 'wrong-loop-child': loop['innerBlocks'] = [block('divi/text')]; loop['innerContent'] = [None]
+    if change == 'legacy-with-native-cards':
+        native = fixture(); native[0]['innerBlocks'].append(cards)
+    if change == 'missing-native-cards': siblings.pop(4)
+    if change == 'map-presentation-restored':
+        leaf = siblings[2]['innerBlocks'][0]['innerBlocks'][0]['innerBlocks'][0]
+        leaf['attrs']['intro']['innerContent']['desktop']['value'] = 'A second introduction'
+    if change == 'different-parent':
+        siblings.pop(4); siblings.append(block('divi/section', {}, [cards]))
+    if change == 'opaque-card-child':
+        column = loop['innerBlocks'][0]
+        column['innerBlocks'].append(block('bioco-divi/depot-map'))
+        column['innerContent'].append(None)
+    native[0]['innerContent'] = [None] * len(native[0]['innerBlocks'])
+    assert 'error' in run(blocks=native)
+
+
+def test_class_substring_and_editor_text_do_not_claim_an_adopted_card_set():
+    legacy = fixture()
+    other = block('divi/section', {'module': {'advanced': {'htmlAttributes': {'desktop': {
+        'value': {'class': 'bioco-native-depot-cards-copy'}}}}}}, [block('divi/row', {}, [
+            block('divi/column', {}, [block('divi/text', {'content': {'innerContent': {'desktop': {
+                'value': '<p>bioco-native-depot-cards bioco-depot-loop</p>'}}}})])])])
+    legacy[0]['innerBlocks'].append(other); legacy[0]['innerContent'].append(None)
+    result = run(blocks=legacy)
+    assert 'error' not in result, result
+    assert result['plan']['report'][0]['action'] == 'insert-native-cards'
+    assert result['blocks'][0]['innerBlocks'][-1] == result['before'][0]['innerBlocks'][-1]

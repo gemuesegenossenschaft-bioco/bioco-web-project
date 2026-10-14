@@ -84,6 +84,20 @@ add_action('template_redirect', function () {
 
 /** Recognize only an unedited Post Content passthrough, never an editor's body. */
 function bioco_utility_is_passthrough(array $blocks): bool {
+    $shape = bioco_utility_block_shape($blocks);
+    // A normal Divi save wraps the body and moves its class into attribute rows.
+    if (count($shape) === 1 && $shape[0]['blockName'] === 'divi/placeholder'
+        && $shape[0]['attrs'] === [] && $shape[0]['innerHTML'] === '') $shape = $shape[0]['innerBlocks'];
+    $current = &$shape;
+    foreach (['divi/section', 'divi/row', 'divi/column', 'divi/post-content'] as $name) {
+        if (count($current) !== 1 || $current[0]['blockName'] !== $name || $current[0]['innerHTML'] !== '') return false;
+        $attrs = bioco_utility_passthrough_attrs($current[0]['attrs'], $name);
+        if ($attrs === null) return false;
+        $current[0]['attrs'] = $attrs;
+        $current = &$current[0]['innerBlocks'];
+    }
+    if ($current !== []) return false;
+    unset($current);
     $leaf = ['blockName' => 'divi/post-content', 'attrs' => [], 'innerBlocks' => [],
         'innerHTML' => '', 'innerContent' => ["\n"]];
     $column = bioco_import_divi_block('divi/column', [
@@ -99,7 +113,51 @@ function bioco_utility_is_passthrough(array $blocks): bool {
     ], [$row]);
     // Compare the seed's complete attributes, including container styling.
     // Even an editor's spacing/preset change keeps their Theme Builder body.
-    return bioco_utility_block_shape($blocks) == bioco_utility_block_shape(parse_blocks(serialize_blocks([$section])));
+    return $shape == bioco_utility_block_shape(parse_blocks(serialize_blocks([$section])));
+}
+
+/** Ignore only saved serialization metadata and neutral native body defaults. */
+function bioco_utility_passthrough_attrs(array $attrs, string $name): ?array {
+    if (array_key_exists('module', $attrs) && !is_array($attrs['module'])) return null;
+    if (isset($attrs['module']) && array_key_exists('decoration', $attrs['module'])
+        && !is_array($attrs['module']['decoration'])) return null;
+    if (isset($attrs['builderVersion'])) {
+        if (!is_string($attrs['builderVersion']) || !preg_match('/^5\.[0-9]+\.[0-9]+(?:-[a-z0-9.-]+)?$/D', $attrs['builderVersion'])) return null;
+        unset($attrs['builderVersion']);
+    }
+    $decoration = $attrs['module']['decoration'] ?? [];
+    if (!is_array($decoration)) return null;
+    if (array_key_exists('layout', $decoration)) {
+        if ($decoration['layout'] !== ['desktop' => ['value' => ['display' => 'block']]]) return null;
+        unset($decoration['layout']);
+    }
+    foreach (['sizing' => ['width' => '100%', 'maxWidth' => 'none'],
+        'spacing' => ['margin' => array_fill_keys(['top', 'right', 'bottom', 'left'], '0px'),
+            'padding' => array_fill_keys(['top', 'right', 'bottom', 'left'], '0px')],
+        'background' => ['color' => 'transparent']] as $domain => $neutral) {
+        if (!array_key_exists($domain, $decoration)) continue;
+        if ($decoration[$domain] !== ['desktop' => ['value' => $neutral]]) return null;
+        unset($decoration[$domain]);
+    }
+    if ($name === 'divi/section' && isset($decoration['attributes'])) {
+        $rows = $decoration['attributes'];
+        $entry = $rows['desktop']['value']['attributes'] ?? null;
+        if (!is_array($entry) || count($entry) !== 1 || array_keys($entry) !== [0]) return null;
+        $row = $entry[0];
+        if (!is_array($row) || array_diff(array_keys($row), ['id', 'name', 'value', 'adminLabel'])
+            || !is_string($row['id'] ?? null) || ($row['name'] ?? '') !== 'class'
+            || ($row['value'] ?? '') !== 'bioco-global-layout bioco-global-body'
+            || ($row['adminLabel'] ?? '') !== 'CSS Class'
+            || $rows !== ['desktop' => ['value' => ['attributes' => [$row]]]]) return null;
+        $html = $attrs['module']['advanced']['htmlAttributes'] ?? null;
+        if ($html !== ['desktop' => ['value' => ['class' => '', 'id' => '']]]) return null;
+        $attrs['module']['advanced']['htmlAttributes'] = ['desktop' => ['value' => ['class' => $row['value']]]];
+        unset($decoration['attributes']);
+    }
+    if ($decoration) $attrs['module']['decoration'] = $decoration;
+    else unset($attrs['module']['decoration']);
+    if (($attrs['module'] ?? null) === []) unset($attrs['module']);
+    return $attrs;
 }
 
 /** Saved structure only. Divi's parser adds per-parse counters (index, id, ...) that differ every call. */
@@ -128,7 +186,11 @@ add_filter('et_theme_builder_template_layouts', function ($layouts) {
     // Default Post Content has no queried post for search/404. Use the child
     // template and existing shared shell only for that known fallback body.
     if ($post && $post->post_name === 'bioco-global-body'
-        && bioco_utility_is_passthrough(parse_blocks($post->post_content))) return [];
+        && bioco_utility_is_passthrough(parse_blocks($post->post_content))) {
+        // Divi independently overrides header/footer through get_header/get_footer.
+        // Keep Divi's complete slot shape; its frontend indexes override directly.
+        $layouts[$key] = array_replace($body, ['id' => 0, 'enabled' => false, 'override' => false]);
+    }
     return $layouts;
 }, 20);
 

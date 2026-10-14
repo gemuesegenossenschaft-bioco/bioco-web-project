@@ -240,8 +240,9 @@ def execute(db, sql):
     return db.execute('SELECT changes()').fetchone()[0]
 
 
-def test_conditional_apply_restore_are_idempotent_and_leave_other_rows_untouched():
-    result = run(fixture())
+@pytest.mark.parametrize('slot', ['header', 'body', 'footer'])
+def test_conditional_apply_restore_are_idempotent_and_leave_other_rows_untouched(slot):
+    result = run(body_fixture() if slot == 'body' else fixture(slot), record=post_record(post_type='et_' + slot + '_layout'))
     db = database(result['plan'])
     before = db.execute('SELECT * FROM posts').fetchall()
     meta = db.execute('SELECT * FROM postmeta').fetchall()
@@ -375,3 +376,111 @@ def test_incomplete_or_ambiguous_context_fails_closed(bad):
     else:
         ctx['meta'][0]['post_id'] = '99'
     assert 'error' in run(fixture(), ctx=ctx)
+
+
+def body_fixture():
+    blocks = fixture('body')
+    wrappers(blocks)[-1]['innerBlocks'] = [block('divi/post-content', {'saved': 'do not expand page content'})]
+    return blocks
+
+
+def test_body_post_content_seam_has_native_neutral_values_and_cas_round_trip():
+    result = run(body_fixture(), record=post_record(post_type='et_body_layout'))
+    assert 'error' not in result
+    assert result['plan']['changed'] == 12
+    section, row, column = wrappers(result['blocks'])
+    for b in [section, row, column, column['innerBlocks'][0]]:
+        native = b['attrs']['module']['decoration']
+        assert native['sizing']['desktop']['value'] == {'width': '100%', 'maxWidth': 'none'}
+        assert native['spacing']['desktop']['value']['padding'] == dict.fromkeys(['top', 'right', 'bottom', 'left'], '0px')
+        assert native['background']['desktop']['value']['color'] == 'transparent'
+    assert column['innerBlocks'][0]['attrs']['saved'] == 'do not expand page content'
+    assert 'post_content' in result['apply'] and 'post_content' in result['restore']
+    repeated = run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']})
+    assert repeated['plan']['changed'] == 0
+    assert repeated['plan']['after_content'] == result['plan']['after_content']
+
+
+@pytest.mark.parametrize('domain,value', [('background', None), ('sizing', {'phone': {'value': {'width': '0px'}}}), ('spacing', {})])
+def test_body_authored_post_content_domains_are_preserved(domain, value):
+    blocks = body_fixture()
+    leaf = wrappers(blocks)[-1]['innerBlocks'][0]
+    leaf['attrs']['module'] = {'decoration': {domain: value}}
+    result = run(blocks, record=post_record(post_type='et_body_layout'))
+    assert result['plan']['changed'] == 11
+    assert wrappers(result['blocks'])[-1]['innerBlocks'][0]['attrs']['module']['decoration'][domain] == wrappers(result['before_blocks'])[-1]['innerBlocks'][0]['attrs']['module']['decoration'][domain]
+
+
+@pytest.mark.parametrize('change', ['extra-module', 'nested-page', 'wrong-module', 'extra-row'])
+@pytest.mark.parametrize('placeholder', [False, True])
+def test_body_seam_unknown_structure_is_byte_exact_and_generates_no_sql(change, placeholder):
+    blocks = body_fixture()
+    column = wrappers(blocks)[-1]
+    if change == 'extra-module':
+        column['innerBlocks'].append(block('divi/text', {'authored': 'keep'}))
+        column['innerContent'].append(None)
+    elif change == 'nested-page':
+        column['innerBlocks'][0]['innerBlocks'] = [block('divi/section', {'page': 'untouched'})]
+        column['innerBlocks'][0]['innerContent'] = [None]
+    elif change == 'wrong-module': column['innerBlocks'][0]['blockName'] = 'bioco-divi/footer-shell'
+    else:
+        blocks[0]['innerBlocks'].append(block('divi/row'))
+        blocks[0]['innerContent'].append(None)
+    if placeholder:
+        blocks = [block('divi/placeholder', {'saved': 'preserve'}, blocks)]
+    result = run(blocks, record=post_record(post_type='et_body_layout'))
+    assert result['plan']['changed'] == 0
+    assert result['plan']['after_content'] == result['plan']['before']['post_content']
+    assert result['apply'] == result['restore'] == ''
+    assert result['plan']['report'][0]['reason'] == 'authored-shell-structure'
+
+
+def test_production_body_placeholder_adopts_defaults_preserving_saved_tree_and_repeat():
+    source = (ROOT / 'tests/fixtures/production-native-body-301.html').read_text()
+    result = run(record=post_record(post_type='et_body_layout', post_content=source))
+    assert result['plan']['changed'] == 12
+    expected = copy.deepcopy(result['before_blocks'])
+    nodes = wrappers(expected[0]['innerBlocks'])
+    nodes.append(nodes[-1]['innerBlocks'][0])
+    for node in nodes:
+        if node['attrs'] == []:
+            node['attrs'] = {}
+        node['attrs'].setdefault('module', {}).setdefault('decoration', {}).update({
+            'sizing': {'desktop': {'value': {'width': '100%', 'maxWidth': 'none'}}},
+            'spacing': {'desktop': {'value': {key: dict.fromkeys(['top', 'right', 'bottom', 'left'], '0px')
+                                            for key in ['margin', 'padding']}}},
+            'background': {'desktop': {'value': {'color': 'transparent'}}},
+        })
+    assert result['blocks'] == expected
+    assert {tuple(row['path']) for row in result['plan']['report']} == {
+        (0, 0), (0, 0, 0), (0, 0, 0, 0), (0, 0, 0, 0, 0)}
+    assert result['plan']['before']['post_content'] == source
+    repeated = run(record=result['plan']['before'] | {'post_content': result['plan']['after_content']})
+    assert repeated['plan']['changed'] == 0
+    assert repeated['plan']['after_content'] == result['plan']['after_content']
+    assert repeated['apply'] == repeated['restore'] == ''
+    db = database(result['plan'])
+    assert execute(db, result['apply']) == 1
+    assert execute(db, result['restore']) == 1
+    assert db.execute('SELECT post_content FROM posts').fetchone()[0] == source
+
+
+@pytest.mark.parametrize('domain,value', [('background', None), ('sizing', {'phone': {'value': {'width': '0px'}}}), ('spacing', {})])
+def test_placeholder_keeps_authored_wrapper_and_descendant_domains(domain, value):
+    blocks = [block('divi/placeholder', {'saved': 'keep wrapper'}, body_fixture())]
+    nodes = wrappers(blocks[0]['innerBlocks'])
+    nodes[1]['attrs']['module']['decoration'] = {domain: value}
+    result = run(blocks, record=post_record(post_type='et_body_layout'))
+    assert result['plan']['changed'] == 11
+    before = result['before_blocks'][0]
+    after = result['blocks'][0]
+    assert {key: value for key, value in after.items() if key != 'innerBlocks'} == {
+        key: value for key, value in before.items() if key != 'innerBlocks'}
+    assert wrappers(after['innerBlocks'])[1]['attrs']['module']['decoration'][domain] == wrappers(before['innerBlocks'])[1]['attrs']['module']['decoration'][domain]
+
+
+def test_unknown_container_is_not_treated_as_a_native_placeholder():
+    result = run([block('unknown/container', {}, body_fixture())], record=post_record(post_type='et_body_layout'))
+    assert result['plan']['changed'] == 0
+    assert result['plan']['after_content'] == result['plan']['before']['post_content']
+    assert result['apply'] == result['restore'] == ''
