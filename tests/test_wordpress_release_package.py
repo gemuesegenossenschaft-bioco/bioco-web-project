@@ -137,6 +137,20 @@ def test_required_coverage_rejects_absent_package_checks(tmp_path, scenario):
     assert required_path in result.stdout
 
 
+@pytest.mark.parametrize('flag', ['--assume-unchanged', '--skip-worktree'])
+def test_build_rejects_git_flags_that_hide_different_validation_inputs(tmp_path, flag):
+    repo, commit, env = fixture(tmp_path)
+    path = OWNED[0] + '/owned.php'
+    git(repo, 'update-index', flag, path)
+    (repo / path).write_text('<?php /* local substitute absent from the Git package */\n')
+    assert git(repo, 'status', '--porcelain') == ''
+    output = tmp_path / 'package'
+    result = command(repo, env, 'build', '--commit', commit, '--output', str(output))
+    assert result.returncode != 0
+    assert not Path(env['TEST_GATE_CALLS']).exists()
+    assert not output.exists()
+
+
 @pytest.mark.parametrize('change', ['tracked-secret', 'ignored-source', 'symlink'])
 def test_unsafe_inputs_are_rejected_before_validation(tmp_path, change):
     repo, commit, env = fixture(tmp_path)

@@ -40,6 +40,8 @@ def inputs(commit, paths):
 
 
 def clean_candidate(commit):
+    if any(row[:1] != b'H' for row in git('ls-files', '-v', '-z', binary=True).split(b'\0') if row):
+        raise ValueError('Build refuses index flags that can hide validation input changes.')
     if git('rev-parse', 'HEAD') != commit or git('status', '--porcelain'):
         raise ValueError('Build requires a clean checkout at the requested commit.')
     if git('ls-files', '--others', '--', *OWNED):
