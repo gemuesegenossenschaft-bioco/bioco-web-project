@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Internal staging-release step; never use as a separate deployment entry point.
+# Internal WordPress-release step; never use as a separate deployment entry point.
 set -euo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ssh_bin="${BIOCO_RELEASE_SSH_BIN:-ssh}"
@@ -14,7 +14,7 @@ fi
 nonce="$(php -r 'echo bin2hex(random_bytes(16));')"
 token="$(php -r 'echo bin2hex(random_bytes(32));')"
 expires="$(php -r 'echo time()+300;')"
-probe_path="${wp_root}/bioco-opcache-${nonce}.php"
+probe_path="${wp_root}/wp-content/bioco-opcache-${nonce}.php"
 ssh_args=(-p "${BIOCO_WP_SSH_PORT:-22}" -o BatchMode=yes -o ConnectTimeout=10 "${BIOCO_WP_USER}@${BIOCO_WP_HOST}")
 cleanup() {
   "${ssh_bin}" "${ssh_args[@]}" "set -eu; rm -f -- '${probe_path}'; test ! -e '${probe_path}'"
@@ -27,7 +27,7 @@ trap 'exit 1' HUP INT TERM
   sed '1d' "${script_dir}/web-opcache-probe.php"
 } | "${ssh_bin}" "${ssh_args[@]}" "set -eu; umask 077; cat > '${probe_path}'"
 "${curl_bin}" -fsS --max-time 30 --request POST \
-  -H "X-Bioco-Opcache-Token: ${token}" "${site_url%/}/bioco-opcache-${nonce}.php" \
+  -H "X-Bioco-Opcache-Token: ${token}" "${site_url%/}/wp-content/bioco-opcache-${nonce}.php" \
   | php -r '$v=json_decode(stream_get_contents(STDIN),true); if(!is_array($v)||($v["ok"]??false)!==true||!is_int($v["invalidated"]??null))exit(1); echo "web-opcache invalidated=".$v["invalidated"]." security-hook=".(int)($v["security_hook"]??false).PHP_EOL;'
 cleanup
 trap - EXIT

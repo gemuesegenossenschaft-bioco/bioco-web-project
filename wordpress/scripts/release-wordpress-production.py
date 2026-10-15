@@ -16,6 +16,8 @@ import sys
 import tarfile
 import tempfile
 
+from wordpress_release import OWNED
+
 ROOT = Path(__file__).resolve().parents[2]
 SITE = 'https://bioco.ch'
 STAGE = 'https://staging.bioco.ch'
@@ -23,16 +25,6 @@ REPO = 'gemuesegenossenschaft-bioco/bioco-web-project'
 SHA = re.compile(r'^[0-9a-f]{40}$')
 SAFE_HOST = re.compile(r'^[A-Za-z0-9._-]+$')
 SAFE_PATH = re.compile(r'^/[A-Za-z0-9._/-]+/wp-content$')
-OWNED = {
-    'wordpress/web/app/mu-plugins/bioco-core': 'mu-plugins/bioco-core',
-    'wordpress/web/app/mu-plugins/bioco-content': 'mu-plugins/bioco-content',
-    'wordpress/web/app/mu-plugins/bioco-forms': 'mu-plugins/bioco-forms',
-    'wordpress/web/app/mu-plugins/bioco-import': 'mu-plugins/bioco-import',
-    'wordpress/web/app/themes/bioco': 'themes/bioco',
-    'wordpress/web/app/themes/bioco-divi': 'themes/bioco-divi',
-    'wordpress/deploy/bioco-mu-loader.php': 'mu-plugins/bioco-mu-loader.php',
-    'wordpress/content-seed': 'mu-plugins/bioco-import/content-seed',
-}
 
 
 def fail(message):

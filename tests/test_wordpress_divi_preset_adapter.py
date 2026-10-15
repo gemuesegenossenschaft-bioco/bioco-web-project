@@ -215,6 +215,6 @@ def test_core_bootstrap_registered_callback_injects_supported_adapter_after_nati
     ], capture_output=True, text=True, timeout=30)
     assert result.returncode == 0, result.stderr
     evidence = json.loads(result.stdout)
-    assert evidence["callbacks"] == ["bioco_divi_preset_adapter_enqueue"]
+    assert evidence["callbacks"] == ["bioco_media_binding_enqueue", "bioco_divi_preset_adapter_enqueue"]
     assert evidence["hash_calls"] == [["sha256", str(asset)]]
     assert evidence["inline"] == [["divi-module-utils", JS.read_text(), "after"]]

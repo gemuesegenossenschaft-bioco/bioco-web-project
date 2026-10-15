@@ -86,3 +86,29 @@ function bioco_record_binding_value($value, array $context) {
 
 add_filter('divi_module_dynamic_content_options', 'bioco_record_binding_fields', 20);
 add_filter('divi_module_dynamic_content_resolved_value', 'bioco_record_binding_value', 20, 2);
+
+/** Divi's editor resolves loop variables from response keys without `loop_`. */
+function bioco_record_loop_preview($response, $server, $request) {
+    if ($request->get_route() !== '/divi/v1/loop/query-results'
+        || !($response instanceof WP_REST_Response) || $response->get_status() !== 200
+        || !current_user_can('edit_post', (int) $request->get_param('post_id'))) return $response;
+    $data = $response->get_data();
+    if (!is_array($data) || !isset($data['items']) || !is_array($data['items'])) return $response;
+    $fields = bioco_record_binding_fields([]);
+    foreach ($data['items'] as &$item) {
+        if (!is_array($item)) continue;
+        $id = (int) ($item['id'] ?? 0);
+        if ($id <= 0) continue;
+        $type = get_post_type($id);
+        if (!in_array($type, ['bioco_group', 'bioco_vegetable', 'bioco_depot'], true)
+            || (get_post_status($id) !== 'publish' && !current_user_can('read_post', $id))) continue;
+        foreach ($fields as $name => $definition) {
+            if (!str_starts_with($name, 'loop_' . $type . '_')) continue;
+            $item[substr($name, 5)] = bioco_record_binding_value('', ['name' => $name, 'loop_id' => $id]);
+        }
+    }
+    unset($item);
+    $response->set_data($data);
+    return $response;
+}
+add_filter('rest_post_dispatch', 'bioco_record_loop_preview', 20, 3);
