@@ -103,6 +103,12 @@ extension fails closed with a clear error, not a false pass.
 
 ## Test map
 
+`test_wordpress_containment_release.py` (keep, required) executes the canonical
+production CLI with the exact protected-document projection and sanitized rollback.
+It rejects missing/tampered receipts, incomplete private proof, baseline drift and
+reappearing documents. The same remote proof code also runs against real private
+files; fixture transports do not establish hosted release acceptance.
+
 Required coverage includes `test_wordpress_record_loop_preview.py` (keep: execute
 registered Divi loop options against the shared record bindings, including record
 permissions and draft isolation) and `test_wordpress_image_delivery.py` (keep:

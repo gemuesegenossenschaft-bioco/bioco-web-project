@@ -17,6 +17,7 @@ import tarfile
 import tempfile
 
 from wordpress_release import OWNED
+from wordpress_containment import ContainmentPolicy, protected_files
 
 ROOT = Path(__file__).resolve().parents[2]
 SITE = 'https://bioco.ch'
@@ -133,10 +134,12 @@ def digest(manifest):
     return hashlib.sha256(json.dumps(manifest, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
-def review_evidence(path, commit, baseline, bootstrap=False):
+def review_evidence(path, commit, baseline, bootstrap=False, containment_hash=None):
     if path.stat().st_mode & 0o077:
         fail('Private review evidence must be mode 0600.')
     data = json.loads(path.read_text())
+    if data.get('containment_evidence_sha256') != containment_hash:
+        fail('Review evidence does not bind the containment policy.')
     match = re.fullmatch(
         r'https://github\.com/gemuesegenossenschaft-bioco/bioco-web-project/pull/([0-9]+)#(issuecomment|pullrequestreview|discussion_r)-([0-9]+)',
         data.get('review_url', ''))
@@ -217,8 +220,9 @@ def step(name, argv, env):
     subprocess.run(argv, cwd=ROOT, env=env, check=True)
 
 
-def rollback(prod, candidate_sha, baseline_sha, baseline_manifest, candidate_manifest, env, apply, bootstrap=False):
+def rollback(prod, candidate_sha, baseline_sha, baseline_manifest, candidate_manifest, env, apply, bootstrap=False, policy=None):
     identity(prod, SITE)
+    if policy: policy.verify_remote(ssh, prod)
     previous = marker(prod, bootstrap)
     current = remote_manifest(prod)
     if (previous or {}).get('commit') not in ((None, candidate_sha, baseline_sha) if bootstrap
@@ -229,7 +233,8 @@ def rollback(prod, candidate_sha, baseline_sha, baseline_manifest, candidate_man
         fail('Rollback refuses code outside the candidate/baseline manifests.')
     print(json.dumps({'mode': 'rollback-apply' if apply else 'rollback-dry-run',
         'target': SITE, 'current_marker': previous, 'current_manifest': digest(current),
-        'rollback_to': baseline_sha, 'baseline_manifest': digest(baseline_manifest)}, sort_keys=True), flush=True)
+        'rollback_to': baseline_sha, 'baseline_manifest': digest(baseline_manifest),
+        'baseline_projection': policy.receipt() if policy else None}, sort_keys=True), flush=True)
     if (previous or {}).get('commit') == baseline_sha and current == baseline_manifest:
         print('rollback-already-baseline remote-mutations=0')
         return
@@ -242,9 +247,13 @@ def rollback(prod, candidate_sha, baseline_sha, baseline_manifest, candidate_man
         identity(prod, SITE)
         if marker(prod, bootstrap) != previous or remote_manifest(prod) != current:
             fail('Production changed while acquiring rollback lease.')
+        if policy: policy.verify_remote(ssh, prod)
         before = fingerprint(prod)
         with tempfile.TemporaryDirectory() as directory:
             extract_commit(baseline_sha, Path(directory))
+            if policy: policy.sanitize(Path(directory))
+            if source_manifest(Path(directory)) != baseline_manifest:
+                fail('Private rollback extraction differs from its reviewed manifest.')
             restore = Path(directory) / 'wordpress/scripts/deploy-wp-code.sh'
             if not restore.is_file(): fail('Baseline has no owned-code deploy tool.')
             rollback_env = env | {'BIOCO_RELEASE_ROLLBACK': '1'}
@@ -260,9 +269,11 @@ def rollback(prod, candidate_sha, baseline_sha, baseline_manifest, candidate_man
         require_lock(alive)
         if fingerprint(prod) != before: fail('Editorial data changed during rollback.')
         if remote_manifest(prod) != baseline_manifest: fail('Rollback code changed during verification.')
+        if policy: policy.verify_remote(ssh, prod)
         receipt = {'commit': baseline_sha, 'rolled_back_from': candidate_sha,
             'manifest': digest(baseline_manifest), 'editorial_fingerprint': before,
             'verify': 'passed', 'smoke': 'passed'}
+        if policy: receipt['baseline_projection'] = policy.receipt()
         ssh(prod, f'cd {q(root)}; wp option update bioco_release_marker {q(json.dumps(receipt,separators=(",",":")))} --format=json >/dev/null')
         require_lock(alive)
         if marker(prod).get('commit') != baseline_sha: fail('Rollback marker write was not retained.')
@@ -274,6 +285,8 @@ def main():
     parser.add_argument('--commit', required=True)
     parser.add_argument('--expected-baseline', required=True)
     parser.add_argument('--review-evidence', type=Path, required=True)
+    parser.add_argument('--containment-evidence', type=Path,
+                        help='Private reviewed proof of the exact protected-document baseline projection.')
     parser.add_argument('--apply', action='store_true')
     parser.add_argument('--rollback', action='store_true', help='Restore only owned code to the expected baseline.')
     parser.add_argument('--bootstrap-baseline', action='store_true',
@@ -285,11 +298,17 @@ def main():
     prod, stage = remote_config('BIOCO_PROD_'), remote_config('BIOCO_STAGE_')
     if prod['HOST'] == stage['HOST'] and prod['CONTENT'] == stage['CONTENT']:
         fail('Production and staging target the same installation.')
-    evidence_hash = review_evidence(args.review_evidence, args.commit, args.expected_baseline,
-                                    args.bootstrap_baseline)
-    step('preflight', [str(ROOT / 'wordpress/scripts/release-wordpress-preflight.sh')], os.environ.copy())
     candidate = source_manifest(ROOT)
     baseline = archive_manifest(args.expected_baseline)
+    if protected_files(candidate): fail('Candidate would republish protected member documents.')
+    policy = (ContainmentPolicy(args.containment_evidence, args.commit, args.expected_baseline,
+                               baseline, candidate, prod) if args.containment_evidence else None)
+    if protected_files(baseline) and policy is None:
+        fail('Protected baseline requires reviewed containment evidence; raw rollback is forbidden.')
+    if policy: baseline = policy.project(baseline)
+    evidence_hash = review_evidence(args.review_evidence, args.commit, args.expected_baseline,
+                                    args.bootstrap_baseline, policy.evidence_sha256 if policy else None)
+    step('preflight', [str(ROOT / 'wordpress/scripts/release-wordpress-preflight.sh')], os.environ.copy())
     identity(stage, STAGE)
     staged = marker(stage)
     if staged.get('commit') != args.commit or staged.get('verify') != 'passed' or staged.get('smoke') != 'passed':
@@ -303,9 +322,10 @@ def main():
                BIOCO_RELEASE_RENDER_RESOLVE='', BIOCO_RELEASE_SSH_BIN=ssh_args(prod)[0])
     if args.rollback:
         rollback(prod, args.commit, args.expected_baseline, baseline, candidate, env, args.apply,
-                 args.bootstrap_baseline)
+                 args.bootstrap_baseline, policy)
         return
     identity(prod, SITE)
+    if policy: policy.verify_remote(ssh, prod)
     previous = marker(prod, args.bootstrap_baseline)
     if ((previous is None and not args.bootstrap_baseline)
             or (previous is not None and previous.get('commit') != args.expected_baseline)):
@@ -317,6 +337,7 @@ def main():
         'previous_marker': previous, 'staging_marker': staged, 'candidate_manifest': digest(candidate),
         'baseline_manifest': digest(baseline), 'owned_changed': sorted(set(candidate) ^ set(baseline) |
             {p for p in candidate.keys() & baseline.keys() if candidate[p] != baseline[p]}),
+        'baseline_projection': policy.receipt() if policy else None,
         'review_evidence_sha256': evidence_hash}, sort_keys=True), flush=True)
     if not args.apply:
         print('release-dry-run-complete remote-mutations=0')
@@ -333,6 +354,7 @@ def main():
         identity(prod, SITE)
         if marker(prod, args.bootstrap_baseline) != previous or remote_manifest(prod) != baseline:
             fail('Production changed while acquiring lease.')
+        if policy: policy.verify_remote(ssh, prod)
         before = fingerprint(prod)
         root = prod['CONTENT'].removesuffix('/wp-content')
         ssh(prod, f'umask 077; mkdir -p {q(backup_dir)}; cd {q(root)}; wp db export {q(backup)} --quiet; test -s {q(backup)}')
@@ -349,10 +371,12 @@ def main():
         require_lock(alive)
         if fingerprint(prod) != before: fail('Editorial data changed during code promotion.')
         if remote_manifest(prod) != candidate: fail('Deployed code changed during verification.')
+        if policy: policy.verify_remote(ssh, prod)
         receipt = {'commit': args.commit, 'previous': args.expected_baseline,
             'staging_commit': staged['commit'], 'manifest': digest(candidate),
             'editorial_fingerprint': before, 'backup': backup,
             'review_evidence_sha256': evidence_hash, 'verify': 'passed', 'smoke': 'passed'}
+        if policy: receipt['baseline_projection'] = policy.receipt()
         ssh(prod, f'cd {q(root)}; wp option update bioco_release_marker {q(json.dumps(receipt,separators=(",",":")))} --format=json >/dev/null')
         require_lock(alive)
         if marker(prod).get('commit') != args.commit: fail('Production marker write was not retained.')

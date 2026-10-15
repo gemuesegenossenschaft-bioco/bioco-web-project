@@ -62,7 +62,8 @@
     "tests/test_wordpress_record_loop_preview.py",
     "tests/test_wordpress_image_delivery.py",
     "tests/test_wordpress_document_seed.py",
-    "tests/test_wordpress_intranet_alignment.py"
+    "tests/test_wordpress_intranet_alignment.py",
+    "tests/test_wordpress_containment_release.py"
   ],
   "operator_only_nodes": [
     "tests/test_wordpress_forms_lifecycle.py::test_wordpress_runtime_emits_runtime_before_adapters_without_blocking_turnstile",

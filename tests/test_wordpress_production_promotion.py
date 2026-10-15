@@ -54,6 +54,7 @@ def fixture(tmp_path):
     script.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(SCRIPT, script)
     shutil.copy2(ROOT / 'wordpress/scripts/wordpress_release.py', script.parent / 'wordpress_release.py')
+    shutil.copy2(ROOT / 'wordpress/scripts/wordpress_containment.py', script.parent / 'wordpress_containment.py')
     shutil.copy2(ROOT / 'wordpress/scripts/editorial-fingerprint.php', script.parent / 'editorial-fingerprint.php')
     for name in ['release-wordpress-preflight.sh', 'deploy-wp-code.sh', 'flush-wordpress-web-opcache.sh']:
         path = script.parent / name
