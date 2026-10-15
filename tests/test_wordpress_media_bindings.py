@@ -267,7 +267,7 @@ def test_dynamic_upload_settings_reject_unparseable_input_and_allow_authorized_p
 def test_native_editor_element_resolves_selected_metadata_without_saving_tokens(attachment, expected_alt):
     attrs = image({'altSource': 'library', 'titleSource': 'library'})
     attrs['image']['innerContent']['desktop']['value']['id'] = attachment
-    request = {'mode': 'render', 'attrs': attrs, 'metadata': {
+    request = {'mode': 'render', 'attrs': attrs, 'moduleAttrs': {}, 'metadata': {
         attachment: {'bioco_media_alt': expected_alt, 'bioco_media_title': 'Fresh title'}}}
     result = subprocess.run(['node', str(ROOT / 'tests/fixtures/divi-media-bindings.cjs'), str(JS)],
                             input=json.dumps(request), capture_output=True, text=True)

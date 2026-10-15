@@ -38,7 +38,7 @@
   }
 
   function runtimeAttrs(attrs, context) {
-    if (context.name !== 'divi/image') return attrs;
+    if (context.name !== 'divi/image' || !attrs) return attrs;
     const sources = attrs.image?.advanced?.biocoMetadata?.desktop?.value || {};
     const selected = Object.fromEntries(['alt', 'title'].map(field => [field, sources[field + 'Source']])
       .filter(([field, mode]) => mode === 'library' || mode === (field === 'alt' ? 'decorative' : 'none')));
@@ -93,6 +93,10 @@
     const React = window.vendor?.React;
     const useDynamicData = window.divi?.dynamicData?.useDynamicData;
     if (!React || !useDynamicData) return element;
+    element = React.cloneElement(element, {
+      moduleAttrs: runtimeAttrs(element.props.moduleAttrs, {name: 'divi/image'}),
+      runtimeModuleAttrs: runtimeAttrs(element.props.runtimeModuleAttrs, {name: 'divi/image'}),
+    });
     const entries = [];
     const attrs = element.props.runtimeModuleAttrs;
     for (const [device, states] of Object.entries(attrs?.image?.innerContent || {})) {
@@ -120,11 +124,12 @@
     if (index + 1 < entries.length) return React.createElement(ResolveMetadata,
       {key: entries[index + 1].token, element, entries, index: index + 1, values: nextValues});
     const project = attrs => {
-      const content = {...attrs.image.innerContent};
+      const image = attrs?.image || {};
+      const content = {...image.innerContent};
       entries.forEach(({device, state, field}, i) => {
-        content[device] = {...content[device], [state]: {...content[device][state], [field]: nextValues[i]}};
+        content[device] = {...content[device], [state]: {...content[device]?.[state], [field]: nextValues[i]}};
       });
-      return {...attrs, image: {...attrs.image, innerContent: content}};
+      return {...attrs, image: {...image, innerContent: content}};
     };
     return React.cloneElement(element, {
       moduleAttrs: project(element.props.moduleAttrs),
@@ -133,6 +138,5 @@
   }
 
   hooks.addFilter('divi.moduleLibrary.moduleAttributes.divi.image', 'bioco/media-metadata-controls', metadataControls);
-  hooks.addFilter('divi.moduleLibrary.registerModule.moduleAttrs', 'bioco/media-metadata-bindings', runtimeAttrs, 20);
   hooks.addFilter('divi.module.elements.render', 'bioco/media-metadata-preview', resolveMetadataElement, 20);
 })();
