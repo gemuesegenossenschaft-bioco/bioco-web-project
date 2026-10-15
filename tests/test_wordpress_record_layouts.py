@@ -213,6 +213,11 @@ def test_calendar_header_order_removal_duplicate_instances_and_accessible_refere
         page.add_script_tag(path=str(ROOT / 'wordpress/web/app/mu-plugins/bioco-core/assets/native-calendar.js'))
         for index, label in enumerate(['Dezember', 'Dec']):
             root = page.locator('.bioco-native-calendar').nth(index)
+            assert root.get_attribute('role') == 'table'
+            assert root.locator('.bioco-calendar-head').get_attribute('role') == 'row'
+            assert root.locator('.bioco-calendar-head .bioco-calendar-name').get_attribute('role') == 'columnheader'
+            assert root.locator('.bioco-calendar-data').get_attribute('role') == 'row'
+            assert root.locator('.bioco-calendar-data .bioco-calendar-name').get_attribute('role') == 'rowheader'
             visible = root.locator('.bioco-calendar-data > div:visible')
             assert visible.all_text_contents() == ['Testgemüse', '●', '●']
             header = root.locator('.bioco-calendar-head .bioco-calendar-month-12')
