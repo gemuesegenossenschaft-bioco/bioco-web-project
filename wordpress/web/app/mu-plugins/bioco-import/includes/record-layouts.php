@@ -66,6 +66,37 @@ function bioco_group_native_modules(bool $loop): array {
     ];
 }
 
+/** Toggle accepts nested modules/groups, not section/row/column structures. */
+function bioco_calendar_nested_groups(array $block): array {
+    if (in_array($block['blockName'], ['divi/section', 'divi/row', 'divi/column'], true)) {
+        $block['blockName'] = 'divi/group';
+        // Structural presets and column types do not belong to a Group module.
+        unset($block['attrs']['modulePreset'], $block['attrs']['module']['advanced']['columnStructure'],
+            $block['attrs']['module']['advanced']['type']);
+        if (empty($block['attrs']['module']['advanced'])) unset($block['attrs']['module']['advanced']);
+    }
+    $block['innerBlocks'] = array_map('bioco_calendar_nested_groups', $block['innerBlocks']);
+    return $block;
+}
+
+/** A separate starter: never replace an editor's existing flat calendar. */
+function bioco_calendar_disclosure(array $calendar): array {
+    $table = bioco_calendar_nested_groups($calendar);
+    $table['attrs']['module']['decoration']['layout']['desktop']['value']['display'] = 'block';
+    $table['innerBlocks'][1]['attrs']['module']['advanced']['loop']['desktop']['value']['orderBy'] = 'none';
+    $table['innerBlocks'][1]['attrs']['module']['advanced']['loop']['desktop']['value']['order'] = 'ascending';
+    $table['innerBlocks'][1] = bioco_record_layout_class($table['innerBlocks'][1],
+        'bioco-record-loop bioco-vegetable-loop bioco-calendar-data bioco-calendar-catalog-order');
+    $toggle = bioco_record_layout_class(bioco_import_divi_block('divi/toggle', [
+        'module' => ['meta' => ['adminLabel' => ['desktop' => ['value' => 'Saisonkalender aufklappen']]],
+            'advanced' => ['open' => ['desktop' => ['value' => 'off']]],
+            'decoration' => ['layout' => ['desktop' => ['value' => ['display' => 'block']]]]],
+        'title' => ['innerContent' => ['desktop' => ['value' => 'Saisonkalender']],
+            'decoration' => ['font' => ['font' => ['desktop' => ['value' => ['headingLevel' => 'h2']]]]]],
+    ], [bioco_utility_text('<p>●: in Saison</p>'), $table]), 'bioco-editorial-toggle bioco-calendar-disclosure');
+    return bioco_utility_section([$toggle]);
+}
+
 function bioco_record_layout_definitions(): array {
     $group = bioco_group_native_modules(true);
     $group[] = bioco_utility_button('Mehr zur Gruppe', bioco_record_variable('loop_bioco_group_url'));
@@ -117,6 +148,8 @@ function bioco_record_layout_definitions(): array {
         'calendar' => ['title' => 'BIOCO Saisonkalender', 'content' => serialize_blocks([
             bioco_utility_section([bioco_utility_heading('Saisonkalender', 'h2'), bioco_utility_text('<p>●: in Saison</p>')]), $calendar,
         ])],
+        'calendar-collapsible' => ['title' => 'BIOCO Saisonkalender: aufklappbar',
+            'content' => serialize_blocks([bioco_calendar_disclosure($calendar)])],
     ];
 }
 
