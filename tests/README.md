@@ -103,6 +103,13 @@ extension fails closed with a clear error, not a false pass.
 
 ## Test map
 
+Required coverage includes `test_wordpress_record_loop_preview.py` (keep: execute
+registered Divi loop options against the shared record bindings, including record
+permissions and draft isolation) and `test_wordpress_image_delivery.py` (keep:
+WordPress responsive candidates, conditional Divi filter removal, attachment-backed
+galleries and the existing gallery fallback). Both modules run without licensed
+Divi; hosted editor save/reopen and actual image rendering remain separate checks.
+
 Grouped by behaviour. Status `keep` (unchanged this pass), `trimmed` (redundant assertions removed,
 replacements documented), `replaced` (rewritten as behavioural tests), `new` (added this pass).
 
