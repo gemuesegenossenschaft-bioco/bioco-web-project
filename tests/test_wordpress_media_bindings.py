@@ -96,6 +96,13 @@ def test_library_projection_removes_only_opted_in_image_rows_without_changing_sa
     assert project(after) == after
 
 
+def test_projection_preserves_malformed_attribute_names_consistently():
+    attrs = image({'altSource': 'library'})
+    rows = attrs['module']['decoration']['attributes']['attributes']
+    rows.extend([{'name': ['alt'], 'targetElement': 'image'}, {'name': 'alt'}, None])
+    assert project(attrs)['module']['decoration']['attributes']['attributes'][-3:] == rows[-3:]
+
+
 def test_replacement_to_114_with_blank_alt_cannot_keep_113_literal_or_binding():
     attrs = image({"altSource": "library", "titleSource": "library"})
     attrs["image"]["innerContent"]["desktop"]["value"].update(id="114", src="https://example.test/114.jpg", alt="")
@@ -179,6 +186,16 @@ def test_nonimages_and_unreadable_private_parent_metadata_are_not_exposed(change
     payload["posts"]["114"]["post_status"] = "private"
     assert php(LIBRARY + "echo json_encode(bioco_media_binding_value('stale',['name'=>'bioco_media_alt',"
                "'settings'=>['image'=>'{\"id\":\"113\"}']]));", payload) == ""
+
+
+def test_private_parent_permission_is_checked_against_parent_identity():
+    payload = library_payload()
+    payload['posts']['113']['post_parent'] = 114
+    payload['posts']['114']['post_status'] = 'private'
+    code = LIBRARY.replace("function current_user_can(...$args) {return $GLOBALS['allowed']??false;}",
+        "function current_user_can($cap,$id) {return $cap==='read_post' && $id===114;}")
+    assert php(code + "echo json_encode(bioco_media_binding_value('stale',['name'=>'bioco_media_alt',"
+               "'settings'=>['image'=>'{\"id\":\"113\"}']]));", payload) == 'Alt "113" & field'
 
 
 def test_controls_extend_supported_native_content_schema_without_mutating_metadata():

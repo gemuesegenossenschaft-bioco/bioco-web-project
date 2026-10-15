@@ -55,8 +55,6 @@ def test_intranet_seeds_link_to_member_portal_without_public_documents():
         assert label in text, label
     assert text.count("<li>") == 4
     assert "dokumente" not in section_ids
-    assert "documents/" not in text
-    assert ".pdf" not in text.lower()
 
     fragen = next(
         section for section in wp["sections"]

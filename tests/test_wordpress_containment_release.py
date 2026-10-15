@@ -18,14 +18,15 @@ def contained_fixture(tmp_path):
     script, env, _, _, review, events, marker = fixture(tmp_path)
     repo = script.parents[2]
     removed = {}
-    names = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only',
-        '594f31f9de0c96bcb3a6d4ae73356a2dd603bd21', '--', 'wordpress/content-seed/documents'], cwd=ROOT, text=True).splitlines()
-    for name in names:
-        data = subprocess.check_output(['git', 'show', '594f31f9de0c96bcb3a6d4ae73356a2dd603bd21:' + name], cwd=ROOT)
-        sha = hashlib.sha256(data).hexdigest()
-        if sha in PROTECTED:
-            path = repo / name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(data)
-            removed[name.replace('wordpress/content-seed/', 'mu-plugins/bioco-import/content-seed/')] = sha
+    blobs = {f'wordpress/content-seed/documents/document-{i}.pdf': f'synthetic-private-{i}'.encode() for i in range(3)}
+    module = script.parent / 'wordpress_containment.py'
+    source = module.read_text()
+    for old, new in zip(sorted(PROTECTED), sorted(hashlib.sha256(data).hexdigest() for data in blobs.values())):
+        source = source.replace(old, new)
+    module.write_text(source)
+    for name, data in blobs.items():
+        path = repo / name; path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(data)
+        removed[name.replace('wordpress/content-seed/', 'mu-plugins/bioco-import/content-seed/')] = hashlib.sha256(data).hexdigest()
     deploy = script.parent / 'deploy-wp-code.sh'
     deploy.write_text(deploy.read_text().replace('echo deploy-wp-code.sh',
         'if [ "${BIOCO_RELEASE_ROLLBACK:-0}" = 1 ]; then\n'

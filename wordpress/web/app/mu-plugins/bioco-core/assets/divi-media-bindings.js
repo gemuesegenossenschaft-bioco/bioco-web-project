@@ -70,7 +70,7 @@
     const result = {...attrs, image: {...attrs.image, innerContent: projected}};
     const attributes = attrs.module?.decoration?.attributes;
     if (attributes) {
-      const remove = row => row?.targetElement !== 'image' || !Object.hasOwn(selected, row.name);
+      const remove = row => row?.targetElement !== 'image' || typeof row.name !== 'string' || !Object.hasOwn(selected, row.name);
       const nextAttributes = {...attributes};
       if (Array.isArray(attributes.attributes)) nextAttributes.attributes = attributes.attributes.filter(remove);
       for (const [device, states] of Object.entries(attributes)) {

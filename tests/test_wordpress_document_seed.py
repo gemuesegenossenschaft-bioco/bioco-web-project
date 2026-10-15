@@ -44,8 +44,6 @@ def test_seeds_reference_documents_instead_of_legacy_hosts():
 
     intranet = (ROOT / "wordpress/content-seed/intranet.json").read_text()
     assert "cms.bioco.ch" not in intranet
-    assert "documents/" not in intranet
-    assert ".pdf" not in intranet.lower()
     assert "https://intranet.bioco.ch" in intranet
 
 

@@ -24,7 +24,7 @@ function bioco_media_binding_value($value, array $context) {
     if (!$post || $post->post_type !== 'attachment' || !wp_attachment_is_image($id)) return '';
     if ($post->post_status !== 'inherit' && !current_user_can('read_post', $id)) return '';
     if ($post->post_parent && get_post_status($post->post_parent) !== 'publish'
-        && !current_user_can('read_post', $id)) return '';
+        && !current_user_can('read_post', $post->post_parent)) return '';
     if ($post->post_parent && post_password_required($post->post_parent)
         && !current_user_can('edit_post', $post->post_parent)) return '';
     // The native image renderer escapes attribute values. Keep the underlying
