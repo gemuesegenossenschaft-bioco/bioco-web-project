@@ -2,12 +2,9 @@
 
 Testflächen: tests/README.md, Keep/Replace/Remove-Karte.
 
-Die fünf PDFs (zwei Statuten, drei Intranet-Dokumente) liegen als Quelle im
-Repo unter content-seed/documents/. Der Import lädt sie einmal in die
-Mediathek, taggt sie mit _bioco_import_source_url = "documents/<datei>" und
-schreibt jeden "documents/…"-Verweis (Button-href und Rich-Text-Link) auf die
-Attachment-URL um. Ein erneuter Lauf ohne Änderung schreibt nichts; Dry-Run
-und Verify importieren nie.
+Only the two approved public documents are release inputs. Member documents
+must not be imported into the public media library. Public document links resolve
+idempotently; verify and dry-run never import files.
 """
 
 import json
@@ -20,9 +17,6 @@ ROOT = Path(__file__).parents[1]
 DOCUMENTS = [
     "13-11-15_Statuten_bioco.pdf",
     "2212_Betriebsreglement.pdf",
-    "2510_fahrspesenrueckforderung.pdf",
-    "gemuese_ausliefertour_dienstag_2026_04.pdf",
-    "gemuese_ausliefertour_freitag_2026_04.pdf",
 ]
 
 
@@ -32,6 +26,9 @@ def test_documents_exist_in_both_seed_trees():
             path = ROOT / root / "content-seed/documents" / name
             assert path.is_file(), path
             assert path.read_bytes()[:5] == b"%PDF-", name
+        assert sorted(p.name for p in (ROOT / root / "content-seed/documents").glob("*.pdf")) == sorted(DOCUMENTS)
+    # The retired reimbursement copy must not remain in legacy public assets.
+    assert not list((ROOT / "frontend/public/intranet").glob("*Rueckforderung.pdf"))
 
 
 def test_seeds_reference_documents_instead_of_legacy_hosts():
@@ -47,9 +44,10 @@ def test_seeds_reference_documents_instead_of_legacy_hosts():
 
     intranet = (ROOT / "wordpress/content-seed/intranet.json").read_text()
     assert "cms.bioco.ch" not in intranet
-    assert f'documents/{DOCUMENTS[2]}' in intranet
-    assert f'documents/{DOCUMENTS[3]}' in intranet
-    assert f'documents/{DOCUMENTS[4]}' in intranet
+    assert "documents/" not in intranet
+    assert ".pdf" not in intranet.lower()
+    assert "https://intranet.bioco.ch" in intranet
+
 
 
 DRIVER = r"""
@@ -132,15 +130,10 @@ def test_apply_resolves_every_document_href_to_the_media_library():
     ])
     assert not any(h.startswith("documents/") for h in hrefs)
 
-    intra_text = next(
-        item["values"]["text"]
-        for item in result["results"]["intranet"]
-        if item["block"] == "rich-text" and "Ausliefertour" in item["values"].get("text", "")
-    )
-    assert "documents/" not in intra_text
-    assert "cms.bioco.ch" not in intra_text
-    for suffix in ("doc-903", "doc-904", "doc-905"):
-        assert suffix in intra_text
+    intra = json.dumps(result["results"]["intranet"])
+    assert "documents/" not in intra
+    assert ".pdf" not in intra.lower()
+    assert "https://intranet.bioco.ch" in intra
 
     assert sorted(result["importCalls"]) == sorted(DOCUMENTS)
 
@@ -163,17 +156,13 @@ def test_unchanged_rerun_is_write_free():
 
 
 def test_verify_and_dry_run_never_import():
-    result = _run("verify")
-    assert result["importCalls"] == []
-    intra_text = next(
-        item["values"]["text"]
-        for item in result["results"]["intranet"]
-        if item["block"] == "rich-text" and "Ausliefertour" in item["values"].get("text", "")
-    )
-    # Unresolved: hrefs stay as seeded, so verify reports a clean mismatch
-    # instead of half-rewritten markup against a never-imported page.
-    assert "documents/" in intra_text
-    assert "cms.bioco.ch" not in intra_text
+    for mode in ("verify", "dry-run"):
+        result = _run(mode)
+        assert result["importCalls"] == []
+        # Public hrefs stay unresolved without writes; intranet has no PDFs.
+        assert "documents/" in json.dumps(result["results"]["statuten"])
+        assert ".pdf" not in json.dumps(result["results"]["intranet"]).lower()
+
 
 def test_all_seed_assets_are_independent_of_legacy_cms():
     """Asset contract: tests/README.md, Keep/Replace/Remove map."""

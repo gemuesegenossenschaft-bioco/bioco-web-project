@@ -122,7 +122,8 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 | `test_wordpress_navigation_scroll.py` | keep (+ new) | Executes the real `bioco-navigation.js` in Node: utility-row auto-hide scenarios (collapse/reveal/top/focus/reduced-motion/mobile/passive/single/duplicate shell) and the mobile-menu toggle (open, close, Escape, link-click, no-toggle inertness). |
 | `test_wordpress_visual_contract.py` | trimmed (#101, #178, #180) | Fallback-theme adapter markup (header part, templates with `bioco-site-header`), approved palette/DM Sans/theme.json truth, nav labels + logo asset, shell-chrome CSS contracts against the core-owned `bioco-shell.css`, adapter-enqueues-nothing contract (#180), approved homepage seed, button AA contrast. |
 | `test_wordpress_subpage_design.py` | keep | Shared section-frame system: one outer frame, `data-owned` page headings, section max-widths, primary-nav CTA colour/interactivity, systemic visual primitives, intranet h1 structure. Shell/chrome rules are read from the core-owned `bioco-shell.css` (since #180). |
-| `test_wordpress_intranet_alignment.py` | keep | Intranet seam: seed mirrors live page, 22-page corpus + staging gate, utility nav links intranet (rendered with `aria-current`), external-link derivation via `bioco_link_target_attributes`. |
+| `test_wordpress_document_seed.py` | keep | Only the two approved public PDFs remain in release inputs; import resolves their links idempotently and never imports during verify/dry-run. Member documents are excluded. |
+| `test_wordpress_intranet_alignment.py` | keep | Intranet seam: matching public seeds link to the member portal without PDF links, 22-page corpus + staging gate, utility nav links intranet (rendered with `aria-current`), external-link derivation via `bioco_link_target_attributes`. |
 
 ### Import, serialization, composer & Divi styles
 
