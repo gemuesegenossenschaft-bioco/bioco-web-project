@@ -14,6 +14,12 @@ function bioco_record_native_query(array $data, array $attrs): array {
     if ($type === '') return $data;
     $args = $data['query_args'] ?? [];
     $args['post_type'] = $type; $args['post_status'] = 'publish'; $args['ignore_sticky_posts'] = true;
+    if ($type === 'bioco_vegetable' && bioco_record_native_has_class($attrs, 'bioco-calendar-catalog-order')
+        && ($args['orderby'] ?? '') === 'none') {
+        // Native Loop has no menu_order choice. None retains the catalog order;
+        // selecting an explicit native order remains an editorial override.
+        $args['orderby'] = ['menu_order' => 'ASC', 'title' => 'ASC'];
+    }
     if ($type === 'bioco_depot') {
         // Match the map's public catalog, including its editor-defined order.
         $posts = get_posts(['post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1,
@@ -35,6 +41,35 @@ function bioco_record_native_query(array $data, array $attrs): array {
     }
     $data['query_type'] = 'post_types'; $data['query_args'] = $args;
     return $data;
+}
+
+/** Divi excludes nonpublic CPTs before this editor-only query hook. */
+function bioco_calendar_editor_query(array $args, array $params): array {
+    $id = $params['post_id'] ?? null;
+    if (($params['query_type'] ?? '') !== 'post_type' || ($params['post_type'] ?? '') !== 'bioco_vegetable'
+        || !(is_int($id) || is_string($id)) || !preg_match('/^[1-9][0-9]*$/D', (string) $id)
+        || !get_post((int) $id) || !current_user_can('edit_post', (int) $id)) return $args;
+    $args['post_type'] = 'bioco_vegetable';
+    $args['post_status'] = 'publish';
+    if (($params['order_by'] ?? '') === 'none') {
+        $args['orderby'] = ['menu_order' => 'ASC', 'title' => 'ASC'];
+    }
+    return $args;
+}
+
+function bioco_calendar_editor_query_begin($response, $handler, $request) {
+    if ($request->get_route() === '/divi/v1/loop/query-results' && $request->get_method() === 'GET'
+        && bioco_calendar_editor_query([], $request->get_params())) {
+        add_filter('divi_module_options_loop_post_type_results_query_args', 'bioco_calendar_editor_query', 20, 2);
+    }
+    return $response;
+}
+
+function bioco_calendar_editor_query_end($response, $handler, $request) {
+    if ($request->get_route() === '/divi/v1/loop/query-results') {
+        remove_filter('divi_module_options_loop_post_type_results_query_args', 'bioco_calendar_editor_query', 20);
+    }
+    return $response;
 }
 
 /** Native Post Content consumes the shared saved detail only for an empty group body. */
@@ -68,3 +103,6 @@ add_filter('divi_module_wrapper_render', 'bioco_record_native_wrapper', 20, 2);
 add_filter('divi_loop_data_after_execution', 'bioco_record_native_query', 20, 2);
 add_filter('the_content', 'bioco_group_record_content', 7);
 add_filter('et_builder_third_party_post_types', static fn(array $types): array => array_values(array_unique(array_merge($types, ['bioco_vegetable', 'bioco_depot']))), 20);
+
+add_filter('rest_request_before_callbacks', 'bioco_calendar_editor_query_begin', 20, 3);
+add_filter('rest_request_after_callbacks', 'bioco_calendar_editor_query_end', 20, 3);

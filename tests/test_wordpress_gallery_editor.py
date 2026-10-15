@@ -64,6 +64,9 @@ def test_arbitrary_categories_captions_order_and_media_metadata_survive_renderin
     assert '&lt;script&gt;alert(1)&lt;/script&gt; &amp; Früchte' in html and '<script>' not in html
     assert html.index('img-1.jpg') < html.index('img-2.jpg') < html.index('img-3.jpg')
     assert 'alt="Media alt 2"' in html and '<figcaption>' in html
+    # Attachment IDs must reach WordPress's responsive/format-filtered markup.
+    assert 'srcset="https://example.test/responsive-2.webp 640w"' in html
+    assert 'loading="lazy"' in html
     assert 'aria-label="Galeriekategorie"' in html
     assert 'data-gallery-more="Auswahl erweitern"' in html
     assert 'data-gallery-less="Auswahl verkleinern"' in html

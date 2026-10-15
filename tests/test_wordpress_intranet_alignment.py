@@ -18,11 +18,7 @@ THEME = ROOT / "wordpress/web/app/themes/bioco"
 WP_SEEDS = ROOT / "wordpress/content-seed"
 CMS_SEEDS = ROOT / "cms/content-seed"
 
-PDFS = (
-    "documents/gemuese_ausliefertour_dienstag_2026_04.pdf",
-    "documents/gemuese_ausliefertour_freitag_2026_04.pdf",
-    "documents/2510_fahrspesenrueckforderung.pdf",
-)
+
 
 
 def run_php(source):
@@ -41,7 +37,7 @@ def test_page_templates_do_not_nest_constrained_layouts():
         assert "wp:post-content" in markup, name
 
 
-def test_intranet_seed_mirrors_the_live_page_content():
+def test_intranet_seeds_link_to_member_portal_without_public_documents():
     wp = json.loads((WP_SEEDS / "intranet.json").read_text())
     cms = json.loads((CMS_SEEDS / "intranet.json").read_text())
     assert wp == cms
@@ -57,10 +53,8 @@ def test_intranet_seed_mirrors_the_live_page_content():
     assert "Was findest du im Intranet?" in titles
     for label in ("Verteilplan", "Fahrspesen", "Interne Dokumente", "Mitgliederbereich"):
         assert label in text, label
-    assert text.count("<li>") >= 7
-
-    for url in PDFS:
-        assert url in text, url
+    assert text.count("<li>") == 4
+    assert "dokumente" not in section_ids
 
     fragen = next(
         section for section in wp["sections"]

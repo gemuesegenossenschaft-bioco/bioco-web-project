@@ -45,6 +45,7 @@ def fixture(tmp_path):
     command(['git', 'init', '-q'], repo)
     command(['git', 'config', 'user.email', 'test@example.test'], repo)
     command(['git', 'config', 'user.name', 'Test'], repo)
+    (repo / '.gitignore').write_text('__pycache__/\n')
     for source in SOURCES:
         path = repo / source
         if path.suffix == '.php': path.parent.mkdir(parents=True, exist_ok=True); path.write_text('<?php baseline\n')
@@ -52,6 +53,8 @@ def fixture(tmp_path):
     script = repo / 'wordpress/scripts/release-wordpress-production.py'
     script.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(SCRIPT, script)
+    shutil.copy2(ROOT / 'wordpress/scripts/wordpress_release.py', script.parent / 'wordpress_release.py')
+    shutil.copy2(ROOT / 'wordpress/scripts/wordpress_containment.py', script.parent / 'wordpress_containment.py')
     shutil.copy2(ROOT / 'wordpress/scripts/editorial-fingerprint.php', script.parent / 'editorial-fingerprint.php')
     for name in ['release-wordpress-preflight.sh', 'deploy-wp-code.sh', 'flush-wordpress-web-opcache.sh']:
         path = script.parent / name

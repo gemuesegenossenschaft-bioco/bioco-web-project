@@ -54,20 +54,29 @@ $resolved_items = [];
 foreach ((array) $items as $item) {
     if (!is_array($item)) continue;
     $image = $item['image'] ?? null;
+    $image_id = 0;
     $image_url = '';
     $image_alt = '';
     if (is_array($image)) {
+        $image_id = (int) ($image['ID'] ?? $image['id'] ?? 0);
         $image_url = $image['url'] ?? '';
         $image_alt = $image['alt'] ?? '';
     } elseif (is_numeric($image) && (int) $image > 0) {
+        $image_id = (int) $image;
         $image_url = wp_get_attachment_image_url((int) $image, 'large') ?: '';
         $image_alt = (string) get_post_meta((int) $image, '_wp_attachment_image_alt', true);
     }
-    if ($image_url === '') {
+    // WordPress supplies responsive sizes and image-format plugin filters.
+    // URL-only legacy entries retain their existing fallback below.
+    $image_html = $image_id > 0
+        ? wp_get_attachment_image($image_id, 'large', false, ['alt' => $image_alt, 'loading' => 'lazy'])
+        : '';
+    if ($image_url === '' && $image_html === '') {
         continue;
     }
     $resolved_items[] = [
         'url' => $image_url,
+        'html' => $image_html,
         'alt' => $image_alt,
         'category' => $item['category'] ?? 'feld',
         'caption' => $item['caption'] ?? '',
@@ -99,7 +108,7 @@ if (!empty($block['className'])) {
             <div class="gallery-grid" data-gallery-grid style="<?php echo esc_attr(implode(';', $grid_styles)); ?>">
                 <?php foreach ($resolved_items as $index => $resolved) : ?>
                     <figure class="gallery-item" data-gallery-category="<?php echo esc_attr($resolved['category']); ?>" <?php if ($show_more_label && $initial_count > 0 && $index >= $initial_count) : ?>style="display: none;"<?php endif; ?>>
-                        <div class="gallery-image"><img src="<?php echo esc_url($resolved['url']); ?>" alt="<?php echo esc_attr($resolved['alt']); ?>" loading="lazy" /></div>
+                        <div class="gallery-image"><?php if ($resolved['html'] !== '') : ?><?php echo $resolved['html']; ?><?php else : ?><img src="<?php echo esc_url($resolved['url']); ?>" alt="<?php echo esc_attr($resolved['alt']); ?>" loading="lazy" /><?php endif; ?></div>
                         <?php if ($resolved['caption'] !== '') : ?><figcaption><?php echo esc_html($resolved['caption']); ?></figcaption><?php endif; ?>
                     </figure>
                 <?php endforeach; ?>

@@ -10,11 +10,13 @@ if (!defined('ABSPATH')) exit;
 define('BIOCO_CORE_DIR', __DIR__);
 
 require_once BIOCO_CORE_DIR . '/includes/helpers.php';
+require_once BIOCO_CORE_DIR . '/includes/image-delivery.php';
 require_once BIOCO_CORE_DIR . '/includes/event-bindings.php';
 require_once BIOCO_CORE_DIR . '/includes/native-loop-empty.php';
 require_once BIOCO_CORE_DIR . '/includes/event-loop.php';
 require_once BIOCO_CORE_DIR . '/includes/price-bindings.php';
 require_once BIOCO_CORE_DIR . '/includes/record-bindings.php';
+require_once BIOCO_CORE_DIR . '/includes/media-bindings.php';
 require_once BIOCO_CORE_DIR . '/includes/navigation.php';
 require_once BIOCO_CORE_DIR . '/includes/redirects.php';
 require_once BIOCO_CORE_DIR . '/includes/dynamic-sections.php';

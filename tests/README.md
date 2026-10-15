@@ -103,6 +103,19 @@ extension fails closed with a clear error, not a false pass.
 
 ## Test map
 
+`test_wordpress_containment_release.py` (keep, required) executes the canonical
+production CLI with the exact protected-document projection and sanitized rollback.
+It rejects missing/tampered receipts, incomplete private proof, baseline drift and
+reappearing documents. The same remote proof code also runs against real private
+files; fixture transports do not establish hosted release acceptance.
+
+Required coverage includes `test_wordpress_record_loop_preview.py` (keep: execute
+registered Divi loop options against the shared record bindings, including record
+permissions and draft isolation) and `test_wordpress_image_delivery.py` (keep:
+WordPress responsive candidates, conditional Divi filter removal, attachment-backed
+galleries and the existing gallery fallback). Both modules run without licensed
+Divi; hosted editor save/reopen and actual image rendering remain separate checks.
+
 Grouped by behaviour. Status `keep` (unchanged this pass), `trimmed` (redundant assertions removed,
 replacements documented), `replaced` (rewritten as behavioural tests), `new` (added this pass).
 
@@ -115,7 +128,8 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 | `test_wordpress_navigation_scroll.py` | keep (+ new) | Executes the real `bioco-navigation.js` in Node: utility-row auto-hide scenarios (collapse/reveal/top/focus/reduced-motion/mobile/passive/single/duplicate shell) and the mobile-menu toggle (open, close, Escape, link-click, no-toggle inertness). |
 | `test_wordpress_visual_contract.py` | trimmed (#101, #178, #180) | Fallback-theme adapter markup (header part, templates with `bioco-site-header`), approved palette/DM Sans/theme.json truth, nav labels + logo asset, shell-chrome CSS contracts against the core-owned `bioco-shell.css`, adapter-enqueues-nothing contract (#180), approved homepage seed, button AA contrast. |
 | `test_wordpress_subpage_design.py` | keep | Shared section-frame system: one outer frame, `data-owned` page headings, section max-widths, primary-nav CTA colour/interactivity, systemic visual primitives, intranet h1 structure. Shell/chrome rules are read from the core-owned `bioco-shell.css` (since #180). |
-| `test_wordpress_intranet_alignment.py` | keep | Intranet seam: seed mirrors live page, 22-page corpus + staging gate, utility nav links intranet (rendered with `aria-current`), external-link derivation via `bioco_link_target_attributes`. |
+| `test_wordpress_document_seed.py` | keep | Only the two approved public PDFs remain in release inputs; import resolves their links idempotently and never imports during verify/dry-run. Member documents are excluded. |
+| `test_wordpress_intranet_alignment.py` | keep | Intranet seam: matching public seeds link to the member portal without PDF links, 22-page corpus + staging gate, utility nav links intranet (rendered with `aria-current`), external-link derivation via `bioco_link_target_attributes`. |
 
 ### Import, serialization, composer & Divi styles
 
@@ -164,6 +178,7 @@ replacements documented), `replaced` (rewritten as behavioural tests), `new` (ad
 | `test_wordpress_divi_foundation.py` | new (#134) | Manifest bundle matches its source; live-value bridge (editor override, archived fallback, stylesheet-injection rejection); seed dry-run/apply semantics against a fake vendor REST boundary: label conflicts report instead of duplicate, conflicted apply performs no write, clean rerun skips satisfied writes, unknown manifest preset titles fail the run. |
 | `test_wordpress_visual_parity.py` | keep | 95% visual parity gate semantics: fail-closed results, masking discipline, threshold validation. |
 | `test_wordpress_release_pipeline.py` | keep | Release pipeline: dry-run non-mutation, step order/abort, input hygiene, CI parity, hash-pinned deps. |
+| `test_wordpress_release_package.py` | new (#280) | Real package CLI against an isolated Git fixture: deterministic owned bytes, checkout binding, rejected source/archive/evidence changes and trusted-run selection. Preflight and GitHub transport are controlled boundaries. This does not prove a hosted workflow run, installed WordPress/Divi compatibility or release preservation. |
 | `test_wordpress_release_preservation.py` | new (#179) | Exact remote-command boundary, no import, fail-closed aborts, non-writing dry run. Database preservation requires the separate real release check. |
 | `test_wordpress_import_cli.py` | new (#179) | Real CLI/importer with controlled WordPress storage: preview writes, no-clobber, forced apply, repeated apply, collection reports and exit statuses. |
 | `test_wordpress_verify_runtime.py` | new (#179) | Real WordPress parser with controlled renderer output: edited layouts, malformed nested comments, empty output, renderer failures and page context. Actual Divi rendering is checked separately. |
@@ -257,6 +272,7 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 | `test_wordpress_shell_wrapper_adoption.py` | Keep, required (#249) | Private header/footer and exact PostContent body plans preserve module settings, assignments, authored domains, preset defaults and global values. Installed style/operator and native GUI checks remain separate. |
 | `test_wordpress_steps_native_preview.py` | Keep, required (#214) | Bounded structural conversion creates native step cards from measured saved HTML, preserves paragraph/anchor bytes and refuses authored variants. Installed module styles and GUI expansion remain separate. |
 | `test_wordpress_divi_preset_adapter.py` | Keep, required (#214) | Captured Divi 5.11.0 staging and 5.15.0 production helpers reproduce the native bug in Node. Both supported builds avoid default dispatch for populated maps, delegate empty maps, preserve live namespace getters/symbols and refuse unknown helpers or late loading. PHP tests execute the core bootstrap hook, native registered URL/path/hash resolution, exact inline-after injection and authorization/build/order gates. Successful CI enqueue tests replace only the filesystem hash boundary in an isolated subprocess; licensed vendor files stay outside fixtures. Actual Divi save/reopen remains a hosted proof. |
+| `test_wordpress_media_bindings.py` | Keep, required (#219) | Native Image Content metadata source controls preserve existing module text by default. Actual PHP/editor callbacks agree on selected attachment bindings, blank library alt, decorative uses, responsive inheritance and unrelated controls. Tests cover fresh library lookup and private image permissions. Installed renderer and native save/reopen remain separate hosted gates. |
 | `test_wordpress_secondary_presentation_preview.py` | Keep, required (#214) | Measured accordion, portal and native timeline header defaults preserve modules, links, native values and controller classes; opaque steps are refused. Installed style and save/reopen checks remain separate. |
 | `test_wordpress_navigation_layout.py` | Keep, new (#249) | Real PHP saved-header renderer and Chromium CSS/JS prove equal header geometry on home, inner pages and a CPT boundary; desktop/mobile overflow, logo bounds, sticky utility collapse, keyboard menu/focus and saved design variables. The later Divi list rule is a controlled boundary. Actual Divi save/reopen and staging/production route parity remain separate release proofs. Required PR coverage. |
 | `test_wordpress_event_back_button.py` | Keep, new (#217) | Real saved-layout generators, WordPress parser and Chromium wrapping/focus checks. Licensed preset rendering and native save/reopen remain hosted checks. |

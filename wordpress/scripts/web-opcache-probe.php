@@ -1,5 +1,5 @@
 <?php
-/** Temporary authenticated probe, installed and removed by the staging release. */
+/** Temporary authenticated probe, installed and removed by the WordPress release. */
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST'
     || !isset($biocoOpcacheToken)
     || !isset($biocoOpcacheExpires) || time() > $biocoOpcacheExpires
@@ -12,7 +12,7 @@ header('Cache-Control: no-store');
 if (!unlink(__FILE__)) { http_response_code(500); exit; }
 // The host can initialize the application's OPcache only after WordPress has
 // bootstrapped. Inspect that cache, rather than an empty standalone-PHP cache.
-require __DIR__ . '/wp-load.php';
+require dirname(__DIR__) . '/wp-load.php';
 $count = 0;
 if (function_exists('opcache_get_status')) {
     $status = opcache_get_status(true);
@@ -20,7 +20,7 @@ if (function_exists('opcache_get_status')) {
         http_response_code(500);
         exit;
     }
-    $root = realpath(__DIR__ . '/wp-content');
+    $root = realpath(__DIR__);
     if (!$root) { http_response_code(500); exit; }
     $prefixes = [];
     foreach (['mu-plugins/bioco-core/', 'mu-plugins/bioco-content/', 'mu-plugins/bioco-forms/', 'mu-plugins/bioco-import/', 'themes/bioco/', 'themes/bioco-divi/'] as $relative) {
