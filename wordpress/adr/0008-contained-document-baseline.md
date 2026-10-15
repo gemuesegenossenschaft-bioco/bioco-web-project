@@ -26,11 +26,12 @@ an unmodified checkout of the old commit.
 ## Operator interface
 
 The canonical production command optionally accepts
-`--containment-evidence=<private-0600-json>`. The production workflow accepts the
-same JSON through its optional `containment_evidence` input. The normal private
-review JSON must include `containment_evidence_sha256`, the SHA-256 of the exact
-containment file bytes. Both documents remain private; neither contains user data
-in public evidence.
+`--containment-evidence=<private-0600-json>`. Use this canonical CLI directly for
+the contained baseline. The public workflow has no containment input: its dispatch
+payload and logs must not receive the private inventory. Without the private file
+the protected baseline fails closed. The normal private review JSON must include
+`containment_evidence_sha256`, the SHA-256 of the exact containment file bytes.
+Keep both documents outside public evidence.
 
 The containment JSON contains exactly `schema: 1`, the current `commit`,
 `accepted_baseline`, production `host` and `content`, the pinned

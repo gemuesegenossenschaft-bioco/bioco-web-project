@@ -11,11 +11,6 @@ on:
         description: JSON with merged PR, CodeRabbit agreement, and accepted baseline
         required: true
         type: string
-      containment_evidence:
-        description: Optional private exact-document containment evidence, hash-bound in review evidence
-        required: false
-        type: string
-        default: ''
       apply:
         description: Write owned code after a reviewed dry run
         required: true
@@ -85,13 +80,9 @@ jobs:
       - name: Create private review evidence
         env:
           EVIDENCE: ${{ inputs.review_evidence }}
-          CONTAINMENT: ${{ inputs.containment_evidence }}
         run: |
           umask 077
           printf '%s' "$EVIDENCE" > "$RUNNER_TEMP/bioco-review-evidence.json"
-          if [[ -n "$CONTAINMENT" ]]; then
-            printf '%s' "$CONTAINMENT" > "$RUNNER_TEMP/bioco-containment-evidence.json"
-          fi
       - name: Run fixed-profile promotion
         env:
           GH_TOKEN: ${{ github.token }}
@@ -112,10 +103,7 @@ jobs:
             --review-evidence="$RUNNER_TEMP/bioco-review-evidence.json")
           if [[ "$APPLY" == true ]]; then args+=(--apply); fi
           if [[ "$BOOTSTRAP_BASELINE" == true ]]; then args+=(--bootstrap-baseline); fi
-          if [[ -f "$RUNNER_TEMP/bioco-containment-evidence.json" ]]; then
-            args+=(--containment-evidence="$RUNNER_TEMP/bioco-containment-evidence.json")
-          fi
           wordpress/scripts/release-wordpress-production.py "${args[@]}"
       - name: Remove private review evidence
         if: always()
-        run: rm -f "$RUNNER_TEMP/bioco-review-evidence.json" "$RUNNER_TEMP/bioco-containment-evidence.json"
+        run: rm -f "$RUNNER_TEMP/bioco-review-evidence.json"
