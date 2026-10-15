@@ -84,6 +84,55 @@
     return result;
   }
 
+  // Native Image renders alt/title as literals. Resolve their runtime tokens
+  // through Divi's own async resolver before handing the element back to Divi.
+  // Each token owns a component, so responsive/state additions do not change
+  // the number of hooks called by an existing component.
+  function resolveMetadataElement(element, params, context) {
+    if (context?.moduleMetadata?.name !== 'divi/image' || params.attrName !== 'image') return element;
+    const React = window.vendor?.React;
+    const useDynamicData = window.divi?.dynamicData?.useDynamicData;
+    if (!React || !useDynamicData) return element;
+    const entries = [];
+    const attrs = element.props.runtimeModuleAttrs;
+    for (const [device, states] of Object.entries(attrs?.image?.innerContent || {})) {
+      for (const [state, value] of Object.entries(states || {})) {
+        for (const field of ['alt', 'titleText']) {
+          const token = value?.[field];
+          if (typeof token !== 'string' || !token.startsWith('$variable(')) continue;
+          try {
+            const name = JSON.parse(token.slice(10, -2))?.value?.name;
+            if (name === 'bioco_media_alt' || name === 'bioco_media_title') entries.push({device, state, field, token});
+          } catch (_) { /* Unrelated or malformed content remains Divi-owned. */ }
+        }
+      }
+    }
+    return entries.length ? React.createElement(ResolveMetadata,
+      {key: entries[0].token, element, entries, index: 0, values: []}) : element;
+  }
+
+  function ResolveMetadata({element, entries, index, values}) {
+    const React = window.vendor.React;
+    const result = window.divi.dynamicData.useDynamicData(entries[index].token);
+    const resolved = !result.isLoading && !result.isError && typeof result.resolvedValue === 'string'
+      ? result.resolvedValue : '';
+    const nextValues = [...values, resolved];
+    if (index + 1 < entries.length) return React.createElement(ResolveMetadata,
+      {key: entries[index + 1].token, element, entries, index: index + 1, values: nextValues});
+    const project = attrs => {
+      const content = {...attrs.image.innerContent};
+      entries.forEach(({device, state, field}, i) => {
+        content[device] = {...content[device], [state]: {...content[device][state], [field]: nextValues[i]}};
+      });
+      return {...attrs, image: {...attrs.image, innerContent: content}};
+    };
+    return React.cloneElement(element, {
+      moduleAttrs: project(element.props.moduleAttrs),
+      runtimeModuleAttrs: project(element.props.runtimeModuleAttrs),
+    });
+  }
+
   hooks.addFilter('divi.moduleLibrary.moduleAttributes.divi.image', 'bioco/media-metadata-controls', metadataControls);
   hooks.addFilter('divi.moduleLibrary.registerModule.moduleAttrs', 'bioco/media-metadata-bindings', runtimeAttrs, 20);
+  hooks.addFilter('divi.module.elements.render', 'bioco/media-metadata-preview', resolveMetadataElement, 20);
 })();
