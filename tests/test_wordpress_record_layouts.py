@@ -230,3 +230,42 @@ def test_calendar_header_order_removal_duplicate_instances_and_accessible_refere
         page.add_script_tag(path=str(ROOT / 'wordpress/web/app/mu-plugins/bioco-core/assets/native-calendar.js'))
         assert page.locator('.bioco-native-calendar').count() == 2
         browser.close()
+
+
+def test_calendar_editor_query_is_scoped_and_preserves_native_filters_and_limits():
+    code = r'''
+function remove_filter($name,$callback,$priority){unset($GLOBALS['hooks'][$name]);}
+class CalendarRequest {
+    function __construct(public $route,public $method,public $params){}
+    function get_route(){return $this->route;}
+    function get_method(){return $this->method;}
+    function get_params(){return $this->params;}
+}
+$params=['query_type'=>'post_type','post_type'=>'bioco_vegetable','post_id'=>9,'order_by'=>'none'];
+$args=['post_type'=>'any','posts_per_page'=>7,'offset'=>2,'tax_query'=>[['taxonomy'=>'keep']], 'post__not_in'=>[3],'orderby'=>'none','order'=>'ASC'];
+$queries=[];
+foreach ([9,'9',0,-1,'9evil','9.0',true,[],99] as $id) {
+    $params['post_id']=$id;$queries[]=bioco_calendar_editor_query($args,$params);
+}
+$params['post_id']=9;
+$explicit=bioco_calendar_editor_query($args+[],array_replace($params,['order_by'=>'title']));
+$routes=[];
+foreach ([['/else','GET'],['/divi/v1/loop/query-results','POST'],['/divi/v1/loop/query-results','GET']] as [$route,$method]) {
+    $r=new CalendarRequest($route,$method,$params);
+    bioco_calendar_editor_query_begin('unchanged',[], $r);
+    $routes[]=isset($GLOBALS['hooks']['divi_module_options_loop_post_type_results_query_args']);
+    bioco_calendar_editor_query_end('unchanged',[], $r);
+}
+$other=[];
+foreach ([['post_type'=>'post'],['query_type'=>'terms'],['post_id'=>8]] as $changes) {
+    $other[]=bioco_calendar_editor_query($args,array_replace($params,$changes));
+}
+echo json_encode(compact('args','queries','explicit','routes','other')+['clean'=>!isset($GLOBALS['hooks']['divi_module_options_loop_post_type_results_query_args'])]);
+'''
+    out = run(code, records={'9': group(), '8': group()}, allowed=[9])
+    for query in out['queries'][:2]:
+        assert query == out['args'] | dict(post_type='bioco_vegetable', post_status='publish', orderby={'menu_order': 'ASC', 'title': 'ASC'})
+    assert out['queries'][2:] == [out['args']] * 7
+    assert out['other'] == [out['args']] * 3
+    assert out['explicit']['orderby'] == 'none'  # Native args already own explicit sorting.
+    assert out['routes'] == [False, False, True] and out['clean']
