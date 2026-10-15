@@ -14,6 +14,12 @@ function bioco_record_native_query(array $data, array $attrs): array {
     if ($type === '') return $data;
     $args = $data['query_args'] ?? [];
     $args['post_type'] = $type; $args['post_status'] = 'publish'; $args['ignore_sticky_posts'] = true;
+    if ($type === 'bioco_vegetable' && bioco_record_native_has_class($attrs, 'bioco-calendar-catalog-order')
+        && ($args['orderby'] ?? '') === 'none') {
+        // Native Loop has no menu_order choice. None retains the catalog order;
+        // selecting an explicit native order remains an editorial override.
+        $args['orderby'] = ['menu_order' => 'ASC', 'title' => 'ASC'];
+    }
     if ($type === 'bioco_depot') {
         // Match the map's public catalog, including its editor-defined order.
         $posts = get_posts(['post_type' => $type, 'post_status' => 'publish', 'numberposts' => -1,

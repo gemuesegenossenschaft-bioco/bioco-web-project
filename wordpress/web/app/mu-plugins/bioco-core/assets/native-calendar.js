@@ -12,12 +12,25 @@
       var head = root.querySelector('.bioco-calendar-head');
       if (!head) return;
       root.dataset.biocoCalendarReady = '1'; instance += 1;
+      root.setAttribute('role', 'table');
+      head.setAttribute('role', 'row');
+      var nameHeader = head.querySelector('.bioco-calendar-name');
+      if (nameHeader) {
+        nameHeader.setAttribute('role', 'columnheader');
+        nameHeader.setAttribute('aria-colindex', '1');
+      }
       var headers = Array.from(head.children).filter(function (el) { return month(el); });
       headers.forEach(function (el, index) {
         if (!el.id) el.id = 'bioco-calendar-' + instance + '-month-' + month(el);
         el.setAttribute('role', 'columnheader'); el.setAttribute('aria-colindex', String(index + 2));
       });
       root.querySelectorAll('.bioco-calendar-data').forEach(function (row) {
+        row.setAttribute('role', 'row');
+        var name = row.querySelector('.bioco-calendar-name');
+        if (name) {
+          name.setAttribute('role', 'rowheader');
+          name.setAttribute('aria-colindex', '1');
+        }
         var cells = Array.from(row.children).filter(function (el) { return month(el); });
         headers.forEach(function (header, index) {
           var cell = cells.find(function (el) { return month(el) === month(header); });

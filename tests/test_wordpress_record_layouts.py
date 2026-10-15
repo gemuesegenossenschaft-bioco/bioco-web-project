@@ -137,7 +137,7 @@ $posts[1]->post_content.='EDITOR_CHANGE';$posts[2]->post_status='draft';$writes=
 echo json_encode(compact('dry','before','first','again','writes','posts'));
 ''')
     assert out['before'] == out['writes'] == []
-    assert len(out['first']) == 3 and all(row['action'] == 'created' for row in out['first'])
+    assert len(out['first']) == 4 and all(row['action'] == 'created' for row in out['first'])
     assert all(row['action'] == 'preserve-existing' for row in out['again'])
     assert {p['post_type'] for p in out['posts'].values()} == {'et_pb_layout'}
     assert out['posts']['1']['post_content'].endswith('EDITOR_CHANGE') and out['posts']['2']['post_status'] == 'draft'
@@ -159,6 +159,51 @@ def test_native_calendar_payload_has_headings_roles_bound_columns_and_contained_
     assert not any('bioco-divi/' in n['blockName'] for n in nodes)
 
 
+def test_collapsible_calendar_keeps_native_editable_cells_and_authoritative_bindings():
+    layouts = definitions()
+    disclosure = layouts['calendar-collapsible']
+    nodes = list(walk(disclosure))
+    toggle, = [n for n in nodes if n['blockName'] == 'divi/toggle']
+    assert toggle['attrs']['module']['advanced']['open']['desktop']['value'] == 'off'
+    assert toggle['attrs']['title']['innerContent']['desktop']['value'] == 'Saisonkalender'
+    assert toggle['attrs']['title']['decoration']['font']['font']['desktop']['value']['headingLevel'] == 'h2'
+    assert 'bioco-editorial-toggle' in json.dumps(toggle['attrs'])
+    nested = list(walk(toggle['innerBlocks']))
+    assert {n['blockName'] for n in nested} <= {'divi/group', 'divi/text'}
+    table = toggle['innerBlocks'][1]
+    assert table['attrs']['module']['decoration']['overflow']['desktop']['value']['x'] == 'auto'
+    old_head, old_body = layouts['calendar'][1]['innerBlocks']
+    head, body = table['innerBlocks']
+    for old, new in [(old_head, head), (old_body, body)]:
+        assert len(new['innerBlocks']) == 13
+        assert new['attrs']['module']['decoration'] == old['attrs']['module']['decoration']
+        assert [n['innerBlocks'] for n in new['innerBlocks']] == [n['innerBlocks'] for n in old['innerBlocks']]
+    loop = body['attrs']['module']['advanced']['loop']['desktop']['value']
+    assert loop['subTypes'] == [{'value': 'bioco_vegetable', 'label': 'Gemüse'}]
+    assert loop['postPerPage'] == 100 and loop['orderBy'] == 'none' and loop['order'] == 'ascending'
+    assert 'bioco-calendar-catalog-order' in json.dumps(body['attrs'])
+    assert all('modulePreset' not in n['attrs'] for n in nested if n['blockName'] == 'divi/group')
+
+
+def test_collapsible_catalog_order_uses_record_order_but_honors_explicit_editor_sort():
+    code = r'''
+$attrs=['module'=>['advanced'=>['htmlAttributes'=>['desktop'=>['value'=>[
+    'class'=>'bioco-vegetable-loop bioco-calendar-catalog-order']]]]]];
+$base=['query_type'=>'post_types','query_args'=>['orderby'=>'none','order'=>'ASC','posts_per_page'=>100]];
+$explicit=$base;$explicit['query_args']['orderby']='title';$explicit['query_args']['order']='DESC';
+echo json_encode(['catalog'=>bioco_record_native_query($base,$attrs),
+    'explicit'=>bioco_record_native_query($explicit,$attrs),
+    'unscoped'=>bioco_record_native_query($base,[])]);
+'''
+    out = run(code)
+    assert out['catalog']['query_args']['orderby'] == {'menu_order': 'ASC', 'title': 'ASC'}
+    assert out['catalog']['query_args']['post_status'] == 'publish'
+    assert out['catalog']['query_args']['posts_per_page'] == 100
+    assert out['explicit']['query_args']['orderby'] == 'title'
+    assert out['explicit']['query_args']['order'] == 'DESC'
+    assert out['unscoped']['query_args']['orderby'] == 'none'
+
+
 def test_calendar_header_order_removal_duplicate_instances_and_accessible_references():
     def calendar(label):
         return '<div class="bioco-native-calendar" style="width:320px;overflow-x:auto"><div style="min-width:1000px"><div class="bioco-calendar-head"><div class="bioco-calendar-name">Gemüse</div><div class="bioco-calendar-month-12">' + label + '</div><div class="bioco-calendar-month-1">Jan</div></div><div class="bioco-calendar-data"><div class="bioco-calendar-name">Testgemüse</div><div class="bioco-calendar-month-1">●</div><div class="bioco-calendar-month-2" style="display:flex">●</div><div class="bioco-calendar-month-12">●</div></div></div></div>'
@@ -168,6 +213,11 @@ def test_calendar_header_order_removal_duplicate_instances_and_accessible_refere
         page.add_script_tag(path=str(ROOT / 'wordpress/web/app/mu-plugins/bioco-core/assets/native-calendar.js'))
         for index, label in enumerate(['Dezember', 'Dec']):
             root = page.locator('.bioco-native-calendar').nth(index)
+            assert root.get_attribute('role') == 'table'
+            assert root.locator('.bioco-calendar-head').get_attribute('role') == 'row'
+            assert root.locator('.bioco-calendar-head .bioco-calendar-name').get_attribute('role') == 'columnheader'
+            assert root.locator('.bioco-calendar-data').get_attribute('role') == 'row'
+            assert root.locator('.bioco-calendar-data .bioco-calendar-name').get_attribute('role') == 'rowheader'
             visible = root.locator('.bioco-calendar-data > div:visible')
             assert visible.all_text_contents() == ['Testgemüse', '●', '●']
             header = root.locator('.bioco-calendar-head .bioco-calendar-month-12')
