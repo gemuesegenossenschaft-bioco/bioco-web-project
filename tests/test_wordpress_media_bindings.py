@@ -261,3 +261,35 @@ def test_dynamic_upload_settings_reject_unparseable_input_and_allow_authorized_p
     echo json_encode([$denied,$allowed,$invalid]);
     ''', payload)
     assert result == ["", 'Alt "113" & field', ""]
+
+
+@pytest.mark.parametrize('attachment,expected_alt', [('113', 'Fresh library alt'), ('114', '')])
+def test_native_editor_element_resolves_selected_metadata_without_saving_tokens(attachment, expected_alt):
+    attrs = image({'altSource': 'library', 'titleSource': 'library'})
+    attrs['image']['innerContent']['desktop']['value']['id'] = attachment
+    request = {'mode': 'render', 'attrs': attrs, 'metadata': {
+        attachment: {'bioco_media_alt': expected_alt, 'bioco_media_title': 'Fresh title'}}}
+    result = subprocess.run(['node', str(ROOT / 'tests/fixtures/divi-media-bindings.cjs'), str(JS)],
+                            input=json.dumps(request), capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    rendered = json.loads(result.stdout)
+    assert rendered['unchanged']
+    assert rendered['value']['type'] == 'native-image-element'
+    assert rendered['value']['props']['keep'] == 'native-controls'
+    for key in ['moduleAttrs', 'runtimeModuleAttrs']:
+        value = rendered['value']['props'][key]['image']['innerContent']['desktop']['value']
+        assert value['alt'] == expected_alt
+        assert value['titleText'] == 'Fresh title'
+
+
+@pytest.mark.parametrize('state', [{'isLoading': True}, {'isError': True}])
+def test_native_editor_never_displays_metadata_tokens_or_stale_text_during_resolution(state):
+    request = {'mode': 'render', 'attrs': image({'altSource': 'library'}), 'state': state}
+    result = subprocess.run(['node', str(ROOT / 'tests/fixtures/divi-media-bindings.cjs'), str(JS)],
+                            input=json.dumps(request), capture_output=True, text=True)
+    assert result.returncode == 0, result.stderr
+    rendered = json.loads(result.stdout)
+    value = rendered['value']['props']['runtimeModuleAttrs']['image']['innerContent']['desktop']['value']
+    assert value['alt'] == ''
+    assert value['titleText'] == 'Old113 title'
+    assert rendered['unchanged']
