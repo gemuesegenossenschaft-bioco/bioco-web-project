@@ -111,13 +111,12 @@ def test_conformance_runs_the_existing_read_only_gates():
     for command in (
         "python3 wordpress/scripts/build-divi-design-system.py --check",
         "python3 wordpress/scripts/check-divi-design-system.py",
+        "python3 wordpress/scripts/build-native-modules.py --components events_feed schnuppertage --check",
         "php wordpress/scripts/check-hardcoded-content.php",
         "php wordpress/scripts/check-seed-plan.php",
         "diff -ru wordpress/content-seed cms/content-seed",
     ):
         assert command in commands
-    # Generators without a --check mode are already executed by the full suite.
-    assert "build-native-modules.py" not in commands
     upload = next(step for step in job["steps"] if step.get("uses", "").startswith("actions/upload-artifact@"))
     assert upload["if"] == "${{ failure() }}"
 

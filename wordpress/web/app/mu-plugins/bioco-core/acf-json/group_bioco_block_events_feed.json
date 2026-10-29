@@ -49,6 +49,14 @@
             "placeholder": ""
         },
         {
+            "key": "field_bioco_events_feed_include_schnuppertage",
+            "name": "include_schnuppertage",
+            "label": "Schnuppertage in dieser Liste zeigen",
+            "type": "true_false",
+            "default_value": 0,
+            "ui": 1
+        },
+        {
             "key": "field_bioco_events_feed_archive_url",
             "label": "Archiv-Link",
             "name": "archive_url",

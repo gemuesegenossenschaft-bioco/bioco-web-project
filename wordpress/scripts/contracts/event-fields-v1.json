@@ -1,0 +1,134 @@
+{
+  "version": 1,
+  "sourceCommit": "4988ecc02b5959f258d25aef9ed332e7e46d5208",
+  "purpose": "Frozen saved-value compatibility only. Never generated; ACF defines current fields. Preserve this version when evolving the contract.",
+  "components": {
+    "events_feed": {
+      "variant": {
+        "type": "text",
+        "label": "Variante",
+        "choices": {
+          "standard": "Standard",
+          "banner": "Banner"
+        }
+      },
+      "limit": {
+        "type": "number",
+        "label": "Maximale Anzahl"
+      },
+      "include_schnuppertage": {
+        "type": "toggle",
+        "label": "Schnuppertage in dieser Liste zeigen"
+      },
+      "archive_url": {
+        "type": "text",
+        "label": "Archiv-Link"
+      },
+      "title": {
+        "type": "text",
+        "label": "Banner-Titel"
+      },
+      "banner_link_label": {
+        "type": "text",
+        "label": "Banner-Linktext"
+      },
+      "standard_title": {
+        "type": "text",
+        "label": "Titel der Standardansicht"
+      },
+      "standard_link_label": {
+        "type": "text",
+        "label": "Linktext der Standardansicht"
+      },
+      "past_title": {
+        "type": "text",
+        "label": "Rückblick-Titel"
+      },
+      "past_description": {
+        "type": "text",
+        "label": "Rückblick-Beschreibung"
+      },
+      "past_link_label": {
+        "type": "text",
+        "label": "Rückblick-Linktext"
+      },
+      "empty_message": {
+        "type": "text",
+        "label": "Hinweis ohne Veranstaltungen"
+      },
+      "schnuppertage_title": {
+        "type": "text",
+        "label": "Überschrift Schnuppertage"
+      },
+      "schnuppertage_empty_message": {
+        "type": "text",
+        "label": "Leere Schnuppertag-Liste"
+      }
+    },
+    "schnuppertage": {
+      "title": {
+        "type": "text",
+        "label": "Titel"
+      },
+      "text": {
+        "type": "richtext",
+        "label": "Text"
+      },
+      "list_label": {
+        "type": "text",
+        "label": "Listen-Label"
+      },
+      "items": {
+        "type": "rows",
+        "label": "Punkte",
+        "row": {
+          "text": {
+            "type": "text",
+            "label": "Text",
+            "required": true
+          }
+        }
+      },
+      "closing": {
+        "type": "richtext",
+        "label": "Schlusstext"
+      },
+      "signup_anchor": {
+        "type": "text",
+        "label": "Anmelde-Anker"
+      },
+      "limit": {
+        "type": "number",
+        "label": "Maximale Anzahl Termine"
+      },
+      "event_type": {
+        "type": "text",
+        "label": "Anlasstyp",
+        "choices": {
+          "general": "Allgemeine Anlässe",
+          "schnuppertag": "Schnuppertage"
+        }
+      },
+      "schedule_title": {
+        "type": "text",
+        "label": "Titel über den Terminen"
+      },
+      "signup_label": {
+        "type": "text",
+        "label": "Text des Anmeldebuttons"
+      },
+      "empty_message": {
+        "type": "text",
+        "label": "Hinweis ohne Termine"
+      },
+      "display": {
+        "type": "text",
+        "label": "Darstellung",
+        "choices": {
+          "list": "Liste",
+          "cards": "Karten"
+        }
+      }
+    }
+  }
+}

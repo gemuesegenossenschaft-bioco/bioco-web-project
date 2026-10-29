@@ -28,6 +28,18 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 
 ## How to run
 
+The #229 event-field checks regenerate only `events_feed` and `schnuppertage`,
+reject incompatible contracts against frozen v1 history even when derived files
+are synchronized, and round-trip saved values through
+the composer, WordPress parser and actual public PHP queries.
+The query boundary models WordPress ID normalization and zero-page-size fallback
+with event ID `1` present. Zero-limit regressions reject a negative sentinel and
+a missing empty-list guard. The real template must render every repeated text
+item, including the saved string `0`. The CI conformance
+gate also runs `build-native-modules.py --components events_feed schnuppertage
+--check`. This check is read-only. Installed Divi save/reopen evidence remains
+separate from repository tests; see `wordpress/adr/0010-event-field-contract.md`.
+
 Event template slice (#202): keep the generated fallback checks until migration;
 add `test_wordpress_event_templates.py` for record context, image/date/body
 behavior and real WordPress block round trips. Extend draft isolation checks to

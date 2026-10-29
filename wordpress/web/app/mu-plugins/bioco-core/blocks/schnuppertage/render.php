@@ -24,7 +24,8 @@ $list_label = bioco_field('list_label');
 $items = bioco_field('items');
 $closing = bioco_field('closing');
 $signup_anchor = bioco_field('signup_anchor');
-$limit = (int) (bioco_field('limit') ?: 3);
+$saved_limit = bioco_field('limit');
+$limit = is_numeric($saved_limit) ? (int) $saved_limit : 3;
 $schedule_title = bioco_field('schedule_title');
 $signup_label = bioco_field('signup_label');
 $empty_message = bioco_field('empty_message');
@@ -63,7 +64,7 @@ $termine_query = bioco_query_events('upcoming', $limit, $event_type);
                 <ul class="cms-schnuppertage-items">
                     <?php foreach ($items as $item) :
                         $item_text = $item['text'] ?? '';
-                        if (!$item_text) continue;
+                        if ((string) $item_text === '') continue;
                     ?>
                         <li><?php echo esc_html($item_text); ?></li>
                     <?php endforeach; ?>

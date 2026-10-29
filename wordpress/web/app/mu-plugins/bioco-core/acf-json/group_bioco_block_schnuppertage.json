@@ -149,6 +149,18 @@
             "placeholder": ""
         },
         {
+            "key": "field_bioco_schnuppertage_event_type",
+            "name": "event_type",
+            "label": "Anlasstyp",
+            "type": "select",
+            "choices": {
+                "general": "Allgemeine Anlässe",
+                "schnuppertag": "Schnuppertage"
+            },
+            "default_value": "schnuppertag",
+            "return_format": "value"
+        },
+        {
             "key": "field_bioco_schnuppertage_schedule_title",
             "label": "Titel über den Terminen",
             "name": "schedule_title",

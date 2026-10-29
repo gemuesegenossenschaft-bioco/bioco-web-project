@@ -17,7 +17,8 @@
 if (!defined('ABSPATH')) exit;
 
 $variant = bioco_field('variant') ?: 'standard';
-$limit = (int) (bioco_field('limit') ?: 3);
+$saved_limit = bioco_field('limit');
+$limit = is_numeric($saved_limit) ? (int) $saved_limit : 3;
 $banner_title = bioco_field('title');
 $banner_link_label = bioco_field('banner_link_label');
 $standard_title = bioco_field('standard_title');
