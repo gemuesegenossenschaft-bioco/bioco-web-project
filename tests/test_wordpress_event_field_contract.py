@@ -125,7 +125,9 @@ class WP_Query {
             $included = array_map(static fn($id) => abs((int) $id), $args['post__in']);
             $ids = array_values(array_intersect($ids, $included));
         }
-        $GLOBALS['selected_event_ids'][] = array_slice($ids, 0, $args['posts_per_page']);
+        // WordPress replaces a zero page size with its configured default.
+        $page_size = $args['posts_per_page'] ?: 10;
+        $GLOBALS['selected_event_ids'][] = array_slice($ids, 0, $page_size);
     }
     public function have_posts() { return false; }
 }
@@ -190,10 +192,12 @@ def test_saved_event_type_controls_the_public_query(event_type):
 
 
 def test_repeated_items_and_explicit_empty_values_survive_the_saved_round_trip():
-    values = {'title': '0', 'text': '', 'items': [{'text': 'A'}, {'text': 'A'}, {'text': '0'}],
+    values = {'title': '0', 'text': '', 'items': [{'text': 'A'}, {'text': 'A'}, {'text': '0'}, {'text': ''}],
               'closing': '', 'empty_message': ''}
     result = saved_render('schnuppertage', values)
     assert result['values'] == values and result['stable']
+    assert result['html'].count('<li>') == 3
+    assert '<li>0</li>' in result['html']
 
 
 def test_unknown_saved_choice_is_reported_and_cannot_query_all_events():

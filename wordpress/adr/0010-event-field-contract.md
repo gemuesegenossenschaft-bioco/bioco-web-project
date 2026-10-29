@@ -89,7 +89,11 @@ in isolation; production adoption remains part of the separate code release.
 
 CodeRabbit caught the negative-ID normalization edge case after the first
 review. A regression fixture now includes valid event ID `1` and applies
-WordPress ID normalization before selection. Both zero-limit cases failed
+WordPress ID normalization and zero-page-size fallback before selection. Both zero-limit cases failed
 with `[-1]` and pass with `[0]`. An installed WordPress `WP_Query` SQL check
 confirmed `[-1]` becomes `ID IN (1)`, while the corrected public helper
 produces `ID IN (0)`. No event or content records were written for that check.
+
+The repeated-item check also renders the real template: duplicate text rows
+and the saved string `0` must each produce a list item. Only empty text is
+omitted; PHP truthiness must not discard the string `0`.

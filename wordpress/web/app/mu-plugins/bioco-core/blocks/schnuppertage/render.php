@@ -64,7 +64,7 @@ $termine_query = bioco_query_events('upcoming', $limit, $event_type);
                 <ul class="cms-schnuppertage-items">
                     <?php foreach ($items as $item) :
                         $item_text = $item['text'] ?? '';
-                        if (!$item_text) continue;
+                        if ((string) $item_text === '') continue;
                     ?>
                         <li><?php echo esc_html($item_text); ?></li>
                     <?php endforeach; ?>
