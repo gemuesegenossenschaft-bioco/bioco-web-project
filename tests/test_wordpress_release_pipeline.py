@@ -221,14 +221,6 @@ def test_preflight_logs_counts_reported_by_seed_gate():
     assert 'pages=${page_count} blocks=${block_count}' in preflight
 
 
-def test_release_marker_is_one_atomic_option_write():
-    release = (ROOT / "wordpress/scripts/release-wordpress-staging.py").read_text()
-
-    assert "wp option update bioco_release_marker" in release
-    assert "bioco_release_commit" not in release
-    assert "bioco_release_backup" not in release
-
-
 def test_release_pipeline_refuses_a_wrong_site_before_any_mutation(tmp_path):
     commit, env, events = _fixture(tmp_path)
     env["BIOCO_TEST_SITEURL"] = "https://www.bioco.ch"

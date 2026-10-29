@@ -111,7 +111,7 @@ wordpress/scripts/release-wordpress-staging.sh --commit="$commit" --expected-bas
 - [ ] Ausgabe vollständig lesen
 - [ ] Prüfen, dass das Script WordPress erkennt
 - [ ] Privaten JSON-Beleg unter `output/releases/` prüfen: bisheriger Marker, installierte Code-Hashes und WordPress-/Divi-/Plugin-Versionen
-- [ ] Kandidat und bisheriger Stand müssen übereinstimmen; unbekannte oder teilweise installierte Änderungen zuerst getrennt klären
+- [ ] Installierter Stand und bisheriger Marker müssen der akzeptierten Baseline entsprechen. Den Kandidaten separat gegen den aktuellen Remote-Stand von `wordpress` und das verifizierte Paket prüfen. Unbekannte oder teilweise installierte Änderungen zuerst getrennt klären
 
 Ohne Paket-Run-ID laufen die vollständigen lokalen Prüfungen aus #280. Für ein bereits erfolgreiches CI-Paket bei beiden Aufrufen zusätzlich `--package-run-id=<RUN-ID>` angeben. Das Script prüft Herkunft, aktuellen Run-Versuch, SHA und Paketbytes. Ein selbst erstellter Erfolgsbeleg ersetzt diese Prüfung nicht.
 
