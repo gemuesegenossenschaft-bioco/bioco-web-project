@@ -100,7 +100,7 @@
             "attrName": "include_schnuppertage.innerContent",
             "label": "Schnuppertage in dieser Liste zeigen",
             "category": "basic_option",
-            "priority": 25,
+            "priority": 30,
             "render": true,
             "features": {
               "responsive": false,
@@ -127,7 +127,7 @@
             "attrName": "archive_url.innerContent",
             "label": "Archiv-Link",
             "category": "basic_option",
-            "priority": 30,
+            "priority": 40,
             "render": true,
             "features": {
               "responsive": false,
@@ -154,7 +154,7 @@
             "attrName": "title.innerContent",
             "label": "Banner-Titel",
             "category": "basic_option",
-            "priority": 40,
+            "priority": 50,
             "render": true,
             "features": {
               "responsive": false,
@@ -181,7 +181,7 @@
             "attrName": "banner_link_label.innerContent",
             "label": "Banner-Linktext",
             "category": "basic_option",
-            "priority": 50,
+            "priority": 60,
             "render": true,
             "features": {
               "responsive": false,
@@ -208,7 +208,7 @@
             "attrName": "standard_title.innerContent",
             "label": "Titel der Standardansicht",
             "category": "basic_option",
-            "priority": 60,
+            "priority": 70,
             "render": true,
             "features": {
               "responsive": false,
@@ -235,7 +235,7 @@
             "attrName": "standard_link_label.innerContent",
             "label": "Linktext der Standardansicht",
             "category": "basic_option",
-            "priority": 70,
+            "priority": 80,
             "render": true,
             "features": {
               "responsive": false,
@@ -262,7 +262,7 @@
             "attrName": "past_title.innerContent",
             "label": "Rückblick-Titel",
             "category": "basic_option",
-            "priority": 80,
+            "priority": 90,
             "render": true,
             "features": {
               "responsive": false,
@@ -289,7 +289,7 @@
             "attrName": "past_description.innerContent",
             "label": "Rückblick-Beschreibung",
             "category": "basic_option",
-            "priority": 90,
+            "priority": 100,
             "render": true,
             "features": {
               "responsive": false,
@@ -316,7 +316,7 @@
             "attrName": "past_link_label.innerContent",
             "label": "Rückblick-Linktext",
             "category": "basic_option",
-            "priority": 100,
+            "priority": 110,
             "render": true,
             "features": {
               "responsive": false,
@@ -343,7 +343,7 @@
             "attrName": "empty_message.innerContent",
             "label": "Hinweis ohne Veranstaltungen",
             "category": "basic_option",
-            "priority": 110,
+            "priority": 120,
             "render": true,
             "features": {
               "responsive": false,
@@ -370,7 +370,7 @@
             "attrName": "schnuppertage_title.innerContent",
             "label": "Überschrift Schnuppertage",
             "category": "basic_option",
-            "priority": 120,
+            "priority": 130,
             "render": true,
             "features": {
               "responsive": false,
@@ -397,7 +397,7 @@
             "attrName": "schnuppertage_empty_message.innerContent",
             "label": "Leere Schnuppertag-Liste",
             "category": "basic_option",
-            "priority": 130,
+            "priority": 140,
             "render": true,
             "features": {
               "responsive": false,

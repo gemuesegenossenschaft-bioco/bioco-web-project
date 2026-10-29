@@ -237,7 +237,7 @@
             "attrName": "event_type.innerContent",
             "label": "Anlasstyp",
             "category": "basic_option",
-            "priority": 15,
+            "priority": 80,
             "render": true,
             "features": {
               "responsive": false,
@@ -245,10 +245,10 @@
               "sticky": false,
               "preset": "content"
             },
-        "component": {
-          "name": "bioco/schnuppertage-event_type",
-          "type": "field"
-        }
+            "component": {
+              "name": "bioco/schnuppertage-event_type",
+              "type": "field"
+            }
           }
         }
       }
@@ -264,7 +264,7 @@
             "attrName": "schedule_title.innerContent",
             "label": "Titel über den Terminen",
             "category": "basic_option",
-            "priority": 80,
+            "priority": 90,
             "render": true,
             "features": {
               "responsive": false,
@@ -291,7 +291,7 @@
             "attrName": "signup_label.innerContent",
             "label": "Text des Anmeldebuttons",
             "category": "basic_option",
-            "priority": 90,
+            "priority": 100,
             "render": true,
             "features": {
               "responsive": false,
@@ -318,7 +318,7 @@
             "attrName": "empty_message.innerContent",
             "label": "Hinweis ohne Termine",
             "category": "basic_option",
-            "priority": 100,
+            "priority": 110,
             "render": true,
             "features": {
               "responsive": false,
@@ -345,7 +345,7 @@
             "attrName": "display.innerContent",
             "label": "Darstellung",
             "category": "basic_option",
-            "priority": 110,
+            "priority": 120,
             "render": true,
             "features": {
               "responsive": false,

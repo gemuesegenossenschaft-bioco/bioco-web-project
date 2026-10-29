@@ -141,6 +141,7 @@ jobs:
           {
             python3 wordpress/scripts/build-divi-design-system.py --check
             python3 wordpress/scripts/check-divi-design-system.py
+            python3 wordpress/scripts/build-native-modules.py --components events_feed schnuppertage --check
             php wordpress/scripts/check-hardcoded-content.php
             php wordpress/scripts/check-seed-plan.php
             diff -ru wordpress/content-seed cms/content-seed

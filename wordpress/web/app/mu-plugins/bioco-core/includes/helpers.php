@@ -169,7 +169,7 @@ function bioco_event_query_args($status, $limit, $event_type = null): array {
         $meta_query[] = ['key' => 'event_type', 'value' => $event_type, 'compare' => '='];
     }
 
-    return [
+    $args = [
         'post_type' => 'event',
         'post_status' => 'publish',
         'posts_per_page' => (int) $limit,
@@ -178,6 +178,13 @@ function bioco_event_query_args($status, $limit, $event_type = null): array {
         'order' => $status === 'past' ? 'DESC' : 'ASC',
         'meta_query' => $meta_query,
     ];
+    // WP_Query rewrites a zero page size to its default. A saved zero is an
+    // explicit empty list, as in native event loops, rather than an omission.
+    if ((int) $limit === 0) {
+        $args['posts_per_page'] = 1;
+        $args['post__in'] = [-1];
+    }
+    return $args;
 }
 
 function bioco_query_events($status, $limit, $event_type = null) {
