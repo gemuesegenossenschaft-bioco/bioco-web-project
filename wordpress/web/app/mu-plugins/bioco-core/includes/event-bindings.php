@@ -76,7 +76,9 @@ function bioco_event_binding_value($value, array $context) {
     $previous = $GLOBALS['post'] ?? null;
     try {
         $GLOBALS['post'] = $record;
-        return wp_kses_post((string) apply_filters('the_content', $record->post_content));
+        // Sanitize authored content before blocks/shortcodes render. Their trusted
+        // output includes form controls and scripts that post KSES would remove.
+        return (string) apply_filters('the_content', wp_kses_post($record->post_content));
     } finally {
         if ($had_post) $GLOBALS['post'] = $previous;
         else unset($GLOBALS['post']);

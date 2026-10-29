@@ -35,14 +35,17 @@ function esc_html($value) { return htmlspecialchars($value,ENT_QUOTES,'UTF-8'); 
 function esc_attr($value) { return esc_html($value); }
 function esc_url_raw($value) { return str_starts_with($value,'https://') ? $value : ''; }
 function wp_strip_all_tags($value) { return strip_tags($value); }
-function wp_kses_post($value) { return preg_replace('~<script>.*?</script>~s','',$value); }
+function wp_kses_post($value) {
+    $value = preg_replace('~<script>.*?</script>~s','',$value);
+    return preg_replace('~</?(?:form|input)\b[^>]*>~i','',$value);
+}
 function apply_filters($name,$value) {
     $GLOBALS['content_ids'][]=$GLOBALS['post']->ID;
     if ($GLOBALS['state']['throw'] ?? false) throw new RuntimeException('Filter failed');
     if ($GLOBALS['state']['recursive'] ?? false) {
         $GLOBALS['recursive_result']=bioco_event_binding_value('', $GLOBALS['state']['context']);
     }
-    return '<div class="filtered">'.$value.'</div>';
+    return '<div class="filtered">'.str_replace('[signup]', $GLOBALS['state']['signup_html'] ?? '', $value).'</div>';
 }
 function wp_json_encode($value,$flags=0) { return json_encode($value,$flags); }
 function home_url($path) { return 'https://example.test'.$path; }
@@ -118,6 +121,19 @@ def test_protected_or_unreadable_records_cannot_leak_description():
     assert run(records=draft, allowed=[1])['value'] == '28.03.2027 14:00 Uhr'
     assert run(records={'1':record() | {'type':'page'}})['value'] == ''
     assert run(context={'name':'unrelated'}, original={'keep':True})['value'] == {'keep':True}
+
+
+def test_event_body_preserves_generated_form_controls_and_script_but_sanitizes_saved_html():
+    form = ('<form data-form="visit-day"><input name="name" required>'
+            '<input name="participants" type="number"><button>Anmelden</button></form>'
+            '<script>window.signupConfig={"id":3};</script>')
+    result = run('description', records={'1': record(body='<p>Join us</p>[signup]<script>bad()</script>')},
+                 signup_html=form)
+    assert result['value'] == '<div class="filtered"><p>Join us</p>' + form + '</div>'
+    assert result['content_ids'] == [1] and result['post'] == 999
+    # Authored HTML still follows the post-content allowlist before rendering.
+    saved = run('description', records={'1': record(body='<p>Safe</p><input name="raw"><script>bad()</script>')})
+    assert saved['value'] == '<div class="filtered"><p>Safe</p></div>'
 
 
 @pytest.mark.parametrize('field', ['image','image_alt'])
