@@ -92,6 +92,7 @@ if mode == 'wp':
             raise SystemExit(1)
         (host / 'marker.json').write_text(args[3])
         event('marker-under-lease')
+        print("Success: Updated 'bioco_release_marker' option.")
     elif args[:2] == ['core', 'version']:
         print('6.8.3')
     elif args[:3] == ['theme', 'get', 'Divi']:

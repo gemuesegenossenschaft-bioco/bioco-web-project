@@ -164,6 +164,20 @@ stage.persist_receipt()
     assert durable.stat().st_mode & 0o077 == 0
 
 
+def test_lease_commands_cannot_read_or_pollute_the_control_stream(tmp_path):
+    repo, _, _, env = fixture(tmp_path)
+    script = """
+import runpy
+staging_lease = runpy.run_path('wordpress/scripts/wordpress_staging_lease.py')['staging_lease']
+with staging_lease(['ssh']) as lease:
+    lease.publish("printf 'command output'")
+    lease.publish('test -z "$(cat)"')
+"""
+    result = subprocess.run([sys.executable, '-c', script], cwd=repo, env=env,
+                            text=True, capture_output=True, timeout=20)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
 @pytest.mark.parametrize('scenario', ['TEST_PARTIAL_SYNC', 'TEST_LOSE_LEASE', 'TEST_FAIL_RUNTIME',
                                      'TEST_EDIT_DURING_RUNTIME', 'TEST_TAMPER_AFTER_RUNTIME',
                                      'TEST_FAIL_MARKER', 'TEST_CHANGE_BASELINE'])

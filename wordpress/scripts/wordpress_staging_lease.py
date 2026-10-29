@@ -14,7 +14,7 @@ class ServerLease:
         # command therefore cannot outlive the lock protecting that command.
         protocol = ("printf 'READY\\n'; "
                     'while IFS= read -r command; do '
-                    'sh -c "$command"; result=$?; '
+                    'sh -c "$command" </dev/null >&2; result=$?; '
                     "printf 'DONE %s\\n' \"$result\"; done")
         command = 'flock -n /tmp/bioco-wordpress-staging.lock sh -c ' + shlex.quote(protocol)
         self.errors = tempfile.TemporaryFile(mode='w+')
