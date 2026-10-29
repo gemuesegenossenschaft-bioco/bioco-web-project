@@ -70,7 +70,7 @@ actual restoration receipts for any later content adoption.
 | `BIOCO_FORMS_BROWSER_TESTS=1 python3 -m pytest tests/test_wordpress_forms_lifecycle.py -q` | Playwright Chromium, local WP runtime at 127.0.0.1:8770 for the runtime proofs | six-form lifecycle in a real browser; opted in, a missing stack fails |
 | `BIOCO_BUTTON_BROWSER_TESTS=1 python3 -m pytest tests/test_wordpress_button_readability.py -q` | Playwright Chromium | button readability/contrast in Chromium |
 | `bash tests/wordpress-staging-render-gate.sh` | network access to staging | all 22 routes return 200 |
-| `bash wordpress/scripts/release-wordpress-staging.sh --commit=<full-40-char-sha>` (dry run default) | repo + CI env | release pipeline preflight |
+| `bash wordpress/scripts/release-wordpress-staging.sh --commit=<full-40-char-sha> --expected-baseline=<accepted-staging-sha>` (dry run default) | clean integration checkout + staging env | package, baseline and target verification |
 
 The suite shells out to real runtimes: **PHP** (`php -r`, one process per scenario) renders real
 templates with only WordPress runtime functions stubbed; **Node** (`tests/js/navigation-scroll-harness.mjs`)
@@ -264,6 +264,7 @@ suite is not refactor-proof everywhere; source-coupled checks are the documented
 
 | File | Keep/Replace/Remove | Evidence |
 | --- | --- | --- |
+| `test_wordpress_staging_lease.py` | Keep, required (#281) | Canonical package staging against real isolated files and fake SSH/rsync/WP boundaries: baseline and integration guards, shared lease, lost-holder cancellation, durable large receipts through stdin, exact installed bytes, editorial preservation and atomic marker publication. Live host behavior remains a release check. |
 | `test_wordpress_home_presentation_preview.py` | Keep, required (#214, #220) | Missing-only native homepage controls cover hero, feature, CTA, live and home event wrappers. Query branches stay exact; unknown variants refuse. The live shape hook has a Chromium cascade check. Installed styles and GUI save/reopen remain separate. |
 | `test_wordpress_editorial_cards_preview.py` | Keep, required (#214) | Pure cards/gallery conversion preserves saved content, responsive values, preset conflicts and empty gallery actions columns. Installed styles and GUI persistence remain separate. |
 | `test_wordpress_editorial_cta_preview.py` | Keep, required (#214) | Real pure CTA/topic conversion preserves exact content and refuses unmeasured class sets and presets. Native save/reopen remains separate. |
