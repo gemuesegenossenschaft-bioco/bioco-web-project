@@ -65,7 +65,8 @@ def fixture(tmp_path):
         path.chmod(0o755)
     for name, event in [('render', 'smoke'), ('web-opcache', 'web-opcache')]:
         path = bins / name
-        path.write_text('#!/bin/sh\nprintf "%s\\n" ' + event + ' >> "$BIOCO_TEST_HOST/events"\n')
+        path.write_text('#!/bin/sh\nprintf "%s\\n" ' + event + ' >> "$BIOCO_TEST_HOST/events"\n'
+                        + ('printf "%s\\n" "$BIOCO_RELEASE_RENDER_URL" "$BIOCO_RELEASE_RENDER_RESOLVE" >> "$BIOCO_TEST_HOST/render-env"\n' if name == 'render' else ''))
         path.chmod(0o755)
     env.update(PATH=str(bins) + os.pathsep + env['PATH'], BIOCO_TEST_HOST=str(host),
                BIOCO_WP_CONTENT=str(content), BIOCO_RELEASE_BACKUP_DIR=str(host / 'backups'),
@@ -128,6 +129,9 @@ def test_apply_installs_package_and_publishes_verified_receipt(tmp_path):
     receipt = json.loads(next((repo / 'output/releases').glob('*.json')).read_text())
     assert receipt['status'] == 'success'
     assert receipt['installed_manifest']
+    durable = Path(receipt['remote_receipt'])
+    assert json.loads(durable.read_text())['status'] == 'success'
+    assert durable.stat().st_mode & 0o077 == 0
     assert next((host / 'backups').glob('*.sql')).stat().st_mode & 0o077 == 0
     assert all(file.stat().st_mode & 0o077 == 0 for file in (repo / 'output/releases').iterdir())
 
@@ -148,6 +152,10 @@ def test_failed_release_keeps_success_marker_and_records_installed_state(tmp_pat
     assert receipt['status'] == 'failed'
     assert receipt['installed_manifest']
     assert receipt['error']
+    if scenario != 'TEST_CHANGE_BASELINE':
+        durable = json.loads(Path(receipt['remote_receipt']).read_text())
+        assert durable['status'] == 'failed'
+        assert durable['installed_manifest'] == receipt['installed_manifest']
     if scenario == 'TEST_CHANGE_BASELINE':
         assert 'changed while acquiring' in receipt['error']
         assert not (host / 'events').exists()
@@ -257,3 +265,17 @@ def test_stale_or_divergent_release_stops_before_validation_or_install(tmp_path,
     assert result.returncode != 0
     assert not Path(env['TEST_GATE_CALLS']).exists()
     assert not (host / 'events').exists()
+
+
+@pytest.mark.parametrize('repeat', [False, True])
+def test_smoke_target_cannot_inherit_production_origin_or_resolve(tmp_path, repeat):
+    repo, baseline, candidate, env = fixture(tmp_path)
+    if repeat:
+        result = command(repo, baseline, candidate, env, '--apply')
+        assert result.returncode == 0, result.stdout + result.stderr
+    env.update(BIOCO_RELEASE_RENDER_URL='https://bioco.ch',
+               BIOCO_RELEASE_RENDER_RESOLVE='bioco.ch:443:192.0.2.1',
+               BIOCO_STAGING_URL='https://other.example.test')
+    result = command(repo, baseline, candidate, env, '--apply')
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert (Path(env['BIOCO_TEST_HOST']) / 'render-env').read_text().splitlines()[-2:] == ['https://staging.bioco.ch', '']

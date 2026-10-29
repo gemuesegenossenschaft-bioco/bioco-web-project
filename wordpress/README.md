@@ -75,8 +75,9 @@ WordPress core, uploads, regular plugins, Divi, and admin accounts remain server
 Omit it locally to run full validation and build a fresh private package. Dry run creates only
 local evidence. CI requires the staging environment variable `STAGING_ACCEPTED_BASELINE`, or
 the explicit baseline input on manual dispatch, and waits for the package for its exact SHA.
-Private logs and JSON receipts are retained under `output/releases/`; keep them out of public
-artifacts. Failed partial installations retain the previous success marker and require reviewed
+Private logs and JSON receipts are retained under `output/releases/`. Apply also retains unique
+attempt receipts under the private server backup directory, including partial-install evidence.
+CI excludes JSON from public artifacts. Failed installations retain the previous success marker and require reviewed
 recovery. See [ADR 0009](adr/0009-staging-package-lease.md).
 
 A normal release is **code-only**: it never writes content. Editorial pages, events, groups and Divi

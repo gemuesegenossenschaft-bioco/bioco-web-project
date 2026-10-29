@@ -53,8 +53,12 @@ class Staging:
         self.root = self.content.removesuffix('/wp-content')
         self.ssh = [os.environ.get('BIOCO_RELEASE_SSH_BIN', 'ssh'), '-p', port,
                     '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=10', user + '@' + host]
-        self.env = os.environ | {'BIOCO_RELEASE_REPO_ROOT': str(ROOT), 'BIOCO_RELEASE_URL': SITE}
+        resolve = os.environ.get('BIOCO_RELEASE_RESOLVE', '')
+        self.env = os.environ | {'BIOCO_RELEASE_REPO_ROOT': str(ROOT), 'BIOCO_RELEASE_URL': SITE,
+                                 'BIOCO_RELEASE_RENDER_URL': SITE, 'BIOCO_STAGING_URL': SITE,
+                                 'BIOCO_RELEASE_RENDER_RESOLVE': resolve, 'BIOCO_STAGING_RESOLVE': resolve}
         self.lease = None
+        self.receipt_path = None
         self.evidence = {'commit': args.commit, 'previous': args.expected_baseline,
                          'site': SITE, 'status': 'failed', 'mode': 'apply' if args.apply else 'dry-run'}
 
@@ -110,6 +114,16 @@ class Staging:
         print(run_guarded(argv, env=self.env, cwd=ROOT, lease=self.lease), end='', flush=True)
         self.evidence.setdefault('gates', {})[name] = 'passed'
 
+    def persist_receipt(self):
+        """Each attempt owns one private path, independent of the success marker."""
+        if self.receipt_path is None:
+            return
+        path = self.receipt_path
+        temporary = path + '.tmp-' + uuid.uuid4().hex
+        self.remote('umask 077; mkdir -p ' + shlex.quote(str(Path(path).parent))
+                    + "; printf '%s\\n' " + shlex.quote(json.dumps(self.evidence, separators=(',', ':')))
+                    + ' > ' + shlex.quote(temporary) + '; mv ' + shlex.quote(temporary) + ' ' + shlex.quote(path))
+
     def execute(self, temporary):
         package = package_module()
         package.clean_candidate(self.args.commit)
@@ -121,6 +135,7 @@ class Staging:
         self.evidence['previous_marker'] = previous
         baseline = installed_paths(package.file_manifest(owned_files(self.args.expected_baseline)))
         candidate = installed_paths(package.file_manifest(owned_files(self.args.commit)))
+        self.evidence['candidate_manifest'] = candidate
         observed = self.manifest()
         repeat = previous.get('commit') == self.args.commit
         if (previous.get('commit') != self.args.expected_baseline and not repeat
@@ -179,6 +194,9 @@ class Staging:
                 raise ValueError('Staging baseline changed while acquiring the server lease.')
             if self.compatibility() != self.evidence['compatibility']:
                 raise ValueError('Staging compatibility changed while acquiring the server lease.')
+            self.receipt_path = backup.rstrip('/') + '/receipts/' + self.evidence['attempt_id'] + '.json'
+            self.evidence.update(remote_receipt=self.receipt_path, status='running', installed_manifest=observed)
+            self.persist_receipt()
             before = self.fingerprint()
             if repeat:
                 self.wp('bioco verify --runtime')
@@ -202,6 +220,7 @@ class Staging:
                           'package_sha256', 'validation_identity', 'validation', 'compatibility',
                           'editorial_fingerprint', 'manifest', 'verify', 'smoke')}
                 marker['backup'] = backup.rstrip('/') + '/' + self.evidence['timestamp'] + '-' + self.args.commit + '.sql'
+                marker['receipt'] = self.receipt_path
                 self.evidence['step'] = 'release-marker'
                 command = 'set -eu; cd ' + shlex.quote(self.root) + '; wp option update bioco_release_marker ' \
                     + shlex.quote(json.dumps(marker, separators=(',', ':'))) + ' --format=json >/dev/null'
@@ -209,6 +228,7 @@ class Staging:
                 if self.marker() != marker:
                     raise ValueError('Published staging marker was not retained.')
             self.evidence['status'] = 'success'
+            self.persist_receipt()
             print(('release-already-staged' if repeat else 'release-complete') + ' commit=' + self.args.commit)
 
 
@@ -244,6 +264,7 @@ def main():
     log_dir.mkdir(parents=True, exist_ok=True)
     log_dir.chmod(0o700)
     name = stamp + '-' + args.commit + '-' + uuid.uuid4().hex[:8]
+    stage.evidence['attempt_id'] = name
     log_path = log_dir / (name + '.log')
     with log_path.open('x') as log:
         log_path.chmod(0o600)
@@ -253,6 +274,7 @@ def main():
                     stage.execute(Path(temporary))
                 print('release-status=' + stage.evidence['status'])
             except Exception as error:
+                stage.evidence['status'] = 'failed'
                 stage.evidence['error'] = str(error)
                 # Observe partial installation without trying to repair or
                 # replacing the last successful marker. Recovery is #284.
@@ -261,6 +283,10 @@ def main():
                     stage.evidence['installed_manifest'] = stage.manifest()
                 except Exception as probe_error:
                     stage.evidence['installed_manifest_error'] = str(probe_error)
+                try:
+                    stage.persist_receipt()
+                except Exception as receipt_error:
+                    stage.evidence['remote_receipt_error'] = str(receipt_error)
                 print('release-status=failed step=' + stage.evidence.get('step', 'initialization'))
                 raise
             finally:
