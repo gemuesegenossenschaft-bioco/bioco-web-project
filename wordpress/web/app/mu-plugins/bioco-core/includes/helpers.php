@@ -180,9 +180,10 @@ function bioco_event_query_args($status, $limit, $event_type = null): array {
     ];
     // WP_Query rewrites a zero page size to its default. A saved zero is an
     // explicit empty list, as in native event loops, rather than an omission.
+    // Use zero: WP_Query applies absint to IDs, turning -1 into valid ID 1.
     if ((int) $limit === 0) {
         $args['posts_per_page'] = 1;
-        $args['post__in'] = [-1];
+        $args['post__in'] = [0];
     }
     return $args;
 }

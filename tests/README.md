@@ -30,7 +30,9 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 
 The #229 event-field checks regenerate only `events_feed` and `schnuppertage`,
 reject incompatible contracts before writes, and round-trip saved values through
-the composer, WordPress parser and actual public PHP queries. The CI conformance
+the composer, WordPress parser and actual public PHP queries.
+The query boundary models WordPress ID normalization with event ID `1` present,
+so a negative empty-list sentinel fails the zero-limit regression. The CI conformance
 gate also runs `build-native-modules.py --components events_feed schnuppertage
 --check`. This check is read-only. Installed Divi save/reopen evidence remains
 separate from repository tests; see `wordpress/adr/0010-event-field-contract.md`.

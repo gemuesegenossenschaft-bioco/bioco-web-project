@@ -117,7 +117,16 @@ function bioco_navigation_url($v) { return $v; }
 function wp_kses_allowed_html($context) { return []; }
 function wp_kses($html, $allowed) { return $html; }
 class WP_Query {
-    public function __construct($args) { $GLOBALS['queries'][] = $args; }
+    public function __construct($args) {
+        $GLOBALS['queries'][] = $args;
+        // WP_Query normalizes post__in with absint; ID 1 is a valid fixture event.
+        $ids = [1, 2];
+        if (isset($args['post__in'])) {
+            $included = array_map(static fn($id) => abs((int) $id), $args['post__in']);
+            $ids = array_values(array_intersect($ids, $included));
+        }
+        $GLOBALS['selected_event_ids'][] = array_slice($ids, 0, $args['posts_per_page']);
+    }
     public function have_posts() { return false; }
 }
 ''') + WP_SERIALIZER_STUB + r'''
@@ -130,7 +139,7 @@ $values = bioco_native_extract_values($component, $saved['attrs']);
 $valid = $values instanceof WP_Error ? $values : bioco_native_validate_values($component, $values);
 $html = $valid instanceof WP_Error ? '' : bioco_render_dynamic_component($component, $valid);
 echo json_encode(['values'=>$values,'error'=>$valid instanceof WP_Error ? $valid->get_error_code() : null,
-    'queries'=>$GLOBALS['queries'] ?? [],'html'=>$html,'attrs'=>$saved['attrs'],
+    'queries'=>$GLOBALS['queries'] ?? [],'selected_event_ids'=>$GLOBALS['selected_event_ids'] ?? [],'html'=>$html,'attrs'=>$saved['attrs'],
     'stable'=>serialize_blocks(parse_blocks($content)) === $content]);
 '''
 
@@ -152,7 +161,7 @@ def test_saved_limit_survives_import_parse_and_public_query(component, limit):
     assert result['values'] == {'limit': limit}
     query = result['queries'][0]
     if limit == 0:
-        assert query['post__in'] == [-1], 'WordPress treats posts_per_page=0 as a fallback.'
+        assert result['selected_event_ids'][0] == [], 'A zero limit must exclude valid event ID 1 after WordPress ID normalization.'
     else:
         assert query['posts_per_page'] == limit
 

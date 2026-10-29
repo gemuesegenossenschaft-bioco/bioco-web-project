@@ -35,7 +35,8 @@ the scoped event check. Other modules retain their current generation behavior.
   not rewrite existing posts. Public renderers retain their historical defaults.
 - Explicit `false`, zero, empty text and empty lists retain their meaning.
   A zero event limit yields no results; WordPress must not replace it with a
-  default page size. An omitted limit still uses three.
+  default page size. The empty-list query uses ID `0`, because WordPress
+  normalizes negative IDs with `absint`. An omitted limit still uses three.
 - Toggle values use the existing bool/`on`/`off` contract. Event types use the
   declared choices. An empty event type retains the historical Schnuppertag
   filter. A missing include toggle retains the general-only feed.
@@ -85,3 +86,10 @@ and synthetic events were then removed, with a zero-remaining-record check.
 Screenshots, snapshots and preservation/cleanup receipts are retained locally
 under `output/issue-229-event-fields/`. This proves the installed editor workflow
 in isolation; production adoption remains part of the separate code release.
+
+CodeRabbit caught the negative-ID normalization edge case after the first
+review. A regression fixture now includes valid event ID `1` and applies
+WordPress ID normalization before selection. Both zero-limit cases failed
+with `[-1]` and pass with `[0]`. An installed WordPress `WP_Query` SQL check
+confirmed `[-1]` becomes `ID IN (1)`, while the corrected public helper
+produces `ID IN (0)`. No event or content records were written for that check.
