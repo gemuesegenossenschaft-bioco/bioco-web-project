@@ -100,6 +100,8 @@ if mode == 'wp':
     elif args[:2] == ['plugin', 'list']:
         print(json.dumps([{'name': 'seo', 'status': 'active', 'version': '1.0'}]))
     elif args[:1] == ['eval']:
+        if os.environ.get('TEST_FINGERPRINT_STDERR'):
+            print('Unsuccessful stat on filename containing newline at ea_php_cli.pm line 87.', file=sys.stderr)
         print(hashlib.sha256((host / 'editorial').read_bytes()).hexdigest())
     elif args[:2] == ['db', 'export']:
         if os.environ.get('TEST_FAIL_BACKUP'):

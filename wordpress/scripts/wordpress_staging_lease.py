@@ -5,6 +5,7 @@ import selectors
 import shlex
 import signal
 import subprocess
+import sys
 import tempfile
 
 
@@ -73,14 +74,16 @@ def run_guarded(argv, *, env, cwd, lease=None, input_text=None):
     """Cancel the whole local transport tree on lost lease; never accept it."""
     if lease:
         lease.require()
-    with tempfile.TemporaryFile(mode='w+') as output, tempfile.TemporaryFile(mode='w+') as source:
+    with (tempfile.TemporaryFile(mode='w+') as output,
+          tempfile.TemporaryFile(mode='w+') as errors,
+          tempfile.TemporaryFile(mode='w+') as source):
         # A file supplies EOF without blocking the lease monitor on a full pipe.
         if input_text is not None:
             source.write(input_text)
             source.seek(0)
         process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=output,
                                     stdin=source if input_text is not None else None,
-                                    stderr=subprocess.STDOUT, text=True, start_new_session=True,
+                                    stderr=errors, text=True, start_new_session=True,
                                     # Keep the holder's input open until an
                                     # in-flight transport exits even if this
                                     # coordinator is killed without cleanup.
@@ -110,3 +113,7 @@ def run_guarded(argv, *, env, cwd, lease=None, input_text=None):
                 except subprocess.TimeoutExpired:
                     os.killpg(process.pid, signal.SIGKILL)
                     process.wait()
+            # Diagnostics belong in the release log, never in structured stdout
+            # such as JSON inventories or the editorial fingerprint digest.
+            errors.seek(0)
+            print(errors.read(), end='', file=sys.stderr, flush=True)

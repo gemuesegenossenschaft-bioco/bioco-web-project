@@ -116,10 +116,15 @@ def test_dry_run_builds_verified_package_without_remote_mutations(tmp_path):
     assert Path(env['TEST_GATE_CALLS']).read_text().splitlines() == ['checked']
 
 
-def test_apply_installs_package_and_publishes_verified_receipt(tmp_path):
+@pytest.mark.parametrize('fingerprint_warning', [False, True])
+def test_apply_installs_package_and_publishes_verified_receipt(tmp_path, fingerprint_warning):
     repo, baseline, candidate, env = fixture(tmp_path)
+    if fingerprint_warning:
+        env['TEST_FINGERPRINT_STDERR'] = '1'
     result = command(repo, baseline, candidate, env, '--apply')
     assert result.returncode == 0, result.stdout + result.stderr
+    if fingerprint_warning:
+        assert 'Unsuccessful stat on filename containing newline' in result.stderr
     host = Path(env['BIOCO_TEST_HOST'])
     marker = json.loads((host / 'marker.json').read_text())
     assert marker['commit'] == candidate
