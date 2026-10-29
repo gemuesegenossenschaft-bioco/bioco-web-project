@@ -74,10 +74,23 @@ function bioco_event_binding_value($value, array $context) {
     $rendering[$id] = true;
     $had_post = array_key_exists('post', $GLOBALS);
     $previous = $GLOBALS['post'] ?? null;
+    // Synced blocks load saved HTML from another record during do_blocks().
+    // Sanitize that input too, before trusted block/shortcode callbacks run.
+    $sanitize_block = static function (array $block): array {
+        if (isset($block['innerHTML'])) $block['innerHTML'] = wp_kses_post($block['innerHTML']);
+        if (isset($block['innerContent'])) {
+            $block['innerContent'] = array_map(static fn($part) => is_string($part) ? wp_kses_post($part) : $part, $block['innerContent']);
+        }
+        return $block;
+    };
+    add_filter('render_block_data', $sanitize_block, PHP_INT_MAX);
     try {
         $GLOBALS['post'] = $record;
-        return wp_kses_post((string) apply_filters('the_content', $record->post_content));
+        // Sanitize authored content before blocks/shortcodes render. Their trusted
+        // output includes form controls and scripts that post KSES would remove.
+        return (string) apply_filters('the_content', wp_kses_post($record->post_content));
     } finally {
+        remove_filter('render_block_data', $sanitize_block, PHP_INT_MAX);
         if ($had_post) $GLOBALS['post'] = $previous;
         else unset($GLOBALS['post']);
         unset($rendering[$id]);

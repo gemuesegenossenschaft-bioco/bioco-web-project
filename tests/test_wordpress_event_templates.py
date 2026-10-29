@@ -16,7 +16,10 @@ define('ABSPATH', '/');
 $state = json_decode(stream_get_contents(STDIN), true);
 $records = $state['records'];
 $GLOBALS['post'] = (object) ['ID' => 999];
-function add_filter($name, $callback, $priority, $args=1) { $GLOBALS['hooks'][$name]=[$callback,$args]; }
+function add_filter($name, $callback, $priority, $args=1) {
+    if ($name === 'render_block_data') $GLOBALS['block_hooks'][]=$callback;
+    else $GLOBALS['hooks'][$name]=[$callback,$args];
+}
 function get_post_type($id) { return $GLOBALS['records'][$id]['type'] ?? 'page'; }
 function get_post_status($id) { return $GLOBALS['records'][$id]['status'] ?? 'publish'; }
 function get_queried_object_id() { return $GLOBALS['state']['queried'] ?? 999; }
@@ -35,18 +38,34 @@ function esc_html($value) { return htmlspecialchars($value,ENT_QUOTES,'UTF-8'); 
 function esc_attr($value) { return esc_html($value); }
 function esc_url_raw($value) { return str_starts_with($value,'https://') ? $value : ''; }
 function wp_strip_all_tags($value) { return strip_tags($value); }
-function wp_kses_post($value) { return preg_replace('~<script>.*?</script>~s','',$value); }
+function wp_kses_post($value) {
+    $value = preg_replace('~</?script\b[^>]*>~i','',$value);
+    return preg_replace('~</?(?:form|input)\b[^>]*>~i','',$value);
+}
 function apply_filters($name,$value) {
+    if ($name === 'render_block_data') {
+        foreach ($GLOBALS['block_hooks'] ?? [] as $callback) $value=$callback($value);
+        return $value;
+    }
     $GLOBALS['content_ids'][]=$GLOBALS['post']->ID;
     if ($GLOBALS['state']['throw'] ?? false) throw new RuntimeException('Filter failed');
     if ($GLOBALS['state']['recursive'] ?? false) {
         $GLOBALS['recursive_result']=bioco_event_binding_value('', $GLOBALS['state']['context']);
     }
-    return '<div class="filtered">'.$value.'</div>';
+    if (str_contains($value,'[referenced]')) {
+        $html=$GLOBALS['state']['referenced_html'];
+        $block=apply_filters('render_block_data',['blockName'=>'core/html','innerHTML'=>$html,'innerContent'=>[$html,null]]);
+        $GLOBALS['reference_inner_html']=$block['innerHTML'];
+        $value=str_replace('[referenced]',implode('',array_filter($block['innerContent'],'is_string')),$value);
+    }
+    return '<div class="filtered">'.str_replace('[signup]', $GLOBALS['state']['signup_html'] ?? '', $value).'</div>';
 }
 function wp_json_encode($value,$flags=0) { return json_encode($value,$flags); }
 function home_url($path) { return 'https://example.test'.$path; }
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/helpers.php';
+function remove_filter($name, $callback, $priority) {
+    $GLOBALS['block_hooks']=array_values(array_filter($GLOBALS['block_hooks'] ?? [],static fn($hook)=>$hook!==$callback));
+}
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/event-bindings.php';
 try { $resolved=bioco_event_binding_value($state['original'] ?? '',$state['context']); }
 catch (Throwable $error) { $resolved=['error'=>$error->getMessage()]; }
@@ -57,7 +76,7 @@ WP_SERIALIZER
 $layout=serialize_blocks(bioco_import_event_template_blocks());
 $parsed=(new WP_Block_Parser())->parse($layout);
 echo json_encode(['value'=>$resolved,'post'=>$GLOBALS['post']->ID,'content_ids'=>$GLOBALS['content_ids'] ?? [],
-    'recursive'=>$GLOBALS['recursive_result'] ?? null,'options'=>bioco_event_binding_fields(['keep'=>['id'=>'keep']]),
+    'recursive'=>$GLOBALS['recursive_result'] ?? null,'block_hooks'=>count($GLOBALS['block_hooks'] ?? []),'reference_inner_html'=>$GLOBALS['reference_inner_html'] ?? null,'options'=>bioco_event_binding_fields(['keep'=>['id'=>'keep']]),
     'layout'=>$parsed,'stable'=>serialize_blocks($parsed)===$layout]);
 '''
 
@@ -107,7 +126,7 @@ def test_summary_and_body_precedence_preserve_filters_and_restore_record_context
     result = run('description', records={'1': record() | {'body':'Body'}}, throw=True)
     assert result['value'] == {'error':'Filter failed'} and result['post'] == 999
     result = run('description', records={'1': record() | {'body':'<p>Safe</p><script>bad()</script>'}})
-    assert result['value'] == '<div class="filtered"><p>Safe</p></div>'
+    assert result['value'] == '<div class="filtered"><p>Safe</p>bad()</div>'
 
 
 def test_protected_or_unreadable_records_cannot_leak_description():
@@ -118,6 +137,30 @@ def test_protected_or_unreadable_records_cannot_leak_description():
     assert run(records=draft, allowed=[1])['value'] == '28.03.2027 14:00 Uhr'
     assert run(records={'1':record() | {'type':'page'}})['value'] == ''
     assert run(context={'name':'unrelated'}, original={'keep':True})['value'] == {'keep':True}
+
+
+def test_event_body_preserves_generated_form_controls_and_script_but_sanitizes_saved_html():
+    form = ('<form data-form="visit-day"><input name="name" required>'
+            '<input name="participants" type="number"><button>Anmelden</button></form>'
+            '<script>window.signupConfig={"id":3};</script>')
+    result = run('description', records={'1': record(body='<p>Join us</p>[signup]<script>bad()</script>')},
+                 signup_html=form)
+    assert result['value'] == '<div class="filtered"><p>Join us</p>' + form + 'bad()</div>'
+    assert result['content_ids'] == [1] and result['post'] == 999
+    # Authored HTML still follows the post-content allowlist before rendering.
+    saved = run('description', records={'1': record(body='<p>Safe</p><input name="raw"><script>bad()</script>')})
+    assert saved['value'] == '<div class="filtered"><p>Safe</p>bad()</div>'
+
+
+def test_referenced_saved_block_is_sanitized_before_shortcode_rendering_and_filter_is_scoped():
+    form = '<form><input name="name"></form><script>window.signupConfig={};</script>'
+    result = run('description', records={'1': record(body='[referenced]')}, signup_html=form,
+                 referenced_html='<p>Synced</p><script>bad()</script><input name="raw">[signup]')
+    assert result['value'] == '<div class="filtered"><p>Synced</p>bad()' + form + '</div>'
+    assert result['reference_inner_html'] == '<p>Synced</p>bad()[signup]'
+    assert result['block_hooks'] == 0
+    failure = run('description', records={'1': record(body='Body')}, throw=True)
+    assert failure['block_hooks'] == 0 and failure['post'] == 999
 
 
 @pytest.mark.parametrize('field', ['image','image_alt'])
