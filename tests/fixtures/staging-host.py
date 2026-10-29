@@ -34,6 +34,10 @@ if mode == 'ssh':
         os.environ['BIOCO_TEST_LEASE_OWNER'] = str(os.getpid())
         if os.environ.get('TEST_CHANGE_BASELINE'):
             (host / 'marker.json').write_text(json.dumps({'commit': 'b' * 40}))
+        if os.environ.get('TEST_MOVE_INTEGRATION'):
+            repo = str(host.parent / 'repo')
+            baseline = subprocess.check_output(['git', '-C', repo, 'rev-parse', 'HEAD^'], text=True).strip()
+            subprocess.run(['git', '-C', repo, 'update-ref', 'refs/heads/wordpress', baseline], check=True)
         os.execvp('sh', shlex.split(command)[3:])
     if ' -type f -exec sha256sum {} +' in command:
         # Execute the Linux hash inventory with actual local fake-host bytes.

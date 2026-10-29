@@ -35,6 +35,8 @@ def fixture(tmp_path):
     git(repo, 'commit', '-qm', 'candidate')
     candidate = git(repo, 'rev-parse', 'HEAD')
     git(repo, 'update-ref', 'refs/remotes/origin/wordpress', candidate)
+    git(repo, 'update-ref', 'refs/heads/wordpress', candidate)
+    git(repo, 'remote', 'add', 'origin', str(repo))
     env.update(BIOCO_WP_HOST='staging.example.test', BIOCO_WP_USER='deploy',
                BIOCO_WP_CONTENT='/srv/staging/wp-content',
                BIOCO_RELEASE_URL='https://staging.bioco.ch')
@@ -279,3 +281,16 @@ def test_smoke_target_cannot_inherit_production_origin_or_resolve(tmp_path, repe
     result = command(repo, baseline, candidate, env, '--apply')
     assert result.returncode == 0, result.stdout + result.stderr
     assert (Path(env['BIOCO_TEST_HOST']) / 'render-env').read_text().splitlines()[-2:] == ['https://staging.bioco.ch', '']
+
+
+@pytest.mark.parametrize('when', ['before-package', 'under-lease'])
+def test_cached_integration_tip_cannot_hide_remote_branch_change(tmp_path, when):
+    repo, baseline, candidate, env = fixture(tmp_path)
+    if when == 'before-package':
+        git(repo, 'update-ref', 'refs/heads/wordpress', baseline)
+    else:
+        env['TEST_MOVE_INTEGRATION'] = '1'
+    result = command(repo, baseline, candidate, env, '--apply')
+    assert result.returncode != 0, result.stdout
+    assert 'current remote integration tip' in result.stderr
+    assert not (Path(env['BIOCO_TEST_HOST']) / 'events').exists()

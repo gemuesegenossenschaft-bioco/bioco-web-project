@@ -73,6 +73,13 @@ class Staging:
         if len(values) != 2 or any(value.rstrip('/') != SITE for value in values):
             raise ValueError('Remote WordPress does not match the fixed staging identity.')
 
+    def integration_tip(self):
+        tip = run_guarded(['git', 'ls-remote', '--exit-code', 'origin', 'refs/heads/wordpress'],
+                          env=self.env, cwd=ROOT, lease=self.lease).strip()
+        if tip != self.args.commit + '\trefs/heads/wordpress':
+            raise ValueError('Candidate is not the current remote integration tip; fetch and coordinate again.')
+        self.evidence.setdefault('gates', {})['integration-tip'] = 'passed'
+
     def marker(self):
         value = json.loads(self.wp('option get bioco_release_marker --format=json'))
         if (not isinstance(value, dict) or not isinstance(value.get('commit'), str)
@@ -130,6 +137,7 @@ class Staging:
         if git('rev-parse', 'refs/remotes/origin/wordpress') != self.args.commit:
             raise ValueError('Candidate is not the accepted origin/wordpress tip; fetch and coordinate first.')
         git('merge-base', '--is-ancestor', self.args.expected_baseline, self.args.commit)
+        self.integration_tip()
         self.identity()
         previous = self.marker()
         self.evidence['previous_marker'] = previous
@@ -189,6 +197,7 @@ class Staging:
         self.evidence['step'] = 'lease'
         with staging_lease(self.ssh) as lease:
             self.lease = lease
+            self.integration_tip()
             self.identity()
             if self.marker() != previous or self.manifest() != observed:
                 raise ValueError('Staging baseline changed while acquiring the server lease.')
