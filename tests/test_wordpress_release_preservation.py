@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).parents[1]
-SCRIPT = ROOT / "wordpress/scripts/release-wordpress-staging.sh"
+SCRIPT = ROOT / "wordpress/scripts/stage-wordpress-code.sh"
 
 
 def _write_executable(path: Path, body: str) -> Path:
@@ -150,7 +150,6 @@ def test_staging_release_runs_only_the_allowed_remote_commands(tmp_path):
         f"set -eu; cd '{wp_root}'; wp bioco editor-routing-guard --backup='{backup}.htaccess' --apply",
         f"set -eu; cd '{wp_root}'; wp cache flush",
         f"set -eu; cd '{wp_root}'; wp bioco verify --runtime",
-        f"set -eu; cd '{wp_root}'; wp option update bioco_release_marker '{marker_json}' --format=json >/dev/null",
     ]
     remote_commands = remotes.read_text().splitlines()
     # The importer is never part of a release; runtime verification replaces
@@ -168,10 +167,9 @@ def test_staging_release_runs_only_the_allowed_remote_commands(tmp_path):
         "web-opcache",
         "runtime-verify",
         "smoke",
-        "marker",
     ]
-    assert "release-status=success" in result.stdout
-    assert "release-marker=" in result.stdout
+    assert "worker-status=success" in result.stdout
+    assert "worker-complete" in result.stdout
 
 
 def test_staging_release_fails_on_unexpected_import_command(tmp_path):

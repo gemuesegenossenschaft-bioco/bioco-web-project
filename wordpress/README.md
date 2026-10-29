@@ -65,7 +65,19 @@ The single entry point is `scripts/release-wordpress-staging.sh`; follow
 same implementation. Dry-run is the default; `--apply` performs database backup, owned-code sync,
 atomic editor asset guard installation, cache flush, the `wp bioco verify --runtime` gate,
 the 22-route render and editor-asset smoke gates, and a release
-marker. WordPress core, uploads, regular plugins, Divi, and admin accounts remain server-owned.
+marker. Pass `--commit=<full-sha> --expected-baseline=<accepted-staging-sha>` from a clean
+checkout at the known `origin/wordpress` tip. Both the existing marker and installed code must
+match that baseline. A server lease serializes local and CI writers through verification.
+The internal `stage-wordpress-code.sh` worker and `deploy-wp-code.sh` are not staging entry points.
+WordPress core, uploads, regular plugins, Divi, and admin accounts remain server-owned.
+
+`--package-run-id=<successful-run-id>` downloads and verifies the exact CI package from #280.
+Omit it locally to run full validation and build a fresh private package. Dry run creates only
+local evidence. CI requires the staging environment variable `STAGING_ACCEPTED_BASELINE`, or
+the explicit baseline input on manual dispatch, and waits for the package for its exact SHA.
+Private logs and JSON receipts are retained under `output/releases/`; keep them out of public
+artifacts. Failed partial installations retain the previous success marker and require reviewed
+recovery. See [ADR 0009](adr/0009-staging-package-lease.md).
 
 A normal release is **code-only**: it never writes content. Editorial pages, events, groups and Divi
 builder metadata survive exactly as the editors left them. `wp bioco verify --runtime` is the release

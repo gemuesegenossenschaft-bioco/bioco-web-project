@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).parents[1]
-SCRIPT = ROOT / "wordpress/scripts/release-wordpress-staging.sh"
+SCRIPT = ROOT / "wordpress/scripts/stage-wordpress-code.sh"
 
 
 def _write_executable(path: Path, body: str) -> Path:
@@ -98,7 +98,7 @@ def test_release_pipeline_dry_run_is_non_mutating(tmp_path):
     assert "mode=dry-run" in result.stdout
     log = Path(env["BIOCO_RELEASE_LOG_DIR"]) / f"20260817T210000Z-{commit}.log"
     assert log.is_file()
-    assert "release-status=success" in log.read_text()
+    assert "worker-status=success" in log.read_text()
 
 
 def test_release_pipeline_apply_runs_each_step_in_order(tmp_path):
@@ -123,10 +123,9 @@ def test_release_pipeline_apply_runs_each_step_in_order(tmp_path):
         "web-opcache",
         "runtime-verify",
         "smoke",
-        "marker",
     ]
     assert "backup-path=/srv/backups/wordpress-staging/20260817T210000Z-" in result.stdout
-    assert f"release-marker={commit}" in result.stdout
+    assert f"worker-complete commit={commit}" in result.stdout
 
 
 def test_release_pipeline_stops_after_first_failed_step(tmp_path):
@@ -152,12 +151,12 @@ def test_release_pipeline_stops_after_first_failed_step(tmp_path):
         "web-opcache",
         "runtime-verify",
     ]
-    assert "release-status=failed" in result.stdout
+    assert "worker-status=failed" in result.stdout
     assert "failed-step=runtime-verify" in result.stdout
     assert "step=smoke" not in result.stdout
     assert "step=release-marker" not in result.stdout
     log = Path(env["BIOCO_RELEASE_LOG_DIR"]) / f"20260817T210000Z-{commit}.log"
-    assert "release-status=failed" in log.read_text()
+    assert "worker-status=failed" in log.read_text()
     assert "failed-step=runtime-verify" in log.read_text()
 
 
@@ -186,7 +185,9 @@ def test_actions_calls_the_same_release_pipeline():
     workflow = (ROOT / ".github/workflows/deploy-wordpress-staging.yml").read_text()
 
     assert "wordpress/scripts/release-wordpress-staging.sh" in workflow
-    assert "--commit=\"$GITHUB_SHA\"" in workflow
+    assert '--commit="$BIOCO_STAGING_CANDIDATE"' in workflow
+    assert '--expected-baseline="$BIOCO_STAGING_BASELINE"' in workflow
+    assert '--package-run-id="$BIOCO_PACKAGE_RUN_ID"' in workflow
     assert "--apply" in workflow
     assert "composer install" not in workflow
     assert "rsync -avz" not in workflow
@@ -221,7 +222,7 @@ def test_preflight_logs_counts_reported_by_seed_gate():
 
 
 def test_release_marker_is_one_atomic_option_write():
-    release = SCRIPT.read_text()
+    release = (ROOT / "wordpress/scripts/release-wordpress-staging.py").read_text()
 
     assert "wp option update bioco_release_marker" in release
     assert "bioco_release_commit" not in release
@@ -365,7 +366,7 @@ def test_code_sync_never_ships_gitignored_files():
     assert "--exclude=.env" in deploy
 
 
-def test_release_uses_one_timestamp_for_log_backup_and_marker(tmp_path):
+def test_worker_uses_one_timestamp_for_log_and_backup(tmp_path):
     commit, env, events = _fixture(tmp_path)
     del env["BIOCO_RELEASE_TIMESTAMP"]
 
@@ -382,9 +383,7 @@ def test_release_uses_one_timestamp_for_log_backup_and_marker(tmp_path):
     assert len(logs) == 1
     log_stamp = logs[0].name.split("-")[0]
     backup_stamp = re.search(r"backup-path=\S*/(\d{8}T\d{6}Z)-", result.stdout).group(1)
-    marker = Path(env["BIOCO_TEST_MARKER"]).read_text()
-    marker_stamp = re.search(r'"timestamp":"(\d{8}T\d{6}Z)"', marker).group(1)
-    assert log_stamp == backup_stamp == marker_stamp
+    assert log_stamp == backup_stamp
     assert f"release-start timestamp={log_stamp}" in result.stdout
 
 

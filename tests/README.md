@@ -70,7 +70,7 @@ actual restoration receipts for any later content adoption.
 | `BIOCO_FORMS_BROWSER_TESTS=1 python3 -m pytest tests/test_wordpress_forms_lifecycle.py -q` | Playwright Chromium, local WP runtime at 127.0.0.1:8770 for the runtime proofs | six-form lifecycle in a real browser; opted in, a missing stack fails |
 | `BIOCO_BUTTON_BROWSER_TESTS=1 python3 -m pytest tests/test_wordpress_button_readability.py -q` | Playwright Chromium | button readability/contrast in Chromium |
 | `bash tests/wordpress-staging-render-gate.sh` | network access to staging | all 22 routes return 200 |
-| `bash wordpress/scripts/release-wordpress-staging.sh --commit=<full-40-char-sha>` (dry run default) | repo + CI env | release pipeline preflight |
+| `bash wordpress/scripts/release-wordpress-staging.sh --commit=<full-40-char-sha> --expected-baseline=<accepted-staging-sha>` (dry run default) | clean integration checkout + staging env | package, baseline and target verification |
 
 The suite shells out to real runtimes: **PHP** (`php -r`, one process per scenario) renders real
 templates with only WordPress runtime functions stubbed; **Node** (`tests/js/navigation-scroll-harness.mjs`)

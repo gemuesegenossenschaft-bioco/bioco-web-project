@@ -83,7 +83,7 @@ Divi ist kein Plugin, sondern ein lizenziertes Theme. Es wird später separat al
 
 ## 4. Verifiziertes Staging-Release
 
-Das Release läuft nur aus einem sauberen, festen Commit. Host, SSH-User und Pfad sind Parameter; keine Werte werden im Script fest codiert.
+Das Release läuft nur aus einem sauberen Commit am bekannten `origin/wordpress`-Stand. Host, SSH-User und Pfad sind Parameter; die Zielidentität bleibt fest `https://staging.bioco.ch`. Vor einem Schreibzugriff Release-Verantwortung, vollständigen Kandidaten-SHA und akzeptierten bisherigen Staging-SHA abstimmen. Bestehende Release-Sperren bleiben bestehen.
 
 ### Parameter setzen
 
@@ -104,27 +104,34 @@ export BIOCO_WP_SSH_PORT='22'
 
 ```bash
 commit="$(git rev-parse HEAD)"
-wordpress/scripts/release-wordpress-staging.sh --commit="$commit"
+baseline='<ABGESTIMMTER-VOLLSTAENDIGER-STAGING-SHA>'
+wordpress/scripts/release-wordpress-staging.sh --commit="$commit" --expected-baseline="$baseline"
 ```
 
 - [ ] Ausgabe vollständig lesen
 - [ ] Prüfen, dass das Script WordPress erkennt
-- [ ] Prüfen, dass `uploads` und `plugins` ausdrücklich als **nicht berührt** gemeldet werden
-- [ ] Prüfen, dass nur `bioco-*`, der mu-plugin-Loader und `content-seed` als Ziele erscheinen
+- [ ] Privaten JSON-Beleg unter `output/releases/` prüfen: bisheriger Marker, installierte Code-Hashes und WordPress-/Divi-/Plugin-Versionen
+- [ ] Kandidat und bisheriger Stand müssen übereinstimmen; unbekannte oder teilweise installierte Änderungen zuerst getrennt klären
+
+Ohne Paket-Run-ID laufen die vollständigen lokalen Prüfungen aus #280. Für ein bereits erfolgreiches CI-Paket bei beiden Aufrufen zusätzlich `--package-run-id=<RUN-ID>` angeben. Das Script prüft Herkunft, aktuellen Run-Versuch, SHA und Paketbytes. Ein selbst erstellter Erfolgsbeleg ersetzt diese Prüfung nicht.
 
 ### Danach anwenden
 
 Nur wenn der Dry-Run sauber ist:
 
 ```bash
-wordpress/scripts/release-wordpress-staging.sh --commit="$commit" --apply
+wordpress/scripts/release-wordpress-staging.sh --commit="$commit" --expected-baseline="$baseline" --apply
 ```
 
 - [ ] Backup-Pfad und Commit stehen im Release-Log unter `output/releases/`
-- [ ] Preflight, Backup, Code-Sync, Cache-Flush, Runtime-Verify, Smoke und Release-Marker zeigen `passed`
+- [ ] Paketprüfung, Backup, Code-Sync, Cache-Flush, Runtime-Verify, Smoke und finale Prüfung erfolgreich; `release-status=success` und privater JSON-Beleg vorhanden
 - [ ] Unter `Plugins` → `Must-Use` sind die bioco-Komponenten sichtbar
 - [ ] `wp-content/uploads/` ist weiterhin vorhanden
 - [ ] Keine fremden Plugins oder Themes wurden verändert
+
+Lokale und CI-Aufrufe halten dieselbe Serversperre bis zur Veröffentlichung des Erfolgsmarkers. Ein konkurrierender Aufruf stoppt. Nach Erwerb der Sperre werden Marker und Code-Hashes erneut geprüft. Ein identischer Wiederholungsaufruf prüft Code und Laufzeit ohne erneute Installation. Bei Teilfehlern bleiben der bisherige Erfolgsmarker und die tatsächlich beobachteten Code-Hashes erhalten; das Script stellt keine Datenbank wieder her.
+
+GitHub Actions wartet auf das erfolgreiche Paket desselben Push-SHA. Im Staging-Environment muss `STAGING_ACCEPTED_BASELINE` den abgestimmten bisherigen SHA enthalten. Bei manuellem Start sind Baseline und Paket-Run-ID Pflichtangaben. Die Baseline wird nicht automatisch vom Ziel übernommen.
 
 Ein normales Release ist **code-only**: Es schreibt keinen Inhalt. Der Schritt `runtime-verify`
 (`wp bioco verify --runtime`) prüft, dass jede benötigte Seite vorhanden, nicht leer, gültiges

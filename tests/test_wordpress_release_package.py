@@ -217,8 +217,8 @@ def test_offline_verification_rejects_tampering_and_stale_evidence(tmp_path, cha
     assert result.returncode != 0
 
 
-def ci_fixture(tmp_path):
-    repo, commit, env = fixture(tmp_path)
+def ci_fixture(tmp_path, configured=None):
+    repo, commit, env = configured or fixture(tmp_path)
     env.update(GITHUB_ACTIONS='true', GITHUB_REPOSITORY='gemuesegenossenschaft-bioco/bioco-web-project',
                GITHUB_SHA=commit, GITHUB_REF='refs/heads/wordpress', GITHUB_RUN_ID='123', GITHUB_RUN_ATTEMPT='2')
     output = tmp_path / 'built'
