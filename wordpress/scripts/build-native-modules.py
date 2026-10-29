@@ -15,6 +15,7 @@ GROUPS = [json.loads(p.read_text()) for p in (CORE / 'acf-json').glob('*.json')]
 FIELDS = {f['key']: f for group in GROUPS for f in group['fields']}
 COMPONENTS = re.findall(r"'([a-z_]+)' => 'bioco/([a-z-]+)'", (CORE / 'includes/dynamic-sections.php').read_text().split('function bioco_dynamic_marker_html')[0])
 EVENT_COMPONENTS = {'events_feed', 'schnuppertage'}
+EVENT_COMPATIBILITY = Path(__file__).with_name('contracts') / 'event-fields-v1.json'
 
 
 def fields_of(fields):
@@ -77,6 +78,7 @@ def build(components=None, *, check=False):
     previous = json.loads((OUT / 'fields.json').read_text())
     schema = copy.deepcopy(previous) if components is not None else {}
     outputs = {}
+    compatibility = None
     for component, slug in COMPONENTS:
         if components is not None and component not in components:
             continue
@@ -84,6 +86,9 @@ def build(components=None, *, check=False):
         strict_component = component if component in EVENT_COMPONENTS else None
         schema[component] = field_schema(group['fields'], strict_component)
         if strict_component:
+            if compatibility is None:
+                compatibility = json.loads(EVENT_COMPATIBILITY.read_text())['components']
+            check_event_compatibility(component, compatibility[component], schema[component])
             check_event_compatibility(component, previous.get(component, {}), schema[component])
         meta = {'name': 'bioco-divi/' + slug, 'title': group['title'], 'titles': group['title'], 'category': 'module', 'moduleIcon': TEMPLATE['moduleIcon'], 'moduleClassName': 'bioco_' + component, 'moduleOrderClassName': 'bioco_' + component, 'attributes': {'module': copy.deepcopy(TEMPLATE['attributes']['module'])}, 'settings': {'content': 'auto', 'design': 'auto', 'advanced': 'auto', 'groups': {'contentFields': {'panel': 'content', 'priority': 10, 'groupName': 'contentFields', 'multiElements': True, 'component': {'name': 'divi/composite', 'props': {'groupLabel': 'Inhalt', 'preset': 'content'}}}}}, 'customCssFields': {}}
         for priority, (name, spec) in enumerate(schema[component].items(), 1):

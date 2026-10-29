@@ -92,6 +92,34 @@ def test_invalid_event_contract_fails_before_writing_any_output(tmp_path, change
     assert snapshot(tmp_path) == before
 
 
+
+@pytest.mark.parametrize('check', [False, True])
+@pytest.mark.parametrize('change,diagnostic', [
+    ('type', 'Conflicting.*include_schnuppertage'),
+    ('removed', 'Removed.*include_schnuppertage'),
+    ('choice', 'Conflicting.*variant'),
+])
+def test_synchronized_incompatible_sources_and_outputs_cannot_erase_compatibility(
+        tmp_path, monkeypatch, check, change, diagnostic):
+    generator = generator_at(tmp_path)
+    fields = next(g['fields'] for g in generator.GROUPS if g['key'] == 'group_bioco_block_events_feed')
+    if change == 'type':
+        next(f for f in fields if f['name'] == 'include_schnuppertage')['type'] = 'text'
+    elif change == 'removed':
+        fields[:] = [f for f in fields if f['name'] != 'include_schnuppertage']
+    else:
+        del fields[0]['choices']['banner']
+    # Arrange synchronized bad artifacts, as if they had been edited together.
+    # Restore the real validator before exercising either production mode.
+    with monkeypatch.context() as fixture:
+        fixture.setattr(generator, 'check_event_compatibility', lambda *_: None)
+        generator.build(COMPONENTS)
+    before = snapshot(tmp_path)
+    with pytest.raises(ValueError, match=diagnostic):
+        generator.build(COMPONENTS, check=check)
+    assert snapshot(tmp_path) == before
+
+
 def test_new_required_row_field_is_an_incompatible_saved_contract(tmp_path):
     generator = generator_at(tmp_path)
     fields = next(g['fields'] for g in generator.GROUPS if g['key'] == 'group_bioco_block_schnuppertage')

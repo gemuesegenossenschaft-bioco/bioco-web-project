@@ -29,7 +29,8 @@ Written for the Divi test-consolidation pass (2026-09); update it when the surfa
 ## How to run
 
 The #229 event-field checks regenerate only `events_feed` and `schnuppertage`,
-reject incompatible contracts before writes, and round-trip saved values through
+reject incompatible contracts against frozen v1 history even when derived files
+are synchronized, and round-trip saved values through
 the composer, WordPress parser and actual public PHP queries.
 The query boundary models WordPress ID normalization and zero-page-size fallback
 with event ID `1` present. Zero-limit regressions reject a negative sentinel and
