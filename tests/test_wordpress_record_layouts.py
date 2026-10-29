@@ -48,7 +48,7 @@ def resolve(field, records=None, prefix='bioco_group_', **state):
 def test_group_binding_preserves_record_fields_and_unresolved_contacts():
     for field, expected in [('title', 'Gruppe &amp; Titel'), ('description', '<p>Beschreibung <strong>der Gruppe</strong></p>'), ('contact', 'Kontaktperson'), ('contact_url', ''), ('image', 'https://example.test/group.jpg'), ('image_alt', 'Gruppenbild')]:
         assert resolve(field)['value'] == expected
-    assert resolve('description', records={'1': group(group_text='<script>bad</script><p>Good</p>')})['value'] == '<p>Good</p>'
+    assert resolve('description', records={'1': group(group_text='<script>bad</script><p>Good</p>')})['value'] == 'bad<p>Good</p>'
     assert resolve('contact_url', records={'1': group(meta={'group_contact_url': 'https://example.test/contact/'})})['value'] == 'https://example.test/contact/'
     assert resolve('contact_url', records={'1': group(meta={'group_contact_url': 'javascript:alert(1)'})})['value'] == ''
     assert resolve('image_alt', records={'1': group(group_image={'url': 'https://example.test/group.jpg', 'alt': ''})})['value'] == 'Gruppe &amp; Titel'

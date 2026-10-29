@@ -16,9 +16,9 @@ define('ABSPATH', '/');
 $state = json_decode(stream_get_contents(STDIN), true);
 $records = $state['records'];
 $GLOBALS['post'] = (object) ['ID' => 999];
-function add_filter($name, $callback, $priority, $args=1) { $GLOBALS['hooks'][$name][]=$callback; }
-function remove_filter($name, $callback, $priority) {
-    $GLOBALS['hooks'][$name]=array_values(array_filter($GLOBALS['hooks'][$name] ?? [],static fn($hook)=>$hook!==$callback));
+function add_filter($name, $callback, $priority, $args=1) {
+    if ($name === 'render_block_data') $GLOBALS['block_hooks'][]=$callback;
+    else $GLOBALS['hooks'][$name]=[$callback,$args];
 }
 function get_post_type($id) { return $GLOBALS['records'][$id]['type'] ?? 'page'; }
 function get_post_status($id) { return $GLOBALS['records'][$id]['status'] ?? 'publish'; }
@@ -44,7 +44,7 @@ function wp_kses_post($value) {
 }
 function apply_filters($name,$value) {
     if ($name === 'render_block_data') {
-        foreach ($GLOBALS['hooks'][$name] ?? [] as $callback) $value=$callback($value);
+        foreach ($GLOBALS['block_hooks'] ?? [] as $callback) $value=$callback($value);
         return $value;
     }
     $GLOBALS['content_ids'][]=$GLOBALS['post']->ID;
@@ -63,6 +63,9 @@ function apply_filters($name,$value) {
 function wp_json_encode($value,$flags=0) { return json_encode($value,$flags); }
 function home_url($path) { return 'https://example.test'.$path; }
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/helpers.php';
+function remove_filter($name, $callback, $priority) {
+    $GLOBALS['block_hooks']=array_values(array_filter($GLOBALS['block_hooks'] ?? [],static fn($hook)=>$hook!==$callback));
+}
 require 'wordpress/web/app/mu-plugins/bioco-core/includes/event-bindings.php';
 try { $resolved=bioco_event_binding_value($state['original'] ?? '',$state['context']); }
 catch (Throwable $error) { $resolved=['error'=>$error->getMessage()]; }
@@ -73,7 +76,7 @@ WP_SERIALIZER
 $layout=serialize_blocks(bioco_import_event_template_blocks());
 $parsed=(new WP_Block_Parser())->parse($layout);
 echo json_encode(['value'=>$resolved,'post'=>$GLOBALS['post']->ID,'content_ids'=>$GLOBALS['content_ids'] ?? [],
-    'recursive'=>$GLOBALS['recursive_result'] ?? null,'block_hooks'=>count($GLOBALS['hooks']['render_block_data'] ?? []),'reference_inner_html'=>$GLOBALS['reference_inner_html'] ?? null,'options'=>bioco_event_binding_fields(['keep'=>['id'=>'keep']]),
+    'recursive'=>$GLOBALS['recursive_result'] ?? null,'block_hooks'=>count($GLOBALS['block_hooks'] ?? []),'reference_inner_html'=>$GLOBALS['reference_inner_html'] ?? null,'options'=>bioco_event_binding_fields(['keep'=>['id'=>'keep']]),
     'layout'=>$parsed,'stable'=>serialize_blocks($parsed)===$layout]);
 '''
 
