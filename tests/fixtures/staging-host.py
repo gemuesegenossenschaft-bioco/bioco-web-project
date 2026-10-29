@@ -23,6 +23,10 @@ def event(value):
 
 if mode == 'ssh':
     command = args[-1]
+    # Linux MAX_ARG_STRLEN includes the terminating NUL. Model the deployment
+    # host's per-argument bound even when tests run on another operating system.
+    if len(command.encode()) >= 128 * 1024:
+        raise SystemExit('SSH command exceeds Linux argument limit')
     if command.startswith('flock -n /tmp/bioco-wordpress-staging.lock '):
         lock = (host / 'lock').open('a')
         try:

@@ -1,4 +1,7 @@
-"""Drive the canonical staging entry point against an isolated fake host."""
+"""Drive the canonical staging entry point against an isolated fake host.
+
+Keep/Replace/Remove evidence: tests/README.md, Production readiness slice.
+"""
 import json
 import hashlib
 import os
@@ -136,6 +139,29 @@ def test_apply_installs_package_and_publishes_verified_receipt(tmp_path):
     assert durable.stat().st_mode & 0o077 == 0
     assert next((host / 'backups').glob('*.sql')).stat().st_mode & 0o077 == 0
     assert all(file.stat().st_mode & 0o077 == 0 for file in (repo / 'output/releases').iterdir())
+
+
+def test_receipt_larger_than_linux_argument_limit_is_durable(tmp_path):
+    repo, baseline, candidate, env = fixture(tmp_path)
+    durable = Path(env['BIOCO_TEST_HOST']) / 'backups/large-receipt.json'
+    script = """
+import argparse, os, runpy, sys
+sys.path.insert(0, 'wordpress/scripts')
+Staging = runpy.run_path('wordpress/scripts/release-wordpress-staging.py')['Staging']
+stage = Staging(argparse.Namespace(commit=sys.argv[1], expected_baseline=sys.argv[2], apply=True))
+stage.evidence['large'] = 'private-receipt-' * 10000
+stage.receipt_path = sys.argv[3]
+stage.persist_receipt()
+"""
+    result = subprocess.run([sys.executable, '-c', script, candidate, baseline, str(durable)],
+                            cwd=repo, env=env, text=True, capture_output=True, timeout=15)
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert durable.stat().st_size > 128 * 1024
+    receipt = json.loads(durable.read_text())
+    assert receipt['large'] == 'private-receipt-' * 10000
+    assert receipt['commit'] == candidate
+    assert receipt['previous'] == baseline
+    assert durable.stat().st_mode & 0o077 == 0
 
 
 @pytest.mark.parametrize('scenario', ['TEST_PARTIAL_SYNC', 'TEST_LOSE_LEASE', 'TEST_FAIL_RUNTIME',

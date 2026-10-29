@@ -69,12 +69,17 @@ def staging_lease(ssh):
         lease.close()
 
 
-def run_guarded(argv, *, env, cwd, lease=None):
+def run_guarded(argv, *, env, cwd, lease=None, input_text=None):
     """Cancel the whole local transport tree on lost lease; never accept it."""
     if lease:
         lease.require()
-    with tempfile.TemporaryFile(mode='w+') as output:
+    with tempfile.TemporaryFile(mode='w+') as output, tempfile.TemporaryFile(mode='w+') as source:
+        # A file supplies EOF without blocking the lease monitor on a full pipe.
+        if input_text is not None:
+            source.write(input_text)
+            source.seek(0)
         process = subprocess.Popen(argv, cwd=cwd, env=env, stdout=output,
+                                    stdin=source if input_text is not None else None,
                                     stderr=subprocess.STDOUT, text=True, start_new_session=True,
                                     # Keep the holder's input open until an
                                     # in-flight transport exits even if this

@@ -62,8 +62,9 @@ class Staging:
         self.evidence = {'commit': args.commit, 'previous': args.expected_baseline,
                          'site': SITE, 'status': 'failed', 'mode': 'apply' if args.apply else 'dry-run'}
 
-    def remote(self, command):
-        return run_guarded(self.ssh + ['set -eu; ' + command], env=self.env, cwd=ROOT, lease=self.lease).strip()
+    def remote(self, command, *, input_text=None):
+        return run_guarded(self.ssh + ['set -eu; ' + command], env=self.env, cwd=ROOT,
+                           lease=self.lease, input_text=input_text).strip()
 
     def wp(self, command):
         return self.remote('cd ' + shlex.quote(self.root) + '; wp ' + command)
@@ -128,8 +129,9 @@ class Staging:
         path = self.receipt_path
         temporary = path + '.tmp-' + uuid.uuid4().hex
         self.remote('umask 077; mkdir -p ' + shlex.quote(str(Path(path).parent))
-                    + "; printf '%s\\n' " + shlex.quote(json.dumps(self.evidence, separators=(',', ':')))
-                    + ' > ' + shlex.quote(temporary) + '; mv ' + shlex.quote(temporary) + ' ' + shlex.quote(path))
+                    + '; cat > ' + shlex.quote(temporary)
+                    + '; mv ' + shlex.quote(temporary) + ' ' + shlex.quote(path),
+                    input_text=json.dumps(self.evidence, separators=(',', ':')) + '\n')
 
     def execute(self, temporary):
         package = package_module()
